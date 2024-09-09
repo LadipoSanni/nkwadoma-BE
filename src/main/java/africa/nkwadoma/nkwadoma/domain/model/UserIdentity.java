@@ -15,7 +15,11 @@ public class UserIdentity {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private boolean isVerified;
-    private boolean isDisabled;
+    private boolean emailVerified;
+    private boolean enabled;
     private String createdAt;
+    private String role;
+    private String createdBy;
+    private String creatorEmail;
+
 }
