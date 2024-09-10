@@ -9,6 +9,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -32,11 +33,11 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException{
+        validateUserIdentityDetails(userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         userRepresentation.setUsername(userIdentity.getEmail());
         userRepresentation.setEmailVerified(userIdentity.isEmailVerified());
         userRepresentation.setEnabled(userIdentity.isEnabled());
-        UserRepresentation createdUserRepresentation;
 
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
@@ -44,55 +45,73 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
                 throw new InfrastructureException("UserIdentity already exists");
             }
-            createdUserRepresentation = getUserRepresentation(userIdentity.getEmail(), Boolean.TRUE);
+            UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setUserId(createdUserRepresentation.getId());
-            log.info("The user id is ........{} ---->  ", userIdentity.getUserId());
 
             assignRole(userIdentity);
+            userIdentity =  mapper.mapUserRepresentationToUserIdentity(createdUserRepresentation);
         } catch (NotFoundException exception) {
             throw new InfrastructureException(exception.getMessage());
         }
-        return mapper.mapUserRepresentationToUserIdentity(createdUserRepresentation);
+        return userIdentity;
     }
 
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
-        String email = userIdentity.getEmail();
-        String role = userIdentity.getRole();
-
         try {
-            UserRepresentation userRepresentation = getUserRepresentation(email,Boolean.TRUE);
-            RoleRepresentation roleRepresentation = keycloak
-                    .realm(KEYCLOAK_REALM)
-                    .roles()
-                    .get(role.toUpperCase().trim())
-                    .toRepresentation();
-            if (roleRepresentation == null) throw new InfrastructureException("Role not found: " + role.toUpperCase());
+            RoleRepresentation roleRepresentation = getRoleRepresentation(userIdentity);
+            UserResource userResource = getUserResource(userIdentity);
 
-            UserResource userResource = keycloak
-                    .realm(KEYCLOAK_REALM)
-                    .users()
-                    .get(userRepresentation.getId());
-
-            userResource.roles()
-                    .realmLevel()
-                    .add(List.of(roleRepresentation));
+            userResource.roles().realmLevel().add(List.of(roleRepresentation));
         } catch (NotFoundException | InfrastructureException exception) {
             throw new InfrastructureException("Resource not found: " + exception.getMessage());
         }
     }
 
-    public List<UserRepresentation> getUserRepresentations(String email) {
+    public List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity) {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(email);
+                .search(userIdentity.getEmail());
     }
-    public UserRepresentation getUserRepresentation(String email, boolean exactMatch) throws InfrastructureException {
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(email,exactMatch)
+                .search(userIdentity.getEmail(),exactMatch)
                 .stream().findFirst().orElseThrow(()-> new InfrastructureException("User not found"));
     }
-
+    public UserResource getUserResource(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        return keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .get(userIdentity.getUserId());
+    }
+    public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws InfrastructureException {
+        RoleRepresentation roleRepresentation;
+        try {
+            roleRepresentation = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(userIdentity.getRole().toUpperCase().trim())
+                    .toRepresentation();
+        }catch (NotFoundException exception){
+            throw new InfrastructureException("Not Found: Role with name "+ userIdentity.getRole());
+        }
+        return roleRepresentation;
+    }
+    private void validateUserIdentity(UserIdentity userIdentity) throws InfrastructureException {
+        if (userIdentity == null)
+            throw new InfrastructureException("Invalid registration details");
+    }
+    private void validateUserIdentityDetails(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        if (StringUtils.isEmpty(userIdentity.getEmail())
+                || StringUtils.isEmpty(userIdentity.getFirstName())
+                || StringUtils.isEmpty(userIdentity.getLastName())
+                || StringUtils.isEmpty(userIdentity.getRole()))
+            throw new InfrastructureException("Invalid registration details");
+        getRoleRepresentation(userIdentity);
+    }
 }
