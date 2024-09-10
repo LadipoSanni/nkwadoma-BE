@@ -8,12 +8,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureExceptio
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,32 +22,31 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private final Keycloak keycloak;
     @Value("${realm}")
     private String KEYCLOAK_REALM;
 
-//    private final KeyCloakMapper mapper;
-    private final ModelMapper mapper;
+    private final KeyCloakMapper mapper;
 
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException{
-//        UserRepresentation userRepresentation = mapper.map(userIdentity);
-        UserRepresentation userRepresentation = mapper.map(userIdentity, UserRepresentation.class);
+        UserRepresentation userRepresentation = mapper.map(userIdentity);
         userRepresentation.setUsername(userIdentity.getEmail());
         userRepresentation.setEmailVerified(userIdentity.isEmailVerified());
         userRepresentation.setEnabled(userIdentity.isEnabled());
-        System.out.println("the realm is ..."+ KEYCLOAK_REALM);
+        log.info("the realm is ...{}",  KEYCLOAK_REALM);
 
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
-//            Response response = users.create(userRepresentation);
-//            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
-//                throw new InfrastructureException("UserIdentity already exists");
-//            }
-            UserResource user = users.get(userIdentity.getEmail());
-            userIdentity.setUserId(user.toRepresentation().getId());
-            System.out.println("The user id is ........{} ---->  "+ userIdentity.getUserId());
+            Response response = users.create(userRepresentation);
+            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                throw new InfrastructureException("UserIdentity already exists");
+            }
+            UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity.getEmail(), Boolean.TRUE);
+            userIdentity.setUserId(createdUserRepresentation.getId());
+            log.info("The user id is ........{} ---->  ", userIdentity.getUserId());
 
 //            assignRole(userRegistrationRequest);
 //            userRepresentation = keycloak.realm(KEYCLOAK_REALM).users().search(userRegistrationRequest.getEmail()).get(0);
@@ -57,6 +56,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 //        return userRepresentation;
      return null;
     }
+
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
         String email = userIdentity.getEmail();
         String role = userIdentity.getRole();
@@ -85,10 +85,19 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new InfrastructureException("Resource not found: " + exception.getMessage());
         }
     }
+
     public List<UserRepresentation> getUserRepresentations(String email) {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
                 .search(email);
     }
+    public UserRepresentation getUserRepresentation(String email, boolean exactMatch) throws InfrastructureException {
+        return keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .search(email,exactMatch)
+                .stream().findFirst().orElseThrow(()-> new InfrastructureException("User not found"));
+    }
+
 }
