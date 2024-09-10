@@ -36,7 +36,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userRepresentation.setUsername(userIdentity.getEmail());
         userRepresentation.setEmailVerified(userIdentity.isEmailVerified());
         userRepresentation.setEnabled(userIdentity.isEnabled());
-        log.info("the realm is ...{}",  KEYCLOAK_REALM);
+        UserRepresentation createdUserRepresentation;
 
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
@@ -44,17 +44,15 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
                 throw new InfrastructureException("UserIdentity already exists");
             }
-            UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity.getEmail(), Boolean.TRUE);
+            createdUserRepresentation = getUserRepresentation(userIdentity.getEmail(), Boolean.TRUE);
             userIdentity.setUserId(createdUserRepresentation.getId());
             log.info("The user id is ........{} ---->  ", userIdentity.getUserId());
 
-//            assignRole(userRegistrationRequest);
-//            userRepresentation = keycloak.realm(KEYCLOAK_REALM).users().search(userRegistrationRequest.getEmail()).get(0);
+            assignRole(userIdentity);
         } catch (NotFoundException exception) {
             throw new InfrastructureException(exception.getMessage());
         }
-//        return userRepresentation;
-     return null;
+        return mapper.mapUserRepresentationToUserIdentity(createdUserRepresentation);
     }
 
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
@@ -62,21 +60,18 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         String role = userIdentity.getRole();
 
         try {
-            List<UserRepresentation> users = getUserRepresentations(email);
-            if (users.isEmpty()) throw new InfrastructureException("User does not exist");
-            UserRepresentation user = users.get(BigDecimal.ZERO.intValue());
-
+            UserRepresentation userRepresentation = getUserRepresentation(email,Boolean.TRUE);
             RoleRepresentation roleRepresentation = keycloak
-                                                        .realm(KEYCLOAK_REALM)
-                                                        .roles()
-                                                        .get(role.toUpperCase().trim())
-                                                        .toRepresentation();
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(role.toUpperCase().trim())
+                    .toRepresentation();
             if (roleRepresentation == null) throw new InfrastructureException("Role not found: " + role.toUpperCase());
 
             UserResource userResource = keycloak
                     .realm(KEYCLOAK_REALM)
                     .users()
-                    .get(user.getId());
+                    .get(userRepresentation.getId());
 
             userResource.roles()
                     .realmLevel()

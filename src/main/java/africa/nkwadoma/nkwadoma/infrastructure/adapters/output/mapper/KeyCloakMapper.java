@@ -11,5 +11,7 @@ public interface KeyCloakMapper {
 
     @Mapping(source = "userId", target = "id")
     UserRepresentation map(UserIdentity user);
+    @Mapping(source = "id", target = "userId")
+    UserIdentity mapUserRepresentationToUserIdentity(UserRepresentation userRepresentation);
 
 }
