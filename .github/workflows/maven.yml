@@ -30,10 +30,10 @@ jobs:
           java-version: 1.17
       - name: Maven Package
         env:
-          keycloak.server.url: ${KEYCLOAK_SERVER:http://localhost:8090}
-          keycloak.auth.password: ${KEYCLOAK_PASSWORD:admin}
-          keycloak.auth.user: ${KEYCLOAK_USERNAME:admin}
-          realm: ${KEYCLOAK_REALM:learnspace}
+          keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
+          keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
+          keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
+          realm: ${{ secrets.KEYCLOAK_REALM }}
           
         run: mvn -B clean package 
 
@@ -53,8 +53,8 @@ jobs:
     - name: Build with Maven
       env:
           keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
-          keycloak.auth.password: ${{ KEYCLOAK_PASSWORD }}
-          keycloak.auth.user: ${{ KEYCLOAK_USERNAME }}
+          keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
+          keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
           realm: ${{ secrets.KEYCLOAK_REALM }}
           
       run: mvn -B package --file pom.xml
