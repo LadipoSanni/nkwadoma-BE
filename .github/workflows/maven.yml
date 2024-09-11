@@ -39,7 +39,7 @@ jobs:
 
 
   build:
-
+    needs: ["test"]
     runs-on: ubuntu-latest
 
     steps:
