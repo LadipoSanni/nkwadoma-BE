@@ -26,9 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class KeycloakAdapterTest {
     @Autowired
-    private KeyCloakMapper mapper;
-
-    @Autowired
     private IdentityManagerOutPutPort identityManagementOutputPort;
     private UserIdentity john;
     private UserIdentity peter;
