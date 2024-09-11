@@ -52,6 +52,7 @@ class KeycloakAdapterTest {
         peter.setRole("TRAINEE");
     }
 
+
     @Test
     @Order(1)
     void createUser() throws InfrastructureException {
