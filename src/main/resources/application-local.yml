@@ -1,8 +1,0 @@
-keycloak:
-  server: http://localhost:8090
-  username: admin
-  password: admin
-  realm: learnspace
-  client: learnspace
-  principal_attribute: preferred_username
-  enabled:
