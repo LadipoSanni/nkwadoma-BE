@@ -18,4 +18,6 @@ public interface IdentityManagerOutPutPort {
 
     UserResource getUserResource(UserIdentity userIdentity) throws InfrastructureException;
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws InfrastructureException;
+
+    void deleteUser(UserIdentity userIdentity) throws InfrastructureException;
 }

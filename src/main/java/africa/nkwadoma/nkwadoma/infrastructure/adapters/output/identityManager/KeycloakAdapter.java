@@ -35,10 +35,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException{
         validateUserIdentityDetails(userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
-        userRepresentation.setUsername(userIdentity.getEmail());
-        userRepresentation.setEmailVerified(userIdentity.isEmailVerified());
-        userRepresentation.setEnabled(userIdentity.isEnabled());
-
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
             Response response = users.create(userRepresentation);
@@ -55,15 +51,30 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return userIdentity;
     }
+    @Override
+    public void deleteUser(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        if (StringUtils.isEmpty(userIdentity.getUserId())) {
+            log.error("User id is empty");
+            throw new InfrastructureException("User does not exist");
+        }
+        UserResource userResource = getUserResource(userIdentity);
+        try{
+            userResource.remove();
+        }catch (NotFoundException exception) {
+            log.info("deleteUser called with invalid user id: {}", userIdentity.getUserId());
+            throw new InfrastructureException("User does not exist");
+        }
+
+    }
 
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
         try {
             RoleRepresentation roleRepresentation = getRoleRepresentation(userIdentity);
             UserResource userResource = getUserResource(userIdentity);
-
             userResource.roles().realmLevel().add(List.of(roleRepresentation));
         } catch (NotFoundException | InfrastructureException exception) {
-            throw new InfrastructureException("Resource not found: " + exception.getMessage());
+            throw new InfrastructureException(String.format("Resource not found: %s", exception.getMessage()));
         }
     }
 
@@ -102,6 +113,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return roleRepresentation;
     }
     private void validateUserIdentity(UserIdentity userIdentity) throws InfrastructureException {
+        log.info("Validating userIdentity {}",userIdentity);
         if (userIdentity == null)
             throw new InfrastructureException("Invalid registration details");
     }
@@ -113,5 +125,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 || StringUtils.isEmpty(userIdentity.getRole()))
             throw new InfrastructureException("Invalid registration details");
         getRoleRepresentation(userIdentity);
+    }
+    private void validateUserIdentityDeleteDetails(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
     }
 }

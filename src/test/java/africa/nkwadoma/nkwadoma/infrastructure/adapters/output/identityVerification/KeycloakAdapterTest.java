@@ -7,8 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMa
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -22,6 +21,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class KeycloakAdapterTest {
     @Autowired
@@ -52,6 +53,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(1)
     void createUser() throws InfrastructureException {
         UserIdentity createdUser = identityManagementOutputPort.createUser(john);
         identityManagementOutputPort.createUser(peter);
@@ -61,6 +63,24 @@ class KeycloakAdapterTest {
         assertEquals(createdUser.getEmail(), john.getEmail());
         assertEquals(createdUser.getFirstName(), john.getFirstName());
         assertEquals(createdUser.getLastName(), john.getLastName());
+    }
+    @Test
+    void createUserWithNullUserIdentity(){
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(null));
+    }
+    @Test
+    void createUserWithExistingEmail(){
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+    }
+    @Test
+    void createUserWithNullEmail(){
+        john.setEmail(null);
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+    }
+    @Test
+    void createUserWithEmptyStringEmail(){
+        john.setEmail("");
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithNoUserRole(){
@@ -73,24 +93,6 @@ class KeycloakAdapterTest {
         assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
     }
 
-    @Test
-    void createUserWithExistingEmail(){
-       assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
-    }
-    @Test
-    void createUserWithNullUserIdentity(){
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(null));
-    }
-    @Test
-    void createUserWithNullEmail(){
-        john.setEmail(null);
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
-    }
-    @Test
-    void createUserWithEmptyStringEmail(){
-        john.setEmail("");
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
-    }
     @Test
     void createUserWithEmptyFirstName(){
         john.setFirstName(null);
@@ -203,5 +205,40 @@ class KeycloakAdapterTest {
     void getRoleResourceWithInvalidRoleName() {
             john.setRole("INVALID_ROLE");
             assertThrows(InfrastructureException.class,()->identityManagementOutputPort.getRoleRepresentation(john));
+    }
+    @Test
+    void deleteUser() {
+        try {
+            UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE);
+            john.setUserId(userRepresentation.getId());
+            identityManagementOutputPort.deleteUser(john);
+        } catch (InfrastructureException exception) {
+            log.info(exception.getMessage());
+        }
+        assertThrows(InfrastructureException.class, ()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
+    }
+    @Test
+    void deleteUserWithNullUserIdentity() {
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.deleteUser(null));
+    }
+    @Test
+    void deleteUserWithNullUserId() {
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.deleteUser(john));
+    }
+    @Test
+    void deleteUserWithInCorrectUserId() {
+        john.setUserId("incorrect user id");
+        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.deleteUser(john));
+    }
+
+    @AfterAll
+    void cleanUp() {
+        try {
+            UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(peter, Boolean.TRUE);
+            peter.setUserId(userRepresentation.getId());
+            identityManagementOutputPort.deleteUser(peter);
+        } catch (InfrastructureException exception) {
+            log.info(exception.getMessage());
+        }
     }
 }
