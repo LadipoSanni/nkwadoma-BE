@@ -26,10 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class KeycloakAdapterTest {
     @Autowired
-    private Keycloak keycloak;
-    @Value("${realm}")
-    private String KEYCLOAK_REALM;
-    @Autowired
     private KeyCloakMapper mapper;
 
     @Autowired
