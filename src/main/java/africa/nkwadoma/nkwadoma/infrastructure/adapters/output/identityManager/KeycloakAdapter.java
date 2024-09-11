@@ -8,12 +8,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureExceptio
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,73 +23,110 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private final Keycloak keycloak;
     @Value("${realm}")
     private String KEYCLOAK_REALM;
 
-//    private final KeyCloakMapper mapper;
-    private final ModelMapper mapper;
+    private final KeyCloakMapper mapper;
 
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException{
-//        UserRepresentation userRepresentation = mapper.map(userIdentity);
-        UserRepresentation userRepresentation = mapper.map(userIdentity, UserRepresentation.class);
-        userRepresentation.setUsername(userIdentity.getEmail());
-        userRepresentation.setEmailVerified(userIdentity.isEmailVerified());
-        userRepresentation.setEnabled(userIdentity.isEnabled());
-        System.out.println("the realm is ..."+ KEYCLOAK_REALM);
-
+        validateUserIdentityDetails(userIdentity);
+        UserRepresentation userRepresentation = mapper.map(userIdentity);
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
-//            Response response = users.create(userRepresentation);
-//            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
-//                throw new InfrastructureException("UserIdentity already exists");
-//            }
-            UserResource user = users.get(userIdentity.getEmail());
-            userIdentity.setUserId(user.toRepresentation().getId());
-            System.out.println("The user id is ........{} ---->  "+ userIdentity.getUserId());
+            Response response = users.create(userRepresentation);
+            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                throw new InfrastructureException("UserIdentity already exists");
+            }
+            UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
+            userIdentity.setUserId(createdUserRepresentation.getId());
 
-//            assignRole(userRegistrationRequest);
-//            userRepresentation = keycloak.realm(KEYCLOAK_REALM).users().search(userRegistrationRequest.getEmail()).get(0);
+            assignRole(userIdentity);
+            userIdentity =  mapper.mapUserRepresentationToUserIdentity(createdUserRepresentation);
         } catch (NotFoundException exception) {
             throw new InfrastructureException(exception.getMessage());
         }
-//        return userRepresentation;
-     return null;
+        return userIdentity;
     }
+    @Override
+    public void deleteUser(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        if (StringUtils.isEmpty(userIdentity.getUserId())) {
+            log.error("User id is empty");
+            throw new InfrastructureException("User does not exist");
+        }
+        UserResource userResource = getUserResource(userIdentity);
+        try{
+            userResource.remove();
+        }catch (NotFoundException exception) {
+            log.info("deleteUser called with invalid user id: {}", userIdentity.getUserId());
+            throw new InfrastructureException("User does not exist");
+        }
+
+    }
+
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
-        String email = userIdentity.getEmail();
-        String role = userIdentity.getRole();
-
         try {
-            List<UserRepresentation> users = getUserRepresentations(email);
-            if (users.isEmpty()) throw new InfrastructureException("User does not exist");
-            UserRepresentation user = users.get(BigDecimal.ZERO.intValue());
-
-            RoleRepresentation roleRepresentation = keycloak
-                                                        .realm(KEYCLOAK_REALM)
-                                                        .roles()
-                                                        .get(role.toUpperCase().trim())
-                                                        .toRepresentation();
-            if (roleRepresentation == null) throw new InfrastructureException("Role not found: " + role.toUpperCase());
-
-            UserResource userResource = keycloak
-                    .realm(KEYCLOAK_REALM)
-                    .users()
-                    .get(user.getId());
-
-            userResource.roles()
-                    .realmLevel()
-                    .add(List.of(roleRepresentation));
+            RoleRepresentation roleRepresentation = getRoleRepresentation(userIdentity);
+            UserResource userResource = getUserResource(userIdentity);
+            userResource.roles().realmLevel().add(List.of(roleRepresentation));
         } catch (NotFoundException | InfrastructureException exception) {
-            throw new InfrastructureException("Resource not found: " + exception.getMessage());
+            throw new InfrastructureException(String.format("Resource not found: %s", exception.getMessage()));
         }
     }
-    public List<UserRepresentation> getUserRepresentations(String email) {
+
+    public List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity) {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(email);
+                .search(userIdentity.getEmail());
+    }
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        return keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .search(userIdentity.getEmail(),exactMatch)
+                .stream().findFirst().orElseThrow(()-> new InfrastructureException("User not found"));
+    }
+    public UserResource getUserResource(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        return keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .get(userIdentity.getUserId());
+    }
+    public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws InfrastructureException {
+        RoleRepresentation roleRepresentation;
+        try {
+            roleRepresentation = keycloak
+                    .realm(KEYCLOAK_REALM)
+                    .roles()
+                    .get(userIdentity.getRole().toUpperCase().trim())
+                    .toRepresentation();
+        }catch (NotFoundException exception){
+            throw new InfrastructureException("Not Found: Role with name "+ userIdentity.getRole());
+        }
+        return roleRepresentation;
+    }
+    private void validateUserIdentity(UserIdentity userIdentity) throws InfrastructureException {
+        log.info("Validating userIdentity {}",userIdentity);
+        if (userIdentity == null)
+            throw new InfrastructureException("Invalid registration details");
+    }
+    private void validateUserIdentityDetails(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
+        if (StringUtils.isEmpty(userIdentity.getEmail())
+                || StringUtils.isEmpty(userIdentity.getFirstName())
+                || StringUtils.isEmpty(userIdentity.getLastName())
+                || StringUtils.isEmpty(userIdentity.getRole()))
+            throw new InfrastructureException("Invalid registration details");
+        getRoleRepresentation(userIdentity);
+    }
+    private void validateUserIdentityDeleteDetails(UserIdentity userIdentity) throws InfrastructureException {
+        validateUserIdentity(userIdentity);
     }
 }

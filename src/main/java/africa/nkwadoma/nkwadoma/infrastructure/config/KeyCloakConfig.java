@@ -1,8 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.config;
 
 import org.keycloak.admin.client.Keycloak;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +27,5 @@ public class KeyCloakConfig {
                 KEYCLOAK_PASSWORD,
                 "admin-cli");
     }
-    @Bean
-    public ModelMapper modelMapper() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper;
-    }
+
 }
