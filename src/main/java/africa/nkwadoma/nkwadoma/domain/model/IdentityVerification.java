@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 public class IdentityVerification {
 
-    private String number;
-    private String image;
+    private String identityId;
+    private String identityImage;
 }

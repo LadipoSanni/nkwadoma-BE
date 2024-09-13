@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.model.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.IdentityVerificationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +25,52 @@ class PremblyAdapterTest {
 private IdentityVerificationOutputPort identityVerificationOutPutPort;
 
     private IdentityVerification identityVerification;
+    private ImageConverter base64Converter;
 
     @BeforeEach
     void setUp(){
         identityVerification =   IdentityVerification.builder().
-                number("12345678923").image("WWW.imageUrl.com").build();
+                identityId("12345678923").identityImage("WWW.imageUrl.com").build();
 
     }
 
     @Test
-    void verifyUserNin(){
-       IdentityVerificationResponse response = identityVerificationOutPutPort.verifyIdentity(identityVerification);
-        assertNotNull(response);
+    void verifyIdentity(){
+        try {
+            IdentityVerificationResponse response = identityVerificationOutPutPort.verifyIdentity(identityVerification);
+            assertNotNull(response);
+        }catch (InfrastructureException e){
 
+        }
     }
     @Test
-    void verifyUserInput(){
-        identityVerification.setNumber("");
+    void verifyIdentityWithNullIdentityVerification(){
+        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(null));
+    }
+    @Test
+    void verifyIdentityWithNullIdentityId(){
+        identityVerification.setIdentityId(null);
         assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+    }
+    @Test
+    void verifyIdentityWithEmptyIdentityId(){
+       identityVerification.setIdentityId(StringUtils.EMPTY);
+        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+    }
+    @Test
+    void verifyIdentityWithNullIdentityImage(){
+       identityVerification.setIdentityImage(null);
+        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+    }
+    @Test
+    void verifyIdentityWithEmptyIdentityImage(){
+       identityVerification.setIdentityImage(StringUtils.EMPTY);
+        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
+    }
+    @Test
+    void confirmBase64Image(){
+        String image = "";
+
+
     }
 }

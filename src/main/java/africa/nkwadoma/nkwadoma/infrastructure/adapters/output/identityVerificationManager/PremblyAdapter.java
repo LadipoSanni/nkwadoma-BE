@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class PremblyAdapter implements IdentityVerificationOutputPort {
 
 
-
     @Value("${PREMBLY_URL}")
     private String premblyUrl;
 
@@ -26,15 +25,16 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     private String apiKey;
 
     @Override
-    public IdentityVerificationResponse verifyIdentity(IdentityVerification identityVerification) {
+    public IdentityVerificationResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
+        validateIdentityVerificationRequest(identityVerification);
 
         return null;
     }
 
-    private  void  validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
-        if (identityVerification ==  null ||
-                StringUtils.isEmpty(identityVerification.getNumber()) &&
-                        StringUtils.isEmpty(identityVerification.getNumber())) throw  new InfrastructureException("credentials should not be empty");
-    }
+    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
+        if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getIdentityImage())) {
+            throw new InfrastructureException("credentials should not be empty");
+        }
 
+    }
 }
