@@ -36,8 +36,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       
-          keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
-          keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
-          keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
-          realm: ${{ secrets.KEYCLOAK_REALM }}
+          KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+          KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
+          KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Nkwadoma-Backend -Dsonar.projectName='Nkwadoma Backend'
