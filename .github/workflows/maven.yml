@@ -14,9 +14,13 @@ on:
   pull_request:
     branches: [ "main", "dev", "prod-support" ]
 
-
+env:
+      KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+      KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+      KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
+      KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
+      
 jobs:
-
 
   test:
     name: Unit Test
@@ -29,12 +33,6 @@ jobs:
         with:
           java-version: 1.17
       - name: Maven Package
-        env:
-          keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
-          keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
-          keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
-          realm: ${{ secrets.KEYCLOAK_REALM }}
-          
         run: mvn -B clean package 
 
 
