@@ -14,6 +14,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -40,7 +41,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
         validateIdentityVerificationRequest(verificationRequest);
         ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
-        String verificationResult = verifyNinResponse(responseEntity.getBody());
+        String verificationResult = getNinVerificationResponse(responseEntity.getBody());
         log.info("Verification Result1: {}", responseEntity.getBody());
         return responseEntity.getBody();
     }
@@ -53,22 +54,35 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
         String url = premblyUrl.concat(PremblyParameter.NIN_URL.getValue());
         log.info(url);
-        ResponseEntity<PremblyNinResponse> responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
-        log.info("Response from NIN API {}", responseEntity.getBody());
+        ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
+        try {
+            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
+        } catch (HttpServerErrorException ex) {
+            log.info("Prembly server error {}", ex.getMessage());
+        }
         return responseEntity;
     }
 
-    private String verifyNinResponse(PremblyNinResponse response) throws PremblyVerificationException {
-        if (response != null && response.getNinData() != null) {
-            switch (response.getResponseCode()) {
-                case "00" -> {
-                    return PremblyVerificationMessage.NIN_VERIFIED.getValue();
-                }
-                case "02" -> throw new PremblyVerificationException(PremblyVerificationMessage.SERVICE_UNAVAILABLE.getValue());
-                case "01" -> throw new PremblyVerificationException(PremblyVerificationMessage.NIN_NOT_FOUND.getValue());
+    private String getNinVerificationResponse(PremblyNinResponse response) throws PremblyVerificationException {
+        String responseMessage = StringUtils.EMPTY;
+        if (response == null || response.getNinData() == null) {
+            throw new PremblyVerificationException(PremblyVerificationMessage.PREMBLY_UNAVAILABLE.getValue());
+        }
+        switch (response.getResponseCode()) {
+            case "00" -> {
+                responseMessage = PremblyVerificationMessage.NIN_VERIFIED.getValue();
+            }
+            case "01" -> responseMessage = PremblyVerificationMessage.NIN_NOT_FOUND.getValue();
+            case "02" -> {
+                log.warn("{} : {}", PremblyAdapter.class.getName(), PremblyVerificationMessage.SERVICE_UNAVAILABLE.getValue());
+                responseMessage = PremblyVerificationMessage.SERVICE_UNAVAILABLE.getValue();
+            }
+            case "03" -> {
+                log.warn("{} : {}", PremblyAdapter.class.getName(), PremblyVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue());
+                responseMessage = PremblyVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue();
             }
         }
-        throw new PremblyVerificationException(PremblyVerificationMessage.VERIFICATION_UNSUCCESSFUL.getValue());
+        return responseMessage;
     }
 
     private HttpHeaders getHttpHeaders() {

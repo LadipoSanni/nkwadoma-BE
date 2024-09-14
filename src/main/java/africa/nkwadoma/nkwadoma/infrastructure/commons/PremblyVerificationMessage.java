@@ -5,7 +5,10 @@ public enum PremblyVerificationMessage {
     NIN_NOT_FOUND("This NIN cannot be found. Please provide a correct NIN."),
     VERIFICATION_SUCCESSFUL("Verification Successful"),
     NIN_VERIFIED("Verified"),
-    VERIFICATION_UNSUCCESSFUL("Verification Unsuccessful");
+    VERIFICATION_UNSUCCESSFUL("Verification Unsuccessful"),
+    PREMBLY_UNAVAILABLE("Prembly server error."),
+    INSUFFICIENT_WALLET_BALANCE("Insufficient wallet balance");
+
 
     private final String message;
     PremblyVerificationMessage(String message) {
