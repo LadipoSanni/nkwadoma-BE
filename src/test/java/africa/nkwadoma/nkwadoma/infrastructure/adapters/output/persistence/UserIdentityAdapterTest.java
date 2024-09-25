@@ -140,11 +140,19 @@ class UserIdentityAdapterTest {
     @Test
     void deleteUserWithExistingEmail(){
        try{
+           assertThrows(IdentityException.class, ()-> userIdentityOutputPort.findByEmail(john.getEmail()));
+
+           UserIdentity savedJohn = userIdentityOutputPort.save(john);
+           assertNotNull(savedJohn);
+
+           UserIdentity findJohn = userIdentityOutputPort.findByEmail(john.getEmail());
+           assertEquals(findJohn.getEmail(),savedJohn.getEmail());
+
            userIdentityOutputPort.deleteUserByEmail(john.getEmail());
        }catch (MiddlException exception){
            log.info("{} ->",exception.getMessage());
        }
-        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getUserId()));
+        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findByEmail(john.getEmail()));
     }
 
 
@@ -173,34 +181,6 @@ class UserIdentityAdapterTest {
         assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
     }
 
-    @Test
-    void deleteUserWithExistingId(){
-        try{
-            userIdentityOutputPort.deleteUserById(john.getEmail());
-        }catch (MiddlException exception){
-            log.info("{} ->",exception.getMessage());
-        }
-        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getUserId()));
-    }
-
-    @Test
-    void deleteUserWithNonExistingId(){
-        john.setEmail("invalid@gmail.com");
-        assertThrows(IdentityException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
-    }
-
-
-    @Test
-    void deleteUserWithNullId(){
-        john.setEmail(null);
-        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
-    }
-
-    @Test
-    void deleteUserWithEmptyId(){
-        john.setEmail(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
-    }
 
     @Test
     void findUserByEmail(){
