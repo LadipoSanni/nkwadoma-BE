@@ -70,10 +70,14 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public UserIdentity update(UserIdentity userIdentity) throws MiddlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         UserIdentity existingUser = setExistingUserIdentity(userIdentity);
-        UserEntity userEntity = userIdentityMapper.toUserEntity(existingUser);
+        return saveAndGetUserIdentity(existingUser);
+
+    }
+
+    private UserIdentity saveAndGetUserIdentity(UserIdentity userIdentity) {
+        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
         return userIdentityMapper.toUserIdentity(userEntity);
-
     }
 
     private UserIdentity setExistingUserIdentity(UserIdentity userIdentity) throws MiddlException {
@@ -82,6 +86,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         existingUser.setFirstName(userIdentity.getFirstName());
         existingUser.setEmail(userIdentity.getEmail());
         existingUser.setRole(userIdentity.getRole());
+        existingUser.setCreatedAt(userIdentity.getCreatedAt());
+        existingUser.setCreatedBy(userIdentity.getCreatedBy());
         return existingUser;
     }
 
