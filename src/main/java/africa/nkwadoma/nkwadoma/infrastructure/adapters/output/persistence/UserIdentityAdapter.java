@@ -64,6 +64,12 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
+    @Override
+    public UserIdentity update(UserIdentity userIdentity) throws MiddlException {
+        UserIdentityValidator.validateUserIdentity(userIdentity);
+        return null;
+    }
+
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND));
     }

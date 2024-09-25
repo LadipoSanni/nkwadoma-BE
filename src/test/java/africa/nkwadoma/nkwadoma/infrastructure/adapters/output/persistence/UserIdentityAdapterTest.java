@@ -209,7 +209,7 @@ class UserIdentityAdapterTest {
     @Test
     void findUserByEmail(){
         try {
-            UserIdentity existingUser = userIdentityOutputPort.findById(john.getUserId());
+            UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getUserId());
             assertEquals(existingUser.getUserId(),john.getUserId());
             UserIdentity userIdentity =  userIdentityOutputPort.findByEmail(john.getEmail());
             assertNotNull(userIdentity);
@@ -244,8 +244,15 @@ class UserIdentityAdapterTest {
 
     @Test
     void  updateUser(){
-        john.setFirstName("Sharon");
-        john.setLastName("lastname");
+        try {
+            UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getUserId());
+            assertEquals(existingUser.getFirstName(),john.getFirstName());
+            john.setFirstName("Sharon");
+            john.setLastName("lastname");
+
+        }catch (MiddlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
     }
 
 
