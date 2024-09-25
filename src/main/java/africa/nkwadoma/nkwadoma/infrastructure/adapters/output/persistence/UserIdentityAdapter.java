@@ -52,11 +52,9 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findByEmail(String email) throws MiddlException {
-
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         return userIdentityMapper.toUserIdentity(userEntity);
-
     }
 
     @Override
@@ -64,7 +62,6 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         userEntityRepository.delete(userEntity);
-
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {

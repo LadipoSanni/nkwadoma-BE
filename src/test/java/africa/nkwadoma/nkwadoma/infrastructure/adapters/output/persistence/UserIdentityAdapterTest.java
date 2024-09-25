@@ -140,10 +140,9 @@ class UserIdentityAdapterTest {
     @Test
     void deleteUser(){
        try{
-        UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getEmail());
-        assertEquals(existingUser.getEmail(),john.getEmail());
-
-           userIdentityOutputPort.deleteUserByEmail(john.getEmail());
+            UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getEmail());
+            assertEquals(john.getUserId(),existingUser.getUserId());
+            userIdentityOutputPort.deleteUserByEmail(john.getEmail());
        }catch (MiddlException exception){
            log.info("{} ->",exception.getMessage());
        }
@@ -205,16 +204,15 @@ class UserIdentityAdapterTest {
     void deleteUserWithNonExistingUserId(){
         john.setUserId("notvalid@gmail.com");
         assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getUserId()));
-
     }
 
     @Test
     void findUserByEmail(){
         try {
-          UserIdentity userIdentity =  userIdentityOutputPort.findByEmail(john.getEmail());
-          assertNotNull(userIdentity);
-          log.info("{}",userIdentity);
-
+            UserIdentity existingUser = userIdentityOutputPort.findById(john.getUserId());
+            assertEquals(existingUser.getUserId(),john.getUserId());
+            UserIdentity userIdentity =  userIdentityOutputPort.findByEmail(john.getEmail());
+            assertNotNull(userIdentity);
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
@@ -242,6 +240,12 @@ class UserIdentityAdapterTest {
     void  findUserWithEmptyEmail(){
         john.setEmail(StringUtils.EMPTY);
         assertThrows(MiddlException.class, () -> userIdentityOutputPort.findByEmail(john.getEmail()));
+    }
+
+    @Test
+    void  updateUser(){
+        john.setFirstName("Sharon");
+        john.setLastName("lastname");
     }
 
 
