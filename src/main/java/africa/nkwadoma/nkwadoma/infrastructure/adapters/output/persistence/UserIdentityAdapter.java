@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validat
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserIdentityAdapter implements UserIdentityOutputPort {
     private final UserEntityRepository userEntityRepository;
     private final UserIdentityMapper userIdentityMapper;
@@ -67,7 +69,20 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     @Override
     public UserIdentity update(UserIdentity userIdentity) throws MiddlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
-        return null;
+        UserIdentity existingUser = setExistingUserIdentity(userIdentity);
+        UserEntity userEntity = userIdentityMapper.toUserEntity(existingUser);
+        userEntity = userEntityRepository.save(userEntity);
+        return userIdentityMapper.toUserIdentity(userEntity);
+
+    }
+
+    private UserIdentity setExistingUserIdentity(UserIdentity userIdentity) throws MiddlException {
+        UserIdentity existingUser = findByEmail(userIdentity.getEmail());
+        existingUser.setLastName(userIdentity.getLastName());
+        existingUser.setFirstName(userIdentity.getFirstName());
+        existingUser.setEmail(userIdentity.getEmail());
+        existingUser.setRole(userIdentity.getRole());
+        return existingUser;
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
