@@ -181,6 +181,22 @@ class UserIdentityAdapterTest {
         assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
     }
 
+    @Test
+    void deleteUserWithExistingId(){
+        try{
+            userIdentityOutputPort.deleteUserById(john.getUserId());
+        }catch (MiddlException exception){
+            log.info("{} ->",exception.getMessage());
+        }
+        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getUserId()));
+    }
+
+
+    @Test
+    void deleteUserWithEmptyId(){
+        john.setEmail(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getUserId()));
+    }
 
     @Test
     void findUserByEmail(){
@@ -199,6 +215,13 @@ class UserIdentityAdapterTest {
         john.setEmail("doesnotexist@gmail.com");
         assertThrows(IdentityException.class, ()->userIdentityOutputPort.findByEmail(john.getEmail()));
     }
+
+    @Test
+    void findUserWithAnInvalidEmailFormat(){
+        john.setEmail("invalid");
+        assertThrows(MiddlException.class, () -> userIdentityOutputPort.findByEmail(john.getEmail()));
+    }
+
 
     @AfterAll
     void cleanUp(){
