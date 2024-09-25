@@ -154,11 +154,23 @@ class UserIdentityAdapterTest {
         assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
     }
 
+    @Test
+    void deleteUserWithEmptyEmail(){
+        john.setEmail(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
+    }
+
 
     @Test
     void deleteUserWithNonExistingEmail(){
         john.setEmail("invalid@gmail.com");
         assertThrows(IdentityException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
+    }
+
+    @Test
+    void deleteUserWithInvalidEmailFormat(){
+        john.setEmail("invalid");
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserByEmail(john.getEmail()));
     }
 
     @Test
@@ -175,6 +187,19 @@ class UserIdentityAdapterTest {
     void deleteUserWithNonExistingId(){
         john.setEmail("invalid@gmail.com");
         assertThrows(IdentityException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
+    }
+
+
+    @Test
+    void deleteUserWithNullId(){
+        john.setEmail(null);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
+    }
+
+    @Test
+    void deleteUserWithEmptyId(){
+        john.setEmail(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getEmail()));
     }
 
     @Test
