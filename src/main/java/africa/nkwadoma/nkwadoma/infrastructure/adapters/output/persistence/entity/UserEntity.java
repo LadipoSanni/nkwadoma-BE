@@ -1,15 +1,18 @@
-package africa.nkwadoma.nkwadoma.domain.model;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.*;
-import org.keycloak.representations.idm.UserRepresentation;
+
 
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserIdentity {
+@Entity
+public class UserEntity {
+    @Id
     private String userId;
     private String email;
     private String firstName;
@@ -20,6 +23,5 @@ public class UserIdentity {
     private String createdAt;
     private String role;
     private String createdBy;
-    private UserRepresentation userRepresentation;
 
 }

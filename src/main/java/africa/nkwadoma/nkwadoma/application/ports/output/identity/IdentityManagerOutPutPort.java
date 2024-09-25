@@ -1,13 +1,14 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IdentityManagerOutPutPort {
     UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException;
@@ -20,4 +21,6 @@ public interface IdentityManagerOutPutPort {
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws InfrastructureException;
 
     void deleteUser(UserIdentity userIdentity) throws InfrastructureException;
+
+    Optional<UserIdentity> getUserByEmail(String email) throws MiddlException;
 }

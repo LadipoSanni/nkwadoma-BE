@@ -34,8 +34,8 @@ class KeycloakAdapterTest {
     void setUp() {
         john = new UserIdentity();
         john.setFirstName("John");
-        john.setLastName("Doe");
-        john.setEmail("john@lendspace.com");
+        john.setLastName("Max");
+        john.setEmail("johnmax@lendspace.com");
         john.setRole("PORTFOLIO_MANAGER");
 
         peter = new UserIdentity();

@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.LearnSpaceUserException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import jakarta.ws.rs.NotFoundException;
@@ -18,8 +19,8 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private String KEYCLOAK_REALM;
 
     private final KeyCloakMapper mapper;
+
 
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException{
@@ -66,6 +68,24 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new InfrastructureException("User does not exist");
         }
 
+    }
+
+    @Override
+    public Optional<UserIdentity> getUserByEmail(String email) throws MiddlException {
+        UserRepresentation userRepresentation = findUserByEmail(email);
+        if (userRepresentation == null) {
+            return Optional.empty();
+        }
+        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        userIdentity.setUserRepresentation(userRepresentation);
+        return Optional.of(userIdentity);
+    }
+
+
+    public UserRepresentation findUserByEmail(String email) throws MiddlException {
+        UserIdentityValidator.validateEmail(email);
+        List<UserRepresentation> foundUsers = keycloak.realm(KEYCLOAK_REALM).users().search(email);
+        return foundUsers.isEmpty() ? null : foundUsers.get(0);
     }
 
     private void assignRole(UserIdentity userIdentity) throws InfrastructureException {
