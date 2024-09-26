@@ -11,8 +11,6 @@ import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.USER_ID
 import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.*;
 
 public class UserIdentityValidator extends MiddleValidator {
-
-
      public static void validateUserIdentity(UserIdentity userIdentity) throws IdentityException {
          if (ObjectUtils.isEmpty(userIdentity)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL);
@@ -34,7 +32,5 @@ public class UserIdentityValidator extends MiddleValidator {
             throw new IdentityException(INVALID_EMAIL_ADDRESS);
         }
     }
-
-
 
 }
