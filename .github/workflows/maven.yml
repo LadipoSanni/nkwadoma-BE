@@ -36,6 +36,7 @@ jobs:
       - name: Run Maven Tests with Debug
         run: mvn -B clean package -e -X # -e for errors, -X for debug
 
+
   build:
     needs: ["test"]
     runs-on: ubuntu-latest
