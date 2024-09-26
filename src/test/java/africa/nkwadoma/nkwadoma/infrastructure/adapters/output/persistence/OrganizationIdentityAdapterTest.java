@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -15,14 +14,16 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-@SpringBootTest
 class OrganizationIdentityAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     private OrganizationIdentity organization;
+
     @BeforeEach
         void setUp(){
         organization = new OrganizationIdentity();
@@ -39,11 +40,11 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganization(){
+            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
             try{
-                assertThrows(IdentityException.class,()-> organizationOutputPort.findByRcNumber(organization.getRcNumber()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(organization);
                 assertNotNull(savedOrganization);
-                OrganizationIdentity foundOrganization = organizationOutputPort.findByRcNumber(organization.getEmail());
+                OrganizationIdentity foundOrganization = organizationOutputPort.findById(organization.getOrganizationId());
                 assertEquals(foundOrganization.getIndustry(),savedOrganization.getIndustry());
              }catch (MiddlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -155,7 +156,7 @@ class OrganizationIdentityAdapterTest {
     @Test
     void findOrganization(){
        try{
-           OrganizationIdentity organizationIdentity = organizationOutputPort.findByRcNumber(organization.getRcNumber());
+           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(organization.getRcNumber());
            assertNotNull(organizationIdentity);
            assertEquals(organizationIdentity.getIndustry(),organization.getIndustry());
        }catch (MiddlException middlException){
@@ -165,27 +166,27 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void findNonExistingOrganization(){
-        organization.setRcNumber("12345RC");
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findByRcNumber(organization.getRcNumber()));
+        organization.setOrganizationId("12345RC");
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
     }
 
     @Test
     void findNullOrganization(){
-        organization.setRcNumber(null);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findByRcNumber(organization.getRcNumber()));
+        organization.setOrganizationId(null);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
     }
     @Test
     void findEmptyOrganization(){
-        organization.setRcNumber(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findByRcNumber(organization.getRcNumber()));
+        organization.setOrganizationId(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
     }
     @Test
     void deleteOrganization() throws MiddlException {
         try{
-            OrganizationIdentity foundUser = organizationOutputPort.findByRcNumber(organization.getRcNumber());
+            OrganizationIdentity foundUser = organizationOutputPort.findById(organization.getRcNumber());
             assertEquals(foundUser.getTin(),organization.getTin());
-            organizationOutputPort.delete(organization.getTin());
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findByRcNumber(organization.getRcNumber()));
+            organizationOutputPort.delete(organization.getRcNumber());
+            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
@@ -205,19 +206,19 @@ class OrganizationIdentityAdapterTest {
     @Test
     void deleteWithEmptyOrganizationRcNumber(){
         organization.setRcNumber(null);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getRcNumber()));
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
     }
     @Test
     void updateOrganization(){
         try {
-            OrganizationIdentity existingUser = organizationOutputPort.findByRcNumber(organization.getRcNumber());
+            OrganizationIdentity existingUser = organizationOutputPort.findById(organization.getOrganizationId());
             assertEquals(existingUser.getPhoneNumber(),organization.getPhoneNumber());
             assertNotNull(existingUser.getIndustry());
 
             existingUser.setName("Felicia");
             OrganizationIdentity updatedUser = organizationOutputPort.update(existingUser);
 
-            OrganizationIdentity findUpdatedUser = organizationOutputPort.findByRcNumber(updatedUser.getRcNumber());
+            OrganizationIdentity findUpdatedUser = organizationOutputPort.findById(updatedUser.getOrganizationId());
 
             assertNotEquals(findUpdatedUser.getName(),organization.getName());
 
@@ -227,18 +228,18 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
-    void updateNullOrganizationEntity(){
+    void updateNullOrganization(){
         assertThrows(MiddlException.class,()-> organizationOutputPort.update(null));
     }
 
 
     @AfterAll
-        void cleanUp(){
-            try {
-                organizationOutputPort.delete(organization.getRcNumber());
-            }catch (MiddlException middlException){
-                log.info("{}",middlException.getMessage());
-            }
+    void cleanUp(){
+        try{
+            organizationOutputPort.delete(organization.getOrganizationId());
+        } catch (MiddlException e) {
+            log.info("{} {}", e.getClass().getName(),e.getMessage());
+        }
         }
 
 

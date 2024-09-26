@@ -41,16 +41,18 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public void delete(String rcNumber) throws MiddlException {
-        OrganizationIdentity foundOrganization = findByRcNumber(rcNumber);
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(foundOrganization);
+    public void delete(String id) throws MiddlException {
+        validateUserDataElement(id);
+        OrganizationEntity organizationEntity = organizationEntityRepository.findByOrganizationId(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND));
         organizationEntityRepository.delete(organizationEntity);
     }
 
+
+
     @Override
-    public OrganizationIdentity findByRcNumber(String rcNumber) throws MiddlException {
-        validateUserDataElement(rcNumber);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findByRcNumber(rcNumber).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND));
+    public OrganizationIdentity findById(String id) throws MiddlException {
+        validateUserDataElement(id);
+        OrganizationEntity organizationEntity = organizationEntityRepository.findByOrganizationId(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
@@ -62,7 +64,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     private OrganizationIdentity setExistingUserDataElement(OrganizationIdentity organizationIdentity) throws MiddlException {
-        OrganizationIdentity existingUser = findByRcNumber(organizationIdentity.getRcNumber());
+        OrganizationIdentity existingUser = findById(organizationIdentity.getRcNumber());
         existingUser.setEmail(organizationIdentity.getEmail());
         existingUser.setName(organizationIdentity.getName());
         existingUser.setIndustry(organizationIdentity.getIndustry());
