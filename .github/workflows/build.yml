@@ -18,6 +18,9 @@ jobs:
       KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 
 
