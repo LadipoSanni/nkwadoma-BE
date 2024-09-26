@@ -40,8 +40,8 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganization(){
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
             try{
+                assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(organization);
                 assertNotNull(savedOrganization);
                 OrganizationIdentity foundOrganization = organizationOutputPort.findById(organization.getOrganizationId());
@@ -156,7 +156,7 @@ class OrganizationIdentityAdapterTest {
     @Test
     void findOrganization(){
        try{
-           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(organization.getRcNumber());
+           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(organization.getOrganizationId());
            assertNotNull(organizationIdentity);
            assertEquals(organizationIdentity.getIndustry(),organization.getIndustry());
        }catch (MiddlException middlException){
@@ -167,7 +167,7 @@ class OrganizationIdentityAdapterTest {
     @Test
     void findNonExistingOrganization(){
         organization.setOrganizationId("12345RC");
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
     }
 
     @Test
@@ -178,15 +178,15 @@ class OrganizationIdentityAdapterTest {
     @Test
     void findEmptyOrganization(){
         organization.setOrganizationId(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
     }
     @Test
     void deleteOrganization() throws MiddlException {
         try{
-            OrganizationIdentity foundUser = organizationOutputPort.findById(organization.getRcNumber());
+            OrganizationIdentity foundUser = organizationOutputPort.findById(organization.getOrganizationId());
             assertEquals(foundUser.getTin(),organization.getTin());
             organizationOutputPort.delete(organization.getRcNumber());
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getRcNumber()));
+            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
@@ -194,18 +194,18 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
-    void deleteWithNonExistingOrganizationRcNumber(){
-        organization.setRcNumber("non existing101");
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getRcNumber()));
+    void deleteWithNonExistingOrganizationId(){
+        organization.setOrganizationId("non existing101");
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
     }
     @Test
-    void deleteWithNullOrganizationRcNumber(){
-        organization.setRcNumber(null);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getRcNumber()));
+    void deleteWithNullOrganizationId(){
+        organization.setOrganizationId(null);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
     }
     @Test
-    void deleteWithEmptyOrganizationRcNumber(){
-        organization.setRcNumber(null);
+    void deleteWithEmptyOrganizationId(){
+        organization.setOrganizationId(StringUtils.EMPTY);
         assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
     }
     @Test
@@ -240,8 +240,6 @@ class OrganizationIdentityAdapterTest {
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
-        }
-
-
+    }
 
 }
