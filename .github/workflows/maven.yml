@@ -19,6 +19,9 @@ env:
   KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
   KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
   KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
 
@@ -57,4 +60,7 @@ jobs:
           keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
           keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
           realm: ${{ secrets.KEYCLOAK_REALM }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: mvn -B package --file pom.xml -e -X # Add -e and -X flags here
