@@ -20,6 +20,7 @@ jobs:
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
 
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,6 +31,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Maven Package for Dev
+        if: github.ref == 'refs/heads/dev'  # Use dev branch for dev environment
+        run: mvn -B clean package -Dspring.profiles.active=dev
       
       - name: Cache SonarQube packages
         uses: actions/cache@v3
