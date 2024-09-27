@@ -25,7 +25,7 @@ class UserIdentityServiceTest {
     void setUp(){
         mary = new UserIdentity();
 
-        mary.setUserId(BigDecimal.ONE.toString());
+        mary.setId(BigDecimal.ONE.toString());
         mary.setFirstName("John");
         mary.setLastName("Mary");
         mary.setEmail("mary4@johnson.com");

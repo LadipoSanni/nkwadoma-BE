@@ -10,5 +10,5 @@ public interface UserIdentityOutputPort {
     void deleteUserById(String id) throws MiddlException;
     UserIdentity findByEmail(String email) throws MiddlException;
     void deleteUserByEmail(String email) throws MiddlException;
-    UserIdentity update(UserIdentity userIdentity) throws MiddlException;
+
 }

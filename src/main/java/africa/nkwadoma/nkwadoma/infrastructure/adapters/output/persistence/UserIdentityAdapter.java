@@ -66,13 +66,6 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
-    @Override
-    public UserIdentity update(UserIdentity userIdentity) throws MiddlException {
-        UserIdentityValidator.validateUserIdentity(userIdentity);
-        UserIdentity existingUser = setExistingUserIdentity(userIdentity);
-        return saveAndGetUserIdentity(existingUser);
-
-    }
 
     private UserIdentity saveAndGetUserIdentity(UserIdentity userIdentity) {
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);

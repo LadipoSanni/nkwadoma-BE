@@ -2,29 +2,37 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.model.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.*;
 
 public class UserIdentityValidator extends MiddleValidator {
-     public static void validateUserIdentity(UserIdentity userIdentity) throws IdentityException {
+     public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MiddlException {
+         if (CollectionUtils.isEmpty(userIdentities)){
+             throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL);
+         }
+         for(OrganizationEmployeeIdentity userIdentity : userIdentities){
+             validateUserIdentity(userIdentity.getMiddlUser());
+         }
+     }
+
+     public static void validateUserIdentity(UserIdentity userIdentity) throws MiddlException {
          if (ObjectUtils.isEmpty(userIdentity)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL);
          }
-
-         try{
-             validateEmail(userIdentity.getEmail());
-             validateUserDataElement(userIdentity.getFirstName());
-             validateUserDataElement(userIdentity.getLastName());
-             validateUserDataElement(userIdentity.getCreatedBy());
-             validateUserDataElement(userIdentity.getRole());
-         }catch (MiddlException exception){
-             throw new IdentityException(exception.getMessage());
-         }
+         validateEmail(userIdentity.getEmail());
+         validateUserDataElement(userIdentity.getFirstName());
+         validateUserDataElement(userIdentity.getLastName());
+         validateUserDataElement(userIdentity.getCreatedBy());
+         validateUserDataElement(userIdentity.getRole());
      }
 
     private static void validateEmail(UserIdentity userIdentity) throws IdentityException {

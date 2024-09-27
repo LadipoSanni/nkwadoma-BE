@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 
@@ -11,9 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "middl_user")
 public class UserEntity {
     @Id
-    private String userId;
+    private String id;
     private String email;
     private String firstName;
     private String lastName;
@@ -23,5 +23,4 @@ public class UserEntity {
     private String createdAt;
     private String role;
     private String createdBy;
-
 }

@@ -30,7 +30,7 @@ public class UserIdentityService implements CreateUserUseCase {
           userIdentity.setCreatedAt(localDateTime.toString());
           userIdentityOutputPort.save(userIdentity);
           return userIdentity;
-      }catch (InfrastructureException exception){
+      }catch (MiddlException exception){
           throw new MiddlException(exception.getMessage());
       }
 

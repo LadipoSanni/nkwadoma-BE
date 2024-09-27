@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -11,16 +11,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IdentityManagerOutPutPort {
-    UserIdentity createUser(UserIdentity userIdentity) throws InfrastructureException;
+    UserIdentity createUser(UserIdentity userIdentity) throws MiddlException;
 
-    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws InfrastructureException;
+    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MiddlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
-    UserResource getUserResource(UserIdentity userIdentity) throws InfrastructureException;
-    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws InfrastructureException;
+    UserResource getUserResource(UserIdentity userIdentity) throws MiddlException;
+    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MiddlException;
 
-    void deleteUser(UserIdentity userIdentity) throws InfrastructureException;
+    void deleteUser(UserIdentity userIdentity) throws MiddlException;
 
     Optional<UserIdentity> getUserByEmail(String email) throws MiddlException;
+
+    OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MiddlException;
 }

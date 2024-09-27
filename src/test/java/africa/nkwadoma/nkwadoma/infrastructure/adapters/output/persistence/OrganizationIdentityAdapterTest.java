@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -22,29 +23,46 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrganizationIdentityAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
-    private OrganizationIdentity organization;
-
+    private OrganizationIdentity amazingGrace;
+    private  UserIdentity joel;
     @BeforeEach
         void setUp(){
-        organization = new OrganizationIdentity();
-        organization.setName("rachel");
-        organization.setIndustry("Education");
-        organization.setEmail("rachel@gmail.com");
-        organization.setInvitedDate(LocalDateTime.now().toString());
-        organization.setRcNumber("RX3456C");
-        organization.setOrganizationId(organization.getRcNumber());
-        organization.setPhoneNumber("0907658483");
-        organization.setTin("Tin5678");
-        organization.setWebsiteAddress("webaddress.org");
+        joel = new UserIdentity();
+        joel.setFirstName("Joel");
+        joel.setLastName("Jacobs");
+        joel.setEmail("joel@johnson.com");
+        joel.setId(joel.getEmail());
+        joel.setPhoneNumber("098647748393");
+        joel.setEmailVerified(true);
+        joel.setEnabled(true);
+        joel.setCreatedAt(LocalDateTime.now().toString());
+        joel.setRole("ADMIN");
+        joel.setCreatedBy("Ayo");
+
+//        List<UserIdentity> organizationAdmin = new ArrayList<>();
+//        organizationAdmin.add(joel);
+
+        amazingGrace = new OrganizationIdentity();
+        amazingGrace.setName("Amazing Grace Enterprises");
+        amazingGrace.setIndustry("Education");
+        amazingGrace.setEmail("rachel@gmail.com");
+        amazingGrace.setInvitedDate(LocalDateTime.now().toString());
+        amazingGrace.setRcNumber("RC345677");
+        amazingGrace.setId(amazingGrace.getRcNumber());
+        amazingGrace.setPhoneNumber("0907658483");
+        amazingGrace.setTin("Tin5678");
+        amazingGrace.setWebsiteAddress("webaddress.org");
+       // amazingGrace.setOrganizationAdmins(organizationAdmin);
         }
 
     @Test
     void saveOrganization(){
             try{
-                assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
-                OrganizationIdentity savedOrganization =  organizationOutputPort.save(organization);
+                assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
+                OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
                 assertNotNull(savedOrganization);
-                OrganizationIdentity foundOrganization = organizationOutputPort.findById(organization.getOrganizationId());
+                OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+                assertEquals(foundOrganization.getName(),savedOrganization.getName());
                 assertEquals(foundOrganization.getIndustry(),savedOrganization.getIndustry());
              }catch (MiddlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -52,11 +70,14 @@ class OrganizationIdentityAdapterTest {
 
        }
 
+
    @Test
-    void saveUserWithExistingEmail(){
+    void saveOrganizationWithExistingRcNumber(){
         try{
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
-            assertEquals(organization.getRcNumber(),savedOrganization.getRcNumber());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+            assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
+            assertEquals(amazingGrace.getId(),savedOrganization.getId());
         }catch (MiddlException exception){
             log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
         }
@@ -69,96 +90,96 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullEmail(){
-        organization.setEmail(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setEmail(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithEmptyEmail(){
-        organization.setEmail(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setEmail(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithNullRcNumber(){
-        organization.setRcNumber(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
-    }
-
-    @Test
-    void saveOrganizationWithEmptyTin(){
-        organization.setTin(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
-    }
-    @Test
-    void saveOrganizationWithInvalidEmailFormat(){
-        organization.setEmail("invalid");
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
-    }
-    @Test
-    void saveOrganizationWithNullTin(){
-        organization.setTin(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setRcNumber(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithEmptyRcNumber(){
-        organization.setRcNumber(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setRcNumber(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
+    void saveOrganizationWithInvalidEmailFormat(){
+        amazingGrace.setEmail("invalid");
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
+    @Test
     void saveOrganizationWithEmptyIndustry(){
-        organization.setIndustry(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setIndustry(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithNullIndustry(){
-        organization.setIndustry(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setIndustry(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
     @Test
     void saveOrganizationWithEmptyName(){
-        organization.setName(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setName(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithNullName(){
-        organization.setName(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setName(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
-    @Test
-    void saveOrganizationWithEmptyWebsiteAddress(){
-        organization.setWebsiteAddress(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
-    }
-
-    @Test
-    void saveOrganizationWithNullWebsiteAddress(){
-        organization.setWebsiteAddress(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
-    }
     @Test
     void saveOrganizationWithEmptyPhoneNumber(){
-        organization.setPhoneNumber(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setPhoneNumber(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void saveOrganizationWithNullPhoneNumber(){
-        organization.setPhoneNumber(null);
-        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(organization));
+        amazingGrace.setPhoneNumber(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
+
+    @Test
+    void saveOrganizationWithNullAdmin(){
+        //amazingGrace.setOrganizationAdmins(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
+
+//    @Test
+//    void saveOrganizationWithEmptyAdmin(){
+//        amazingGrace.setOrganizationAdmins(Collections.EMPTY_LIST);
+//        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
+//    }
+
+    @Test
+    void saveOrganizationWithIncompleteAdminField(){
+        joel.setEmail(null);
+        joel.setPhoneNumber(null);
+        joel.setFirstName(null);
+        joel.setLastName(null);
+        joel.setCreatedBy(null);
+        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
     @Test
     void findOrganization(){
        try{
-           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(organization.getOrganizationId());
+           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(amazingGrace.getId());
            assertNotNull(organizationIdentity);
-           assertEquals(organizationIdentity.getIndustry(),organization.getIndustry());
+           assertEquals(organizationIdentity.getIndustry(), amazingGrace.getIndustry());
        }catch (MiddlException middlException){
            log.info("{}", middlException.getMessage());
        }
@@ -166,77 +187,70 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void findNonExistingOrganization(){
-        organization.setOrganizationId("12345RC");
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
+        amazingGrace.setId("12345RC");
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
     }
 
     @Test
     void findNullOrganization(){
-        organization.setOrganizationId(null);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
+        amazingGrace.setId(null);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
     }
     @Test
     void findEmptyOrganization(){
-        organization.setOrganizationId(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
+        amazingGrace.setId(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
     }
     @Test
-    void deleteOrganization() throws MiddlException {
+    void deleteOrganization(){
         try{
-            OrganizationIdentity foundUser = organizationOutputPort.findById(organization.getOrganizationId());
-            assertEquals(foundUser.getTin(),organization.getTin());
-            organizationOutputPort.delete(organization.getRcNumber());
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(organization.getOrganizationId()));
+            OrganizationIdentity foundUser = organizationOutputPort.findById(amazingGrace.getId());
+            assertEquals(foundUser.getTin(), amazingGrace.getTin());
+            organizationOutputPort.delete(amazingGrace.getId());
+            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
-
     }
 
     @Test
     void deleteWithNonExistingOrganizationId(){
-        organization.setOrganizationId("non existing101");
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
+        amazingGrace.setId("non existing101");
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(amazingGrace.getId()));
     }
     @Test
     void deleteWithNullOrganizationId(){
-        organization.setOrganizationId(null);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
+        amazingGrace.setId(null);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(amazingGrace.getId()));
     }
     @Test
     void deleteWithEmptyOrganizationId(){
-        organization.setOrganizationId(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(organization.getOrganizationId()));
+        amazingGrace.setId(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()-> organizationOutputPort.delete(amazingGrace.getId()));
     }
     @Test
     void updateOrganization(){
         try {
-            OrganizationIdentity existingUser = organizationOutputPort.findById(organization.getOrganizationId());
-            assertEquals(existingUser.getPhoneNumber(),organization.getPhoneNumber());
+            OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
+            assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
             assertNotNull(existingUser.getIndustry());
 
             existingUser.setName("Felicia");
-            OrganizationIdentity updatedUser = organizationOutputPort.update(existingUser);
+            OrganizationIdentity updatedUser = organizationOutputPort.save(existingUser);
 
-            OrganizationIdentity findUpdatedUser = organizationOutputPort.findById(updatedUser.getOrganizationId());
+            OrganizationIdentity findUpdatedUser = organizationOutputPort.findById(updatedUser.getId());
 
-            assertNotEquals(findUpdatedUser.getName(),organization.getName());
+            assertNotEquals(findUpdatedUser.getName(), amazingGrace.getName());
 
         }catch (MiddlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
     }
 
-    @Test
-    void updateNullOrganization(){
-        assertThrows(MiddlException.class,()-> organizationOutputPort.update(null));
-    }
-
-
     @AfterAll
     void cleanUp(){
         try{
-            organizationOutputPort.delete(organization.getOrganizationId());
+            organizationOutputPort.delete(amazingGrace.getId());
         } catch (MiddlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +32,7 @@ class UserIdentityAdapterTest {
         john.setFirstName("John");
         john.setLastName("Johnson");
         john.setEmail("john@johnson.com");
-        john.setUserId(john.getEmail());
+        john.setId(john.getEmail());
         john.setPhoneNumber("09087655454");
         john.setEmailVerified(true);
         john.setEnabled(true);
@@ -63,7 +62,7 @@ class UserIdentityAdapterTest {
     void saveUserWithExistingEmail(){
         try{
             UserIdentity savedJohn = userIdentityOutputPort.save(john);
-            assertEquals(john.getUserId(),savedJohn.getUserId());
+            assertEquals(john.getId(),savedJohn.getId());
         }catch (MiddlException exception){
             log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
         }
@@ -71,69 +70,69 @@ class UserIdentityAdapterTest {
 
     @Test
     void saveUserWithNullUserIdentity(){
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(null));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(null));
     }
 
     @Test
     void saveUserWithNullEmail(){
         john.setEmail(null);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithEmptyEmail(){
         john.setEmail(StringUtils.EMPTY);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithInvalidEmail(){
         john.setEmail("invalid");
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithNullFirstName(){
         john.setFirstName(null);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
     @Test
     void saveUserWithEmptyFirstName(){
         john.setFirstName(StringUtils.EMPTY);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
     @Test
     void saveUserWithNullLastName(){
         john.setLastName(null);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
     @Test
     void saveUserWithEmptyLastName(){
         john.setLastName(StringUtils.EMPTY);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithNullRole(){
         john.setRole(null);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
     @Test
     void saveUserWithEmptyRole(){
         john.setRole(StringUtils.EMPTY);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithNullCreatedBy(){
         john.setCreatedBy(null);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
     @Test
     void saveUserWithEmptyCreatedBy(){
         john.setCreatedBy(StringUtils.EMPTY);
-        assertThrows(IdentityException.class, ()->userIdentityOutputPort.save(john));
+        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
 
 
@@ -141,7 +140,7 @@ class UserIdentityAdapterTest {
     void deleteUser(){
        try{
             UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getEmail());
-            assertEquals(john.getUserId(),existingUser.getUserId());
+            assertEquals(john.getId(),existingUser.getId());
             userIdentityOutputPort.deleteUserByEmail(john.getEmail());
        }catch (MiddlException exception){
            log.info("{} ->",exception.getMessage());
@@ -178,39 +177,39 @@ class UserIdentityAdapterTest {
     @Test
     void deleteUserWithUserId(){
         try{
-            UserIdentity existingUser = userIdentityOutputPort.findById(john.getUserId());
-            assertEquals(existingUser.getUserId(),john.getUserId());
+            UserIdentity existingUser = userIdentityOutputPort.findById(john.getId());
+            assertEquals(existingUser.getId(),john.getId());
 
-            userIdentityOutputPort.deleteUserById(john.getUserId());
+            userIdentityOutputPort.deleteUserById(john.getId());
         }catch (MiddlException exception){
             log.info("{} ->",exception.getMessage());
         }
-        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getUserId()));
+        assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getId()));
     }
 
 
     @Test
     void deleteUserWithEmptyId(){
-        john.setUserId(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getUserId()));
+        john.setId(StringUtils.EMPTY);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getId()));
     }
     @Test
     void deleteUserWithNullId(){
-        john.setUserId(null);
-        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getUserId()));
+        john.setId(null);
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getId()));
     }
 
     @Test
     void deleteUserWithNonExistingUserId(){
-        john.setUserId("notvalid@gmail.com");
-        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getUserId()));
+        john.setId("notvalid@gmail.com");
+        assertThrows(MiddlException.class,()->userIdentityOutputPort.deleteUserById(john.getId()));
     }
 
     @Test
     void findUserByEmail(){
         try {
-            UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getUserId());
-            assertEquals(existingUser.getUserId(),john.getUserId());
+            UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getId());
+            assertEquals(existingUser.getId(),john.getId());
             UserIdentity userIdentity =  userIdentityOutputPort.findByEmail(john.getEmail());
             assertNotNull(userIdentity);
         } catch (MiddlException e) {
@@ -250,9 +249,9 @@ class UserIdentityAdapterTest {
             assertNotNull(existingUser.getPhoneNumber());
 
             existingUser.setLastName("Johnny");
-            UserIdentity updatedUser = userIdentityOutputPort.update(existingUser);
+            UserIdentity updatedUser = userIdentityOutputPort.save(existingUser);
 
-            UserIdentity findUpdatedUser = userIdentityOutputPort.findByEmail(updatedUser.getUserId());
+            UserIdentity findUpdatedUser = userIdentityOutputPort.findByEmail(updatedUser.getId());
 
             assertNotEquals(findUpdatedUser.getLastName(),john.getLastName());
 

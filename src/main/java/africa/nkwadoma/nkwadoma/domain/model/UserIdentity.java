@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model;
 
 import lombok.*;
-import org.keycloak.representations.idm.UserRepresentation;
 
 @Setter
 @Getter
@@ -10,7 +9,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserIdentity {
-    private String userId;
+    private String id;
     private String email;
     private String firstName;
     private String lastName;
@@ -20,6 +19,6 @@ public class UserIdentity {
     private String createdAt;
     private String role;
     private String createdBy;
-    private UserRepresentation userRepresentation;
 
+//    private OrganizationIdentity employer;
 }

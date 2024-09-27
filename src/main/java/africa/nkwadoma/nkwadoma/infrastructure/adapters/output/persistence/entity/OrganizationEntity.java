@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Setter
@@ -10,15 +8,18 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "organization")
 public class OrganizationEntity {
     @Id
-    private String organizationId;
+    private String id;
     private String industry;
     private String name;
     private String email;
     private String websiteAddress;
     private String invitedDate;
-    private String rcNumber;
-    private String tin;
+    private String registrationNumber;
+    private String taxIdentity;
     private String phoneNumber;
+//    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+//    private List<UserEntity> organizationAdmins;
 }
