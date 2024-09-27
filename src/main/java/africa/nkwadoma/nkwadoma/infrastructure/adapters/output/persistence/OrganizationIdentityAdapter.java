@@ -29,7 +29,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MiddlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-       // UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationAdmins());
+       UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
@@ -61,37 +62,37 @@ class KeycloakAdapterTest {
     }
     @Test
     void createUserWithNullUserIdentity(){
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(null));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(null));
     }
     @Test
     void createUserWithExistingEmail(){
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithNullEmail(){
         john.setEmail(null);
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithEmptyStringEmail(){
         john.setEmail("");
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithNoUserRole(){
         john.setRole(null);
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithInvalidUserRole(){
         john.setRole("INVALID_ROLE");
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
 
     @Test
     void createUserWithEmptyFirstName(){
         john.setFirstName(null);
-        assertThrows(InfrastructureException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
     void createUserWithEmptyLastName(){

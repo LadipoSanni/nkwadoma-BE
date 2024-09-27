@@ -38,8 +38,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private String KEYCLOAK_REALM;
 
     private final KeyCloakMapper mapper;
-    //private final UserIdentityOutputPort userIdentityOutputPort;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws MiddlException{
@@ -96,18 +94,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
             clientRepresentation = getClientRepresentation(organizationIdentity);
             organizationIdentity.setId(clientRepresentation.getId());
-
-            //now create user in keycloak
-//            UserIdentity newUser = createUser(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
-//            OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
-//            employeeIdentity.setMiddlUser(newUser);
-//            employeeIdentity.setOrganization(organizationIdentity);
-
-//            UserIdentity newUser = createUser(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
-//            OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
-//            employeeIdentity.setMiddlUser(newUser);
-//            employeeIdentity.setOrganization(organizationIdentity.getId());
-
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
             throw new MiddlException(CLIENT_EXIST);
         }
