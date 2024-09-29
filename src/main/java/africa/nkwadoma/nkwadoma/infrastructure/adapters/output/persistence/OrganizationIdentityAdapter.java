@@ -3,8 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.OrganizationEntity;
@@ -20,7 +19,6 @@ import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMAIL_NOT_
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateUserDataElement;
 
-@Component
 @RequiredArgsConstructor
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
@@ -38,14 +36,14 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity findByEmail(String email) throws MiddlException {
         validateEmail(email);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
     public void delete(String id) throws MiddlException {
         validateUserDataElement(id);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
     }
 
@@ -54,7 +52,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity findById(String id) throws MiddlException {
         validateUserDataElement(id);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper;
 
-import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;

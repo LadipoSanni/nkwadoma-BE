@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;

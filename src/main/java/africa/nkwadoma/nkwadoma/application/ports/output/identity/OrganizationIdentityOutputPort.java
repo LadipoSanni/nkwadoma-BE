@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 
 public interface OrganizationIdentityOutputPort {
     OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MiddlException;

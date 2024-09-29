@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;

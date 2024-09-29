@@ -4,4 +4,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeAdminEntityRepository extends JpaRepository<OrganizationEmployeeEntity,String> {
+    OrganizationEmployeeEntity findByMiddlUserId(String userId);
 }

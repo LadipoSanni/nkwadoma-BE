@@ -1,8 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 
 public interface UserIdentityOutputPort {
     UserIdentity save(UserIdentity userIdentity) throws MiddlException;

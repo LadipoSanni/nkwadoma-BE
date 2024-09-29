@@ -12,13 +12,13 @@ public class MiddleValidator {
 
     public static void validateEmail(String email) throws MiddlException {
         if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email.trim())) {
-            throw new MiddlException(INVALID_EMAIL_ADDRESS);
+            throw new MiddlException(INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
 
     public static void validateUserDataElement(String dataElement) throws MiddlException {
         if (StringUtils.isEmpty(dataElement)) {
-            throw new MiddlException(EMPTY_INPUT_FIELD_ERROR);
+            throw new MiddlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 

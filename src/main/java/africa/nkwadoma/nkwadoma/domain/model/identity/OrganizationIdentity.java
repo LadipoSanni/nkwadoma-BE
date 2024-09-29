@@ -1,7 +1,5 @@
-package africa.nkwadoma.nkwadoma.domain.model;
+package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
-import jakarta.persistence.OneToMany;
 import lombok.*;
 
 import java.util.List;

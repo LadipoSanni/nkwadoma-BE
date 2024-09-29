@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
@@ -19,7 +19,6 @@ import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMAIL_NOT_
 import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class UserIdentityAdapter implements UserIdentityOutputPort {
@@ -37,18 +36,18 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     @Override
     public UserIdentity findById(String id) throws MiddlException {
         if (StringUtils.isNotEmpty(id)){
-            UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND));
+            UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
             return userIdentityMapper.toUserIdentity(userEntity);
         }
-        throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL);
+        throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
 
     @Override
     public void deleteUserById(String id) throws MiddlException {
         if (StringUtils.isEmpty(id)){
-            throw new IdentityException(EMPTY_INPUT_FIELD_ERROR);
+            throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
-        UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND));
+        UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         userEntityRepository.delete(userEntity);
     }
 
@@ -66,26 +65,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
-
-    private UserIdentity saveAndGetUserIdentity(UserIdentity userIdentity) {
-        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
-        userEntity = userEntityRepository.save(userEntity);
-        return userIdentityMapper.toUserIdentity(userEntity);
-    }
-
-    private UserIdentity setExistingUserIdentity(UserIdentity userIdentity) throws MiddlException {
-        UserIdentity existingUser = findByEmail(userIdentity.getEmail());
-        existingUser.setLastName(userIdentity.getLastName());
-        existingUser.setFirstName(userIdentity.getFirstName());
-        existingUser.setEmail(userIdentity.getEmail());
-        existingUser.setRole(userIdentity.getRole());
-        existingUser.setCreatedAt(userIdentity.getCreatedAt());
-        existingUser.setCreatedBy(userIdentity.getCreatedBy());
-        return existingUser;
-    }
-
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
-        return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND));
+        return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }
 
 

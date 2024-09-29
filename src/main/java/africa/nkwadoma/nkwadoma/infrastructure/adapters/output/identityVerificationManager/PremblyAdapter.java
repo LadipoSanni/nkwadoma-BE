@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
-import africa.nkwadoma.nkwadoma.domain.model.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.PremblyVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.PremblyParameter;
@@ -18,7 +18,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 
-@Service
 @Slf4j
 public class PremblyAdapter implements IdentityVerificationOutputPort {
 
