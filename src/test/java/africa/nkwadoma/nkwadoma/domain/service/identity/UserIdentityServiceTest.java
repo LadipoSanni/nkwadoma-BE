@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOut
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -199,6 +200,17 @@ class UserIdentityServiceTest {
            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
        }
     }
+     @Test
+    void createPasswordWithWrongToken(){
+
+           favour.setPassword("passwoRd@123");
+           String generatedToken = "wrong.Token";
+           assertNotNull(generatedToken);
+           assertThrows(MalformedJwtException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+
+    }
+
+
 
 
 }
