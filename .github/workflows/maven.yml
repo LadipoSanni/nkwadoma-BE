@@ -14,9 +14,16 @@ on:
   pull_request:
     branches: [ "main", "dev", "prod-support" ]
 
+env:
+  KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+  KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+  KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
+  KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
-
 
   test:
     name: Unit Test
@@ -28,14 +35,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.17
-      - name: Maven Package
-        env:
-          keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
-          keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
-          keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
-          realm: ${{ secrets.KEYCLOAK_REALM }}
-          
-        run: mvn -B clean package 
+
+      - name: Run Maven Tests with Debug
+        run: mvn -B clean package -e -X # -e for errors, -X for debug
 
 
   build:
@@ -43,18 +45,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      env:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven (Detailed Logs)
+        env:
           keycloak.server.url: ${{ secrets.KEYCLOAK_SERVER }}
           keycloak.auth.password: ${{ secrets.KEYCLOAK_PASSWORD }}
           keycloak.auth.user: ${{ secrets.KEYCLOAK_USERNAME }}
           realm: ${{ secrets.KEYCLOAK_REALM }}
-          
-      run: mvn -B package --file pom.xml
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        run: mvn -B package --file pom.xml -e -X # Add -e and -X flags here
