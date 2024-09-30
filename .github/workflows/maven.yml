@@ -37,7 +37,11 @@ jobs:
           java-version: 1.17
 
       - name: Run Maven Tests with Debug
-        run: mvn -B clean package -e -X  -DskipTests
+
+        run: mvn -B clean package -e -X -DskipTests # -e for errors, -X for debug
+
+
+
 
 
   build:

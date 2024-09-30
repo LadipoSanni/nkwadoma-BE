@@ -1,16 +1,15 @@
-package africa.nkwadoma.nkwadoma.domain.model;
+package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@ToString
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserIdentity {
-    private String userId;
+    private String id;
     private String email;
     private String firstName;
     private String lastName;
@@ -20,6 +19,6 @@ public class UserIdentity {
     private String createdAt;
     private String role;
     private String createdBy;
-    private String creatorEmail;
-
+    private String password;
+//    private OrganizationIdentity employer;
 }
