@@ -19,6 +19,7 @@ class TokenGeneratorAdapterTest {
     void generateToken(){
        try {
            String generatedToken = tokenGeneratorOutputPort.generateToken("test@gmail.com");
+           log.info("{}",generatedToken);
            assertNotNull(generatedToken);
        }catch (MiddlException exception){
         log.info("{} {}",exception.getClass().getName(),exception.getMessage());}

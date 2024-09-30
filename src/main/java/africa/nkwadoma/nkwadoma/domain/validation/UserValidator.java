@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 
-import africa.nkwadoma.nkwadoma.domain.constants.UserConstants;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.UserConstants.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserConstants.INVALID_EMAIL;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserConstants.INVALID_FIRST_NAME;
 
 public class UserValidator {
     public static void validateUserInput(UserIdentity user) throws MiddlException {

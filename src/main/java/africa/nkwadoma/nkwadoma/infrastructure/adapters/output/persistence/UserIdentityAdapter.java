@@ -11,12 +11,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.USER_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMAIL_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
 
 @RequiredArgsConstructor

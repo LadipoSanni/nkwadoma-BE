@@ -16,15 +16,15 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -96,6 +96,30 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new MiddlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
+    }
+
+    @Override
+    public void createPassword(String email, String password) throws MiddlException {
+
+        List<UserRepresentation> users = getUserRepresentations(email);
+        if (users.isEmpty()) throw new MiddlException(USER_NOT_FOUND.getMessage());
+        UserRepresentation user = users.get(0);
+        UserResource userResource = keycloak.realm(KEYCLOAK_REALM).users().get(user.getId());
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+        credential.setTemporary(false);
+        userResource.resetPassword(credential);
+        user.setEmailVerified(true);
+        user.setEnabled(true);
+        userResource.update(user);
+    }
+
+    public List<UserRepresentation> getUserRepresentations(String email) {
+        return keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .search(email);
     }
 
     public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MiddlException {

@@ -11,11 +11,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMAIL_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateUserDataElement;
 

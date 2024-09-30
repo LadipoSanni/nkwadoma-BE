@@ -12,14 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 
 @RequiredArgsConstructor

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -19,6 +20,8 @@ class UserIdentityServiceTest {
     private UserIdentityService userIdentityService;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private TokenGeneratorOutputPort tokenGeneratorOutputPort;
     private UserIdentity favour;
 
     @BeforeEach
@@ -27,7 +30,7 @@ class UserIdentityServiceTest {
         favour.setFirstName("favour");
         favour.setLastName("gabriel");
         favour.setEmail("favour@gmail.com");
-        favour.setCreatedBy("d25ac212-d83a-4019-9680-58c5e98e736e");
+        favour.setCreatedBy("5b44bc18-ee08-4559-94d3-e8f7fec4a6fc");
     }
 
     @Test
@@ -81,8 +84,121 @@ class UserIdentityServiceTest {
         assertThrows(MiddlException.class,()->userIdentityService.inviteColleague(favour));
     }
 
+    @Test
+    void createPassword(){
+        try {
+            assertNull(favour.getPassword());
+            favour.setPassword("Passkey90@");
+            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+            assertNotNull(generatedToken);
+            log.info("{}",favour.getPassword());
+            userIdentityService.createPassword(generatedToken,favour.getPassword());
+        }catch (MiddlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
 
+    }
 
+    @Test
+    void createPasswordLessThanEightLetterWord(){
+       try{
+           favour.setPassword("Key90@");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+
+    @Test
+    void createPasswordGreaterThanSixteenLetterWord(){
+        try{
+            favour.setPassword("passWord12345@3345556677788");
+            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+            assertNotNull(generatedToken);
+            assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+    @Test
+    void createPasswordWithAllLetters(){
+       try{
+           favour.setPassword("Kayodebbn");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+    @Test
+    void createPasswordWithoutCapitalLetters(){
+       try{
+           favour.setPassword("password@123");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    } @Test
+    void createPasswordWithoutSmallLetters(){
+       try{
+           favour.setPassword("PASSWORD@123");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+    @Test
+    void createPasswordWithoutNumbers(){
+       try{
+           favour.setPassword("Password@#$%");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+    @Test
+    void createPasswordWithoutSpecialCharacters(){
+       try{
+           favour.setPassword("Password1234");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+    @Test
+    void createPasswordWithAllNumbers(){
+       try{
+           favour.setPassword("99900000001234");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
+ @Test
+    void createPasswordWithAllSymbols(){
+       try{
+           favour.setPassword("@#$#$%^&&&");
+           String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+           assertNotNull(generatedToken);
+           assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+       }catch (MiddlException middlException){
+           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+       }
+    }
 
 
 }

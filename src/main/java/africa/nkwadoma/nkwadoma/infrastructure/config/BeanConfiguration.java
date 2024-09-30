@@ -42,8 +42,11 @@ public class BeanConfiguration {
         return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,emailOutputPort);
     }
     @Bean
-    public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,IdentityManagerOutPutPort identityManagerOutPutPort,OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort);
+    public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
+                                                   IdentityManagerOutPutPort identityManagerOutPutPort,
+                                                   OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
+                                                   TokenGeneratorOutputPort tokenGeneratorOutputPort){
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort);
     }
 
     @Bean
@@ -62,11 +65,13 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository, OrganizationIdentityMapper organizationIdentityMapper){
+    public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository,
+                                                                   OrganizationIdentityMapper organizationIdentityMapper){
         return new OrganizationIdentityAdapter(organizationEntityRepository,organizationIdentityMapper);
     }
     @Bean
-    public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository, UserIdentityMapper userIdentityMapper){
+    public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
+                                                   UserIdentityMapper userIdentityMapper){
         return new UserIdentityAdapter(userEntityRepository,userIdentityMapper);
     }
 

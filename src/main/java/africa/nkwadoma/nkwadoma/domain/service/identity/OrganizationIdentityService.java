@@ -22,9 +22,9 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.CREATE_PASSWORD_URL;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.EMAIL_INVITATION_SUBJECT;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.ORGANIZATION_INVITATION_TEMPLATE;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.CREATE_PASSWORD_URL;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_INVITATION_SUBJECT;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.ORGANIZATION_INVITATION_TEMPLATE;
 
 
 @RequiredArgsConstructor

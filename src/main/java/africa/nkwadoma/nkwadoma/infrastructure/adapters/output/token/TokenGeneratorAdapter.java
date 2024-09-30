@@ -42,7 +42,7 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
+    @Override
     public String decodeJWT(String token){
 
         Claims claims = Jwts.parserBuilder()

@@ -10,9 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
-import static africa.nkwadoma.nkwadoma.domain.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
-import static africa.nkwadoma.nkwadoma.domain.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
 
 public class UserIdentityValidator extends MiddleValidator {
      public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MiddlException {
@@ -54,5 +55,14 @@ public class UserIdentityValidator extends MiddleValidator {
         String inviterEmailDomain = inviterEmail.substring(inviterEmail.indexOf(EMAIL_INDEX.getMessage()));
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
+
+    public static void validatePassword(String password) throws MiddlException {
+        Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
+        if (!pattern.matcher(password).matches()){
+            throw new IdentityException(INVALID_PASSWORD.getMessage());
+        }
+    }
+
+
 
 }

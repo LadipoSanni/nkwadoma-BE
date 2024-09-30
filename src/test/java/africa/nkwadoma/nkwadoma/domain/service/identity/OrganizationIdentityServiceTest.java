@@ -1,11 +1,12 @@
-package africa.nkwadoma.nkwadoma.domain.service;
+package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,10 @@ class OrganizationIdentityServiceTest {
     private OrganizationIdentityAdapter organizationAdapter;
     @Autowired
     private KeycloakAdapter keycloakAutowiredAdapter;
+    @Autowired
+    private TokenGeneratorOutputPort tokenGeneratorOutputPort;
+    @Autowired
+    private CreateUserUseCase createUserUseCase;
 
     private OrganizationIdentity roseCouture;
 
@@ -93,14 +98,27 @@ class OrganizationIdentityServiceTest {
 
     }
 
-
-
     @Test
     void inviteOrganizationWithEmptyOrganization(){
         assertThrows(MiddlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
 
+    @Test
+    void createPassword(){
+        try {
+            List<OrganizationEmployeeIdentity> organizationEmployees = roseCouture.getOrganizationEmployees();
 
+            for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployees){
+                UserIdentity foundUser =organizationEmployeeIdentity.getMiddlUser();
+                assertNull(foundUser.getPassword());
+                foundUser.setPassword("Password@123");
+                String generatedToken = tokenGeneratorOutputPort.generateToken(foundUser.getEmail());
+                assertNotNull(generatedToken);
+                createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
+            }}catch (MiddlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
 
+    }
 
-}
+    }

@@ -226,6 +226,17 @@ class KeycloakAdapterTest {
         assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(john));
     }
 
+    @Test
+    void createPassword(){
+     try {
+         john.setPassword("password");
+         identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+     }catch (MiddlException e){
+         log.info("{} {}",e.getClass().getName(),e.getMessage());
+     }
+
+    }
+
     @AfterAll
     void cleanUp() {
         try {

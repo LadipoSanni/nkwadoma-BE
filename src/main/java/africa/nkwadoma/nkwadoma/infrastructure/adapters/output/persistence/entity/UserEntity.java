@@ -23,4 +23,5 @@ public class UserEntity {
     private String createdAt;
     private String role;
     private String createdBy;
+    private String password;
 }

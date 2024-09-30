@@ -6,4 +6,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureExceptio
 
 public interface CreateUserUseCase {
     UserIdentity inviteColleague(UserIdentity userIdentity) throws MiddlException;
+    void createPassword(String token,String password) throws MiddlException;
 }

@@ -19,6 +19,6 @@ public class UserIdentity {
     private String createdAt;
     private String role;
     private String createdBy;
-
+    private String password;
 //    private OrganizationIdentity employer;
 }

@@ -25,4 +25,5 @@ public interface IdentityManagerOutPutPort {
     Optional<UserIdentity> getUserByEmail(String email) throws MiddlException;
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MiddlException;
+    void createPassword(String email, String password) throws MiddlException;
 }
