@@ -29,5 +29,7 @@ public interface IdentityManagerOutPutPort {
     void createPassword(String email, String password) throws MiddlException;
     UserIdentity login(UserIdentity userIdentity) throws MiddlException;
     void changePassword(UserIdentity userIdentity)throws MiddlException;
+    UserIdentity enableUserAccount(UserIdentity userIdentity) throws MiddlException;
+
 
 }

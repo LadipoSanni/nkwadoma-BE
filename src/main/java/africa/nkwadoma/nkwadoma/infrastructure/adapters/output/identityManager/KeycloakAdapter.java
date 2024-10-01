@@ -156,6 +156,23 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userResource.update(userRepresentation);}
     }
 
+    @Override
+    public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MiddlException {
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+                .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        if (foundUser.isEnabled()) {
+            throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
+        }
+
+        List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
+        for (UserRepresentation userRepresentation : userRepresentations){
+            userRepresentation.setEnabled(true);
+            UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
+            userResource.update(userRepresentation);}
+        return foundUser;
+
+    }
+
 
     public UserResource getUserResourceByKeycloakId(String keycloakId) throws IdentityException {
         try {

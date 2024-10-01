@@ -145,8 +145,12 @@ class KeycloakAdapterTest {
         }catch (MiddlException middlException){
             log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
         }
-    }
+    }  @Test
+    @Order(5)
+    void enableAccountThatHasBeenEnabled() {
+        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
 
+    }
 
 
     @Test

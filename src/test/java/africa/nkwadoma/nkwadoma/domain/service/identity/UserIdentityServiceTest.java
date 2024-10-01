@@ -332,7 +332,7 @@ class UserIdentityServiceTest {
 
 
 
-@Test
+    @Test
     @Order(8)
     void resetPasswordWithInvalidEmail() {
         try {
@@ -350,6 +350,11 @@ class UserIdentityServiceTest {
             log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
         }
     }
+
+    @Test
+    void enableAccountThatHasBeenEnabled() {
+       assertThrows(MiddlException.class, () -> userIdentityService.enableAccount(favour));
+        }
 
 
 

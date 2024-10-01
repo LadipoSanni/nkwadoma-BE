@@ -23,8 +23,7 @@ import java.util.Objects;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
-import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.validateEmailDomain;
-import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.validatePassword;
+import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -76,16 +75,21 @@ public class UserIdentityService implements CreateUserUseCase {
                 passwordHistories = new ArrayList<>();
             }
 
-            PasswordHistory passwordHistory = new PasswordHistory();
-            passwordHistory.setPassword(password);
-            passwordHistory.setMiddlUser(userIdentity.getId());
-            passwordHistoryOutputPort.save(passwordHistory);
+            PasswordHistory passwordHistory = getPasswordHistory(password, userIdentity);
 
             passwordHistories.add(passwordHistory);
             userIdentityOutputPort.save(userIdentity);
             identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
         }
        else throw new IdentityException(PASSWORD_HAS_BEEN_CREATED.getMessage());
+    }
+
+    private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {
+        PasswordHistory passwordHistory = new PasswordHistory();
+        passwordHistory.setPassword(password);
+        passwordHistory.setMiddlUser(userIdentity.getId());
+        passwordHistoryOutputPort.save(passwordHistory);
+        return passwordHistory;
     }
 
     @Override
@@ -113,10 +117,7 @@ public class UserIdentityService implements CreateUserUseCase {
             passwordHistories = new ArrayList<>();
         }
 
-        PasswordHistory passwordHistory = new PasswordHistory();
-        passwordHistory.setPassword(userIdentity.getPassword());
-        passwordHistory.setMiddlUser(userIdentity.getId());
-        passwordHistoryOutputPort.save(passwordHistory);
+        PasswordHistory passwordHistory = getPasswordHistory(userIdentity.getPassword(), userIdentity);
 
         passwordHistories.add(passwordHistory);
 
@@ -128,10 +129,16 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public void resetPassword(String email, String password) throws MiddlException {
         UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        UserIdentityValidator.validatePassword(password);
+        validatePassword(password);
         identityManagerOutPutPort.createPassword(foundUser.getEmail(),password);
         foundUser.setPassword(password);
         userIdentityOutputPort.save(foundUser);
+    }
+
+    @Override
+    public UserIdentity enableAccount(UserIdentity userIdentity) throws MiddlException {
+        validateUserIdentity(userIdentity);
+        return identityManagerOutPutPort.enableUserAccount(userIdentity);
     }
 
     private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MiddlException {
