@@ -100,6 +100,56 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(2)
+    void createPassword(){
+        try {
+            john.setPassword("passwordJ@345");
+            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+        }catch (MiddlException e){
+            log.info("{} {}",e.getClass().getName(),e.getMessage());
+        }
+
+    }
+
+    @Test
+    @Order(3)
+    void login(){
+        try {
+            john.setPassword("passwordJ@345");
+            identityManagementOutputPort.login(john);
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+    @Test
+    void loginWithWrongDetails() throws MiddlException {
+
+        john.setEmail("wrong@gmail.com");
+        john.setPassword("passwordJ@345");
+        john.setFirstName("wrong firstname");
+        assertThrows(IdentityException.class,()->identityManagementOutputPort.login(john));
+    }
+
+    @Test
+    @Order(4)
+    void changePassword(){
+
+        try {
+            john.setNewPassword("neWpasswordJ@345");
+            identityManagementOutputPort.changePassword(john);
+
+            john.setPassword(john.getNewPassword());
+            identityManagementOutputPort.login(john);
+
+
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+
+
+    @Test
     void getUserRepresentation()  {
         try {
             UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE);
@@ -226,16 +276,6 @@ class KeycloakAdapterTest {
         assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(john));
     }
 
-    @Test
-    void createPassword(){
-     try {
-         john.setPassword("password");
-         identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
-     }catch (MiddlException e){
-         log.info("{} {}",e.getClass().getName(),e.getMessage());
-     }
-
-    }
 
     @AfterAll
     void cleanUp() {

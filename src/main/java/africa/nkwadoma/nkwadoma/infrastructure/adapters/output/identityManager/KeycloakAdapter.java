@@ -7,19 +7,25 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +41,15 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private final KeyCloakMapper mapper;
     @Value("${realm}")
     private String KEYCLOAK_REALM;
+    @Value("${keycloak.client.id}")
+    private String CLIENT_ID;
+
+    @Value("${keycloak.server.url}")
+    private String SERVER_URL;
+
+    @Value("${keycloak.client.secret}")
+    private String CLIENT_SECRET;
+
 
 
     @Override
@@ -114,6 +129,54 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         user.setEnabled(true);
         userResource.update(user);
     }
+ @Override
+    public UserIdentity login(UserIdentity userIdentity) throws IdentityException {
+        try {
+            Keycloak keycloakClient = getKeycloak(userIdentity);
+            TokenManager tokenManager = keycloakClient.tokenManager();
+            userIdentity.setAccessToken(tokenManager.getAccessToken().getToken());
+            userIdentity.setRefreshToken(tokenManager.getAccessToken().getRefreshToken());
+
+            return userIdentity;
+        } catch (NotAuthorizedException exception) {
+            throw new IdentityException(INVALID_CREDENTIALS.getMessage());
+        }
+    }
+
+    @Override
+    public void changePassword(UserIdentity userIdentity) throws MiddlException {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setTemporary(false);
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(userIdentity.getNewPassword());
+        List<UserRepresentation> userRepresentations = getUserRepresentations(userIdentity);
+        for (UserRepresentation userRepresentation : userRepresentations){
+
+        userRepresentation.setCredentials(List.of(credential));
+        UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());
+        userResource.update(userRepresentation);}
+    }
+
+    public UserResource getUserResourceByKeycloakId(String keycloakId) throws IdentityException {
+        try {
+            return keycloak.realm(KEYCLOAK_REALM).users().get(keycloakId);
+        } catch (Exception e) {
+            throw new IdentityException(ERROR_FETCHING_USER_INFORMATION.getMessage());
+        }
+    }
+
+    private Keycloak getKeycloak(UserIdentity userIdentity) {
+        return KeycloakBuilder.builder()
+                .grantType(OAuth2Constants.PASSWORD)
+                .realm(KEYCLOAK_REALM)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .username(userIdentity.getEmail())
+                .password(userIdentity.getPassword())
+                .serverUrl(SERVER_URL)
+                .build();
+    }
+
 
     public List<UserRepresentation> getUserRepresentations(String email) {
         return keycloak

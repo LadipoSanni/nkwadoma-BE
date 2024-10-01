@@ -2,19 +2,22 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class UserIdentityServiceTest {
     @Autowired
@@ -24,6 +27,10 @@ class UserIdentityServiceTest {
     @Autowired
     private TokenGeneratorOutputPort tokenGeneratorOutputPort;
     private UserIdentity favour;
+    private String userId;
+    private String role;
+    private String password;
+    private String newPassword;
 
     @BeforeEach
     void setUp(){
@@ -31,24 +38,41 @@ class UserIdentityServiceTest {
         favour.setFirstName("favour");
         favour.setLastName("gabriel");
         favour.setEmail("favour@gmail.com");
-        favour.setCreatedBy("5b44bc18-ee08-4559-94d3-e8f7fec4a6fc");
+        favour.setCreatedBy("b04d6687-1a6c-4379-9f19-f5b1dbdd3678");
     }
 
     @Test
-    void inviteColleague(){
-       try{
-          assertThrows(MiddlException.class,()->userIdentityOutputPort.findById(favour.getId()));
-           UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
-           assertNotNull(invitedColleague);
-           assertEquals(favour.getFirstName(),invitedColleague.getFirstName());
-           assertEquals(favour.getRole(),invitedColleague.getRole());
-           UserIdentity foundInvitedColleague = userIdentityOutputPort.findById(favour.getId());
-           assertEquals(foundInvitedColleague.getCreatedBy(),invitedColleague.getCreatedBy());
-           assertEquals(favour.getLastName(),foundInvitedColleague.getLastName());
-       }catch (MiddlException exception){
-           log.info("{} {}",exception.getClass().getName(),exception.getMessage());
-       }
+    @Order(1)
+    void inviteColleague() {
+        try {
+            // Ensure the user doesn't exist initially
+            assertThrows(MiddlException.class, () -> userIdentityOutputPort.findById(favour.getId()));
+
+            // Invite the colleague (create the user)
+            UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
+
+            // Ensure the user was created and has an ID
+            assertNotNull(invitedColleague);
+            assertNotNull(invitedColleague.getId());
+
+
+            // Validate the created user's attributes
+            assertEquals(favour.getFirstName(), invitedColleague.getFirstName());
+            assertEquals(favour.getRole(), invitedColleague.getRole());
+
+            // Retrieve the invited colleague from the database and verify
+            UserIdentity foundInvitedColleague = userIdentityOutputPort.findById(favour.getId());
+            assertEquals(foundInvitedColleague.getCreatedBy(), invitedColleague.getCreatedBy());
+            assertEquals(favour.getLastName(), foundInvitedColleague.getLastName());
+
+            userId = foundInvitedColleague.getId();
+            role = foundInvitedColleague.getRole();
+        } catch (MiddlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
     }
+
+
     @Test
     void inviteColleagueWithInviterIdThatDoesNotExist(){
         favour.setCreatedBy("notexisting");
@@ -86,14 +110,15 @@ class UserIdentityServiceTest {
     }
 
     @Test
+    @Order(2)
     void createPassword(){
         try {
             assertNull(favour.getPassword());
             favour.setPassword("Passkey90@");
             String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
             assertNotNull(generatedToken);
-            log.info("{}",favour.getPassword());
             userIdentityService.createPassword(generatedToken,favour.getPassword());
+            password = favour.getPassword();
         }catch (MiddlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
@@ -202,13 +227,88 @@ class UserIdentityServiceTest {
     }
      @Test
     void createPasswordWithWrongToken(){
-
            favour.setPassword("passwoRd@123");
            String generatedToken = "wrong.Token";
            assertNotNull(generatedToken);
            assertThrows(MalformedJwtException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
-
     }
+    @Test
+    @Order(3)
+    void login(){
+        try {
+            assertThrows(MiddlException.class,()->userIdentityService.login(favour));
+            favour.setPassword(password);
+            userIdentityService.login(favour);
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+    @Test
+    void loginWithInvalidPassword(){
+       favour.setPassword("Invalid@456");
+       assertThrows(MiddlException.class,()->userIdentityService.login(favour));
+    }
+
+    @Test
+    @Order(4)
+    void changePassword() {
+        try {
+            favour.setPassword(password);
+            userIdentityService.login(favour);
+
+            favour.setId(userId);
+            favour.setRole(role);
+
+            favour.setNewPassword("newPassword@8");
+            userIdentityService.changePassword(favour);
+
+            newPassword = favour.getPassword();
+
+            // Verify that the password has been updated
+            assertEquals(favour.getNewPassword(), favour.getPassword(), "Password should be updated to the new password");
+
+
+            // Re-login to verify the new password works
+            userIdentityService.login(favour);
+
+        } catch (MiddlException middlException) {
+            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        }
+    }
+
+    @Test
+    @Order(5)
+    void changePasswordWithLastPassword() {
+        try {
+            favour.setPassword(newPassword);
+            userIdentityService.login(favour);
+            favour.setId(userId);
+            favour.setRole(role);
+            favour.setNewPassword(newPassword);
+            assertThrows(MiddlException.class,()-> userIdentityService.changePassword(favour));
+        } catch (MiddlException middlException) {
+            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        }
+    }
+
+    @Test
+    @Order(6)
+    void changePasswordWithLastTwoPassword() {
+        try {
+            favour.setPassword(newPassword);
+            userIdentityService.login(favour);
+            favour.setId(userId);
+            favour.setRole(role);
+            favour.setNewPassword(password);
+            assertThrows(MiddlException.class,()-> userIdentityService.changePassword(favour));
+        } catch (MiddlException middlException) {
+            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        }
+    }
+
+
+
 
 
 
