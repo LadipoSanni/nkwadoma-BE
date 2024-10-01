@@ -307,6 +307,52 @@ class UserIdentityServiceTest {
         }
     }
 
+    @Test
+    @Order(7)
+    void resetPassword() {
+        try {
+            favour.setPassword(newPassword);
+            userIdentityService.login(favour);
+
+            favour.setId(userId);
+            favour.setRole(role);
+
+
+            favour.setPassword("Reset@123");
+            userIdentityService.resetPassword(favour.getEmail(),favour.getPassword());
+            assertNotEquals(password,favour.getPassword());
+
+            userIdentityService.login(favour);
+
+
+        } catch (MiddlException middlException) {
+            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        }
+    }
+
+
+
+@Test
+    @Order(8)
+    void resetPasswordWithInvalidEmail() {
+        try {
+            favour.setPassword(newPassword);
+            userIdentityService.login(favour);
+
+            favour.setId(userId);
+            favour.setRole(role);
+
+            favour.setPassword("Reset@123");
+            favour.setEmail("Invalid@gmail.com");
+            assertThrows(MiddlException.class,()->userIdentityService.resetPassword(favour.getEmail(),favour.getPassword()));
+
+        } catch (MiddlException middlException) {
+            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        }
+    }
+
+
+
 
 
 

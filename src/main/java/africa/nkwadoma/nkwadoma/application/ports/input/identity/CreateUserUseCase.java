@@ -9,4 +9,5 @@ public interface CreateUserUseCase {
     void createPassword(String token,String password) throws MiddlException;
     UserIdentity login(UserIdentity userIdentity) throws MiddlException;
     void changePassword(UserIdentity userIdentity)throws MiddlException;
+    void resetPassword(String email, String password) throws MiddlException;
 }

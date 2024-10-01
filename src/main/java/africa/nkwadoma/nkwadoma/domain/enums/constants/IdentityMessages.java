@@ -25,7 +25,9 @@ public enum IdentityMessages{
     INVALID_CREDENTIALS("invalid credentials"),
     ERROR_FETCHING_USER_INFORMATION("Error fetching user information"),
     PASSWORD_HISTORY_EMPTY("password history is empty"),
-    PASSWORD_NOT_ACCEPTED("password not accepted");
+    PASSWORD_NOT_ACCEPTED("password not accepted"),
+    ACCOUNT_ALREADY_ENABLED("Account has been enabled"),
+    ACCOUNT_ALREADY_DISABLED("Account has been disabled");
     private final String message;
 
     IdentityMessages(String message){

@@ -151,11 +151,11 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         credential.setValue(userIdentity.getNewPassword());
         List<UserRepresentation> userRepresentations = getUserRepresentations(userIdentity);
         for (UserRepresentation userRepresentation : userRepresentations){
-
         userRepresentation.setCredentials(List.of(credential));
         UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());
         userResource.update(userRepresentation);}
     }
+
 
     public UserResource getUserResourceByKeycloakId(String keycloakId) throws IdentityException {
         try {

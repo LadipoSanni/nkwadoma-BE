@@ -124,6 +124,16 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentityOutputPort.save(userIdentity);
         identityManagerOutPutPort.changePassword(userIdentity);
     }
+
+    @Override
+    public void resetPassword(String email, String password) throws MiddlException {
+        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
+        UserIdentityValidator.validatePassword(password);
+        identityManagerOutPutPort.createPassword(foundUser.getEmail(),password);
+        foundUser.setPassword(password);
+        userIdentityOutputPort.save(foundUser);
+    }
+
     private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MiddlException {
         List<PasswordHistory> passwordHistories = passwordHistoryOutputPort.findByUser(userId);
         int checkCount = Math.min(5, passwordHistories.size());
