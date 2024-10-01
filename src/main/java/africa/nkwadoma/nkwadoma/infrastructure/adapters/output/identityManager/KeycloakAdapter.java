@@ -25,7 +25,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -167,6 +167,23 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
             userRepresentation.setEnabled(true);
+            UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
+            userResource.update(userRepresentation);}
+        return foundUser;
+
+    }
+
+    @Override
+    public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MiddlException {
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+                .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        if (foundUser.isEnabled()) {
+            throw new IdentityException(ACCOUNT_ALREADY_DISABLED.getMessage());
+        }
+
+        List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
+        for (UserRepresentation userRepresentation : userRepresentations){
+            userRepresentation.setEnabled(false);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;

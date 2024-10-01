@@ -68,13 +68,10 @@ public class UserIdentityService implements CreateUserUseCase {
             userIdentity.setEnabled(true);
             String encodedPassword = passwordEncoder.encode(password);
             userIdentity.setPassword(password);
-
             List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-
             if (passwordHistories == null) {
                 passwordHistories = new ArrayList<>();
             }
-
             PasswordHistory passwordHistory = getPasswordHistory(password, userIdentity);
 
             passwordHistories.add(passwordHistory);
@@ -110,18 +107,12 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
-
         List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-
         if (passwordHistories == null) {
             passwordHistories = new ArrayList<>();
         }
-
         PasswordHistory passwordHistory = getPasswordHistory(userIdentity.getPassword(), userIdentity);
-
         passwordHistories.add(passwordHistory);
-
-
         userIdentityOutputPort.save(userIdentity);
         identityManagerOutPutPort.changePassword(userIdentity);
     }
@@ -138,7 +129,19 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public UserIdentity enableAccount(UserIdentity userIdentity) throws MiddlException {
         validateUserIdentity(userIdentity);
-        return identityManagerOutPutPort.enableUserAccount(userIdentity);
+        userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
+        userIdentity.setEnabled(true);
+        userIdentityOutputPort.save(userIdentity);
+        return userIdentity;
+    }
+
+    @Override
+    public UserIdentity disableAccount(UserIdentity userIdentity) throws MiddlException {
+        validateUserIdentity(userIdentity);
+        userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
+        userIdentity.setEnabled(false);
+        userIdentityOutputPort.save(userIdentity);
+        return userIdentity;
     }
 
     private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MiddlException {

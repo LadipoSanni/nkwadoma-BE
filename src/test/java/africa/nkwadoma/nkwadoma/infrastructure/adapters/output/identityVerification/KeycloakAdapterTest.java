@@ -145,11 +145,29 @@ class KeycloakAdapterTest {
         }catch (MiddlException middlException){
             log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
         }
-    }  @Test
+    }
+
+    @Test
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
         assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
 
+    }
+
+    @Test
+    void enableAccountWithWrongEmail() {
+        john.setEmail("wrong@gmail.com");
+        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    }
+
+    @Test
+    @Order(6)
+    void disAbleAccount() {
+        try{
+            identityManagementOutputPort.disableUserAccount(john);
+        }catch (MiddlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
     }
 
 
