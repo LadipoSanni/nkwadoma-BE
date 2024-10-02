@@ -11,9 +11,11 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -34,17 +36,19 @@ public class UserIdentityService implements CreateUserUseCase {
     private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
     private final PasswordEncoder passwordEncoder;
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
-
-
+    private final NotificationService notificationService;
 
 
 
     @Override
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MiddlException {
-        UserIdentity inviter = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
-        validateEmailDomain(userIdentity.getEmail(),inviter.getEmail());
-        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(inviter.getId());
-        userIdentity.setRole(inviter.getRole());
+        //UserIdentity inviter = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
+
+        //OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(inviter.getId());
+        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy());
+        //check if employee was found, if not throw an error
+        //userIdentity.setRole(inviter.getRole());
+        validateEmailDomain(userIdentity.getEmail(), foundEmployee.getMiddlUser().getEmail());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
@@ -54,12 +58,15 @@ public class UserIdentityService implements CreateUserUseCase {
         organizationEmployeeIdentity.setMiddlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
+        notificationService.sendColleagueEmail(userIdentity);
+
         return userIdentity;
     }
 
     @Override
     public void createPassword(String token, String password) throws MiddlException {
         validatePassword(password);
+        validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
 
@@ -91,8 +98,8 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity login(UserIdentity userIdentity)throws MiddlException {
-        UserIdentityValidator.validateUserDataElement(userIdentity.getEmail());
-        UserIdentityValidator.validateUserDataElement(userIdentity.getPassword());
+        UserIdentityValidator.validateDataElement(userIdentity.getEmail());
+        UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
 

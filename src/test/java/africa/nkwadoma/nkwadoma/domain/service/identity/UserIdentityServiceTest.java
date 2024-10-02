@@ -38,7 +38,8 @@ class UserIdentityServiceTest {
         favour.setFirstName("favour");
         favour.setLastName("gabriel");
         favour.setEmail("favour@gmail.com");
-        favour.setCreatedBy("b04d6687-1a6c-4379-9f19-f5b1dbdd3678");
+        favour.setRole(IdentityRole.INSTITUTE_ADMIN.toString());
+        favour.setCreatedBy("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
     }
 
     @Test
@@ -232,6 +233,31 @@ class UserIdentityServiceTest {
            assertNotNull(generatedToken);
            assertThrows(MalformedJwtException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
     }
+
+    @Test
+    void createPasswordWithEmptyToken(){
+        favour.setPassword("passwoRd@123");
+        String generatedToken = StringUtils.EMPTY;
+        assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+    }
+    @Test
+    void createPasswordWithNullToken(){
+        favour.setPassword("passwoRd@123");
+        String generatedToken =null;
+        assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+    }
+
+    @Test
+    void createPasswordAgain(){
+        try {
+            favour.setPassword("passwoRd@123");
+            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+            assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
     @Test
     @Order(3)
     void login(){
