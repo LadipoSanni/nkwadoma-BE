@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.config;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -39,9 +41,9 @@ public class BeanConfiguration {
             IdentityManagerOutPutPort identityManagerOutPutPort,
             UserIdentityOutputPort userIdentityOutputPort,
             OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-            NotificationService notificationService
+            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase
             ){
-        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort, notificationService);
+        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
     }
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
@@ -50,9 +52,9 @@ public class BeanConfiguration {
                                                    TokenGeneratorOutputPort tokenGeneratorOutputPort,
                                                    PasswordEncoder passwordEncoder,
                                                    PasswordHistoryOutputPort passwordHistoryOutputPort,
-                                                   NotificationService notificationService
+                                                   SendColleagueEmailUseCase sendColleagueEmailUseCase
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,notificationService);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase);
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
@@ -36,7 +37,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
     private final PasswordEncoder passwordEncoder;
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
-    private final NotificationService notificationService;
+    private final SendColleagueEmailUseCase sendEmail;
 
 
 
@@ -58,7 +59,7 @@ public class UserIdentityService implements CreateUserUseCase {
         organizationEmployeeIdentity.setMiddlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
-        notificationService.sendColleagueEmail(userIdentity);
+        sendEmail.sendColleagueEmail(userIdentity);
 
         return userIdentity;
     }

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -25,7 +26,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final NotificationService notificationService;
+    private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
 
     @Override
@@ -46,7 +47,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
         //send invite email to organization admin
-        notificationService.sendEmail(organizationEmployeeIdentity.getMiddlUser());
+        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
        return null;
