@@ -55,4 +55,4 @@ jobs:
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Nkwadoma-Backend \
-            -Dsonar.projectName='Nkwadoma Backend' -DskipTests  # Skip tests during Sonar analysis
+            -Dsonar.projectName='Nkwadoma Backend'  
