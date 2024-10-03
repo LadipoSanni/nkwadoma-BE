@@ -13,7 +13,10 @@ public class CurriculumEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String description;
+    @Lob
     private String objectives;
     private String duration;
     private String name;
+    @OneToOne
+    private ProgramEntity programEntity;
 }

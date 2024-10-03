@@ -48,9 +48,6 @@ public class ProgramEntity {
     @Column(nullable = false)
     private String createdBy;
     private String updatedBy;
-    @OneToOne
-    @JoinColumn(name = "curriculum_entity_id")
-    private CurriculumEntity curriculumEntity;
     @ManyToOne
     private TrainingInstituteEntity trainingInstituteEntity;
 }
