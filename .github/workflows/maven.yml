@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Maven Tests with Debug
 
-        run: mvn -B clean package -e -X -DskipTests # -e for errors, -X for debug
+        run: mvn -B clean package  
 
 
 
@@ -67,4 +67,4 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        run: mvn -B package --file pom.xml -e -X -DskipTests # Add -e and -X flags here
+        run: mvn -B package --file pom.xml 
