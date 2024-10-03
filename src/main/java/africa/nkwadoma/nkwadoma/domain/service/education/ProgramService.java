@@ -16,13 +16,10 @@ import static africa.nkwadoma.nkwadoma.domain.validation.ProgramValidator.valida
 @RequiredArgsConstructor
 public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
-    private final ProgramRepository programRepository;
 
     @Override
     public Program addProgram(Program program) throws ProgramException {
         validateInput(program);
-//        if (programRepository.findByName(program.getName()).isPresent())
-//            throw new ProgramException(ProgramMessages.PROGRAM_ALREADY_EXISTS.getMessage());
         return programOutputPort.saveProgram(program);
     }
 }

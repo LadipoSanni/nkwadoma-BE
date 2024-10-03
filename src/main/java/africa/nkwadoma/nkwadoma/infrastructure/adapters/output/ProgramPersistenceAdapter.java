@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
-public class ProgramAdapter implements ProgramOutputPort {
+public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final TrainingInstituteRepository trainingInstituteRepository;
     private final ProgramMapper programMapper;
