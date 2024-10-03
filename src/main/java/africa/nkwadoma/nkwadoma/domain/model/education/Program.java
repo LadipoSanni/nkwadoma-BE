@@ -1,13 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +14,8 @@ import java.time.LocalDateTime;
 public class Program {
     private String programDescription;
     private String name;
-    private DurationStatus durationStatus;
+    private String objectives;
+    private DurationType durationType;
     private LocalDate programStartDate;
     private int duration;
     private int numberOfTrainees;

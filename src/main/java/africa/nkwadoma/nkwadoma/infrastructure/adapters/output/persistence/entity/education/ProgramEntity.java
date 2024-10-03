@@ -24,9 +24,9 @@ public class ProgramEntity {
     private String id;
     private String programDescription;
     private String name;
-    private String type;
+    @Lob
     private String objectives;
-    private DurationStatus durationStatus;
+    private DurationType durationType;
     private int duration;
     private int numberOfTrainees;
     private int numberOfCohort;

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ProgramValidator {
     public static void validateInput(Program program) throws ProgramException {
         if (StringUtils.isEmpty(program.getName()) ||
-                program.getDurationStatus() == null ||
+                program.getDurationType() == null ||
                 StringUtils.isEmpty(program.getOrganizationId())
         ){
             throw new ProgramException(ProgramMessages.THIS_FIELD_IS_REQUIRED.getMessage());
