@@ -12,4 +12,5 @@ public interface CreateUserUseCase {
     void resetPassword(String email, String password) throws MiddlException;
     UserIdentity enableAccount(UserIdentity userIdentity) throws MiddlException;
     UserIdentity disableAccount(UserIdentity userIdentity) throws MiddlException;
+    UserIdentity forgotPassword(String email) throws MiddlException;
 }

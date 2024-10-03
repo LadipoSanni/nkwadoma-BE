@@ -248,6 +248,28 @@ class UserIdentityServiceTest {
     }
 
     @Test
+    void createPasswordWithNullPassword(){
+        try {
+            favour.setPassword(null);
+            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+            assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+        }catch (MiddlException middlException){
+            log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+    @Test
+    void createPasswordWithEmptyPassword(){
+        try {
+            favour.setPassword(StringUtils.EMPTY);
+            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
+            assertThrows(MiddlException.class,()->userIdentityService.createPassword(generatedToken,favour.getPassword()));
+        }catch (MiddlException middlException){
+            log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+    @Test
     void createPasswordAgain(){
         try {
             favour.setPassword("passwoRd@123");
@@ -275,6 +297,20 @@ class UserIdentityServiceTest {
        favour.setPassword("Invalid@456");
        assertThrows(MiddlException.class,()->userIdentityService.login(favour));
     }
+
+    @Test
+    void loginWithNullPassword(){
+       favour.setPassword(null);
+       assertThrows(MiddlException.class,()->userIdentityService.login(favour));
+    }
+
+    @Test
+    void loginWithEmptyPassword(){
+       favour.setPassword(StringUtils.EMPTY);
+       assertThrows(MiddlException.class,()->userIdentityService.login(favour));
+    }
+
+
 
     @Test
     @Order(4)
@@ -381,6 +417,37 @@ class UserIdentityServiceTest {
     void enableAccountThatHasBeenEnabled() {
        assertThrows(MiddlException.class, () -> userIdentityService.enableAccount(favour));
         }
+
+    @Test
+     void forgotPassword() {
+         try {
+             UserIdentity userIdentity =  userIdentityService.forgotPassword(favour.getEmail());
+             assertNotNull(userIdentity);
+             assertEquals(favour.getFirstName(),userIdentity.getFirstName());
+
+         }catch (MiddlException middlException){
+             log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+         }
+    }
+
+    @Test
+     void forgotPasswordWithInvalidEmailAAddress() {
+        favour.setEmail("wrongemail@gmail.com");
+        assertThrows(MiddlException.class, () -> userIdentityService.forgotPassword(favour.getEmail()));
+    }
+
+    @Test
+    void forgotPasswordWithNullEmailAAddress() {
+        favour.setEmail(null);
+        assertThrows(MiddlException.class, () -> userIdentityService.forgotPassword(favour.getEmail()));
+    }
+
+    @Test
+    void forgotPasswordWithEmptyEmailAddress() {
+        favour.setEmail(StringUtils.EMPTY);
+        assertThrows(MiddlException.class, () -> userIdentityService.forgotPassword(favour.getEmail()));
+    }
+
 
 
 

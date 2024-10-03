@@ -64,11 +64,13 @@ public class UserIdentityValidator extends MiddleValidator {
     }
 
     public static void validatePassword(String password) throws MiddlException {
+        validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()){
             throw new IdentityException(INVALID_PASSWORD.getMessage());
         }
     }
+
 
 
 

@@ -152,6 +152,12 @@ public class UserIdentityService implements CreateUserUseCase {
         return userIdentity;
     }
 
+    @Override
+    public UserIdentity forgotPassword(String email) throws MiddlException {
+       validateEmail(email);
+      return userIdentityOutputPort.findByEmail(email);
+    }
+
     private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MiddlException {
         List<PasswordHistory> passwordHistories = passwordHistoryOutputPort.findByUser(userId);
         int checkCount = Math.min(5, passwordHistories.size());
