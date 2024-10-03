@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.DurationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ProgramException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,13 +27,15 @@ class ProgramServiceTest {
     private ProgramService programService;
     @Mock
     private ProgramOutputPort programOutputPort;
-    @Mock
-    private ProgramRepository programRepository;
     private Program program;
+
     @BeforeEach
     void setUp() {
         program = Program.builder().name("My program").durationStatus(DurationStatus.YEARS).
-                programDescription("A great program").organizationId("68t46").build();
+                programDescription("A great program").organizationId("68t46").
+                programType(ProgramType.VOCATIONAL).programStatus(ProgramStatus.ACTIVE).
+                deliveryType(DeliveryType.ONSITE).mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).
+                build();
     }
 
     @Test
@@ -75,11 +78,15 @@ class ProgramServiceTest {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program addedProgram = programService.addProgram(program);
+
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
             assertEquals(addedProgram.getDurationStatus(), program.getDurationStatus());
             assertEquals(addedProgram.getName(), program.getName());
-//            assertEquals(addedProgram.ge(), program.getProgramDescription());
 
+            assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
+            assertEquals(addedProgram.getDuration(), program.getDuration());
+            assertEquals(addedProgram.getProgramType(), program.getProgramType());
+            assertEquals(addedProgram.getMode(), program.getMode());
         } catch (MiddlException e) {
             e.printStackTrace();
         }
