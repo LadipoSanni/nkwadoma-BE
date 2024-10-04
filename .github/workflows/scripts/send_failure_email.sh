@@ -9,7 +9,7 @@ BRANCH_NAME=$7
 COMMIT_AUTHOR=${8}
 SONARQUBE_URL=http://sonarqube.enum.africa/dashboard?id=Nkwadoma
 MAVEN_REPORT_URL=s3://semicolon-build-reports/enum/enumverse-backend/maven-report/new-reports/surefire-report.html
-# AUTOMATION_TEST_URL=s3://semicolon-build-reports/enum/enumverse-backend/maven-report/automation-test-report/report-pytest-results.html
+AUTOMATION_TEST_URL=s3://semicolon-build-reports/enum/enumverse-backend/maven-report/automation-test-report/report-pytest-results.html
 
 SONARQUBE_URL_SET=${9}
 MAVEN_REPORT_URL_SET=${10}
