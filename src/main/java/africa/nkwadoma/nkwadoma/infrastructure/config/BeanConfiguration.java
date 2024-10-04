@@ -26,6 +26,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.oauth2.server.resource.authentication.*;
 import org.thymeleaf.TemplateEngine;
 
 @Configuration
@@ -88,4 +89,8 @@ public class BeanConfiguration {
         return new TokenGeneratorAdapter();
     }
 
+    @Bean
+    public JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter() {
+        return new JwtGrantedAuthoritiesConverter();
+    }
 }
