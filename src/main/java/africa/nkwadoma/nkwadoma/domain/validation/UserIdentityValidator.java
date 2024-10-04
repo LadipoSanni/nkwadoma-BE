@@ -30,10 +30,10 @@ public class UserIdentityValidator extends MiddleValidator {
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          validateEmail(userIdentity.getEmail());
-         validateUserDataElement(userIdentity.getFirstName());
-         validateUserDataElement(userIdentity.getLastName());
-         validateUserDataElement(userIdentity.getCreatedBy());
-         validateUserDataElement(userIdentity.getRole());
+         validateDataElement(userIdentity.getFirstName());
+         validateDataElement(userIdentity.getLastName());
+         validateDataElement(userIdentity.getCreatedBy());
+         validateDataElement(userIdentity.getRole());
      }
 
     private static void validateEmail(UserIdentity userIdentity) throws IdentityException {

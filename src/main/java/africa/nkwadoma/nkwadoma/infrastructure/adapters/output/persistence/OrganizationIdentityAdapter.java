@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
-import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateUserDataElement;
+import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateDataElement;
 
 @RequiredArgsConstructor
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {
@@ -41,7 +41,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void delete(String id) throws MiddlException {
-        validateUserDataElement(id);
+        validateDataElement(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
     }
@@ -50,7 +50,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findById(String id) throws MiddlException {
-        validateUserDataElement(id);
+        validateDataElement(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
