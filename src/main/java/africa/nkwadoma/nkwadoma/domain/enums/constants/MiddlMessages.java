@@ -10,6 +10,7 @@ public enum MiddlMessages {
     EMAIL_ALREADY_EXISTS("email address already exist"),
     EMAIL_INVITATION_SUBJECT("Invitation to Middl"),
     ORGANIZATION_INVITATION_TEMPLATE("organization-invitation"),
+    COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
     DOMAIN_EMAIL_DOES_NOT_MATCH("domain email does not match"),
     EMAIL_INDEX("@");
 
