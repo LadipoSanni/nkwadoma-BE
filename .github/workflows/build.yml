@@ -35,7 +35,7 @@ jobs:
 
       - name: Maven Package for Dev
         if: github.ref == 'refs/heads/dev'  # Use dev branch for dev environment
-        run: mvn -B clean package -Dspring.profiles.active=dev -DskipTests  # Skip tests
+        run: mvn -B clean package -Dspring.profiles.active=dev   
 
       - name: Cache SonarQube packages
         uses: actions/cache@v3
@@ -55,4 +55,4 @@ jobs:
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Nkwadoma-Backend \
-            -Dsonar.projectName='Nkwadoma Backend' -DskipTests  # Skip tests during Sonar analysis
+            -Dsonar.projectName='Nkwadoma Backend'  
