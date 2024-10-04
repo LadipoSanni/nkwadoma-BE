@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Create
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +37,7 @@ public class InvestmentVehicleServiceTest {
     void createInvestmentVehicle() throws MiddlException {
         investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
     }
+
+
 
 }

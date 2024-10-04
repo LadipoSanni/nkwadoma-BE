@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -24,6 +25,7 @@ class InvestmentVehicleIdentityAdapterTest {
 
     @Autowired
     private InvestmentVehicleIdentityOutputPort investmentVehicleIdentityOutputPort;
+    private InvestmentVehicleEntityRepository investmentVehicleEntityRepository;
     private InvestmentVehicleIdentity capitalGrowth;
     private InvestmentVehicleIdentity fundGrowth;
     private String investmentVehicleId;
@@ -157,6 +159,11 @@ class InvestmentVehicleIdentityAdapterTest {
     void createInvestmentVehicleNameWithExistingInvestmentVehicleName() {
         assertThrows(MiddlException.class,()->investmentVehicleIdentityOutputPort.findById(fundGrowth.getId()));
         assertThrows(MiddlException.class,()->investmentVehicleIdentityOutputPort.save(fundGrowth));
+    }
+
+    @AfterAll
+    void cleanUp(){
+        investmentVehicleEntityRepository.deleteAll();
     }
 
 }
