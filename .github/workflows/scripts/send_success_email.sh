@@ -12,7 +12,7 @@ MAVEN_REPORT_URL_SET=${10}
 AUTOMATION_TEST_URL_SET=${11}
 COMMIT_MESSAGE=${12}
 ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
-SONARQUBE_URL=http://sonarqube.enum.africa/dashboard?id=EnumVerse
+SONARQUBE_URL=http://sonarqube.enum.africa/dashboard?id=Nkwadoma
 MAVEN_REPORT_URL=https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/enum/enumverse-backend/maven-report/new-reports/surefire-report.html
 # AUTOMATION_TEST_URL=https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/enum/enumverse-backend/maven-report/new-reports/report-pytest-results.html
 COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/\\(/(/g; s/\\)/)/g; s/\\#/#/g')
