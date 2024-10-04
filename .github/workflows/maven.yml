@@ -22,6 +22,7 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
 
 jobs:
 
@@ -67,4 +68,5 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
         run: mvn -B package --file pom.xml 
