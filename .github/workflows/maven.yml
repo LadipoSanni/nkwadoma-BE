@@ -22,7 +22,10 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-
+  FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
+  
 jobs:
 
   test:
@@ -67,4 +70,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
+     
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
         run: mvn -B package --file pom.xml 
