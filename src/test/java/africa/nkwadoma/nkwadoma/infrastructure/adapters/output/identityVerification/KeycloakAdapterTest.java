@@ -100,6 +100,78 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(2)
+    void createPassword(){
+        try {
+            john.setPassword("passwordJ@345");
+            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+        }catch (MiddlException e){
+            log.info("{} {}",e.getClass().getName(),e.getMessage());
+        }
+
+    }
+
+    @Test
+    @Order(3)
+    void login(){
+        try {
+            john.setPassword("passwordJ@345");
+            identityManagementOutputPort.login(john);
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+    @Test
+    void loginWithWrongDetails() throws MiddlException {
+
+        john.setEmail("wrong@gmail.com");
+        john.setPassword("passwordJ@345");
+        john.setFirstName("wrong firstname");
+        assertThrows(IdentityException.class,()->identityManagementOutputPort.login(john));
+    }
+
+    @Test
+    @Order(4)
+    void changePassword(){
+
+        try {
+            john.setNewPassword("neWpasswordJ@345");
+            identityManagementOutputPort.changePassword(john);
+
+            john.setPassword(john.getNewPassword());
+            identityManagementOutputPort.login(john);
+
+
+        }catch (MiddlException middlException){
+            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }
+    }
+
+    @Test
+    @Order(5)
+    void enableAccountThatHasBeenEnabled() {
+        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+
+    }
+
+    @Test
+    void enableAccountWithWrongEmail() {
+        john.setEmail("wrong@gmail.com");
+        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    }
+
+    @Test
+    @Order(6)
+    void disAbleAccount() {
+        try{
+            identityManagementOutputPort.disableUserAccount(john);
+        }catch (MiddlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
+    }
+
+
+    @Test
     void getUserRepresentation()  {
         try {
             UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE);
@@ -226,16 +298,6 @@ class KeycloakAdapterTest {
         assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(john));
     }
 
-    @Test
-    void createPassword(){
-     try {
-         john.setPassword("password");
-         identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
-     }catch (MiddlException e){
-         log.info("{} {}",e.getClass().getName(),e.getMessage());
-     }
-
-    }
 
     @AfterAll
     void cleanUp() {

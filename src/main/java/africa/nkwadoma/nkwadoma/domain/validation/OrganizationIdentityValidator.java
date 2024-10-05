@@ -17,10 +17,10 @@ public class OrganizationIdentityValidator extends MiddleValidator {
             throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
         }
         validateEmail(organizationIdentity.getEmail());
-        validateUserDataElement(organizationIdentity.getName());
-        validateUserDataElement(organizationIdentity.getIndustry());
-        validateUserDataElement(organizationIdentity.getRcNumber());
-        validateUserDataElement(organizationIdentity.getPhoneNumber());
+        validateDataElement(organizationIdentity.getName());
+        validateDataElement(organizationIdentity.getIndustry());
+        validateDataElement(organizationIdentity.getRcNumber());
+        validateDataElement(organizationIdentity.getPhoneNumber());
 
     }
 
