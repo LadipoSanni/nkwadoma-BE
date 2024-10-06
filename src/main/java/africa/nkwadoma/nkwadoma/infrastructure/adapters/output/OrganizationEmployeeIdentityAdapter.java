@@ -15,7 +15,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 
 @RequiredArgsConstructor
 @Slf4j
-public class OrganizationOrganizationEmployeeIdentityAdapter implements OrganizationEmployeeIdentityOutputPort {
+public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployeeIdentityOutputPort {
     private final EmployeeAdminEntityRepository employeeAdminEntityRepository;
     private final OrganizationEmployeeIdentityMapper organizationEmployeeIdentityMapper;
 

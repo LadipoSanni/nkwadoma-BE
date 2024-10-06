@@ -115,6 +115,7 @@ class OrganizationIdentityServiceTest {
                 String generatedToken = tokenGeneratorOutputPort.generateToken(foundUser.getEmail());
                 assertNotNull(generatedToken);
                 createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
+                log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMiddlUser());
             }}catch (MiddlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
