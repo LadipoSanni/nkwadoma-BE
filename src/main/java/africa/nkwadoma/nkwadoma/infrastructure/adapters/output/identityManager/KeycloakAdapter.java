@@ -129,15 +129,14 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         user.setEnabled(true);
         userResource.update(user);
     }
- @Override
-    public UserIdentity login(UserIdentity userIdentity) throws IdentityException {
+
+    @Override
+    public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
-            userIdentity.setAccessToken(tokenManager.getAccessToken().getToken());
-            userIdentity.setRefreshToken(tokenManager.getAccessToken().getRefreshToken());
 
-            return userIdentity;
+            return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
             throw new IdentityException(INVALID_CREDENTIALS.getMessage());
         }

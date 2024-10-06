@@ -8,4 +8,5 @@ import org.mapstruct.*;
 public interface IdentityMapper {
 
     UserIdentity toIdentity(UserIdentityRequest userIdentityRequest);
+
 }
