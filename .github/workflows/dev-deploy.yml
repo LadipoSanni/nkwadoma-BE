@@ -1,10 +1,13 @@
 name: Deploy Systest to Aws Ecs
 
 env:
-  ECR_REPO: enumverse-backend-systest
-  CLUSTER: enumverse
-  ECS: enumverse-backend-systest
+  ECR_REPOSITORY: learnspace-backend-systest
+  CLUSTER: learnspace-africa
+  ECS: learnspace-backend-systest
+  AWS_REGION: eu-west-1
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/learnspace-backend-systest 
   EMAILS: 'sam@semicolon.africa,ladipo@semicolon.africa'
+  
 
 on:
   push:
