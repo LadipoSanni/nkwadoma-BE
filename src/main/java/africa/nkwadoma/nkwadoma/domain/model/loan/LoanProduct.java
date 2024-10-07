@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -19,8 +20,7 @@ public class LoanProduct {
     @Column(unique = true)
     private String name;
     private int moratorium;
-//    @Enumerated(EnumType.STRING)
-//    private TenureStatus tenorStatus;
+    private TenorStatus tenorStatus;
     private int tenor;
     private double interestRate;
     @Size(max=2500)
@@ -43,9 +43,7 @@ public class LoanProduct {
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
-//    @OneToOne
 //    private FundProduct fundProduct;
-    @Column(nullable = false, columnDefinition = "int DEFAULT 0")
     private int numberOfLoanees;
 
 

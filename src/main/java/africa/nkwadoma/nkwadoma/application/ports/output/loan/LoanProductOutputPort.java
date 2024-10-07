@@ -6,5 +6,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanProductException;
 
 public interface LoanProductOutputPort {
 
-    LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException;
+//    LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException;
+
+    LoanProduct save(LoanProduct loanProduct);
 }

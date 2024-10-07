@@ -40,83 +40,9 @@ class LoanProductAdapterTest {
 
     @Test
     void createLoanProduct() {
-        try {
-            LoanProduct createdLoanProduct = loanProductOutputPort.createLoanProduct(loanProduct);
+            LoanProduct createdLoanProduct = loanProductOutputPort.save(loanProduct);
             assertNotNull(createdLoanProduct);
-            log.info(createdLoanProduct.getId());
             assertNotNull(createdLoanProduct.getId());
-        }catch (MiddlException exception){
-            log.error(exception.getMessage());
-        }
     }
 
-    @Test
-    void createLoanProductWithNullRequestEntity(){
-        assertThrows(MiddlException.class, () -> loanProductOutputPort.createLoanProduct(null));
-    }
-    @Test
-    void createLoanProductWithNullMandate(){
-        loanProduct.setMandate(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullLoanProductName(){
-        loanProduct.setName(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct((loanProduct)));
-    }
-    @Test
-    void createLoanProductWithNullSponsor(){
-        loanProduct.setSponsors(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNoSponsor(){
-        loanProduct.setSponsors(new ArrayList<>());
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullLoanProductSize(){
-        loanProduct.setLoanProductSize(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNoLoanProductSize(){
-        loanProduct.setLoanProductSize(new BigDecimal(0));
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullObligorLimit(){
-        loanProduct.setObligorLoanLimit(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNoObligorLimit(){
-        loanProduct.setObligorLoanLimit(new BigDecimal(0));
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeInterestRate(){
-        loanProduct.setInterestRate(-1);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeMoratoriumPeriod(){
-        loanProduct.setMoratorium(-1);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeTenor(){
-        loanProduct.setTenor(-1);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullMinimumRepaymentAmount(){
-        loanProduct.setMinRepaymentAmount(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNoTermsAndConditions(){
-        loanProduct.setTermsAndCondition(null);
-        assertThrows(MiddlException.class,()-> loanProductOutputPort.createLoanProduct(loanProduct));
-    }
 }

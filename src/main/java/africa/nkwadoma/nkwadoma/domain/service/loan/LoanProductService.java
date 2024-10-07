@@ -1,5 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loan;
+package africa.nkwadoma.nkwadoma.domain.service.loan;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
@@ -15,44 +16,19 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProduct;
+import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProductDetails;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanProductAdapter implements LoanProductOutputPort {
-    private final LoanProductEntityRepository loanProductEntityRepository;
-    private final LoanProductMapper loanProductMapper;
+public class LoanProductService implements CreateLoanProductUseCase {
+    private final LoanProductOutputPort loanProductOutputPort;
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException {
         validateLoanProduct(loanProduct);
         validateLoanProductDetails(loanProduct);
-        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
-        loanProductEntity.setCreatedAtDate(LocalDateTime.now());
-        LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
-        loanProduct.setId(savedLoanProductEntity.getId());
-        return loanProduct;
+        return loanProductOutputPort.save(loanProduct);
     }
 
-    private void validateLoanProductDetails(LoanProduct loanProduct) throws MiddlException{
-        if (StringUtils.isEmpty(loanProduct.getName())
-                ||StringUtils.isEmpty(loanProduct.getMandate())
-                ||loanProduct.getSponsors() == null
-                ||loanProduct.getSponsors().isEmpty()
-                ||loanProduct.getLoanProductSize() == null
-                ||loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) < 0
-                ||loanProduct.getObligorLoanLimit() == null
-                ||loanProduct.getObligorLoanLimit().compareTo(BigDecimal.ZERO) < 0
-                ||loanProduct.getInterestRate() < 0
-                ||loanProduct.getMoratorium() < 0
-                ||loanProduct.getTenor() < 0
-                ||loanProduct.getMinRepaymentAmount() == null
-                ||StringUtils.isEmpty(loanProduct.getTermsAndCondition())
-        ) {
-            log.error("Invalid or empty request details to create loan product {} ",loanProduct);
-            throw new LoanProductException("Invalid or empty request details to create loan product");
-        }
-    }
-
-    private void validateLoanProduct(LoanProduct loanProduct)throws MiddlException {
-        if (loanProduct == null) throw new LoanProductException("Invalid details provided");
-    }
 }
