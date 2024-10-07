@@ -25,10 +25,11 @@ class InvestmentVehicleIdentityAdapterTest {
 
     @Autowired
     private InvestmentVehicleIdentityOutputPort investmentVehicleIdentityOutputPort;
-    private InvestmentVehicleEntityRepository investmentVehicleEntityRepository;
     private InvestmentVehicleIdentity capitalGrowth;
     private InvestmentVehicleIdentity fundGrowth;
     private String investmentVehicleId;
+    @Autowired
+    private InvestmentVehicleEntityRepository investmentVehicleEntityRepository;
 
 
 
@@ -157,12 +158,13 @@ class InvestmentVehicleIdentityAdapterTest {
     @Order(5)
     @Test
     void createInvestmentVehicleNameWithExistingInvestmentVehicleName() {
-        assertThrows(MiddlException.class,()->investmentVehicleIdentityOutputPort.findById(fundGrowth.getId()));
-        assertThrows(MiddlException.class,()->investmentVehicleIdentityOutputPort.save(fundGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleIdentityOutputPort.findById(fundGrowth.getId()));
+        assertThrows(MiddlException.class, () -> investmentVehicleIdentityOutputPort.save(fundGrowth));
     }
 
+
     @AfterAll
-    void cleanUp(){
+    void deleteAll(){
         investmentVehicleEntityRepository.deleteAll();
     }
 
