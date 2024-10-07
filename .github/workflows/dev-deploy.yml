@@ -1,0 +1,156 @@
+name: Deploy Systest to Aws Ecs
+
+env:
+  ECR_REPO: enumverse-backend-systest
+  CLUSTER: enumverse
+  ECS: enumverse-backend-systest
+  EMAILS: 'sam@semicolon.africa,ladipo@semicolon.africa'
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Restore Maven Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/*.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Set environment variables
+        id: vars
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          TAG="commit-${COMMIT_HASH}-timestamp-${TIMESTAMP}"
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          echo "JAR_NAME=myapp-${TAG}.jar" >> $GITHUB_ENV
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+   #      COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+   #      echo "COMMIT_TITLE=${COMMIT_TITLE}" >> $GITHUB_ENV
+   #      COMMIT_TITLE=$(git log -1 --pretty=%s)
+   #      echo "COMMIT_MESSAGE=${COMMIT_MESSAGE}" >> $GITHUB_ENV
+
+      - name: Debug Environment Variables
+        run: |
+          echo "TAG=${{ env.TAG }}"
+          echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
+          echo "COMMIT_AUTHOR=${{ env.COMMIT_AUTHOR }}"
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
+          echo "COMMIT_TITLE=${{ env.COMMIT_TITLE }}"
+          echo "COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}"
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.ECR_REPO }}:$GITHUB_SHA .
+
+      - name: Tag Docker image with "latest"
+        run: |
+          DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:latest
+          docker tag ${{ env.ECR_REPO }}:$GITHUB_SHA $DOCKER_TAG
+          docker tag ${{ env.ECR_REPO }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:$GITHUB_SHA
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:$GITHUB_SHA
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service --cluster ${{ env.CLUSTER }} --service ${{ env.ECS }} --force-new-deployment
+
+
+
+      - name: Send build success email notification
+        if: success()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: ${{ env.EMAILS }}
+        run: |
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"
+          do
+            echo "From: builds@semicolon.africa" > /tmp/email.txt
+            echo "To: $email" >> /tmp/email.txt
+            echo "Subject: Build and Deployment Status" >> /tmp/email.txt
+            printf "Congratulations, your recent build in Nkwadoma Backend was successful.\n" >> /tmp/email.txt
+            printf "Branch: ${BRANCH_NAME}\n" >> /tmp/email.txt
+
+            printf "Author: ${COMMIT_AUTHOR}\n" >> /tmp/email.txt
+            printf "\nTAG: ${{ env.TAG }}\n\n" >> /tmp/email.txt
+            printf "Regards,\nThe Cloud Team" >> /tmp/email.txt
+            curl --verbose --ssl-reqd \
+              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
+              --mail-from "builds@semicolon.africa" \
+              --mail-rcpt "$email" \
+              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
+              --upload-file /tmp/email.txt
+          done
+
+      - name: Send build failure email notification
+        if: failure()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: ${{ env.EMAILS }}
+        run: |
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"
+          do
+            echo "From: builds@semicolon.africa" > /tmp/email.txt
+            echo "To: $email" >> /tmp/email.txt
+            echo "Subject: Build Failure" >> /tmp/email.txt
+            printf "Oooops, Your recent build in Nkwadoma Backend was unsuccessful, kindly check the new commit and fix.\n\n" >> /tmp/email.txt
+            printf "Branch: ${BRANCH_NAME}\n" >> /tmp/email.txt
+
+            printf "Author: ${COMMIT_AUTHOR}\n" >> /tmp/email.txt
+            printf "\nTAG: ${{ env.TAG }}\n\n" >> /tmp/email.txt
+            printf "Regards,\nThe Cloud Team" >> /tmp/email.txt
+            curl --verbose --ssl-reqd \
+              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
+              --mail-from "builds@semicolon.africa" \
+              --mail-rcpt "$email" \
+              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
+              --upload-file /tmp/email.txt
+          done
