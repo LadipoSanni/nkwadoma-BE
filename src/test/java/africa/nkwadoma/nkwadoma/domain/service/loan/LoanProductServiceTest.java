@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class LoanProductServiceTest {
     @Autowired
-    private LoanProductService loanProductService;
+    private LoanService loanProductService;
     private LoanProduct loanProduct;
 
     @BeforeEach

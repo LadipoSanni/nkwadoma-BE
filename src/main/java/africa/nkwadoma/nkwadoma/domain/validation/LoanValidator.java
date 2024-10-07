@@ -2,17 +2,21 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanProductException;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.*;
+
 @Slf4j
-public class LoanValidator {
+public class LoanValidator extends MiddleValidator {
     public static void validateLoanProductDetails(LoanProduct loanProduct) throws MiddlException {
-        if (StringUtils.isEmpty(loanProduct.getName())
-                ||StringUtils.isEmpty(loanProduct.getMandate())
-                ||loanProduct.getSponsors() == null
+        validateDataElement(loanProduct.getName());
+        validateDataElement(loanProduct.getMandate());
+        validateDataElement(loanProduct.getTermsAndCondition());
+        if (loanProduct.getSponsors() == null
                 ||loanProduct.getSponsors().isEmpty()
                 ||loanProduct.getLoanProductSize() == null
                 ||loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) < 0
@@ -22,14 +26,13 @@ public class LoanValidator {
                 ||loanProduct.getMoratorium() < 0
                 ||loanProduct.getTenor() < 0
                 ||loanProduct.getMinRepaymentAmount() == null
-                ||StringUtils.isEmpty(loanProduct.getTermsAndCondition())
         ) {
-            log.error("Invalid or empty request details to create loan product {} ",loanProduct);
-            throw new LoanProductException("Invalid or empty request details to create loan product");
+            log.error(INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage(),loanProduct);
+            throw new LoanException(INVALID_LOAN_PRODUCT_REQUEST_DETAILS.getMessage());
         }
     }
 
     public static void validateLoanProduct(LoanProduct loanProduct)throws MiddlException {
-        if (loanProduct == null) throw new LoanProductException("Invalid details provided");
+        if (loanProduct == null) throw new LoanException(INVALID_REQUEST.getMessage());
     }
 }

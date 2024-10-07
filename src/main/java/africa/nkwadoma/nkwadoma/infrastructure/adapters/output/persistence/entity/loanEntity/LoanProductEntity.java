@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanProductStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -27,6 +28,8 @@ public class LoanProductEntity {
     @Column(unique = true)
     private String name;
     private int moratorium;
+    @Enumerated(EnumType.STRING)
+    private LoanProductStatus loanProductStatus;
     @Enumerated(EnumType.STRING)
     private TenorStatus tenorStatus;
     private int tenor;

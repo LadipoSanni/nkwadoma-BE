@@ -14,13 +14,13 @@ import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateL
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanProductService implements CreateLoanProductUseCase {
+public class LoanService implements CreateLoanProductUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException {
         validateLoanProduct(loanProduct);
         validateLoanProductDetails(loanProduct);
+//        validateObligorAndProductSize(loanProduct);;
         return loanProductOutputPort.save(loanProduct);
     }
-
 }
