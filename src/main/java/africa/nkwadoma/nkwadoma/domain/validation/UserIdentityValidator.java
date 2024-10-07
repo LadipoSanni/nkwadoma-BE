@@ -30,10 +30,10 @@ public class UserIdentityValidator extends MiddleValidator {
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          validateEmail(userIdentity.getEmail());
-         validateUserDataElement(userIdentity.getFirstName());
-         validateUserDataElement(userIdentity.getLastName());
-         validateUserDataElement(userIdentity.getCreatedBy());
-         validateUserDataElement(userIdentity.getRole());
+         validateDataElement(userIdentity.getFirstName());
+         validateDataElement(userIdentity.getLastName());
+         validateDataElement(userIdentity.getCreatedBy());
+         validateDataElement(userIdentity.getRole());
      }
 
     private static void validateEmail(UserIdentity userIdentity) throws IdentityException {
@@ -41,8 +41,15 @@ public class UserIdentityValidator extends MiddleValidator {
             throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
+    private static void validateUserEmail(String email) throws IdentityException {
+            if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email)) {
+                throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());
+            }
+        }
 
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws IdentityException {
+         validateUserEmail(inviteeEmail);
+         validateUserEmail(inviterEmail);
          if (!compareEmailDomain(inviteeEmail,inviterEmail)){
              throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
          }
@@ -57,11 +64,13 @@ public class UserIdentityValidator extends MiddleValidator {
     }
 
     public static void validatePassword(String password) throws MiddlException {
+        validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()){
             throw new IdentityException(INVALID_PASSWORD.getMessage());
         }
     }
+
 
 
 

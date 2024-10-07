@@ -15,7 +15,7 @@ public class MiddleValidator {
         }
     }
 
-    public static void validateUserDataElement(String dataElement) throws MiddlException {
+    public static void validateDataElement(String dataElement) throws MiddlException {
         if (StringUtils.isEmpty(dataElement)) {
             throw new MiddlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }

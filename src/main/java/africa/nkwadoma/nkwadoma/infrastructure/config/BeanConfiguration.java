@@ -1,8 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.config;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.OrganizationEmployeeIdentityAdapter;
@@ -38,10 +41,9 @@ public class BeanConfiguration {
             IdentityManagerOutPutPort identityManagerOutPutPort,
             UserIdentityOutputPort userIdentityOutputPort,
             OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-            TokenGeneratorOutputPort tokenGeneratorOutputPort,
-            EmailOutputPort emailOutputPort
+            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase
             ){
-        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,emailOutputPort);
+        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
     }
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
@@ -49,9 +51,10 @@ public class BeanConfiguration {
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenGeneratorOutputPort tokenGeneratorOutputPort,
                                                    PasswordEncoder passwordEncoder,
-                                                   PasswordHistoryOutputPort passwordHistoryOutputPort
+                                                   PasswordHistoryOutputPort passwordHistoryOutputPort,
+                                                   SendColleagueEmailUseCase sendColleagueEmailUseCase
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase);
     }
 
     @Bean
@@ -104,6 +107,11 @@ public class BeanConfiguration {
             PasswordHistoryRepository passwordHistoryRepository
     ){
         return new PasswordHistoryAdapter(passwordHistoryMapper,passwordHistoryRepository);
+    }
+
+    @Bean
+    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenGeneratorOutputPort tokenGeneratorOutputPort){
+        return new NotificationService(emailOutputPort,tokenGeneratorOutputPort);
     }
 
 

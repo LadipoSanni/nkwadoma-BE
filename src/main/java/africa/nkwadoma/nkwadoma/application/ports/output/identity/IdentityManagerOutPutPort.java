@@ -30,6 +30,7 @@ public interface IdentityManagerOutPutPort {
     UserIdentity login(UserIdentity userIdentity) throws MiddlException;
     void changePassword(UserIdentity userIdentity)throws MiddlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MiddlException;
+    UserIdentity disableUserAccount(UserIdentity userIdentity) throws MiddlException;
 
 
 }
