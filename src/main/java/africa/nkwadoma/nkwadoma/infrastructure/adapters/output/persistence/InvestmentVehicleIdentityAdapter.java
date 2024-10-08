@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Objects;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.*;
@@ -53,5 +54,11 @@ public class InvestmentVehicleIdentityAdapter implements InvestmentVehicleIdenti
             return investmentVehicleIdentityMapper.toInvestmentVehicleIdentity(investmentVehicleEntity);
         }
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
+    }
+
+    @Override
+    public List<InvestmentVehicleIdentity> findAll() {
+        return investmentVehicleRepository.findAll().stream()
+                .map(investmentVehicleIdentityMapper::toInvestmentVehicleIdentity).toList();
     }
 }

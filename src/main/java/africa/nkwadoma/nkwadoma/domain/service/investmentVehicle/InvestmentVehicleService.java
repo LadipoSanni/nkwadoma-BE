@@ -5,6 +5,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleIdentity;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 @RequiredArgsConstructor
 
 public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
@@ -19,5 +22,15 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     @Override
     public InvestmentVehicleIdentity updateInvestmentVehicle(InvestmentVehicleIdentity foundInvestmentVehicle) throws MiddlException {
         return investmentVehicleIdentityOutputPort.save(foundInvestmentVehicle);
+    }
+
+    @Override
+    public InvestmentVehicleIdentity viewInvestmentVehicleDetails(String investmentId) throws MiddlException {
+        return investmentVehicleIdentityOutputPort.findById(investmentId);
+    }
+
+    @Override
+    public List<InvestmentVehicleIdentity> viewAllInvestmentVehicles() {
+        return investmentVehicleIdentityOutputPort.findAll();
     }
 }

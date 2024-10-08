@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
 @Slf4j
 class InvestmentVehicleIdentityAdapterTest {
 
@@ -162,9 +162,8 @@ class InvestmentVehicleIdentityAdapterTest {
         assertThrows(MiddlException.class, () -> investmentVehicleIdentityOutputPort.save(fundGrowth));
     }
 
-
     @AfterAll
-    void deleteAll(){
+     void deleteAll(){
         investmentVehicleEntityRepository.deleteAll();
     }
 
