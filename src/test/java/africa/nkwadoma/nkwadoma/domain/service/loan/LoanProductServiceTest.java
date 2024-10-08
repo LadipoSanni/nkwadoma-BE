@@ -84,7 +84,9 @@ class LoanProductServiceTest {
     }
     @Test
     void obligorLimitGreaterThanLoanProductSize(){
-        assertNotNull(null);
+        loanProduct.setLoanProductSize(new BigDecimal(1000));
+        loanProduct.setObligorLoanLimit(new BigDecimal(2000000));
+        assertThrows(MiddlException.class,()-> loanProductService.createLoanProduct(loanProduct));
     }
     @Test
     void createLoanProductWithNullObligorLimit(){

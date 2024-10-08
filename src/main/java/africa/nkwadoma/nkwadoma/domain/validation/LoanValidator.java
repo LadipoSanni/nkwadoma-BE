@@ -35,4 +35,10 @@ public class LoanValidator extends MiddleValidator {
     public static void validateLoanProduct(LoanProduct loanProduct)throws MiddlException {
         if (loanProduct == null) throw new LoanException(INVALID_REQUEST.getMessage());
     }
+    public static void validateObligorAndProductSize(LoanProduct loanProduct) throws MiddlException {
+        if (loanProduct.getObligorLoanLimit().compareTo(loanProduct.getLoanProductSize()) > 0) {
+            log.error(OBLIGOR_LIMIT_GREATER_THAN_PRODUCT_SIZE.getMessage());
+            throw new LoanException(OBLIGOR_LIMIT_GREATER_THAN_PRODUCT_SIZE.getMessage());
+        }
+    }
 }

@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProduct;
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProductDetails;
+import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -20,7 +19,7 @@ public class LoanService implements CreateLoanProductUseCase {
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException {
         validateLoanProduct(loanProduct);
         validateLoanProductDetails(loanProduct);
-//        validateObligorAndProductSize(loanProduct);;
+        validateObligorAndProductSize(loanProduct);;
         return loanProductOutputPort.save(loanProduct);
     }
 }
