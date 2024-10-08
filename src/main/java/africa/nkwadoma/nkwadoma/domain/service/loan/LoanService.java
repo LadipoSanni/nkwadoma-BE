@@ -19,7 +19,7 @@ public class LoanService implements CreateLoanProductUseCase {
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MiddlException {
         validateLoanProduct(loanProduct);
         validateLoanProductDetails(loanProduct);
-        validateObligorAndProductSize(loanProduct);;
+        validateObligorAgainstProductSize(loanProduct);;
         return loanProductOutputPort.save(loanProduct);
     }
 }
