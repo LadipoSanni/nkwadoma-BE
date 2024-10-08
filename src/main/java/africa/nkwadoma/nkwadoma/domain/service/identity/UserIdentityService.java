@@ -12,11 +12,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.parameters.P;
+import org.keycloak.representations.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -98,7 +97,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity login(UserIdentity userIdentity)throws MiddlException {
+    public AccessTokenResponse login(UserIdentity userIdentity)throws MiddlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
         UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
