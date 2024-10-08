@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.exceptions;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +32,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public  ResponseEntity<ExceptionResponse> handleResourceNotFoundException(ResourceNotFoundException exception){
         return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidInputException.class)
+    public  ResponseEntity<ExceptionResponse> handleInvalidInputException(InvalidInputException exception){
+        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public  ResponseEntity<ExceptionResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception){
+        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.CONFLICT);
     }
 
     private static ExceptionResponse errorResponseBuilder(String message) {

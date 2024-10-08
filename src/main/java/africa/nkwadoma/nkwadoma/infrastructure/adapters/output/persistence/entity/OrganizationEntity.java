@@ -11,6 +11,7 @@ import lombok.*;
 @Table(name = "organization")
 public class OrganizationEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String industry;
     private String name;

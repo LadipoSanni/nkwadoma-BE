@@ -26,6 +26,7 @@ public class ProgramEntity {
     private String name;
     @Lob
     private String objectives;
+    @Enumerated(EnumType.STRING)
     private DurationType durationType;
     private int duration;
     private int numberOfTrainees;
@@ -38,6 +39,8 @@ public class ProgramEntity {
     private DeliveryType deliveryType;
     @Enumerated(EnumType.STRING)
     private ProgramStatus programStatus;
+    @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDate programStartDate;
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

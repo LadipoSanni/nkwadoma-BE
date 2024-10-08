@@ -55,6 +55,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
+    @Override
+    public boolean existsById(String organizationId) {
+        return organizationEntityRepository.existsById(organizationId);
+    }
+
 //    @Override
 //    public OrganizationIdentity update(OrganizationIdentity organizationIdentity) throws MiddlException {
 //        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);

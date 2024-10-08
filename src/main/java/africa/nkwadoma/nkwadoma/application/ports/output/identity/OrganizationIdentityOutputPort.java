@@ -8,5 +8,7 @@ public interface OrganizationIdentityOutputPort {
     OrganizationIdentity findByEmail(String email) throws MiddlException;
     void delete(String rcNumber) throws MiddlException;
     OrganizationIdentity findById(String id) throws MiddlException;
+
+    boolean existsById(String organizationId);
 }
 

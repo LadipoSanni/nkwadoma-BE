@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.ProgramException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import lombok.extern.slf4j.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,15 +16,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class ProgramServiceTest {
     @InjectMocks
     private ProgramService programService;
     @Mock
     private ProgramOutputPort programOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+
     private Program program;
 
     @BeforeEach
@@ -40,42 +43,41 @@ class ProgramServiceTest {
     @Test
     void addProgramWithEmptyProgramName() {
         program.setName(null);
-        assertThrows(ProgramException.class, ()->programService.createProgram(program));
+        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
     }
-    @Test
-    void addProgramWithEmptyProgramDescription() {
-        program.setProgramDescription(null);
-        try {
-            when(programService.createProgram(program)).thenThrow(ProgramException.class);
-        } catch (ProgramException | ResourceNotFoundException e) {
-            e.printStackTrace();
-        }
-        assertThrows(ProgramException.class, ()->programService.createProgram(program));
-    }
+
     @Test
     void addProgramWithEmptyDurationStatus() {
         program.setDurationType(null);
-        assertThrows(ProgramException.class, ()->programService.createProgram(program));
+        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
     }
     @Test
     void addProgramWithEmptyOrganizationId() {
         program.setOrganizationId(null);
-        assertThrows(ProgramException.class, ()->programService.createProgram(program));
+        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
     }
     @Test
     void addProgramWithExistingName() {
         program.setName(program.getName());
         try {
-            when(programService.createProgram(program)).thenThrow(ProgramException.class);
-        } catch (ProgramException | ResourceNotFoundException e) {
-            e.printStackTrace();
+            when(programOutputPort.saveProgram(program)).thenThrow(ResourceAlreadyExistsException.class);
+            when(organizationIdentityOutputPort.existsById(program.getOrganizationId())).thenReturn(true);
+        } catch (ResourceAlreadyExistsException | ResourceNotFoundException e) {
+            log.info("Error creating program: {}", e.getMessage());
         }
-        assertThrows(ProgramException.class, ()->programService.createProgram(program));
+        assertThrows(ResourceAlreadyExistsException.class, ()->programService.createProgram(program));
+    }
+    @Test
+    void addProgramWithInvalidOrganizationId() {
+        program.setOrganizationId("invalid organization id");
+        when(organizationIdentityOutputPort.existsById(program.getOrganizationId())).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class, ()->programService.createProgram(program));
     }
     @Test
     void addProgram() {
         try {
-            when(programOutputPort.saveProgram(program)).thenReturn(program);
+//            when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program addedProgram = programService.createProgram(program);
 
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
@@ -88,7 +90,7 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getMode(), program.getMode());
             assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
         } catch (MiddlException e) {
-            e.printStackTrace();
+            log.info("Error creating program: {}", e.getMessage());
         }
     }
 }

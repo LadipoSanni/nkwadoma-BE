@@ -2,9 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.ProgramException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.OrganizationEntity;
@@ -17,8 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Component
@@ -30,19 +27,20 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
 
     @Override
-    public Program saveProgram(Program program) throws ProgramException, ResourceNotFoundException {
+    public Program saveProgram(Program program) throws ResourceNotFoundException, ResourceAlreadyExistsException {
         if (programRepository.findByName(program.getName()).isPresent())
-            throw new ProgramException(ProgramMessages.PROGRAM_ALREADY_EXISTS.getMessage());
+            throw new ResourceAlreadyExistsException(ProgramMessages.PROGRAM_ALREADY_EXISTS.getMessage());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
-        programRepository.save(programEntity);
-
-        TrainingInstituteEntity institute = programEntity.getTrainingInstituteEntity();
         OrganizationEntity organizationEntity =
                 organizationEntityRepository.findById(program.getOrganizationId()).
-                        orElseThrow(()-> new ResourceNotFoundException(""));
+                        orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+        TrainingInstituteEntity institute = TrainingInstituteEntity.builder().build();
         institute.setOrganizationEntity(organizationEntity);
         institute.setNumberOfPrograms(institute.getNumberOfPrograms() + 1);
         trainingInstituteRepository.save(institute);
+
+        programRepository.save(programEntity);
+
 
         return programMapper.toProgram(programEntity);
     }

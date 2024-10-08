@@ -115,8 +115,6 @@ public class BeanConfiguration {
         return new NotificationService(emailOutputPort,tokenGeneratorOutputPort);
     }
 
-
-
     @Bean
     public JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter() {
         return new JwtGrantedAuthoritiesConverter();

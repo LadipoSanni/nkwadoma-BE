@@ -1,11 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.token;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 

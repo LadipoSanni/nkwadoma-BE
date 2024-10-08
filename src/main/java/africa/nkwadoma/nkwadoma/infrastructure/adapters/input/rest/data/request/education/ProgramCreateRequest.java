@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
@@ -31,6 +31,4 @@ public class ProgramCreateRequest {
     private ProgramMode programMode;
     private ProgramType programType;
     private String durationStatus;
-    private int pageNumber;
-    private int pageSize;
 }
