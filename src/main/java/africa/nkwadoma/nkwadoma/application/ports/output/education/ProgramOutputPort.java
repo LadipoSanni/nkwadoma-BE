@@ -4,5 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 
 public interface ProgramOutputPort {
+    Program findProgram(Program program);
     Program saveProgram(Program program) throws ResourceNotFoundException, ResourceAlreadyExistsException;
 }

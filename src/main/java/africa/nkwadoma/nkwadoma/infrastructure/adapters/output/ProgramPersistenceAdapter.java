@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -25,6 +27,15 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final TrainingInstituteRepository trainingInstituteRepository;
     private final ProgramMapper programMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
+
+    @Override
+    public Program findProgram(Program program) {
+        Optional<ProgramEntity> programEntity = programRepository.findByName(program.getName());
+        if (programEntity.isPresent()) {
+            return programEntity;
+        }
+        return null;
+    }
 
     @Override
     public Program saveProgram(Program program) throws ResourceNotFoundException, ResourceAlreadyExistsException {
