@@ -164,6 +164,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
 
+        // TODO: Getting user representation is not necessary
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
             userRepresentation.setEnabled(true);
