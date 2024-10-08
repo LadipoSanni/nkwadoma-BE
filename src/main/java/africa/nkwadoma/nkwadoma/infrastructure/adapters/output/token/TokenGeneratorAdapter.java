@@ -11,7 +11,6 @@ import io.jsonwebtoken.security.Keys;
 
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
@@ -43,8 +42,8 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
         return Keys.hmacShaKeyFor(keyBytes);
     }
     @Override
-    public String decodeJWT(String token){
-
+    public String decodeJWT(String token) throws MiddlException{
+        MiddleValidator.validateDataElement(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()

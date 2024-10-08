@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import lombok.*;
 
+import java.util.List;
+
 @Setter
 @Getter
 @ToString
@@ -20,5 +22,11 @@ public class UserIdentity {
     private String role;
     private String createdBy;
     private String password;
+    private String accessToken;
+    private String refreshToken;
+    private String newPassword;
+    private String organizationDomain;
+
+    private List<PasswordHistory> passwordHistories;
 //    private OrganizationIdentity employer;
 }
