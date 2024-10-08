@@ -1,15 +1,16 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response;
 
 import lombok.*;
-import org.springframework.http.HttpStatus;
 
-@Getter
-@Builder
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiResponse {
+@Builder
+@Setter
+@Getter
+public class ApiResponse<T>{
     private String message;
-    private boolean isSuccessful;
-    private HttpStatus httpStatus;
+
+    private T body;
+
+    private String statusCode;
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class CreateOrganizationRequest {
+public class InviteOrganizationRequest {
     private String industry;
     private String name;
     private String email;
@@ -13,4 +13,9 @@ public class CreateOrganizationRequest {
     private String rcNumber;
     private String tin;
     private String phoneNumber;
+    private String adminFirstName;
+    private String adminLastName;
+    private String adminEmail;
+    private String adminRole;
+    private String createdBy;
 }
