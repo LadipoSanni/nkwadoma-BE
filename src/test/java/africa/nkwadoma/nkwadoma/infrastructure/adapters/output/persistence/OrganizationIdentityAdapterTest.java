@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +62,7 @@ class OrganizationIdentityAdapterTest {
                 assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
                 assertNotNull(savedOrganization);
-                OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+                OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId()).get();
                 assertEquals(foundOrganization.getName(),savedOrganization.getName());
                 assertEquals(foundOrganization.getIndustry(),savedOrganization.getIndustry());
              }catch (MiddlException exception){
@@ -74,7 +75,7 @@ class OrganizationIdentityAdapterTest {
    @Test
     void saveOrganizationWithExistingRcNumber(){
         try{
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId()).get();
             assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             assertEquals(amazingGrace.getId(),savedOrganization.getId());
@@ -177,7 +178,7 @@ class OrganizationIdentityAdapterTest {
     @Test
     void findOrganization(){
        try{
-           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(amazingGrace.getId());
+           OrganizationIdentity organizationIdentity = organizationOutputPort.findById(amazingGrace.getId()).get();
            assertNotNull(organizationIdentity);
            assertEquals(organizationIdentity.getIndustry(), amazingGrace.getIndustry());
        }catch (MiddlException middlException){
@@ -204,7 +205,7 @@ class OrganizationIdentityAdapterTest {
     @Test
     void deleteOrganization(){
         try{
-            OrganizationIdentity foundUser = organizationOutputPort.findById(amazingGrace.getId());
+            OrganizationIdentity foundUser = organizationOutputPort.findById(amazingGrace.getId()).get();
             assertEquals(foundUser.getTin(), amazingGrace.getTin());
             organizationOutputPort.delete(amazingGrace.getId());
             assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
@@ -231,14 +232,14 @@ class OrganizationIdentityAdapterTest {
     @Test
     void updateOrganization(){
         try {
-            OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
+            OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId()).get();
             assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
             assertNotNull(existingUser.getIndustry());
 
             existingUser.setName("Felicia");
             OrganizationIdentity updatedUser = organizationOutputPort.save(existingUser);
 
-            OrganizationIdentity findUpdatedUser = organizationOutputPort.findById(updatedUser.getId());
+            OrganizationIdentity findUpdatedUser = organizationOutputPort.findById(updatedUser.getId()).get();
 
             assertNotEquals(findUpdatedUser.getName(), amazingGrace.getName());
 

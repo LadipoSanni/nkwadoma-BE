@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class Program {
+    private String id;
     private String programDescription;
     private String name;
     private String objectives;
@@ -30,4 +31,5 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private TrainingInstitute trainingInstitute;
 }

@@ -11,6 +11,7 @@ public interface ProgramMapper {
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "programStartDate", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "trainingInstituteEntity", source = "trainingInstitute")
     ProgramEntity toProgramEntity(Program program);
 
     @InheritInverseConfiguration

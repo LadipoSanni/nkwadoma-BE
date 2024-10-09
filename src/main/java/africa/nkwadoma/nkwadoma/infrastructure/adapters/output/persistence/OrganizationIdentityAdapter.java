@@ -13,6 +13,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
@@ -49,10 +51,9 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
 
     @Override
-    public OrganizationIdentity findById(String id) throws MiddlException {
-        validateDataElement(id);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+    public Optional<OrganizationIdentity> findById(String id) throws MiddlException {
+        Optional<OrganizationEntity> organizationEntity = organizationEntityRepository.findById(id);
+        return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
     @Override
@@ -67,15 +68,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 //        return saveAndGetUserIdentity(setExistingUser);
 //    }
 
-    private OrganizationIdentity setExistingUserDataElement(OrganizationIdentity organizationIdentity) throws MiddlException {
-        OrganizationIdentity existingUser = findById(organizationIdentity.getRcNumber());
-        existingUser.setEmail(organizationIdentity.getEmail());
-        existingUser.setName(organizationIdentity.getName());
-        existingUser.setIndustry(organizationIdentity.getIndustry());
-        existingUser.setRcNumber(organizationIdentity.getRcNumber());
-        existingUser.setTin(organizationIdentity.getTin());
-        return existingUser;
-    }
+//    private Optional<OrganizationIdentity> setExistingUserDataElement(OrganizationIdentity organizationIdentity) throws MiddlException {
+//        Optional<OrganizationIdentity> existingUser = findById(organizationIdentity.getRcNumber());
+//        existingUser.setEmail(organizationIdentity.getEmail());
+//        existingUser.setName(organizationIdentity.getName());
+//        existingUser.setIndustry(organizationIdentity.getIndustry());
+//        existingUser.setRcNumber(organizationIdentity.getRcNumber());
+//        existingUser.setTin(organizationIdentity.getTin());
+//        return existingUser;
+//    }
 
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);

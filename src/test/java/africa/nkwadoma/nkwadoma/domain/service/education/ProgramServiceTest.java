@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -14,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigInteger;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -25,9 +25,6 @@ class ProgramServiceTest {
     private ProgramService programService;
     @Mock
     private ProgramOutputPort programOutputPort;
-    @Mock
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-
     private Program program;
 
     @BeforeEach
@@ -58,26 +55,18 @@ class ProgramServiceTest {
     }
     @Test
     void addProgramWithExistingName() {
-        program.setName(program.getName());
         try {
-            when(programOutputPort.saveProgram(program)).thenThrow(ResourceAlreadyExistsException.class);
-            when(organizationIdentityOutputPort.existsById(program.getOrganizationId())).thenReturn(true);
-        } catch (ResourceAlreadyExistsException | ResourceNotFoundException e) {
-            log.info("Error creating program: {}", e.getMessage());
+            when(programOutputPort.findProgramByName(program.getName())).thenReturn(Optional.of(program));
+            assertThrows(ResourceAlreadyExistsException.class, ()-> programService.createProgram(program));
+        } catch (MiddlException e) {
+            log.error(e.getMessage());
         }
-        assertThrows(ResourceAlreadyExistsException.class, ()->programService.createProgram(program));
     }
-    @Test
-    void addProgramWithInvalidOrganizationId() {
-        program.setOrganizationId("invalid organization id");
-        when(organizationIdentityOutputPort.existsById(program.getOrganizationId())).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, ()->programService.createProgram(program));
-    }
     @Test
     void addProgram() {
         try {
-//            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programOutputPort.findProgramByName(program.getName())).thenReturn(Optional.of(program));
             Program addedProgram = programService.createProgram(program);
 
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());

@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -90,8 +90,8 @@ class OrganizationIdentityServiceTest {
         try {
             assertThrows(MiddlException.class, () -> organizationAdapter.findById(roseCouture.getId()));
             organizationIdentityService.inviteOrganization(roseCouture);
-            OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
-            assertEquals(roseCouture.getName(), foundOrganization.getName());
+            Optional<OrganizationIdentity> foundOrganization = organizationAdapter.findById(roseCouture.getId());
+            assertEquals(roseCouture.getName(), foundOrganization.get().getName());
         } catch (MiddlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }

@@ -2,31 +2,31 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
+import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.ProgramValidator.validateInput;
 
 @Service
 @RequiredArgsConstructor
 public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
     @Override
-    public Program createProgram(Program program) throws InvalidInputException, ResourceAlreadyExistsException, ResourceNotFoundException {
+    public Program createProgram(Program program) throws MiddlException {
         validateInput(program);
-        checkOrganizationExists(program);
-        return programOutputPort.saveProgram(program);
+        Optional<Program> foundProgram = programOutputPort.findProgramByName(program.getName());
+        if (foundProgram.isPresent()) {
+            throw new ResourceAlreadyExistsException(PROGRAM_ALREADY_EXISTS.getMessage());
+        }
+        else foundProgram = Optional.of(program);
+        return programOutputPort.saveProgram(foundProgram.get());
     }
 
-    private void checkOrganizationExists(Program program) throws ResourceNotFoundException {
-        if (!organizationIdentityOutputPort.existsById(program.getOrganizationId())) {
-            throw new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage());
-        }
-    }
 }
