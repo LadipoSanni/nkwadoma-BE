@@ -58,7 +58,7 @@ public class InvestmentVehicleController {
                                                                           investmentVehicleRequest){
         try {
             InvestmentVehicle investmentVehicle =
-                    investmentVehicleRestMapper.toUpdateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
+                    investmentVehicleRestMapper.updateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
             investmentVehicle = investmentVehicleUseCase.updateInvestmentVehicle(investmentVehicle);
             UpdateInvestmentVehicleResponse updateInvestmentVehicleResponse =
                     investmentVehicleRestMapper.investmentVehicleToUpdateInvestmentVehicleResponse(investmentVehicle);
