@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
@@ -14,8 +13,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 
@@ -30,17 +27,14 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program findProgram(Program program) {
-        Optional<ProgramEntity> programEntity = programRepository.findByName(program.getName());
-        if (programEntity.isPresent()) {
-            return programEntity;
-        }
-        return null;
+        ProgramEntity programEntity = programRepository.findByName(program.getName());
+        return programMapper.toProgram(programEntity);
     }
 
     @Override
     public Program saveProgram(Program program) throws ResourceNotFoundException, ResourceAlreadyExistsException {
-        if (programRepository.findByName(program.getName()).isPresent())
-            throw new ResourceAlreadyExistsException(ProgramMessages.PROGRAM_ALREADY_EXISTS.getMessage());
+//        if (programRepository.findByName(program.getName()).isPresent())
+//            throw new ResourceAlreadyExistsException(ProgramMessages.PROGRAM_ALREADY_EXISTS.getMessage());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
         OrganizationEntity organizationEntity =
                 organizationEntityRepository.findById(program.getOrganizationId()).

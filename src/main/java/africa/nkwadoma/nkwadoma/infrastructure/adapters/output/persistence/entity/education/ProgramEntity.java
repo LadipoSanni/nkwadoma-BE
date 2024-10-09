@@ -3,10 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -18,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProgramEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
