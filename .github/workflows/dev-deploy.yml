@@ -81,18 +81,18 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build Docker image
-        run: docker build -t ${{ env.ECR_REPO }}:$GITHUB_SHA .
+        run: docker build -t ${{ env.REPO_URL }}:$GITHUB_SHA .
 
       - name: Tag Docker image with "latest"
         run: |
-          DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:latest
-          docker tag ${{ env.ECR_REPO }}:$GITHUB_SHA $DOCKER_TAG
-          docker tag ${{ env.ECR_REPO }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:$GITHUB_SHA
+          DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY}}:latest
+          docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA $DOCKER_TAG
+          docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$GITHUB_SHA
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:$GITHUB_SHA
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$GITHUB_SHA
 
       - name: Update ECS service
         run: |
