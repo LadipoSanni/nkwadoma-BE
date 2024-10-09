@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.*;
 
@@ -36,13 +37,12 @@ public class InvestmentVehicleIdentityAdapter implements InvestmentVehicleIdenti
         return investmentVehicleIdentityMapper.toInvestmentVehicleIdentity(investmentEntity);
     }
 
-    private void checkIfInvestmentVehicleNameExist(InvestmentVehicleIdentity investmentVehicleIdentity) throws MiddlException {
-        if (investmentVehicleRepository.findByName(investmentVehicleIdentity.getName()).isPresent() &&
-                !Objects.equals(investmentVehicleRepository.findByName(investmentVehicleIdentity.getName()).get().getId()
-                        ,investmentVehicleIdentity.getId())){
-              throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
-            }
 
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicleIdentity investmentVehicleIdentity) throws MiddlException {
+        Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicleIdentity.getName());
+        if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicleIdentity.getId())) {
+                throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
+        }
     }
 
     @Override
