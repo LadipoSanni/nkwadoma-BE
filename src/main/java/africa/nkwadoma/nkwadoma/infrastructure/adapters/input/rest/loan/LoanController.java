@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_FAILED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.*;
 
@@ -41,8 +42,12 @@ public class LoanController {
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        } catch (MiddlException e) {
-            throw new RuntimeException(e);
+        } catch (MiddlException exception) {
+            return new ResponseEntity<>(ApiResponse.builder()
+                    .body(exception.getMessage())
+                    .message(CREATE_LOAN_PRODUCT_FAILED)
+                    .statusCode(HttpStatus.BAD_REQUEST.toString())
+                    .build(), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -29,9 +29,7 @@ public class LoanProduct {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
     private BigDecimal amountAvailable;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAtDate;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updatedAtDate;
     private BigDecimal amountEarned ;
     private BigDecimal amountDisbursed;

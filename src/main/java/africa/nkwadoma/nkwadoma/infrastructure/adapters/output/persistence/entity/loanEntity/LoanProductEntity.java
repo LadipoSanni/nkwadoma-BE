@@ -24,7 +24,6 @@ public class LoanProductEntity {
     @Id
     @UuidGenerator
     private String id;
-
     @Column(unique = true)
     private String name;
     private int moratorium;
@@ -39,16 +38,14 @@ public class LoanProductEntity {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize = BigDecimal.ZERO;
     private BigDecimal amountAvailable = BigDecimal.ZERO;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAtDate;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updatedAtDate;
     private BigDecimal amountEarned = BigDecimal.ZERO;
     private BigDecimal amountDisbursed = BigDecimal.ZERO;
     private BigDecimal amountRepaid = BigDecimal.ZERO;
     @Size(max=2500)
     private String mandate;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> sponsors;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;

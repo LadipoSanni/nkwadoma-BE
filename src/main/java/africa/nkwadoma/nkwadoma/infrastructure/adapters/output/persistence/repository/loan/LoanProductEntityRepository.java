@@ -4,4 +4,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LoanProductEntityRepository extends JpaRepository<LoanProductEntity,String> {
+    boolean existsByName(String name);
 }

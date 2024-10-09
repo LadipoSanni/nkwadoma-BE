@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
@@ -6,14 +6,13 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProduct;
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProductDetails;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +27,29 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
         loanProduct.setId(savedLoanProductEntity.getId());
         return loanProduct;
+    }
+
+    @Override
+    public void deleteById(String id) throws MiddlException {
+        validateField(id, "Please provide a valid detail to delete a loan product");
+        loanProductEntityRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsByName(String name) throws MiddlException {
+        validateField(name, "Invalid name provided");
+        return loanProductEntityRepository.existsByName(name);
+    }
+
+    @Override
+    public LoanProduct findById(String id) throws MiddlException {
+        validateField(id, "Invalid loan product selected");
+        LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
+        return loanProductMapper.mapEntityToLoanProduct(entity);
+    }
+
+    private void validateField(String field, String message) throws LoanException {
+        if(StringUtils.isEmpty(field)) throw new LoanException(message);
     }
 
 }
