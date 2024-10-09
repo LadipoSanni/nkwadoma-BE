@@ -29,8 +29,6 @@ public class InvestmentVehicleServiceTest {
     @Autowired
     private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
     private InvestmentVehicleIdentity fundGrowth;
-    private InvestmentVehicleIdentity fundGrowthTwo;
-    private String investmentId;
 
     @Autowired
     private InvestmentVehicleIdentityOutputPort outputPort;
@@ -46,16 +44,6 @@ public class InvestmentVehicleServiceTest {
         fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         fundGrowth.setTenure("12 Month");
 
-        fundGrowthTwo = new InvestmentVehicleIdentity();
-        fundGrowthTwo.setName("Growth Investment limited two");
-        fundGrowthTwo.setSize(BigDecimal.valueOf(5000));
-        fundGrowthTwo.setRate(13F);
-        fundGrowthTwo.setMandate("Long-term fund");
-        fundGrowthTwo.setSponsors("GT");
-        fundGrowthTwo.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
-        fundGrowthTwo.setTenure("12 Month");
-
-
     }
 
     @Test
@@ -64,50 +52,6 @@ public class InvestmentVehicleServiceTest {
        InvestmentVehicleIdentity createdInvestmentVehicle =
                investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
        assertNotNull(createdInvestmentVehicle);
-       investmentId = createdInvestmentVehicle.getId();
     }
-
-
-
-    @Test
-    @Order(2)
-    void updateInvestmentVehicle() throws MiddlException {
-        InvestmentVehicleIdentity foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setFundRaisingStatus(FundRaisingStatus.DEPLOYING);
-        InvestmentVehicleIdentity updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
-        assertEquals(updatedInvestmentVehicle.getFundRaisingStatus().toString(),
-                FundRaisingStatus.DEPLOYING.toString());
-    }
-
-    @Test
-    @Order(3)
-    void viewInvestmentVehicleDetails() throws MiddlException {
-        InvestmentVehicleIdentity viewedInvestmentVehicle =
-                investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
-        assertNotNull(viewedInvestmentVehicle);
-        assertEquals(fundGrowth.getName(),viewedInvestmentVehicle.getName());
-    }
-
-    @Test
-    @Order(4)
-    void viewAllInvestmentVehicle(){
-        List<InvestmentVehicleIdentity> investmentVehicleIdentities =
-                investmentVehicleUseCase.viewAllInvestmentVehicles();
-        assertNotNull(investmentVehicleIdentities);
-        assertEquals(1,investmentVehicleIdentities.size());
-    }
-
-    @Test
-    @Order(5)
-    void viewAllInvestmentVehicleTwo() throws MiddlException {
-        investmentVehicleUseCase.createInvestmentVehicle(fundGrowthTwo);
-        List<InvestmentVehicleIdentity> investmentVehicleIdentities =
-                investmentVehicleUseCase.viewAllInvestmentVehicles();
-        assertNotNull(investmentVehicleIdentities);
-        assertEquals(2,investmentVehicleIdentities.size());
-    }
-
 
 }

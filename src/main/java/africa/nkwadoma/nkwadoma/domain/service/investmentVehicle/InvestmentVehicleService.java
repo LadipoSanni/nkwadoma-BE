@@ -19,18 +19,4 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         return investmentVehicleIdentityOutputPort.save(investmentVehicleIdentity);
     }
 
-    @Override
-    public InvestmentVehicleIdentity updateInvestmentVehicle(InvestmentVehicleIdentity foundInvestmentVehicle) throws MiddlException {
-        return investmentVehicleIdentityOutputPort.save(foundInvestmentVehicle);
-    }
-
-    @Override
-    public InvestmentVehicleIdentity viewInvestmentVehicleDetails(String investmentId) throws MiddlException {
-        return investmentVehicleIdentityOutputPort.findById(investmentId);
-    }
-
-    @Override
-    public List<InvestmentVehicleIdentity> viewAllInvestmentVehicles() {
-        return investmentVehicleIdentityOutputPort.findAll();
-    }
 }

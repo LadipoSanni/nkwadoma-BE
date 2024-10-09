@@ -56,9 +56,4 @@ public class InvestmentVehicleIdentityAdapter implements InvestmentVehicleIdenti
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
 
-    @Override
-    public List<InvestmentVehicleIdentity> findAll() {
-        return investmentVehicleRepository.findAll().stream()
-                .map(investmentVehicleIdentityMapper::toInvestmentVehicleIdentity).toList();
-    }
 }

@@ -10,5 +10,4 @@ public interface InvestmentVehicleIdentityOutputPort {
 
     InvestmentVehicleIdentity findById(String id) throws MiddlException;
 
-    List<InvestmentVehicleIdentity> findAll();
 }

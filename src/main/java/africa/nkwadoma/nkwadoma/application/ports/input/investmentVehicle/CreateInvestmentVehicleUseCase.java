@@ -9,9 +9,4 @@ public interface CreateInvestmentVehicleUseCase {
 
     InvestmentVehicleIdentity createInvestmentVehicle(InvestmentVehicleIdentity investmentVehicleIdentity) throws MiddlException;
 
-    InvestmentVehicleIdentity updateInvestmentVehicle(InvestmentVehicleIdentity foundInvestmentVehicle) throws MiddlException;
-
-    InvestmentVehicleIdentity viewInvestmentVehicleDetails(String investmentId) throws MiddlException;
-
-    List<InvestmentVehicleIdentity> viewAllInvestmentVehicles();
 }
