@@ -78,6 +78,7 @@ class LoanProductAdapterTest {
     }
     @Test
     void deleteLoanProduct() {
+        loanProduct.setName("Test: for delete loan product. Application testing in code");
         LoanProduct savedLoanProduct = loanProductOutputPort.save(loanProduct);
         try {
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());

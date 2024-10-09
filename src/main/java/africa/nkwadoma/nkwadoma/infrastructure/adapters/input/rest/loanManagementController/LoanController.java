@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.loanManageme
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequiredRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanProductRestMapper;
@@ -30,7 +30,7 @@ public class LoanController {
 
     @PostMapping("/create_loan_product")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanProduct (@RequestBody @Valid LoanProductRequiredRequest request){
+    public ResponseEntity<ApiResponse<?>> createLoanProduct (@RequestBody @Valid LoanProductRequest request){
         log.info("Create loan product called.... ");
         LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
         try {
