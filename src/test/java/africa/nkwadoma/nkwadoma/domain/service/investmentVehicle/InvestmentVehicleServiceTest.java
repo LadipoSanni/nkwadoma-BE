@@ -1,21 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,14 +23,14 @@ public class InvestmentVehicleServiceTest {
 
     @Autowired
     private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
-    private InvestmentVehicleIdentity fundGrowth;
+    private InvestmentVehicle fundGrowth;
 
     @Autowired
-    private InvestmentVehicleIdentityOutputPort outputPort;
+    private InvestmentVehicleOutputPort outputPort;
 
     @BeforeEach
     void setUp(){
-        fundGrowth = new InvestmentVehicleIdentity();
+        fundGrowth = new InvestmentVehicle();
         fundGrowth.setName("Growth Investment limited");
         fundGrowth.setSize(BigDecimal.valueOf(4000));
         fundGrowth.setRate(12F);
@@ -49,7 +44,7 @@ public class InvestmentVehicleServiceTest {
     @Test
     @Order(1)
     void createInvestmentVehicle() throws MiddlException {
-       InvestmentVehicleIdentity createdInvestmentVehicle =
+       InvestmentVehicle createdInvestmentVehicle =
                investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
        assertNotNull(createdInvestmentVehicle);
     }

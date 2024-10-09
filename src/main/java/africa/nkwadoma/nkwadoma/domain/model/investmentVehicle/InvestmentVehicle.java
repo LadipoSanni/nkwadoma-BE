@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InvestmentVehicleIdentity {
+public class InvestmentVehicle {
 
     private String id;
     private String name;

@@ -3,11 +3,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CreateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CreateInvestmentVehicleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleRestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class InvestmentVehicleController {
 
-    private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
     private final CreateInvestmentVehicleUseCase investmentVehicleUseCase;
 
     @PostMapping("create-investment-vehicle")
@@ -33,11 +33,11 @@ public class InvestmentVehicleController {
     public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@RequestBody CreateInvestmentVehicleRequest
                                                                               investmentVehicleRequest){
         try {
-            InvestmentVehicleIdentity investmentVehicleIdentity =
-                    investmentVehicleMapper.toInvestmentVehicleIdentity(investmentVehicleRequest);
-            investmentVehicleIdentity = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicleIdentity);
+            InvestmentVehicle investmentVehicle =
+                    investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
+            investmentVehicle = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicle);
             CreateInvestmentVehicleResponse investmentVehicleResponse  =
-                    investmentVehicleMapper.toCreateInvestmentVehicleResponse(investmentVehicleIdentity);
+                    investmentVehicleRestMapper.toCreateInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .body(investmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_CREATED)
