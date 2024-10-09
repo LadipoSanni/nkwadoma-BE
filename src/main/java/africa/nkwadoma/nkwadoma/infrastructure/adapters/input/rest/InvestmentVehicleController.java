@@ -28,7 +28,7 @@ public class InvestmentVehicleController {
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
     private final CreateInvestmentVehicleUseCase investmentVehicleUseCase;
 
-    @PostMapping("create-investment-vehicle")
+    @PostMapping("investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@RequestBody CreateInvestmentVehicleRequest
                                                                               investmentVehicleRequest){
