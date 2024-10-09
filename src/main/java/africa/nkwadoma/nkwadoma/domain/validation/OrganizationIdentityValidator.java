@@ -12,7 +12,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.INVA
 
 public class OrganizationIdentityValidator extends MiddleValidator {
 
-    public static void  validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public static void validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MiddlException {
         if (ObjectUtils.isEmpty(organizationIdentity)){
             throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
         }

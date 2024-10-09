@@ -1,6 +1,5 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;

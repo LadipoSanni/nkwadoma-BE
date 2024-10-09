@@ -14,7 +14,11 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.
 
 @Slf4j
 public class LoanValidator extends MiddleValidator {
-    private static int ZERO = 0;
+    private static final int ZERO = 0;
+    private static final int MIN_MORATORIUM = 1;
+    private static final int MAX_MORATORIUM = 24;
+    private static final int MAX_TENOR_IN_YEARS = 10;
+    private static final int MAX_TENOR_IN_MONTHS = 120;
     public static void validateLoanProductDetails(LoanProduct loanProduct) throws MiddlException {
         validateLoanProduct(loanProduct);
         validateDataElement(loanProduct.getName());
@@ -38,8 +42,8 @@ public class LoanValidator extends MiddleValidator {
         validateObligorAgainstProductSize(loanProduct);
     }
     private static void validateMoratorium(LoanProduct loanProduct) throws LoanException {
-        if (loanProduct.getMoratorium() < 1) throwException(MORATORIUM_BELOW_BOUND);
-        if (loanProduct.getMoratorium() > 24) throwException(MORATORIUM_ABOVE_BOUND);
+        if (loanProduct.getMoratorium() < MIN_MORATORIUM) throwException(MORATORIUM_BELOW_BOUND);
+        if (loanProduct.getMoratorium() > MAX_MORATORIUM) throwException(MORATORIUM_ABOVE_BOUND);
     }
     private static void validateTenor(LoanProduct loanProduct) throws LoanException {
         if (loanProduct.getTenor() <= ZERO) throwException(TENOR_IS_REQUIRED);
@@ -50,10 +54,10 @@ public class LoanValidator extends MiddleValidator {
                 loanProduct.getTenorStatus().equals(TenorStatus.Years))) throwException(INVALID_STATUS);
 
         if (loanProduct.getTenorStatus().equals(TenorStatus.Months))
-            if (loanProduct.getTenor() > 120) throwException(TENOR_STATUS_MONTH_BOND);
+            if (loanProduct.getTenor() > MAX_TENOR_IN_MONTHS) throwException(TENOR_STATUS_MONTH_BOND);
 
         if (loanProduct.getTenorStatus().equals(TenorStatus.Years))
-            if (loanProduct.getTenor() > 10) throwException(TENOR_STATUS_YEAR_BOND);
+            if (loanProduct.getTenor() > MAX_TENOR_IN_YEARS) throwException(TENOR_STATUS_YEAR_BOND);
 
     }
     public static void validateLoanProduct(LoanProduct loanProduct)throws MiddlException {
