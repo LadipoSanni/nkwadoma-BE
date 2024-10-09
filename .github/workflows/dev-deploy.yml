@@ -87,7 +87,7 @@ jobs:
         run: |
           DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY}}:latest
           docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA $DOCKER_TAG
-          docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:$GITHUB_SHA
+          docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$GITHUB_SHA
 
       - name: Push Docker image to ECR
         run: |
