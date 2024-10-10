@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort1;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
@@ -19,7 +19,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages
 
 @Slf4j
 @RequiredArgsConstructor
-public class InvestmentVehicleAdapter1 implements InvestmentVehicleOutputPort1 {
+public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     private final InvestmentVehicleEntityRepository investmentVehicleRepository;
     private final InvestmentVehicleMapper investmentVehicleMapper;

@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort1;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class InvestmentVehicleAdapterTest {
 
     @Autowired
-    private InvestmentVehicleOutputPort1 investmentVehicleOutputPort1;
+    private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
     @Autowired
@@ -56,13 +56,13 @@ class InvestmentVehicleAdapterTest {
     @Order(1)
     @Test
     void createInvestmentVehicle() throws MiddlException {
-        assertThrows(InvestmentException.class, () -> investmentVehicleOutputPort1.findById(capitalGrowth.getId()));
+        assertThrows(InvestmentException.class, () -> investmentVehicleOutputPort.findById(capitalGrowth.getId()));
         InvestmentVehicle savedInvestmentVehicle =
-                investmentVehicleOutputPort1.save(capitalGrowth);
+                investmentVehicleOutputPort.save(capitalGrowth);
         assertNotNull(savedInvestmentVehicle);
         log.info("this is ======={}", savedInvestmentVehicle);
         InvestmentVehicle foundInvestmentVehicle =
-                investmentVehicleOutputPort1.findById(savedInvestmentVehicle.getId());
+                investmentVehicleOutputPort.findById(savedInvestmentVehicle.getId());
         investmentVehicleId = foundInvestmentVehicle.getId();
         assertEquals(foundInvestmentVehicle.getName(), savedInvestmentVehicle.getName());
     }
@@ -70,100 +70,100 @@ class InvestmentVehicleAdapterTest {
 
     @Test
     void createInvestmentVehicleWithNullInvestmentVehicleIdentity() {
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(null));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(null));
     }
 
 
     @Test
     void createInvestmentVehicleWithNullName() {
         capitalGrowth.setName(null);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithEmptyName() {
         capitalGrowth.setName(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithNullSponsors() {
         capitalGrowth.setSponsors(null);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithEmptySponsors() {
         capitalGrowth.setSponsors(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
 
     @Test
     void createInvestmentVehicleWithNullTenure() {
         capitalGrowth.setTenure(null);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithEmptyTenure() {
         capitalGrowth.setTenure(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithNullRate() {
         capitalGrowth.setRate(null);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
     void createInvestmentVehicleWithNullSize() {
         capitalGrowth.setSize(null);
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(capitalGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
     @Order(2)
     @Test
     void UpdateInvestmentVehicleToCommercial() throws MiddlException {
-        InvestmentVehicle existingInvestmentVehicleIdentity = investmentVehicleOutputPort1.findById(investmentVehicleId);
+        InvestmentVehicle existingInvestmentVehicleIdentity = investmentVehicleOutputPort.findById(investmentVehicleId);
         assertEquals(capitalGrowth.getInvestmentVehicleType().toString(), existingInvestmentVehicleIdentity.getInvestmentVehicleType().toString());
         log.info("passed---------");
         existingInvestmentVehicleIdentity.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
         InvestmentVehicle updatedInvestmentVehicleIdentity =
-                investmentVehicleOutputPort1.save(existingInvestmentVehicleIdentity);
-        InvestmentVehicle foundUpdatedInvestmentVehicleIdentity = investmentVehicleOutputPort1.findById(updatedInvestmentVehicleIdentity.getId());
+                investmentVehicleOutputPort.save(existingInvestmentVehicleIdentity);
+        InvestmentVehicle foundUpdatedInvestmentVehicleIdentity = investmentVehicleOutputPort.findById(updatedInvestmentVehicleIdentity.getId());
         assertNotEquals(capitalGrowth.getInvestmentVehicleType().toString(), foundUpdatedInvestmentVehicleIdentity.getInvestmentVehicleType().toString());
     }
 
     @Order(3)
     @Test
     void updateInvestmentVehicleName() throws MiddlException {
-        InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort1.findById(investmentVehicleId);
+        InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         assertEquals(capitalGrowth.getName(),existingInvestmentVehicle.getName());
         log.info("passed---------");
         existingInvestmentVehicle.setName("Growth Investment2");
         InvestmentVehicle updatedInvestmentVehicleIdentity =
-                investmentVehicleOutputPort1.save(existingInvestmentVehicle);
-        InvestmentVehicle foundUpdatedInvestmentVehicleIdentity = investmentVehicleOutputPort1.findById(updatedInvestmentVehicleIdentity.getId());
+                investmentVehicleOutputPort.save(existingInvestmentVehicle);
+        InvestmentVehicle foundUpdatedInvestmentVehicleIdentity = investmentVehicleOutputPort.findById(updatedInvestmentVehicleIdentity.getId());
         assertNotEquals(capitalGrowth.getName(),foundUpdatedInvestmentVehicleIdentity.getName());
     }
 
     @Order(4)
     @Test
     void updateInvestmentVehicleNameWithExistingInvestmentVehicleNameButTheSameEntity() throws MiddlException {
-        InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort1.findById(investmentVehicleId);
+        InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         assertNotNull(existingInvestmentVehicle);
         assertNotEquals(capitalGrowth.getName(),existingInvestmentVehicle.getName());
         existingInvestmentVehicle.setName("Growth Investment2");
-        InvestmentVehicle updatedInvestmentVehicleIdentity = investmentVehicleOutputPort1.save(existingInvestmentVehicle);
+        InvestmentVehicle updatedInvestmentVehicleIdentity = investmentVehicleOutputPort.save(existingInvestmentVehicle);
         assertEquals(existingInvestmentVehicle.getName(),updatedInvestmentVehicleIdentity.getName());
     }
 
     @Order(5)
     @Test
     void  createInvestmentVehicleWithExistingInvestmentVehicleName() {
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.findById(fundGrowth.getId()));
-        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort1.save(fundGrowth));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.findById(fundGrowth.getId()));
+        assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(fundGrowth));
     }
 
     @AfterAll

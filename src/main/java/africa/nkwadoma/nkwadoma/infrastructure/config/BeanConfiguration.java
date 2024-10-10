@@ -10,7 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort1;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
@@ -19,7 +19,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapte
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter1;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.PasswordHistoryAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
@@ -94,13 +94,13 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public InvestmentVehicleAdapter1 investmentVehicleIdentityAdapter(InvestmentVehicleEntityRepository vehicleEntityRepository,
-                                                                      InvestmentVehicleMapper investmentVehicleMapper){
-        return new InvestmentVehicleAdapter1(vehicleEntityRepository, investmentVehicleMapper);
+    public InvestmentVehicleAdapter investmentVehicleIdentityAdapter(InvestmentVehicleEntityRepository vehicleEntityRepository,
+                                                                     InvestmentVehicleMapper investmentVehicleMapper){
+        return new InvestmentVehicleAdapter(vehicleEntityRepository, investmentVehicleMapper);
     }
 
     @Bean
-    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort1 investmentVehicleIdentityOutputPort){
+    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort){
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean

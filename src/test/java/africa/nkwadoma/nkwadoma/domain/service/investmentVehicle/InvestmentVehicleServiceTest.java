@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort1;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -29,7 +29,7 @@ public class InvestmentVehicleServiceTest {
     private String investmentId;
 
     @Autowired
-    private InvestmentVehicleOutputPort1 outputPort;
+    private InvestmentVehicleOutputPort outputPort;
 
     @BeforeEach
     void setUp(){
