@@ -5,10 +5,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 
 
@@ -21,13 +21,16 @@ import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validate
 @RequiredArgsConstructor
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
+    private final ServiceOfferEntityRepository serviceOfferEntityRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
 
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-       UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        ServiceOfferingEntity serviceOfferingEntity = organizationEntity.getServiceOfferingEntity();
+        serviceOfferEntityRepository.save(serviceOfferingEntity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }

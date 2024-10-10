@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -25,6 +27,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
+    private final ServiceOfferEntityRepository serviceOfferEntityRepository;
 
     @Override
     public Program findProgramByName(String programName) throws ResourceNotFoundException {
@@ -40,8 +43,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        if (organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION)
+            throw new ProgramException(ProgramMessages.WRONG_INDUSTRY.getMessage());
+
+        serviceOfferEntityRepository.save(organizationEntity.getServiceOfferingEntity());
         organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + 1);
-        organizationEntityRepository.save(organizationEntity);
+        organizationEntity = organizationEntityRepository.save(organizationEntity);
 
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);

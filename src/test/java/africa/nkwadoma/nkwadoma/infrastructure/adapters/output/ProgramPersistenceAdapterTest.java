@@ -39,7 +39,7 @@ class ProgramPersistenceAdapterTest {
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().
                 id("9bb328d3-2bf4-4ad1-95d0-818a72734d00").email("org@example.com").
-                name("My Organization").industry("My industry").rcNumber("56767").
+                name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
@@ -133,10 +133,29 @@ class ProgramPersistenceAdapterTest {
             programOutputPort.deleteProgram(foundProgram.getId());
             organizationOutputPort.delete(savedOrganization.getId());
 
-            Program deletedProgram = programOutputPort.findProgramById(savedProgram.getId());
-            assertNull(deletedProgram);
+            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(savedProgram.getId()));
+        } catch (MeedlException e) {
+            e.printStackTrace();
+            log.info("{}", e.getMessage());
+        }
+    }
+    @Test
+    @Order(5)
+    void saveProgramWithWrongIndustry() {
+        try {
+            organizationIdentity.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
+            assertNotNull(savedOrganization);
+
+            program.setOrganizationId(savedOrganization.getId());
+
+            assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(program));
+
+            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             log.info("{}", e.getMessage());
         }
     }
+
+
 }

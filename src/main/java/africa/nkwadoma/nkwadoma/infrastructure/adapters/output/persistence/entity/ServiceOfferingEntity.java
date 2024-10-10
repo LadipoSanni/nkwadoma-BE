@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.*;
 import java.util.*;
 @Getter
 @Setter
@@ -14,9 +15,14 @@ import java.util.*;
 @Entity
 public class ServiceOfferingEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String serviceOfferingId;
+    @Enumerated(EnumType.STRING)
     private Industry industry;
-    private ServiceOfferingType offering;
-    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private ServiceOfferingType serviceOfferingType;
+    private BigDecimal transactionLowerBound = BigDecimal.ZERO;
+    private BigDecimal transactionUpperBound = BigDecimal.ZERO;
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> serviceOfferings = new ArrayList<>();
 }
