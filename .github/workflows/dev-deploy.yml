@@ -85,7 +85,7 @@ jobs:
 
       - name: Tag Docker image with "latest"
         run: |
-          DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY}}:latest
+          DOCKER_TAG=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY}}:latest
           docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA $DOCKER_TAG
           docker tag ${{ env.ECR_REPOSITORY }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$GITHUB_SHA
 
