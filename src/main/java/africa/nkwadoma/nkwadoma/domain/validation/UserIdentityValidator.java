@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
 
-public class UserIdentityValidator extends MiddleValidator {
+public class UserIdentityValidator extends MeedlValidator {
      public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
          if (CollectionUtils.isEmpty(userIdentities)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());

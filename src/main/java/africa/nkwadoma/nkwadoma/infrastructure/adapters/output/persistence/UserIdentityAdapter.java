@@ -16,7 +16,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.U
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
-import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 
 @RequiredArgsConstructor
 @Slf4j

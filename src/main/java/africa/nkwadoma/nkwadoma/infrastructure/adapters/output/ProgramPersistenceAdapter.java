@@ -9,7 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMap
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.ProgramRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,6 +24,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
     @Override
     public Program findProgramByName(String programName) throws ResourceNotFoundException {
@@ -40,6 +41,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + 1);
+        organizationEntityRepository.save(organizationEntity);
+
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
 
@@ -49,5 +52,17 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public boolean programExists(String programName) {
         return programRepository.existsByName(programName);
+    }
+
+    @Override
+    public void deleteProgram(String programId) {
+        programRepository.deleteById(programId);
+    }
+
+    @Override
+    public Program findProgramById(String programId) throws ResourceNotFoundException {
+        ProgramEntity programEntity = programRepository.findById(programId).
+                orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
+        return programMapper.toProgram(programEntity);
     }
 }

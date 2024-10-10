@@ -12,13 +12,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 
 
-import java.util.*;
-
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
-import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateDataElement;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
 @RequiredArgsConstructor
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {

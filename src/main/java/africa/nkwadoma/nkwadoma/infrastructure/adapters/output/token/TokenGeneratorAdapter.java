@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.token;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -24,7 +24,7 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
 
     @Override
     public String generateToken(String email) throws MeedlException {
-        MiddleValidator.validateEmail(email);
+        MeedlValidator.validateEmail(email);
             Map<String, Object> claims = new HashMap<>();
             return Jwts.builder()
                     .setClaims(claims)
@@ -41,7 +41,7 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
     }
     @Override
     public String decodeJWT(String token) throws MeedlException {
-        MiddleValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()

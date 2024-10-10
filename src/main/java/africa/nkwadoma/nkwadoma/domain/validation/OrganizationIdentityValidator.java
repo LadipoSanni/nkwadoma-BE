@@ -10,7 +10,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_IDENTITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.INVALID_EMAIL_ADDRESS;
 
-public class OrganizationIdentityValidator extends MiddleValidator {
+public class OrganizationIdentityValidator extends MeedlValidator {
 
     public static void validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
         if (ObjectUtils.isEmpty(organizationIdentity)){
