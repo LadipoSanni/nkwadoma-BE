@@ -161,7 +161,7 @@ class InvestmentVehicleAdapterTest {
 
     @Order(5)
     @Test
-    void createInvestmentVehicleWithExistingInvestmentVehicleName() {
+    void  createInvestmentVehicleWithExistingInvestmentVehicleName() {
         assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.findById(fundGrowth.getId()));
         assertThrows(MiddlException.class, () -> investmentVehicleOutputPort.save(fundGrowth));
     }
