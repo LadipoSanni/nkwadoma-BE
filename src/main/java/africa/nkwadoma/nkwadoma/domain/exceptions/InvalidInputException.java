@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions;
 
-public class InvalidInputException extends MiddlException {
+public class InvalidInputException extends MeedlException {
     public InvalidInputException(String message) {
         super(message);
     }

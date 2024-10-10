@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import lombok.*;
 
 import java.util.List;
@@ -21,9 +21,7 @@ public class OrganizationIdentity {
     private String rcNumber;
     private String tin;
     private String phoneNumber;
-    private IndustryType industryType;
     private ServiceOffering serviceOffering;
-//    private List<UserIdentity> organizationEmployees;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
 
 }

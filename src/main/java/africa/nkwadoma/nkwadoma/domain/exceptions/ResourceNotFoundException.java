@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions;
 
-public class ResourceNotFoundException extends MiddlException {
+public class ResourceNotFoundException extends MeedlException {
 
     public ResourceNotFoundException(String message) {
         super(message);

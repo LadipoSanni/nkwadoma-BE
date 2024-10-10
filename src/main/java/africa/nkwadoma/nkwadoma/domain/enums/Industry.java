@@ -1,4 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.enums;
 
-public enum ServiceOffering {
+public enum Industry {
+    BANKING
 }

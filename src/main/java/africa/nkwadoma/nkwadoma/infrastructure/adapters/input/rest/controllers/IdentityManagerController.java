@@ -22,7 +22,7 @@ public class IdentityManagerController {
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody UserIdentityRequest userIdentityRequest) throws MiddlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
         AccessTokenResponse tokenResponse = identityManagerOutPutPort.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().

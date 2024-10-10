@@ -23,7 +23,7 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
     private Long expiration;
 
     @Override
-    public String generateToken(String email) throws MiddlException {
+    public String generateToken(String email) throws MeedlException {
         MiddleValidator.validateEmail(email);
             Map<String, Object> claims = new HashMap<>();
             return Jwts.builder()
@@ -40,7 +40,7 @@ public class TokenGeneratorAdapter implements TokenGeneratorOutputPort {
         return Keys.hmacShaKeyFor(keyBytes);
     }
     @Override
-    public String decodeJWT(String token) throws MiddlException{
+    public String decodeJWT(String token) throws MeedlException {
         MiddleValidator.validateDataElement(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignKey())

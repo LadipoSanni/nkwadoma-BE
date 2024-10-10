@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigInteger;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -56,9 +55,9 @@ class ProgramServiceTest {
     @Test
     void addProgramWithExistingName() {
         try {
-            when(programOutputPort.findProgramByName(program.getName())).thenReturn(Optional.of(program));
+            when(programOutputPort.programExists(program.getName())).thenReturn(true);
             assertThrows(ResourceAlreadyExistsException.class, ()-> programService.createProgram(program));
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             log.error(e.getMessage());
         }
     }
@@ -66,7 +65,7 @@ class ProgramServiceTest {
     @Test
     void addProgram() {
         try {
-            when(programOutputPort.findProgramByName(program.getName())).thenReturn(Optional.of(program));
+            when(programOutputPort.programExists(program.getName())).thenReturn(true);
             Program addedProgram = programService.createProgram(program);
 
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
@@ -78,7 +77,7 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getProgramType(), program.getProgramType());
             assertEquals(addedProgram.getMode(), program.getMode());
             assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             log.info("Error creating program: {}", e.getMessage());
         }
     }

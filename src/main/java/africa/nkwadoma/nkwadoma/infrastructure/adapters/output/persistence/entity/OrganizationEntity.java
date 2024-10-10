@@ -1,5 +1,4 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,12 +19,9 @@ public class OrganizationEntity {
     private String websiteAddress;
     private String invitedDate;
     private String registrationNumber;
-    @Enumerated(EnumType.STRING)
-    private ServiceOffering serviceOffering;
-    @Enumerated(EnumType.STRING)
-    private IndustryType industryType;
     private String taxIdentity;
     private String phoneNumber;
-//    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-//    private List<UserEntity> organizationAdmins;
+    private int numberOfPrograms;
+    @OneToOne
+    private ServiceOfferingEntity serviceOfferingEntity;
 }

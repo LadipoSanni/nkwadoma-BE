@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions;
 
-public class ProgramException extends MiddlException{
+public class ProgramException extends MeedlException {
     public ProgramException(String message) {
         super(message);
     }

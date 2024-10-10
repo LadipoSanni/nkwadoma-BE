@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions;
 
-public class ResourceAlreadyExistsException extends MiddlException {
+public class ResourceAlreadyExistsException extends MeedlException {
 
     public ResourceAlreadyExistsException(String message) {
         super(message);

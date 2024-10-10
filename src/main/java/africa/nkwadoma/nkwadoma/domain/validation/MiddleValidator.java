@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -9,15 +9,15 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.INVA
 
 public class MiddleValidator {
 
-    public static void validateEmail(String email) throws MiddlException {
+    public static void validateEmail(String email) throws MeedlException {
         if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email.trim())) {
-            throw new MiddlException(INVALID_EMAIL_ADDRESS.getMessage());
+            throw new MeedlException(INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
 
-    public static void validateDataElement(String dataElement) throws MiddlException {
+    public static void validateDataElement(String dataElement) throws MeedlException {
         if (StringUtils.isEmpty(dataElement)) {
-            throw new MiddlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+            throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 

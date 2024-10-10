@@ -1,4 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.enums;
 
-public enum IndustryType {
+public enum ServiceOfferingType {
+    EDUCATION
 }

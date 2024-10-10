@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerifica
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ class KeycloakAdapterTest {
             assertEquals(createdUser.getEmail(), john.getEmail());
             assertEquals(createdUser.getFirstName(), john.getFirstName());
             assertEquals(createdUser.getLastName(), john.getLastName());
-        }catch (MiddlException exception){
+        }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(),exception.getMessage());
         }
     }
@@ -96,7 +96,7 @@ class KeycloakAdapterTest {
     @Test
     void createUserWithEmptyLastName(){
         john.setLastName(null);
-        assertThrows(MiddlException.class,()-> identityManagementOutputPort.createUser(john));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createUser(john));
     }
 
     @Test
@@ -105,7 +105,7 @@ class KeycloakAdapterTest {
         try {
             john.setPassword("passwordJ@345");
             identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
-        }catch (MiddlException e){
+        }catch (MeedlException e){
             log.info("{} {}",e.getClass().getName(),e.getMessage());
         }
 
@@ -117,12 +117,12 @@ class KeycloakAdapterTest {
         try {
             john.setPassword("passwordJ@345");
             identityManagementOutputPort.login(john);
-        }catch (MiddlException middlException){
-            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
     @Test
-    void loginWithWrongDetails() throws MiddlException {
+    void loginWithWrongDetails() {
 
         john.setEmail("wrong@gmail.com");
         john.setPassword("passwordJ@345");
@@ -142,22 +142,22 @@ class KeycloakAdapterTest {
             identityManagementOutputPort.login(john);
 
 
-        }catch (MiddlException middlException){
-            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
     @Test
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
-        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
 
     }
 
     @Test
     void enableAccountWithWrongEmail() {
         john.setEmail("wrong@gmail.com");
-        assertThrows(MiddlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
 
     @Test
@@ -165,7 +165,7 @@ class KeycloakAdapterTest {
     void disAbleAccount() {
         try{
             identityManagementOutputPort.disableUserAccount(john);
-        }catch (MiddlException exception){
+        }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
     }
@@ -178,7 +178,7 @@ class KeycloakAdapterTest {
             assertNotNull(userRepresentation);
             assertEquals(john.getFirstName(), userRepresentation.getFirstName());
             assertEquals(john.getLastName(), userRepresentation.getLastName());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
@@ -189,7 +189,7 @@ class KeycloakAdapterTest {
             assertNotNull(userRepresentation);
             assertEquals(john.getFirstName(), userRepresentation.getFirstName());
             assertEquals(john.getLastName(), userRepresentation.getLastName());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
@@ -204,7 +204,7 @@ class KeycloakAdapterTest {
             assertNotNull(userRepresentations);
             assertEquals(2, userRepresentations.size());
             assertEquals(userRepresentation.getId(), userRepresentations.get(0).getId());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
@@ -212,26 +212,26 @@ class KeycloakAdapterTest {
     @Test
     void getUserRepresentationWithExactMatchForMultipleUsers()  {
         john.setEmail("lendspace.com");
-        assertThrows(MiddlException.class,()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
     }
 
     @Test
     void getUserRepresentationThatDoesNotExist() {
         john.setEmail("noneexistinguser@example.com");
         assertThrows(
-                MiddlException.class,
+                MeedlException.class,
                 ()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
     }
     @Test
     void getUserRepresentationWithNullUserIdentity() {
         assertThrows(
-                MiddlException.class,
+                MeedlException.class,
                 ()-> identityManagementOutputPort.getUserRepresentation(null, Boolean.TRUE));
     }
     @Test
     void getUserResourceWithNullUserIdentity() {
         assertThrows(
-                MiddlException.class,
+                MeedlException.class,
                 ()-> identityManagementOutputPort.getUserResource(null));
     }
 
@@ -243,7 +243,7 @@ class KeycloakAdapterTest {
             UserResource  userResource = identityManagementOutputPort.getUserResource(john);
             assertNotNull(userResource);
             assertEquals(john.getEmail(), userResource.toRepresentation().getEmail());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
@@ -253,7 +253,7 @@ class KeycloakAdapterTest {
             john.setId("invalid user id");
             UserResource userResource = identityManagementOutputPort.getUserResource(john);
             assertThrows(NotFoundException.class,()->userResource.toRepresentation());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
@@ -264,14 +264,14 @@ class KeycloakAdapterTest {
             RoleRepresentation roleRepresentation = identityManagementOutputPort.getRoleRepresentation(john);
             assertNotNull(roleRepresentation);
             assertEquals(john.getRole(), roleRepresentation.getName());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
     @Test
     void getRoleResourceWithInvalidRoleName() {
             john.setRole("INVALID_ROLE");
-            assertThrows(MiddlException.class,()->identityManagementOutputPort.getRoleRepresentation(john));
+            assertThrows(MeedlException.class,()->identityManagementOutputPort.getRoleRepresentation(john));
     }
     @Test
     void deleteUser() {
@@ -279,23 +279,23 @@ class KeycloakAdapterTest {
             UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE);
             john.setId(userRepresentation.getId());
             identityManagementOutputPort.deleteUser(john);
-        } catch (MiddlException exception) {
+        } catch (MeedlException exception) {
             log.info(exception.getMessage());
         }
-        assertThrows(MiddlException.class, ()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserRepresentation(john, Boolean.TRUE));
     }
     @Test
     void deleteUserWithNullUserIdentity() {
-        assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(null));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.deleteUser(null));
     }
     @Test
     void deleteUserWithNullUserId() {
-        assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(john));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.deleteUser(john));
     }
     @Test
     void deleteUserWithInCorrectUserId() {
         john.setId("incorrect user id");
-        assertThrows(MiddlException.class,()-> identityManagementOutputPort.deleteUser(john));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.deleteUser(john));
     }
 
 
@@ -305,7 +305,7 @@ class KeycloakAdapterTest {
             UserRepresentation userRepresentation = identityManagementOutputPort.getUserRepresentation(peter, Boolean.TRUE);
             peter.setId(userRepresentation.getId());
             identityManagementOutputPort.deleteUser(peter);
-        } catch (MiddlException exception) {
+        } catch (MeedlException exception) {
             log.info(exception.getMessage());
         }
     }

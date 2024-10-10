@@ -1,8 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
@@ -15,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.RC_NUMBER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MiddleValidator.validateEmail;
@@ -26,7 +26,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     private final OrganizationIdentityMapper organizationIdentityMapper;
 
     @Override
-    public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
@@ -35,14 +35,14 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public OrganizationIdentity findByEmail(String email) throws MiddlException {
+    public OrganizationIdentity findByEmail(String email) throws MeedlException {
         validateEmail(email);
         OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
-    public void delete(String id) throws MiddlException {
+    public void delete(String id) throws MeedlException {
         validateDataElement(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
@@ -51,9 +51,11 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
 
     @Override
-    public Optional<OrganizationIdentity> findById(String id) throws MiddlException {
-        Optional<OrganizationEntity> organizationEntity = organizationEntityRepository.findById(id);
-        return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
+    public OrganizationIdentity findById(String id) throws MeedlException {
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
+                orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+
     }
 
     @Override
@@ -61,22 +63,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return organizationEntityRepository.existsById(organizationId);
     }
 
-//    @Override
-//    public OrganizationIdentity update(OrganizationIdentity organizationIdentity) throws MiddlException {
-//        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-//        OrganizationIdentity setExistingUser = setExistingUserDataElement(organizationIdentity);
-//        return saveAndGetUserIdentity(setExistingUser);
-//    }
-
-//    private Optional<OrganizationIdentity> setExistingUserDataElement(OrganizationIdentity organizationIdentity) throws MiddlException {
-//        Optional<OrganizationIdentity> existingUser = findById(organizationIdentity.getRcNumber());
-//        existingUser.setEmail(organizationIdentity.getEmail());
-//        existingUser.setName(organizationIdentity.getName());
-//        existingUser.setIndustry(organizationIdentity.getIndustry());
-//        existingUser.setRcNumber(organizationIdentity.getRcNumber());
-//        existingUser.setTin(organizationIdentity.getTin());
-//        return existingUser;
-//    }
 
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);

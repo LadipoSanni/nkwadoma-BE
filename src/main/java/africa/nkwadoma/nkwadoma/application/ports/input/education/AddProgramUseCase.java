@@ -4,5 +4,5 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 
 public interface AddProgramUseCase {
-    Program createProgram(Program program) throws MiddlException;
+    Program createProgram(Program program) throws MeedlException;
 }

@@ -7,10 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.ProgramValidator.validateInput;
 
 @Service
@@ -19,14 +16,13 @@ public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
 
     @Override
-    public Program createProgram(Program program) throws MiddlException {
+    public Program createProgram(Program program) throws MeedlException {
         validateInput(program);
-        Optional<Program> foundProgram = programOutputPort.findProgramByName(program.getName());
-        if (foundProgram.isPresent()) {
+        boolean programExists = programOutputPort.programExists(program.getName());
+        if (programExists) {
             throw new ResourceAlreadyExistsException(PROGRAM_ALREADY_EXISTS.getMessage());
         }
-        else foundProgram = Optional.of(program);
-        return programOutputPort.saveProgram(foundProgram.get());
+        return programOutputPort.saveProgram(program);
     }
 
 }

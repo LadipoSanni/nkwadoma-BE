@@ -9,7 +9,9 @@ import org.mapstruct.*;
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
+    @Mapping(source = "serviceOffering", target = "serviceOfferingEntity")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
+
     @InheritInverseConfiguration
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
 }

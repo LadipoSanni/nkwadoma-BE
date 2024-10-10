@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +12,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.INVA
 
 public class OrganizationIdentityValidator extends MiddleValidator {
 
-    public static void validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public static void validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
         if (ObjectUtils.isEmpty(organizationIdentity)){
             throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
         }

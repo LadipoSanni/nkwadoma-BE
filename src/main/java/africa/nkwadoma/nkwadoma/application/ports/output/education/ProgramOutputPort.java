@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import java.util.*;
 
 public interface ProgramOutputPort {
-    Optional<Program> findProgramByName(String programName) throws ResourceNotFoundException;
-    Program saveProgram(Program program) throws MiddlException;
+    Program findProgramByName(String programName) throws ResourceNotFoundException;
+    Program saveProgram(Program program) throws MeedlException;
+    boolean programExists(String programName) throws MeedlException;
 }

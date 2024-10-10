@@ -2,23 +2,18 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.TrainingInstituteEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.ProgramRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.TrainingInstituteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -26,34 +21,33 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 @Slf4j
 public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
-    private final TrainingInstituteRepository trainingInstituteRepository;
     private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
 
     @Override
-    public Optional<Program> findProgramByName(String programName) {
-        Optional<ProgramEntity> programEntity = programRepository.findByName(programName);
-        if (programEntity.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(programMapper.toProgram(programEntity.get()));
+    public Program findProgramByName(String programName) throws ResourceNotFoundException {
+        ProgramEntity programEntity = programRepository.findByName(programName).
+                orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
+
+        return programMapper.toProgram(programEntity);
     }
 
     @Override
-    public Program saveProgram(Program program) throws MiddlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId()).
-                orElseThrow(() -> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+    public Program saveProgram(Program program) throws MeedlException {
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
 
-        TrainingInstituteEntity instituteEntity = TrainingInstituteEntity.builder().
-                organizationEntity(organizationIdentityMapper.toOrganizationEntity(organizationIdentity)).
-                numberOfPrograms(+1).build();
-        instituteEntity = trainingInstituteRepository.save(instituteEntity);
-
-        programEntity.setTrainingInstituteEntity(instituteEntity);
+        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + 1);
+        programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
 
         return programMapper.toProgram(programEntity);
+    }
+
+    @Override
+    public boolean programExists(String programName) {
+        return programRepository.existsByName(programName);
     }
 }

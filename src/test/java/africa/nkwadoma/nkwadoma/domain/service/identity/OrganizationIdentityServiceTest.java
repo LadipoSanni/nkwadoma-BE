@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -62,6 +62,7 @@ class OrganizationIdentityServiceTest {
 
 
             roseCouture = new OrganizationIdentity();
+            roseCouture.setId("576867");
             roseCouture.setName("rose couture6");
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");
@@ -88,11 +89,11 @@ class OrganizationIdentityServiceTest {
     @Test
     void inviteOrganizationForReal() {
         try {
-            assertThrows(MiddlException.class, () -> organizationAdapter.findById(roseCouture.getId()));
+            assertThrows(ResourceNotFoundException.class, () -> organizationAdapter.findById(roseCouture.getId()));
             organizationIdentityService.inviteOrganization(roseCouture);
-            Optional<OrganizationIdentity> foundOrganization = organizationAdapter.findById(roseCouture.getId());
-            assertEquals(roseCouture.getName(), foundOrganization.get().getName());
-        } catch (MiddlException exception) {
+            OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
+            assertEquals(roseCouture.getName(), foundOrganization.getName());
+        } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
@@ -100,7 +101,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganizationWithEmptyOrganization(){
-        assertThrows(MiddlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
 
     @Test
@@ -116,7 +117,7 @@ class OrganizationIdentityServiceTest {
                 assertNotNull(generatedToken);
                 createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
                 log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMiddlUser());
-            }}catch (MiddlException exception){
+            }}catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
 

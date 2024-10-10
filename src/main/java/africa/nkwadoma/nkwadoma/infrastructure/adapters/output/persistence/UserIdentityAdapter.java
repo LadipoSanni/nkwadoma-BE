@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
@@ -25,7 +25,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     private final UserIdentityMapper userIdentityMapper;
 
     @Override
-    public UserIdentity save(UserIdentity userIdentity) throws MiddlException {
+    public UserIdentity save(UserIdentity userIdentity) throws MeedlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
@@ -33,7 +33,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     }
 
     @Override
-    public UserIdentity findById(String id) throws MiddlException {
+    public UserIdentity findById(String id) throws MeedlException {
         if (StringUtils.isNotEmpty(id)){
             UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
             return userIdentityMapper.toUserIdentity(userEntity);
@@ -42,7 +42,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     }
 
     @Override
-    public void deleteUserById(String id) throws MiddlException {
+    public void deleteUserById(String id) throws MeedlException {
         if (StringUtils.isEmpty(id)){
             throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
@@ -51,14 +51,14 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     }
 
     @Override
-    public UserIdentity findByEmail(String email) throws MiddlException {
+    public UserIdentity findByEmail(String email) throws MeedlException {
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 
     @Override
-    public void deleteUserByEmail(String email) throws MiddlException {
+    public void deleteUserByEmail(String email) throws MeedlException {
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         userEntityRepository.delete(userEntity);
