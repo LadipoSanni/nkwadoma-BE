@@ -1,8 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.annotation.PostConstruct;
@@ -16,31 +19,20 @@ import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
-//@Component
-//@RequiredArgsConstructor
-//@Slf4j
-//@AllArgsConstructor
+@Component
+@RequiredArgsConstructor
+@Slf4j
 public class AdminInitializer {
-
-//    private final IdentityManagerOutPutPort identityManagerOutPutPort;
-//    private final CreateUserUseCase createUserUseCase;
-
-//    private final UserManager userManager;
-//
-//    @Value("${keycloak.client}")
-//   private String CLIENT;
+    private final CreateOrganizationUseCase createOrganizationUseCase;
 
 //    @Value("${superAdmin.email}")
-    private String SUPER_ADMIN_EMAIL;
-
-//    @Value("${superAdmin.password}")
-    private String SUPER_ADMIN_PASSWORD;
+    private String SUPER_ADMIN_EMAIL = "email@email.com";
 
 //    @Value("${superAdmin.firstName}")
-    private String SUPER_ADMIN_FIRST_NAME;
+    private String SUPER_ADMIN_FIRST_NAME = "first name";
 
 //    @Value("${superAdmin.lastName}")
-    private String SUPER_ADMIN_LAST_NAME;
+    private String SUPER_ADMIN_LAST_NAME = "Last name";
 
     private UserIdentity getUserIdentity() {
         return UserIdentity.builder()
@@ -48,6 +40,12 @@ public class AdminInitializer {
                 .firstName(SUPER_ADMIN_FIRST_NAME)
                 .lastName(SUPER_ADMIN_LAST_NAME)
                 .role(PORTFOLIO_MANAGER.name())
+                .createdBy("ned")
+                .build();
+    }
+    private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity() {
+        return OrganizationEmployeeIdentity.builder()
+                .middlUser(getUserIdentity())
                 .build();
     }
     private OrganizationIdentity getOrganizationIdentity() {
@@ -58,49 +56,15 @@ public class AdminInitializer {
                 .phoneNumber("nil")
                 .industry("Middl")
                 .rcNumber("nil")
+                .organizationEmployees(List.of(getOrganizationEmployeeIdentity()))
                 .build();
     }
-    @PostConstruct
-    public void init(){
-        //create user
-//        UserIdentity userIdentity = getUserIdentity();
-//        identityManagerOutPutPort.createUser(userIdentity);
-//
-//        //create organization
-//        OrganizationIdentity organizationIdentity = getOrganizationIdentity();
-//        identityManagerOutPutPort.createOrganization(organizationIdentity);
-//
-//        //invite colleague
-//        createUserUseCase.inviteColleague(userIdentity);
-
-//        createClientAndRoles(userIdentity);
-//        saveUserToDatabase(request);
+    public OrganizationIdentity inviteFirstUser(OrganizationIdentity organizationIdentity) throws MiddlException {
+        return createOrganizationUseCase.inviteOrganization(organizationIdentity);
     }
-//    private void createClientAndRoles(UserIdentity request)  {
-//        List<ClientRepresentation> clientRepresentations = keyCloakUserService.getClients(CLIENT);
-//        PortfolioManagerRequest portfolioManagerRequest = new PortfolioManagerRequest();
-//        portfolioManagerRequest.setInstituteName(CLIENT);
-//
-//        if (clientRepresentations.isEmpty()) {
-//            keyCloakUserService.createClient(portfolioManagerRequest);
-//            keyCloakUserService.addRolesToRealm();
-//
-//        }
+//    @PostConstruct
+    public void init() throws MiddlException {
+        inviteFirstUser(getOrganizationIdentity());
 
     }
-//
-//    private void saveUserToDatabase(UserRegistrationRequest request) throws LearnSpaceUserException {
-//        List<UserRepresentation> users = keyCloakUserService.getUserRepresentations(request.getEmail());
-//        if(!userManager.userExistsByEmail(request.getEmail()) && users.isEmpty()){
-//            User user = new User();
-//            user.setUserId(keyCloakUserService.createUser(request).getId());
-//            user.setEmail(request.getEmail());
-//            user.setVerified(true);
-//            user.setDisabled(false);
-//            user.setFirstName(request.getFirstName());
-//            user.setLastName(request.getLastName());
-//            userManager.saveUser(user);
-//            keyCloakUserService.createPassword(getUserRegistrationRequest().getEmail(), SUPER_ADMIN_PASSWORD);
-//        }
-//    }
 }

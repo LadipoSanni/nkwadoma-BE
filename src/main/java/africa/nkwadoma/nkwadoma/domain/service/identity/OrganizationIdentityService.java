@@ -33,9 +33,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MiddlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-        organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
-        UserIdentity newUser = identityManagerOutPutPort.createUser(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
+
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
+        organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
         employeeIdentity.setMiddlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
 
@@ -47,7 +48,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
         //send invite email to organization admin
-        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
+//        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
        return null;

@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

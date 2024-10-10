@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import lombok.*;
 import lombok.extern.slf4j.*;

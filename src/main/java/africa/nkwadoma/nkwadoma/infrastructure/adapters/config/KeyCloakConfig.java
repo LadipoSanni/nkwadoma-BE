@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Value;
