@@ -67,6 +67,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramType(), savedProgram.getProgramType());
             assertEquals(program.getProgramStartDate(), savedProgram.getProgramStartDate());
             programOutputPort.deleteProgram(savedProgram.getId());
+            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -88,6 +89,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram.getId());
             assertEquals(savedProgram.getId(), foundProgram.getId());
             programOutputPort.deleteProgram(savedProgram.getId());
+            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -109,6 +111,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram.getId());
             assertEquals(savedProgram.getId(), foundProgram.getId());
             programOutputPort.deleteProgram(savedProgram.getId());
+            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -128,6 +131,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram);
 
             programOutputPort.deleteProgram(foundProgram.getId());
+            organizationOutputPort.delete(savedOrganization.getId());
 
             Program deletedProgram = programOutputPort.findProgramById(savedProgram.getId());
             assertNull(deletedProgram);
