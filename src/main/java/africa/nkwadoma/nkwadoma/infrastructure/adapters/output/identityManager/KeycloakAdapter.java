@@ -72,6 +72,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return userIdentity;
     }
+
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MiddlException {
         validateUserIdentity(userIdentity);
@@ -115,18 +116,18 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public void createPassword(String email, String password) throws MiddlException {
-
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MiddlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
-        UserResource userResource = keycloak.realm(KEYCLOAK_REALM).users().get(user.getId());
+        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
+        UserResource userResource = getUserResource(userIdentity);
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
         credential.setValue(password);
-        credential.setTemporary(false);
+        credential.setTemporary(Boolean.FALSE);
         userResource.resetPassword(credential);
-        user.setEmailVerified(true);
-        user.setEnabled(true);
+        user.setEmailVerified(Boolean.TRUE);
+        user.setEnabled(Boolean.TRUE);
         userResource.update(user);
     }
 
@@ -165,7 +166,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(true);
+            userRepresentation.setEnabled(Boolean.TRUE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;
@@ -182,7 +183,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(false);
+            userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;
@@ -229,8 +230,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());
         clientRepresentation.setName(organizationIdentity.getName());
-        clientRepresentation.setDirectAccessGrantsEnabled(true);
-        clientRepresentation.setPublicClient(true);
+        clientRepresentation.setDirectAccessGrantsEnabled(Boolean.TRUE);
+        clientRepresentation.setPublicClient(Boolean.TRUE);
         return clientRepresentation;
     }
 
@@ -257,7 +258,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(userIdentity.getEmail());
     }
-    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MiddlException {
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MiddlException {
         validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)

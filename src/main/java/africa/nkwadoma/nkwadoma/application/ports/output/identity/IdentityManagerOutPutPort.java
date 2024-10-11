@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface IdentityManagerOutPutPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MiddlException;
 
-    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MiddlException;
+    UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MiddlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
