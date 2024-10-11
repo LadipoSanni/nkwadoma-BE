@@ -36,7 +36,7 @@ env:
   MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
   MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
   MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-  MAIL_PORT: ${{ EMAIL_PORT }}
+  
   
   
 jobs:
@@ -76,7 +76,7 @@ jobs:
           MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-          MAIL_PORT: ${{ EMAIL_PORT }}
+          
         run: mvn -B clean package  
 
 
@@ -113,7 +113,7 @@ jobs:
           MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-          MAIL_PORT: ${{ EMAIL_PORT }}
+          
 
     steps:
       - uses: actions/checkout@v4
