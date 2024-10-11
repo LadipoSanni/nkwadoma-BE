@@ -58,6 +58,7 @@ jobs:
           FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
+          PROFILE: dev
         run: mvn -B clean package  
 
 
@@ -85,6 +86,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
+          PROFILE: dev
 
     steps:
       - uses: actions/checkout@v4
