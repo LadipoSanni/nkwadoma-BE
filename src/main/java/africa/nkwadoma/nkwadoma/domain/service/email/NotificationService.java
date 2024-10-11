@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
@@ -15,6 +16,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.C
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
 
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {
     private final EmailOutputPort emailOutputPort;
     private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
@@ -31,8 +33,17 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-        emailOutputPort.sendEmail(email);
 
+        handleEmailConnectionIssue(userIdentity, email);
+
+    }
+
+    private void handleEmailConnectionIssue(UserIdentity userIdentity, Email email) {
+        try {
+            emailOutputPort.sendEmail(email);
+        } catch (MiddlException e) {
+            log.error("Error sending email to {} user id is {}. The error received is : {}", userIdentity.getEmail(), userIdentity.getRole(), e.getMessage());
+        }
     }
 
 
@@ -46,7 +57,8 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-        emailOutputPort.sendEmail(email);
+
+        handleEmailConnectionIssue(userIdentity, email);
     }
 
     private String getLink(UserIdentity userIdentity) throws MiddlException {

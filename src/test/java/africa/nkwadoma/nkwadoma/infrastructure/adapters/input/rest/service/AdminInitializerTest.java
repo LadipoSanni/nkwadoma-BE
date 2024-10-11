@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,44 +23,40 @@ import static org.junit.jupiter.api.Assertions.*;
 class AdminInitializerTest {
     @Autowired
     private AdminInitializer adminInitializer;
+    @Autowired
+    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
     @BeforeEach
     void setUp() {
     }
     @Test
     void initializeFirstUser(){
+        UserIdentity userIdentity = null;
         try {
-            OrganizationIdentity organizationIdentity = adminInitializer.inviteFirstUser(getOrganizationIdentity());
-            assertNotNull(organizationIdentity);
-            assertNotNull(organizationIdentity.getId());
+            userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
         } catch (MiddlException e) {
             log.error("{}", e.getMessage());
-//            assertTrue(false);
-            throw new RuntimeException(e);
+        }finally {
+            log.error("finally block initiated...");
+            try {
+                assertNotNull(userIdentity);
+                assertNotNull(userIdentity.getId());
+                identityManagerOutPutPort.deleteUser(userIdentity);
+                userIdentityOutputPort.deleteUserById(userIdentity.getId());
+            } catch (MiddlException ex) {
+                log.error(ex.getMessage());
+            }
         }
     }
     private UserIdentity getUserIdentity() {
         return UserIdentity.builder()
-                .email("initializertest@gmail.com")
+                .email("kobih47727@paxnw.com")
                 .firstName("test: super admin first name ")
                 .lastName("test: super admin last name")
-                .role(PORTFOLIO_MANAGER.name())
+                .role(PORTFOLIO_MANAGER)
                 .createdBy("ned")
                 .build();
     }
-    private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity() {
-        return OrganizationEmployeeIdentity.builder()
-                .middlUser(getUserIdentity())
-                .build();
-    }
-    private OrganizationIdentity getOrganizationIdentity() {
 
-        return OrganizationIdentity.builder()
-                .email("initializertest@gmail.com")
-                .name("Middl")
-                .phoneNumber("nil")
-                .industry("Middl")
-                .rcNumber("nil")
-                .organizationEmployees(List.of(getOrganizationEmployeeIdentity()))
-                .build();
-    }
 }

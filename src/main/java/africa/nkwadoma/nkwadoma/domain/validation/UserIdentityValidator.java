@@ -33,7 +33,7 @@ public class UserIdentityValidator extends MiddleValidator {
          validateDataElement(userIdentity.getFirstName());
          validateDataElement(userIdentity.getLastName());
          validateDataElement(userIdentity.getCreatedBy());
-         validateDataElement(userIdentity.getRole());
+         validateDataElement(userIdentity.getRole().name());
      }
 
     private static void validateEmail(UserIdentity userIdentity) throws IdentityException {

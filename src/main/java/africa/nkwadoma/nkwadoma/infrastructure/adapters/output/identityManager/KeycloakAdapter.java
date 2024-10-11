@@ -278,7 +278,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             roleRepresentation = keycloak
                     .realm(KEYCLOAK_REALM)
                     .roles()
-                    .get(userIdentity.getRole().toUpperCase().trim())
+                    .get(userIdentity.getRole().name().toUpperCase().trim())
                     .toRepresentation();
         }catch (NotFoundException exception){
             throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole());
@@ -295,7 +295,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (StringUtils.isEmpty(userIdentity.getEmail())
                 || StringUtils.isEmpty(userIdentity.getFirstName())
                 || StringUtils.isEmpty(userIdentity.getLastName())
-                || StringUtils.isEmpty(userIdentity.getRole()))
+                || StringUtils.isEmpty(userIdentity.getRole().name()))
             throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
         getRoleRepresentation(userIdentity);
     }

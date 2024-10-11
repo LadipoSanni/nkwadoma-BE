@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -36,7 +37,7 @@ class OrganizationIdentityAdapterTest {
         joel.setEmailVerified(true);
         joel.setEnabled(true);
         joel.setCreatedAt(LocalDateTime.now().toString());
-        joel.setRole("ADMIN");
+        joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
         joel.setCreatedBy("Ayo");
 
 //        List<UserIdentity> organizationAdmin = new ArrayList<>();
