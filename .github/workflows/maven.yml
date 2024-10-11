@@ -27,7 +27,7 @@ env:
   FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
-  ACTIVE_PROFILE: dev
+  PROFILE: dev
   
   
 jobs:
