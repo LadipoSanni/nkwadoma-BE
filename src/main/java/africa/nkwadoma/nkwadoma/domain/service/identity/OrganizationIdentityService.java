@@ -39,7 +39,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
-        log.info("organization identity saved is : {}", organizationIdentity);
+        log.info("organization identity saved is : {}",organizationIdentity);
        return organizationIdentity;
     }
 
