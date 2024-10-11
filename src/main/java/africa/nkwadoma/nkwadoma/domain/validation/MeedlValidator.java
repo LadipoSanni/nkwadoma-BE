@@ -24,15 +24,15 @@ public class MeedlValidator {
 
     }
 
-    public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MiddlException {
+    public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MeedlException {
         if (dataElement == null){
-            throw new MiddlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+            throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 
-    public static void validateFloatDataElement(Float dataElement) throws MiddlException {
+    public static void validateFloatDataElement(Float dataElement) throws MeedlException {
         if (dataElement == null){
-            throw new MiddlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+            throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 }
