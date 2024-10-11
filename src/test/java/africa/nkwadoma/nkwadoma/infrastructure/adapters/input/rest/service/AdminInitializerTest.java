@@ -58,5 +58,4 @@ class AdminInitializerTest {
                 .createdBy("ned")
                 .build();
     }
-
 }
