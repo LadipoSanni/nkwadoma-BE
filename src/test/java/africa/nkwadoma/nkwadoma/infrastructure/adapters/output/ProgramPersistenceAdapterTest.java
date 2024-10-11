@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
@@ -34,11 +35,9 @@ class ProgramPersistenceAdapterTest {
     void setUp() {
         userIdentity = UserIdentity.builder().firstName("Fred").role("PORTFOLIO_MANAGER").
                 lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
-
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().
-                id("9bb328d3-2bf4-4ad1-95d0-818a72734d00").email("org@example.com").
+        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
                 name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
@@ -66,8 +65,6 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(program.getProgramType(), savedProgram.getProgramType());
             assertEquals(program.getProgramStartDate(), savedProgram.getProgramStartDate());
-            programOutputPort.deleteProgram(savedProgram.getId());
-            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -77,19 +74,10 @@ class ProgramPersistenceAdapterTest {
     @Order(2)
     void findProgramByName() {
         try {
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
-
-            program.setOrganizationId(savedOrganization.getId());
-            Program savedProgram = programOutputPort.saveProgram(program);
-
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
 
             assertNotNull(foundProgram);
-            assertNotNull(foundProgram.getId());
-            assertEquals(savedProgram.getId(), foundProgram.getId());
-            programOutputPort.deleteProgram(savedProgram.getId());
-            organizationOutputPort.delete(savedOrganization.getId());
+            assertEquals(foundProgram.getName(), program.getName());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -99,19 +87,13 @@ class ProgramPersistenceAdapterTest {
     @Order(3)
     void findProgramById() {
         try {
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
+            Program programByName = programOutputPort.findProgramByName(program.getName());
 
-            program.setOrganizationId(savedOrganization.getId());
-            Program savedProgram = programOutputPort.saveProgram(program);
-
-            Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
+            Program foundProgram = programOutputPort.findProgramById(programByName.getId());
 
             assertNotNull(foundProgram);
             assertNotNull(foundProgram.getId());
-            assertEquals(savedProgram.getId(), foundProgram.getId());
-            programOutputPort.deleteProgram(savedProgram.getId());
-            organizationOutputPort.delete(savedOrganization.getId());
+            assertEquals(programByName.getId(), foundProgram.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -121,41 +103,44 @@ class ProgramPersistenceAdapterTest {
     @Order(4)
     void deleteProgram() {
         try {
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
-
-            program.setOrganizationId(savedOrganization.getId());
-
-            Program savedProgram = programOutputPort.saveProgram(program);
-            Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
             assertNotNull(foundProgram);
 
             programOutputPort.deleteProgram(foundProgram.getId());
-            organizationOutputPort.delete(savedOrganization.getId());
 
-            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(savedProgram.getId()));
+            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(foundProgram.getId()));
         } catch (MeedlException e) {
             e.printStackTrace();
-            log.info("{}", e.getMessage());
         }
     }
     @Test
     @Order(5)
     void saveProgramWithWrongIndustry() {
         try {
-            organizationIdentity.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
             assertNotNull(savedOrganization);
+            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
 
             program.setOrganizationId(savedOrganization.getId());
 
             assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(program));
 
-            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             log.info("{}", e.getMessage());
         }
     }
 
+    @AfterAll
+//    @Test
+    void cleanUp() {
+        try {
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            organizationOutputPort.delete(organization.getId());
+        } catch (MeedlException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

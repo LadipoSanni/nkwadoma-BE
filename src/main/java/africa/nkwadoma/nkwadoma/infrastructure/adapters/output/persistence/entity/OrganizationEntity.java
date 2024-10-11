@@ -22,6 +22,6 @@ public class OrganizationEntity {
     private String taxIdentity;
     private String phoneNumber;
     private int numberOfPrograms;
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private ServiceOfferingEntity serviceOfferingEntity;
 }

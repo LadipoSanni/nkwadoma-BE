@@ -29,6 +29,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+
         ServiceOfferingEntity serviceOfferingEntity = organizationEntity.getServiceOfferingEntity();
         serviceOfferEntityRepository.save(serviceOfferingEntity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
