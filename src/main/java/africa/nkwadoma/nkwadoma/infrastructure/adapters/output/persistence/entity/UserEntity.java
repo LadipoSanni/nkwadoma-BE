@@ -25,6 +25,7 @@ public class UserEntity {
     private boolean emailVerified;
     private boolean enabled;
     private String createdAt;
+    @Enumerated(EnumType.STRING)
     private IdentityRole role;
     private String createdBy;
     private String password;
