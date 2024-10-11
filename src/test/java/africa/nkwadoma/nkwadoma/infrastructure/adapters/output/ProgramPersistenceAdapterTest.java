@@ -133,7 +133,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @AfterAll
-//    @Test
     void cleanUp() {
         try {
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
