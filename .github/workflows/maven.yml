@@ -32,10 +32,10 @@ env:
   SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
   SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
   CREATED_BY: ${{ secrets.CREATED_BY }}
-  MAIL_HOST: ${{ secrets.EMAIL_HOST }}
-  MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-  MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-  MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+  MAIL_HOST: ${{ secrets.MAIL_HOST }}
+  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+  MAIL_PORT: ${{ secrets.MAIL_PORT }}
   
   
   
@@ -72,10 +72,10 @@ jobs:
           SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
           SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
           CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
           
         run: mvn -B clean package  
 
@@ -109,10 +109,10 @@ jobs:
           SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
           SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
           CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
           
 
     steps:
