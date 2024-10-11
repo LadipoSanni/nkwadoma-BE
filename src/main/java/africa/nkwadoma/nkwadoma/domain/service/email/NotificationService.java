@@ -25,8 +25,6 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     @Override
     public void sendEmail(UserIdentity userIdentity) throws MiddlException {
-        String token = getLink(userIdentity);
-        log.info("The token link is : {}",token);
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
