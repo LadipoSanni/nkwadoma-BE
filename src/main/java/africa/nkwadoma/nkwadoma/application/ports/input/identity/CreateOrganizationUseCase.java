@@ -9,9 +9,6 @@ public interface CreateOrganizationUseCase {
 
     void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MiddlException;
 
-    OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MiddlException;
-
-    OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MiddlException;
     // OrganizationIdentity inviteColleague(OrganizationIdentity organizationIdentity)throws MiddlException;
 
 }

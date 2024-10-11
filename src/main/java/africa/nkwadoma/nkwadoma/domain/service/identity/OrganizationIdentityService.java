@@ -50,8 +50,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
     }
 
-    @Override
-    public OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MiddlException {
+    private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MiddlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
@@ -59,8 +58,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         employeeIdentity.setOrganization(organizationIdentity.getId());
         return organizationIdentity;
     }
-    @Override
-    public OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MiddlException {
+
+    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MiddlException {
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());
