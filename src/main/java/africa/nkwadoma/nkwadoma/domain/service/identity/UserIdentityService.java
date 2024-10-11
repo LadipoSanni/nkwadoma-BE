@@ -58,9 +58,9 @@ public class UserIdentityService implements CreateUserUseCase {
         organizationEmployeeIdentity.setMiddlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
-            sendEmail.sendColleagueEmail(userIdentity);
+        sendEmail.sendColleagueEmail(userIdentity);
 
-            return userIdentity;
+        return userIdentity;
     }
 
     @Override
