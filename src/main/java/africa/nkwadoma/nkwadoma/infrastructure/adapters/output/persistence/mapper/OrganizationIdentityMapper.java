@@ -10,6 +10,7 @@ public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
     @Mapping(source = "serviceOffering", target = "serviceOfferingEntity")
+    @Mapping(source = "numberOfPrograms", target = "numberOfPrograms", defaultValue = "0")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration
