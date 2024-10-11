@@ -25,6 +25,8 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     @Override
     public void sendEmail(UserIdentity userIdentity) throws MiddlException {
+        String token = getLink(userIdentity);
+        log.info("The token link is : {}",token);
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
@@ -37,16 +39,6 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         handleEmailConnectionIssue(userIdentity, email);
 
     }
-
-    private void handleEmailConnectionIssue(UserIdentity userIdentity, Email email) {
-        try {
-            emailOutputPort.sendEmail(email);
-        } catch (MiddlException e) {
-            log.error("Error sending email to {} user id is {}. The error received is : {}", userIdentity.getEmail(), userIdentity.getRole(), e.getMessage());
-        }
-    }
-
-
     @Override
     public void sendColleagueEmail(UserIdentity userIdentity) throws MiddlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
@@ -65,4 +57,13 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
+
+    private void handleEmailConnectionIssue(UserIdentity userIdentity, Email email) {
+        try {
+            emailOutputPort.sendEmail(email);
+        } catch (MiddlException e) {
+            log.error("Error sending email to {} user id is {}. The error received is : {}", userIdentity.getEmail(), userIdentity.getRole(), e.getMessage());
+        }
+    }
+
 }
