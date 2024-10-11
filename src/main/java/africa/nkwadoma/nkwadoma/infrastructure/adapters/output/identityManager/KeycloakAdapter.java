@@ -273,6 +273,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .get(userIdentity.getId());
     }
     public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MiddlException {
+        if (userIdentity.getRole() == null || StringUtils.isEmpty(userIdentity.getRole().name()))
+            throw new IdentityException(INVALID_VALID_ROLE.getMessage());
         RoleRepresentation roleRepresentation;
         try {
             roleRepresentation = keycloak
@@ -295,6 +297,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (StringUtils.isEmpty(userIdentity.getEmail())
                 || StringUtils.isEmpty(userIdentity.getFirstName())
                 || StringUtils.isEmpty(userIdentity.getLastName())
+                || userIdentity.getRole() == null
                 || StringUtils.isEmpty(userIdentity.getRole().name()))
             throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
         getRoleRepresentation(userIdentity);

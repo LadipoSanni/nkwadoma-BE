@@ -29,11 +29,13 @@ public class UserIdentityValidator extends MiddleValidator {
          if (ObjectUtils.isEmpty(userIdentity)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
+         if (userIdentity.getRole() == null || StringUtils.isEmpty(userIdentity.getRole().name()))
+             throw new IdentityException(INVALID_VALID_ROLE.getMessage());
+
          validateEmail(userIdentity.getEmail());
          validateDataElement(userIdentity.getFirstName());
          validateDataElement(userIdentity.getLastName());
          validateDataElement(userIdentity.getCreatedBy());
-         validateDataElement(userIdentity.getRole().name());
      }
 
     private static void validateEmail(UserIdentity userIdentity) throws IdentityException {

@@ -79,11 +79,7 @@ class KeycloakAdapterTest {
         john.setEmail("");
         assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
-    @Test
-    void createUserWithNoUserRole(){
-        john.setRole(null);
-        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
-    }
+
     @Test
     void createUserWithInvalidUserRole(){
         john.setRole(null);
@@ -265,7 +261,7 @@ class KeycloakAdapterTest {
             john.setRole(PORTFOLIO_MANAGER);
             RoleRepresentation roleRepresentation = identityManagementOutputPort.getRoleRepresentation(john);
             assertNotNull(roleRepresentation);
-            assertEquals(john.getRole(), roleRepresentation.getName());
+            assertEquals(john.getRole().toString(), roleRepresentation.getName().toString());
         } catch (MiddlException e) {
             e.printStackTrace();
         }

@@ -118,11 +118,6 @@ class UserIdentityAdapterTest {
         john.setRole(null);
         assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
     }
-    @Test
-    void saveUserWithEmptyRole(){
-        john.setRole(null);
-        assertThrows(MiddlException.class, ()->userIdentityOutputPort.save(john));
-    }
 
     @Test
     void saveUserWithNullCreatedBy(){
