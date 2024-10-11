@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import org.springframework.data.jpa.repository.*;

@@ -6,8 +6,8 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.math.BigDecimal;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.INVALID_EMAIL_ADDRESS;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVALID_EMAIL_ADDRESS;
 
 public class MeedlValidator {
 
@@ -17,8 +17,11 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateUUID(String UUID) throws MeedlException {
+        //TODO
+    }
     public static void validateDataElement(String dataElement) throws MeedlException {
-        if (StringUtils.isEmpty(dataElement)) {
+        if (StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement)) {
             throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
 

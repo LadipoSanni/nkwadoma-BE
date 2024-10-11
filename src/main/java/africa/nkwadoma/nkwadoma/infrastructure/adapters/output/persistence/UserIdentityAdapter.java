@@ -14,8 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMAIL_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.EMPTY_INPUT_FIELD_ERROR;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 
 @RequiredArgsConstructor

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.CREATE_PASSWORD_URL;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @RequiredArgsConstructor
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {

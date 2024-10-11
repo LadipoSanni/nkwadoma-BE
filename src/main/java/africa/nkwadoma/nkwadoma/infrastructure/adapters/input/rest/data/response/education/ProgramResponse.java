@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class ProgramResponse{
     private LocalDateTime createdAt;
     private String updatedBy;
     private String programDescription;
-    private ProgramStatus programStatus;
+    private ActivationStatus programStatus;
     private int programDuration;
     private DeliveryType deliveryType;
     private ProgramMode programMode;

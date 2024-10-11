@@ -1,10 +1,11 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -44,7 +46,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         if (organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION)
-            throw new ProgramException(ProgramMessages.WRONG_INDUSTRY.getMessage());
+            throw new EducationException(ProgramMessages.WRONG_INDUSTRY.getMessage());
 
         serviceOfferEntityRepository.save(organizationEntity.getServiceOfferingEntity());
         organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + 1);

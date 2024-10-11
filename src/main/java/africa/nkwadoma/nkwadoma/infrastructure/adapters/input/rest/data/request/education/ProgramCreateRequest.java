@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 
 import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class ProgramCreateRequest {
     private LocalDateTime createdAt;
     private String updatedBy;
     private String programDescription;
-    private ProgramStatus programStatus;
+    private ActivationStatus programStatus;
     @Positive(message = "Duration must be a positive number")
     private int programDuration;
     private DeliveryType deliveryType;

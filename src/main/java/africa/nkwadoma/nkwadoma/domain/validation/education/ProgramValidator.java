@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.validation;
+package africa.nkwadoma.nkwadoma.domain.validation.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;

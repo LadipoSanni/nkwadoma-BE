@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ class ProgramPersistenceAdapterTest {
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
-                programStatus(ProgramStatus.ACTIVE).programDescription("Program description").
+                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).deliveryType(DeliveryType.ONSITE).
                 programType(ProgramType.PROFESSIONAL).createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).
                 build();
@@ -125,7 +126,7 @@ class ProgramPersistenceAdapterTest {
 
             program.setOrganizationId(savedOrganization.getId());
 
-            assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(program));
+            assertThrows(EducationException.class, ()-> programOutputPort.saveProgram(program));
 
         } catch (MeedlException e) {
             log.info("{}", e.getMessage());
