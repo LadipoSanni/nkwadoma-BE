@@ -32,7 +32,7 @@ env:
   SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
   SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
   CREATED_BY: ${{ secrets.CREATED_BY }}
-  MAIL_HOST_: ${{ secrets.EMAIL_HOST }}
+  MAIL_HOST: ${{ secrets.EMAIL_HOST }}
   MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
   MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
   MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
@@ -72,7 +72,7 @@ jobs:
           SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
           SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
           CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST_: ${{ secrets.EMAIL_HOST }}
+          MAIL_HOST: ${{ secrets.EMAIL_HOST }}
           MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
@@ -109,7 +109,7 @@ jobs:
           SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
           SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
           CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST_: ${{ secrets.EMAIL_HOST }}
+          MAIL_HOST: ${{ secrets.EMAIL_HOST }}
           MAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
