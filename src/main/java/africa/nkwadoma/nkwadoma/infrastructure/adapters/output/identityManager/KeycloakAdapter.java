@@ -138,7 +138,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
-            throw new IdentityException(INVALID_CREDENTIALS.getMessage());
+            throw new IdentityException(exception.getMessage());
         }
     }
 

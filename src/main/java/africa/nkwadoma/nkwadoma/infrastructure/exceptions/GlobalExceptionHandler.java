@@ -29,19 +29,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public  ResponseEntity<ExceptionResponse> handleResourceNotFoundException(ResourceNotFoundException exception){
-        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.NOT_FOUND);
-    }
+//    @ExceptionHandler(ResourceNotFoundException.class)
+//    public  ResponseEntity<ExceptionResponse> handleResourceNotFoundException(ResourceNotFoundException exception){
+//        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.NOT_FOUND);
+//    }
+//
+//    @ExceptionHandler(InvalidInputException.class)
+//    public  ResponseEntity<ExceptionResponse> handleInvalidInputException(InvalidInputException exception){
+//        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
+//    }
+//
+//    @ExceptionHandler(ResourceAlreadyExistsException.class)
+//    public  ResponseEntity<ExceptionResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception){
+//        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.CONFLICT);
+//    }
 
-    @ExceptionHandler(InvalidInputException.class)
-    public  ResponseEntity<ExceptionResponse> handleInvalidInputException(InvalidInputException exception){
+    @ExceptionHandler(MeedlException.class)
+    public  ResponseEntity<ExceptionResponse> handleMeedlException(MeedlException exception){
         return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public  ResponseEntity<ExceptionResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception){
-        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.CONFLICT);
     }
 
     private static ExceptionResponse errorResponseBuilder(String message) {

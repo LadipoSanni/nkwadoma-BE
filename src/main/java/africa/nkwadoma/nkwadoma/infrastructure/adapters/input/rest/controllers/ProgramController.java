@@ -1,11 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.ProgramCreateRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @Slf4j
@@ -29,16 +31,21 @@ public class ProgramController {
     private final ProgramRestMapper programRestMapper;
 
     @PostMapping("")
-    public ResponseEntity<ProgramResponse> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
-                                                         @AuthenticationPrincipal Jwt middlUser) throws MeedlException {
-        // Request to domain
-        Program program = programRestMapper.toProgram(programCreateRequest, middlUser.getClaimAsString("sub"));
-        log.info("Mapped Program create request: {}, {}", program.toString(), middlUser.getClaimAsString("sub"));
+    public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
+                                                        @AuthenticationPrincipal Jwt meedlUser) {
+        try {
+            Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
+            log.info("Mapped Program create request: {}, {}", program.toString(), meedlUser.getClaimAsString("sub"));
 
-        program = addProgramUseCase.createProgram(program);
+            program = addProgramUseCase.createProgram(program);
 
-        // Domain to response
-        return new ResponseEntity<>(programRestMapper.toProgramResponse(program), HttpStatus.CREATED);
+            return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
+                    body(programRestMapper.toProgramResponse(program)).
+                    message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                    HttpStatus.CREATED);
+        } catch (MeedlException e) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
