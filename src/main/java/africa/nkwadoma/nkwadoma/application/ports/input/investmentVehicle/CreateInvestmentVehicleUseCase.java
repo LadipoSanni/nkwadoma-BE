@@ -7,4 +7,5 @@ public interface CreateInvestmentVehicleUseCase {
 
     InvestmentVehicle createOrUpdateInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MiddlException;
 
+    void deleteInvestmentVehicle(String investmentId);
 }

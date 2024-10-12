@@ -53,4 +53,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
 
+    @Override
+    public void deleteInvestmentVehicle(String id) {
+        investmentVehicleRepository.deleteById(id);
+    }
+
+
 }

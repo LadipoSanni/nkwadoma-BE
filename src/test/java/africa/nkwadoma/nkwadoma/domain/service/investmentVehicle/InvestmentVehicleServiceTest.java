@@ -126,4 +126,9 @@ public class InvestmentVehicleServiceTest {
         assertNotEquals(fundGrowth.getMandate(),updatedInvestmentVehicle.getMandate());
     }
 
+    @AfterAll
+    void cleanUp(){
+        investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+    }
+
 }

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -26,6 +27,8 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
     private String investmentVehicleId;
+    @Autowired
+    private InvestmentVehicleEntityRepository repository;
 
     @BeforeEach
     void setUp() {
@@ -197,5 +200,9 @@ class InvestmentVehicleAdapterTest {
     }
 
 
+    @AfterAll
+    void cleanUp(){
+        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+    }
 
 }

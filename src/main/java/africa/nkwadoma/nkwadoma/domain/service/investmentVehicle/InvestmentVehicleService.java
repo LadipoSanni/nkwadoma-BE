@@ -17,7 +17,10 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
-
+    @Override
+    public void deleteInvestmentVehicle(String investmentId) {
+        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+    }
 
 
 }
