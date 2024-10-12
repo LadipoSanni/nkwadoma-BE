@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
 @RequiredArgsConstructor
 @Component
@@ -30,7 +33,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ServiceOfferEntityRepository serviceOfferEntityRepository;
 
     @Override
-    public Program findProgramByName(String programName) throws ResourceNotFoundException {
+    public Program findProgramByName(String programName) throws MeedlException {
+        validateDataElement(programName);
         ProgramEntity programEntity = programRepository.findByName(programName).
                 orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
 
@@ -57,17 +61,22 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public boolean programExists(String programName) {
+    public boolean programExists(String programName) throws MeedlException {
+        validateDataElement(programName);
         return programRepository.existsByName(programName);
     }
 
     @Override
-    public void deleteProgram(String programId) {
-        programRepository.deleteById(programId);
+    public void deleteProgram(String programId) throws MeedlException {
+        validateDataElement(programId);
+        ProgramEntity program = programRepository.findById(programId).
+                orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
+        programRepository.delete(program);
     }
 
     @Override
-    public Program findProgramById(String programId) throws ResourceNotFoundException {
+    public Program findProgramById(String programId) throws MeedlException {
+        validateDataElement(programId);
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         return programMapper.toProgram(programEntity);

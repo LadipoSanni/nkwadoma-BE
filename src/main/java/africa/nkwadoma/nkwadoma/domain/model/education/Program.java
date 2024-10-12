@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class Program {
     private String id;
     private String programDescription;
+    @Column(unique = true)
     private String name;
     private String objectives;
     private DurationType durationType;

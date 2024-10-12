@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
-import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
@@ -38,18 +37,19 @@ class ProgramPersistenceAdapterTest {
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(ServiceOffering.builder().industry(Industry.EDUCATION).build()).
+                name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(
+                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
                 programStatus(ProgramStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).deliveryType(DeliveryType.ONSITE).
-                programType(ProgramType.PROFESSIONAL).createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).
-                build();
+                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
+                deliveryType(DeliveryType.ONSITE).programType(ProgramType.PROFESSIONAL).
+                createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
     }
 
     @Test
-    @Order(1)
+//    @Order(1)
     void saveProgram() {
         try {
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
@@ -71,7 +71,26 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    @Order(2)
+//    @Order(5)
+    void saveProgramWithWrongIndustry() {
+        try {
+            OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
+            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
+            assertNotNull(savedOrganization);
+            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
+
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            foundProgram.setOrganizationId(savedOrganization.getId());
+
+            assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(foundProgram));
+        } catch (MeedlException e) {
+            log.info("{}", e.getMessage());
+        }
+    }
+
+    @Test
+//    @Order(2)
     void findProgramByName() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
@@ -84,23 +103,26 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    @Order(3)
+//    @Order(3)
     void findProgramById() {
         try {
-            Program programByName = programOutputPort.findProgramByName(program.getName());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            program.setId(foundOrganization.getId());
+            Program savedProgram = programOutputPort.saveProgram(program);
+            assertNotNull(savedProgram);
 
-            Program foundProgram = programOutputPort.findProgramById(programByName.getId());
+            Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
 
             assertNotNull(foundProgram);
             assertNotNull(foundProgram.getId());
-            assertEquals(programByName.getId(), foundProgram.getId());
+            assertEquals(savedProgram, foundProgram);
         } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    @Order(4)
+//    @Order(4)
     void deleteProgram() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
@@ -108,33 +130,18 @@ class ProgramPersistenceAdapterTest {
 
             programOutputPort.deleteProgram(foundProgram.getId());
 
-            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(foundProgram.getId()));
+            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(program.getId()));
         } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
-    @Test
-    @Order(5)
-    void saveProgramWithWrongIndustry() {
-        try {
-            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
-            assertNotNull(savedOrganization);
-            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
 
-            program.setOrganizationId(savedOrganization.getId());
-
-            assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(program));
-
-        } catch (MeedlException e) {
-            log.info("{}", e.getMessage());
-        }
-    }
 
     @AfterAll
     void cleanUp() {
         try {
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            programOutputPort.deleteProgram(foundProgram.getId());
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organizationOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
