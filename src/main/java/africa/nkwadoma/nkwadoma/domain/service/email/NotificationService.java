@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.CREATE_PASSWORD_URL;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @RequiredArgsConstructor
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {
@@ -22,7 +22,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     private String baseUrl;
 
     @Override
-    public void sendEmail(UserIdentity userIdentity) throws MiddlException {
+    public void sendEmail(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
@@ -37,7 +37,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
 
     @Override
-    public void sendColleagueEmail(UserIdentity userIdentity) throws MiddlException {
+    public void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
@@ -49,7 +49,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         emailOutputPort.sendEmail(email);
     }
 
-    private String getLink(UserIdentity userIdentity) throws MiddlException {
+    private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
         return baseUrl + CREATE_PASSWORD_URL + token;
     }

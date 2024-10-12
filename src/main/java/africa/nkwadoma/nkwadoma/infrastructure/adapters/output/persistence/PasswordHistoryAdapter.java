@@ -2,9 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.PasswordHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.PasswordHistoryEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PasswordHistoryMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.PasswordHistoryRepository;
@@ -28,7 +27,7 @@ public class PasswordHistoryAdapter implements PasswordHistoryOutputPort {
     }
 
     @Override
-    public List<PasswordHistory> findByUser(String id) throws MiddlException {
+    public List<PasswordHistory> findByUser(String id) throws MeedlException {
         List<PasswordHistory> passwordHistories = new ArrayList<>();
         if(!StringUtils.isEmpty(id)){
             List<PasswordHistoryEntity> passwordHistoryEntities = passwordHistoryRepository.findByMiddlUser(id);

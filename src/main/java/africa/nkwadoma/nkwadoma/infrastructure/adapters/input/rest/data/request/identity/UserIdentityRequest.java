@@ -8,7 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserIdentityRequest {
+    @NotBlank(message = "Email address must not be empty")
     private String email;
+    @NotBlank(message = "Password must not be empty")
     private String password;
 
 }

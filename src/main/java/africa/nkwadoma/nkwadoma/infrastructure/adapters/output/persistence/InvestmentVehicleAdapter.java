@@ -2,8 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.InvestmentVehicleValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
@@ -25,7 +25,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     private final InvestmentVehicleMapper investmentVehicleMapper;
 
     @Override
-    public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MiddlException {
+    public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
         InvestmentVehicleValidator.validateInvestmentVehicle(investmentVehicle);
         checkIfInvestmentVehicleNameExist(investmentVehicle);
         if (investmentVehicle.getId()== null) investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
@@ -36,7 +36,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
 
-    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MiddlException {
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicle.getName());
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
                 throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
@@ -44,7 +44,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public InvestmentVehicle findById(String id) throws MiddlException {
+    public InvestmentVehicle findById(String id) throws MeedlException {
         if (id != null){
             InvestmentVehicleEntity investmentVehicleEntity =
                     investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
