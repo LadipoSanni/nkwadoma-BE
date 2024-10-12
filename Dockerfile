@@ -17,7 +17,7 @@ COPY --from=build /app/target/*.jar nkwadoma.jar
 
 # Set environment variables
 ENV SPRING_PROFILES_ACTIVE=${PROFILE}
-ENV PORT=8081
+ENV PORT=${PORT}
 
 # Expose the port
 EXPOSE ${PORT}
