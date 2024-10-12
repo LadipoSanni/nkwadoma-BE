@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
-public class UserIdentityValidator extends MiddleValidator {
-     public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MiddlException {
+public class UserIdentityValidator extends MeedlValidator {
+     public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
          if (CollectionUtils.isEmpty(userIdentities)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
@@ -25,7 +25,7 @@ public class UserIdentityValidator extends MiddleValidator {
          }
      }
 
-     public static void validateUserIdentity(UserIdentity userIdentity) throws MiddlException {
+     public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
          if (ObjectUtils.isEmpty(userIdentity)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
@@ -63,7 +63,7 @@ public class UserIdentityValidator extends MiddleValidator {
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
 
-    public static void validatePassword(String password) throws MiddlException {
+    public static void validatePassword(String password) throws MeedlException {
         validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()){

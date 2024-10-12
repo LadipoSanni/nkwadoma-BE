@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CreateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -44,7 +44,7 @@ public class InvestmentVehicleController {
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
                     HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }

@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 @SpringBootTest
-public class InvestmentVehicleServiceTest {
+class InvestmentVehicleServiceTest {
 
 
     @Autowired
@@ -43,7 +43,7 @@ public class InvestmentVehicleServiceTest {
 
     @Test
     @Order(1)
-    void createInvestmentVehicle() throws MiddlException {
+    void createInvestmentVehicle() throws MeedlException {
        InvestmentVehicle createdInvestmentVehicle =
                investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
        assertNotNull(createdInvestmentVehicle);
