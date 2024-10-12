@@ -49,7 +49,7 @@ public class InvestmentVehicleServiceTest {
     @Order(1)
     void createInvestmentVehicle() throws MiddlException {
        InvestmentVehicle createdInvestmentVehicle =
-               investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
+               investmentVehicleUseCase.createOrUpdateInvestmentVehicle(fundGrowth);
        investmentId = createdInvestmentVehicle.getId();
        assertNotNull(createdInvestmentVehicle);
     }
@@ -62,7 +62,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setFundRaisingStatus(DEPLOYING);
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertEquals(updatedInvestmentVehicle.getFundRaisingStatus().toString(),
                 DEPLOYING.toString());
     }
@@ -74,7 +74,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setName("Growth Investment limited2");
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(fundGrowth.getName(), updatedInvestmentVehicle.getName());
     }
 
@@ -85,7 +85,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setRate(14F);
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(fundGrowth.getRate(),updatedInvestmentVehicle.getRate());
     }
 
@@ -97,7 +97,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setInvestmentVehicleType(ENDOWMENT);
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(InvestmentVehicleType.COMMERCIAL.toString(),
                 updatedInvestmentVehicle.getFundRaisingStatus().toString());
     }
@@ -110,7 +110,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setSponsors("Gt");
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(fundGrowth.getSponsors(),updatedInvestmentVehicle.getSponsors());
     }
 
@@ -122,7 +122,7 @@ public class InvestmentVehicleServiceTest {
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setMandate("mandate");
         InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.updateInvestmentVehicle(foundInvestmentVehicle);
+                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(fundGrowth.getMandate(),updatedInvestmentVehicle.getMandate());
     }
 

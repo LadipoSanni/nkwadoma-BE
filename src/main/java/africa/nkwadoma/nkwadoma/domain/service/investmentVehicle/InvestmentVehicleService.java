@@ -13,14 +13,11 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
 
     @Override
-    public InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MiddlException {
+    public InvestmentVehicle createOrUpdateInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MiddlException {
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
-    @Override
-    public InvestmentVehicle updateInvestmentVehicle(InvestmentVehicle foundInvestmentVehicle) throws MiddlException {
-        return investmentVehicleOutputPort.save(foundInvestmentVehicle);
-    }
+
 
 
 }

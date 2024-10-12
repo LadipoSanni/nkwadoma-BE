@@ -39,7 +39,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MiddlException {
         Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicle.getName());
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
-                throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
+            throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
         }
     }
 

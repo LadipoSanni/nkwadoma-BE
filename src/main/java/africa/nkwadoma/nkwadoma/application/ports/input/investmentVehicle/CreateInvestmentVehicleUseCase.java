@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 
 public interface CreateInvestmentVehicleUseCase {
 
-    InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MiddlException;
+    InvestmentVehicle createOrUpdateInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MiddlException;
 
-    InvestmentVehicle updateInvestmentVehicle(InvestmentVehicle foundInvestmentVehicle) throws MiddlException;
 }
