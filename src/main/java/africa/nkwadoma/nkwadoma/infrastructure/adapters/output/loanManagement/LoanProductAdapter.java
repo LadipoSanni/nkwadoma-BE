@@ -47,6 +47,13 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
 
+    @Override
+    public LoanProduct findByName(String name) throws LoanException {
+        validateField(name, "Invalid name provided");
+        LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
+        return loanProductMapper.mapEntityToLoanProduct(entity);
+    }
+
     private void validateField(String field, String message) throws LoanException {
         if(StringUtils.isEmpty(field)) throw new LoanException(message);
     }

@@ -12,4 +12,6 @@ public interface LoanProductOutputPort {
     boolean existsByName(String name) throws MiddlException;
 
     LoanProduct findById(String id) throws MiddlException;
+
+    LoanProduct findByName(String name) throws LoanException;
 }
