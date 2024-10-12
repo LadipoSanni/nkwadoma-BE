@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions;
 
-public class IdentityException extends MiddlException {
+public class IdentityException extends MeedlException {
 
     public IdentityException(String message){
         super(message);
