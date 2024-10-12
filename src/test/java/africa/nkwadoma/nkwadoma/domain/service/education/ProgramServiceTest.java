@@ -30,7 +30,7 @@ class ProgramServiceTest {
     void setUp() {
         program = Program.builder().name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").organizationId("68t46").
-                programType(ProgramType.VOCATIONAL).programStatus(ProgramStatus.ACTIVE).
+                programType(ProgramType.VOCATIONAL).programStatus(ActivationStatus.ACTIVE).
                 objectives("Program Objectives").
                 deliveryType(DeliveryType.ONSITE).mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).
                 build();

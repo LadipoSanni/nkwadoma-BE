@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -38,7 +39,7 @@ public class ProgramEntity {
     @Enumerated(EnumType.STRING)
     private DeliveryType deliveryType;
     @Enumerated(EnumType.STRING)
-    private ProgramStatus programStatus;
+    private ActivationStatus programStatus;
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDate programStartDate;
@@ -51,6 +52,6 @@ public class ProgramEntity {
     @Column(nullable = false)
     private String createdBy;
     private String updatedBy;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     private OrganizationEntity organizationEntity;
 }

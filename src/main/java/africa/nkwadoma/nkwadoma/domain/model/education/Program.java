@@ -27,7 +27,7 @@ public class Program {
     private ProgramMode mode;
     private ProgramType programType;
     private DeliveryType deliveryType;
-    private ProgramStatus programStatus;
+    private ActivationStatus programStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

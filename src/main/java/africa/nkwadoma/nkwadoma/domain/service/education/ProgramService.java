@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
-import static africa.nkwadoma.nkwadoma.domain.validation.ProgramValidator.validateInput;
+import static africa.nkwadoma.nkwadoma.domain.validation.education.ProgramValidator.validateInput;
 
 @Service
 @RequiredArgsConstructor

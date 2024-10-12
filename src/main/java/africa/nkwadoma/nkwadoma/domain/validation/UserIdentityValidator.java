@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 public class UserIdentityValidator extends MeedlValidator {
      public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
