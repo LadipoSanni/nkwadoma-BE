@@ -42,20 +42,28 @@ class ProgramPersistenceAdapterTest {
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
-                programStatus(ProgramStatus.ACTIVE).programDescription("Program description").
+                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).programType(ProgramType.PROFESSIONAL).
                 createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
+    }
+
+    @BeforeAll
+    void init() {
+        try {
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
+            assertNotNull(savedOrganization);
+        } catch (MeedlException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
 //    @Order(1)
     void saveProgram() {
         try {
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
-
-            program.setOrganizationId(savedOrganization.getId());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findById(organizationIdentity.getId());
+            program.setOrganizationId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
 
             assertNotNull(savedProgram);
@@ -83,7 +91,7 @@ class ProgramPersistenceAdapterTest {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             foundProgram.setOrganizationId(savedOrganization.getId());
 
-            assertThrows(ProgramException.class, ()-> programOutputPort.saveProgram(foundProgram));
+            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(foundProgram));
         } catch (MeedlException e) {
             log.info("{}", e.getMessage());
         }
@@ -106,7 +114,7 @@ class ProgramPersistenceAdapterTest {
 //    @Order(3)
     void findProgramById() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findById(organizationIdentity.getId());
             program.setId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
             assertNotNull(savedProgram);
@@ -142,7 +150,7 @@ class ProgramPersistenceAdapterTest {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             programOutputPort.deleteProgram(foundProgram.getId());
-            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
             organizationOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
