@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
@@ -68,7 +68,7 @@ public class InvestmentVehicleController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
                     HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
