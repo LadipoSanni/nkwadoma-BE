@@ -202,7 +202,6 @@ class InvestmentVehicleAdapterTest {
 
     }
 
-
     @AfterAll
     void cleanUp(){
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
