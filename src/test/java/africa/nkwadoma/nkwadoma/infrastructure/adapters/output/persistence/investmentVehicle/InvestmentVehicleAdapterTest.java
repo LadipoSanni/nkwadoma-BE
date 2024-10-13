@@ -27,9 +27,7 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
-    @Autowired
-    private InvestmentVehicleEntityRepository investmentVehicleEntityRepository;
-
+    private String investmentVehicleId;
 
 
     @BeforeEach
@@ -67,6 +65,7 @@ class InvestmentVehicleAdapterTest {
         log.info("this is ======={}",savedInvestmentVehicle);
         InvestmentVehicle foundInvestmentVehicle =
                 investmentVehicleOutputPort.findById(savedInvestmentVehicle.getId());
+        investmentVehicleId = foundInvestmentVehicle.getId();
         assertEquals(foundInvestmentVehicle.getName(),savedInvestmentVehicle.getName());
     }
 
@@ -134,10 +133,34 @@ class InvestmentVehicleAdapterTest {
     }
 
 
+    @Test
+    void viewInvestmentVehicleDetailsWithNullId()  {
+        try {
+             investmentVehicleOutputPort.findById(null);
+        }catch (MeedlException e){
+            assertEquals("Investment vehicle id cannot be null",e.getMessage());
+        }
+    }
 
-    @AfterAll
-     void deleteAll(){
-        investmentVehicleEntityRepository.deleteAll();
+
+    @Test
+    void viewInvestmentVehicleDetailsWithFakeID() {
+        try {
+             investmentVehicleOutputPort.findById("Fake-id");
+        }catch (MeedlException e){
+            assertEquals("Investment vehicle not found",e.getMessage());
+        }
+    }
+
+    @Test
+    void viewInvestmentVehicleDetails() {
+        try {
+             InvestmentVehicle investmentVehicle =
+                     investmentVehicleOutputPort.findById(investmentVehicleId);
+             assertNotNull(investmentVehicle);
+        }catch (MeedlException e){
+            log.info("{} {}",e.getClass().getName(), e.getMessage());
+        }
     }
 
 }

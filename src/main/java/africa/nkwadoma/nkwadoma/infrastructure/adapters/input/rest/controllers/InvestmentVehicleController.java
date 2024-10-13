@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
@@ -47,6 +47,28 @@ public class InvestmentVehicleController {
         } catch (MeedlException e) {
             return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
                     HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    @GetMapping("view-investment-vehicle-details/{id}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id){
+        try {
+            InvestmentVehicle investmentVehicleIdentity =
+                    investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
+            ViewInvestmentVehicleResponse viewInvestmentVehicleResponse =
+                    investmentVehicleMapper.toViewInvestmentVehicleResponse(investmentVehicleIdentity);
+            ApiResponse<Object> apiResponse =ApiResponse.builder()
+                    .body(viewInvestmentVehicleResponse)
+                    .message(INVESTMENT_VEHICLE_VIEWED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+        } catch (MeedlException e) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION,e.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()),HttpStatus.BAD_REQUEST);
         }
     }
 

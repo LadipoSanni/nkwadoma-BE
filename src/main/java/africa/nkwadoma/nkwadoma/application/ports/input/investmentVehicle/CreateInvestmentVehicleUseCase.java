@@ -7,4 +7,5 @@ public interface CreateInvestmentVehicleUseCase {
 
     InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
+    InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException;
 }

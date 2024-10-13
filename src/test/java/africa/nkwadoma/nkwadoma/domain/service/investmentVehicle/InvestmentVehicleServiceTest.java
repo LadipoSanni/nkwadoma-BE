@@ -29,7 +29,7 @@ class InvestmentVehicleServiceTest {
     private InvestmentVehicleOutputPort outputPort;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         fundGrowth = new InvestmentVehicle();
         fundGrowth.setName("Growth Investment limited");
         fundGrowth.setSize(BigDecimal.valueOf(4000));
@@ -44,9 +44,22 @@ class InvestmentVehicleServiceTest {
     @Test
     @Order(1)
     void createInvestmentVehicle() throws MeedlException {
-       InvestmentVehicle createdInvestmentVehicle =
-               investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
-       assertNotNull(createdInvestmentVehicle);
+        InvestmentVehicle createdInvestmentVehicle =
+                investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
+        assertNotNull(createdInvestmentVehicle);
+    }
+
+    @Test
+    @Order(3)
+    void viewInvestmentVehicleDetails() {
+        try {
+            InvestmentVehicle viewedInvestmentVehicle =
+                    investmentVehicleUseCase.viewInvestmentVehicleDetails("");
+            assertNotNull(viewedInvestmentVehicle);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+
     }
 
 }

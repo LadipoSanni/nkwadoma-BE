@@ -8,4 +8,5 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findById(String id) throws MeedlException;
 
+
 }
