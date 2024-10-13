@@ -8,5 +8,8 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findById(String id) throws MeedlException;
 
+    void deleteInvestmentVehicle(String id);
 
-}
+    void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException ;
+
+    }

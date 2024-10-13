@@ -13,13 +13,20 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
 
     @Override
-    public InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
+    public InvestmentVehicle createOrUpdateInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    @Override
+    public void deleteInvestmentVehicle(String investmentId) {
+        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
     }
 
     @Override
     public InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException {
         return investmentVehicleOutputPort.findById(id);
     }
+
+
 
 }

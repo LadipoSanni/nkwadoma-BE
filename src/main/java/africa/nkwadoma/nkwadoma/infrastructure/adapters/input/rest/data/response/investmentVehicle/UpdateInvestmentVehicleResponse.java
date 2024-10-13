@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
-
 import africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
 import lombok.Getter;
@@ -9,7 +8,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 @Getter
 @Setter
-public class ViewInvestmentVehicleResponse {
+public class UpdateInvestmentVehicleResponse {
 
     private String name;
     private InvestmentVehicleType investmentVehicleType;
@@ -19,4 +18,5 @@ public class ViewInvestmentVehicleResponse {
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
+
 }

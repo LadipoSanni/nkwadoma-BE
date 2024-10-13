@@ -5,8 +5,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Create
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CreateInvestmentVehicleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.UpdateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CreateInvestmentVehicleResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.UpdateInvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.ViewInvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleRestMapper;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,7 @@ public class InvestmentVehicleController {
         try {
             InvestmentVehicle investmentVehicle =
                     investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
-            investmentVehicle = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicle);
+            investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
             CreateInvestmentVehicleResponse investmentVehicleResponse  =
                     investmentVehicleRestMapper.toCreateInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -51,19 +53,39 @@ public class InvestmentVehicleController {
         }
     }
 
-
+    @PostMapping("update-investment-vehicle")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> updateInvestmentVehicle(@RequestBody UpdateInvestmentVehicleRequest
+                                                                          investmentVehicleRequest){
+        try {
+            InvestmentVehicle investmentVehicle =
+                    investmentVehicleRestMapper.mapUpdateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
+            investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
+            UpdateInvestmentVehicleResponse updateInvestmentVehicleResponse =
+                    investmentVehicleRestMapper.toUpdateInvestmentVehicleResponse(investmentVehicle);
+            ApiResponse<Object> apiResponse =ApiResponse.builder()
+                    .body(updateInvestmentVehicleResponse)
+                    .message(INVESTMENT_VEHICLE_UPDATED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+        } catch (MeedlException e) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @GetMapping("view-investment-vehicle-details/{id}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id){
         try {
-            InvestmentVehicle investmentVehicleIdentity =
+            InvestmentVehicle investmentVehicle =
                     investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
             ViewInvestmentVehicleResponse viewInvestmentVehicleResponse =
-                    investmentVehicleMapper.toViewInvestmentVehicleResponse(investmentVehicleIdentity);
+                    investmentVehicleRestMapper.toViewInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse =ApiResponse.builder()
                     .body(viewInvestmentVehicleResponse)
-//                    .message(INVESTMENT_VEHICLE_VIEWED)
+                    .message(INVESTMENT_VEHICLE_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
@@ -72,5 +94,4 @@ public class InvestmentVehicleController {
                     HttpStatus.BAD_REQUEST.toString()),HttpStatus.BAD_REQUEST);
         }
     }
-
 }
