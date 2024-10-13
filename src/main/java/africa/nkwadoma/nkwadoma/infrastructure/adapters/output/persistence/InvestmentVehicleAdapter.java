@@ -36,10 +36,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
 
-    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
+    @Override
+    public void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicle.getName());
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
-                throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
+            throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
         }
     }
 
@@ -52,5 +53,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         }
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
+
+    @Override
+    public void deleteInvestmentVehicle(String id) {
+        investmentVehicleRepository.deleteById(id);
+    }
+
 
 }
