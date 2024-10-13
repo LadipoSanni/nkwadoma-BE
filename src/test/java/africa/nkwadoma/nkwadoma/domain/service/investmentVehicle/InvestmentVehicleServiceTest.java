@@ -57,7 +57,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(2)
-    void updateInvestmentVehicleFundRaisingStatus() throws MiddlException {
+    void updateInvestmentVehicleFundRaisingStatus() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setFundRaisingStatus(DEPLOYING);
@@ -69,7 +69,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(3)
-    void updateInvestmentVehicleName() throws MiddlException {
+    void updateInvestmentVehicleName() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setName("Growth Investment limited2");
@@ -80,7 +80,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(4)
-    void updateInvestmentVehicleRate() throws MiddlException {
+    void updateInvestmentVehicleRate() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setRate(14F);
@@ -92,7 +92,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(5)
-    void updateInvestmentVehicleType() throws MiddlException {
+    void updateInvestmentVehicleType() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setInvestmentVehicleType(ENDOWMENT);
@@ -105,7 +105,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(5)
-    void updateInvestmentVehicleSponsors() throws MiddlException {
+    void updateInvestmentVehicleSponsors() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setSponsors("Gt");
@@ -117,7 +117,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(5)
-    void updateInvestmentVehicleMandate() throws MiddlException {
+    void updateInvestmentVehicleMandate() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
         foundInvestmentVehicle.setMandate("mandate");
