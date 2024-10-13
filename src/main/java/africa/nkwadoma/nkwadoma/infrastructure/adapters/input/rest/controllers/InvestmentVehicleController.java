@@ -58,10 +58,10 @@ public class InvestmentVehicleController {
                                                                           investmentVehicleRequest){
         try {
             InvestmentVehicle investmentVehicle =
-                    investmentVehicleRestMapper.updateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
+                    investmentVehicleRestMapper.mapUpdateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
             investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
             UpdateInvestmentVehicleResponse updateInvestmentVehicleResponse =
-                    investmentVehicleRestMapper.investmentVehicleToUpdateInvestmentVehicleResponse(investmentVehicle);
+                    investmentVehicleRestMapper.toUpdateInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse =ApiResponse.builder()
                     .body(updateInvestmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_UPDATED)

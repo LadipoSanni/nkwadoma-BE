@@ -15,7 +15,7 @@ public interface InvestmentVehicleRestMapper {
 
     CreateInvestmentVehicleResponse toCreateInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 
-    InvestmentVehicle updateInvestmentVehicleRequestToInvestmentVehicle(UpdateInvestmentVehicleRequest investmentVehicleRequest);
+    InvestmentVehicle mapUpdateInvestmentVehicleRequestToInvestmentVehicle(UpdateInvestmentVehicleRequest investmentVehicleRequest);
 
-    UpdateInvestmentVehicleResponse investmentVehicleToUpdateInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
+    UpdateInvestmentVehicleResponse toUpdateInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 }

@@ -26,7 +26,9 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
+    private InvestmentVehicle investment;
     private String investmentVehicleId;
+    private String investmentId;
     @Autowired
     private InvestmentVehicleEntityRepository investmentVehicleEntityRepository;
 
@@ -53,6 +55,16 @@ class InvestmentVehicleAdapterTest {
         fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
         fundGrowth.setTenure("12 Month");
 
+
+        investment = new InvestmentVehicle();
+        investment.setName("Investment");
+        investment.setSize(BigDecimal.valueOf(4000));
+        investment.setRate(12F);
+        investment.setMandate("Long-term fund");
+        investment.setSponsors("UBA");
+        investment.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
+        investment.setTenure("12 Month");
+
     }
 
     @Order(1)
@@ -69,6 +81,27 @@ class InvestmentVehicleAdapterTest {
         assertEquals(foundInvestmentVehicle.getName(), savedInvestmentVehicle.getName());
     }
 
+
+    @Test
+    void checkIfInvestmentVehicleNameExistTest(){
+        try {
+            investmentVehicleOutputPort.checkIfInvestmentVehicleNameExist(capitalGrowth);
+        } catch (MeedlException e) {
+            assertEquals("Investment vehicle name exist",e.getMessage());
+        }
+
+    }
+
+    @Test
+    void checkIfInvestmentVehicleExistWithSameEntity(){
+        try{
+            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.save(investment);
+            investmentId = investmentVehicle.getId();
+            investmentVehicleOutputPort.checkIfInvestmentVehicleNameExist(investmentVehicle);
+        } catch (MeedlException exception) {
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
 
     @Test
     void updateInvestmentVehicleRate() {
@@ -205,6 +238,7 @@ class InvestmentVehicleAdapterTest {
     @AfterAll
     void cleanUp(){
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
     }
 
 }
