@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import io.micrometer.common.util.StringUtils;
@@ -13,13 +13,13 @@ import java.math.BigDecimal;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.*;
 
 @Slf4j
-public class LoanValidator extends MiddleValidator {
+public class LoanValidator extends MeedlValidator {
     private static final int ZERO = 0;
     private static final int MIN_MORATORIUM = 1;
     private static final int MAX_MORATORIUM = 24;
     private static final int MAX_TENOR_IN_YEARS = 10;
     private static final int MAX_TENOR_IN_MONTHS = 120;
-    public static void validateLoanProductDetails(LoanProduct loanProduct) throws MiddlException {
+    public static void validateLoanProductDetails(LoanProduct loanProduct) throws MeedlException {
         validateLoanProduct(loanProduct);
         validateDataElement(loanProduct.getName());
         log.info("Validating loan product {}", loanProduct.getName());
@@ -60,10 +60,10 @@ public class LoanValidator extends MiddleValidator {
             if (loanProduct.getTenor() > MAX_TENOR_IN_YEARS) throwException(TENOR_STATUS_YEAR_BOND);
 
     }
-    public static void validateLoanProduct(LoanProduct loanProduct)throws MiddlException {
+    public static void validateLoanProduct(LoanProduct loanProduct)throws MeedlException {
         if (loanProduct == null) throwException(INVALID_REQUEST);
     }
-    public static void validateObligorAgainstProductSize(LoanProduct loanProduct) throws MiddlException {
+    public static void validateObligorAgainstProductSize(LoanProduct loanProduct) throws MeedlException {
         if (loanProduct.getObligorLoanLimit().compareTo(loanProduct.getLoanProductSize()) > 0) {
             throwException(OBLIGOR_LIMIT_GREATER_THAN_PRODUCT_SIZE);
         }

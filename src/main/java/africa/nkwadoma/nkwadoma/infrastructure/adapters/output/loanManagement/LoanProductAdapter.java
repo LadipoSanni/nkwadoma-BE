@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
@@ -29,33 +30,29 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     }
 
     @Override
-    public void deleteById(String id) throws MiddlException {
-        validateField(id, "Please provide a valid detail to delete a loan product");
+    public void deleteById(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
         loanProductEntityRepository.deleteById(id);
     }
 
     @Override
-    public boolean existsByName(String name) throws MiddlException {
-        validateField(name, "Invalid name provided");
+    public boolean existsByName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
         return loanProductEntityRepository.existsByName(name);
     }
 
     @Override
-    public LoanProduct findById(String id) throws MiddlException {
-        validateField(id, "Invalid loan product selected");
+    public LoanProduct findById(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
         LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
 
     @Override
-    public LoanProduct findByName(String name) throws LoanException {
-        validateField(name, "Invalid name provided");
+    public LoanProduct findByName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
         LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
         return loanProductMapper.mapEntityToLoanProduct(entity);
-    }
-
-    private void validateField(String field, String message) throws LoanException {
-        if(StringUtils.isEmpty(field)) throw new LoanException(message);
     }
 
 }

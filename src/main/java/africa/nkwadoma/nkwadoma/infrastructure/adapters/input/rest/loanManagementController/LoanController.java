@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.loanManagementController;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -42,7 +42,7 @@ public class LoanController {
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        } catch (MiddlException exception) {
+        } catch (MeedlException exception) {
             return new ResponseEntity<>(ApiResponse.builder()
                     .body(exception.getMessage())
                     .message(CREATE_LOAN_PRODUCT_FAILED)
