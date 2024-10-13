@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,17 +14,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProgramResponse{
-    private String programName;
+    private String id;
+    private String name;
     private String objectives;
-    private String instituteId;
+    private String organizationId;
     private String creatorId;
     private LocalDateTime createdAt;
     private String updatedBy;
     private String programDescription;
     private ActivationStatus programStatus;
-    private int programDuration;
+    private int duration;
     private DeliveryType deliveryType;
-    private ProgramMode programMode;
+    private ProgramMode mode;
     private ProgramType programType;
-    private String durationStatus;
+    private DurationType durationType;
 }

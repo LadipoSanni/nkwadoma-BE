@@ -32,8 +32,7 @@ public class ProgramController {
 
     @PostMapping("")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
-                                                        @AuthenticationPrincipal Jwt meedlUser) {
-        try {
+                                                        @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
             Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
             log.info("Mapped Program create request: {}, {}", program.toString(), meedlUser.getClaimAsString("sub"));
 
@@ -43,9 +42,6 @@ public class ProgramController {
                     body(programRestMapper.toProgramResponse(program)).
                     message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                     HttpStatus.CREATED);
-        } catch (MeedlException e) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
     }
 
 }
