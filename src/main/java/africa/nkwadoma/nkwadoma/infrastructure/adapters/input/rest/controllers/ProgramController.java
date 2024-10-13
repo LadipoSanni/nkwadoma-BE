@@ -34,14 +34,14 @@ public class ProgramController {
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
             Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
-            log.info("Mapped Program create request: {}, {}", program.toString(), meedlUser.getClaimAsString("sub"));
 
             program = addProgramUseCase.createProgram(program);
 
             return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
                     body(programRestMapper.toProgramResponse(program)).
                     message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
-                    HttpStatus.CREATED);
+                    HttpStatus.CREATED
+            );
     }
 
 }
