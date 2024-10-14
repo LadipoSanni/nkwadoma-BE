@@ -23,4 +23,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # Entry point to run the application
-ENTRYPOINT ["java", "-jar", "-Dserver.port=${PORT}", "nkwadoma.jar"]
+ENTRYPOINT ["java", "-jar", "-Dserver.port=${PORT}", "-Dspring.profiles.active=${PROFILE}", "nkwadoma.jar"]

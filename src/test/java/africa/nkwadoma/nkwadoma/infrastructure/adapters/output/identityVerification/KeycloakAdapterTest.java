@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -33,13 +35,13 @@ class KeycloakAdapterTest {
         john.setFirstName("John");
         john.setLastName("Max");
         john.setEmail("johnmax@lendspace.com");
-        john.setRole("PORTFOLIO_MANAGER");
+        john.setRole(PORTFOLIO_MANAGER);
 
         peter = new UserIdentity();
         peter.setFirstName("Peter");
         peter.setLastName("Mark");
         peter.setEmail("peter@lendspace.com");
-        peter.setRole("TRAINEE");
+        peter.setRole(TRAINEE);
     }
 
 
@@ -78,13 +80,8 @@ class KeycloakAdapterTest {
         assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
-    void createUserWithNoUserRole(){
-        john.setRole(null);
-        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
-    }
-    @Test
     void createUserWithInvalidUserRole(){
-        john.setRole("INVALID_ROLE");
+        john.setRole(null);
         assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
 
@@ -265,17 +262,17 @@ class KeycloakAdapterTest {
     @Test
     void getRoleResource() {
         try {
-            john.setRole("PORTFOLIO_MANAGER");
+            john.setRole(PORTFOLIO_MANAGER);
             RoleRepresentation roleRepresentation = identityManagementOutputPort.getRoleRepresentation(john);
             assertNotNull(roleRepresentation);
-            assertEquals(john.getRole(), roleRepresentation.getName());
+            assertEquals(john.getRole().toString(), roleRepresentation.getName().toString());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
     @Test
     void getRoleResourceWithInvalidRoleName() {
-            john.setRole("INVALID_ROLE");
+            john.setRole(null);
             assertThrows(MeedlException.class,()->identityManagementOutputPort.getRoleRepresentation(john));
     }
     @Test

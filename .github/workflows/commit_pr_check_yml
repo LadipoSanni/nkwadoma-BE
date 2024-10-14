@@ -1,0 +1,103 @@
+name: Commit and PR Status Tracker
+
+on:
+  schedule:
+    - cron: "0 11 * * *"  # Runs every day at 11:00 AM
+    - cron: "0 17 * * *"  # Runs every day at 5:00 PM
+    - cron: "0 23 * * *"  # Runs every day at 11:00 PM
+
+jobs:
+  commit-pr-tracker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set environment variables
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa 
+        run: |
+          # Calculate timestamp for the last 6 hours
+          TIMESTAMP=$(date -u -d "6 hours ago" +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Query successful and unsuccessful commits
+          SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
+            --since "$TIMESTAMP" | wc -l)
+
+          UNSUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' \
+            --since "$TIMESTAMP" | wc -l)
+
+          # Get commit authors
+          SUCCESSFUL_AUTHORS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
+            --since "$TIMESTAMP" | sort | uniq)
+
+          UNSUCCESSFUL_AUTHORS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' \
+            --since "$TIMESTAMP" | sort | uniq)
+
+          # Query PRs merged or closed in the last 6 hours
+          SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
+            --paginate -q '.[] | select(.merged_at != null) | .user.login' \
+            --state merged --since "$TIMESTAMP" | wc -l)
+
+          UNSUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
+            --paginate -q '.[] | select(.merged_at == null) | .user.login' \
+            --state closed --since "$TIMESTAMP" | wc -l)
+
+          # Export variables for later steps
+          echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
+          echo "UNSUCCESSFUL_COMMITS=${UNSUCCESSFUL_COMMITS}" >> $GITHUB_ENV
+          echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
+          echo "UNSUCCESSFUL_PRS=${UNSUCCESSFUL_PRS}" >> $GITHUB_ENV
+          echo "SUCCESSFUL_AUTHORS=${SUCCESSFUL_AUTHORS}" >> $GITHUB_ENV
+          echo "UNSUCCESSFUL_AUTHORS=${UNSUCCESSFUL_AUTHORS}" >> $GITHUB_ENV
+
+      - name: Debug Results
+        run: |
+          echo "Successful Commits: ${{ env.SUCCESSFUL_COMMITS }}"
+          echo "Unsuccessful Commits: ${{ env.UNSUCCESSFUL_COMMITS }}"
+          echo "Successful PRs: ${{ env.SUCCESSFUL_PRS }}"
+          echo "Unsuccessful PRs: ${{ env.UNSUCCESSFUL_PRS }}"
+          echo "Successful Authors:\n${{ env.SUCCESSFUL_AUTHORS }}"
+          echo "Unsuccessful Authors:\n${{ env.UNSUCCESSFUL_AUTHORS }}"
+
+      - name: Send Email Notification
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: ${{ secrets.EMAILS }}
+        run: |
+          # Prepare the email content
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"
+          do
+            echo "From: builds@semicolon.africa" > /tmp/email.txt
+            echo "To: $email" >> /tmp/email.txt
+            echo "Subject: Commit and PR Status Summary" >> /tmp/email.txt
+            printf "Commit and PR Summary for the Last 6 Hours:\n\n" >> /tmp/email.txt
+            printf "Successful Commits: ${{ env.SUCCESSFUL_COMMITS }}\n" >> /tmp/email.txt
+            printf "Unsuccessful Commits: ${{ env.UNSUCCESSFUL_COMMITS }}\n" >> /tmp/email.txt
+            printf "Successful Authors:\n${{ env.SUCCESSFUL_AUTHORS }}\n\n" >> /tmp/email.txt
+            printf "Unsuccessful Authors:\n${{ env.UNSUCCESSFUL_AUTHORS }}\n\n" >> /tmp/email.txt
+            printf "Successful PRs: ${{ env.SUCCESSFUL_PRS }}\n" >> /tmp/email.txt
+            printf "Unsuccessful PRs: ${{ env.UNSUCCESSFUL_PRS }}\n\n" >> /tmp/email.txt
+            printf "Regards,\nThe Cloud Team" >> /tmp/email.txt
+
+            # Send the email
+            curl --verbose --ssl-reqd \
+              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
+              --mail-from "builds@semicolon.africa" \
+              --mail-rcpt "$email" \
+              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
+              --upload-file /tmp/email.txt
+          done
