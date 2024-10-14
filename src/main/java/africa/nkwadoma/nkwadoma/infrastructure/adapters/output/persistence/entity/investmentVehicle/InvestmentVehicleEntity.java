@@ -26,14 +26,12 @@ public class InvestmentVehicleEntity {
     @UuidGenerator
     private String id;
     private String name;
-    @Enumerated(EnumType.STRING)
     private InvestmentVehicleType investmentVehicleType;
     private String mandate;
     private String sponsors;
     private String tenure;
     private BigDecimal size;
     private Float rate;
-    @Enumerated(EnumType.STRING)
     private FundRaisingStatus fundRaisingStatus;
 
 }
