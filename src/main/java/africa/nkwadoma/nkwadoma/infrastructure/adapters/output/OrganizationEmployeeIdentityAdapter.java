@@ -40,6 +40,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
       if(!StringUtils.isEmpty(employeeId)){
           OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMiddlUserId(employeeId);
           if (organization == null){
+              log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
           }
 
