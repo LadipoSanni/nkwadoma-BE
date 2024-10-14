@@ -72,14 +72,16 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
+        OrganizationIdentity invitedOrganisation = null;
         try {
             assertThrows(ResourceNotFoundException.class, () -> organizationAdapter.findById(roseCouture.getId()));
-            createOrganizationUseCase.inviteOrganization(roseCouture);
+            invitedOrganisation = createOrganizationUseCase.inviteOrganization(roseCouture);
             OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
             assertEquals(roseCouture.getName(), foundOrganization.getName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertNotNull(invitedOrganisation);
 
     }
 
