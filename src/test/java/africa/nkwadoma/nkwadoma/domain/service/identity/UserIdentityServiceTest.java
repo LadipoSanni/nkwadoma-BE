@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCa
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ class UserIdentityServiceTest {
     void inviteColleague() {
         try {
             // Ensure the user doesn't exist initially
-            assertThrows(MiddlException.class, () -> userIdentityOutputPort.findById(favour.getId()));
+            assertThrows(MeedlException.class, () -> userIdentityOutputPort.findById(favour.getId()));
 
             // Invite the colleague (create the user)
             UserIdentity invitedColleague = createUserUseCase.inviteColleague(favour);
@@ -68,7 +68,7 @@ class UserIdentityServiceTest {
 
             userId = foundInvitedColleague.getId();
             role = foundInvitedColleague.getRole();
-        } catch (MiddlException exception) {
+        } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
@@ -77,23 +77,23 @@ class UserIdentityServiceTest {
     @Test
     void inviteColleagueWithInviterIdThatDoesNotExist(){
         favour.setCreatedBy("notexisting");
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(favour));
+        assertThrows(MeedlException.class,()->createUserUseCase.inviteColleague(favour));
     }
 
     @Test
     void inviteColleagueWithEmptyInviterId(){
         favour.setCreatedBy(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(favour));
+        assertThrows(MeedlException.class,()-> createUserUseCase.inviteColleague(favour));
     }
 
     @Test
     void inviteColleagueWithNullInviterId(){
         favour.setCreatedBy(null);
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(favour));
+        assertThrows(MeedlException.class,()-> createUserUseCase.inviteColleague(favour));
     }
     @Test
     void  inviteColleagueWithNullUserIdentity(){
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(new UserIdentity()));
+        assertThrows(MeedlException.class,()-> createUserUseCase.inviteColleague(null));
     }
     @Test
     void  inviteColleagueWithEmptyUserIdentity(){
@@ -101,13 +101,13 @@ class UserIdentityServiceTest {
         favour.setLastName(StringUtils.EMPTY);
         favour.setEmail(StringUtils.EMPTY);
         favour.setCreatedBy(StringUtils.EMPTY);
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(favour));
+        assertThrows(MeedlException.class,()-> createUserUseCase.inviteColleague(favour));
     }
 
     @Test
     void inviteColleagueWithDifferentDomainEmail(){
         favour.setEmail("differentdomainemail@yahoo.com");
-        assertThrows(MiddlException.class,()-> createUserUseCase.inviteColleague(favour));
+        assertThrows(MeedlException.class,()-> createUserUseCase.inviteColleague(favour));
     }
 
     @Test
@@ -120,7 +120,7 @@ class UserIdentityServiceTest {
             assertNotNull(generatedToken);
             createUserUseCase.createPassword(generatedToken,favour.getPassword());
             password = favour.getPassword();
-        }catch (MiddlException exception){
+        }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
 
@@ -132,9 +132,9 @@ class UserIdentityServiceTest {
            favour.setPassword("Key90@");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}",meedlException.getClass().getName(),meedlException.getMessage());
        }
     }
 
@@ -144,8 +144,8 @@ class UserIdentityServiceTest {
             favour.setPassword("passWord12345@3345556677788");
             String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
             assertNotNull(generatedToken);
-            assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-        }catch (MiddlException middlException){
+            assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        }catch (MeedlException middlException){
             log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
         }
     }
@@ -156,9 +156,9 @@ class UserIdentityServiceTest {
            favour.setPassword("Kayodebbn");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
     @Test
@@ -167,9 +167,9 @@ class UserIdentityServiceTest {
            favour.setPassword("password@123");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     } @Test
     void createPasswordWithoutSmallLetters(){
@@ -177,9 +177,9 @@ class UserIdentityServiceTest {
            favour.setPassword("PASSWORD@123");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
     @Test
@@ -188,9 +188,9 @@ class UserIdentityServiceTest {
            favour.setPassword("Password@#$%");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
     @Test
@@ -199,9 +199,9 @@ class UserIdentityServiceTest {
            favour.setPassword("Password1234");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
     @Test
@@ -210,9 +210,9 @@ class UserIdentityServiceTest {
            favour.setPassword("99900000001234");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
  @Test
@@ -221,9 +221,9 @@ class UserIdentityServiceTest {
            favour.setPassword("@#$#$%^&&&");
            String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
            assertNotNull(generatedToken);
-           assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-       }catch (MiddlException middlException){
-           log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+           assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+       }catch (MeedlException meedlException){
+           log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
        }
     }
      @Test
@@ -238,13 +238,13 @@ class UserIdentityServiceTest {
     void createPasswordWithEmptyToken(){
         favour.setPassword("passwoRd@123");
         String generatedToken = StringUtils.EMPTY;
-        assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
     }
     @Test
     void createPasswordWithNullToken(){
         favour.setPassword("passwoRd@123");
         String generatedToken =null;
-        assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
     }
 
     @Test
@@ -252,9 +252,9 @@ class UserIdentityServiceTest {
         try {
             favour.setPassword(null);
             String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
-            assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-        }catch (MiddlException middlException){
-            log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+            assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -263,9 +263,9 @@ class UserIdentityServiceTest {
         try {
             favour.setPassword(StringUtils.EMPTY);
             String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
-            assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-        }catch (MiddlException middlException){
-            log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+            assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -274,9 +274,9 @@ class UserIdentityServiceTest {
         try {
             favour.setPassword("passwoRd@123");
             String generatedToken = tokenGeneratorOutputPort.generateToken(favour.getEmail());
-            assertThrows(MiddlException.class,()-> createUserUseCase.createPassword(generatedToken,favour.getPassword()));
-        }catch (MiddlException middlException){
-            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+            assertThrows(MeedlException.class,()->createUserUseCase.createPassword(generatedToken,favour.getPassword()));
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -284,30 +284,30 @@ class UserIdentityServiceTest {
     @Order(3)
     void login(){
         try {
-            assertThrows(MiddlException.class,()-> createUserUseCase.login(favour));
+            assertThrows(MeedlException.class,()->createUserUseCase.login(favour));
             favour.setPassword(password);
             createUserUseCase.login(favour);
-        }catch (MiddlException middlException){
-            log.info("{} {}",middlException.getClass().getName(),middlException.getMessage());
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
     @Test
     void loginWithInvalidPassword(){
        favour.setPassword("Invalid@456");
-       assertThrows(MiddlException.class,()-> createUserUseCase.login(favour));
+       assertThrows(MeedlException.class,()->createUserUseCase.login(favour));
     }
 
     @Test
     void loginWithNullPassword(){
        favour.setPassword(null);
-       assertThrows(MiddlException.class,()-> createUserUseCase.login(favour));
+       assertThrows(MeedlException.class,()->createUserUseCase.login(favour));
     }
 
     @Test
     void loginWithEmptyPassword(){
        favour.setPassword(StringUtils.EMPTY);
-       assertThrows(MiddlException.class,()-> createUserUseCase.login(favour));
+       assertThrows(MeedlException.class,()->createUserUseCase.login(favour));
     }
 
 
@@ -334,8 +334,8 @@ class UserIdentityServiceTest {
             // Re-login to verify the new password works
             createUserUseCase.login(favour);
 
-        } catch (MiddlException middlException) {
-            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        } catch (MeedlException meedlException) {
+            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -348,9 +348,9 @@ class UserIdentityServiceTest {
             favour.setId(userId);
             favour.setRole(role);
             favour.setNewPassword(newPassword);
-            assertThrows(MiddlException.class,()-> createUserUseCase.changePassword(favour));
-        } catch (MiddlException middlException) {
-            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+            assertThrows(MeedlException.class,()-> createUserUseCase.changePassword(favour));
+        } catch (MeedlException meedlException) {
+            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -363,9 +363,9 @@ class UserIdentityServiceTest {
             favour.setId(userId);
             favour.setRole(role);
             favour.setNewPassword(password);
-            assertThrows(MiddlException.class,()-> createUserUseCase.changePassword(favour));
-        } catch (MiddlException middlException) {
-            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+            assertThrows(MeedlException.class,()-> createUserUseCase.changePassword(favour));
+        } catch (MeedlException meedlException) {
+            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -387,8 +387,8 @@ class UserIdentityServiceTest {
             createUserUseCase.login(favour);
 
 
-        } catch (MiddlException middlException) {
-            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        } catch (MeedlException meedlException) {
+            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
@@ -406,16 +406,16 @@ class UserIdentityServiceTest {
 
             favour.setPassword("Reset@123");
             favour.setEmail("Invalid@gmail.com");
-            assertThrows(MiddlException.class,()-> createUserUseCase.resetPassword(favour.getEmail(),favour.getPassword()));
+            assertThrows(MeedlException.class,()->createUserUseCase.resetPassword(favour.getEmail(),favour.getPassword()));
 
-        } catch (MiddlException middlException) {
-            log.info("Exception occurred: {} {}", middlException.getClass().getName(), middlException.getMessage());
+        } catch (MeedlException meedlException) {
+            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
 
     @Test
     void enableAccountThatHasBeenEnabled() {
-       assertThrows(MiddlException.class, () -> createUserUseCase.enableAccount(favour));
+       assertThrows(MeedlException.class, () -> createUserUseCase.enableAccount(favour));
         }
 
     @Test
@@ -425,27 +425,27 @@ class UserIdentityServiceTest {
              assertNotNull(userIdentity);
              assertEquals(favour.getFirstName(),userIdentity.getFirstName());
 
-         }catch (MiddlException middlException){
-             log.info("{} {}", middlException.getClass().getName(),middlException.getMessage());
+         }catch (MeedlException meedlException){
+             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
          }
     }
 
     @Test
      void forgotPasswordWithInvalidEmailAAddress() {
         favour.setEmail("wrongemail@gmail.com");
-        assertThrows(MiddlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
+        assertThrows(MeedlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
     }
 
     @Test
     void forgotPasswordWithNullEmailAAddress() {
         favour.setEmail(null);
-        assertThrows(MiddlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
+        assertThrows(MeedlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
     }
 
     @Test
     void forgotPasswordWithEmptyEmailAddress() {
         favour.setEmail(StringUtils.EMPTY);
-        assertThrows(MiddlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
+        assertThrows(MeedlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
     }
 
 

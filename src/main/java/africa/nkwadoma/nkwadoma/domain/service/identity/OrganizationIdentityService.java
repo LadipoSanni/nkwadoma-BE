@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -29,8 +29,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
 
     @Override
-    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MiddlException {
-
+    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
 
         organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
@@ -45,12 +44,12 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
 
     @Override
-    public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
     }
 
-    private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MiddlException {
+    private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
@@ -59,12 +58,17 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         return organizationIdentity;
     }
 
-    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MiddlException {
+    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMiddlUser());
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+
+        //send invite email to organization admin
+        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
+
+        log.info("sent email");
         return organizationEmployeeIdentity;
     }
 

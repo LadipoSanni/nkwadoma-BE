@@ -8,7 +8,17 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserIdentityRequest {
-    private String email;
-    private String password;
 
+    private String id;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private boolean emailVerified;
+    private boolean enabled;
+    private String role;
+    private String createdBy;
+    private String password;
+    private String newPassword;
+    private String organizationDomain;
 }

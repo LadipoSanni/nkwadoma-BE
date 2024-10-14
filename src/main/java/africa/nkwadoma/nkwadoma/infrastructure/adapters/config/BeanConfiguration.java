@@ -33,6 +33,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.PasswordHistoryRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.token.TokenGeneratorAdapter;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.context.annotation.Bean;
@@ -84,8 +85,9 @@ public class BeanConfiguration {
 
     @Bean
     public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository,
-                                                                   OrganizationIdentityMapper organizationIdentityMapper){
-        return new OrganizationIdentityAdapter(organizationEntityRepository,organizationIdentityMapper);
+                                                                   OrganizationIdentityMapper organizationIdentityMapper,
+                                                                   ServiceOfferEntityRepository serviceOfferEntityRepository){
+        return new OrganizationIdentityAdapter(organizationEntityRepository, serviceOfferEntityRepository, organizationIdentityMapper);
     }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
@@ -133,8 +135,6 @@ public class BeanConfiguration {
     public NotificationService emailService(EmailOutputPort emailOutputPort, TokenGeneratorOutputPort tokenGeneratorOutputPort){
         return new NotificationService(emailOutputPort,tokenGeneratorOutputPort);
     }
-
-
 
     @Bean
     public JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter() {

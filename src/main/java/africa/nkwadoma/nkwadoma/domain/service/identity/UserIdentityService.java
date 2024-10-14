@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.PasswordHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -41,14 +41,10 @@ public class UserIdentityService implements CreateUserUseCase {
 
 
     @Override
-    public UserIdentity inviteColleague(UserIdentity userIdentity) throws MiddlException {
-        //UserIdentity inviter = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
-
-        //OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(inviter.getId());
-        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy());
-        //check if employee was found, if not throw an error
-        //userIdentity.setRole(inviter.getRole());
-        validateEmailDomain(userIdentity.getEmail(), foundEmployee.getMiddlUser().getEmail());
+    public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
+        UserIdentityValidator.validateUserIdentity(userIdentity);
+        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
+        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMiddlUser().getEmail().trim());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
@@ -64,7 +60,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void createPassword(String token, String password) throws MiddlException {
+    public void createPassword(String token, String password) throws MeedlException {
         validatePassword(password);
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
@@ -97,14 +93,14 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity)throws MiddlException {
+    public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
         UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
 
     @Override
-    public void changePassword(UserIdentity userIdentity) throws MiddlException {
+    public void changePassword(UserIdentity userIdentity) throws MeedlException {
         validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
         if(checkNewPasswordMatchLastFive(userIdentity.getNewPassword(), userIdentity.getId())){
@@ -125,7 +121,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String email, String password) throws MiddlException {
+    public void resetPassword(String email, String password) throws MeedlException {
         UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
         validatePassword(password);
         identityManagerOutPutPort.createPassword(foundUser.getEmail(),password);
@@ -134,7 +130,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity enableAccount(UserIdentity userIdentity) throws MiddlException {
+    public UserIdentity enableAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
         userIdentity.setEnabled(true);
@@ -143,7 +139,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity disableAccount(UserIdentity userIdentity) throws MiddlException {
+    public UserIdentity disableAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
         userIdentity.setEnabled(false);
@@ -152,12 +148,12 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity forgotPassword(String email) throws MiddlException {
+    public UserIdentity forgotPassword(String email) throws MeedlException {
        validateEmail(email);
       return userIdentityOutputPort.findByEmail(email);
     }
 
-    private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MiddlException {
+    private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MeedlException {
         List<PasswordHistory> passwordHistories = passwordHistoryOutputPort.findByUser(userId);
         int checkCount = Math.min(5, passwordHistories.size());
         for (int index = passwordHistories.size() - 1; index >= passwordHistories.size() - checkCount; index--) {

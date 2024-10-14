@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -30,7 +30,7 @@ public class EmailAdapter implements EmailOutputPort {
     private String mailSender;
 
     @Override
-    public void sendEmail(Email email) throws MiddlException {
+    public void sendEmail(Email email) throws MeedlException {
         try {
             String emailContent = templateEngine.process(email.getTemplate(), email.getContext());
             MimeMessage mailMessage = getMimeMessage(email, emailContent);

@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,10 +14,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MiddlMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
-public class UserIdentityValidator extends MiddleValidator {
-     public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MiddlException {
+@Slf4j
+public class UserIdentityValidator extends MeedlValidator {
+     public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
          if (CollectionUtils.isEmpty(userIdentities)){
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
@@ -25,8 +27,9 @@ public class UserIdentityValidator extends MiddleValidator {
          }
      }
 
-     public static void validateUserIdentity(UserIdentity userIdentity) throws MiddlException {
+     public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
          if (ObjectUtils.isEmpty(userIdentity)){
+             log.error("{} - {}",USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentity);
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          if (userIdentity.getRole() == null || StringUtils.isEmpty(userIdentity.getRole().name()))
@@ -53,6 +56,7 @@ public class UserIdentityValidator extends MiddleValidator {
          validateUserEmail(inviteeEmail);
          validateUserEmail(inviterEmail);
          if (!compareEmailDomain(inviteeEmail,inviterEmail)){
+             log.error("{} - {} : {}",DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage(), inviteeEmail, inviterEmail);
              throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
          }
 
@@ -65,7 +69,7 @@ public class UserIdentityValidator extends MiddleValidator {
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
 
-    public static void validatePassword(String password) throws MiddlException {
+    public static void validatePassword(String password) throws MeedlException {
         validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()){

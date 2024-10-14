@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.keycloak.admin.client.resource.UserResource;
@@ -12,25 +12,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IdentityManagerOutPutPort {
-    UserIdentity createUser(UserIdentity userIdentity) throws MiddlException;
+    UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
-    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MiddlException;
+    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MeedlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
-    UserResource getUserResource(UserIdentity userIdentity) throws MiddlException;
-    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MiddlException;
+    UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
+    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
-    void deleteUser(UserIdentity userIdentity) throws MiddlException;
+    void deleteUser(UserIdentity userIdentity) throws MeedlException;
 
-    Optional<UserIdentity> getUserByEmail(String email) throws MiddlException;
+    Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
 
-    OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MiddlException;
-    void createPassword(String email, String password) throws MiddlException;
-    AccessTokenResponse login(UserIdentity userIdentity) throws MiddlException;
-    void changePassword(UserIdentity userIdentity)throws MiddlException;
-    UserIdentity enableUserAccount(UserIdentity userIdentity) throws MiddlException;
-    UserIdentity disableUserAccount(UserIdentity userIdentity) throws MiddlException;
+    OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
+    void createPassword(String email, String password) throws MeedlException;
+    AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
+    void changePassword(UserIdentity userIdentity)throws MeedlException;
+    UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
+    UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
 
 }

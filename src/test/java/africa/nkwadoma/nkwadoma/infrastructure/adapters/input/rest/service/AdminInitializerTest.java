@@ -2,18 +2,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +30,7 @@ class AdminInitializerTest {
         UserIdentity userIdentity = null;
         try {
             userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
-        } catch (MiddlException e) {
+        } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }finally {
             log.error("finally block initiated...");
@@ -44,7 +39,7 @@ class AdminInitializerTest {
                 assertNotNull(userIdentity.getId());
                 identityManagerOutPutPort.deleteUser(userIdentity);
                 userIdentityOutputPort.deleteUserById(userIdentity.getId());
-            } catch (MiddlException ex) {
+            } catch (MeedlException ex) {
                 log.error(ex.getMessage());
             }
         }
