@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -32,7 +33,7 @@ class ProgramPersistenceAdapterTest {
 
     @BeforeEach
     void setUp() {
-        userIdentity = UserIdentity.builder().firstName("Fred").role("PORTFOLIO_MANAGER").
+        userIdentity = UserIdentity.builder().firstName("Fred").role(PORTFOLIO_MANAGER).
                 lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();

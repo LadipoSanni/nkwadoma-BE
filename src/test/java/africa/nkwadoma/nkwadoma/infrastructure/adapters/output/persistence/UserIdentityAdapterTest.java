@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -37,7 +38,7 @@ class UserIdentityAdapterTest {
         john.setEmailVerified(true);
         john.setEnabled(true);
         john.setCreatedAt(LocalDateTime.now().toString());
-        john.setRole("TRAINEE");
+        john.setRole(TRAINEE);
         john.setCreatedBy("Smart");
 
     }
@@ -115,11 +116,6 @@ class UserIdentityAdapterTest {
     @Test
     void saveUserWithNullRole(){
         john.setRole(null);
-        assertThrows(MeedlException.class, ()->userIdentityOutputPort.save(john));
-    }
-    @Test
-    void saveUserWithEmptyRole(){
-        john.setRole(StringUtils.EMPTY);
         assertThrows(MeedlException.class, ()->userIdentityOutputPort.save(john));
     }
 

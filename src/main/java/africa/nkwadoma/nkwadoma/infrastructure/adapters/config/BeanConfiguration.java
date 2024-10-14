@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;

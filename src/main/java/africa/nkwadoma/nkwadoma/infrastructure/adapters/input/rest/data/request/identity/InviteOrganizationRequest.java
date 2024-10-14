@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,6 @@ public class InviteOrganizationRequest {
     private String adminFirstName;
     private String adminLastName;
     private String adminEmail;
-    private String adminRole;
+    private IdentityRole adminRole;
     private String createdBy;
 }
