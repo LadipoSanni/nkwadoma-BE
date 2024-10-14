@@ -34,7 +34,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .firstName(userIdentity.getFirstName())
                 .build();
 
-        handleEmailConnectionIssue(userIdentity, email);
+        sendMail(userIdentity, email);
 
     }
     @Override
@@ -48,7 +48,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .firstName(userIdentity.getFirstName())
                 .build();
 
-        handleEmailConnectionIssue(userIdentity, email);
+        sendMail(userIdentity, email);
     }
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
@@ -57,7 +57,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 
-    private void handleEmailConnectionIssue(UserIdentity userIdentity, Email email) {
+    private void sendMail(UserIdentity userIdentity, Email email) {
         try {
             emailOutputPort.sendEmail(email);
         } catch (MeedlException e) {

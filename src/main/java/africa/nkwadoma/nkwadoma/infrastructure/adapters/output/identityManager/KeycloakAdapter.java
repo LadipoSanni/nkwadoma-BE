@@ -120,6 +120,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
+        log.info("User ID: " + user.getId());
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
         return enableUserAccount(userIdentity);
     }
@@ -151,15 +152,17 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
         validateDataElement(userIdentity.getEmail());
-        if (userIdentity.isEnabled()) {
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+                .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
-        UserRepresentation userRepresentation = mapper.map(userIdentity);
+        UserRepresentation userRepresentation = mapper.map(foundUser);
         userRepresentation.setEnabled(Boolean.TRUE);
         userRepresentation.setEmailVerified(Boolean.TRUE);
         UserResource userResource = getUserResource(userIdentity);
         userResource.update(userRepresentation);
-        return userIdentity;
+        return foundUser;
     }
 
     @Override

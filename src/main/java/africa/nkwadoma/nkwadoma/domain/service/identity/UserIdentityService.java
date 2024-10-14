@@ -13,6 +13,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
@@ -37,6 +40,8 @@ public class UserIdentityService implements CreateUserUseCase {
     private final PasswordEncoder passwordEncoder;
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
+    private final UserIdentityMapper userIdentityMapper;
+    private final UserEntityRepository userEntityRepository;
 
 
 
@@ -66,7 +71,8 @@ public class UserIdentityService implements CreateUserUseCase {
         String email = tokenGeneratorOutputPort.decodeJWT(token);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
         userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        userIdentity = userIdentityOutputPort.save(userIdentity);
+        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
+        userEntityRepository.save(userEntity);
         return userIdentity;
     }
 
