@@ -262,7 +262,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(userIdentity.getEmail());
     }
-    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MiddlException {
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException {
         validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)
