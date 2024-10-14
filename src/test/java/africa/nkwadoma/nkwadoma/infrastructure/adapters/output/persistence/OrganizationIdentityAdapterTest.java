@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +37,7 @@ class OrganizationIdentityAdapterTest {
         joel.setEmailVerified(true);
         joel.setEnabled(true);
         joel.setCreatedAt(LocalDateTime.now().toString());
-        joel.setRole("ADMIN");
+        joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
         joel.setCreatedBy("Ayo");
 
         amazingGrace = new OrganizationIdentity();
@@ -188,7 +190,7 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void findNullOrganization(){
-        amazingGrace.setId("");
+        amazingGrace.setId(null);
         assertThrows(MeedlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
     }
     @Test
