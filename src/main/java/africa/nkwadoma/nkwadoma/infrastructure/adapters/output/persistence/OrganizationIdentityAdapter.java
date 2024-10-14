@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
@@ -18,6 +19,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAI
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
+@Slf4j
 @RequiredArgsConstructor
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
@@ -32,7 +34,9 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         ServiceOfferingEntity serviceOfferingEntity = organizationEntity.getServiceOfferingEntity();
         serviceOfferEntityRepository.save(serviceOfferingEntity);
+        log.info("Service offering entity saved successfully {}", serviceOfferingEntity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
+        log.info("Organization entity saved successfully");
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
@@ -60,7 +64,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-
     }
 
     @Override

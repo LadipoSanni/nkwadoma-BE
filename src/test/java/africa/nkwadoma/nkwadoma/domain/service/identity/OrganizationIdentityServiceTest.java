@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizat
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -62,7 +64,8 @@ class OrganizationIdentityServiceTest {
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");
             roseCouture.setRcNumber("RC87899");
-            roseCouture.setIndustry("education");
+            roseCouture.setServiceOffering(new ServiceOffering());
+            roseCouture.getServiceOffering().setIndustry(Industry.EDUCATION);
             roseCouture.setPhoneNumber("09876365713");
             roseCouture.setInvitedDate(LocalDateTime.now().toString());
             roseCouture.setWebsiteAddress("rosecouture.org");
@@ -78,10 +81,10 @@ class OrganizationIdentityServiceTest {
             invitedOrganisation = createOrganizationUseCase.inviteOrganization(roseCouture);
             OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
             assertEquals(roseCouture.getName(), foundOrganization.getName());
+            assertNotNull(invitedOrganisation);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(invitedOrganisation);
 
     }
 

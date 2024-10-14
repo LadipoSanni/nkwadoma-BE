@@ -33,8 +33,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         validateOrganizationIdentityDetails(organizationIdentity);
 
         organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
+        log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         //save entities to DB
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
+        log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
+        //send invite email to organization admin
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
@@ -47,6 +50,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+        log.info("Organization service validated is : {}",organizationIdentity);
     }
 
     private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -65,10 +69,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMiddlUser());
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
-        //send invite email to organization admin
-        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
-
-        log.info("sent email");
         return organizationEmployeeIdentity;
     }
 
