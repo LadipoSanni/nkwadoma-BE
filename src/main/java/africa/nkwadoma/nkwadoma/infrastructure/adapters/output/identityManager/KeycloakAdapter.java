@@ -132,10 +132,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
+        log.info("Calling keycloak server----");
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
+            log.info("Login credentials: {}", keycloakClient.tokenManager());
             TokenManager tokenManager = keycloakClient.tokenManager();
-
+            log.info("Access Token : {}", keycloakClient.tokenManager().getAccessToken().getToken());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
             throw new IdentityException(exception.getMessage());
@@ -199,6 +201,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     private Keycloak getKeycloak(UserIdentity userIdentity) {
+        log.info("User credentials: {}", userIdentity.toString());
         return KeycloakBuilder.builder()
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(KEYCLOAK_REALM)

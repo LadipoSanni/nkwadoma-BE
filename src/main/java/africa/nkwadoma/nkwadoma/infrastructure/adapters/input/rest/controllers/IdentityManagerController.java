@@ -32,7 +32,8 @@ public class IdentityManagerController {
                     body(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                     statusCode(HttpStatus.OK.name()).build());
         } catch (MeedlException e) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -6,11 +6,11 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import java.util.*;
 
 public interface ProgramOutputPort {
-    Program findProgramByName(String programName) throws ResourceNotFoundException;
+    Program findProgramByName(String programName) throws MeedlException;
     Program saveProgram(Program program) throws MeedlException;
     boolean programExists(String programName) throws MeedlException;
 
-    void deleteProgram(String programId);
+    void deleteProgram(String programId) throws MeedlException;
 
-    Program findProgramById(String programId) throws ResourceNotFoundException;
+    Program findProgramById(String programId) throws MeedlException;
 }
