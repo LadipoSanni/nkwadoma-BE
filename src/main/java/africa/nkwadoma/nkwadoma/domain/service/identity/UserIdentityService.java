@@ -42,13 +42,9 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
-        //UserIdentity inviter = userIdentityOutputPort.findById(userIdentity.getCreatedBy());
-
-        //OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(inviter.getId());
-        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy());
-        //check if employee was found, if not throw an error
-        //userIdentity.setRole(inviter.getRole());
-        validateEmailDomain(userIdentity.getEmail(), foundEmployee.getMiddlUser().getEmail());
+        UserIdentityValidator.validateUserIdentity(userIdentity);
+        OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
+        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMiddlUser().getEmail().trim());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
