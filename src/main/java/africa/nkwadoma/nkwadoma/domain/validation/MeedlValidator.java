@@ -3,8 +3,11 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.glassfish.jaxb.core.v2.*;
+import org.hibernate.validator.internal.constraintvalidators.hv.*;
 
 import java.math.BigDecimal;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVALID_EMAIL_ADDRESS;
@@ -35,6 +38,11 @@ public class MeedlValidator {
 
     public static void validateFloatDataElement(Float dataElement) throws MeedlException {
         if (dataElement == null){
+            throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+    }
+    public static void validateIntegerDataElement(int dataElement) throws MeedlException {
+        if (dataElement == 0){
             throw new MeedlException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }

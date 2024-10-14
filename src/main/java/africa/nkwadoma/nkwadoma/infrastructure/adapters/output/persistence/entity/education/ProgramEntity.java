@@ -24,6 +24,7 @@ public class ProgramEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String programDescription;
+    @Column(unique = true)
     private String name;
     @Lob
     private String objectives;

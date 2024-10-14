@@ -39,14 +39,16 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity findByEmail(String email) throws MeedlException {
         validateEmail(email);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).
+                orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
     public void delete(String id) throws MeedlException {
         validateDataElement(id);
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).orElseThrow(()-> new IdentityException(RC_NUMBER_NOT_FOUND.getMessage()));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
+                orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
     }
 
@@ -54,6 +56,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findById(String id) throws MeedlException {
+        validateDataElement(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);

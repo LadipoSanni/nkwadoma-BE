@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -31,4 +34,10 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateDataElement(this.name);
+        MeedlValidator.validateDataElement(this.createdBy);
+        MeedlValidator.validateDataElement(this.organizationId);
+    }
 }

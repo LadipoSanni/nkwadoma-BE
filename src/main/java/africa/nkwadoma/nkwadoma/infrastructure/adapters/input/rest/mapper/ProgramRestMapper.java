@@ -16,6 +16,5 @@ public interface ProgramRestMapper {
     @Mapping(source = "meedlUserId", target = "createdBy")
     Program toProgram(ProgramCreateRequest programCreateRequest, String meedlUserId);
 
-    @InheritInverseConfiguration
     ProgramResponse toProgramResponse(Program program);
 }
