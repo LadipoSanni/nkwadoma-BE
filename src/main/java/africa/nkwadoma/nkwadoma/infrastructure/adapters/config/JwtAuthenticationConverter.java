@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import com.nimbusds.jwt.*;
 import lombok.*;

@@ -30,15 +30,35 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
     @Override
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        validateOrganizationIdentityDetails(organizationIdentity);
+
+        organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
+        //save entities to DB
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
+        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
+
+        log.info("sent email");
+        log.info("organization identity saved is : {}",organizationIdentity);
+       return organizationIdentity;
+    }
+
+
+    @Override
+    public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-        organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
-        UserIdentity newUser = identityManagerOutPutPort.createUser(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
+    }
+
+    private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
+        organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
         employeeIdentity.setMiddlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
+        return organizationIdentity;
+    }
 
-        //save entities to DB
+    private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());
@@ -49,9 +69,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
-       return null;
+        return organizationEmployeeIdentity;
     }
-
 
 
 

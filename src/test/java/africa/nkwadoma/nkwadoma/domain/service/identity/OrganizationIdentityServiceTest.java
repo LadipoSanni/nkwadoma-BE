@@ -48,7 +48,7 @@ class OrganizationIdentityServiceTest {
         void setUp(){
 
             UserIdentity sarah = new UserIdentity();
-            sarah.setRole(IdentityRole.PORTFOLIO_MANAGER.toString());
+            sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
             sarah.setFirstName("Sarah");
             sarah.setLastName("Jacobs");
             sarah.setEmail("divinemercy601@gmail.com");

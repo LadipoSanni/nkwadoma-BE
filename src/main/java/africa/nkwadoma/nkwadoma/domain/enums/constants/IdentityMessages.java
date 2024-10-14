@@ -13,6 +13,7 @@ public enum IdentityMessages{
     ORGANIZATION_NOT_FOUND("Organization not found"),
     CLIENT_EXIST("Client already exists"),
     INVALID_REGISTRATION_DETAILS("Invalid registration details"),
+    INVALID_VALID_ROLE("Role is required"),
     USER_IDENTITY_ALREADY_EXISTS("UserIdentity already exists"),
     ENCODING_VALUE("utf-8"),
     CONTEXT_TOKEN("token"),
