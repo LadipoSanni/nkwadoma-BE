@@ -116,6 +116,7 @@ class KeycloakAdapterTest {
     void login(){
         try {
             john.setPassword("passwordJ@345");
+            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
             identityManagementOutputPort.login(john);
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
@@ -150,8 +151,12 @@ class KeycloakAdapterTest {
     @Test
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
+        try {
+            identityManagementOutputPort.enableUserAccount(john);
+        } catch (MeedlException e) {
+            log.info("{}", e.getMessage());
+        }
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
-
     }
 
     @Test

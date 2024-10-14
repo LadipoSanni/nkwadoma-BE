@@ -60,28 +60,14 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void createPassword(String token, String password) throws MeedlException {
+    public UserIdentity createPassword(String token, String password) throws MeedlException {
         validatePassword(password);
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-
-//        if (!userIdentity.isEmailVerified() || !userIdentity.isEnabled()){
-//            userIdentity.setEmailVerified(true);
-//            userIdentity.setEnabled(true);
-//            String encodedPassword = passwordEncoder.encode(password);
-//            userIdentity.setPassword(password);
-//            List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-//            if (passwordHistories == null) {
-//                passwordHistories = new ArrayList<>();
-//            }
-//            PasswordHistory passwordHistory = getPasswordHistory(password, userIdentity);
-//
-//            passwordHistories.add(passwordHistory);
-//            userIdentityOutputPort.save(userIdentity);
-            identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-//        }
-//       else throw new IdentityException(PASSWORD_HAS_BEEN_CREATED.getMessage());
+        identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        userIdentityOutputPort.save(userIdentity);
+        return userIdentity;
     }
 
     private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {
@@ -133,7 +119,6 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity enableAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
-        userIdentity.setEnabled(true);
         userIdentityOutputPort.save(userIdentity);
         return userIdentity;
     }

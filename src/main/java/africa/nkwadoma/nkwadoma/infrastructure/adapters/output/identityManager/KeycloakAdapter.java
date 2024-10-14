@@ -116,7 +116,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public void createPassword(String email, String password) throws MeedlException {
-
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
@@ -127,19 +126,15 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         credential.setValue(password);
         credential.setTemporary(Boolean.FALSE);
         userResource.resetPassword(credential);
-        user.setEmailVerified(Boolean.TRUE);
-        user.setEnabled(Boolean.TRUE);
         userResource.update(user);
+        enableUserAccount(userIdentity);
     }
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
-        log.info("Calling keycloak server----");
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
-            log.info("Login credentials: {}", keycloakClient.tokenManager());
             TokenManager tokenManager = keycloakClient.tokenManager();
-            log.info("Access Token : {}", keycloakClient.tokenManager().getAccessToken().getToken());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
             throw new IdentityException(exception.getMessage());
@@ -166,15 +161,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
-
-        // TODO: Getting user representation is not necessary
-        List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
-        for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(Boolean.TRUE);
-            UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
-            userResource.update(userRepresentation);}
+        UserRepresentation userRepresentation = getUserRepresentation(foundUser, Boolean.TRUE);
+        userRepresentation.setEnabled(Boolean.TRUE);
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        UserResource userResource = getUserResource(foundUser);
+        userResource.update(userRepresentation);
         return foundUser;
-
     }
 
     @Override
