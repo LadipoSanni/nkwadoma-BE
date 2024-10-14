@@ -75,7 +75,7 @@ public class InvestmentVehicleController {
         }
     }
 
-    @GetMapping("view-investment-vehicle-details/{id}")
+    @GetMapping("investment-vehicle-details/{id}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id){
         try {
