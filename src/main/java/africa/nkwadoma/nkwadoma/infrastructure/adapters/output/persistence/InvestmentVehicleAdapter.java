@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.*;
@@ -42,6 +43,12 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
         }
+    }
+
+    @Override
+    public List<InvestmentVehicle> findAllInvestmentVehicle() {
+        return investmentVehicleRepository.findAll().stream()
+                .map(investmentVehicleMapper::toInvestmentVehicleIdentity).toList();
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -92,6 +93,7 @@ class InvestmentVehicleAdapterTest {
 
     }
 
+    @Order(2)
     @Test
     void checkIfInvestmentVehicleExistWithSameEntity(){
         try{
@@ -171,7 +173,7 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
     }
 
-    @Order(2)
+    @Order(3)
     @Test
     void UpdateInvestmentVehicleToCommercial() throws MeedlException {
         InvestmentVehicle existingInvestmentVehicleIdentity = investmentVehicleOutputPort.findById(investmentVehicleId);
@@ -184,7 +186,7 @@ class InvestmentVehicleAdapterTest {
         assertNotEquals(capitalGrowth.getInvestmentVehicleType().toString(), foundUpdatedInvestmentVehicleIdentity.getInvestmentVehicleType().toString());
     }
 
-    @Order(3)
+    @Order(4)
     @Test
     void updateInvestmentVehicleName() throws MeedlException {
         InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
@@ -197,7 +199,7 @@ class InvestmentVehicleAdapterTest {
         assertNotEquals(capitalGrowth.getName(),foundUpdatedInvestmentVehicleIdentity.getName());
     }
 
-    @Order(4)
+    @Order(5)
     @Test
     void updateInvestmentVehicleNameWithExistingInvestmentVehicleNameButTheSameEntity() {
         try {
@@ -212,7 +214,7 @@ class InvestmentVehicleAdapterTest {
         }
     }
 
-    @Order(5)
+    @Order(6)
     @Test
     void  createInvestmentVehicleWithExistingInvestmentVehicleName() {
     try {
@@ -222,7 +224,7 @@ class InvestmentVehicleAdapterTest {
     }
 }
 
-    @Order(6)
+    @Order(7)
     @Test
     void updateNonExistentInvestmentVehicle() {
         try {
@@ -232,6 +234,14 @@ class InvestmentVehicleAdapterTest {
         }catch (MeedlException e){
             assertEquals("Investment vehicle not found",e.getMessage());
         }
+
+    }
+
+    @Order(8)
+    @Test
+    void findAllInvestmentVehicleInvestmentVehicle(){
+           List<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicle();
+           assertEquals(2,investmentVehicles.size());
 
     }
 

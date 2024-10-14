@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus.DEPLOYING;
 import static africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType.ENDOWMENT;
@@ -124,6 +125,14 @@ class InvestmentVehicleServiceTest {
         InvestmentVehicle updatedInvestmentVehicle =
                 investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
         assertNotEquals(fundGrowth.getMandate(),updatedInvestmentVehicle.getMandate());
+    }
+
+    @Test
+    @Order(6)
+    void viewAllInvestmentVehicle(){
+        List<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicle();
+        assertEquals(1,investmentVehicles.size());
     }
 
     @AfterAll

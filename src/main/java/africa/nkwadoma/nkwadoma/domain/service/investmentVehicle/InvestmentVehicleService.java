@@ -6,6 +6,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 
 public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
@@ -20,6 +22,11 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     @Override
     public void deleteInvestmentVehicle(String investmentId) {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+    }
+
+    @Override
+    public List<InvestmentVehicle> viewAllInvestmentVehicle() {
+        return investmentVehicleOutputPort.findAllInvestmentVehicle();
     }
 
 
