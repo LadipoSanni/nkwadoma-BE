@@ -11,6 +11,7 @@ import lombok.*;
 @Table(name = "organization")
 public class OrganizationEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String industry;
     private String name;
@@ -20,6 +21,7 @@ public class OrganizationEntity {
     private String registrationNumber;
     private String taxIdentity;
     private String phoneNumber;
-//    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-//    private List<UserEntity> organizationAdmins;
+    private int numberOfPrograms;
+    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+    private ServiceOfferingEntity serviceOfferingEntity;
 }

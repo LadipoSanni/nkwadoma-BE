@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MiddlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
@@ -53,7 +53,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
 
     @Override
-    public UserIdentity createUser(UserIdentity userIdentity) throws MiddlException{
+    public UserIdentity createUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentityDetails(userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         try{
@@ -74,24 +74,24 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public void deleteUser(UserIdentity userIdentity) throws MiddlException {
+    public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         if (StringUtils.isEmpty(userIdentity.getId())) {
             log.error("User id is empty");
-            throw new MiddlException("User does not exist");
+            throw new MeedlException("User does not exist");
         }
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();
         }catch (NotFoundException exception) {
             log.info("deleteUser called with invalid user id: {}", userIdentity.getId());
-            throw new MiddlException("User does not exist");
+            throw new MeedlException("User does not exist");
         }
 
     }
 
     @Override
-    public Optional<UserIdentity> getUserByEmail(String email) throws MiddlException {
+    public Optional<UserIdentity> getUserByEmail(String email) throws MeedlException {
         UserRepresentation userRepresentation = findUserByEmail(email);
         if (userRepresentation == null) {
             return Optional.empty();
@@ -101,7 +101,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentity(organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
@@ -109,15 +109,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             clientRepresentation = getClientRepresentation(organizationIdentity);
             organizationIdentity.setId(clientRepresentation.getId());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
-            throw new MiddlException(CLIENT_EXIST.getMessage());
+            throw new MeedlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
     }
 
     @Override
-    public void createPassword(String email, String password) throws MiddlException {
+    public void createPassword(String email, String password) throws MeedlException {
+
         List<UserRepresentation> users = getUserRepresentations(email);
-        if (users.isEmpty()) throw new MiddlException(USER_NOT_FOUND.getMessage());
+        if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
         UserResource userResource = getUserResource(userIdentity);
@@ -139,12 +140,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
-            throw new IdentityException(INVALID_CREDENTIALS.getMessage());
+            throw new IdentityException(exception.getMessage());
         }
     }
 
     @Override
-    public void changePassword(UserIdentity userIdentity) throws MiddlException {
+    public void changePassword(UserIdentity userIdentity) throws MeedlException {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(false);
         credential.setType(CredentialRepresentation.PASSWORD);
@@ -157,7 +158,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MiddlException {
+    public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
@@ -174,7 +175,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MiddlException {
+    public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException {
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
@@ -219,7 +220,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .search(email);
     }
 
-    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MiddlException {
+    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
                 .findByClientId(organizationIdentity.getId())
@@ -236,13 +237,13 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
 
-    public UserRepresentation findUserByEmail(String email) throws MiddlException {
+    public UserRepresentation findUserByEmail(String email) throws MeedlException {
         UserIdentityValidator.validateEmail(email);
         List<UserRepresentation> foundUsers = keycloak.realm(KEYCLOAK_REALM).users().search(email);
         return foundUsers.isEmpty() ? null : foundUsers.get(0);
     }
 
-    private void assignRole(UserIdentity userIdentity) throws MiddlException {
+    private void assignRole(UserIdentity userIdentity) throws MeedlException {
         try {
             RoleRepresentation roleRepresentation = getRoleRepresentation(userIdentity);
             UserResource userResource = getUserResource(userIdentity);
@@ -266,14 +267,14 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .search(userIdentity.getEmail(),exactMatch)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
     }
-    public UserResource getUserResource(UserIdentity userIdentity) throws MiddlException {
+    public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
                 .get(userIdentity.getId());
     }
-    public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MiddlException {
+    public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException {
         RoleRepresentation roleRepresentation;
         try {
             roleRepresentation = keycloak
@@ -286,12 +287,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return roleRepresentation;
     }
-    private void validateUserIdentity(UserIdentity userIdentity) throws MiddlException {
+    private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
         log.info("Validating userIdentity {}",userIdentity);
         if (userIdentity == null)
             throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
     }
-    private void validateUserIdentityDetails(UserIdentity userIdentity) throws MiddlException {
+    private void validateUserIdentityDetails(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         if (StringUtils.isEmpty(userIdentity.getEmail())
                 || StringUtils.isEmpty(userIdentity.getFirstName())
@@ -300,7 +301,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
         getRoleRepresentation(userIdentity);
     }
-    private void validateUserIdentityDeleteDetails(UserIdentity userIdentity) throws MiddlException {
+    private void validateUserIdentityDeleteDetails(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
     }
 
