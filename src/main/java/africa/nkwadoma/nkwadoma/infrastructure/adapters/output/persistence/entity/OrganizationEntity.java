@@ -21,6 +21,7 @@ public class OrganizationEntity {
     private String registrationNumber;
     private String taxIdentity;
     private String phoneNumber;
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
     @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private ServiceOfferingEntity serviceOfferingEntity;

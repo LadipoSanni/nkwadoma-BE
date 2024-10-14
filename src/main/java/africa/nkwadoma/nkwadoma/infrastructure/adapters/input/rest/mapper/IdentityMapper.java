@@ -6,7 +6,8 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface IdentityMapper {
-
+    @Mapping(source = "email", target = "email")
+    @Mapping(source = "password", target = "password")
     UserIdentity toIdentity(UserIdentityRequest userIdentityRequest);
 
 }

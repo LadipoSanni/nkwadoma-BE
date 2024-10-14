@@ -17,7 +17,7 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
-        validateInput(program);
+        program.validate();
         boolean programExists = programOutputPort.programExists(program.getName());
         if (programExists) {
             throw new ResourceAlreadyExistsException(PROGRAM_ALREADY_EXISTS.getMessage());

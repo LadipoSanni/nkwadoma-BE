@@ -8,6 +8,8 @@ import lombok.extern.slf4j.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,27 +33,32 @@ class ProgramServiceTest {
         program = Program.builder().name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").organizationId("68t46").
                 programType(ProgramType.VOCATIONAL).programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").
+                objectives("Program Objectives").createdBy("875565").
                 deliveryType(DeliveryType.ONSITE).mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).
                 build();
     }
 
-    @Test
-    void addProgramWithEmptyProgramName() {
-        program.setName(null);
-        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void addProgramWithEmptyProgramName(String programName) {
+        program.setName(programName);
+        assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
 
-    @Test
-    void addProgramWithEmptyDurationStatus() {
-        program.setDurationType(null);
-        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void addProgramWithInvalidCreatorId(String createdBy) {
+        program.setCreatedBy(createdBy);
+        assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
-    @Test
-    void addProgramWithEmptyOrganizationId() {
-        program.setOrganizationId(null);
-        assertThrows(InvalidInputException.class, ()->programService.createProgram(program));
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void addProgramWithEmptyOrganizationId(String organizationId) {
+        program.setOrganizationId(organizationId);
+        assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
+
     @Test
     void addProgramWithExistingName() {
         try {
@@ -65,7 +72,7 @@ class ProgramServiceTest {
     @Test
     void addProgram() {
         try {
-            when(programOutputPort.programExists(program.getName())).thenReturn(true);
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program addedProgram = programService.createProgram(program);
 
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());

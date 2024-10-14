@@ -1,33 +1,33 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProgramResponse{
-    private String programName;
-    private String objectives;
-    private String instituteId;
-    private String creatorId;
-    private LocalDateTime createdAt;
-    private String updatedBy;
+    private String id;
     private String programDescription;
-    private ActivationStatus programStatus;
-    private int programDuration;
-    private DeliveryType deliveryType;
-    private ProgramMode programMode;
+    private String name;
+    private String objectives;
+    private DurationType durationType;
+    private LocalDate programStartDate;
+    private int duration;
+    private ProgramMode mode;
     private ProgramType programType;
-    private String durationStatus;
+    private DeliveryType deliveryType;
+    private ActivationStatus programStatus;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String createdBy;
+    private String updatedBy;
+    private String organizationId;
 }
