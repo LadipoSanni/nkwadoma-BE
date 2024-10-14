@@ -9,8 +9,7 @@ import org.hibernate.validator.internal.constraintvalidators.hv.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVALID_EMAIL_ADDRESS;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 public class MeedlValidator {
 
@@ -20,8 +19,13 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateUUID(String UUID) throws MeedlException {
+    public static void validateUUID(String dataElement) throws MeedlException {
         //TODO
+        try {
+            UUID.fromString(dataElement);
+        } catch (IllegalArgumentException e) {
+            throw new MeedlException(UUID_NOT_VALID.getMessage());
+        }
     }
     public static void validateDataElement(String dataElement) throws MeedlException {
         if (StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement)) {

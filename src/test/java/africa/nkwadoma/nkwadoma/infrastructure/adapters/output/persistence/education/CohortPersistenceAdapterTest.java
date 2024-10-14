@@ -52,7 +52,7 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com"})
+    @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com","3gdgttebdindndd673ydieyendjdljdh"})
     void saveCohortWithInvalidCreator(String createdBy){
         //TODO validate for UUID
         elites.setCreatedBy(createdBy);
