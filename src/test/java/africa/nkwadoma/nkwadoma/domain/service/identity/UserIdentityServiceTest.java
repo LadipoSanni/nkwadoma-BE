@@ -92,7 +92,7 @@ class UserIdentityServiceTest {
     }
     @Test
     void  inviteColleagueWithNullUserIdentity(){
-        assertThrows(MeedlException.class,()->userIdentityService.inviteColleague(new UserIdentity()));
+        assertThrows(MeedlException.class,()->userIdentityService.inviteColleague(null));
     }
     @Test
     void  inviteColleagueWithEmptyUserIdentity(){
