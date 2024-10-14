@@ -11,6 +11,8 @@ import jakarta.validation.*;
 import lombok.*;
 import org.keycloak.representations.*;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
@@ -37,8 +39,10 @@ public class IdentityManagerController {
         }
     }
     @PostMapping("auth/invite-colleague")
-    public ResponseEntity<ApiResponse<?>> inviteColleague(@RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+            userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                     body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
