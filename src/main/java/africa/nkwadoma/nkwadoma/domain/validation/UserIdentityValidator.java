@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
+@Slf4j
 public class UserIdentityValidator extends MeedlValidator {
      public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
          if (CollectionUtils.isEmpty(userIdentities)){
@@ -27,6 +29,7 @@ public class UserIdentityValidator extends MeedlValidator {
 
      public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
          if (ObjectUtils.isEmpty(userIdentity)){
+             log.error("{} - {}",USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentity);
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          validateEmail(userIdentity.getEmail());
@@ -51,6 +54,7 @@ public class UserIdentityValidator extends MeedlValidator {
          validateUserEmail(inviteeEmail);
          validateUserEmail(inviterEmail);
          if (!compareEmailDomain(inviteeEmail,inviterEmail)){
+             log.error("{} - {} : {}",DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage(), inviteeEmail, inviterEmail);
              throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
          }
 
