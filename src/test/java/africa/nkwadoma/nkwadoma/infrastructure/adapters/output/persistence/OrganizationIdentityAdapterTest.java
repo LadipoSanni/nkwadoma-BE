@@ -149,7 +149,7 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullAdmin(){
-        //amazingGrace.setOrganizationAdmins(null);
+//        amazingGrace.setOrganizationAdmins(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
