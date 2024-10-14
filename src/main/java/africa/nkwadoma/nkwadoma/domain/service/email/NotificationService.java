@@ -53,6 +53,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
+        log.info("Token: ============> {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 

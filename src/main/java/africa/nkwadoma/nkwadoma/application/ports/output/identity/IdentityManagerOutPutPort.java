@@ -26,7 +26,7 @@ public interface IdentityManagerOutPutPort {
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
-    void createPassword(String email, String password) throws MeedlException;
+    UserIdentity createPassword(String email, String password) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;

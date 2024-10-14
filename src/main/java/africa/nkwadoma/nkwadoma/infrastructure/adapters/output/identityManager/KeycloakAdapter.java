@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -115,19 +116,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public void createPassword(String email, String password) throws MeedlException {
+    public UserIdentity createPassword(String email, String password) throws MeedlException {
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
-        UserResource userResource = getUserResource(userIdentity);
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(password);
-        credential.setTemporary(Boolean.FALSE);
-        userResource.resetPassword(credential);
-        userResource.update(user);
-        enableUserAccount(userIdentity);
+        return enableUserAccount(userIdentity);
     }
 
     @Override
@@ -156,17 +150,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
-        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
-                .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-        if (foundUser.isEnabled()) {
+        validateDataElement(userIdentity.getEmail());
+        if (userIdentity.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
-        UserRepresentation userRepresentation = getUserRepresentation(foundUser, Boolean.TRUE);
+        UserRepresentation userRepresentation = mapper.map(userIdentity);
         userRepresentation.setEnabled(Boolean.TRUE);
         userRepresentation.setEmailVerified(Boolean.TRUE);
-        UserResource userResource = getUserResource(foundUser);
+        UserResource userResource = getUserResource(userIdentity);
         userResource.update(userRepresentation);
-        return foundUser;
+        return userIdentity;
     }
 
     @Override

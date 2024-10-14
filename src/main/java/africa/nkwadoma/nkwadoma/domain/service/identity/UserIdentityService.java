@@ -65,8 +65,8 @@ public class UserIdentityService implements CreateUserUseCase {
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        userIdentityOutputPort.save(userIdentity);
+        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        userIdentity = userIdentityOutputPort.save(userIdentity);
         return userIdentity;
     }
 
