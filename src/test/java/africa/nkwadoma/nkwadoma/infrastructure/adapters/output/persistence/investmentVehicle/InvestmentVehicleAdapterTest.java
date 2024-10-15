@@ -257,7 +257,7 @@ class InvestmentVehicleAdapterTest {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleOutputPort.findById(investmentVehicleId);
         assertNotNull(investmentVehicle);
-        assertEquals(investmentVehicle.getId(),investmentId);
+        assertEquals(investmentVehicle.getId(),investmentVehicleId);
 
     }
 
