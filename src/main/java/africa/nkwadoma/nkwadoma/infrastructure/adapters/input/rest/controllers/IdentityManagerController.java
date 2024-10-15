@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import jakarta.validation.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
+@Slf4j
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class IdentityManagerController {
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
+            log.info("The user id of user inviting a colleague : {}",meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                     body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
