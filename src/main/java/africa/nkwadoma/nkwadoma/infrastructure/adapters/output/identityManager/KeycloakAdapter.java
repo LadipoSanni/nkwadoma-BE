@@ -55,19 +55,22 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentityDetails(userIdentity);
+        log.info("Done validating user identity details in keycloak adapter : {}",userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
             Response response = users.create(userRepresentation);
             if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                log.error("{} - {} --- Error occurred on attempting to create user on keycloak", Response.Status.CONFLICT, USER_IDENTITY_ALREADY_EXISTS.getMessage());
                 throw new IdentityException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
             }
             UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setId(createdUserRepresentation.getId());
 
             assignRole(userIdentity);
-            //userIdentity = userIdentityOutputPort.save(userIdentity);
+            log.info("User created on keycloak, role assigned : {}", createdUserRepresentation.getId());
         } catch (NotFoundException exception) {
+            log.error("{} - {} --- Error occurred on attempting to create user on keycloak", exception.getClass().getName(), exception.getMessage());
             throw new IdentityException(exception.getMessage());
         }
         return userIdentity;
@@ -102,6 +105,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentity(organizationIdentity);
+        log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
