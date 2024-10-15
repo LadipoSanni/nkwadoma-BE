@@ -2,9 +2,10 @@ name: Commit and PR Status Tracker
 
 on:
   schedule:
-    - cron: "0 11 * * *"  # Runs every day at 11:00 AM
-    - cron: "0 17 * * *"  # Runs every day at 5:00 PM
-    - cron: "0 23 * * *"  # Runs every day at 11:00 PM
+    - cron: "0 11 * * *"
+    - cron: "0 17 * * *"  
+    - cron: "45 13 * * *"
+    - cron: "0 23 * * *"  
 
 jobs:
   commit-pr-tracker:
