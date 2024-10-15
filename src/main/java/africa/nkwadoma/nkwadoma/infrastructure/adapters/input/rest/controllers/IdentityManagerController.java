@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
@@ -20,19 +20,28 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class IdentityManagerController {
-    private final IdentityManagerOutPutPort identityManagerOutPutPort;
+    private final CreateUserUseCase createUserUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
     public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
         try {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
-            AccessTokenResponse tokenResponse = identityManagerOutPutPort.login(userIdentity);
+            AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
             return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
                     body(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                     statusCode(HttpStatus.OK.name()).build());
         } catch (MeedlException e) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
+    }
+    @PostMapping("auth/invite-colleague")
+    public ResponseEntity<ApiResponse<?>> inviteColleague(@RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+            UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+            UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
+            return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
+                    body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                    statusCode(HttpStatus.OK.name()).build());
     }
 }

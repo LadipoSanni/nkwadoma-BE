@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import lombok.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class UserIdentity {
     private boolean emailVerified;
     private boolean enabled;
     private String createdAt;
-    private String role;
+    private IdentityRole role;
     private String createdBy;
     private String password;
     private String accessToken;

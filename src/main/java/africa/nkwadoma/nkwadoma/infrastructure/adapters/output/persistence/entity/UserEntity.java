@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +25,8 @@ public class UserEntity {
     private boolean emailVerified;
     private boolean enabled;
     private String createdAt;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private IdentityRole role;
     private String createdBy;
     private String password;
 }
