@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.keycloak.admin.client.resource.UserResource;
@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface IdentityManagerOutPutPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
-    UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MeedlException;
+    UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
@@ -26,7 +26,7 @@ public interface IdentityManagerOutPutPort {
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
-    void createPassword(String email, String password) throws MeedlException;
+    UserIdentity createPassword(String email, String password) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;

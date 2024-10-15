@@ -19,12 +19,16 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 @Slf4j
 public class UserIdentityValidator extends MeedlValidator {
      public static void validateUserIdentity(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
+         log.info("Started validdating for user identities (List) : {}", userIdentities);
+         log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
          if (CollectionUtils.isEmpty(userIdentities)){
+             log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          for(OrganizationEmployeeIdentity userIdentity : userIdentities){
              validateUserIdentity(userIdentity.getMiddlUser());
          }
+         log.info("Users identity validation completed... for user {} ", userIdentities);
      }
 
      public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {

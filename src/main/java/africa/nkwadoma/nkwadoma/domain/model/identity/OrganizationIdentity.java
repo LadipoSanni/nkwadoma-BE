@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class OrganizationIdentity {
     private String id;
-    private String industry;
     private String name;
     private String email;
     private String websiteAddress;

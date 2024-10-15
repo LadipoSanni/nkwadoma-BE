@@ -1,5 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -16,17 +17,9 @@ public class OrganizationEmployeeEntity {
     @Id
     @UuidGenerator
     private String id;
-//    @ManyToOne
-//    private OrganizationEntity organization;
     @ManyToOne
     private UserEntity middlUser;
-
     private String organization;
 
-
-//    private UserEntity middlUser;
-//
-//    private String organization;
-//    private String middlUser;
 
 }

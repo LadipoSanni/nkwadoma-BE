@@ -7,6 +7,7 @@ public enum MeedlMessages {
     EMPTY_INPUT_FIELD_ERROR("field cannot be null or empty"),
     INVALID_REQUEST("Request cannot be null or empty"),
     INVALID_EMAIL_ADDRESS("email address is not valid"),
+    INVALID_INDUSTRY_OR_SERVICE_OFFERING("Industry or service offering cannot be empty"),
     EMAIL_NOT_FOUND("email address cannot be found"),
     EMAIL_ALREADY_EXISTS("email address already exist"),
     EMAIL_INVITATION_SUBJECT("Invitation to Middl"),
