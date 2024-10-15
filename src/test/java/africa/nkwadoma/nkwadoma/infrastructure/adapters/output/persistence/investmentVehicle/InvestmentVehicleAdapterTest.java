@@ -199,17 +199,13 @@ class InvestmentVehicleAdapterTest {
 
     @Order(4)
     @Test
-    void updateInvestmentVehicleNameWithExistingInvestmentVehicleNameButTheSameEntity() {
-        try {
+    void updateInvestmentVehicleNameWithExistingInvestmentVehicleNameButTheSameEntity() throws MeedlException {
             InvestmentVehicle existingInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             assertNotNull(existingInvestmentVehicle);
             assertNotEquals(capitalGrowth.getName(),existingInvestmentVehicle.getName());
             existingInvestmentVehicle.setName("Growth Investment2");
             InvestmentVehicle updatedInvestmentVehicleIdentity = investmentVehicleOutputPort.save(existingInvestmentVehicle);
             assertEquals(existingInvestmentVehicle.getName(),updatedInvestmentVehicleIdentity.getName());
-        }catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
-        }
     }
 
     @Order(5)
@@ -256,14 +252,13 @@ class InvestmentVehicleAdapterTest {
 
     @Order(7)
     @Test
-    void findInvestmentVehicleDetailsById() {
-        try {
-            InvestmentVehicle investmentVehicle =
-                    investmentVehicleOutputPort.findById(investmentVehicleId);
-            assertNotNull(investmentVehicle);
-        }catch (MeedlException e){
-            log.info("{} {}",e.getClass().getName(), e.getMessage());
-        }
+    void findInvestmentVehicleDetailsById() throws MeedlException {
+
+        InvestmentVehicle investmentVehicle =
+                investmentVehicleOutputPort.findById(investmentVehicleId);
+        assertNotNull(investmentVehicle);
+        assertEquals(investmentVehicle.getId(),investmentId);
+
     }
 
     @AfterAll
