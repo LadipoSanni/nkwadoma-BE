@@ -28,6 +28,4 @@ public class OrganizationEntity {
     private int numberOfPrograms;
     @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private ServiceOfferingEntity serviceOfferingEntity;
-    @ManyToOne
-    private List<OrganizationEmployeeIdentity> organizationEmployees;
 }
