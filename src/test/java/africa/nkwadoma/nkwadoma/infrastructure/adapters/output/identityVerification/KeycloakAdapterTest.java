@@ -149,11 +149,12 @@ class KeycloakAdapterTest {
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
         try {
-            identityManagementOutputPort.enableUserAccount(john);
+            UserIdentity userIdentity = identityManagementOutputPort.enableUserAccount(john);
+            assertEquals(userIdentity.isEnabled(), true);
+            assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
         } catch (MeedlException e) {
             log.info("{}", e.getMessage());
         }
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
 
     @Test
