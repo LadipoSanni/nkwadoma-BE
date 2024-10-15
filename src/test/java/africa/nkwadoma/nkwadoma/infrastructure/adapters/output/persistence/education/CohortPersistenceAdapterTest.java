@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
@@ -59,4 +60,10 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
 
+    @Test
+    void saveCohort() throws MeedlException {
+//        elites.setProgramId();
+        Cohort cohort = cohortOutputPort.saveCohort(elites);
+        assertEquals(cohort.getName(),elites.getName());
+    }
 }
