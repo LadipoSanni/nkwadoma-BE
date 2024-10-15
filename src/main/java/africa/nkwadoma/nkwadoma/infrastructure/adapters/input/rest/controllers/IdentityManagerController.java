@@ -39,7 +39,7 @@ public class IdentityManagerController {
 
     }
 
-    @PostMapping("auth/invite-colleague")
+    @PostMapping("auth/colleague/invite")
     public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
