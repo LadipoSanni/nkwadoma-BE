@@ -7,9 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CreateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.UpdateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CreateInvestmentVehicleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.UpdateInvestmentVehicleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleDetails;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleRestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +37,8 @@ public class InvestmentVehicleController {
             InvestmentVehicle investmentVehicle =
                     investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
             investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
-            CreateInvestmentVehicleResponse investmentVehicleResponse  =
-                    investmentVehicleRestMapper.toCreateInvestmentVehicleResponse(investmentVehicle);
+            InvestmentVehicleResponse investmentVehicleResponse  =
+                    investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .body(investmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_CREATED)
@@ -61,9 +59,9 @@ public class InvestmentVehicleController {
             InvestmentVehicle investmentVehicle =
                     investmentVehicleRestMapper.mapUpdateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
             investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
-            UpdateInvestmentVehicleResponse updateInvestmentVehicleResponse =
-                    investmentVehicleRestMapper.toUpdateInvestmentVehicleResponse(investmentVehicle);
-            ApiResponse<Object> apiResponse =ApiResponse.builder()
+            InvestmentVehicleResponse updateInvestmentVehicleResponse =
+                    investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+            ApiResponse<InvestmentVehicleResponse> apiResponse =ApiResponse.<InvestmentVehicleResponse>builder()
                     .body(updateInvestmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_UPDATED)
                     .statusCode(HttpStatus.OK.toString())
@@ -81,10 +79,10 @@ public class InvestmentVehicleController {
         try {
             InvestmentVehicle investmentVehicle =
                     investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
-            InvestmentVehicleDetails investmentVehicleDetails =
-                    investmentVehicleRestMapper.toViewInvestmentVehicleResponse(investmentVehicle);
-            ApiResponse<Object> apiResponse =ApiResponse.builder()
-                    .body(investmentVehicleDetails)
+            InvestmentVehicleResponse investmentVehicleResponse =
+                    investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+            ApiResponse<InvestmentVehicleResponse> apiResponse =ApiResponse.<InvestmentVehicleResponse>builder()
+                    .body(investmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();

@@ -135,6 +135,7 @@ class InvestmentVehicleServiceTest {
             assertNotNull(viewedInvestmentVehicle);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+
         }
 
     }
