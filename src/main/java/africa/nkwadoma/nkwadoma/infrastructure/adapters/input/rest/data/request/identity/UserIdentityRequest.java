@@ -17,7 +17,6 @@ public class UserIdentityRequest {
     private boolean emailVerified;
     private boolean enabled;
     private String role;
-    private String createdBy;
     private String password;
     private String newPassword;
     private String organizationDomain;
