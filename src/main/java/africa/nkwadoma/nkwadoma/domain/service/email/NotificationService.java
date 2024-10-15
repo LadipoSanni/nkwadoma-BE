@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
@@ -15,6 +16,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.C
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {
     private final EmailOutputPort emailOutputPort;
     private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
@@ -31,11 +33,10 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-        emailOutputPort.sendEmail(email);
+
+        sendMail(userIdentity, email);
 
     }
-
-
     @Override
     public void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
@@ -46,11 +47,22 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-        emailOutputPort.sendEmail(email);
+
+        sendMail(userIdentity, email);
     }
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
+        log.info("Token: ============> {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
+
+    private void sendMail(UserIdentity userIdentity, Email email) {
+        try {
+            emailOutputPort.sendEmail(email);
+        } catch (MeedlException e) {
+            log.error("Error sending email to {} user id is {}. The error received is : {}", userIdentity.getEmail(), userIdentity.getRole(), e.getMessage());
+        }
+    }
+
 }
