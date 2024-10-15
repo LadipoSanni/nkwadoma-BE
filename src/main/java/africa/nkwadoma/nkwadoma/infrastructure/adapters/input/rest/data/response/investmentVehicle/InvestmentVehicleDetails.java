@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 @Getter
 @Setter
-public class ViewInvestmentVehicleResponse {
+public class InvestmentVehicleDetails {
 
     private String name;
     private InvestmentVehicleType investmentVehicleType;

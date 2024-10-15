@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.UpdateInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CreateInvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.UpdateInvestmentVehicleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.ViewInvestmentVehicleResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleDetails;
 import org.mapstruct.Mapper;
 
 
@@ -20,5 +20,5 @@ public interface InvestmentVehicleRestMapper {
 
     UpdateInvestmentVehicleResponse toUpdateInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 
-    ViewInvestmentVehicleResponse toViewInvestmentVehicleResponse(InvestmentVehicle investmentVehicleIdentity);
+    InvestmentVehicleDetails toViewInvestmentVehicleResponse(InvestmentVehicle investmentVehicleIdentity);
 }

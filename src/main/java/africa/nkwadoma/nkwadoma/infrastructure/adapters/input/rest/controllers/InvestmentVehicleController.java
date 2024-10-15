@@ -9,7 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CreateInvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.UpdateInvestmentVehicleResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.ViewInvestmentVehicleResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleDetails;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleRestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,10 +81,10 @@ public class InvestmentVehicleController {
         try {
             InvestmentVehicle investmentVehicle =
                     investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
-            ViewInvestmentVehicleResponse viewInvestmentVehicleResponse =
+            InvestmentVehicleDetails investmentVehicleDetails =
                     investmentVehicleRestMapper.toViewInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse =ApiResponse.builder()
-                    .body(viewInvestmentVehicleResponse)
+                    .body(investmentVehicleDetails)
                     .message(INVESTMENT_VEHICLE_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
