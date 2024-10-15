@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class Program {
     private String id;
     private String programDescription;
+    @Column(unique = true)
     private String name;
     private String objectives;
     private DurationType durationType;

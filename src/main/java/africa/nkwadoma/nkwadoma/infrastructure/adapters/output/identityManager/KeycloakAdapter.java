@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -75,6 +76,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return userIdentity;
     }
+
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
@@ -118,30 +120,20 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public void createPassword(String email, String password) throws MeedlException {
-
+    public UserIdentity createPassword(String email, String password) throws MeedlException {
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation user = users.get(0);
-        UserResource userResource = keycloak.realm(KEYCLOAK_REALM).users().get(user.getId());
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(password);
-        credential.setTemporary(false);
-        userResource.resetPassword(credential);
-        user.setEmailVerified(true);
-        user.setEnabled(true);
-        userResource.update(user);
+        log.info("User ID: " + user.getId());
+        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
+        return enableUserAccount(userIdentity);
     }
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
-        log.info("Calling keycloak server----");
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
-            log.info("Login credentials: {}", keycloakClient.tokenManager());
             TokenManager tokenManager = keycloakClient.tokenManager();
-            log.info("Access Token : {}", keycloakClient.tokenManager().getAccessToken().getToken());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
             throw new IdentityException(exception.getMessage());
@@ -163,19 +155,18 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
+        validateDataElement(userIdentity.getEmail());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
-
-        List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
-        for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(true);
-            UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
-            userResource.update(userRepresentation);}
+        UserRepresentation userRepresentation = mapper.map(foundUser);
+        userRepresentation.setEnabled(Boolean.TRUE);
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        UserResource userResource = getUserResource(userIdentity);
+        userResource.update(userRepresentation);
         return foundUser;
-
     }
 
     @Override
@@ -188,7 +179,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(false);
+            userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;
@@ -236,8 +227,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());
         clientRepresentation.setName(organizationIdentity.getName());
-        clientRepresentation.setDirectAccessGrantsEnabled(true);
-        clientRepresentation.setPublicClient(true);
+        clientRepresentation.setDirectAccessGrantsEnabled(Boolean.TRUE);
+        clientRepresentation.setPublicClient(Boolean.TRUE);
         return clientRepresentation;
     }
 
@@ -264,7 +255,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(userIdentity.getEmail());
     }
-    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MeedlException {
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException {
         validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)

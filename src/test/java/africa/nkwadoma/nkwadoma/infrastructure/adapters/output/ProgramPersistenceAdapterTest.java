@@ -63,7 +63,7 @@ class ProgramPersistenceAdapterTest {
 //    @Order(1)
     void saveProgram() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(organizationIdentity.getId());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             program.setOrganizationId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
 
@@ -151,7 +151,7 @@ class ProgramPersistenceAdapterTest {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             programOutputPort.deleteProgram(foundProgram.getId());
-            OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organizationOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();
