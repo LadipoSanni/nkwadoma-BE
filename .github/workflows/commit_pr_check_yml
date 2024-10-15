@@ -2,9 +2,10 @@ name: Commit and PR Status Tracker
 
 on:
   schedule:
-    - cron: "0 11 * * *"  # Runs every day at 11:00 AM
-    - cron: "0 17 * * *"  # Runs every day at 5:00 PM
-    - cron: "0 23 * * *"  # Runs every day at 11:00 PM
+    - cron: "0 11 * * *"
+    - cron: "0 17 * * *"
+    - cron: "15 14 * * *"
+    - cron: "0 23 * * *"
 
 jobs:
   commit-pr-tracker:
@@ -20,10 +21,10 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa 
+          EMAILS: 'ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
-          # Calculate timestamp for the last 6 hours
-          TIMESTAMP=$(date -u -d "6 hours ago" +"%Y-%m-%dT%H:%M:%SZ")
+          # Calculate timestamp for the last 4 hours
+          TIMESTAMP=$(date -u -d "4 hours ago" +"%Y-%m-%dT%H:%M:%SZ")
 
           # Query successful and unsuccessful commits
           SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
@@ -43,7 +44,7 @@ jobs:
             --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' \
             --since "$TIMESTAMP" | sort | uniq)
 
-          # Query PRs merged or closed in the last 6 hours
+          # Query PRs merged or closed in the last 4 hours
           SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
             --paginate -q '.[] | select(.merged_at != null) | .user.login' \
             --state merged --since "$TIMESTAMP" | wc -l)
@@ -69,22 +70,48 @@ jobs:
           echo "Successful Authors:\n${{ env.SUCCESSFUL_AUTHORS }}"
           echo "Unsuccessful Authors:\n${{ env.UNSUCCESSFUL_AUTHORS }}"
 
-      - name: Send Email Notification
+      - name: Check for Inactivity and Send Notification
+        if: env.SUCCESSFUL_COMMITS == '0' && env.UNSUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' && env.UNSUCCESSFUL_PRS == '0'
+        run: |
+          echo "No commits or PRs have been made in the last 4 hours."
+
+          # Prepare the inactivity email content
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"
+          do
+            echo "From: builds@semicolon.africa" > /tmp/inactivity_email.txt
+            echo "To: $email" >> /tmp/inactivity_email.txt
+            echo "Subject: No Activity in the Repository (Last 4 Hours)" >> /tmp/inactivity_email.txt
+            printf "No commits, pushes, or pull requests have been made in the last 4 hours.\n" >> /tmp/inactivity_email.txt
+            printf "Please check in with the team or confirm that everything is on track.\n\n" >> /tmp/inactivity_email.txt
+            printf "Regards,\nThe Cloud Team" >> /tmp/inactivity_email.txt
+
+            # Send the inactivity email
+            curl --verbose --ssl-reqd \
+              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
+              --mail-from "builds@semicolon.africa" \
+              --mail-rcpt "$email" \
+              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
+              --upload-file /tmp/inactivity_email.txt
+          done
+
+      - name: Send Regular Activity Notification
+        if: env.SUCCESSFUL_COMMITS != '0' || env.UNSUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' || env.UNSUCCESSFUL_PRS != '0'
         env:
           SMTP_SERVER: semicolon.africa
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: ${{ secrets.EMAILS }}
+          EMAILS: ${{ env.EMAILS }}
         run: |
-          # Prepare the email content
+          # Prepare the regular email content
           IFS=',' read -r -a email_array <<< "${EMAILS}"
           for email in "${email_array[@]}"
           do
             echo "From: builds@semicolon.africa" > /tmp/email.txt
             echo "To: $email" >> /tmp/email.txt
             echo "Subject: Commit and PR Status Summary" >> /tmp/email.txt
-            printf "Commit and PR Summary for the Last 6 Hours:\n\n" >> /tmp/email.txt
+            printf "Commit and PR Summary for the Last 4 Hours:\n\n" >> /tmp/email.txt
             printf "Successful Commits: ${{ env.SUCCESSFUL_COMMITS }}\n" >> /tmp/email.txt
             printf "Unsuccessful Commits: ${{ env.UNSUCCESSFUL_COMMITS }}\n" >> /tmp/email.txt
             printf "Successful Authors:\n${{ env.SUCCESSFUL_AUTHORS }}\n\n" >> /tmp/email.txt
