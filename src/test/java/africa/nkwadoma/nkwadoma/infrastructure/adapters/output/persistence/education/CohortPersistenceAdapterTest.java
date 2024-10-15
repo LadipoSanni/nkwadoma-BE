@@ -40,19 +40,19 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveCohortWithValidProgramId(String programId){
         elites.setProgramId(programId);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveCohortWithEmptyName(String name){
         elites.setName(name);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com"})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "email@gmail.com"})
     void saveCohortWithInvalidCreator(String createdBy){
         //TODO validate for UUID
         elites.setCreatedBy(createdBy);
