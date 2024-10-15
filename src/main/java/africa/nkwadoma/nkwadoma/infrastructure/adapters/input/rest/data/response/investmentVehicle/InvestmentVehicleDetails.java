@@ -19,4 +19,10 @@ public class InvestmentVehicleDetails {
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
+    private BigDecimal totalAmountInInvestmentVehicle;
+    private BigDecimal amountRaised;
+    private BigDecimal amountDisbursed;
+    private BigDecimal amountAvailable;
+    private BigDecimal totalIncomeGenerated;
+    private BigDecimal netAssetValue;
 }
