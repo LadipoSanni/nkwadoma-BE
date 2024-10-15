@@ -28,7 +28,7 @@ public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanProductRestMapper loanProductMapper;
 
-    @PostMapping("/create_loan_product")
+    @PostMapping("/loan-product/create")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
