@@ -29,7 +29,7 @@ class LoanProductAdapterTest {
     @BeforeEach
     void setUp() {
         gemsLoanProduct = new LoanProduct();
-        gemsLoanProduct.setName("Test Loan Product");
+        gemsLoanProduct.setName("Test Loan Product 2");
         gemsLoanProduct.setMandate("Test: A new mandate for test");
         gemsLoanProduct.setSponsors(List.of("Mark", "Jack"));
         gemsLoanProduct.setLoanProductSize(new BigDecimal(1000));
