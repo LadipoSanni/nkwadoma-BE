@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
 
-//    @Query("select p from ProgramEntity p where p.name = :programName")
     Optional<ProgramEntity> findByName(@Param("programName") String programName);
 
     boolean existsByName(String programName);

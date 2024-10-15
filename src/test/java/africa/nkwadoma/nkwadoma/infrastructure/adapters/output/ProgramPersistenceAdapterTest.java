@@ -38,7 +38,7 @@ class ProgramPersistenceAdapterTest {
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(
+                name("My Organization").rcNumber("56767").serviceOffering(
                         ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
@@ -63,7 +63,7 @@ class ProgramPersistenceAdapterTest {
 //    @Order(1)
     void saveProgram() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(organizationIdentity.getId());
+            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             program.setOrganizationId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
 
@@ -151,7 +151,7 @@ class ProgramPersistenceAdapterTest {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             programOutputPort.deleteProgram(foundProgram.getId());
-            OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organizationOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
             e.printStackTrace();

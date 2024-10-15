@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -22,16 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
-//@ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
-//    @InjectMocks
-    @Autowired
-    private OrganizationIdentityService organizationIdentityService;
-//    @Mock
-//    private OrganizationIdentityAdapter organizationIdentityAdapter;
-//    @Mock
-//    private KeycloakAdapter keycloakAdapter;
 
+    @Autowired
+    private CreateOrganizationUseCase createOrganizationUseCase;
 
     @Autowired
     private OrganizationIdentityAdapter organizationAdapter;
@@ -67,32 +64,24 @@ class OrganizationIdentityServiceTest {
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");
             roseCouture.setRcNumber("RC87899");
-            roseCouture.setIndustry("education");
+            roseCouture.setServiceOffering(new ServiceOffering());
+            roseCouture.getServiceOffering().setIndustry(Industry.EDUCATION);
             roseCouture.setPhoneNumber("09876365713");
             roseCouture.setInvitedDate(LocalDateTime.now().toString());
             roseCouture.setWebsiteAddress("rosecouture.org");
             roseCouture.setOrganizationEmployees(orgEmployee);
 
     }
-//
-//    @Test
-//    void inviteOrganization(){
-//        try{
-//            doNothing().when(keycloakAdapter).inviteOrganization(roseCouture);
-//            organizationIdentityService.inviteOrganization(roseCouture);
-//            verify(keycloakAdapter, times(1)).inviteOrganization(roseCouture);
-//        }catch (MiddlException exception){
-//            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
-//        }
-//    }
 
     @Test
-    void inviteOrganizationForReal() {
+    void inviteOrganization() {
+        OrganizationIdentity invitedOrganisation = null;
         try {
             assertThrows(ResourceNotFoundException.class, () -> organizationAdapter.findById(roseCouture.getId()));
-            organizationIdentityService.inviteOrganization(roseCouture);
+            invitedOrganisation = createOrganizationUseCase.inviteOrganization(roseCouture);
             OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
             assertEquals(roseCouture.getName(), foundOrganization.getName());
+            assertNotNull(invitedOrganisation);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -101,7 +90,11 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganizationWithEmptyOrganization(){
-        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
+        assertThrows(MeedlException.class, () -> createOrganizationUseCase.inviteOrganization(new OrganizationIdentity()));
+    }
+    @Test
+    void inviteOrganizationWithNullOrganization(){
+        assertThrows(MeedlException.class, () -> createOrganizationUseCase.inviteOrganization(null));
     }
 
     @Test
