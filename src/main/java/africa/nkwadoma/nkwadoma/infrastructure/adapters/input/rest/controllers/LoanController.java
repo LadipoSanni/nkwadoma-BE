@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.loanManagementController;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -30,24 +30,17 @@ public class LoanController {
 
     @PostMapping("/create_loan_product")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanProduct (@RequestBody @Valid LoanProductRequest request){
+    public ResponseEntity<ApiResponse<?>> createLoanProduct (@RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
         LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
-        try {
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
             LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
-            ApiResponse<Object> apiResponse = ApiResponse.builder()
+            ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                     .body(loanProductResponse)
                     .message(CREATE_LOAN_PRODUCT_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        } catch (MeedlException exception) {
-            return new ResponseEntity<>(ApiResponse.builder()
-                    .body(exception.getMessage())
-                    .message(CREATE_LOAN_PRODUCT_FAILED)
-                    .statusCode(HttpStatus.BAD_REQUEST.toString())
-                    .build(), HttpStatus.BAD_REQUEST);
-        }
+
     }
 }
