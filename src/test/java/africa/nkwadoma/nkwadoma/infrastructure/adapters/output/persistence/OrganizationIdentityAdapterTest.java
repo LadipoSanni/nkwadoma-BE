@@ -124,6 +124,11 @@ class OrganizationIdentityAdapterTest {
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
     @Test
+    void saveOrganizationWithNullServiceOffering(){
+        amazingGrace.setServiceOffering(null);
+        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
+    @Test
     void saveOrganizationWithEmptyName(){
         amazingGrace.setName(StringUtils.EMPTY);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
