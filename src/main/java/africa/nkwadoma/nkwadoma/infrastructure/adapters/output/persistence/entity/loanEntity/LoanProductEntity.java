@@ -1,9 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanProductStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -28,7 +27,7 @@ public class LoanProductEntity {
     private String name;
     private int moratorium;
     @Enumerated(EnumType.STRING)
-    private LoanProductStatus loanProductStatus;
+    private ActivationStatus loanProductStatus;
     @Enumerated(EnumType.STRING)
     private TenorStatus tenorStatus;
     private int tenor;

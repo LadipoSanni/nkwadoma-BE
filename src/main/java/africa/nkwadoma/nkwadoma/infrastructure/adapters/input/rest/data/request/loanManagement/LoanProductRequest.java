@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanProductStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -20,7 +20,7 @@ public class LoanProductRequest {
     private BigDecimal amountEarned ;
     private BigDecimal amountDisbursed;
     private BigDecimal amountRepaid;
-    private LoanProductStatus loanProductStatus;
+    private ActivationStatus loanProductStatus;
     private String bankPartner;
     private String disbursementTerms;
     @NotBlank(message = LOAN_PRODUCT_NAME_REQUIRED)
