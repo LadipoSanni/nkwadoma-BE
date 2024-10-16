@@ -6,14 +6,16 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.*;
 import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
@@ -100,8 +102,24 @@ class KeycloakAdapterTest {
     @Order(2)
     void createPassword(){
         try {
+            Optional<UserIdentity> existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
+            assertTrue(existingUser.isPresent());
+            assertFalse(existingUser.get().isEnabled());
+            assertFalse(existingUser.get().isEmailVerified());
+
             john.setPassword("passwordJ@345");
-            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+
+            assertNotNull(userIdentity);
+            assertNotNull(userIdentity.getId());
+            assertTrue(userIdentity.isEmailVerified());
+            assertTrue(userIdentity.isEnabled());
+            userIdentity.setPassword(john.getPassword());
+
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(userIdentity);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException e){
             log.info("{} {}",e.getClass().getName(),e.getMessage());
         }
