@@ -5,8 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -14,6 +13,8 @@ import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAG
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class AdminInitializerTest {
     @Autowired
@@ -26,7 +27,22 @@ class AdminInitializerTest {
     void setUp() {
     }
     @Test
+    @Order(1)
     void initializeFirstUser(){
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }finally {
+            log.error("finally block initiated...");
+                assertNotNull(userIdentity);
+                assertNotNull(userIdentity.getId());
+        }
+    }
+    @Test
+    @Order(2)
+    void initializeAlreadyExistingUser(){
         UserIdentity userIdentity = null;
         try {
             userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
