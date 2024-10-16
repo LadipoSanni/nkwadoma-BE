@@ -68,9 +68,11 @@ public class UserIdentityService implements CreateUserUseCase {
         validatePassword(password);
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
+        log.info("The email of the user is: {} creating password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        log.info("The user found by the email is: {}", userIdentity);
         if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
-            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
             return userIdentity;
         }
         else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());

@@ -126,7 +126,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation userRepresentation = users.get(0);
-        log.info("User ID: " + userRepresentation.getId());
+        log.info("User ID for user creating password : {}", userRepresentation.getId());
 
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
         UserResource userResource = getUserResource(userIdentity);
