@@ -2,14 +2,15 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @ToString
 @Setter
@@ -31,5 +32,9 @@ public class InvestmentVehicleEntity {
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
+    @OneToOne
+    private InvestmentVehicleFinancierEntity leads;
+    @OneToOne
+    private InvestmentVehicleFinancierEntity contributors;
 
 }

@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -41,9 +41,8 @@ class InvestmentVehicleAdapterTest {
         capitalGrowth.setSize(BigDecimal.valueOf(4000));
         capitalGrowth.setRate(13F);
         capitalGrowth.setMandate("Long-term Growth");
-        capitalGrowth.setSponsors("UBA");
         capitalGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
-        capitalGrowth.setTenure("12 Month");
+        capitalGrowth.setTenure(12);
 
 
         fundGrowth = new InvestmentVehicle();
@@ -51,9 +50,8 @@ class InvestmentVehicleAdapterTest {
         fundGrowth.setSize(BigDecimal.valueOf(4000));
         fundGrowth.setRate(12F);
         fundGrowth.setMandate("Long-term fund");
-        fundGrowth.setSponsors("UBA");
         fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
-        fundGrowth.setTenure("12 Month");
+        fundGrowth.setTenure(12);
 
 
         investment = new InvestmentVehicle();
@@ -61,9 +59,8 @@ class InvestmentVehicleAdapterTest {
         investment.setSize(BigDecimal.valueOf(4000));
         investment.setRate(12F);
         investment.setMandate("Long-term fund");
-        investment.setSponsors("UBA");
         investment.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
-        investment.setTenure("12 Month");
+        investment.setTenure(12);
 
     }
 
@@ -135,27 +132,8 @@ class InvestmentVehicleAdapterTest {
     }
 
     @Test
-    void createInvestmentVehicleWithNullSponsors(){
-        capitalGrowth.setSponsors(null);
-        assertThrows(MeedlException.class,()-> investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithEmptySponsors(){
-        capitalGrowth.setSponsors(StringUtils.EMPTY);
-        assertThrows(MeedlException.class,()-> investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-
-    @Test
-    void createInvestmentVehicleWithNullTenure() {
-        capitalGrowth.setTenure(null);
-        assertThrows(MeedlException.class,()-> investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithEmptyTenure() {
-        capitalGrowth.setTenure(StringUtils.EMPTY);
+    void createInvestmentVehicleWithZeroTenure() {
+        capitalGrowth.setTenure(0);
         assertThrows(MeedlException.class,()-> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
