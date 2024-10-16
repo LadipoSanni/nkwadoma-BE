@@ -123,6 +123,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public UserIdentity createPassword(String email, String password) throws MeedlException {
         MeedlValidator.validateDataElement(email);
         MeedlValidator.validateDataElement(password);
+        password = password.trim();
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation userRepresentation = users.get(0);

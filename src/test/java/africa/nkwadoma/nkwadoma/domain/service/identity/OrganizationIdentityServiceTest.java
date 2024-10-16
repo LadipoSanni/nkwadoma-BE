@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -12,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ class OrganizationIdentityServiceTest {
     @Autowired
     private KeycloakAdapter keycloakAutowiredAdapter;
     @Autowired
-    private TokenGeneratorOutputPort tokenGeneratorOutputPort;
+    private TokenUtils tokenUtils;
     @Autowired
     private CreateUserUseCase createUserUseCase;
 
@@ -106,7 +106,7 @@ class OrganizationIdentityServiceTest {
                 UserIdentity foundUser =organizationEmployeeIdentity.getMiddlUser();
                 assertNull(foundUser.getPassword());
                 foundUser.setPassword("Password@123");
-                String generatedToken = tokenGeneratorOutputPort.generateToken(foundUser.getEmail());
+                String generatedToken = tokenUtils.generateToken(foundUser.getEmail());
                 assertNotNull(generatedToken);
                 createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
                 log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMiddlUser());
