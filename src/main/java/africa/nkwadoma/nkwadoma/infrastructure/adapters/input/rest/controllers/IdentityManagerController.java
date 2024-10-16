@@ -44,7 +44,7 @@ public class IdentityManagerController {
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
-            log.info("The user id of user inviting a colleague : {}",meedlUser.getClaimAsString("sub"));
+            log.info("The user id of user inviting a colleague : {} ",meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                     body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
