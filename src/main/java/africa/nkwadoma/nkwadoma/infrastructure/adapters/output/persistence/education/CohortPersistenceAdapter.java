@@ -45,6 +45,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         } else {
             program.getCohorts().add(cohort);
             program.setNumberOfCohort(program.getNumberOfCohort() + 1);
+            program.setOrganizationId(cohort.getOrganizationId());
+            programOutputPort.saveProgram(program);
             cohort.setCreatedAt(LocalDateTime.now());
         }
         CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);

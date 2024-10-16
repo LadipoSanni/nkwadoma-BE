@@ -56,6 +56,6 @@ public class ProgramEntity {
     private String updatedBy;
     @ManyToOne(cascade = CascadeType.MERGE)
     private OrganizationEntity organizationEntity;
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = CascadeType.MERGE , fetch = FetchType.EAGER)
     private List<CohortEntity> cohorts;
 }

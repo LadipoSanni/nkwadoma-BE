@@ -35,7 +35,7 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
-    private List<Cohort> cohorts;
+    private ProgramCohort programCohort;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.name);

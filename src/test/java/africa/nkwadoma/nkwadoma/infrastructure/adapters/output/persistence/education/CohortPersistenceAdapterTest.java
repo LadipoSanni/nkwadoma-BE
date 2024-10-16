@@ -42,33 +42,32 @@ public class CohortPersistenceAdapterTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort ;
-    private String programId;
-    private UserIdentity userIdentity;
-//    @BeforeAll
+    private  OrganizationEmployeeIdentity employeeIdentity;
+    private  OrganizationIdentity organizationIdentity;
+    private   Program program;
+
+
+
+    @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role("PORTFOLIO_MANAGER").
                 lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
-        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
+        employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
-        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
+        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
                 name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(
                         ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
-        Program program = Program.builder().name("My program").
+        program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).programType(ProgramType.PROFESSIONAL).
                 createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
         try {
-            userIdentityOutputPort.save(userIdentity);
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(organizationIdentity);
             program.setOrganizationId(savedOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
-            programId = savedProgram.getId();
-            log.info("id{} = =",programId);
-            assertNotNull(savedOrganization);
-            assertNotNull(savedProgram);
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -78,9 +77,9 @@ public class CohortPersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         elites = new Cohort();
-        elites.setProgramId("1234");
+        elites.setProgramId(program.getId());
         elites.setName("Elite Nigerian Students");
-
+        elites.setCreatedBy(employeeIdentity.getId());
     }
     @Test
     void saveCohortWithNullCohort(){
@@ -113,9 +112,6 @@ public class CohortPersistenceAdapterTest {
 
     @Test
     void saveCohort() throws MeedlException {
-//        elites.setProgramId();
-        elites.setProgramId("4ce0490b-e309-4078-999b-65d357f54119");
-        elites.setCreatedBy("8937-b9897g3-bv38");
         Cohort cohort = cohortOutputPort.saveCohort(elites);
         assertEquals(cohort.getName(),elites.getName());
     }

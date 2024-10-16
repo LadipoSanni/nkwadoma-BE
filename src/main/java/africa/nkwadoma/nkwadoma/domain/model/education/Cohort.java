@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @Slf4j
 public class Cohort {
     private String id;
-//    private String organizationId;
     private String programId;
     private String cohortDescription;
     private String name;
