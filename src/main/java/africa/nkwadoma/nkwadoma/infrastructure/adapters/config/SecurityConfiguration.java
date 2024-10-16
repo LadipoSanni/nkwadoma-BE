@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                 csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(requests -> {
-            requests.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+            requests.requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/password/create").permitAll();
             requests.anyRequest().authenticated();
         });
 
