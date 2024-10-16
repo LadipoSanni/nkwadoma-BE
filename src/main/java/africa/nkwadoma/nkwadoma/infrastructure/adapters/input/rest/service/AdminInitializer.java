@@ -57,6 +57,7 @@ public class AdminInitializer {
             userIdentity.setId(userRepresentation.getId());
         }
         try {
+
             userIdentityOutputPort.save(userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to save user to user identity output port, error : {}", e.getMessage());
