@@ -10,12 +10,12 @@ public class WhiteList {
             "/v3/api-docs",
             "/webjars/**",
 
-            "/swagger-resources/",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/v3/api-docs/",
-            "/webjars/",
+//            "/swagger-resources/",
+//            "/swagger-ui/**",
+//            "/swagger-ui.html",
+//            "/v3/api-docs",
+//            "/v3/api-docs/**",
+//            "/v3/api-docs/",
+//            "/webjars/",
     };
 }
