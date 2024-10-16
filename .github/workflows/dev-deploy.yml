@@ -113,18 +113,21 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAILS: ${{ env.EMAILS }}
         run: |
+          chmod +x .github/workflows/scripts/send_success_email.sh
           IFS=',' read -r -a email_array <<< "${EMAILS}"
           for email in "${email_array[@]}"
           do
-            echo "From: builds@semicolon.africa" > /tmp/email.txt
-            echo "To: $email" >> /tmp/email.txt
-            echo "Subject: Build and Deployment Status" >> /tmp/email.txt
-            printf "Congratulations, your recent build in Nkwadoma Backend was successful.\n" >> /tmp/email.txt
-            printf "Branch: ${BRANCH_NAME}\n" >> /tmp/email.txt
-
-            printf "Author: ${COMMIT_AUTHOR}\n" >> /tmp/email.txt
-            printf "\nTAG: ${{ env.TAG }}\n\n" >> /tmp/email.txt
-            printf "Regards,\nThe Cloud Team" >> /tmp/email.txt
+            if [ ! -f .github/workflows/scripts/send_success_email.sh ]; then
+              echo "Error: Success email template not found!" >&2
+              exit 1
+            fi
+      
+            content=$(cat .github/workflows/scripts/send_success_email.sh | sed -e "s/{{BRANCH_NAME}}/${BRANCH_NAME}/g" \
+                                                            -e "s/{{COMMIT_AUTHOR}}/${COMMIT_AUTHOR}/g" \
+                                                            -e "s/{{TAG}}/${{ env.TAG }}/g")
+      
+            echo -e "From: builds@semicolon.africa\nTo: $email\nSubject: Build Success Notification\nContent-Type: text/html\n\n$content" > /tmp/email.txt
+      
             curl --verbose --ssl-reqd \
               --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
               --mail-from "builds@semicolon.africa" \
@@ -132,7 +135,7 @@ jobs:
               --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
               --upload-file /tmp/email.txt
           done
-
+      
       - name: Send build failure email notification
         if: failure()
         env:
@@ -142,18 +145,21 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAILS: ${{ env.EMAILS }}
         run: |
+          chmod +x .github/workflows/scripts/send_failure_email.sh
           IFS=',' read -r -a email_array <<< "${EMAILS}"
           for email in "${email_array[@]}"
           do
-            echo "From: builds@semicolon.africa" > /tmp/email.txt
-            echo "To: $email" >> /tmp/email.txt
-            echo "Subject: Build Failure" >> /tmp/email.txt
-            printf "Oooops, Your recent build in Nkwadoma Backend was unsuccessful, kindly check the new commit and fix.\n\n" >> /tmp/email.txt
-            printf "Branch: ${BRANCH_NAME}\n" >> /tmp/email.txt
-
-            printf "Author: ${COMMIT_AUTHOR}\n" >> /tmp/email.txt
-            printf "\nTAG: ${{ env.TAG }}\n\n" >> /tmp/email.txt
-            printf "Regards,\nThe Cloud Team" >> /tmp/email.txt
+            if [ ! -f .github/workflows/scripts/send_failure_email.sh ]; then
+              echo "Error: Failure email template not found!" >&2
+              exit 1
+            fi
+      
+            content=$(cat .github/workflows/scripts/send_failure_email.sh | sed -e "s/{{BRANCH_NAME}}/${BRANCH_NAME}/g" \
+                                                            -e "s/{{COMMIT_AUTHOR}}/${COMMIT_AUTHOR}/g" \
+                                                            -e "s/{{TAG}}/${{ env.TAG }}/g")
+      
+            echo -e "From: builds@semicolon.africa\nTo: $email\nSubject: Build Failure Notification\nContent-Type: text/html\n\n$content" > /tmp/email.txt
+      
             curl --verbose --ssl-reqd \
               --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
               --mail-from "builds@semicolon.africa" \
@@ -161,3 +167,4 @@ jobs:
               --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
               --upload-file /tmp/email.txt
           done
+

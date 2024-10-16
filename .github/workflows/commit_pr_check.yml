@@ -2,7 +2,8 @@ name: Commit and PR Status Tracker
 
 on:
   pull_request:
-    - dev
+    branches:
+      - dev
   schedule:
     - cron: "0 10 * * *"
     - cron: "0 17 * * *"
@@ -19,7 +20,7 @@ jobs:
 
       - name: Set permissions for templates
         run: |
-          chmod 644 templates/*.html
+          chmod +x .github/workflows/templates/*.html
 
       - name: Set environment variables
         env:
