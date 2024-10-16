@@ -131,12 +131,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    void viewAllPrograms() {
-        List<Program> programs = programOutputPort.findAllPrograms();
-        assertFalse(programs.isEmpty());
-    }
-
-    @Test
 //    @Order(4)
     void deleteProgram() {
         try {

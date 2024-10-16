@@ -87,8 +87,4 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         return programMapper.toProgram(programEntity);
     }
 
-    @Override
-    public List<Program> findAllPrograms() {
-        return List.of();
-    }
 }

@@ -13,6 +13,4 @@ public interface ProgramOutputPort {
     void deleteProgram(String programId) throws MeedlException;
 
     Program findProgramById(String programId) throws MeedlException;
-
-    List<Program> findAllPrograms();
 }
