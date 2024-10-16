@@ -1,6 +1,8 @@
 name: Commit and PR Status Tracker
 
 on:
+  pull_request:
+    - dev
   schedule:
     - cron: "0 10 * * *"
     - cron: "0 17 * * *"
