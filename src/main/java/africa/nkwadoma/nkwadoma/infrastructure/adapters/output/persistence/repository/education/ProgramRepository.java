@@ -4,11 +4,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.*;
 
-import java.util.Optional;
+import java.util.*;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
 
     Optional<ProgramEntity> findByName(@Param("programName") String programName);
 
     boolean existsByName(String programName);
+
+    List<ProgramEntity> findAllByOrganizationEntityId(String organizationId);
 }

@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
@@ -83,5 +85,11 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         return programMapper.toProgram(programEntity);
+    }
+
+    @Override
+    public List<Program> findAllPrograms(String organizationId) {
+        List<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId);
+        return programMapper.toPrograms(programEntities);
     }
 }

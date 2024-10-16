@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -35,6 +36,9 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private BigDecimal totalAmountRepaid;
+    private BigDecimal totalAmountDisbursed;
+    private BigDecimal totalAmountOutstanding;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.name);

@@ -7,7 +7,11 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
+import org.hibernate.annotations.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
@@ -33,14 +37,29 @@ class ProgramPersistenceAdapterTest {
 
     @BeforeEach
     void setUp() {
-        userIdentity = UserIdentity.builder().firstName("Fred").role(PORTFOLIO_MANAGER).
-                lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
-        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOffering(
-                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
-                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
+        userIdentity = new UserIdentity();
+        userIdentity.setFirstName("Joel");
+        userIdentity.setLastName("Jacobs");
+        userIdentity.setEmail("joel@johnson.com");
+        userIdentity.setId(userIdentity.getEmail());
+        userIdentity.setPhoneNumber("098647748393");
+        userIdentity.setEmailVerified(true);
+        userIdentity.setEnabled(true);
+        userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity.setRole(PORTFOLIO_MANAGER);
+        userIdentity.setCreatedBy("Ayo");
+
+        organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setName("Amazing Grace Enterprises");
+        organizationIdentity.setEmail("rachel@gmail.com");
+        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setRcNumber("RC345677");
+        organizationIdentity.setId(organizationIdentity.getRcNumber());
+        organizationIdentity.setPhoneNumber("0907658483");
+        organizationIdentity.setTin("Tin5678");
+        organizationIdentity.setServiceOffering(new ServiceOffering());
+        organizationIdentity.getServiceOffering().setIndustry(Industry.BANKING);
+        organizationIdentity.setWebsiteAddress("webaddress.org");
 
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
@@ -54,8 +73,9 @@ class ProgramPersistenceAdapterTest {
         try {
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
             assertNotNull(savedOrganization);
+            assertNotNull(savedOrganization.getId());
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.info("Failed to save organization: {}", e.getMessage());
         }
     }
 
@@ -63,7 +83,11 @@ class ProgramPersistenceAdapterTest {
 //    @Order(1)
     void saveProgram() {
         try {
+            organizationIdentity.setEmail("org@example.com");
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            assertNotNull(foundOrganization);
+            assertEquals("org@example.com", foundOrganization.getEmail());
+
             program.setOrganizationId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
 
@@ -75,7 +99,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramType(), savedProgram.getProgramType());
             assertEquals(program.getProgramStartDate(), savedProgram.getProgramStartDate());
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.error("Error saving program", e);
         }
     }
 
@@ -107,7 +131,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram);
             assertEquals(foundProgram.getName(), program.getName());
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.error("Error finding program by ID", e);
         }
     }
 
@@ -126,8 +150,38 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram.getId());
             assertEquals(savedProgram, foundProgram);
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.error("Error finding program by ID", e);
         }
+    }
+
+    @Test
+    void findAllPrograms() {
+        try {
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            assertNotNull(organization);
+            assertNotNull(organization.getId());
+
+            program.setOrganizationId(organization.getId());
+            List<Program> foundPrograms = programOutputPort.findAllPrograms(program.getOrganizationId());
+
+            assertNotNull(foundPrograms);
+            assertEquals(1, foundPrograms.size());
+            assertEquals(foundPrograms.get(0).getName(), program.getName());
+            assertEquals(foundPrograms.get(0).getDuration(), program.getDuration());
+            assertEquals(foundPrograms.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+            assertEquals(foundPrograms.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(foundPrograms, List.of(program));
+        } catch (MeedlException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", StringUtils.EMPTY, "f98hv"})
+    void findAllProgramsByNullOrInvalidOrganizationId(String organizationId) {
+        List<Program> foundPrograms = programOutputPort.findAllPrograms(organizationId);
+        assertTrue(foundPrograms.isEmpty());
+        assertEquals(foundPrograms, List.of());
     }
 
     @Test
@@ -141,7 +195,7 @@ class ProgramPersistenceAdapterTest {
 
             assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(program.getId()));
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.error("Error while deleting program", e);
         }
     }
 
@@ -154,7 +208,7 @@ class ProgramPersistenceAdapterTest {
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organizationOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
-            e.printStackTrace();
+            log.info(e.getMessage());
         }
     }
 

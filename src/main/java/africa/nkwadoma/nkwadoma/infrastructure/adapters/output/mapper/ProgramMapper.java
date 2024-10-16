@@ -6,6 +6,8 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.*;
+
 @Mapper(componentModel = "spring")
 public interface ProgramMapper {
 
@@ -15,4 +17,6 @@ public interface ProgramMapper {
 
     @InheritInverseConfiguration
     Program toProgram(ProgramEntity programEntity);
+
+    List<Program> toPrograms(List<ProgramEntity> programEntities);
 }

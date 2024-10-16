@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigInteger;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -87,5 +88,30 @@ class ProgramServiceTest {
         } catch (MeedlException e) {
             log.info("Error creating program: {}", e.getMessage());
         }
+    }
+
+    @Test
+    void viewAllPrograms() {
+        when(programOutputPort.findAllPrograms(program.getOrganizationId())).thenReturn(List.of(program));
+        List<Program> programs = programService.viewAllPrograms(program);
+
+        assertNotNull(programs);
+        assertEquals(programs.get(0).getId(), program.getId());
+        assertEquals(programs.get(0).getOrganizationId(), program.getOrganizationId());
+        assertEquals(programs.get(0).getName(), program.getName());
+        assertEquals(programs.get(0).getDuration(), program.getDuration());
+        assertEquals(programs.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+        assertEquals(programs.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+        assertEquals(programs.get(0).getTotalAmountDisbursed(), program.getTotalAmountDisbursed());
+        assertEquals(programs.get(0).getTotalAmountOutstanding(), program.getTotalAmountOutstanding());
+        assertEquals(programs.get(0).getTotalAmountRepaid(), program.getTotalAmountRepaid());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void viewAllProgramsWithNullOrganizationId(String organizationId) {
+//        when(programOutputPort.findAllPrograms(organizationId)).thenThrow(MeedlException.class);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewAllPrograms(program));
+        assertEquals("Organization ID cannot be null or empty", meedlException.getMessage());
     }
 }
