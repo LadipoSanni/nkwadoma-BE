@@ -41,7 +41,6 @@ public class UserIdentityService implements CreateUserUseCase {
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
-    private final UserEntityRepository userEntityRepository;
 
 
 
@@ -70,10 +69,11 @@ public class UserIdentityService implements CreateUserUseCase {
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
-        userEntityRepository.save(userEntity);
-        return userIdentity;
+        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+            return userIdentity;
+        }
+        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
     private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {
