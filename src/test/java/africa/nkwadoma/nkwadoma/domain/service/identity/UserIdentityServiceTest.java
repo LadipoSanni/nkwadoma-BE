@@ -415,8 +415,14 @@ class UserIdentityServiceTest {
 
     @Test
     void enableAccountThatHasBeenEnabled() {
-       assertThrows(MeedlException.class, () -> createUserUseCase.enableAccount(favour));
+       assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
         }
+    @Test
+    @Order(10)
+    void disAbleAccountAlreadyDisabled() {
+        assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
+
+    }
 
     @Test
      void forgotPassword() {

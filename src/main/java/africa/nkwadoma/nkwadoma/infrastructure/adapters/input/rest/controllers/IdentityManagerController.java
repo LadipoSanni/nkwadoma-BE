@@ -59,4 +59,27 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("auth/reactivate/user")
+    public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+        userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
+        UserIdentity createdUserIdentity = createUserUseCase.reactivateUserAccount(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
+                body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/deactivate/user")
+    public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+        userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
+        UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
+                body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build());
+    }
+
 }

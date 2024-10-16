@@ -166,13 +166,20 @@ class KeycloakAdapterTest {
     @Test
     @Order(6)
     void disAbleAccount() {
+        UserIdentity userIdentity = null;
         try{
-            identityManagementOutputPort.disableUserAccount(john);
+            userIdentity = identityManagementOutputPort.disableUserAccount(john);
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
+        assertFalse(userIdentity.isEnabled());
     }
+    @Test
+    @Order(7)
+    void disAbleAccountAlreadyDisabled() {
+          assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
+    }
 
     @Test
     void getUserRepresentation()  {
