@@ -13,9 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
@@ -26,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
@@ -40,7 +39,6 @@ public class UserIdentityService implements CreateUserUseCase {
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
-    private final UserEntityRepository userEntityRepository;
 
 
 
@@ -68,11 +66,14 @@ public class UserIdentityService implements CreateUserUseCase {
         validatePassword(password);
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
+        log.info("The email of the user is: {} creating password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
-        userEntityRepository.save(userEntity);
-        return userIdentity;
+        log.info("The user found by the email is: {}", userIdentity);
+        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+            return userIdentity;
+        }
+        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
     private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {

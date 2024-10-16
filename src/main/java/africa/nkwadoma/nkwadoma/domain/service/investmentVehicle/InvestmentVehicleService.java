@@ -22,5 +22,11 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
     }
 
+    @Override
+    public InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException {
+        return investmentVehicleOutputPort.findById(id);
+    }
+
+
 
 }

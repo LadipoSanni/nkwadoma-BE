@@ -122,12 +122,27 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity createPassword(String email, String password) throws MeedlException {
+        validateDataElement(email);
+        validateDataElement(password);
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
-        UserRepresentation user = users.get(0);
-        log.info("User ID: " + user.getId());
-        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(user);
-        return enableUserAccount(userIdentity);
+        UserRepresentation userRepresentation = users.get(0);
+        log.info("User ID for user creating password : {}", userRepresentation.getId());
+
+        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        UserResource userResource = getUserResource(userIdentity);
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+        credential.setTemporary(Boolean.FALSE);
+        userResource.resetPassword(credential);
+
+        userRepresentation.setEnabled(Boolean.TRUE);
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        userResource.update(userRepresentation);
+
+        return userIdentity;
     }
 
     @Override
@@ -163,6 +178,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
         }
+
+        List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
+        for (UserRepresentation userRepresentation : userRepresentations){
+            userRepresentation.setEnabled(true);
+            UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
+            userResource.update(userRepresentation);}
         UserRepresentation userRepresentation = mapper.map(foundUser);
         userRepresentation.setEnabled(Boolean.TRUE);
         userRepresentation.setEmailVerified(Boolean.TRUE);

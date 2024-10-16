@@ -19,7 +19,6 @@ public enum IdentityMessages{
     CONTEXT_TOKEN("token"),
     CONTEXT_FIRST_NAME("firstName"),
     CONTEXT_CURRENT_YEAR("currentYear"),
-    CREATE_PASSWORD_URL("/create-password?token="),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),
     PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$"),
     INVALID_PASSWORD("Password validation failed"),

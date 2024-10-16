@@ -1,16 +1,16 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.validation.InvestmentVehicleValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Optional;
 
@@ -26,7 +26,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
-        InvestmentVehicleValidator.validateInvestmentVehicle(investmentVehicle);
+        if (ObjectUtils.isEmpty(investmentVehicle)){
+            throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
+        }
+        investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
         if (investmentVehicle.getId()== null) investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         InvestmentVehicleEntity investmentEntity =
