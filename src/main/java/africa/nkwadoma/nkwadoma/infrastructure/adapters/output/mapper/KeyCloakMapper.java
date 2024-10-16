@@ -17,8 +17,6 @@ public interface KeyCloakMapper {
     @Mapping(source = "enabled", target = "enabled")
     UserRepresentation map(UserIdentity user);
 
-
-
     @InheritInverseConfiguration
     UserIdentity mapUserRepresentationToUserIdentity(UserRepresentation userRepresentation);
 
