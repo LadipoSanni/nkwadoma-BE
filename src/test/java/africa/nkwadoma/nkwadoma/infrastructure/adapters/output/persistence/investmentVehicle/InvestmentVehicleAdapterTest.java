@@ -252,12 +252,15 @@ class InvestmentVehicleAdapterTest {
 
     @Order(7)
     @Test
-    void findInvestmentVehicleDetailsById() throws MeedlException {
-
-        InvestmentVehicle investmentVehicle =
-                investmentVehicleOutputPort.findById(investmentVehicleId);
+    void findInvestmentVehicleDetailsById() {
+        InvestmentVehicle investmentVehicle = null;
+        try {
+            investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
         assertNotNull(investmentVehicle);
-        assertEquals(investmentVehicle.getId(),investmentVehicleId);
+        assertEquals(investmentVehicle.getId(), investmentVehicleId);
 
     }
 

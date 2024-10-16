@@ -128,9 +128,13 @@ class InvestmentVehicleServiceTest {
 
     @Test
     @Order(8)
-    void viewInvestmentVehicleDetails() throws MeedlException {
-        InvestmentVehicle viewedInvestmentVehicle =
-                investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
+    void viewInvestmentVehicleDetails() {
+        InvestmentVehicle viewedInvestmentVehicle = null;
+        try {
+            viewedInvestmentVehicle = investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
         assertNotNull(viewedInvestmentVehicle);
         assertEquals(viewedInvestmentVehicle.getId(),investmentId);
     }
