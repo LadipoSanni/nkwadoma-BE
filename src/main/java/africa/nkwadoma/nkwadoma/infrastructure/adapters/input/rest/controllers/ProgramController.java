@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
@@ -26,11 +28,16 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RestController
 @RequestMapping(BASE_URL + "program")
 @RequiredArgsConstructor
+@Tag(name = "Program Controller", description = "Manage Programs in an institute")
 public class ProgramController {
     private final AddProgramUseCase addProgramUseCase;
     private final ProgramRestMapper programRestMapper;
 
     @PostMapping("")
+    @Operation(summary = "Add a proram to an Institute", description = "Fetch a loan product by its ID.")
+//    @ApiResponse(responseCode = "200", description = "Loan product found")
+//    @ApiResponse(responseCode = "404", description = "Loan product not found")
+
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
             Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));

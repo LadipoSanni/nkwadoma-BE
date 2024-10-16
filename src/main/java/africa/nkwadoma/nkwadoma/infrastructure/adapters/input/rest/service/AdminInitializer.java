@@ -53,7 +53,7 @@ public class AdminInitializer {
             sendEmail.sendColleagueEmail(userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
-            UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, true);
+            UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setId(userRepresentation.getId());
         }
         try {
