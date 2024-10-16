@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.CREATE_PASSWORD_URL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.CREATE_PASSWORD_URL;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -53,7 +53,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
-        log.info("Token: ============> {}", token);
+        log.info("Token: ============> {}", baseUrl + "/create-password?token=" + token);
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 
