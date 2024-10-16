@@ -64,10 +64,9 @@ public class BeanConfiguration {
                                                    PasswordEncoder passwordEncoder,
                                                    PasswordHistoryOutputPort passwordHistoryOutputPort,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
-                                                   UserIdentityMapper userIdentityMapper,
-                                                   UserEntityRepository userEntityRepository
+                                                   UserIdentityMapper userIdentityMapper
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper, userEntityRepository);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper);
     }
 
     @Bean
