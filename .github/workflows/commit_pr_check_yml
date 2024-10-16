@@ -1,3 +1,12 @@
+name: Commit and PR Status Tracker
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+    - cron: "0 17 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 23 * * *"
+
 jobs:
   commit-pr-tracker:
     runs-on: ubuntu-latest
@@ -6,40 +15,48 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set permissions for templates
+        run: |
+          chmod 644 templates/*.html
+
       - name: Set environment variables
         env:
           SMTP_SERVER: semicolon.africa
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa '  # shortened for brevity
+          EMAILS: 'ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa '
         run: |
-          # Calculate timestamp for the last 4 hours
           TIMESTAMP=$(date -u -d "4 hours ago" +"%Y-%m-%dT%H:%M:%SZ")
 
-          # Fetch commit and PR data
-          SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits --since "$TIMESTAMP" --paginate -q '.[].commit | select(.verification.verified) | .author.name' | wc -l)
-          UNSUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits --since "$TIMESTAMP" --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' | wc -l)
-          SUCCESSFUL_AUTHORS=$(gh api repos/${{ github.repository }}/commits --since "$TIMESTAMP" --paginate -q '.[].commit | select(.verification.verified) | .author.name' | sort | uniq)
-          UNSUCCESSFUL_AUTHORS=$(gh api repos/${{ github.repository }}/commits --since "$TIMESTAMP" --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' | sort | uniq)
-          SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls --state merged --since "$TIMESTAMP" --paginate -q '.[] | select(.merged_at != null) | .user.login' | wc -l)
-          UNSUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls --state closed --since "$TIMESTAMP" --paginate -q '.[] | select(.merged_at == null) | .user.login' | wc -l)
+          SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
+            --since "$TIMESTAMP" | wc -l)
 
-          # Export values to environment
+          UNSUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
+            --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' \
+            --since "$TIMESTAMP" | wc -l)
+
+          SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
+            --paginate -q '.[] | select(.merged_at != null) | .user.login' \
+            --state merged --since "$TIMESTAMP" | wc -l)
+
+          UNSUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
+            --paginate -q '.[] | select(.merged_at == null) | .user.login' \
+            --state closed --since "$TIMESTAMP" | wc -l)
+
           echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
           echo "UNSUCCESSFUL_COMMITS=${UNSUCCESSFUL_COMMITS}" >> $GITHUB_ENV
-          echo "SUCCESSFUL_AUTHORS=${SUCCESSFUL_AUTHORS}" >> $GITHUB_ENV
-          echo "UNSUCCESSFUL_AUTHORS=${UNSUCCESSFUL_AUTHORS}" >> $GITHUB_ENV
           echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
           echo "UNSUCCESSFUL_PRS=${UNSUCCESSFUL_PRS}" >> $GITHUB_ENV
 
       - name: Send Inactivity Email
         if: env.SUCCESSFUL_COMMITS == '0' && env.UNSUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' && env.UNSUCCESSFUL_PRS == '0'
         run: |
-          for email in ${EMAILS//,/ }
-          do
-            CONTENT=$(cat templates/inactivity_email.html)
-            echo "$CONTENT" > /tmp/inactivity_email.html
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"; do
+            cat templates/inactivity_email.html | \
+            sed "s/{{TIMESTAMP}}/$(date)/g" > /tmp/inactivity_email.html
 
             curl --verbose --ssl-reqd \
               --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
@@ -52,23 +69,18 @@ jobs:
       - name: Send Activity Summary Email
         if: env.SUCCESSFUL_COMMITS != '0' || env.UNSUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' || env.UNSUCCESSFUL_PRS != '0'
         run: |
-          for email in ${EMAILS//,/ }
-          do
-            CONTENT=$(cat templates/activity_email.html)
-            # Replace placeholders with environment values
-            CONTENT=${CONTENT//\{\{SUCCESSFUL_COMMITS\}\}/$SUCCESSFUL_COMMITS}
-            CONTENT=${CONTENT//\{\{UNSUCCESSFUL_COMMITS\}\}/$UNSUCCESSFUL_COMMITS}
-            CONTENT=${CONTENT//\{\{SUCCESSFUL_AUTHORS\}\}/$SUCCESSFUL_AUTHORS}
-            CONTENT=${CONTENT//\{\{UNSUCCESSFUL_AUTHORS\}\}/$UNSUCCESSFUL_AUTHORS}
-            CONTENT=${CONTENT//\{\{SUCCESSFUL_PRS\}\}/$SUCCESSFUL_PRS}
-            CONTENT=${CONTENT//\{\{UNSUCCESSFUL_PRS\}\}/$UNSUCCESSFUL_PRS}
-
-            echo "$CONTENT" > /tmp/activity_email.html
+          IFS=',' read -r -a email_array <<< "${EMAILS}"
+          for email in "${email_array[@]}"; do
+            cat templates/activity_summary.html | \
+            sed -e "s/{{SUCCESSFUL_COMMITS}}/${{ env.SUCCESSFUL_COMMITS }}/g" \
+                -e "s/{{UNSUCCESSFUL_COMMITS}}/${{ env.UNSUCCESSFUL_COMMITS }}/g" \
+                -e "s/{{SUCCESSFUL_PRS}}/${{ env.SUCCESSFUL_PRS }}/g" \
+                -e "s/{{UNSUCCESSFUL_PRS}}/${{ env.UNSUCCESSFUL_PRS }}/g" > /tmp/activity_summary.html
 
             curl --verbose --ssl-reqd \
               --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
               --mail-from "builds@semicolon.africa" \
               --mail-rcpt "$email" \
               --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
-              --upload-file /tmp/activity_email.html
+              --upload-file /tmp/activity_summary.html
           done
