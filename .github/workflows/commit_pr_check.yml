@@ -20,7 +20,7 @@ jobs:
 
       - name: Set permissions for templates
         run: |
-          chmod 644 templates/*.html
+          chmod +x .github/workflows/templates/*.html
 
       - name: Set environment variables
         env:
