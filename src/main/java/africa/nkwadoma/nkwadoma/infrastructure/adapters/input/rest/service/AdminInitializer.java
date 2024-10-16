@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,32 @@ public class AdminInitializer {
 
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity = saveUserToKeycloak(userIdentity);
+        UserIdentity foundUserIdentity = null;
+        try {
+            foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
+        } catch (MeedlException e) {
+            log.warn("First user not found, creating first user: {}", e.getMessage());
+        } finally {
+            if (ObjectUtils.isEmpty(foundUserIdentity)) {
+                saveUserToDB(userIdentity);
+            }else {
+                log.info("First user already exists");
+            }
+        }
+        return userIdentity;
+    }
+
+    private void saveUserToDB(UserIdentity userIdentity) {
+            try {
+                userIdentityOutputPort.save(userIdentity);
+                log.info("First user created successfully");
+            } catch (MeedlException e) {
+                log.error("Unable to save user to identity manager, error : {}", e.getMessage());
+            }
+    }
+
+    private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) throws MeedlException {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             sendEmail.sendColleagueEmail(userIdentity);
@@ -55,12 +82,6 @@ public class AdminInitializer {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
             UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setId(userRepresentation.getId());
-        }
-        try {
-
-            userIdentityOutputPort.save(userIdentity);
-        } catch (MeedlException e) {
-            log.warn("Unable to save user to user identity output port, error : {}", e.getMessage());
         }
         return userIdentity;
     }
