@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
@@ -62,9 +62,10 @@ public class BeanConfiguration {
                                                    TokenGeneratorOutputPort tokenGeneratorOutputPort,
                                                    PasswordEncoder passwordEncoder,
                                                    PasswordHistoryOutputPort passwordHistoryOutputPort,
-                                                   SendColleagueEmailUseCase sendColleagueEmailUseCase
+                                                   SendColleagueEmailUseCase sendColleagueEmailUseCase,
+                                                   UserIdentityMapper userIdentityMapper
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper);
     }
 
     @Bean

@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +17,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProgramCreateRequest {
+    @NotBlank(message = "Program name is required")
     private String programName;
     private String objectives;
+    @NotNull(message = "Organization ID is required")
+    @Positive(message = "Organization ID must be a positive number")
     private String instituteId;
     private String creatorId;
     private LocalDateTime createdAt;

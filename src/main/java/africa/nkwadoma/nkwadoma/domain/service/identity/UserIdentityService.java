@@ -13,6 +13,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
@@ -37,6 +40,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final PasswordEncoder passwordEncoder;
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
+    private final UserIdentityMapper userIdentityMapper;
 
 
 
@@ -60,28 +64,18 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void createPassword(String token, String password) throws MeedlException {
+    public UserIdentity createPassword(String token, String password) throws MeedlException {
         validatePassword(password);
         validateDataElement(token);
         String email = tokenGeneratorOutputPort.decodeJWT(token);
+        log.info("The email of the user is: {} creating password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-
-        if (!userIdentity.isEmailVerified() || !userIdentity.isEnabled()){
-            userIdentity.setEmailVerified(true);
-            userIdentity.setEnabled(true);
-            String encodedPassword = passwordEncoder.encode(password);
-            userIdentity.setPassword(password);
-            List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-            if (passwordHistories == null) {
-                passwordHistories = new ArrayList<>();
-            }
-            PasswordHistory passwordHistory = getPasswordHistory(password, userIdentity);
-
-            passwordHistories.add(passwordHistory);
-            userIdentityOutputPort.save(userIdentity);
-            identityManagerOutPutPort.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        log.info("The user found by the email is: {}", userIdentity);
+        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+            return userIdentity;
         }
-       else throw new IdentityException(PASSWORD_HAS_BEEN_CREATED.getMessage());
+        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
     private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {
@@ -133,7 +127,6 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity enableAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
-        userIdentity.setEnabled(true);
         userIdentityOutputPort.save(userIdentity);
         return userIdentity;
     }

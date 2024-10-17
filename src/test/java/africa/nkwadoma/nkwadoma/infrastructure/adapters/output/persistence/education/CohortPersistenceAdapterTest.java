@@ -50,12 +50,12 @@ public class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role("PORTFOLIO_MANAGER").
+        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").industry("My industry").rcNumber("56767").serviceOffering(
+                name("My Organization").rcNumber("56767").serviceOffering(
                         ServiceOffering.builder().industry(Industry.EDUCATION).build()).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
@@ -91,13 +91,13 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveCohortWithValidProgramId(String programId){
         elites.setProgramId(programId);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveCohortWithEmptyName(String name){
         elites.setName(name);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));

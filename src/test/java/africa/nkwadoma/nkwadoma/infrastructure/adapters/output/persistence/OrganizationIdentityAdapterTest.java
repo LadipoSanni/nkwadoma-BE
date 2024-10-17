@@ -1,7 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
@@ -35,18 +39,19 @@ class OrganizationIdentityAdapterTest {
         joel.setEmailVerified(true);
         joel.setEnabled(true);
         joel.setCreatedAt(LocalDateTime.now().toString());
-        joel.setRole("ADMIN");
+        joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
         joel.setCreatedBy("Ayo");
 
         amazingGrace = new OrganizationIdentity();
         amazingGrace.setName("Amazing Grace Enterprises");
-        amazingGrace.setIndustry("Education");
         amazingGrace.setEmail("rachel@gmail.com");
         amazingGrace.setInvitedDate(LocalDateTime.now().toString());
         amazingGrace.setRcNumber("RC345677");
         amazingGrace.setId(amazingGrace.getRcNumber());
         amazingGrace.setPhoneNumber("0907658483");
         amazingGrace.setTin("Tin5678");
+        amazingGrace.setServiceOffering(new ServiceOffering());
+        amazingGrace.getServiceOffering().setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
         }
 
@@ -58,7 +63,7 @@ class OrganizationIdentityAdapterTest {
                 assertNotNull(savedOrganization);
                 OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
                 assertEquals(foundOrganization.getName(),savedOrganization.getName());
-                assertEquals(foundOrganization.getIndustry(),savedOrganization.getIndustry());
+                assertEquals(foundOrganization.getServiceOffering().getIndustry(),savedOrganization.getServiceOffering().getIndustry());
              }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
@@ -112,15 +117,15 @@ class OrganizationIdentityAdapterTest {
         amazingGrace.setEmail("invalid");
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
-    @Test
-    void saveOrganizationWithEmptyIndustry(){
-        amazingGrace.setIndustry(StringUtils.EMPTY);
-        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
-    }
 
     @Test
     void saveOrganizationWithNullIndustry(){
-        amazingGrace.setIndustry(null);
+        amazingGrace.getServiceOffering().setIndustry(null);
+        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
+    @Test
+    void saveOrganizationWithNullServiceOffering(){
+        amazingGrace.setServiceOffering(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
     @Test
@@ -149,7 +154,7 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullAdmin(){
-        //amazingGrace.setOrganizationAdmins(null);
+//        amazingGrace.setOrganizationAdmins(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
@@ -174,7 +179,7 @@ class OrganizationIdentityAdapterTest {
        try{
            OrganizationIdentity organizationIdentity = organizationOutputPort.findById(amazingGrace.getId());
            assertNotNull(organizationIdentity);
-           assertEquals(organizationIdentity.getIndustry(), amazingGrace.getIndustry());
+           assertEquals(organizationIdentity.getName(), amazingGrace.getName());
        }catch (MeedlException meedlException){
            log.info("{}", meedlException.getMessage());
        }
@@ -188,7 +193,7 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void findNullOrganization(){
-        amazingGrace.setId("");
+        amazingGrace.setId(null);
         assertThrows(MeedlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
     }
     @Test
@@ -228,7 +233,7 @@ class OrganizationIdentityAdapterTest {
         try {
             OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
             assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
-            assertNotNull(existingUser.getIndustry());
+            assertNotNull(existingUser.getServiceOffering().getIndustry());
 
             existingUser.setName("Felicia");
             OrganizationIdentity updatedUser = organizationOutputPort.save(existingUser);

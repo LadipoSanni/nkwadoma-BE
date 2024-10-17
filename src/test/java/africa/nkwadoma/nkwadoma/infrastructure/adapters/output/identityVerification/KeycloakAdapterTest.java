@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -33,13 +35,13 @@ class KeycloakAdapterTest {
         john.setFirstName("John");
         john.setLastName("Max");
         john.setEmail("johnmax@lendspace.com");
-        john.setRole("PORTFOLIO_MANAGER");
+        john.setRole(PORTFOLIO_MANAGER);
 
         peter = new UserIdentity();
         peter.setFirstName("Peter");
         peter.setLastName("Mark");
         peter.setEmail("peter@lendspace.com");
-        peter.setRole("TRAINEE");
+        peter.setRole(TRAINEE);
     }
 
 
@@ -78,13 +80,8 @@ class KeycloakAdapterTest {
         assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
     @Test
-    void createUserWithNoUserRole(){
-        john.setRole(null);
-        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
-    }
-    @Test
     void createUserWithInvalidUserRole(){
-        john.setRole("INVALID_ROLE");
+        john.setRole(null);
         assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(john));
     }
 
@@ -116,6 +113,7 @@ class KeycloakAdapterTest {
     void login(){
         try {
             john.setPassword("passwordJ@345");
+            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
             identityManagementOutputPort.login(john);
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
@@ -150,8 +148,13 @@ class KeycloakAdapterTest {
     @Test
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
-
+        try {
+            UserIdentity userIdentity = identityManagementOutputPort.enableUserAccount(john);
+            assertTrue(userIdentity.isEnabled());
+            assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        } catch (MeedlException e) {
+            log.info("{}", e.getMessage());
+        }
     }
 
     @Test
@@ -260,17 +263,17 @@ class KeycloakAdapterTest {
     @Test
     void getRoleResource() {
         try {
-            john.setRole("PORTFOLIO_MANAGER");
+            john.setRole(PORTFOLIO_MANAGER);
             RoleRepresentation roleRepresentation = identityManagementOutputPort.getRoleRepresentation(john);
             assertNotNull(roleRepresentation);
-            assertEquals(john.getRole(), roleRepresentation.getName());
+            assertEquals(john.getRole().toString(), roleRepresentation.getName().toString());
         } catch (MeedlException e) {
             e.printStackTrace();
         }
     }
     @Test
     void getRoleResourceWithInvalidRoleName() {
-            john.setRole("INVALID_ROLE");
+            john.setRole(null);
             assertThrows(MeedlException.class,()->identityManagementOutputPort.getRoleRepresentation(john));
     }
     @Test

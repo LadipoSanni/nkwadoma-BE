@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.mapstruct.*;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring"  , uses = InvestmentVehicleFinancierMapper.class)
 public interface InvestmentVehicleMapper {
 
 

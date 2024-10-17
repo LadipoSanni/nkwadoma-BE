@@ -19,6 +19,7 @@ import java.util.List;
 public class Program {
     private String id;
     private String programDescription;
+    @Column(unique = true)
     private String name;
     private String objectives;
     private DurationType durationType;
@@ -35,7 +36,7 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
-    private ProgramCohort programCohort;
+    private List<ProgramCohort> programCohort;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.name);

@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +30,7 @@ public class MailConfig {
         mailSender.setPort(port);
         mailSender.setUsername(username);
         mailSender.setPassword(password);
+
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.auth", "true");
@@ -37,6 +38,7 @@ public class MailConfig {
         props.put("mail.smtp.connectiontimeout", "5000");
         props.put("mail.smtp.writetimeout", "5000");
         props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.debug", "true");
 
         return mailSender;
     }

@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -30,6 +30,7 @@ public class SecurityConfiguration {
                 csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(requests -> {
+            requests.requestMatchers(WhiteList.patterns).permitAll();
             requests.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
             requests.anyRequest().authenticated();
         });
