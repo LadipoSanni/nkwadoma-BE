@@ -2,7 +2,7 @@ name: Update GitHub Actions Workflows with New Configurations
 
 on:
   schedule:
-    - cron: "0 11,14,17,23 * * *"  # Runs at 11am, 5pm, and 11pm every day
+    - cron: "0 11,14,17,23 * * *"  # Runs at 11am, 2pm, 5pm, and 11pm every day
 
 jobs:
   update-workflows:
@@ -21,36 +21,33 @@ jobs:
           timestamp=$(date +%Y%m%d%H%M%S)
           echo "task_branch=task/update-config-$timestamp" >> $GITHUB_ENV
 
-      - name: Pull Latest Changes from dev Branch
+      - name: Pull Latest Changes from Dev Branch
         run: |
           git checkout ${{ env.dev_branch }}
           git pull origin ${{ env.dev_branch }}
 
-      - name: Read and Decode application-dev.properties
-        id: read_dev
+      - name: Read and Encode Configuration Files
+        id: read_configs
         run: |
-          content=$(cat ${{ env.dev_config_file }} | base64)
-          echo "::set-output name=dev_content::$content"
-
-      - name: Read and Decode application-local.properties
-        id: read_local
-        run: |
-          content=$(cat ${{ env.local_config_file }} | base64)
-          echo "::set-output name=local_content::$content"
+          for config_file in ${{ env.dev_config_file }} ${{ env.local_config_file }}; do
+            content=$(cat "$config_file" | base64)
+            echo "::set-output name=${config_file##*/}_content::$content"
+          done
 
       - name: Parse Configuration Files
+        id: parse_configs
         run: |
-          dev_env_vars=$(echo "${{ steps.read_dev.outputs.dev_content }}" | base64 --decode | awk -F= '{print $1}')
-          local_env_vars=$(echo "${{ steps.read_local.outputs.local_content }}" | base64 --decode | awk -F= '{print $1}')
-          echo "dev_env_vars=$dev_env_vars" >> $GITHUB_ENV
-          echo "local_env_vars=$local_env_vars" >> $GITHUB_ENV
+          for config_file in "application-dev.properties" "application-local.properties"; do
+            env_vars=$(echo "${{ steps.read_configs.outputs[config_file] }}\n" | base64 --decode | awk -F= '{print $1}')
+            echo "${config_file%%.*}_env_vars=$env_vars" >> $GITHUB_ENV
+          done
 
       - name: Update Workflows with Environment Variables
         run: |
           for workflow in .github/workflows/maven.yml .github/workflows/dev-deploy.yml; do
             sed -i '/^env:$/,$d' $workflow
             echo "env:" >> $workflow
-            for var in $dev_env_vars $local_env_vars; do
+            for var in ${{ env.application-dev_env_vars }} ${{ env.application-local_env_vars }}; do
               echo "  $var: \"${!var}\"" >> $workflow
             done
           done
@@ -59,18 +56,16 @@ jobs:
         run: |
           git add .github/workflows/
           git commit -m "Update GitHub Actions workflows with new environment variables" || echo "No changes to commit"
-          git push origin ${{ env.dev_branch }} || FAILED=true
-        env:
-          FAILED: ""
+          git push origin ${{ env.dev_branch }} || echo "Push failed; creating a task branch."
 
       - name: Create a Task Branch if Push to Dev Fails
-        if: env.FAILED == 'true'
+        if: failure()
         run: |
           git checkout -b ${{ env.task_branch }}
           git push origin ${{ env.task_branch }}
 
       - name: Open Pull Request if Task Branch Created
-        if: env.FAILED == 'true'
+        if: failure()
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
