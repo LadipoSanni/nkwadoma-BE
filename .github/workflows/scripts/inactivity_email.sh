@@ -17,7 +17,7 @@ read -r -d '' HTML_BODY <<EOF
 <body>
   <h1>No Activity Detected</h1>
   <p>No commits or PRs were recorded since ${TIMESTAMP}.</p>
-  <p>What are you guys up to! Please Report to your PM!</p>
+  <p>What are you guys up to! Please report to your PM!</p>
 </body>
 </html>
 EOF

@@ -6,9 +6,8 @@ SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
 SUCCESSFUL_COMMITS=$6
-UNSUCCESSFUL_COMMITS=$7
-SUCCESSFUL_PRS=$8
-UNSUCCESSFUL_PRS=$9
+SUCCESSFUL_PRS=$7
+TIMESTAMP=$(date)
 
 # HTML Template for Activity Summary Email
 read -r -d '' HTML_BODY <<EOF
@@ -18,11 +17,11 @@ read -r -d '' HTML_BODY <<EOF
   <title>Activity Summary</title>
 </head>
 <body>
-  <h1>Activity Summary Report</h1>
-  <p><strong>Successful Commits:</strong> ${SUCCESSFUL_COMMITS}</p>
-  <p><strong>Unsuccessful Commits:</strong> ${UNSUCCESSFUL_COMMITS}</p>
-  <p><strong>Successful PRs:</strong> ${SUCCESSFUL_PRS}</p>
-  <p><strong>Unsuccessful PRs:</strong> ${UNSUCCESSFUL_PRS}</p>
+  <h1>Activity Summary</h1>
+  <p>Commits: ${SUCCESSFUL_COMMITS}</p>
+  <p>Pull Requests Merged: ${SUCCESSFUL_PRS}</p>
+  <p>Last checked at ${TIMESTAMP}.</p>
+  <p>Thank you for your contributions!</p>
 </body>
 </html>
 EOF
