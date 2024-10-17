@@ -10,13 +10,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProduct;
-import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProductDetails;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,8 +22,8 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     private final LoanProductMapper loanProductMapper;
     @Override
     public LoanProduct save(LoanProduct loanProduct) throws MeedlException {
-        validateLoanProduct(loanProduct);
-        validateLoanProductDetails(loanProduct);
+        MeedlValidator.validateObjectInstance(loanProduct);
+        loanProduct.validateLoanProductDetails();
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAtDate(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);

@@ -49,11 +49,6 @@ public class UserIdentityValidator extends MeedlValidator {
         }
     }
 
-    private static void validateEmail(UserIdentity userIdentity) throws IdentityException {
-        if (StringUtils.isEmpty(userIdentity.getEmail()) || !EmailValidator.getInstance().isValid(userIdentity.getEmail().trim())) {
-            throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());
-        }
-    }
     private static void validateUserEmail(String email) throws IdentityException {
             if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email)) {
                 throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());

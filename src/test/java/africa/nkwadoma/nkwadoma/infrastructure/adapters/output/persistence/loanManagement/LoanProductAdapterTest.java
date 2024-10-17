@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ class LoanProductAdapterTest {
         gemsLoanProduct.setObligorLoanLimit(new BigDecimal(1000));
         gemsLoanProduct.setInterestRate(0);
         gemsLoanProduct.setMoratorium(5);
+        gemsLoanProduct.setTenorStatus(TenorStatus.Years);
         gemsLoanProduct.setTenor(5);
         gemsLoanProduct.setMinRepaymentAmount(new BigDecimal(1000));
         gemsLoanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
@@ -57,9 +59,15 @@ class LoanProductAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"-1", " 0", StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings = {"-1", "0"})
     void createWithInvalidProductSize(String size){
         gemsLoanProduct.setLoanProductSize(new BigDecimal(size));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "0"})
+    void createWithInvalidObligorLimit(String obligorLimit){
+        gemsLoanProduct.setObligorLoanLimit(new BigDecimal(obligorLimit));
         assertThrows(MeedlException.class, () -> loanProductOutputPort.save(gemsLoanProduct));
     }
     @Test
@@ -77,9 +85,49 @@ class LoanProductAdapterTest {
            log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
         }
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void createLoanProductWithInvalidMandate(String name){
+        gemsLoanProduct.setMandate(name);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNegativeInterestRate(){
+        gemsLoanProduct.setInterestRate(-1);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNegativeMoratoriumPeriod(){
+        gemsLoanProduct.setMoratorium(-1);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 11})
+    void createLoanProductWithInvalidTenorForYears(int value){
+        gemsLoanProduct.setTenorStatus(TenorStatus.Years);
+        gemsLoanProduct.setTenor(value);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 121})
+    void createLoanProductWithInvalidTenorForMonths(int value){
+        gemsLoanProduct.setTenorStatus(TenorStatus.Months);
+        gemsLoanProduct.setTenor(value);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    public void createLoanProductWithInvalidTenor(){
+        gemsLoanProduct.setTenorStatus(null);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNoTermsAndConditions(){
+        gemsLoanProduct.setTermsAndCondition(null);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
 
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void existsByInvalidName(String name) {
         gemsLoanProduct.setName(name);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));

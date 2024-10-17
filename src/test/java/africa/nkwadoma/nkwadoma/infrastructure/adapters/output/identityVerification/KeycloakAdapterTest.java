@@ -6,17 +6,23 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.*;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -100,12 +106,56 @@ class KeycloakAdapterTest {
     @Order(2)
     void createPassword(){
         try {
+            Optional<UserIdentity> existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
+            assertTrue(existingUser.isPresent());
+            assertFalse(existingUser.get().isEnabled());
+            assertFalse(existingUser.get().isEmailVerified());
+
             john.setPassword("passwordJ@345");
-            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+
+            assertNotNull(userIdentity);
+            assertNotNull(userIdentity.getId());
+            assertTrue(userIdentity.isEmailVerified());
+            assertTrue(userIdentity.isEnabled());
+            userIdentity.setPassword(john.getPassword());
+
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(userIdentity);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException e){
             log.info("{} {}",e.getClass().getName(),e.getMessage());
         }
+    }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
+    void createPasswordWithNullPassword(String password) {
+        MeedlException meedlException = assertThrows(MeedlException.class, () ->
+                identityManagementOutputPort.createPassword(john.getEmail(), password));
+        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"fgdgffdfdfdf    ", "    dddfdsfdsfsfd"})
+    void createPasswordWithSpaces(String password) {
+        try {
+
+            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), password);
+            assertNotNull(userIdentity);
+            assertNotNull(userIdentity.getId());
+            assertTrue(userIdentity.isEmailVerified());
+            assertTrue(userIdentity.isEnabled());
+            userIdentity.setPassword(password);
+
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(userIdentity);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+        } catch (MeedlException e) {
+            log.error("Failed to create password", e);
+        }
     }
 
     @Test
@@ -121,7 +171,6 @@ class KeycloakAdapterTest {
     }
     @Test
     void loginWithWrongDetails() {
-
         john.setEmail("wrong@gmail.com");
         john.setPassword("passwordJ@345");
         john.setFirstName("wrong firstname");
@@ -138,7 +187,7 @@ class KeycloakAdapterTest {
 
             john.setPassword(john.getNewPassword());
             identityManagementOutputPort.login(john);
-
+            //TODO include asserts
 
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
@@ -168,11 +217,12 @@ class KeycloakAdapterTest {
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
+            assertTrue(john.isEnabled());
             userIdentity = identityManagementOutputPort.disableUserAccount(john);
+            assertFalse(userIdentity.isEnabled());
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
-        assertFalse(userIdentity.isEnabled());
     }
     @Test
     @Order(7)
