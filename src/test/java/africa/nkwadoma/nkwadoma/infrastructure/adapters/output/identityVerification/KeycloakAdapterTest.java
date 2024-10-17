@@ -194,6 +194,22 @@ class KeycloakAdapterTest {
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
+    @Test
+    void changePasswordWithNull() {
+        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(null));
+    }
+    @Test
+    void changePasswordWithNullNewPassword() {
+        john.setNewPassword(null);
+        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE})
+    void changePasswordWithInvalidPassword(String password) {
+        john.setNewPassword(null);
+        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(john));
+    }
+
 
     @Test
     @Order(5)
