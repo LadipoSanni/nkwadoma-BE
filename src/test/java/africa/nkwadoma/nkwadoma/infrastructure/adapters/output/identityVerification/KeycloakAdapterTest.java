@@ -52,6 +52,7 @@ class KeycloakAdapterTest {
 
 
     @Test
+    @Order(1)
     void createUser() {
         try {
             UserIdentity createdUser = identityManagementOutputPort.createUser(john);
@@ -102,6 +103,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(2)
     void createPassword(){
         try {
             Optional<UserIdentity> existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
@@ -157,6 +159,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(3)
     void login(){
         try {
             john.setPassword("passwordJ@345");
@@ -176,6 +179,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(4)
     void changePassword(){
 
         try {
@@ -192,6 +196,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(5)
     void enableAccountThatHasBeenEnabled() {
         try {
             UserIdentity userIdentity = identityManagementOutputPort.enableUserAccount(john);
@@ -209,6 +214,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
+    @Order(6)
     void disAbleAccount() {
         try{
             //TODO: check account is enabled
