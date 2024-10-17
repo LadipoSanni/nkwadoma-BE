@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Input variables
-PROJECT_NAME="Nkwadoma_fe"
+PROJECT_NAME="Nkwadoma_Be"
 TASK_ID="task-${BRANCH_NAME}"
 
 SMTP_SERVER=$1
