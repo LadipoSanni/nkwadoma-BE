@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
+
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -121,8 +121,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity createPassword(String email, String password) throws MeedlException {
-        validateDataElement(email);
-        validateDataElement(password);
+        MeedlValidator.validateDataElement(email);
+        MeedlValidator.validateDataElement(password);
+        password = password.trim();
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
         UserRepresentation userRepresentation = users.get(0);
@@ -140,6 +141,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userRepresentation.setEnabled(Boolean.TRUE);
         userRepresentation.setEmailVerified(Boolean.TRUE);
         userResource.update(userRepresentation);
+        userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
 
         return userIdentity;
     }

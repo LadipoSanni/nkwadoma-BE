@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.PasswordHistoryOutputPort;
@@ -13,9 +12,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
@@ -36,7 +34,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
+    private final TokenUtils tokenUtils;
     private final PasswordEncoder passwordEncoder;
     private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
@@ -67,7 +65,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         validatePassword(password);
         validateDataElement(token);
-        String email = tokenGeneratorOutputPort.decodeJWT(token);
+        String email = tokenUtils.decodeJWT(token);
         log.info("The email of the user is: {} creating password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
         log.info("The user found by the email is: {}", userIdentity);
