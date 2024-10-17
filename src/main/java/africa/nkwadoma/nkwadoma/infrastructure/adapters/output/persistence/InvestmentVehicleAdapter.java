@@ -40,8 +40,8 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
 
-    @Override
-    public void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
+
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicle.getName());
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());

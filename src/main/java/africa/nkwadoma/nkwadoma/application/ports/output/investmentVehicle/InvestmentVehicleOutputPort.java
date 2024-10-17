@@ -12,7 +12,5 @@ public interface InvestmentVehicleOutputPort {
 
     void deleteInvestmentVehicle(String id);
 
-    void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException ;
-
     List<InvestmentVehicle> findAllInvestmentVehicle();
 }

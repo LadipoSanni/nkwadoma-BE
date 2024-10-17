@@ -105,8 +105,8 @@ public class InvestmentVehicleController {
                     investmentVehicleUseCase.viewAllInvestmentVehicle();
             List<InvestmentVehicleResponse> investmentVehicleResponse =
                     investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles);
-            ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
-//                    .body(investmentVehicleResponse)
+            ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
+                    .body(investmentVehicleResponse)
                     .message(VIEW_ALL_INVESTMENT_VEHICLE)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
