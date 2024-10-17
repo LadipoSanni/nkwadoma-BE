@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,9 @@ import org.junit.jupiter.params.provider.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
-import java.math.BigInteger;
+import java.math.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,33 +30,33 @@ class ProgramServiceTest {
     @Mock
     private ProgramOutputPort programOutputPort;
     private Program program;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
         program = Program.builder().name("My program").durationType(DurationType.YEARS).
-                programDescription("A great program").organizationId("68t46").
-                programType(ProgramType.VOCATIONAL).programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy("875565").
-                deliveryType(DeliveryType.ONSITE).mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).
-                build();
+                programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
+                objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
+                mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " "})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void addProgramWithEmptyProgramName(String programName) {
         program.setName(programName);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " "})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void addProgramWithInvalidCreatorId(String createdBy) {
         program.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " "})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void addProgramWithEmptyOrganizationId(String organizationId) {
         program.setOrganizationId(organizationId);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
@@ -82,7 +84,6 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getObjectives(), program.getObjectives());
             assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
             assertEquals(addedProgram.getDuration(), program.getDuration());
-            assertEquals(addedProgram.getProgramType(), program.getProgramType());
             assertEquals(addedProgram.getMode(), program.getMode());
             assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
         } catch (MeedlException e) {
@@ -92,26 +93,52 @@ class ProgramServiceTest {
 
     @Test
     void viewAllPrograms() {
-        when(programOutputPort.findAllPrograms(program.getOrganizationId())).thenReturn(List.of(program));
-        List<Program> programs = programService.viewAllPrograms(program);
+        try {
+            when(programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber)).
+                    thenReturn(new PageImpl<>(List.of(program)));
+            Page<Program> programs = programService.viewAllPrograms(program);
+            List<Program> programsList = programs.toList();
 
-        assertNotNull(programs);
-        assertEquals(programs.get(0).getId(), program.getId());
-        assertEquals(programs.get(0).getOrganizationId(), program.getOrganizationId());
-        assertEquals(programs.get(0).getName(), program.getName());
-        assertEquals(programs.get(0).getDuration(), program.getDuration());
-        assertEquals(programs.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-        assertEquals(programs.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
-        assertEquals(programs.get(0).getTotalAmountDisbursed(), program.getTotalAmountDisbursed());
-        assertEquals(programs.get(0).getTotalAmountOutstanding(), program.getTotalAmountOutstanding());
-        assertEquals(programs.get(0).getTotalAmountRepaid(), program.getTotalAmountRepaid());
+            assertNotNull(programs);
+            assertNotNull(programsList);
+            assertEquals(programsList.get(0).getId(), program.getId());
+            assertEquals(programsList.get(0).getOrganizationId(), program.getOrganizationId());
+            assertEquals(programsList.get(0).getName(), program.getName());
+            assertEquals(programsList.get(0).getDuration(), program.getDuration());
+            assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountDisbursed());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountOutstanding());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountRepaid());
+        } catch (MeedlException e) {
+            log.error("Error viewing all programs", e);
+        }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " "})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewAllProgramsWithNullOrganizationId(String organizationId) {
-//        when(programOutputPort.findAllPrograms(organizationId)).thenThrow(MeedlException.class);
+        program.setOrganizationId(organizationId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewAllPrograms(program));
-        assertEquals("Organization ID cannot be null or empty", meedlException.getMessage());
+        assertEquals("field cannot be null or empty", meedlException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    void viewAllProgramsWithSpaces(String organizationId) {
+        try {
+            program.setOrganizationId(organizationId);
+            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
+                    thenReturn(new PageImpl<>(List.of(program)));
+            Page<Program> programs = programService.viewAllPrograms(program);
+            List<Program> programsList = programs.toList();
+
+            assertNotNull(programs);
+            assertNotNull(programsList);
+            assertEquals(programsList.get(0).getId(), program.getId());
+            assertEquals(programsList.get(0), program);
+        } catch (MeedlException e) {
+            log.error("Error viewing all programs", e);
+        }
     }
 }

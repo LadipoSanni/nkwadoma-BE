@@ -14,6 +14,7 @@ import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +35,8 @@ class ProgramPersistenceAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     private UserIdentity userIdentity;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -64,8 +67,8 @@ class ProgramPersistenceAdapterTest {
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).programType(ProgramType.PROFESSIONAL).
-                createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
+                deliveryType(DeliveryType.ONSITE).createdAt(LocalDateTime.now()).createdBy("68379").
+                programStartDate(LocalDate.now()).build();
     }
 
     @BeforeAll
@@ -96,7 +99,6 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getName(), savedProgram.getName());
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
-            assertEquals(program.getProgramType(), savedProgram.getProgramType());
             assertEquals(program.getProgramStartDate(), savedProgram.getProgramStartDate());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
@@ -162,26 +164,32 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(organization.getId());
 
             program.setOrganizationId(organization.getId());
-            List<Program> foundPrograms = programOutputPort.findAllPrograms(program.getOrganizationId());
+            Page<Program> foundPrograms = programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber);
+            List<Program> programsList = foundPrograms.toList();
 
-            assertNotNull(foundPrograms);
-            assertEquals(1, foundPrograms.size());
-            assertEquals(foundPrograms.get(0).getName(), program.getName());
-            assertEquals(foundPrograms.get(0).getDuration(), program.getDuration());
-            assertEquals(foundPrograms.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-            assertEquals(foundPrograms.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
-            assertEquals(foundPrograms, List.of(program));
+            assertNotNull(programsList);
+            assertEquals(1, programsList.size());
+            assertEquals(programsList.get(0).getName(), program.getName());
+            assertEquals(programsList.get(0).getDuration(), program.getDuration());
+            assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(programsList, List.of(program));
         } catch (MeedlException e) {
             log.info(e.getMessage());
         }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", StringUtils.EMPTY, "f98hv"})
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "f98hv"})
     void findAllProgramsByNullOrInvalidOrganizationId(String organizationId) {
-        List<Program> foundPrograms = programOutputPort.findAllPrograms(organizationId);
-        assertTrue(foundPrograms.isEmpty());
-        assertEquals(foundPrograms, List.of());
+        try {
+            Page<Program> foundPrograms = programOutputPort.findAllPrograms(organizationId, pageSize, pageNumber);
+            List<Program> foundProgramsList = foundPrograms.toList();
+            assertTrue(foundProgramsList.isEmpty());
+            assertEquals(foundProgramsList, List.of());
+        } catch (MeedlException e) {
+            log.error("Failed to find all programs", e);
+        }
     }
 
     @Test

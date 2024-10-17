@@ -4,14 +4,12 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseC
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.*;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
-import static africa.nkwadoma.nkwadoma.domain.validation.education.ProgramValidator.validateInput;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +27,10 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public List<Program> viewAllPrograms(Program program) throws MeedlException {
-//        if (StringUtils.isEmpty(program.getOrganizationId())) {
-//            throw new MeedlException("Organization ID is required");
-//        }
-        return programOutputPort.findAllPrograms(program.getOrganizationId());
+    public Page<Program> viewAllPrograms(Program program) throws MeedlException {
+        MeedlValidator.validateDataElement(program.getOrganizationId());
+        String organizationId = program.getOrganizationId().trim();
+        return programOutputPort.findAllPrograms(organizationId, program.getPageSize(), program.getPageNumber());
     }
 
 }

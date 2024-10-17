@@ -17,6 +17,4 @@ public interface ProgramMapper {
 
     @InheritInverseConfiguration
     Program toProgram(ProgramEntity programEntity);
-
-    List<Program> toPrograms(List<ProgramEntity> programEntities);
 }

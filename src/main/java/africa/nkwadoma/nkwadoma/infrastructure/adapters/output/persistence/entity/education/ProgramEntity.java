@@ -34,8 +34,6 @@ public class ProgramEntity {
     private int numberOfCohort;
     @Enumerated(EnumType.STRING)
     private ProgramMode mode;
-    //    @Enumerated(EnumType.STRING)
-//    private ProgramType programType;
     @Enumerated(EnumType.STRING)
     private DeliveryType deliveryType;
     @Enumerated(EnumType.STRING)

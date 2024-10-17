@@ -16,9 +16,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
@@ -88,8 +89,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public List<Program> findAllPrograms(String organizationId) {
-        List<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId);
-        return programMapper.toPrograms(programEntities);
+    public Page<Program> findAllPrograms(String organizationId, int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
+        return programEntities.map(programMapper::toProgram);
     }
 }
