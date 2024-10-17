@@ -38,13 +38,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         }
         cohort.validate();
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
+
         boolean cohortExists = program.getCohorts().stream()
                 .anyMatch(eachCohort -> eachCohort.getName().equals(cohort.getName()));
         if (cohortExists) {
             throw new CohortExistException(COHORT_EXIST.getMessage());
         } else {
             program.getCohorts().add(cohort);
-            program.setNumberOfCohort(program.getNumberOfCohort() + 1);
+            program.setNumberOfCohort(program.getNumberOfCohort()+1);
             cohort.setCreatedAt(LocalDateTime.now());
             programOutputPort.saveProgram(program);
         }

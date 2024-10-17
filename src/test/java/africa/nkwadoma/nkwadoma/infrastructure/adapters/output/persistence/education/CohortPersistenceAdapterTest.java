@@ -67,7 +67,7 @@ public class CohortPersistenceAdapterTest {
         try {
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(organizationIdentity);
             program.setOrganizationId(savedOrganization.getId());
-            Program savedProgram = programOutputPort.saveProgram(program);
+            program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
             e.printStackTrace();
         }
@@ -79,7 +79,7 @@ public class CohortPersistenceAdapterTest {
         elites = new Cohort();
         elites.setProgramId(program.getId());
         elites.setName("Elite Nigerian Students");
-        elites.setCreatedBy(employeeIdentity.getId());
+        elites.setCreatedBy(program.getId());
     }
     @Test
     void saveCohortWithNullCohort(){

@@ -31,4 +31,5 @@ public class CohortEntity {
     private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+
 }
