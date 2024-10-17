@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProduct;
+import static africa.nkwadoma.nkwadoma.domain.validation.LoanValidator.validateLoanProductDetails;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -22,7 +25,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     private final LoanProductEntityRepository loanProductEntityRepository;
     private final LoanProductMapper loanProductMapper;
     @Override
-    public LoanProduct save(LoanProduct loanProduct)  {
+    public LoanProduct save(LoanProduct loanProduct) throws MeedlException {
+        validateLoanProduct(loanProduct);
+        validateLoanProductDetails(loanProduct);
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAtDate(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);

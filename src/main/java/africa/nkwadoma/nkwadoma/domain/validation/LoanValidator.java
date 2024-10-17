@@ -30,7 +30,7 @@ public class LoanValidator extends MeedlValidator {
         if (loanProduct.getSponsors() == null
                 ||loanProduct.getSponsors().isEmpty()
                 ||loanProduct.getLoanProductSize() == null
-                ||loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) < ZERO
+                ||loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) <= ZERO
                 ||loanProduct.getObligorLoanLimit() == null
                 ||loanProduct.getObligorLoanLimit().compareTo(BigDecimal.ZERO) < ZERO
                 ||loanProduct.getInterestRate() < ZERO
