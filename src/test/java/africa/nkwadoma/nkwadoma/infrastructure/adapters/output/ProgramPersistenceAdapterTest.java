@@ -167,6 +167,11 @@ class ProgramPersistenceAdapterTest {
             Page<Program> foundPrograms = programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber);
             List<Program> programsList = foundPrograms.toList();
 
+            assertEquals(1, foundPrograms.getTotalElements());
+            assertEquals(1, foundPrograms.getTotalPages());
+            assertTrue(foundPrograms.isFirst());
+            assertTrue(foundPrograms.isLast());
+
             assertNotNull(programsList);
             assertEquals(1, programsList.size());
             assertEquals(programsList.get(0).getName(), program.getName());
