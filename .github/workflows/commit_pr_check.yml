@@ -22,7 +22,6 @@ jobs:
         id: vars
         run: |
           TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          COMMIT_HASH=$(git rev-parse --short HEAD)
           PROJECT_NAME="Nkwadoma Backend"
           DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           TASK_BRANCH=${{ github.head_ref || github.ref_name }}
