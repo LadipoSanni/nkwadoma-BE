@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.FundRaisingStatus.DEPLOYING;
-import static africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType.ENDOWMENT;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus.DEPLOYING;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.ENDOWMENT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -33,15 +33,14 @@ class InvestmentVehicleServiceTest {
     private InvestmentVehicleOutputPort outputPort;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         fundGrowth = new InvestmentVehicle();
         fundGrowth.setName("Growth Investment limited");
         fundGrowth.setSize(BigDecimal.valueOf(4000));
         fundGrowth.setRate(12F);
         fundGrowth.setMandate("Long-term fund");
-        fundGrowth.setSponsors("UBA");
         fundGrowth.setInvestmentVehicleType(ENDOWMENT);
-        fundGrowth.setTenure("12 Month");
+        fundGrowth.setTenure(12);
 
 
     }
@@ -105,19 +104,7 @@ class InvestmentVehicleServiceTest {
 
 
     @Test
-    @Order(5)
-    void updateInvestmentVehicleSponsors() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setSponsors("Gt");
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertNotEquals(fundGrowth.getSponsors(),updatedInvestmentVehicle.getSponsors());
-    }
-
-
-    @Test
-    @Order(5)
+    @Order(6)
     void updateInvestmentVehicleMandate() throws MeedlException {
         InvestmentVehicle foundInvestmentVehicle =
                 outputPort.findById(investmentId);
@@ -127,13 +114,28 @@ class InvestmentVehicleServiceTest {
         assertNotEquals(fundGrowth.getMandate(),updatedInvestmentVehicle.getMandate());
     }
 
+
     @Test
-    @Order(6)
+    @Order(7)
+    void viewInvestmentVehicleDetails() {
+        InvestmentVehicle viewedInvestmentVehicle = null;
+        try {
+            viewedInvestmentVehicle = investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(viewedInvestmentVehicle);
+        assertEquals(viewedInvestmentVehicle.getId(),investmentId);
+    }
+
+    @Test
+    @Order(8)
     void viewAllInvestmentVehicle(){
         List<InvestmentVehicle> investmentVehicles =
                 investmentVehicleUseCase.viewAllInvestmentVehicle();
         assertEquals(1,investmentVehicles.size());
     }
+
 
     @AfterAll
     void cleanUp(){

@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -18,10 +20,18 @@ public class InvestmentVehicle {
     private String name;
     private InvestmentVehicleType investmentVehicleType;
     private String mandate;
-    private String sponsors;
-    private String tenure;
+    private int tenure;
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
+    private InvestmentVehicleFinancier leads;
+    private InvestmentVehicleFinancier contributors;
 
+    public void validate() throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateIntegerDataElement(tenure);
+        MeedlValidator.validateDataElement(investmentVehicleType.toString());
+        MeedlValidator.validateFloatDataElement(rate);
+        MeedlValidator.validateBigDecimalDataElement(size);
+    }
 }

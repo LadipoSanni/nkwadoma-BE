@@ -25,6 +25,12 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     }
 
     @Override
+    public InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException {
+        return investmentVehicleOutputPort.findById(id);
+    }
+
+
+    @Override
     public List<InvestmentVehicle> viewAllInvestmentVehicle() {
         return investmentVehicleOutputPort.findAllInvestmentVehicle();
     }

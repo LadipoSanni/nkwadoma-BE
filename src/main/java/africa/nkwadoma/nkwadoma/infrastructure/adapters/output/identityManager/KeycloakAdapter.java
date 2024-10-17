@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -55,23 +56,27 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public UserIdentity createUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentityDetails(userIdentity);
+        log.info("Done validating user identity details in keycloak adapter : {}",userIdentity);
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
             Response response = users.create(userRepresentation);
             if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                log.error("{} - {} --- Error occurred on attempting to create user on keycloak", Response.Status.CONFLICT, USER_IDENTITY_ALREADY_EXISTS.getMessage());
                 throw new IdentityException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
             }
             UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setId(createdUserRepresentation.getId());
 
             assignRole(userIdentity);
-            //userIdentity = userIdentityOutputPort.save(userIdentity);
+            log.info("User created on keycloak, role assigned : {}", createdUserRepresentation.getId());
         } catch (NotFoundException exception) {
+            log.error("{} - {} --- Error occurred on attempting to create user on keycloak", exception.getClass().getName(), exception.getMessage());
             throw new IdentityException(exception.getMessage());
         }
         return userIdentity;
     }
+
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
@@ -102,6 +107,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentity(organizationIdentity);
+        log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
@@ -114,30 +120,37 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public void createPassword(String email, String password) throws MeedlException {
-
+    public UserIdentity createPassword(String email, String password) throws MeedlException {
+        MeedlValidator.validateDataElement(email);
+        MeedlValidator.validateDataElement(password);
+        password = password.trim();
         List<UserRepresentation> users = getUserRepresentations(email);
         if (users.isEmpty()) throw new MeedlException(USER_NOT_FOUND.getMessage());
-        UserRepresentation user = users.get(0);
-        UserResource userResource = keycloak.realm(KEYCLOAK_REALM).users().get(user.getId());
+        UserRepresentation userRepresentation = users.get(0);
+        log.info("User ID for user creating password : {}", userRepresentation.getId());
+
+        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        UserResource userResource = getUserResource(userIdentity);
+
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
         credential.setValue(password);
-        credential.setTemporary(false);
+        credential.setTemporary(Boolean.FALSE);
         userResource.resetPassword(credential);
-        user.setEmailVerified(true);
-        user.setEnabled(true);
-        userResource.update(user);
+
+        userRepresentation.setEnabled(Boolean.TRUE);
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        userResource.update(userRepresentation);
+        userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+
+        return userIdentity;
     }
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
-        log.info("Calling keycloak server----");
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
-            log.info("Login credentials: {}", keycloakClient.tokenManager());
             TokenManager tokenManager = keycloakClient.tokenManager();
-            log.info("Access Token : {}", keycloakClient.tokenManager().getAccessToken().getToken());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException exception) {
             throw new IdentityException(exception.getMessage());
@@ -171,7 +184,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;
-
     }
 
     @Override
@@ -184,7 +196,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
         List<UserRepresentation> userRepresentations = getUserRepresentations(foundUser);
         for (UserRepresentation userRepresentation : userRepresentations){
-            userRepresentation.setEnabled(false);
+            userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
         return foundUser;
@@ -232,8 +244,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());
         clientRepresentation.setName(organizationIdentity.getName());
-        clientRepresentation.setDirectAccessGrantsEnabled(true);
-        clientRepresentation.setPublicClient(true);
+        clientRepresentation.setDirectAccessGrantsEnabled(Boolean.TRUE);
+        clientRepresentation.setPublicClient(Boolean.TRUE);
         return clientRepresentation;
     }
 
@@ -260,7 +272,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(userIdentity.getEmail());
     }
-    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, boolean exactMatch) throws MeedlException {
+    public UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException {
         validateUserIdentity(userIdentity);
         return keycloak
                 .realm(KEYCLOAK_REALM)
@@ -276,12 +288,14 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .get(userIdentity.getId());
     }
     public RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException {
+        if (userIdentity.getRole() == null || StringUtils.isEmpty(userIdentity.getRole().name()))
+            throw new IdentityException(INVALID_VALID_ROLE.getMessage());
         RoleRepresentation roleRepresentation;
         try {
             roleRepresentation = keycloak
                     .realm(KEYCLOAK_REALM)
                     .roles()
-                    .get(userIdentity.getRole().toUpperCase().trim())
+                    .get(userIdentity.getRole().name().toUpperCase().trim())
                     .toRepresentation();
         }catch (NotFoundException exception){
             throw new IdentityException("Not Found: Role with name "+ userIdentity.getRole());
@@ -298,7 +312,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         if (StringUtils.isEmpty(userIdentity.getEmail())
                 || StringUtils.isEmpty(userIdentity.getFirstName())
                 || StringUtils.isEmpty(userIdentity.getLastName())
-                || StringUtils.isEmpty(userIdentity.getRole()))
+                || userIdentity.getRole() == null
+                || StringUtils.isEmpty(userIdentity.getRole().name()))
             throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
         getRoleRepresentation(userIdentity);
     }
