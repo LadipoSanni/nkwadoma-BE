@@ -1,12 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.utilities;
 
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.ImageConverterException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.codec.Base64;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
