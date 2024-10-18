@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,6 @@ class LoanProductAdapterTest {
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
     private LoanProduct gemsLoanProduct;
-    private String gemsLoanProductId;
 
     @BeforeEach
     void setUp() {
@@ -36,6 +36,7 @@ class LoanProductAdapterTest {
         gemsLoanProduct.setObligorLoanLimit(new BigDecimal(1000));
         gemsLoanProduct.setInterestRate(0);
         gemsLoanProduct.setMoratorium(5);
+        gemsLoanProduct.setTenorStatus(TenorStatus.Years);
         gemsLoanProduct.setTenor(5);
         gemsLoanProduct.setMinRepaymentAmount(new BigDecimal(1000));
         gemsLoanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
@@ -44,30 +45,39 @@ class LoanProductAdapterTest {
     @Test
     @Order(1)
     void createLoanProduct() {
-        assertThrows(MeedlException.class,()-> loanProductOutputPort.findById(gemsLoanProduct.getId()));
+        try {
             LoanProduct createdLoanProduct = loanProductOutputPort.save(gemsLoanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
-            gemsLoanProductId = createdLoanProduct.getId();
-        try {
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(createdLoanProduct.getId());
             assertNotNull(foundLoanProduct);
             assertEquals(foundLoanProduct.getName(),gemsLoanProduct.getName());
             assertEquals(foundLoanProduct.getTermsAndCondition(), gemsLoanProduct.getTermsAndCondition());
-            gemsLoanProduct.setId(createdLoanProduct.getId());
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
-//    @ParameterizedTest
-//    @ValueSource(strings = {"-1", "1000", StringUtils.EMPTY, StringUtils.SPACE})
-//    void createWithInvalidProductSize(String size){
-//        gemsLoanProduct.setLoanProductSize(new BigDecimal(size));
-//        assertThrows(MeedlException.class, () -> loanProductOutputPort.save(gemsLoanProduct));
-//    }
+
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "fake/non-existing test" })
-    void existsByNameFalse(String name) {
+    @ValueSource(strings = {"-1", "0"})
+    void createWithInvalidProductSize(String size){
+        gemsLoanProduct.setLoanProductSize(new BigDecimal(size));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "0"})
+    void createWithInvalidObligorLimit(String obligorLimit){
+        gemsLoanProduct.setObligorLoanLimit(new BigDecimal(obligorLimit));
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createWithNullLoanRequest(){
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.save(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"non-existing loan product" })
+    void existsByNameWithNonExistingName(String name) {
         gemsLoanProduct.setName(name);
         try {
             assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
@@ -75,9 +85,49 @@ class LoanProductAdapterTest {
            log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
         }
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void createLoanProductWithInvalidMandate(String name){
+        gemsLoanProduct.setMandate(name);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNegativeInterestRate(){
+        gemsLoanProduct.setInterestRate(-1);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNegativeMoratoriumPeriod(){
+        gemsLoanProduct.setMoratorium(-1);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 11})
+    void createLoanProductWithInvalidTenorForYears(int value){
+        gemsLoanProduct.setTenorStatus(TenorStatus.Years);
+        gemsLoanProduct.setTenor(value);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 121})
+    void createLoanProductWithInvalidTenorForMonths(int value){
+        gemsLoanProduct.setTenorStatus(TenorStatus.Months);
+        gemsLoanProduct.setTenor(value);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    public void createLoanProductWithInvalidTenor(){
+        gemsLoanProduct.setTenorStatus(null);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
+    void createLoanProductWithNoTermsAndConditions(){
+        gemsLoanProduct.setTermsAndCondition(null);
+        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
 
     @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, " "})
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void existsByInvalidName(String name) {
         gemsLoanProduct.setName(name);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
@@ -86,7 +136,7 @@ class LoanProductAdapterTest {
     }
     @Test
     @Order(2)
-    void existsByNameTrue() {
+    void existsByNameWithValidName() {
         try {
         assertTrue(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
         } catch (MeedlException exception) {
@@ -111,13 +161,18 @@ class LoanProductAdapterTest {
             log.error("Failed to find loan product by name: {} With exception : {} {}", gemsLoanProduct.getName(), e.getClass().getName(), e.getMessage());
         }
         assertNotNull(foundLoanProduct);
+        assertNotNull(foundLoanProduct.getId());
+        assertEquals(gemsLoanProduct.getMandate(), foundLoanProduct.getMandate());
     }
     @Test
     @Order(4)
     void findById(){
         LoanProduct foundLoanProduct = null;
         try {
-            foundLoanProduct = loanProductOutputPort.findById(gemsLoanProductId);
+            foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            assertNotNull(foundLoanProduct);
+            assertNotNull(foundLoanProduct.getId());
+            foundLoanProduct = loanProductOutputPort.findById(foundLoanProduct.getId());
         } catch (MeedlException e) {
             log.error("Failed to find loan product by id: {} With exception : {} {}",gemsLoanProduct.getId(), e.getClass().getName(), e.getMessage());
         }
@@ -147,13 +202,25 @@ class LoanProductAdapterTest {
     @Order(5)
     void deleteLoanProduct() {
         try {
-            LoanProduct foundLoanProduct = loanProductOutputPort.findById(gemsLoanProductId);
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
             assertNotNull(foundLoanProduct);
-            loanProductOutputPort.deleteById(gemsLoanProductId);
+            assertNotNull(foundLoanProduct.getId());
+            assertEquals(gemsLoanProduct.getName(), foundLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundLoanProduct.getId());
+
+            assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(foundLoanProduct.getId()));
         } catch (MeedlException e) {
-            log.error("Failed to delete loan product {}", gemsLoanProductId);
-            assertTrue(false);
+            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
         }
-        assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(gemsLoanProduct.getId()));
+    }
+
+    @AfterAll
+    void cleanUp() {
+        try {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundLoanProduct.getId());
+        } catch (MeedlException e) {
+            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
+        }
     }
 }

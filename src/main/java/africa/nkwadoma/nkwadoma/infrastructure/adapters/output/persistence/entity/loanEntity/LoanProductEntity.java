@@ -32,6 +32,7 @@ public class LoanProductEntity {
     private TenorStatus tenorStatus;
     private int tenor;
     private double interestRate;
+    private double costOfFund;
     @Size(max=2500)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;

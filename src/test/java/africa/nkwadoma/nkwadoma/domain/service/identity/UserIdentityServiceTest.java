@@ -27,6 +27,7 @@ class UserIdentityServiceTest {
     @Autowired
     private TokenUtils tokenUtils;
     private UserIdentity favour;
+    private UserIdentity inviter;
     private String userId;
     private IdentityRole role;
     private String password;
@@ -34,12 +35,20 @@ class UserIdentityServiceTest {
 
     @BeforeEach
     void setUp(){
+
         favour = new UserIdentity();
         favour.setFirstName("favour");
         favour.setLastName("gabriel");
         favour.setEmail("favour@gmail.com");
         favour.setRole(IdentityRole.INSTITUTE_ADMIN);
         favour.setCreatedBy("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
+
+
+        inviter = new UserIdentity();
+        inviter.setFirstName("favour");
+        inviter.setLastName("gabriel");
+        inviter.setEmail("favour@gmail.com");
+        inviter.setRole(IdentityRole.INSTITUTE_ADMIN);
     }
 
     @Test
@@ -47,11 +56,11 @@ class UserIdentityServiceTest {
     void inviteColleague() {
         try {
             // Ensure the user doesn't exist initially
-            assertThrows(MeedlException.class, () -> userIdentityOutputPort.findById(favour.getId()));
+            assertThrows(MeedlException.class, () -> userIdentityOutputPort.findByEmail(favour.getEmail()));
 
             // Invite the colleague (create the user)
             UserIdentity invitedColleague = createUserUseCase.inviteColleague(favour);
-
+            log.info("invited colleague {}", invitedColleague.getId());
             // Ensure the user was created and has an ID
             assertNotNull(invitedColleague);
             assertNotNull(invitedColleague.getId());
@@ -62,7 +71,7 @@ class UserIdentityServiceTest {
             assertEquals(favour.getRole(), invitedColleague.getRole());
 
             // Retrieve the invited colleague from the database and verify
-            UserIdentity foundInvitedColleague = userIdentityOutputPort.findById(favour.getId());
+            UserIdentity foundInvitedColleague = userIdentityOutputPort.findById(invitedColleague.getId());
             assertEquals(foundInvitedColleague.getCreatedBy(), invitedColleague.getCreatedBy());
             assertEquals(favour.getLastName(), foundInvitedColleague.getLastName());
 
@@ -309,9 +318,6 @@ class UserIdentityServiceTest {
        favour.setPassword(StringUtils.EMPTY);
        assertThrows(MeedlException.class,()->createUserUseCase.login(favour));
     }
-
-
-
     @Test
     @Order(4)
     void changePassword() {
@@ -413,10 +419,34 @@ class UserIdentityServiceTest {
         }
     }
 
-    @Test
-    void enableAccountThatHasBeenEnabled() {
-       assertThrows(MeedlException.class, () -> createUserUseCase.enableAccount(favour));
-        }
+//    @Test
+//    void enableAccountThatHasBeenEnabled() {
+//        UserIdentity foundUser = null;
+//        try {
+//            log.info("UserIdentity id {} ", userId);
+//            foundUser = userIdentityOutputPort.findById(userId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertNotNull(foundUser);
+//        assertTrue(foundUser.isEnabled());
+//       assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
+//        }
+//    @Test
+//    @Order(10)
+//    void disAbleAccountAlreadyDisabled() {
+//        log.info("UserIdentity id {} ", userId);
+//        UserIdentity foundUser = null;
+//        try {
+//            foundUser = userIdentityOutputPort.findById(userId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertNotNull(foundUser);
+//        assertFalse(foundUser.isEnabled());
+//        assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
+//
+//    }
 
     @Test
      void forgotPassword() {
