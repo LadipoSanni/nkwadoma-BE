@@ -37,7 +37,7 @@ class InvestmentVehicleAdapterTest {
     @BeforeEach
     void setUp(){
         capitalGrowth = new InvestmentVehicle();
-        capitalGrowth.setName("Growth Investment");
+        capitalGrowth.setName("Growth Investments");
         capitalGrowth.setSize(BigDecimal.valueOf(4000));
         capitalGrowth.setRate(13F);
         capitalGrowth.setMandate("Long-term Growth");
@@ -46,7 +46,7 @@ class InvestmentVehicleAdapterTest {
 
 
         fundGrowth = new InvestmentVehicle();
-        fundGrowth.setName("Growth Investment2");
+        fundGrowth.setName("Growth Investments2");
         fundGrowth.setSize(BigDecimal.valueOf(4000));
         fundGrowth.setRate(12F);
         fundGrowth.setMandate("Long-term fund");
@@ -55,7 +55,7 @@ class InvestmentVehicleAdapterTest {
 
 
         investment = new InvestmentVehicle();
-        investment.setName("Investment");
+        investment.setName("Investments");
         investment.setSize(BigDecimal.valueOf(4000));
         investment.setRate(12F);
         investment.setMandate("Long-term fund");

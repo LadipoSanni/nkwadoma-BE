@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
@@ -35,6 +34,8 @@ class KeycloakAdapterTest {
     private IdentityManagerOutPutPort identityManagementOutputPort;
     private UserIdentity john;
     private UserIdentity peter;
+    private String johnId;
+    private boolean enabled;
 
     @BeforeEach
     void setUp() {
@@ -64,6 +65,7 @@ class KeycloakAdapterTest {
             assertEquals(createdUser.getEmail(), john.getEmail());
             assertEquals(createdUser.getFirstName(), john.getFirstName());
             assertEquals(createdUser.getLastName(), john.getLastName());
+            johnId = createdUser.getId();
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(),exception.getMessage());
         }
@@ -120,6 +122,7 @@ class KeycloakAdapterTest {
             assertTrue(userIdentity.isEmailVerified());
             assertTrue(userIdentity.isEnabled());
             userIdentity.setPassword(john.getPassword());
+            enabled = userIdentity.isEnabled();
 
             AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(userIdentity);
             assertNotNull(accessTokenResponse);
@@ -216,13 +219,8 @@ class KeycloakAdapterTest {
     @Test
     @Order(5)
     void enableAccountThatHasBeenEnabled() {
-        try {
-            UserIdentity userIdentity = identityManagementOutputPort.enableUserAccount(john);
-            assertTrue(userIdentity.isEnabled());
+            john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
-        } catch (MeedlException e) {
-            log.info("{}", e.getMessage());
-        }
     }
 
     @Test
@@ -234,17 +232,23 @@ class KeycloakAdapterTest {
     @Test
     @Order(6)
     void disAbleAccount() {
+        UserIdentity userIdentity = null;
         try{
-            //TODO: check account is enabled
-
-            identityManagementOutputPort.disableUserAccount(john);
-
-            //TODO assert account is disabled
+            john.setId(johnId);
+            john.setEnabled(enabled);
+            assertTrue(john.isEnabled());
+            userIdentity = identityManagementOutputPort.disableUserAccount(john);
+            assertFalse(userIdentity.isEnabled());
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
     }
+    @Test
+    @Order(7)
+    void disAbleAccountAlreadyDisabled() {
+          assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
+    }
 
     @Test
     void getUserRepresentation()  {
