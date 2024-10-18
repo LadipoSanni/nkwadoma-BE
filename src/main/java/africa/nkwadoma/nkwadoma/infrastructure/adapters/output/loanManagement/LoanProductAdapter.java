@@ -31,6 +31,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAt(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
+        log.info("Loan product {}",  loanProduct);
         return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
     }
 

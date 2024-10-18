@@ -14,18 +14,17 @@ public class LoanProductResponse {
     private String id;
     private String name;
     private int moratorium;
-    private DurationType tenorStatus;
     private int tenor;
     private double interestRate;
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize ;
-    private BigDecimal amountAvailable;
+    private BigDecimal totalAmountAvailable;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDateTime createdAtDate;
-    private BigDecimal amountEarned ;
-    private BigDecimal amountDisbursed ;
-    private BigDecimal amountRepaid ;
+    private LocalDateTime createdAt;
+    private BigDecimal totalAmountEarned ;
+    private BigDecimal totalAmountDisbursed ;
+    private BigDecimal totalAmountRepaid ;
     private String mandate;
     private List<String> sponsors;
     private BigDecimal minRepaymentAmount;

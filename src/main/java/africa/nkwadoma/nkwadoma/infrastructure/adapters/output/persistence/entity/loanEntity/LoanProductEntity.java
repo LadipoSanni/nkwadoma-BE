@@ -28,8 +28,6 @@ public class LoanProductEntity {
     private int moratorium;
     @Enumerated(EnumType.STRING)
     private ActivationStatus loanProductStatus;
-    @Enumerated(EnumType.STRING)
-    private DurationType tenorStatus;
     private int tenor;
     private double interestRate;
     private double costOfFund;
