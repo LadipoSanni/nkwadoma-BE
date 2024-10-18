@@ -35,9 +35,6 @@ public class ProgramController {
 
     @PostMapping("")
     @Operation(summary = "Add a proram to an Institute", description = "Fetch a loan product by its ID.")
-//    @ApiResponse(responseCode = "200", description = "Loan product found")
-//    @ApiResponse(responseCode = "404", description = "Loan product not found")
-
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
             Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));

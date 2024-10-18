@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -169,13 +170,30 @@ class KeycloakAdapterTest {
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
-    @Test
-    void loginWithWrongDetails() {
+    @ParameterizedTest
+    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
+    void loginWithNullPassword(String password) {
+        john.setPassword(password);
+        MeedlException meedlException = assertThrows(MeedlException.class, () ->
+                identityManagementOutputPort.login(john));
+        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+    }
 
-        john.setEmail("wrong@gmail.com");
-        john.setPassword("passwordJ@345");
-        john.setFirstName("wrong firstname");
-        assertThrows(IdentityException.class,()->identityManagementOutputPort.login(john));
+    @ParameterizedTest
+    @ValueSource(strings = {"fgdgffdfdfdf    ", "    dddfdsfdsfsfd"})
+    void loginWithSpaces(String password) {
+        john.setPassword(password);
+        MeedlException meedlException = assertThrows(MeedlException.class, () ->
+                identityManagementOutputPort.login(john));
+        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"wrongpasswordJ@348625"})
+    void loginWithInvalidPassword(String password) {
+        john.setPassword(password);
+        IdentityException exception = assertThrows(IdentityException.class, () -> identityManagementOutputPort.login(john));
+        assertEquals(exception.getMessage(), MeedlMessages.INVALID_EMAIL_ADDRES_OR_PASSWORD.getMessage());
     }
 
     @Test
