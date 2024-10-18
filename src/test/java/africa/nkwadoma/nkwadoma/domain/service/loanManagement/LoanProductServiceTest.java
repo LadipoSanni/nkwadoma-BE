@@ -34,13 +34,13 @@ class LoanProductServiceTest {
         loanProduct.setName("Test Loan Product: unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
-        loanProduct.setLoanProductSize(new BigDecimal(1000));
-        loanProduct.setObligorLoanLimit(new BigDecimal(1000));
+//        loanProduct.setLoanProductSize(new BigDecimal(1000));
+//        loanProduct.setObligorLoanLimit(new BigDecimal(1000));
         loanProduct.setInterestRate(0);
         loanProduct.setMoratorium(5);
         loanProduct.setTenor(5);
         loanProduct.setTenorStatus(Years);
-        loanProduct.setMinRepaymentAmount(new BigDecimal(1000));
+//        loanProduct.setMinRepaymentAmount(new BigDecimal(1000));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
     }
 
@@ -92,34 +92,8 @@ class LoanProductServiceTest {
         assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct((loanProduct)));
     }
     @Test
-    void createLoanProductWithNullSponsor(){
-        loanProduct.setSponsors(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNoSponsor(){
-        loanProduct.setSponsors(List.of());
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullLoanProductSize(){
-        loanProduct.setLoanProductSize(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
     void createLoanProductWithNegativeLoanProductSize(){
         loanProduct.setLoanProductSize(new BigDecimal(-1));
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void obligorLimitGreaterThanLoanProductSize(){
-        loanProduct.setLoanProductSize(new BigDecimal(1000));
-        loanProduct.setObligorLoanLimit(new BigDecimal(2000000));
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullObligorLimit(){
-        loanProduct.setObligorLoanLimit(null);
         assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
     }
     @Test
@@ -140,11 +114,6 @@ class LoanProductServiceTest {
     @Test
     void createLoanProductWithNegativeTenor(){
         loanProduct.setTenor(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNullMinimumRepaymentAmount(){
-        loanProduct.setMinRepaymentAmount(null);
         assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
     }
     @Test

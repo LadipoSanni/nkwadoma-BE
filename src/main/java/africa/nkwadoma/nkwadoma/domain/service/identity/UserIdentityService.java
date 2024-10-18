@@ -107,19 +107,23 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity enableAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
+    public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
+        validateUserIdentityObject(userIdentity);
+        validateDataElement(userIdentity.getId());
+        userIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
         userIdentityOutputPort.save(userIdentity);
+        log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
 
     @Override
-    public UserIdentity disableAccount(UserIdentity userIdentity) throws MeedlException {
+    public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
+        validateDataElement(userIdentity.getEmail());
         userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
-        userIdentity.setEnabled(false);
         userIdentityOutputPort.save(userIdentity);
+        log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
 

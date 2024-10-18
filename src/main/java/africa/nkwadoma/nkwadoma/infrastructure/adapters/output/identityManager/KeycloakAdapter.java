@@ -32,7 +32,9 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
+import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.validateUserIdentityObject;
 
 
 @RequiredArgsConstructor
@@ -182,6 +184,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
+        validateUserIdentityObject(userIdentity);
+        validateDataElement(userIdentity.getEmail());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
@@ -193,14 +197,23 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             userRepresentation.setEnabled(true);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
+        UserRepresentation userRepresentation = mapper.map(foundUser);
+        userRepresentation.setEnabled(Boolean.TRUE);
+        userRepresentation.setEmailVerified(Boolean.TRUE);
+        UserResource userResource = getUserResource(userIdentity);
+        userResource.update(userRepresentation);
+        foundUser.setEnabled(Boolean.TRUE);
         return foundUser;
     }
 
     @Override
     public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException {
+        validateUserIdentityObject(userIdentity);
+        validateDataElement(userIdentity.getEmail());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-        if (foundUser.isEnabled()) {
+        if (!foundUser.isEnabled()) {
+            log.warn("The status of the found user is...  {} id : {}", foundUser.isEnabled(), foundUser.getId() );
             throw new IdentityException(ACCOUNT_ALREADY_DISABLED.getMessage());
         }
 
@@ -209,6 +222,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
+        foundUser.setEnabled(Boolean.FALSE);
         return foundUser;
 
     }
