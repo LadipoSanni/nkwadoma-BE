@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.ServiceOfferingEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,15 +36,16 @@ class UserIdentityServiceTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private CreateOrganizationUseCase createOrganizationUseCase;
     @Autowired
     private TokenUtils tokenUtils;
     private UserIdentity favour;
-    private UserIdentity inviter;
     private String userId;
     private IdentityRole role;
     private String password;
     private String newPassword;
+    private OrganizationIdentity roseCouture;
+    private OrganizationIdentity invitedOrganisation;
 
     @BeforeEach
     void setUp(){
@@ -56,25 +58,39 @@ class UserIdentityServiceTest {
         favour.setCreatedBy("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
 
 
-        inviter = new UserIdentity();
-        inviter.setFirstName("favour");
-        inviter.setLastName("gabriel");
-        inviter.setEmail("favour@gmail.com");
-        inviter.setRole(IdentityRole.INSTITUTE_ADMIN);
 
-        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-        organizationIdentity.setName("Test Organization");
-        organizationIdentity.setEmail("dahsjhn@fjd.cjnd");
-        organizationIdentity.setPhoneNumber("9876545782");
-        organizationIdentity.setRcNumber("9876545782");
-        organizationIdentity.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
-        organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(inviter).build()));
+        UserIdentity sarah = new UserIdentity();
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        sarah.setFirstName("Sarah");
+        sarah.setLastName("bangs");
+        sarah.setEmail("sarah908@gmail.com");
+        sarah.setCreatedBy(favour.getFirstName());
+
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setMiddlUser(sarah);
+
+        List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
+        orgEmployee.add(employeeIdentity);
+
+        roseCouture = new OrganizationIdentity();
+        roseCouture.setName("Redstest");
+        roseCouture.setEmail("roesesarered@gmail.com");
+        roseCouture.setTin("7682-5627");
+        roseCouture.setRcNumber("RC87899");
+        roseCouture.setServiceOffering(new ServiceOffering());
+        roseCouture.getServiceOffering().setIndustry(Industry.EDUCATION);
+        roseCouture.setPhoneNumber("09876365713");
+        roseCouture.setInvitedDate(LocalDateTime.now().toString());
+        roseCouture.setWebsiteAddress("rosecouture.org");
+        roseCouture.setOrganizationEmployees(orgEmployee);
+
         try {
-            OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
-            assertNotNull(savedOrganization.getId());
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
+            invitedOrganisation = createOrganizationUseCase.inviteOrganization(roseCouture);
+            assertNotNull(invitedOrganisation);
+            assertNotNull(invitedOrganisation.getId());
+            log.info("Invited organisation {} ", invitedOrganisation.getId());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 

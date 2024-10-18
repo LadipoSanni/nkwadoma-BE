@@ -56,6 +56,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
         employeeIdentity.setMiddlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
