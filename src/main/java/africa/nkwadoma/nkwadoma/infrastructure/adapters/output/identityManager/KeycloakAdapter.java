@@ -149,7 +149,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
+    public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
@@ -227,14 +229,17 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     private Keycloak getKeycloak(UserIdentity userIdentity) {
-        log.info("User credentials: {}", userIdentity.toString());
+        String email = userIdentity.getEmail().trim();
+        String password = userIdentity.getPassword().trim();
+        log.info("Email: {}", email);
+        log.info("Password: {}", password);
         return KeycloakBuilder.builder()
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(KEYCLOAK_REALM)
                 .clientId(CLIENT_ID)
                 .clientSecret(CLIENT_SECRET)
-                .username(userIdentity.getEmail())
-                .password(userIdentity.getPassword())
+                .username(email)
+                .password(password)
                 .serverUrl(SERVER_URL)
                 .build();
     }

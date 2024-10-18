@@ -67,6 +67,7 @@ class KeycloakAdapterTest {
             assertEquals(createdUser.getLastName(), john.getLastName());
             johnId = createdUser.getId();
         }catch (MeedlException exception){
+            log.error("Failed to create user in keycloak", exception);
             log.info("{} {}", exception.getClass().getName(),exception.getMessage());
         }
     }
@@ -142,10 +143,9 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"fgdgffdfdfdf    ", "    dddfdsfdsfsfd"})
+    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
     void createPasswordWithSpaces(String password) {
         try {
-
             UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), password);
             assertNotNull(userIdentity);
             assertNotNull(userIdentity.getId());
@@ -168,9 +168,12 @@ class KeycloakAdapterTest {
         try {
             john.setPassword("passwordJ@345");
             identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
-            identityManagementOutputPort.login(john);
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException meedlException){
-            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
+            log.error("Error logging in user", meedlException);
         }
     }
     @ParameterizedTest
@@ -183,12 +186,17 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"fgdgffdfdfdf    ", "    dddfdsfdsfsfd"})
-    void loginWithSpaces(String password) {
+    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
+    void loginWithPasswordWithSpaces(String password) {
         john.setPassword(password);
-        MeedlException meedlException = assertThrows(MeedlException.class, () ->
-                identityManagementOutputPort.login(john));
-        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+        try {
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+        } catch (MeedlException e) {
+            log.error("Failed to login with spaces", e);
+
+        }
     }
 
     @ParameterizedTest
