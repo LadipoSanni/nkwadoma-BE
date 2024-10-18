@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
 
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.ProgramCreateRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
 import org.mapstruct.*;
 
@@ -15,6 +15,10 @@ public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.durationStatus", target = "durationType")
     @Mapping(source = "meedlUserId", target = "createdBy")
     Program toProgram(ProgramCreateRequest programCreateRequest, String meedlUserId);
+
+    @Mapping(target = "pageNumber", source = "pageNumber", defaultValue = "0")
+    @Mapping(target = "pageSize", source = "pageSize", defaultValue = "0")
+    Program toProgram(ProgramsRequest programsRequest);
 
     ProgramResponse toProgramResponse(Program program);
 }

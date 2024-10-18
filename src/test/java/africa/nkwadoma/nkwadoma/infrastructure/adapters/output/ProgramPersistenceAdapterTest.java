@@ -32,8 +32,6 @@ class ProgramPersistenceAdapterTest {
     private ProgramOutputPort programOutputPort;
     private Program program;
     private OrganizationIdentity organizationIdentity;
-    private OrganizationIdentity bankingOrganization;
-
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     private UserIdentity userIdentity;
@@ -69,8 +67,6 @@ class ProgramPersistenceAdapterTest {
         organizationIdentity.setServiceOffering(serviceOffering);
         organizationIdentity.setWebsiteAddress("webaddress.org");
         organizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
-
-        bankingOrganization = new OrganizationIdentity();
 
         program = new Program();
         program.setName("My program");

@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.ProgramCreateRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.*;
@@ -35,8 +36,6 @@ public class ProgramController {
 
     @PostMapping("")
     @Operation(summary = "Add a proram to an Institute", description = "Fetch a program by its ID.")
-//    @ApiResponse(responseCode = "200", description = "Loan product found")
-//    @ApiResponse(responseCode = "404", description = "Loan product not found")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
@@ -50,17 +49,20 @@ public class ProgramController {
         );
     }
 
-    @GetMapping("{organizationId}/all")
+    @GetMapping("/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given institute.")
-    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@PathVariable @Valid @NotBlank(message = "Organization ID is required") String organizationId) throws MeedlException {
-        Program program = new Program();
-        program.setOrganizationId(organizationId);
-//        program = addProgramUseCase.viewAllPrograms(program);
+    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@Valid @RequestBody ProgramsRequest programsRequest)
+            throws MeedlException {
+        Program program = programRestMapper.toProgram(programsRequest);
 
+        Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
+        PaginatedResponse<Program> response = new PaginatedResponse<>(programs.getContent(),
+                programs.hasNext(), programs.getTotalPages(), programsRequest.getPageSize(),
+                programsRequest.getPageNumber());
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                body(programRestMapper.toProgramResponse(program)).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
-                HttpStatus.OK
+                body(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
         );
     }
 
