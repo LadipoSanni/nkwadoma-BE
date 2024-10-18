@@ -134,11 +134,8 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException {
+    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
-        UserResource userResource = identityManagerOutPutPort.getUserResource(userIdentity);
-        log.info("{}",userResource);
-
         return false;
     }
 
