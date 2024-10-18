@@ -52,6 +52,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setRole(PORTFOLIO_MANAGER);
         userIdentity.setCreatedBy("Ayo");
 
+        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().middlUser(userIdentity).build();
         organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName("Amazing Grace Enterprises");
         organizationIdentity.setEmail("rachel@gmail.com");
@@ -60,9 +61,11 @@ class ProgramPersistenceAdapterTest {
         organizationIdentity.setId(organizationIdentity.getRcNumber());
         organizationIdentity.setPhoneNumber("0907658483");
         organizationIdentity.setTin("Tin5678");
+        organizationIdentity.setNumberOfPrograms(0);
         organizationIdentity.setServiceOffering(new ServiceOffering());
         organizationIdentity.getServiceOffering().setIndustry(Industry.BANKING);
         organizationIdentity.setWebsiteAddress("webaddress.org");
+        organizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
 
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
@@ -78,15 +81,15 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedOrganization);
             assertNotNull(savedOrganization.getId());
         } catch (MeedlException e) {
-            log.info("Failed to save organization: {}", e.getMessage());
+            log.error("Failed to save organization", e);
         }
     }
 
     @Test
-//    @Order(1)
+    @Order(1)
     void saveProgram() {
         try {
-            organizationIdentity.setEmail("org@example.com");
+//            organizationIdentity.setEmail("org@example.com");
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             assertNotNull(foundOrganization);
             assertEquals("org@example.com", foundOrganization.getEmail());
@@ -106,7 +109,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(5)
     void saveProgramWithWrongIndustry() {
         try {
             OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
@@ -125,7 +127,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(2)
+    @Order(2)
     void findProgramByName() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
@@ -198,7 +200,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(4)
+    @Order(2)
     void deleteProgram() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
