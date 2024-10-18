@@ -443,7 +443,11 @@ class UserIdentityServiceTest {
     }
     @Test
     void checkLastFivePassword() throws MeedlException {
-        createUserUseCase.checkNewPasswordMatchLastFive(favour);
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail("johnmax@lendspace.com");
+        userIdentity.setId("8ba30e52-60d2-4fd7-ac7b-a558b1d20c9d");
+
+        createUserUseCase.checkNewPasswordMatchLastFive(userIdentity);
     }
 
     @Test

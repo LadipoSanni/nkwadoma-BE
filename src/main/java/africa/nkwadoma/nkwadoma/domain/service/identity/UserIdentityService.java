@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -130,9 +131,9 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException {
-        UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, true);
-        List<CredentialRepresentation> userCredentials = userRepresentation.getCredentials();
-        userCredentials.forEach(credential -> log.info(credential.getCredentialData()));
+        List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
+        UserResource userResource = identityManagerOutPutPort.getUserResource(userIdentity);
+        log.info("{}",userResource);
 
         return false;
     }
