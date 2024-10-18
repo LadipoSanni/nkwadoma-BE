@@ -3,10 +3,10 @@ package africa.nkwadoma.nkwadoma.domain.service.email;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Slf4j
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {
     private final EmailOutputPort emailOutputPort;
-    private final TokenGeneratorOutputPort tokenGeneratorOutputPort;
+    private final TokenUtils tokenUtils;
     @Value("${FRONTEND_URL}")
     private String baseUrl;
 
@@ -52,7 +52,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     }
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
-        String token = tokenGeneratorOutputPort.generateToken(userIdentity.getEmail());
+        String token = tokenUtils.generateToken(userIdentity.getEmail());
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 

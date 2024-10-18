@@ -4,11 +4,12 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseC
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
-import static africa.nkwadoma.nkwadoma.domain.validation.education.ProgramValidator.validateInput;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,13 @@ public class ProgramService implements AddProgramUseCase {
             throw new ResourceAlreadyExistsException(PROGRAM_ALREADY_EXISTS.getMessage());
         }
         return programOutputPort.saveProgram(program);
+    }
+
+    @Override
+    public Page<Program> viewAllPrograms(Program program) throws MeedlException {
+        MeedlValidator.validateDataElement(program.getOrganizationId());
+        String organizationId = program.getOrganizationId().trim();
+        return programOutputPort.findAllPrograms(organizationId, program.getPageSize(), program.getPageNumber());
     }
 
 }

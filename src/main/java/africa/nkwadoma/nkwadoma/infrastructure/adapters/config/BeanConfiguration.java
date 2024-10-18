@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.TokenGeneratorOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
@@ -34,8 +33,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.PasswordHistoryRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.token.TokenGeneratorAdapter;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,13 +60,13 @@ public class BeanConfiguration {
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
                                                    IdentityManagerOutPutPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                                   TokenGeneratorOutputPort tokenGeneratorOutputPort,
+                                                   TokenUtils tokenUtils,
                                                    PasswordEncoder passwordEncoder,
                                                    PasswordHistoryOutputPort passwordHistoryOutputPort,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenGeneratorOutputPort,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenUtils,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper);
     }
 
     @Bean
@@ -128,11 +127,6 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public TokenGeneratorAdapter tokenGeneratorAdapter(){
-        return new TokenGeneratorAdapter();
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
@@ -146,8 +140,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenGeneratorOutputPort tokenGeneratorOutputPort){
-        return new NotificationService(emailOutputPort,tokenGeneratorOutputPort);
+    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenUtils tokenUtils){
+        return new NotificationService(emailOutputPort,tokenUtils);
     }
 
     @Bean

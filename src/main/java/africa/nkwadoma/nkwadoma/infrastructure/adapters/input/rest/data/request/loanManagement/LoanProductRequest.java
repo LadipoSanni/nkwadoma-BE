@@ -23,6 +23,8 @@ public class LoanProductRequest {
     private ActivationStatus loanProductStatus;
     private String bankPartner;
     private String disbursementTerms;
+    @PositiveOrZero(message = "Interest rate must be zero or positive")
+    private double costOfFund;
     @NotBlank(message = LOAN_PRODUCT_NAME_REQUIRED)
     private String name;
 
@@ -30,16 +32,14 @@ public class LoanProductRequest {
     @NotBlank(message = LOAN_PRODUCT_MANDATE_REQUIRED)
     private String mandate;
 
-    @NotNull(message = "Sponsors list cannot be null")
-    @Size(min = 1, message = "Sponsors list cannot be empty")
     private List<String> sponsors;
 
-    @NotNull(message = "Loan product size is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Loan product size must be greater than zero")
+//    @NotNull(message = "Loan product size is required")
+//    @DecimalMin(value = "0.0", inclusive = false, message = "Loan product size must be greater than zero")
     private BigDecimal loanProductSize;
 
-    @NotNull(message = "Obligor loan limit is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Obligor loan limit must be greater than zero")
+//    @NotNull(message = "Obligor loan limit is required")
+//    @DecimalMin(value = "0.0", inclusive = false, message = "Obligor loan limit must be greater than zero")
     private BigDecimal obligorLoanLimit;
 
     @PositiveOrZero(message = "Interest rate must be zero or positive")
@@ -51,8 +51,8 @@ public class LoanProductRequest {
     @PositiveOrZero(message = "Tenor must be zero or positive")
     private int tenor;
 
-    @NotNull(message = "Minimum repayment amount is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Minimum repayment amount must be greater than zero")
+//    @NotNull(message = "Minimum repayment amount is required")
+//    @DecimalMin(value = "0.0", inclusive = false, message = "Minimum repayment amount must be greater than zero")
     private BigDecimal minRepaymentAmount;
 
     @Size(max=2500)
