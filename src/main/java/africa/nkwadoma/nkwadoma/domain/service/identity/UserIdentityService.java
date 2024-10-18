@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
@@ -123,8 +124,9 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
         validateDataElement(userIdentity.getId());
+        validateDataElement(userIdentity.getReactivationReason());
         userIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
         userIdentityOutputPort.save(userIdentity);
@@ -136,6 +138,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
         validateDataElement(userIdentity.getEmail());
+        validateDataElement(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());

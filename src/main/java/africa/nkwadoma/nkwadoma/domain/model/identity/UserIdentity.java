@@ -27,6 +27,8 @@ public class UserIdentity {
     private String refreshToken;
     private String newPassword;
     private String organizationDomain;
+    private String deactivationReason;
+    private String reactivationReason;
 
     private List<PasswordHistory> passwordHistories;
 //    private OrganizationIdentity employer;

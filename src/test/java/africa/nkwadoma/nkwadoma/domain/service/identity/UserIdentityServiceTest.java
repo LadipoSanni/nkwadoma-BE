@@ -1,17 +1,27 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.ServiceOfferingEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +34,8 @@ class UserIdentityServiceTest {
     private CreateUserUseCase createUserUseCase;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private TokenUtils tokenUtils;
     private UserIdentity favour;
@@ -49,6 +61,21 @@ class UserIdentityServiceTest {
         inviter.setLastName("gabriel");
         inviter.setEmail("favour@gmail.com");
         inviter.setRole(IdentityRole.INSTITUTE_ADMIN);
+
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setName("Test Organization");
+        organizationIdentity.setEmail("dahsjhn@fjd.cjnd");
+        organizationIdentity.setPhoneNumber("9876545782");
+        organizationIdentity.setRcNumber("9876545782");
+        organizationIdentity.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+        organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(inviter).build()));
+        try {
+            OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(organizationIdentity);
+            assertNotNull(savedOrganization);
+            assertNotNull(savedOrganization.getId());
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
     }
 
     @Test
@@ -418,35 +445,54 @@ class UserIdentityServiceTest {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void reactivateWithOutReason(String reactivateReason) {
+        favour.setReactivationReason(reactivateReason);
+        assertThrows(MeedlException.class,()->createUserUseCase.reactivateUserAccount(favour));
 
-//    @Test
-//    void enableAccountThatHasBeenEnabled() {
-//        UserIdentity foundUser = null;
-//        try {
-//            log.info("UserIdentity id {} ", userId);
-//            foundUser = userIdentityOutputPort.findById(userId);
-//        } catch (MeedlException e) {
-//            throw new RuntimeException(e);
-//        }
-//        assertNotNull(foundUser);
-//        assertTrue(foundUser.isEnabled());
-//       assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
-//        }
-//    @Test
-//    @Order(10)
-//    void disAbleAccountAlreadyDisabled() {
-//        log.info("UserIdentity id {} ", userId);
-//        UserIdentity foundUser = null;
-//        try {
-//            foundUser = userIdentityOutputPort.findById(userId);
-//        } catch (MeedlException e) {
-//            throw new RuntimeException(e);
-//        }
-//        assertNotNull(foundUser);
-//        assertFalse(foundUser.isEnabled());
-//        assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
-//
-//    }
+        favour.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->createUserUseCase.reactivateUserAccount(favour));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deactivateWithReason(String deactivateReason) {
+        favour.setReactivationReason(deactivateReason);
+        assertThrows(MeedlException.class,()->createUserUseCase.deactivateUserAccount(favour));
+
+        favour.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->createUserUseCase.deactivateUserAccount(favour));
+    }
+
+
+    @Test
+    void enableAccountThatHasBeenEnabled() {
+        UserIdentity foundUser = null;
+        try {
+            log.info("UserIdentity id {} ", userId);
+            foundUser = userIdentityOutputPort.findById(userId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundUser);
+        assertTrue(foundUser.isEnabled());
+       assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
+        }
+    @Test
+    @Order(10)
+    void disAbleAccountAlreadyDisabled() {
+        log.info("UserIdentity id {} ", userId);
+        UserIdentity foundUser = null;
+        try {
+            foundUser = userIdentityOutputPort.findById(userId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundUser);
+        assertFalse(foundUser.isEnabled());
+        assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
+
+    }
 
     @Test
      void forgotPassword() {

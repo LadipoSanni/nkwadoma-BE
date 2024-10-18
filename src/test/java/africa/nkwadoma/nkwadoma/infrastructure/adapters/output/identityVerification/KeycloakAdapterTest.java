@@ -1,13 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
@@ -308,6 +306,24 @@ class KeycloakAdapterTest {
         } catch (MeedlException e) {
             e.printStackTrace();
         }
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void reactivateWithOutReason(String reactivateReason) {
+        john.setReactivationReason(reactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deactivateWithReason(String deactivateReason) {
+        john.setReactivationReason(deactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
     }
     @Test
     void getUserResourceWithInvalidUserId() {

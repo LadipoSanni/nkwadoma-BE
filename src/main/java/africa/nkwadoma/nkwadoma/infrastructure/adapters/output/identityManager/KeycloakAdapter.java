@@ -34,7 +34,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
-import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.validateUserIdentityObject;
 
 
 @RequiredArgsConstructor
@@ -174,7 +173,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
         validateDataElement(userIdentity.getEmail());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
@@ -198,8 +197,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
-        validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (!foundUser.isEnabled()) {

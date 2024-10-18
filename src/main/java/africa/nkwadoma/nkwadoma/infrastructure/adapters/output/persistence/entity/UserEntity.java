@@ -29,4 +29,7 @@ public class UserEntity {
     private IdentityRole role;
     private String createdBy;
     private String password;
+
+    private String reasonForDeactivation;
+    private String reasonForReactivation;
 }
