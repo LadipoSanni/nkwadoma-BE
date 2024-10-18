@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -27,7 +28,6 @@ public class Program {
     private int numberOfTrainees;
     private int numberOfCohort;
     private ProgramMode mode;
-    private ProgramType programType;
     private DeliveryType deliveryType;
     private ActivationStatus programStatus;
     private LocalDateTime createdAt;
@@ -35,10 +35,32 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
+    private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
+    private int pageNumber;
+    private int pageSize;
+
+    public int getPageSize() {
+        int defaultPageSize = BigInteger.TEN.intValue();
+        return  this.pageSize == 0 ? defaultPageSize : this.pageSize;
+    }
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.name);
         MeedlValidator.validateDataElement(this.createdBy);
         MeedlValidator.validateDataElement(this.organizationId);
+    }
+
+    public BigDecimal getTotalAmountRepaid() {
+        return totalAmountRepaid == null ? BigDecimal.ZERO : totalAmountRepaid;
+    }
+
+    public BigDecimal getTotalAmountDisbursed() {
+        return totalAmountDisbursed == null ? BigDecimal.ZERO : totalAmountDisbursed;
+    }
+
+    public BigDecimal getTotalAmountOutstanding() {
+        return totalAmountOutstanding == null ? BigDecimal.ZERO : totalAmountOutstanding;
     }
 }
