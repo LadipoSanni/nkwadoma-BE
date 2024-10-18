@@ -102,13 +102,13 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
-        List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-        if (passwordHistories == null) {
-            passwordHistories = new ArrayList<>();
-        }
-        PasswordHistory passwordHistory = getPasswordHistory(userIdentity.getPassword(), userIdentity);
-        passwordHistories.add(passwordHistory);
-        userIdentityOutputPort.save(userIdentity);
+//        List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
+//        if (passwordHistories == null) {
+//            passwordHistories = new ArrayList<>();
+//        }
+//        PasswordHistory passwordHistory = getPasswordHistory(userIdentity.getPassword(), userIdentity);
+//        passwordHistories.add(passwordHistory);
+//        userIdentityOutputPort.save(userIdentity);
         identityManagerOutPutPort.changePassword(userIdentity);
     }
 

@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
@@ -34,6 +33,7 @@ class KeycloakAdapterTest {
     private IdentityManagerOutPutPort identityManagementOutputPort;
     private UserIdentity john;
     private UserIdentity peter;
+    private final String password = "This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword";
 
     @BeforeEach
     void setUp() {
@@ -111,7 +111,7 @@ class KeycloakAdapterTest {
             assertFalse(existingUser.get().isEnabled());
             assertFalse(existingUser.get().isEmailVerified());
 
-            john.setPassword("passwordJ@345");
+            john.setPassword(password);
             UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
 
             assertNotNull(userIdentity);
@@ -162,7 +162,7 @@ class KeycloakAdapterTest {
     @Order(3)
     void login(){
         try {
-            john.setPassword("passwordJ@345");
+            john.setPassword(password);
             identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
             identityManagementOutputPort.login(john);
         }catch (MeedlException meedlException){
@@ -179,35 +179,67 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(4)
-    void changePassword(){
-
-        try {
-            john.setNewPassword("neWpasswordJ@345");
-            identityManagementOutputPort.changePassword(john);
-
-            john.setPassword(john.getNewPassword());
-            identityManagementOutputPort.login(john);
-            //TODO include asserts
-
-        }catch (MeedlException meedlException){
-            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
-        }
-    }
-    @Test
     void changePasswordWithNull() {
-        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(null));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(null));
     }
     @Test
     void changePasswordWithNullNewPassword() {
         john.setNewPassword(null);
-        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(john));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
     }
     @ParameterizedTest
-    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "rniejfkn", "  ADKFDJHFD", "ADKFDJHFD  ", "@ndnue90 -  f"})
     void changePasswordWithInvalidPassword(String password) {
-        john.setNewPassword(null);
-        assertThrows(IdentityException.class, () -> identityManagementOutputPort.changePassword(john));
+        john.setNewPassword(password);
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
+        log.info(exception.getMessage());
+    }
+    @Test
+    @Order(4)
+    void changePasswordWithValidPassword() {
+        String newPassword = "neWpasswordJ@345";
+        AccessTokenResponse accessTokenResponse = null;
+        john.setPassword(password);
+
+        log.info(john.getEmail());
+        Optional<UserIdentity> existingUser;
+        try {
+            accessTokenResponse = identityManagementOutputPort.login(john);
+            existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertNotNull(accessTokenResponse);
+        assertNotNull(accessTokenResponse.getToken());
+
+        assertTrue(existingUser.isPresent());
+        assertNotNull(existingUser.get().getId());
+
+        john.setNewPassword(newPassword);
+        john.setId(existingUser.get().getId());
+        log.info("user id is {}", john.getId());
+        try {
+            identityManagementOutputPort.changePassword(john);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
+        john.setPassword(newPassword);
+
+        AccessTokenResponse newAccessTokenResponse;
+        try {
+            newAccessTokenResponse = identityManagementOutputPort.login(john);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertNotNull(newAccessTokenResponse);
+        assertNotNull(newAccessTokenResponse.getToken());
+
+        john.setPassword(password);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
+
     }
 
 
