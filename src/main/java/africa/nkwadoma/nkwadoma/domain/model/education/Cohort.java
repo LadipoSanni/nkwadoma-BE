@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import jakarta.persistence.Lob;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Slf4j
+@ToString
 public class Cohort {
     private String id;
     private String programId;

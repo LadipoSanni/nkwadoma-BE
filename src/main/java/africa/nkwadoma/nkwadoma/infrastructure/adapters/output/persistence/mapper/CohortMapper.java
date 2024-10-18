@@ -11,4 +11,6 @@ public interface CohortMapper {
     CohortEntity toCohortEntity(Cohort cohort);
 
     Cohort toCohort(CohortEntity cohortEntity);
+
+    Cohort cohortToUpdateCohort(Cohort cohort);
 }
