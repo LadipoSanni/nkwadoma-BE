@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
@@ -24,6 +25,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public LoanProduct save(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         loanProduct.validateLoanProductDetails();
+        if (existsByName(loanProduct.getName())){
+            throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
+        }
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAtDate(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);

@@ -25,8 +25,6 @@ class UserIdentityAdapterTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     private UserIdentity john;
 
-
-
     @BeforeEach
     void setUp(){
         john = new UserIdentity();
@@ -53,7 +51,6 @@ class UserIdentityAdapterTest {
             assertEquals(findJohn.getFirstName(),savedJohn.getFirstName());
             assertEquals(findJohn.getLastName(),savedJohn.getLastName());
             assertEquals(findJohn.getCreatedBy(),savedJohn.getCreatedBy());
-
         }catch (MeedlException exception){
             log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
         }

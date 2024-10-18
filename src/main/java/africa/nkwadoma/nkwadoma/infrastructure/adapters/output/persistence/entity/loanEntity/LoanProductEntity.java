@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -29,29 +29,29 @@ public class LoanProductEntity {
     @Enumerated(EnumType.STRING)
     private ActivationStatus loanProductStatus;
     @Enumerated(EnumType.STRING)
-    private TenorStatus tenorStatus;
+    private DurationType tenorStatus;
     private int tenor;
     private double interestRate;
     private double costOfFund;
-    @Size(max=2500)
+    @Size(max=15000)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize = BigDecimal.ZERO;
-    private BigDecimal amountAvailable = BigDecimal.ZERO;
+    private BigDecimal totalAmountAvailable = BigDecimal.ZERO;
     private LocalDateTime createdAtDate;
     private LocalDateTime updatedAtDate;
-    private BigDecimal amountEarned = BigDecimal.ZERO;
-    private BigDecimal amountDisbursed = BigDecimal.ZERO;
-    private BigDecimal amountRepaid = BigDecimal.ZERO;
-    @Size(max=2500)
+    private BigDecimal totalAmountEarned = BigDecimal.ZERO;
+    private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
+    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+
+    @Size(max=5500)
     private String mandate;
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> sponsors;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
-//    @OneToOne
-//    private InvestmentVehicle investmentVehicle;
+    private String fundProductId;
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
-    private int numberOfLoanees;
+    private int totalNumberOfLoanees;
 }

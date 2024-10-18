@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,11 +15,12 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Setter
 public class LoanProductRequest {
     private String fundProductId;
-    private TenorStatus tenorStatus;
-    private BigDecimal amountAvailable;
-    private BigDecimal amountEarned ;
-    private BigDecimal amountDisbursed;
-    private BigDecimal amountRepaid;
+    private DurationType tenorStatus;
+    private BigDecimal totalAmountAvailable;
+    private BigDecimal totalAmountEarned;
+    private BigDecimal totalAmountDisbursed;
+    private BigDecimal totalAmountRepaid;
+
     private ActivationStatus loanProductStatus;
     private String bankPartner;
     private String disbursementTerms;

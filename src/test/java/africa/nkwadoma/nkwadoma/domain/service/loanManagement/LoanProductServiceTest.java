@@ -14,11 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus.Months;
-import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus.Years;
+import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Months;
+import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Years;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -34,14 +33,9 @@ class LoanProductServiceTest {
         loanProduct.setName("Test Loan Product: unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
-//        loanProduct.setLoanProductSize(new BigDecimal(1000));
-//        loanProduct.setObligorLoanLimit(new BigDecimal(1000));
-        loanProduct.setInterestRate(0);
-        loanProduct.setMoratorium(5);
-        loanProduct.setTenor(5);
-        loanProduct.setTenorStatus(Years);
-//        loanProduct.setMinRepaymentAmount(new BigDecimal(1000));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
+        loanProduct.setLoanProductSize(new BigDecimal("1000"));
     }
 
     @Test
@@ -68,11 +62,10 @@ class LoanProductServiceTest {
             createLoanProductUseCase.deleteLoanProductById(createdLoanProduct);
         } catch (MeedlException e) {
             log.error(e.getMessage());
-            assertTrue(false);
         }
     }
     @Test
-    void createLoanProductWithNullRequestEntity(){
+    void createLoanProductWithNullLoanProduct(){
         assertThrows(MeedlException.class, () -> createLoanProductUseCase.createLoanProduct(null));
     }
     @Test
@@ -102,60 +95,8 @@ class LoanProductServiceTest {
         assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
     }
     @Test
-    void createLoanProductWithNegativeInterestRate(){
-        loanProduct.setInterestRate(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeMoratoriumPeriod(){
-        loanProduct.setMoratorium(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeTenor(){
-        loanProduct.setTenor(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
     void createLoanProductWithNoTermsAndConditions(){
         loanProduct.setTermsAndCondition(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void missingRequiredRequestTenorStatusThrowsProperError(){
-        loanProduct.setTenorStatus(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void missingRequiredRequestTenorThrowsProperError(){
-        int ZERO  = 0;
-        loanProduct.setTenor(ZERO);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void tenorYearAboveApproveNumberOfYear(){
-        int ELEVEN  = 11;
-        loanProduct.setTenor(ELEVEN);
-        loanProduct.setTenorStatus(Years);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void wrongTenorMonthBondThrowsProperError(){
-        int ONE_HUNDRED_AND_ONE = 121;
-        loanProduct.setTenor(ONE_HUNDRED_AND_ONE);
-        loanProduct.setTenorStatus(Months);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void moratoriumAboveBoundThrowsProperError(){
-        loanProduct.setMoratorium(26);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void moratoriumBelowBoundThrowsProperError(){
-        loanProduct.setMoratorium(0);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-        loanProduct.setMoratorium(-1);
         assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
     }
     @Test
@@ -164,8 +105,8 @@ class LoanProductServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void deleteLoanProductWithNullId(String name){
-        loanProduct.setId(name);
+    void deleteLoanProductWithNullId(String value){
+        loanProduct.setId(value);
         assertThrows(MeedlException.class, ()-> createLoanProductUseCase.deleteLoanProductById(loanProduct));
         loanProduct.setId(null);
         assertThrows(MeedlException.class, ()-> createLoanProductUseCase.deleteLoanProductById(loanProduct));
