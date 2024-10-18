@@ -18,72 +18,53 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set permissions for templates
-        run: |
-          chmod +x .github/workflows/templates/*.html
-
       - name: Set environment variables
-        env:
-          SMTP_SERVER: semicolon.africa
-          SMTP_PORT: 465
-          SMTP_USERNAME: builds@semicolon.africa
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa '
+        id: vars
         run: |
-          TIMESTAMP=$(date -u -d "4 hours ago" +"%Y-%m-%dT%H:%M:%SZ")
+          TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          PROJECT_NAME="Nkwadoma Backend"
+          DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+          TASK_BRANCH=${{ github.head_ref || github.ref_name }}
+          TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${TASK_BRANCH}"
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          echo "JAR_NAME=myapp-${TAG}.jar" >> $GITHUB_ENV
+
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+
+          SMTP_SERVER="semicolon.africa"
+          SMTP_PORT="465"
+          SMTP_USERNAME="builds@semicolon.africa"
+          SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
+          EMAILS="ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa"
 
           SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
             --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
             --since "$TIMESTAMP" | wc -l)
-
-          UNSUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
-            --paginate -q '.[].commit | select(.verification.verified | not) | .author.name' \
-            --since "$TIMESTAMP" | wc -l)
-
+          
           SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
             --paginate -q '.[] | select(.merged_at != null) | .user.login' \
             --state merged --since "$TIMESTAMP" | wc -l)
 
-          UNSUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
-            --paginate -q '.[] | select(.merged_at == null) | .user.login' \
-            --state closed --since "$TIMESTAMP" | wc -l)
-
           echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
-          echo "UNSUCCESSFUL_COMMITS=${UNSUCCESSFUL_COMMITS}" >> $GITHUB_ENV
           echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
-          echo "UNSUCCESSFUL_PRS=${UNSUCCESSFUL_PRS}" >> $GITHUB_ENV
 
       - name: Send Inactivity Email
-        if: env.SUCCESSFUL_COMMITS == '0' && env.UNSUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' && env.UNSUCCESSFUL_PRS == '0'
+        if: ${{ env.SUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' }}
         run: |
-          IFS=',' read -r -a email_array <<< "${EMAILS}"
-          for email in "${email_array[@]}"; do
-            cat templates/inactivity_email.html | \
-            sed "s/{{TIMESTAMP}}/$(date)/g" > /tmp/inactivity_email.html
-
-            curl --verbose --ssl-reqd \
-              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
-              --mail-from "builds@semicolon.africa" \
-              --mail-rcpt "$email" \
-              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
-              --upload-file /tmp/inactivity_email.html
-          done
+          chmod +x .github/workflows/scripts/inactivity_email.sh
+          .github/workflows/scripts/inactivity_email.sh \
+            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" "$EMAILS"
 
       - name: Send Activity Summary Email
-        if: env.SUCCESSFUL_COMMITS != '0' || env.UNSUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' || env.UNSUCCESSFUL_PRS != '0'
+        if: ${{ env.SUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' }}
         run: |
-          IFS=',' read -r -a email_array <<< "${EMAILS}"
-          for email in "${email_array[@]}"; do
-            cat templates/activity_summary.html | \
-            sed -e "s/{{SUCCESSFUL_COMMITS}}/${{ env.SUCCESSFUL_COMMITS }}/g" \
-                -e "s/{{UNSUCCESSFUL_COMMITS}}/${{ env.UNSUCCESSFUL_COMMITS }}/g" \
-                -e "s/{{SUCCESSFUL_PRS}}/${{ env.SUCCESSFUL_PRS }}/g" \
-                -e "s/{{UNSUCCESSFUL_PRS}}/${{ env.UNSUCCESSFUL_PRS }}/g" > /tmp/activity_summary.html
-
-            curl --verbose --ssl-reqd \
-              --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
-              --mail-from "builds@semicolon.africa" \
-              --mail-rcpt "$email" \
-              --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
-              --upload-file /tmp/activity_summary.html
-          done
+          chmod +x .github/workflows/scripts/activity_email.sh
+          .github/workflows/scripts/activity_email.sh \
+            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" "$EMAILS" \
+            "${{ env.SUCCESSFUL_COMMITS }}" 0 \
+            "${{ env.SUCCESSFUL_PRS }}" 0
