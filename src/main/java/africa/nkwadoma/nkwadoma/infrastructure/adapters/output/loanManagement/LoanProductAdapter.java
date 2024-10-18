@@ -29,7 +29,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
             throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
         }
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
-        loanProductEntity.setCreatedAtDate(LocalDateTime.now());
+        loanProductEntity.setCreatedAt(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
         return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
     }

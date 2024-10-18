@@ -38,8 +38,8 @@ public class LoanProductEntity {
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize = BigDecimal.ZERO;
     private BigDecimal totalAmountAvailable = BigDecimal.ZERO;
-    private LocalDateTime createdAtDate;
-    private LocalDateTime updatedAtDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private BigDecimal totalAmountEarned = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
