@@ -4,12 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.PasswordHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
@@ -17,12 +15,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
@@ -36,7 +34,6 @@ public class UserIdentityService implements CreateUserUseCase {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final TokenUtils tokenUtils;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordHistoryOutputPort passwordHistoryOutputPort;
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
 
@@ -76,13 +73,7 @@ public class UserIdentityService implements CreateUserUseCase {
         else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
-    private PasswordHistory getPasswordHistory(String password, UserIdentity userIdentity) {
-        PasswordHistory passwordHistory = new PasswordHistory();
-        passwordHistory.setPassword(password);
-        passwordHistory.setMiddlUser(userIdentity.getId());
-        passwordHistoryOutputPort.save(passwordHistory);
-        return passwordHistory;
-    }
+
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
@@ -95,20 +86,13 @@ public class UserIdentityService implements CreateUserUseCase {
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
-        if(checkNewPasswordMatchLastFive(userIdentity.getNewPassword(), userIdentity.getId())){
+        if(checkNewPasswordMatchLastFive(userIdentity)){
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
         userIdentity.setPassword(userIdentity.getNewPassword());
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
-//        List<PasswordHistory> passwordHistories = userIdentity.getPasswordHistories();
-//        if (passwordHistories == null) {
-//            passwordHistories = new ArrayList<>();
-//        }
-//        PasswordHistory passwordHistory = getPasswordHistory(userIdentity.getPassword(), userIdentity);
-//        passwordHistories.add(passwordHistory);
-//        userIdentityOutputPort.save(userIdentity);
         identityManagerOutPutPort.changePassword(userIdentity);
     }
 
@@ -144,14 +128,11 @@ public class UserIdentityService implements CreateUserUseCase {
       return userIdentityOutputPort.findByEmail(email);
     }
 
-    private boolean checkNewPasswordMatchLastFive(String newPassword, String userId) throws MeedlException {
-        List<PasswordHistory> passwordHistories = passwordHistoryOutputPort.findByUser(userId);
-        int checkCount = Math.min(5, passwordHistories.size());
-        for (int index = passwordHistories.size() - 1; index >= passwordHistories.size() - checkCount; index--) {
-            if (Objects.equals(passwordHistories.get(index).getPassword(), newPassword)) {
-                return true;
-            }
-        }
+    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException {
+        UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, true);
+        List<CredentialRepresentation> userCredentials = userRepresentation.getCredentials();
+        userCredentials.forEach(credential -> log.info(credential.getCredentialData()));
+
         return false;
     }
 

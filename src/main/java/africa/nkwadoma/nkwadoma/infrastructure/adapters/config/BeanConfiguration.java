@@ -20,17 +20,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificat
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.PasswordHistoryAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.PasswordHistoryMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.PasswordHistoryRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
@@ -61,11 +58,10 @@ public class BeanConfiguration {
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenUtils tokenUtils,
                                                    PasswordEncoder passwordEncoder,
-                                                   PasswordHistoryOutputPort passwordHistoryOutputPort,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenUtils,passwordEncoder,passwordHistoryOutputPort,sendColleagueEmailUseCase, userIdentityMapper);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper);
     }
 
     @Bean
@@ -118,13 +114,6 @@ public class BeanConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public PasswordHistoryAdapter passwordHistoryAdapter(
-            PasswordHistoryMapper passwordHistoryMapper,
-            PasswordHistoryRepository passwordHistoryRepository
-    ){
-        return new PasswordHistoryAdapter(passwordHistoryMapper,passwordHistoryRepository);
-    }
 
     @Bean
     public NotificationService emailService(EmailOutputPort emailOutputPort, TokenUtils tokenUtils){
