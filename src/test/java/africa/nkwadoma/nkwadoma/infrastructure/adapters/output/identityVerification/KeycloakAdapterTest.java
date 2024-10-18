@@ -176,6 +176,18 @@ class KeycloakAdapterTest {
             log.error("Error logging in user", meedlException);
         }
     }
+
+    @Test
+    void loginWithInvalidPassword() {
+        john.setPassword("invalid-password");
+        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+    }
+    @Test
+    void loginWithInvalidEmail() {
+        john.setEmail("invalid-email");
+        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
     void loginWithNullPassword(String password) {

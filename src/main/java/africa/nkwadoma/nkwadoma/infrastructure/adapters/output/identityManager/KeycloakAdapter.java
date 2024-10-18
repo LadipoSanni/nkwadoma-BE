@@ -7,8 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -156,7 +155,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
-        } catch (NotAuthorizedException exception) {
+        } catch (NotAuthorizedException | BadRequestException exception ) {
             throw new IdentityException(exception.getMessage());
         }
     }
@@ -231,8 +230,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     private Keycloak getKeycloak(UserIdentity userIdentity) {
         String email = userIdentity.getEmail().trim();
         String password = userIdentity.getPassword().trim();
-        log.info("Email: {}", email);
-        log.info("Password: {}", password);
+
         return KeycloakBuilder.builder()
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(KEYCLOAK_REALM)
