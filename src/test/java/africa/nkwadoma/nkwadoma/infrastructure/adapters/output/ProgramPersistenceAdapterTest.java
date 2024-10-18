@@ -106,24 +106,25 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-//    @Test
-//    void saveProgramWithWrongIndustry() {
-//        try {
-//            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-//            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
-//
-//            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
-//            assertNotNull(savedOrganization);
-//            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
-//
-//            Program foundProgram = programOutputPort.findProgramByName(program.getName());
-//            foundProgram.setOrganizationId(savedOrganization.getId());
-//
-//            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(foundProgram));
-//        } catch (MeedlException e) {
-//            log.error("Error while saving program", e);
-//        }
-//    }
+    @Test
+    @Disabled
+    void saveProgramWithWrongIndustry() {
+        try {
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
+            assertNotNull(savedOrganization);
+            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
+
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            foundProgram.setOrganizationId(savedOrganization.getId());
+
+            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(foundProgram));
+        } catch (MeedlException e) {
+            log.error("Error while saving program", e);
+        }
+    }
 
     @Test
     void findProgramByName() {
