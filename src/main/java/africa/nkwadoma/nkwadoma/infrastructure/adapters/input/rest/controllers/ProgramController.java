@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
@@ -21,6 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
@@ -56,10 +60,14 @@ public class ProgramController {
         Program program = programRestMapper.toProgram(programsRequest);
 
         Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
-        PaginatedResponse<Program> response = new PaginatedResponse<>(programs.getContent(),
-                programs.hasNext(), programs.getTotalPages(), programsRequest.getPageSize(),
-                programsRequest.getPageNumber());
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();
+        PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
+                programResponses, programs.hasNext(),
+                programs.getTotalPages(), programsRequest.getPageSize(),
+                programsRequest.getPageNumber()
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
                 body(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK

@@ -20,5 +20,8 @@ public interface ProgramRestMapper {
     @Mapping(target = "pageSize", source = "pageSize", defaultValue = "0")
     Program toProgram(ProgramsRequest programsRequest);
 
+    @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid", defaultValue = "0")
+    @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
+    @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")
     ProgramResponse toProgramResponse(Program program);
 }
