@@ -6,6 +6,8 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.*;
+
 @Mapper(componentModel = "spring")
 public interface ProgramMapper {
 

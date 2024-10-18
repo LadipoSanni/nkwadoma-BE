@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.*;
 import java.time.*;
 
 @Getter
@@ -30,4 +31,7 @@ public class ProgramResponse{
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
+    private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
+    private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
 }
