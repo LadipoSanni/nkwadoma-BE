@@ -66,7 +66,7 @@ public class CohortServiceTest {
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).programType(ProgramType.PROFESSIONAL).
+                deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
         try {
             organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
