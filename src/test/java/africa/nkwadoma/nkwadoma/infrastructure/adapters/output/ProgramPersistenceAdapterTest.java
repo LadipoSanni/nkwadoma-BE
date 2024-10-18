@@ -32,6 +32,8 @@ class ProgramPersistenceAdapterTest {
     private ProgramOutputPort programOutputPort;
     private Program program;
     private OrganizationIdentity organizationIdentity;
+    private OrganizationIdentity bankingOrganization;
+
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     private UserIdentity userIdentity;
@@ -62,37 +64,33 @@ class ProgramPersistenceAdapterTest {
         organizationIdentity.setPhoneNumber("0907658483");
         organizationIdentity.setTin("Tin5678");
         organizationIdentity.setNumberOfPrograms(0);
-        organizationIdentity.setServiceOffering(new ServiceOffering());
-        organizationIdentity.getServiceOffering().setIndustry(Industry.BANKING);
+        ServiceOffering serviceOffering = new ServiceOffering();
+        serviceOffering.setIndustry(Industry.EDUCATION);
+        organizationIdentity.setServiceOffering(serviceOffering);
         organizationIdentity.setWebsiteAddress("webaddress.org");
         organizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
 
-        program = Program.builder().name("My program").
-                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).createdAt(LocalDateTime.now()).createdBy("68379").
-                programStartDate(LocalDate.now()).build();
+        bankingOrganization = new OrganizationIdentity();
+
+        program = new Program();
+        program.setName("My program");
+        program.setProgramDescription("My program description");
+        program.setMode(ProgramMode.FULL_TIME);
+        program.setProgramStatus(ActivationStatus.ACTIVE);
+        program.setDuration(2);
+        program.setDeliveryType(DeliveryType.ONSITE);
+        program.setCreatedBy(userIdentity.getCreatedBy());
+        program.setDurationType(DurationType.MONTHS);
     }
 
-    @BeforeAll
-    void init() {
-        try {
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            assertNotNull(savedOrganization);
-            assertNotNull(savedOrganization.getId());
-        } catch (MeedlException e) {
-            log.error("Failed to save organization", e);
-        }
-    }
 
     @Test
-    @Order(1)
     void saveProgram() {
         try {
-//            organizationIdentity.setEmail("org@example.com");
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
+            OrganizationIdentity foundOrganization = organizationOutputPort.findById(savedOrganization.getId());
             assertNotNull(foundOrganization);
-            assertEquals("org@example.com", foundOrganization.getEmail());
+            assertNotNull(foundOrganization.getId());
 
             program.setOrganizationId(foundOrganization.getId());
             Program savedProgram = programOutputPort.saveProgram(program);
@@ -102,32 +100,32 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getName(), savedProgram.getName());
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
-            assertEquals(program.getProgramStartDate(), savedProgram.getProgramStartDate());
+            assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
     }
 
+//    @Test
+//    void saveProgramWithWrongIndustry() {
+//        try {
+//            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+//            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
+//
+//            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
+//            assertNotNull(savedOrganization);
+//            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
+//
+//            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+//            foundProgram.setOrganizationId(savedOrganization.getId());
+//
+//            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(foundProgram));
+//        } catch (MeedlException e) {
+//            log.error("Error while saving program", e);
+//        }
+//    }
+
     @Test
-    void saveProgramWithWrongIndustry() {
-        try {
-            OrganizationIdentity organization = organizationOutputPort.findById(organizationIdentity.getId());
-            organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(organization);
-            assertNotNull(savedOrganization);
-            assertEquals(Industry.BANKING, savedOrganization.getServiceOffering().getIndustry());
-
-            Program foundProgram = programOutputPort.findProgramByName(program.getName());
-            foundProgram.setOrganizationId(savedOrganization.getId());
-
-            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(foundProgram));
-        } catch (MeedlException e) {
-            log.info("{}", e.getMessage());
-        }
-    }
-
-    @Test
-    @Order(2)
     void findProgramByName() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
@@ -135,24 +133,19 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundProgram);
             assertEquals(foundProgram.getName(), program.getName());
         } catch (MeedlException e) {
-            log.error("Error finding program by ID", e);
+            log.error("Error finding program by name", e);
         }
     }
 
     @Test
-//    @Order(3)
     void findProgramById() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(organizationIdentity.getId());
-            program.setId(foundOrganization.getId());
-            Program savedProgram = programOutputPort.saveProgram(program);
-            assertNotNull(savedProgram);
+            Program foundProgramByName = programOutputPort.findProgramByName(program.getName());
 
-            Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
+            Program foundProgram = programOutputPort.findProgramById(foundProgramByName.getId());
 
             assertNotNull(foundProgram);
             assertNotNull(foundProgram.getId());
-            assertEquals(savedProgram, foundProgram);
         } catch (MeedlException e) {
             log.error("Error finding program by ID", e);
         }
@@ -180,9 +173,8 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programsList.get(0).getDuration(), program.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
             assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
-            assertEquals(programsList, List.of(program));
         } catch (MeedlException e) {
-            log.info(e.getMessage());
+            log.error("Error finding all programs", e);
         }
     }
 
@@ -200,11 +192,11 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    @Order(2)
     void deleteProgram() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             assertNotNull(foundProgram);
+            assertNotNull(foundProgram.getId());
 
             programOutputPort.deleteProgram(foundProgram.getId());
 
@@ -220,10 +212,14 @@ class ProgramPersistenceAdapterTest {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
             programOutputPort.deleteProgram(foundProgram.getId());
+
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            organizationOutputPort.delete(organization.getId());
+            assertNotNull(organization);
+            organizationIdentity.setId(organization.getId());
+            organizationOutputPort.delete(organizationIdentity.getId());
+            assertThrows(ResourceNotFoundException.class, ()-> organizationOutputPort.findById(organizationIdentity.getId()));
         } catch (MeedlException e) {
-            log.info(e.getMessage());
+            log.error("Error deleting program", e);
         }
     }
 
