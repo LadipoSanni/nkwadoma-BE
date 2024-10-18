@@ -17,9 +17,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.MORATORIUM_ABOVE_BOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages.MORATORIUM_BELOW_BOUND;
-
 @Getter
 @Setter
 @ToString
@@ -31,6 +28,7 @@ public class LoanProduct {
     private TenorStatus tenorStatus;
     private int tenor;
     private double interestRate;
+    private double costOfFund;
     @Size(max=2500)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
