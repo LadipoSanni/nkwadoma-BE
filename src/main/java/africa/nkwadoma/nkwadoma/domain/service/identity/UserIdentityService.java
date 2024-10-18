@@ -128,6 +128,7 @@ public class UserIdentityService implements CreateUserUseCase {
       return userIdentityOutputPort.findByEmail(email);
     }
 
+    @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException {
         UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, true);
         List<CredentialRepresentation> userCredentials = userRepresentation.getCredentials();

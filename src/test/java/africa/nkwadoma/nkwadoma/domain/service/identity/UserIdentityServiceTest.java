@@ -441,6 +441,10 @@ class UserIdentityServiceTest {
         favour.setEmail(null);
         assertThrows(MeedlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
     }
+    @Test
+    void checkLastFivePassword() throws MeedlException {
+        createUserUseCase.checkNewPasswordMatchLastFive(favour);
+    }
 
     @Test
     void forgotPasswordWithEmptyEmailAddress() {
