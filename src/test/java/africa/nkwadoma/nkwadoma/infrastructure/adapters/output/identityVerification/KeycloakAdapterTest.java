@@ -178,13 +178,14 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    void loginWithInvalidPassword() {
+    void loginWithValidEmailAddressAndInvalidPassword() {
         john.setPassword("invalid-password");
         assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
     }
     @Test
-    void loginWithInvalidEmail() {
+    void loginWithInvalidEmailAndValidPassword() {
         john.setEmail("invalid-email");
+        john.setPassword("passwordJ@345");
         assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
     }
 
@@ -198,8 +199,8 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
-    void loginWithPasswordWithSpaces(String password) {
+    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345", "    passwordJ@345    "})
+    void loginWithValidPasswordWithSpaces(String password) {
         john.setPassword(password);
         try {
             AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
@@ -216,7 +217,7 @@ class KeycloakAdapterTest {
     void loginWithInvalidPassword(String password) {
         john.setPassword(password);
         IdentityException exception = assertThrows(IdentityException.class, () -> identityManagementOutputPort.login(john));
-        assertEquals(exception.getMessage(), MeedlMessages.INVALID_EMAIL_ADDRES_OR_PASSWORD.getMessage());
+        assertEquals(exception.getMessage(), IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
     }
 
     @Test

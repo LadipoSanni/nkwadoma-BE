@@ -11,13 +11,11 @@ import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
-import org.slf4j.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @Slf4j
@@ -25,18 +23,17 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class IdentityManagerController {
-    private static final Logger log = LoggerFactory.getLogger(IdentityManagerController.class);
     private final CreateUserUseCase createUserUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toLoginUserIdentity(loginRequest);
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
                 body(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
-
+                statusCode(HttpStatus.OK.name()).build()
+        );
     }
 
     @PostMapping("auth/colleague/invite")

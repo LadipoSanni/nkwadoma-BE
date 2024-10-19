@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -156,7 +157,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
-            throw new IdentityException(exception.getMessage());
+            throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
 
