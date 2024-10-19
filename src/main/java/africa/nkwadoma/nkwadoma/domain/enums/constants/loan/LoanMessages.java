@@ -17,7 +17,6 @@ public enum LoanMessages {
     MORATORIUM_BELOW_BOUND ("Moratorium cannot be below 1"),
     MORATORIUM_ABOVE_BOUND ("Moratorium cannot be above 24"),
     LOAN_PRODUCT_NAME_REQUIRED ("Loan product name is required"),
-    TENOR_STATUS_REQUIRED("Tenor status is required"),
     MINIMUM_REPAYMENT_AMOUNT_REQUIRED ("Minimum repayment amount is required"),
     TERMS_AND_CONDITIONS_REQUIRED ("Loan terms and conditions is required"),
     LOAN_INTEREST_RATE_REQUIRED ("Loan interest rate is required"),
@@ -25,7 +24,6 @@ public enum LoanMessages {
     MANDATE_REQUIRED("Loan mandate is required"),
     FUND_PRODUCT_ID_REQUIRED("Please select a fund product."),
     LOAN_ID_REQUIRED("Loan id is required"),
-    TENOR_STATUS_YEAR_BOND ("Tenor should be between 1 to 10 years"),
     TENOR_STATUS_MONTH_BOND("Tenor should be between 1 TO 120 months");
     private final String message;
 

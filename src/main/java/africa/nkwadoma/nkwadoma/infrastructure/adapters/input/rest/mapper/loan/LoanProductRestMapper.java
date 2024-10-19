@@ -9,10 +9,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanProductRestMapper {
-    @Mapping(source = "amountAvailable", target = "amountAvailable", defaultValue = "0.0")
-    @Mapping(source = "amountRepaid", target = "amountRepaid", defaultValue = "0.0")
-    @Mapping(source = "amountEarned", target = "amountEarned", defaultValue = "0.0")
-    @Mapping(source = "amountDisbursed", target = "amountDisbursed", defaultValue = "0.0")
+    @Mapping(source = "totalAmountAvailable", target = "totalAmountAvailable", defaultValue = "0.0")
+    @Mapping(source = "totalAmountRepaid", target = "totalAmountRepaid", defaultValue = "0.0")
+    @Mapping(source = "totalAmountEarned", target = "totalAmountEarned", defaultValue = "0.0")
+    @Mapping(source = "totalAmountDisbursed", target = "totalAmountDisbursed", defaultValue = "0.0")
     @Mapping(source = "minRepaymentAmount", target = "minRepaymentAmount", defaultValue = "0.0")
     @Mapping(source = "obligorLoanLimit", target = "obligorLoanLimit", defaultValue = "0.0")
     LoanProduct mapToLoanProduct(LoanProductRequest request);
