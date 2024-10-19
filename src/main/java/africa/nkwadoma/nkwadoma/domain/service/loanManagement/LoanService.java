@@ -20,9 +20,6 @@ public class LoanService implements CreateLoanProductUseCase {
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         loanProduct.validateLoanProductDetails();
-        if (loanProductOutputPort.existsByName(loanProduct.getName())){
-            throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
-        }
         log.info("Loan product {} created successfully", loanProduct.getName());
         return loanProductOutputPort.save(loanProduct);
     }
