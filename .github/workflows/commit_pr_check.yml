@@ -52,24 +52,24 @@ jobs:
           echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
           echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
 
-      - name: Send Inctivity Email
+      - name: Send Activity Email
         if: ${{ env.SUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' }}
-        env:
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        run: |
-          chmod +x .github/workflows/scripts/inactivity_email.sh
-          .github/workflows/scripts/inactivity_email.sh \
-            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" \
-            "${{ env.SMTP_USERNAME }}" "${{ env.SMTP_PASSWORD }}" \
-            "${{ env.EMAILS }}" "${{ env.TIMESTAMP }}"
-
-      - name: Send Activity Summary Email
-        if: ${{ env.SUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' }}
         env:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
           .github/workflows/scripts/activity_email.sh \
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" \
+            "${{ env.SMTP_USERNAME }}" "${{ env.SMTP_PASSWORD }}" \
+            "${{ env.EMAILS }}" "${{ env.TIMESTAMP }}"
+
+      - name: Send Inactivity Summary Email
+        if: ${{ env.SUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' }}
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          chmod +x .github/workflows/scripts/inactivity_email.sh
+          .github/workflows/scripts/inactivity_email.sh \
             "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" \
             "${{ env.SMTP_USERNAME }}" "${{ env.SMTP_PASSWORD }}" \
             "${{ env.EMAILS }}" "${{ env.SUCCESSFUL_COMMITS }}" \
