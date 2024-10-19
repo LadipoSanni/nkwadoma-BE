@@ -174,8 +174,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        validateDataElement(userIdentity.getEmail());
-        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());

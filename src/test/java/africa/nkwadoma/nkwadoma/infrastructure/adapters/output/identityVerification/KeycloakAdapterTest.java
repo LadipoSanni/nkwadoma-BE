@@ -203,13 +203,33 @@ class KeycloakAdapterTest {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
-
     @Test
-    void enableAccountWithWrongEmail() {
-        john.setEmail("wrong@gmail.com");
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    void enableAccountWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(null));
     }
 
+    @Test
+    void enableAccountWithNonExistingEmail() {
+        john.setEmail("nonexisting@gmail.com");
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ebuefh", " osisiogubjh@mailinator.com"})
+    void enableAccountWithInvalidEmail(String email) {
+        john.setEmail(email);
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        log.info(exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void reactivateWithOutReason(String reactivateReason) {
+        john.setReactivationReason(reactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+    }
     @Test
     @Order(6)
     void disAbleAccount() {
@@ -307,15 +327,7 @@ class KeycloakAdapterTest {
             e.printStackTrace();
         }
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void reactivateWithOutReason(String reactivateReason) {
-        john.setReactivationReason(reactivateReason);
-        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
 
-        john.setReactivationReason(null);
-        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
-    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void deactivateWithReason(String deactivateReason) {
