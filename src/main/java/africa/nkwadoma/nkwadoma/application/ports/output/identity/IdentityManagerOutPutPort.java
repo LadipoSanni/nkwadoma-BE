@@ -14,13 +14,6 @@ import java.util.Optional;
 public interface IdentityManagerOutPutPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
-    UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
-
-    List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
-
-    UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
-    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
-
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
 
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
@@ -32,5 +25,12 @@ public interface IdentityManagerOutPutPort {
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
+
+    UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
+
+    List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
+
+    UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
+    RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
 }

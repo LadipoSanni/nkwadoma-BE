@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,6 +32,8 @@ class InvestmentVehicleServiceTest {
 
     @Autowired
     private InvestmentVehicleOutputPort outputPort;
+    private int pageSize = 5;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -147,9 +150,10 @@ class InvestmentVehicleServiceTest {
 
     @Test
     void viewAllInvestmentVehicle(){
-        List<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicle();
-        assertEquals(1,investmentVehicles.size());
+        Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicle(
+                pageSize, pageNumber);
+        List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        assertEquals(1, investmentVehiclesList.size());
     }
 
 

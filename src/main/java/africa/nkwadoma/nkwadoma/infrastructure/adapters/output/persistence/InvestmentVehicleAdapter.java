@@ -11,8 +11,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.*;
@@ -36,7 +38,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         InvestmentVehicleEntity investmentEntity =
                 investmentVehicleMapper.toInvestmentVehicleEntity(investmentVehicle);
         investmentEntity = investmentVehicleRepository.save(investmentEntity);
-        return investmentVehicleMapper.toInvestmentVehicleIdentity(investmentEntity);
+        return investmentVehicleMapper.toInvestmentVehicle(investmentEntity);
     }
 
 
@@ -49,9 +51,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public List<InvestmentVehicle> findAllInvestmentVehicle() {
-        return investmentVehicleRepository.findAll().stream()
-                .map(investmentVehicleMapper::toInvestmentVehicleIdentity).toList();
+    public Page<InvestmentVehicle> findAllInvestmentVehicle(int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAll(pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
     @Override
@@ -59,7 +62,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         if (id != null){
             InvestmentVehicleEntity investmentVehicleEntity =
                     investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
-            return investmentVehicleMapper.toInvestmentVehicleIdentity(investmentVehicleEntity);
+            return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
         }
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
     }

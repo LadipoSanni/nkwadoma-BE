@@ -7,6 +7,8 @@ public enum LoanMessages {
 
     INVALID_STATUS ("Invalid status provided"),
     INVALID_LOAN_PRODUCT_REQUEST_DETAILS("Invalid or empty request details to create loan product "),
+    INVALID_LOAN_PRODUCT_SIZE("Loan product size can not be 0 or less"),
+    INVALID_OBLIGOR_LIMIT("Obligor limit can not be 0 or less"),
     INVALID_REQUEST("Invalid or empty request "),
     OBLIGOR_LIMIT_GREATER_THAN_PRODUCT_SIZE("Obligor limit is greater than loan product size"),
     LOAN_PRODUCT_SIZE_REQUIRED("Loan product size is required"),

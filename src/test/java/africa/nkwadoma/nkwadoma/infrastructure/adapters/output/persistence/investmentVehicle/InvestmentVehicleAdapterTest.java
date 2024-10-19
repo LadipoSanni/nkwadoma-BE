@@ -5,12 +5,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +28,8 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
     private String investmentVehicleId;
+    private int pageSize = 5;
+    private int pageNumber = 0;
 
 
 
@@ -204,8 +206,10 @@ class InvestmentVehicleAdapterTest {
 
     @Test
     void findAllInvestmentVehicleInvestmentVehicle(){
-           List<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicle();
-           assertEquals(1,investmentVehicles.size());
+        Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicle(
+                pageSize, pageNumber);
+        List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        assertEquals(1, investmentVehiclesList.size());
     }
 
     @AfterAll

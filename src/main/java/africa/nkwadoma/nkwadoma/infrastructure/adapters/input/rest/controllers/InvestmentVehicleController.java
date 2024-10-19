@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InvestmentVehicleRestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -99,21 +100,25 @@ public class InvestmentVehicleController {
 
     @GetMapping("view-all-investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(){
+    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
+            @RequestParam int pageSize,
+            @RequestParam int pageNumber) {
         try {
-            List<InvestmentVehicle> investmentVehicles =
-                    investmentVehicleUseCase.viewAllInvestmentVehicle();
+            Page<InvestmentVehicle> investmentVehicles =
+                    investmentVehicleUseCase.viewAllInvestmentVehicle(pageSize, pageNumber);
             List<InvestmentVehicleResponse> investmentVehicleResponse =
-                    investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles);
+                    investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
+
             ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
                     .body(investmentVehicleResponse)
                     .message(VIEW_ALL_INVESTMENT_VEHICLE)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION,e.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
     }
 }
