@@ -134,10 +134,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
         UserResource userResource = getUserResource(userIdentity);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(password);
-        credential.setTemporary(Boolean.FALSE);
+        CredentialRepresentation credential = createCredentialRepresentation(password);
         userResource.resetPassword(credential);
 
         userRepresentation.setEnabled(Boolean.TRUE);
@@ -163,15 +160,28 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setTemporary(false);
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(userIdentity.getNewPassword());
+        if (userIdentity == null) {
+            throw new MeedlException("User identity is null");
+        }
+        UserIdentityValidator.validatePassword(userIdentity.getNewPassword());
+        CredentialRepresentation credential = createCredentialRepresentation(userIdentity.getNewPassword());
+        updateUserCredentialOnKeyCloak(userIdentity, credential);
+    }
+
+    private void updateUserCredentialOnKeyCloak(UserIdentity userIdentity, CredentialRepresentation credential) throws IdentityException {
         List<UserRepresentation> userRepresentations = getUserRepresentations(userIdentity);
         for (UserRepresentation userRepresentation : userRepresentations){
         userRepresentation.setCredentials(List.of(credential));
         UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());
         userResource.update(userRepresentation);}
+    }
+
+    private static CredentialRepresentation createCredentialRepresentation(String password) throws MeedlException {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setTemporary(Boolean.FALSE);
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+        return credential;
     }
 
     @Override
