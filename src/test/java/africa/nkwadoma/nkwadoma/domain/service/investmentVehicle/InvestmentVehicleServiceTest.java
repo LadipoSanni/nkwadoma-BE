@@ -104,7 +104,6 @@ class InvestmentVehicleServiceTest {
 
 
     @Test
-    @Order(5)
     void updateInvestmentVehicleType()  {
         try{
             InvestmentVehicle foundInvestmentVehicle =
