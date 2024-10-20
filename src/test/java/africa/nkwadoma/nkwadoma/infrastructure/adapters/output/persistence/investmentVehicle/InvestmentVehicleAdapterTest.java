@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
+
 class InvestmentVehicleAdapterTest {
 
     @Autowired
