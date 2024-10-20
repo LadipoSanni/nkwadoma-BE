@@ -155,7 +155,7 @@ class InvestmentVehicleServiceTest {
         assertEquals(1, investmentVehiclesList.size());
     }
 
-
+    
     @AfterAll
     void cleanUp(){
         investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
