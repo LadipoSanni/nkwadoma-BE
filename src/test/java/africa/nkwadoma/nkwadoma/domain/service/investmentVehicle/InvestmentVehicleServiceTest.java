@@ -32,7 +32,7 @@ class InvestmentVehicleServiceTest {
 
     @Autowired
     private InvestmentVehicleOutputPort outputPort;
-    private int pageSize = 5;
+    private int pageSize = 1;
     private int pageNumber = 0;
 
     @BeforeEach

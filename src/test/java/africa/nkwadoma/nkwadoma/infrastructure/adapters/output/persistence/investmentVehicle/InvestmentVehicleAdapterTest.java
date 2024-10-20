@@ -29,7 +29,7 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
     private String investmentVehicleId;
-    private int pageSize = 5;
+    private int pageSize = 1;
     private int pageNumber = 0;
 
 
