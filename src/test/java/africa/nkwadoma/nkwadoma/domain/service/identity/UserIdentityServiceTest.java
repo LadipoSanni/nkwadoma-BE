@@ -387,7 +387,7 @@ class UserIdentityServiceTest {
 
             favour.setPassword("Reset@123");
             favour.setEmail("Invalid@gmail.com");
-            assertThrows(MeedlException.class,()->createUserUseCase.resetPassword(favour.getEmail(),favour.getPassword()));
+            assertThrows(MeedlException.class,()->createUserUseCase.resetPassword(favour.getEmail()));
 
         } catch (MeedlException meedlException) {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());

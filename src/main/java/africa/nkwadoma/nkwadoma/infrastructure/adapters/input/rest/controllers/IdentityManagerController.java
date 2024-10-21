@@ -9,18 +9,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import jakarta.validation.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
 import org.slf4j.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
-@Slf4j
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
@@ -56,6 +52,14 @@ public class IdentityManagerController {
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 body(createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword())).
+                message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
+                statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/password/reset")
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestParam String email) throws MeedlException {
+        createUserUseCase.resetPassword(email);
+        return ResponseEntity.ok(ApiResponse.<String>builder().
+                body("Please check your email to create new password. "+email).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }

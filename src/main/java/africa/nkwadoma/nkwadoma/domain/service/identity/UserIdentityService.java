@@ -100,8 +100,7 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String email, String password){
-
+    public void resetPassword(String email){
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
             identityManagerOutPutPort.resetPassword(foundUser);
