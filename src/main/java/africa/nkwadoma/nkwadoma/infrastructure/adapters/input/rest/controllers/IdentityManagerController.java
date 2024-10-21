@@ -56,7 +56,8 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/reset")
-    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestParam String email) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+        String email = userIdentityRequest.getEmail();
         createUserUseCase.resetPassword(email);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 body("Please check your email to create new password. "+email).
