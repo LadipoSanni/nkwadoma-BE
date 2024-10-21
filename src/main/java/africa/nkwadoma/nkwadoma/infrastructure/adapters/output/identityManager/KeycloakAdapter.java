@@ -155,6 +155,14 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(exception.getMessage());
         }
     }
+    @Override
+    public UserIdentity resetPassword(UserIdentity userIdentity) throws MeedlException {
+        validateUserIdentity(userIdentity);
+        UserRepresentation userRepresentation = getUserRepresentation(userIdentity, true);
+        userIdentity.setId(userRepresentation.getId());
+
+        return userIdentity;
+    }
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
@@ -326,12 +334,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return roleRepresentation;
     }
-
-    @Override
-    public UserIdentity resetPassword(UserIdentity userIdentity) {
-        return null;
-    }
-
     private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
         log.info("Validating userIdentity {}",userIdentity);
         if (userIdentity == null)

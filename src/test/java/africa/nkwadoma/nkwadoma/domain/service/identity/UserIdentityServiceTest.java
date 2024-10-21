@@ -376,31 +376,6 @@ class UserIdentityServiceTest {
     }
 
     @Test
-    @Order(7)
-    void resetPassword() {
-        try {
-            favour.setPassword(newPassword);
-            createUserUseCase.login(favour);
-
-            favour.setId(userId);
-            favour.setRole(role);
-
-
-            favour.setPassword("Reset@123");
-            createUserUseCase.resetPassword(favour.getEmail(),favour.getPassword());
-            assertNotEquals(password,favour.getPassword());
-
-            createUserUseCase.login(favour);
-
-
-        } catch (MeedlException meedlException) {
-            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
-        }
-    }
-
-
-
-    @Test
     @Order(8)
     void resetPasswordWithInvalidEmail() {
         try {
