@@ -29,7 +29,4 @@ public class UserIdentity {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
-
-    private List<PasswordHistory> passwordHistories;
-//    private OrganizationIdentity employer;
 }

@@ -533,6 +533,14 @@ class UserIdentityServiceTest {
         favour.setEmail(null);
         assertThrows(MeedlException.class, () -> createUserUseCase.forgotPassword(favour.getEmail()));
     }
+    @Test
+    void checkLastFivePassword() throws MeedlException {
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setEmail("johnmax@lendspace.com");
+        userIdentity.setId("8ba30e52-60d2-4fd7-ac7b-a558b1d20c9d");
+
+        createUserUseCase.checkNewPasswordMatchLastFive(userIdentity);
+    }
 
     @Test
     void forgotPasswordWithEmptyEmailAddress() {

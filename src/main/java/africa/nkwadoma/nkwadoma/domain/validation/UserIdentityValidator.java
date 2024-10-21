@@ -70,7 +70,7 @@ public class UserIdentityValidator extends MeedlValidator {
         validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()){
-            throw new IdentityException(INVALID_PASSWORD.getMessage());
+            throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
 

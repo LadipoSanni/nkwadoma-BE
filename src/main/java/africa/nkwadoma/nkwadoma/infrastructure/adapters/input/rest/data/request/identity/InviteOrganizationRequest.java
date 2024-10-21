@@ -18,6 +18,5 @@ public class InviteOrganizationRequest {
     private String adminLastName;
     private String adminEmail;
     private IdentityRole adminRole;
-    private String createdBy;
     private ServiceOffering serviceOffering;
 }

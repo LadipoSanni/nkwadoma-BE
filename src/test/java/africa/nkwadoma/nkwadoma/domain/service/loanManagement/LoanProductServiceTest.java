@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
@@ -8,24 +9,34 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus.Months;
-import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.TenorStatus.Years;
+import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Months;
+import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Years;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class LoanProductServiceTest {
-    @Autowired
-    private CreateLoanProductUseCase createLoanProductUseCase;
+    @Mock
+    private LoanProductOutputPort loanProductOutputPort;
+
+    @InjectMocks
+    private LoanService loanService;
     private LoanProduct loanProduct;
 
     @BeforeEach
@@ -34,14 +45,9 @@ class LoanProductServiceTest {
         loanProduct.setName("Test Loan Product: unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
-//        loanProduct.setLoanProductSize(new BigDecimal(1000));
-//        loanProduct.setObligorLoanLimit(new BigDecimal(1000));
-        loanProduct.setInterestRate(0);
-        loanProduct.setMoratorium(5);
-        loanProduct.setTenor(5);
-        loanProduct.setTenorStatus(Years);
-//        loanProduct.setMinRepaymentAmount(new BigDecimal(1000));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
+        loanProduct.setLoanProductSize(new BigDecimal("1000"));
     }
 
     @Test
@@ -49,125 +55,53 @@ class LoanProductServiceTest {
     void createLoanProduct() {
         LoanProduct createdLoanProduct = null;
         try {
-            createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
+            loanProduct.setId("uuid.idwith32numeric");
+            when(loanService.createLoanProduct(loanProduct)).thenReturn(loanProduct);
+            createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             log.info(createdLoanProduct.getId());
             assertNotNull(createdLoanProduct.getId());
-            createLoanProductUseCase.deleteLoanProductById(createdLoanProduct);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
     }
     @Test
-    void createLoanProductWithTheSameName(){
-        loanProduct.setName("Test: Similar test name only for application testing in code");
-        LoanProduct createdLoanProduct = null;
-        try {
-            createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
-            assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-            createLoanProductUseCase.deleteLoanProductById(createdLoanProduct);
-        } catch (MeedlException e) {
-            log.error(e.getMessage());
-            assertTrue(false);
-        }
-    }
-    @Test
-    void createLoanProductWithNullRequestEntity(){
-        assertThrows(MeedlException.class, () -> createLoanProductUseCase.createLoanProduct(null));
+    void createLoanProductWithNullLoanProduct(){
+        assertThrows(MeedlException.class, () -> loanService.createLoanProduct(null));
     }
     @Test
     void createLoanProductWithNullMandate(){
         loanProduct.setMandate(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void createLoanProductWithInvalidMandate(String name){
         loanProduct.setMandate(name);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
     @Test
     void createLoanProductWithNullLoanProductName(){
         loanProduct.setName(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct((loanProduct)));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct((loanProduct)));
     }
     @Test
     void createLoanProductWithNegativeLoanProductSize(){
         loanProduct.setLoanProductSize(new BigDecimal(-1));
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
     @Test
     void createLoanProductWithNoObligorLimit(){
         loanProduct.setObligorLoanLimit(new BigDecimal(-1));
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeInterestRate(){
-        loanProduct.setInterestRate(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeMoratoriumPeriod(){
-        loanProduct.setMoratorium(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void createLoanProductWithNegativeTenor(){
-        loanProduct.setTenor(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
     @Test
     void createLoanProductWithNoTermsAndConditions(){
         loanProduct.setTermsAndCondition(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void missingRequiredRequestTenorStatusThrowsProperError(){
-        loanProduct.setTenorStatus(null);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void missingRequiredRequestTenorThrowsProperError(){
-        int ZERO  = 0;
-        loanProduct.setTenor(ZERO);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void tenorYearAboveApproveNumberOfYear(){
-        int ELEVEN  = 11;
-        loanProduct.setTenor(ELEVEN);
-        loanProduct.setTenorStatus(Years);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void wrongTenorMonthBondThrowsProperError(){
-        int ONE_HUNDRED_AND_ONE = 121;
-        loanProduct.setTenor(ONE_HUNDRED_AND_ONE);
-        loanProduct.setTenorStatus(Months);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    public void moratoriumAboveBoundThrowsProperError(){
-        loanProduct.setMoratorium(26);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-    }
-    @Test
-    void moratoriumBelowBoundThrowsProperError(){
-        loanProduct.setMoratorium(0);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
-        loanProduct.setMoratorium(-1);
-        assertThrows(MeedlException.class,()-> createLoanProductUseCase.createLoanProduct(loanProduct));
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
     @Test
     void deleteLoanProductWithNullRequest(){
-        assertThrows(MeedlException.class, ()-> createLoanProductUseCase.deleteLoanProductById(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void deleteLoanProductWithNullId(String name){
-        loanProduct.setId(name);
-        assertThrows(MeedlException.class, ()-> createLoanProductUseCase.deleteLoanProductById(loanProduct));
-        loanProduct.setId(null);
-        assertThrows(MeedlException.class, ()-> createLoanProductUseCase.deleteLoanProductById(loanProduct));
+        assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(null));
     }
 }

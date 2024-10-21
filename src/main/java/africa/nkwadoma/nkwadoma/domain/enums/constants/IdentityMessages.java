@@ -21,7 +21,7 @@ public enum IdentityMessages{
     CONTEXT_CURRENT_YEAR("currentYear"),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),
     PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$"),
-    INVALID_PASSWORD("Password validation failed"),
+    WEAK_PASSWORD("Password should be up to 8 characters and must contain at least 1 alphabet, number and special characters."),
     INVALID_CREDENTIALS("invalid credentials"),
     ERROR_FETCHING_USER_INFORMATION("Error fetching user information"),
     PASSWORD_HISTORY_EMPTY("password history is empty"),

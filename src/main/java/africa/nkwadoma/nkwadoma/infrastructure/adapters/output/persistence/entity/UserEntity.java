@@ -1,11 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.model.identity.PasswordHistory;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 
 @Setter
