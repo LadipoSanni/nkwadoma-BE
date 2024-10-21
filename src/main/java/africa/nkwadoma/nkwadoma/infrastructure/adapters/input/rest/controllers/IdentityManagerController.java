@@ -59,7 +59,7 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
-    @PostMapping("auth/reactivate/user")
+    @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
@@ -70,7 +70,7 @@ public class IdentityManagerController {
                 body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
-    @PostMapping("auth/deactivate/user")
+    @PostMapping("auth/user/deactivate")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
