@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,11 +36,13 @@ public class InviteOrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
-    @PostMapping("invite-organization")
+    @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> inviteOrganization(@RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
+    public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
         try{
             UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
+            userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
             List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
             OrganizationIdentity organizationIdentity = inviteOrganizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
@@ -76,7 +80,6 @@ public class InviteOrganizationController {
                 .lastName(inviteOrganizationRequest.getAdminLastName())
                 .email(inviteOrganizationRequest.getEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
-                .createdBy(inviteOrganizationRequest.getCreatedBy())
                 .build();
     }
 }
