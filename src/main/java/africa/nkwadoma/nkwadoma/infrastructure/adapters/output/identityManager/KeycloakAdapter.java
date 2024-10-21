@@ -326,6 +326,12 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return roleRepresentation;
     }
+
+    @Override
+    public UserIdentity resetPassword(UserIdentity userIdentity) {
+        return null;
+    }
+
     private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
         log.info("Validating userIdentity {}",userIdentity);
         if (userIdentity == null)

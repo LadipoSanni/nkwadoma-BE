@@ -198,6 +198,27 @@ class KeycloakAdapterTest {
         log.info(exception.getMessage());
     }
     @Test
+    void resetPassword() {
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = identityManagementOutputPort.resetPassword(john);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(userIdentity.getId());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "dibfjhd"})
+    void resetPasswordWithInvalidEmail(String email) {
+        john.setEmail(email);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.resetPassword(john));
+    }
+    @Test
+    void resetPasswordWithInvalidEmail() {
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.resetPassword(null));
+    }
+
+    @Test
     @Order(4)
     void changePasswordWithValidPassword() {
         String newPassword = "neWpasswordJ@345";
