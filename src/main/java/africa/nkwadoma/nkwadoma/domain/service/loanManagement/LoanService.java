@@ -27,6 +27,7 @@ public class LoanService implements CreateLoanProductUseCase {
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
+        MeedlValidator.validateDataElement(loanProduct.getId());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
 

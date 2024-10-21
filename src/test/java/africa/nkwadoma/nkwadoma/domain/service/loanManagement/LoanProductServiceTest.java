@@ -25,11 +25,9 @@ import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Month
 import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Years;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
-@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class LoanProductServiceTest {
     @Mock
@@ -37,6 +35,7 @@ class LoanProductServiceTest {
 
     @InjectMocks
     private LoanService loanService;
+
     private LoanProduct loanProduct;
 
     @BeforeEach
@@ -48,19 +47,18 @@ class LoanProductServiceTest {
         loanProduct.setObligorLoanLimit(new BigDecimal("100"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000"));
+        loanProduct.setId("uuid.idfortesting");
     }
 
     @Test
-    @Order(1)
     void createLoanProduct() {
-        LoanProduct createdLoanProduct = null;
         try {
-            loanProduct.setId("uuid.idwith32numeric");
-            when(loanService.createLoanProduct(loanProduct)).thenReturn(loanProduct);
-            createdLoanProduct = loanService.createLoanProduct(loanProduct);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
-            log.info(createdLoanProduct.getId());
             assertNotNull(createdLoanProduct.getId());
+            assertEquals(createdLoanProduct.getName(), loanProduct.getName());
+            verify(loanProductOutputPort, atLeastOnce()).save(loanProduct);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
@@ -100,8 +98,30 @@ class LoanProductServiceTest {
         loanProduct.setTermsAndCondition(null);
         assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.EMPTY})
+    void createLoanProductWithInvalidTermsAndConditions(String value){
+        loanProduct.setTermsAndCondition(value);
+        assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
+    }
     @Test
     void deleteLoanProductWithNullRequest(){
         assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deleteLoanProductWithInvalidId(String value){
+        loanProduct.setId(value);
+        assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(loanProduct));
+    }
+    @Test
+    void deleteLoanProductWithValidId(){
+        try {
+            doNothing().when(loanProductOutputPort).deleteById(loanProduct.getId());
+            loanService.deleteLoanProductById(loanProduct);
+            verify(loanProductOutputPort, atLeastOnce()).deleteById(loanProduct.getId());
+        } catch (MeedlException e) {
+            log.error("Error deleting loan product {}", e.getMessage());
+        }
     }
 }
