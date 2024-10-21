@@ -175,6 +175,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getReactivationReason());
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
@@ -191,17 +192,21 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userRepresentation.setEmailVerified(Boolean.TRUE);
         UserResource userResource = getUserResource(userIdentity);
         userResource.update(userRepresentation);
-        foundUser.setEnabled(Boolean.TRUE);
-        return foundUser;
+        userIdentity.setEnabled(Boolean.TRUE);
+        userIdentity.setEmailVerified(Boolean.TRUE);
+        return userIdentity;
     }
 
     @Override
     public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
+        log.info("validate user email  {}", userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
-        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+
         if (!foundUser.isEnabled()) {
             log.warn("The status of the found user is...  {} id : {}", foundUser.isEnabled(), foundUser.getId() );
             throw new IdentityException(ACCOUNT_ALREADY_DISABLED.getMessage());
@@ -212,8 +217,10 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
-        foundUser.setEnabled(Boolean.FALSE);
-        return foundUser;
+        userIdentity.setEnabled(Boolean.FALSE);
+        userIdentity.setEmailVerified(Boolean.FALSE);
+        log.info("after deactivation on keycloak {}", userIdentity);
+        return userIdentity;
 
     }
 

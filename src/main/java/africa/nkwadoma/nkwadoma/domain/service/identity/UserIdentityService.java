@@ -127,8 +127,9 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateObjectInstance(userIdentity);
         validateDataElement(userIdentity.getId());
         validateDataElement(userIdentity.getReactivationReason());
-        userIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setReactivationReason(userIdentity.getReactivationReason());
+        userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
@@ -136,10 +137,12 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
-        validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateObjectInstance(userIdentity);
+        validateDataElement(userIdentity.getId());
         validateDataElement(userIdentity.getDeactivationReason());
-        userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
+        userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;

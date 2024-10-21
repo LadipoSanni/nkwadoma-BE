@@ -32,6 +32,7 @@ public class UserIdentityValidator extends MeedlValidator {
      }
 
      public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
+         log.info("Started validating for user identity in validation class : {}", userIdentity);
          MeedlValidator.validateObjectInstance(userIdentity);
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
