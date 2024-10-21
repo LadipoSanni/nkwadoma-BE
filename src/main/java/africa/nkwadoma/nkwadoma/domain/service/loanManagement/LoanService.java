@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -31,4 +32,9 @@ public class LoanService implements CreateLoanProductUseCase {
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
 
+    @Override
+    public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
+        MeedlValidator.validateDataElement(loanProductId);
+        return loanProductOutputPort.findById(loanProductId);
+    }
 }

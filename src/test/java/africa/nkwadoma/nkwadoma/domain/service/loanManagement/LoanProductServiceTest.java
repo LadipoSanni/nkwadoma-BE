@@ -104,6 +104,23 @@ class LoanProductServiceTest {
         loanProduct.setTermsAndCondition(value);
         assertThrows(MeedlException.class,()-> loanService.createLoanProduct(loanProduct));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.EMPTY})
+    void viewLoanProductDetailsWithInvalidId(String value){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanProductDetailsById(value));
+    }
+    @Test
+    void viewLoanProductDetailsWithValidId(){
+        try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            LoanProduct foundLoanProduct = loanService.viewLoanProductDetailsById(loanProduct.getId());
+            assertEquals(foundLoanProduct.getName() , loanProduct.getName());
+            assertEquals(foundLoanProduct.getMandate() , loanProduct.getMandate());
+            verify(loanProductOutputPort, times(1)).findById(loanProduct.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Test
     void deleteLoanProductWithNullRequest(){
         assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(null));
