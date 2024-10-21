@@ -58,7 +58,7 @@ class LoanProductServiceTest {
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
             assertEquals(createdLoanProduct.getName(), loanProduct.getName());
-            verify(loanProductOutputPort, atLeastOnce()).save(loanProduct);
+            verify(loanProductOutputPort, times(1)).save(loanProduct);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
@@ -119,7 +119,7 @@ class LoanProductServiceTest {
         try {
             doNothing().when(loanProductOutputPort).deleteById(loanProduct.getId());
             loanService.deleteLoanProductById(loanProduct);
-            verify(loanProductOutputPort, atLeastOnce()).deleteById(loanProduct.getId());
+            verify(loanProductOutputPort, times(1)).deleteById(loanProduct.getId());
         } catch (MeedlException e) {
             log.error("Error deleting loan product {}", e.getMessage());
         }
