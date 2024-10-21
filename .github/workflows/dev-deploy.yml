@@ -1,17 +1,17 @@
 name: Deploy Systest to AWS ECS
 
+
+on:
+  push:
+    branches:
+      - dev
 env:
   ECR_REPOSITORY: learnspace-backend-systest
   CLUSTER: learnspace-africa
   ECS: learnspace-backend-systest
   AWS_REGION: eu-west-1
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/learnspace-backend-systest
-  EMAILS: 'ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
-
-on:
-  push:
-    branches:
-      - dev
+  EMAILS: 'ladipo@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
 
 jobs:
   build-and-deploy:
@@ -63,6 +63,7 @@ jobs:
           COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+          
 
       - name: Debug Environment Variables
         run: |

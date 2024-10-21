@@ -5,9 +5,9 @@ SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
-TIMESTAMP=$(date)
+TIMESTAMP=$6
 
-# HTML Template for Inactivity Email
+# Define the HTML body with proper formatting
 read -r -d '' HTML_BODY <<EOF
 <!DOCTYPE html>
 <html>
@@ -22,10 +22,20 @@ read -r -d '' HTML_BODY <<EOF
 </html>
 EOF
 
-# Send Email
-IFS=',' read -r -a email_array <<< "${EMAILS}"
+# Prepare the email headers and body as MIME format
+read -r -d '' MIME_EMAIL <<EOF
+From: "Build Tracker" <${SMTP_USERNAME}>
+To: ${EMAILS}
+Subject: 🚨 Inactivity Alert - No Commits or PRs
+Content-Type: text/html; charset=UTF-8
+
+${HTML_BODY}
+EOF
+
+# Loop through the email list and send each email using curl
+IFS=',' read -r -a email_array <<< "$EMAILS"
 for email in "${email_array[@]}"; do
-  echo "$HTML_BODY" | curl --verbose --ssl-reqd \
+  echo "$MIME_EMAIL" | curl --verbose --ssl-reqd \
     --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
     --mail-from "$SMTP_USERNAME" \
     --mail-rcpt "$email" \
