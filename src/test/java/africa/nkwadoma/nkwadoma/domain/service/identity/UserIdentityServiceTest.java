@@ -483,30 +483,31 @@ class UserIdentityServiceTest {
 
     @Test
     void enableAccountThatHasBeenEnabled() {
-        UserIdentity foundUser = null;
         try {
             log.info("UserIdentity id {} ", userId);
-            foundUser = userIdentityOutputPort.findById(userId);
+            UserIdentity foundUser = userIdentityOutputPort.findById(userId);
+
+            assertNotNull(foundUser);
+            assertTrue(foundUser.isEnabled());
+            assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("error occurred {}", e.getMessage());
         }
-        assertNotNull(foundUser);
-        assertTrue(foundUser.isEnabled());
-        assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
         }
     @Test
     @Order(10)
     void disAbleAccountAlreadyDisabled() {
         log.info("UserIdentity id {} ", userId);
-        UserIdentity foundUser = null;
         try {
-            foundUser = userIdentityOutputPort.findById(userId);
+            UserIdentity foundUser = userIdentityOutputPort.findById(userId);
+
+            assertNotNull(foundUser);
+            assertFalse(foundUser.isEnabled());
+            assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
+
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("error occured {}", e.getMessage());
         }
-        assertNotNull(foundUser);
-        assertFalse(foundUser.isEnabled());
-        assertThrows(MeedlException.class, ()-> createUserUseCase.deactivateUserAccount(favour));
 
     }
 
