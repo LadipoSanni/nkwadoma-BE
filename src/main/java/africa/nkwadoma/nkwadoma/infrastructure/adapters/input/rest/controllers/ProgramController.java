@@ -74,4 +74,18 @@ public class ProgramController {
         );
     }
 
+    @GetMapping("/{name}")
+    @Operation(summary = "Search a program by name")
+    public ResponseEntity<ApiResponse<?>> searchProgramByName(@PathVariable @Valid @NotBlank(message = "Program name is required") String name)
+            throws MeedlException {
+        Program program = new Program();
+        program.setName(name.trim());
+        program = addProgramUseCase.viewProgramByName(program);
+
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                body(programRestMapper.toProgramResponse(program)).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
 }

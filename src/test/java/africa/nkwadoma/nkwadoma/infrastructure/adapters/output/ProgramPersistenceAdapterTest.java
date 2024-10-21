@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -81,6 +82,7 @@ class ProgramPersistenceAdapterTest {
 
 
     @Test
+    @Order(1)
     void saveProgram() {
         try {
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
@@ -123,10 +125,10 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
+    @Order(2)
     void findProgramByName() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
-
             assertNotNull(foundProgram);
             assertEquals(foundProgram.getName(), program.getName());
         } catch (MeedlException e) {
@@ -134,7 +136,27 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void findProgramByNullOrEmptyName(String name) {
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
+        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"  My program", "My program   ", "    My program     "})
+    void findProgramByNameWithSpaces(String name) {
+        try {
+            Program foundProgramByName = programOutputPort.findProgramByName(name);
+            assertNotNull(foundProgramByName);
+            assertEquals(foundProgramByName.getName(), program.getName());
+        } catch (MeedlException e) {
+            log.error("Error finding program by name with spaces", e);
+        }
+    }
+
     @Test
+    @Order(3)
     void findProgramById() {
         try {
             Program foundProgramByName = programOutputPort.findProgramByName(program.getName());
@@ -149,6 +171,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
+    @Order(4)
     void findAllPrograms() {
         try {
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -189,6 +212,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
+    @Order(5)
     void deleteProgram() {
         try {
             Program foundProgram = programOutputPort.findProgramByName(program.getName());
@@ -197,27 +221,18 @@ class ProgramPersistenceAdapterTest {
 
             programOutputPort.deleteProgram(foundProgram.getId());
 
-            assertThrows(ResourceNotFoundException.class, ()-> programOutputPort.findProgramById(program.getId()));
+            MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(program.getId()));
+            assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+
+            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            assertNotNull(organization);
+            organizationOutputPort.delete(organization.getId());
+            assertThrows(ResourceNotFoundException.class, ()-> organizationOutputPort.findById(organization.getId()));
+
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }
     }
 
-
-    @AfterAll
-    void cleanUp() {
-        try {
-            Program foundProgram = programOutputPort.findProgramByName(program.getName());
-            programOutputPort.deleteProgram(foundProgram.getId());
-
-            OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            assertNotNull(organization);
-            organizationIdentity.setId(organization.getId());
-            organizationOutputPort.delete(organizationIdentity.getId());
-            assertThrows(ResourceNotFoundException.class, ()-> organizationOutputPort.findById(organizationIdentity.getId()));
-        } catch (MeedlException e) {
-            log.error("Error deleting program", e);
-        }
-    }
 
 }

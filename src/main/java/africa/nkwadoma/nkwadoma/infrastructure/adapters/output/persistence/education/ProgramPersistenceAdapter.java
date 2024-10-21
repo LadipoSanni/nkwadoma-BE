@@ -36,9 +36,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
         validateDataElement(programName);
+        programName = programName.trim();
         ProgramEntity programEntity = programRepository.findByName(programName).
                 orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-
         return programMapper.toProgram(programEntity);
     }
 

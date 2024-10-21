@@ -141,4 +141,56 @@ class ProgramServiceTest {
             log.error("Error viewing all programs", e);
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    void viewProgramsWithSpaces(String organizationId) {
+        try {
+            program.setOrganizationId(organizationId);
+            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
+                    thenReturn(new PageImpl<>(List.of(program)));
+            Page<Program> programs = programService.viewAllPrograms(program);
+            List<Program> programsList = programs.toList();
+
+            assertNotNull(programs);
+            assertNotNull(programsList);
+            assertEquals(programsList.get(0).getId(), program.getId());
+            assertEquals(programsList.get(0), program);
+        } catch (MeedlException e) {
+            log.error("Error viewing all programs", e);
+        }
+    }
+
+    @Test
+    void viewProgramByName() {
+        try {
+            when(programOutputPort.findProgramByName(program.getName())).thenReturn(program);
+            Program foundProgram = programService.viewProgramByName(program);
+            assertNotNull(foundProgram);
+            assertEquals(foundProgram, program);
+        } catch (MeedlException e) {
+            log.error("Error viewing program by name", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    void viewProgramByNameWithSpaces(String programWithSpace) {
+        try {
+            program.setName(programWithSpace);
+            when(programOutputPort.findProgramByName(programWithSpace.trim())).thenReturn(program);
+
+            Program foundProgram = programService.viewProgramByName(program);
+            assertNotNull(foundProgram);
+        } catch (MeedlException e) {
+            log.error("Error viewing program by name", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewProgramWithNullOrEmptyName(String programWithSpace) {
+        program.setName(programWithSpace);
+        assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
+    }
 }
