@@ -48,9 +48,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        if (organizationIdentity.getServiceOffering() != null &&
-                organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION
-        ) {
+        if (organizationIdentity.getServiceOffering() != null
+                && organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION) {
             throw new EducationException(ProgramMessages.WRONG_INDUSTRY.getMessage());
         }
 

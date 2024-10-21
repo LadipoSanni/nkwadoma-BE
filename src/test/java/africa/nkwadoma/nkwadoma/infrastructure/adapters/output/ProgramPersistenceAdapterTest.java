@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.hibernate.annotations.*;
@@ -105,8 +106,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    @Disabled
-    void saveProgramWithWrongIndustry() {
+    void saveProgramWithNonEducationIndustry() {
         try {
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organization.setServiceOffering(ServiceOffering.builder().industry(Industry.BANKING).build());
@@ -122,6 +122,44 @@ class ProgramPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
         }
+    }
+
+    @Test
+    void createProgramWithExistingName(){
+        try {
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            assertNotNull(foundProgram);
+            assertEquals(program.getName(), foundProgram.getName());
+        } catch (MeedlException exception) {
+            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
+    }
+
+    @Test
+    void createProgramWithNullName(){
+        program.setName(null);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram((program)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void createProgramWithInvalidName(String name){
+        program.setName(name);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
+    }
+
+    @Test
+    void createProgramWithNullOrganizationId(){
+        program.setOrganizationId(null);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram((program)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void createProgramWithInvalidOrganizationId(String organzationId){
+        program.setOrganizationId(organzationId);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
     }
 
     @Test
