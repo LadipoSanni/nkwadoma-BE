@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @Slf4j
