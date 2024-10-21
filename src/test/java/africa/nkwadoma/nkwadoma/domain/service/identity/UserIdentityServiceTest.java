@@ -56,8 +56,8 @@ class UserIdentityServiceTest {
         favour.setEmail("favour@gmail.com");
         favour.setRole(IdentityRole.INSTITUTE_ADMIN);
         favour.setCreatedBy("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
-
-
+        favour.setReactivationReason("Reason for reactivation is to test");
+        favour.setDeactivationReason("Reason for deactivation is to test");
 
         UserIdentity sarah = new UserIdentity();
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
@@ -492,7 +492,7 @@ class UserIdentityServiceTest {
         }
         assertNotNull(foundUser);
         assertTrue(foundUser.isEnabled());
-       assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
+        assertThrows(MeedlException.class, () -> createUserUseCase.reactivateUserAccount(favour));
         }
     @Test
     @Order(10)
