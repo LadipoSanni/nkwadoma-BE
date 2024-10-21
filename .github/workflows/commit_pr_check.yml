@@ -39,7 +39,7 @@ jobs:
           echo "SMTP_SERVER=semicolon.africa" >> $GITHUB_ENV
           echo "SMTP_PORT=465" >> $GITHUB_ENV
           echo "SMTP_USERNAME=builds@semicolon.africa" >> $GITHUB_ENV
-          echo "EMAILS=ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa " >> $GITHUB_ENV
+          echo "EMAILS=ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa" >> $GITHUB_ENV
 
           SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
             --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
