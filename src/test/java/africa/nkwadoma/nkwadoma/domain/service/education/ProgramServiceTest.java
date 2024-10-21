@@ -20,7 +20,7 @@ import java.math.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -65,10 +65,16 @@ class ProgramServiceTest {
     @Test
     void addProgramWithExistingName() {
         try {
-            when(programOutputPort.programExists(program.getName())).thenReturn(true);
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            Program createdProgram = programService.createProgram(program);
+            assertNotNull(createdProgram);
+            verify(programOutputPort, times(1)).saveProgram(program);
+
+            when(programOutputPort.programExists(program.getName())).thenThrow(ResourceAlreadyExistsException.class);
+            verify(programOutputPort, times(1)).programExists(program.getName());
             assertThrows(ResourceAlreadyExistsException.class, ()-> programService.createProgram(program));
         } catch (MeedlException e) {
-            log.error(e.getMessage());
+            log.error("Error creating program", e);
         }
     }
 
@@ -77,6 +83,7 @@ class ProgramServiceTest {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program addedProgram = programService.createProgram(program);
+            verify(programOutputPort, times(1)).saveProgram(program);
 
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
             assertEquals(addedProgram.getDurationType(), program.getDurationType());
@@ -99,6 +106,8 @@ class ProgramServiceTest {
             Page<Program> programs = programService.viewAllPrograms(program);
             List<Program> programsList = programs.toList();
 
+            verify(programOutputPort, times(1)).
+                    findAllPrograms(program.getOrganizationId(), pageSize, pageNumber);
             assertNotNull(programs);
             assertNotNull(programsList);
             assertEquals(programsList.get(0).getId(), program.getId());
@@ -133,6 +142,8 @@ class ProgramServiceTest {
             Page<Program> programs = programService.viewAllPrograms(program);
             List<Program> programsList = programs.toList();
 
+            verify(programOutputPort, times(1)).
+                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
             assertNotNull(programs);
             assertNotNull(programsList);
             assertEquals(programsList.get(0).getId(), program.getId());
@@ -156,6 +167,8 @@ class ProgramServiceTest {
             assertNotNull(programsList);
             assertEquals(programsList.get(0).getId(), program.getId());
             assertEquals(programsList.get(0), program);
+            verify(programOutputPort, times(1)).
+                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
         } catch (MeedlException e) {
             log.error("Error viewing all programs", e);
         }
@@ -168,6 +181,7 @@ class ProgramServiceTest {
             Program foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
             assertEquals(foundProgram, program);
+            verify(programOutputPort, times(1)).findProgramByName(program.getName());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
@@ -182,6 +196,7 @@ class ProgramServiceTest {
 
             Program foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
+            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
