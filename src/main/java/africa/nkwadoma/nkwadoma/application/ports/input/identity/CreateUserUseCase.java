@@ -14,4 +14,6 @@ public interface CreateUserUseCase {
     UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity forgotPassword(String email) throws MeedlException;
+
+    boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException;
 }

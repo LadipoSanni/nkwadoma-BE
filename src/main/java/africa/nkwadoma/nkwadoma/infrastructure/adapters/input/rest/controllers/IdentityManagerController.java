@@ -81,5 +81,16 @@ public class IdentityManagerController {
                 body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
-
+    @PostMapping("auth/password/change")
+    public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+        userIdentity.setId(meedlUser.getClaimAsString("sub"));
+        userIdentity.setEmail(meedlUser.getClaimAsString("email"));
+        log.info("The user changing the password : {} and ",meedlUser.getClaimAsString("sub"));
+        createUserUseCase.changePassword(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder().
+                body("Password change successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build());
+    }
 }

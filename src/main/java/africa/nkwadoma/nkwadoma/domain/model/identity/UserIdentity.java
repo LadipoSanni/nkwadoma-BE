@@ -26,7 +26,5 @@ public class UserIdentity {
     private String accessToken;
     private String refreshToken;
     private String newPassword;
-
-    private List<PasswordHistory> passwordHistories;
-//    private OrganizationIdentity employer;
+    private String organizationDomain;
 }
