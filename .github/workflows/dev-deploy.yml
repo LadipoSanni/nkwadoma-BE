@@ -63,6 +63,7 @@ jobs:
           COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+          
 
       - name: Debug Environment Variables
         run: |
