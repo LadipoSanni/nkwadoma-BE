@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.LOGOUT_SUCCESSFUL;
 
 @Slf4j
 @RestController
@@ -32,6 +34,15 @@ public class IdentityManagerController {
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
                 body(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build()
+        );
+    }
+    @PostMapping("auth/logout")
+    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
+        createUserUseCase.logout(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<String>builder().
+                body(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
