@@ -46,7 +46,6 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
-
     @PostMapping("auth/colleague/invite")
     public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
