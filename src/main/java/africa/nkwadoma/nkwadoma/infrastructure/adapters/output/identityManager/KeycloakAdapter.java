@@ -1,14 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -145,13 +145,15 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
+    public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
-        } catch (NotAuthorizedException exception) {
-            throw new IdentityException(exception.getMessage());
+        } catch (NotAuthorizedException | BadRequestException exception ) {
+            throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
 
@@ -244,14 +246,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     private Keycloak getKeycloak(UserIdentity userIdentity) {
-        log.info("User credentials: {}", userIdentity.toString());
+        String email = userIdentity.getEmail().trim();
+        String password = userIdentity.getPassword().trim();
+
         return KeycloakBuilder.builder()
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(KEYCLOAK_REALM)
                 .clientId(CLIENT_ID)
                 .clientSecret(CLIENT_SECRET)
-                .username(userIdentity.getEmail())
-                .password(userIdentity.getPassword())
+                .username(email)
+                .password(password)
                 .serverUrl(SERVER_URL)
                 .build();
     }
