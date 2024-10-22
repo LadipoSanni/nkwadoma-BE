@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -103,5 +106,29 @@ class LoanProductServiceTest {
     @Test
     void deleteLoanProductWithNullRequest(){
         assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(null));
+    }
+
+    @Test
+    void viewAllPrograms() {
+        try {
+            when(programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber)).
+                    thenReturn(new PageImpl<>(List.of(program)));
+            Page<Program> programs = programService.viewAllPrograms(program);
+            List<Program> programsList = programs.toList();
+
+            assertNotNull(programs);
+            assertNotNull(programsList);
+            assertEquals(programsList.get(0).getId(), program.getId());
+            assertEquals(programsList.get(0).getOrganizationId(), program.getOrganizationId());
+            assertEquals(programsList.get(0).getName(), program.getName());
+            assertEquals(programsList.get(0).getDuration(), program.getDuration());
+            assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountDisbursed());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountOutstanding());
+            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountRepaid());
+        } catch (MeedlException e) {
+            log.error("Error viewing all programs", e);
+        }
     }
 }

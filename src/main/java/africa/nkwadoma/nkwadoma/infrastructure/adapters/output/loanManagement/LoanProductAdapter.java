@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -67,7 +68,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public Page<LoanProduct> findAllLoanProduct(int pageSize, int pageNumber) {
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        int defaultPageSize = BigInteger.TEN.intValue();
+        int size = pageSize <= BigInteger.ZERO.intValue() ? defaultPageSize : pageSize;
+        Pageable pageRequest = PageRequest.of(pageNumber, size);
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }
