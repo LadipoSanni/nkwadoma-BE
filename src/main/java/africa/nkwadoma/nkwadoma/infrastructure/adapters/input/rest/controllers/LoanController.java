@@ -8,8 +8,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanProductRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
+import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.INVALID_ID;
+import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.RESPONSE_IS_SUCCESSFUL;
 
 @RestController()
 @RequestMapping(BASE_URL + LOAN)
@@ -46,7 +50,9 @@ public class LoanController {
     }
     @GetMapping("/loan-product/view-details-by-id")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam String loanProductId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
+                                                                          @NotBlank(message = "Provide a valid loan product identifier")
+                                                                          String loanProductId) throws MeedlException {
         log.info("View loan product details by id was called.... {}", loanProductId);
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
