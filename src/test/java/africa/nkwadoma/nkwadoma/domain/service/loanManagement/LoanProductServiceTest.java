@@ -56,7 +56,6 @@ class LoanProductServiceTest {
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000"));
     }
-
     @Test
     @Order(1)
     void createLoanProduct() {
