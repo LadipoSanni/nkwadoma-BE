@@ -36,9 +36,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
         validateDataElement(programName);
+        programName = programName.trim();
         ProgramEntity programEntity = programRepository.findByName(programName).
                 orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-
         return programMapper.toProgram(programEntity);
     }
 
@@ -48,9 +48,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        if (organizationIdentity.getServiceOffering() != null &&
-                organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION
-        ) {
+        if (organizationIdentity.getServiceOffering() != null
+                && organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION) {
             throw new EducationException(ProgramMessages.WRONG_INDUSTRY.getMessage());
         }
 

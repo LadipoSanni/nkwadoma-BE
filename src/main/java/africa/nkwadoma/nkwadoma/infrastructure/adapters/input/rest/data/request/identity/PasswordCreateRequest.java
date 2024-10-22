@@ -12,4 +12,12 @@ public class PasswordCreateRequest {
     private String token;
     @NotBlank(message= "Password is required")
     private String password;
+
+    public void setToken(@NotBlank(message = "Token is required") String token) {
+        this.token = token.trim();
+    }
+
+    public void setPassword(@NotBlank(message = "Password is required") String password) {
+        this.password = password.trim();
+    }
 }
