@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message;
 import lombok.Getter;
 
 @Getter
-public class SwaggerUiConstant {
+public class ControllerConstant {
    public static final String  INVITE_ORGANIZATION_TITLE = "Invite Organization";
    public static final String  INVITE_ORGANIZATION_DESCRIPTION = "To invite an organization, kindly provide the industry name,organization name, email address, website address,rc number,tin and phone number ";
    public static final String  LOAN_PRODUCT_CREATION = "create loan product";
