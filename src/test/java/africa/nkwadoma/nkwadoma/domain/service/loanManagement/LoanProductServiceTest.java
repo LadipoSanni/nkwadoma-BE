@@ -110,23 +110,25 @@ class LoanProductServiceTest {
 
     @Test
     void viewAllPrograms() {
+        int pageNumber = 2;
+        int pageSize = 10;
         try {
-            when(programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber)).
-                    thenReturn(new PageImpl<>(List.of(program)));
-            Page<Program> programs = programService.viewAllPrograms(program);
-            List<Program> programsList = programs.toList();
+            when(loanService.viewAllLoanProduct( pageSize, pageNumber)).
+                    thenReturn(new PageImpl<>(List.of(loanProduct)));
+            Page<LoanProduct> loanProducts = loanService.viewAllLoanProduct(pageSize, pageNumber);
+            List<LoanProduct> loanProductList = loanProducts.toList();
 
-            assertNotNull(programs);
-            assertNotNull(programsList);
-            assertEquals(programsList.get(0).getId(), program.getId());
-            assertEquals(programsList.get(0).getOrganizationId(), program.getOrganizationId());
-            assertEquals(programsList.get(0).getName(), program.getName());
-            assertEquals(programsList.get(0).getDuration(), program.getDuration());
-            assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
-            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountDisbursed());
-            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountOutstanding());
-            assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountRepaid());
+            assertNotNull(loanProducts);
+            assertNotNull(loanProductList);
+            assertEquals(loanProductList.get(0).getId(), program.getId());
+            assertEquals(loanProductList.get(0).getOrganizationId(), program.getOrganizationId());
+            assertEquals(loanProductList.get(0).getName(), program.getName());
+            assertEquals(loanProductList.get(0).getDuration(), program.getDuration());
+            assertEquals(loanProductList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
+            assertEquals(loanProductList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountDisbursed());
+            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountOutstanding());
+            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountRepaid());
         } catch (MeedlException e) {
             log.error("Error viewing all programs", e);
         }
