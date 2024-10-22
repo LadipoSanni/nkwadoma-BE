@@ -14,15 +14,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.*;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
 
-@RestController("/api/v1/loan")
+@RestController()
+@RequestMapping(BASE_URL + LOAN)
 @RequiredArgsConstructor
 @Slf4j
 public class LoanController {
@@ -44,7 +44,7 @@ public class LoanController {
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
-    @PostMapping("/loan-product/view-details-by-id")
+    @GetMapping("/loan-product/view-details-by-id")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam String loanProductId) throws MeedlException {
         log.info("View loan product details by id was called.... {}", loanProductId);
