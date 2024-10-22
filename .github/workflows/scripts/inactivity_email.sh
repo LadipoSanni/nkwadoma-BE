@@ -5,9 +5,12 @@ SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
-TIMESTAMP=$6
+LAST_TIMESTAMP=$6
 
-# Define the HTML body with proper formatting
+CURRENT_TIME=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+
+TIME_DIFF=$(( ($(date -d "$CURRENT_TIME" +%s) - $(date -d "$LAST_TIMESTAMP" +%s)) / 3600 ))
+
 read -r -d '' HTML_BODY <<EOF
 <!DOCTYPE html>
 <html>
@@ -16,28 +19,30 @@ read -r -d '' HTML_BODY <<EOF
 </head>
 <body>
   <h1>No Activity Detected</h1>
-  <p>No commits or PRs were recorded since ${TIMESTAMP}.</p>
-  <p>What are you guys up to! Please report to your PM!</p>
+  <p>No commits or PRs have been made in the last ${TIME_DIFF} hours.</p>
+  <p>Last activity was at: ${LAST_TIMESTAMP}</p>
+  <p>Checked at: ${CURRENT_TIME}</p>
+  <p>Please engage with your tasks!</p>
+  <p>Or Speak with your PM, you just can't do Nothing!</p>
+  <p>T for Phanks!</p>
 </body>
 </html>
 EOF
 
-# Prepare the email headers and body as MIME format
 read -r -d '' MIME_EMAIL <<EOF
 From: "Build Tracker" <${SMTP_USERNAME}>
 To: ${EMAILS}
-Subject: 🚨 Inactivity Alert - No Commits or PRs
+Subject: 🚨 Inactivity Alert
 Content-Type: text/html; charset=UTF-8
 
 ${HTML_BODY}
 EOF
 
-# Loop through the email list and send each email using curl
-IFS=',' read -r -a email_array <<< "$EMAILS"
+IFS=',' read -r -a email_array <<< "${EMAILS}"
 for email in "${email_array[@]}"; do
   echo "$MIME_EMAIL" | curl --verbose --ssl-reqd \
     --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
-    --mail-from "$SMTP_USERNAME" \
+    --mail-from "${SMTP_USERNAME}" \
     --mail-rcpt "$email" \
     --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
     --upload-file -
