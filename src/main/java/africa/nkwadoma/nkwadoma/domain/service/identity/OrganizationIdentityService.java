@@ -29,7 +29,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
 
     @Override
-    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
 
         organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
