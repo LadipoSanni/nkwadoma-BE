@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -126,6 +128,11 @@ class UserIdentityAdapterTest {
     void saveUserWithEmptyCreatedBy(){
         john.setCreatedBy(StringUtils.EMPTY);
         assertThrows(MeedlException.class, ()->userIdentityOutputPort.save(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "fndjnke"})
+    void verifyUserWithInvalidId(String userId){
+        assertThrows(MeedlException.class,()->userIdentityOutputPort.verifyUser(userId));
     }
 
 

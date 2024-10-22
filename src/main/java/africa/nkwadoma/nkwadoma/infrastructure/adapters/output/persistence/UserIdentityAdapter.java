@@ -64,6 +64,11 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
+    @Override
+    public void verifyUser(String actorId) {
+
+    }
+
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }

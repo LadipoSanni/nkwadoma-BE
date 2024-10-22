@@ -20,6 +20,7 @@ import java.util.List;
 @ToString
 public class LoanProduct {
     private String id;
+    private String actorId;
     private String name;
     private int moratorium;
     private ActivationStatus loanProductStatus;

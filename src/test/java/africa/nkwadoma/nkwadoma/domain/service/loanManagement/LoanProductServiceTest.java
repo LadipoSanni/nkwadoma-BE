@@ -69,6 +69,23 @@ class LoanProductServiceTest {
         }
     }
     @Test
+    void createLoanProductWithNonExistingActor() {
+
+    }
+    @Test
+    void createLoanProductWithDisabledUser(){
+
+    }
+    @Test
+    void viewAllLoanProductWithNonExistingActor() {
+
+    }
+    @Test
+    void viewAllLoanProductWithDisabledUser(){
+
+    }
+
+    @Test
     void createLoanProductWithNullLoanProduct(){
         assertThrows(MeedlException.class, () -> loanService.createLoanProduct(null));
     }
@@ -112,25 +129,16 @@ class LoanProductServiceTest {
     void viewAllPrograms() {
         int pageNumber = 2;
         int pageSize = 10;
-        try {
             when(loanService.viewAllLoanProduct( pageSize, pageNumber)).
                     thenReturn(new PageImpl<>(List.of(loanProduct)));
-            Page<LoanProduct> loanProducts = loanService.viewAllLoanProduct(pageSize, pageNumber);
-            List<LoanProduct> loanProductList = loanProducts.toList();
+            Page<LoanProduct> loanProductPage = loanService.viewAllLoanProduct(pageSize, pageNumber);
+            List<LoanProduct> loanProductList = loanProductPage.toList();
 
-            assertNotNull(loanProducts);
+            assertNotNull(loanProductPage);
             assertNotNull(loanProductList);
-            assertEquals(loanProductList.get(0).getId(), program.getId());
-            assertEquals(loanProductList.get(0).getOrganizationId(), program.getOrganizationId());
-            assertEquals(loanProductList.get(0).getName(), program.getName());
-            assertEquals(loanProductList.get(0).getDuration(), program.getDuration());
-            assertEquals(loanProductList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-            assertEquals(loanProductList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
-            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountDisbursed());
-            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountOutstanding());
-            assertEquals(BigDecimal.ZERO, loanProductsList.get(0).getTotalAmountRepaid());
-        } catch (MeedlException e) {
-            log.error("Error viewing all programs", e);
-        }
+            assertEquals(loanProductList.get(0).getMandate(), loanProduct.getMandate());
+            assertEquals(loanProductList.get(0).getName(), loanProduct.getName());
+            assertEquals(loanProductList.get(0).getTermsAndCondition(), loanProduct.getTermsAndCondition());
+
     }
 }
