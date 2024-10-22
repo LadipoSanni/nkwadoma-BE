@@ -1,5 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.enums.loanEnums;
 
-public enum TenorStatus {
+public enum DurationType {
     Months, Years
 }

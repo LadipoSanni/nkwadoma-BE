@@ -1,14 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -134,10 +134,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
         UserResource userResource = getUserResource(userIdentity);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(password);
-        credential.setTemporary(Boolean.FALSE);
+        CredentialRepresentation credential = createCredentialRepresentation(password);
         userResource.resetPassword(credential);
 
         userRepresentation.setEnabled(Boolean.TRUE);
@@ -149,27 +146,42 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity) throws IdentityException {
+    public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
-        } catch (NotAuthorizedException exception) {
-            throw new IdentityException(exception.getMessage());
+        } catch (NotAuthorizedException | BadRequestException exception ) {
+            throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setTemporary(false);
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(userIdentity.getNewPassword());
+        if (userIdentity == null) {
+            throw new MeedlException("User identity is null");
+        }
+        UserIdentityValidator.validatePassword(userIdentity.getNewPassword());
+        CredentialRepresentation credential = createCredentialRepresentation(userIdentity.getNewPassword());
+        updateUserCredentialOnKeyCloak(userIdentity, credential);
+    }
+
+    private void updateUserCredentialOnKeyCloak(UserIdentity userIdentity, CredentialRepresentation credential) throws IdentityException {
         List<UserRepresentation> userRepresentations = getUserRepresentations(userIdentity);
         for (UserRepresentation userRepresentation : userRepresentations){
         userRepresentation.setCredentials(List.of(credential));
         UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());
         userResource.update(userRepresentation);}
+    }
+
+    private static CredentialRepresentation createCredentialRepresentation(String password) throws MeedlException {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setTemporary(Boolean.FALSE);
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+        return credential;
     }
 
     @Override
@@ -227,14 +239,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
 
     private Keycloak getKeycloak(UserIdentity userIdentity) {
-        log.info("User credentials: {}", userIdentity.toString());
+        String email = userIdentity.getEmail().trim();
+        String password = userIdentity.getPassword().trim();
+
         return KeycloakBuilder.builder()
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(KEYCLOAK_REALM)
                 .clientId(CLIENT_ID)
                 .clientSecret(CLIENT_SECRET)
-                .username(userIdentity.getEmail())
-                .password(userIdentity.getPassword())
+                .username(email)
+                .password(password)
                 .serverUrl(SERVER_URL)
                 .build();
     }
