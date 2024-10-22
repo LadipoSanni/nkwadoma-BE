@@ -9,6 +9,7 @@ import lombok.*;
 import java.math.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,6 +36,7 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private List<Cohort> cohorts;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;

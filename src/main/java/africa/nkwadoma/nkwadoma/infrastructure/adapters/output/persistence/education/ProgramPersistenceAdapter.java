@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -60,6 +61,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
 
+
         return programMapper.toProgram(programEntity);
     }
 
@@ -91,4 +93,5 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
+
 }
