@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanProductRestMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +21,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
-import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.INVALID_ID;
-import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.RESPONSE_IS_SUCCESSFUL;
 
 @RestController()
 @RequestMapping(BASE_URL + LOAN)
