@@ -21,7 +21,6 @@ public class ProgramCreateRequest {
     private String programName;
     private String objectives;
     @NotBlank(message = "Organization ID is required")
-    @Positive(message = "Organization ID must be a positive number")
     private String instituteId;
     private String creatorId;
     private LocalDateTime createdAt;
