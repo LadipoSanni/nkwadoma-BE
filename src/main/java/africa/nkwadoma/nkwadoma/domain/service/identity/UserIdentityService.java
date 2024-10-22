@@ -133,11 +133,6 @@ public class UserIdentityService implements CreateUserUseCase {
         return userIdentity;
     }
 
-    @Override
-    public UserIdentity forgotPassword(String email) throws MeedlException {
-       validateEmail(email);
-      return userIdentityOutputPort.findByEmail(email);
-    }
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
