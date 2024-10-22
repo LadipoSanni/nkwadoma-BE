@@ -63,7 +63,6 @@ class UserIdentityServiceTest {
         employeeIdentity.setMiddlUser(favour);
 
     }
-
     @Test
     void inviteColleague() {
         try {
