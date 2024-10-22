@@ -7,9 +7,13 @@ SMTP_PASSWORD=$4
 EMAILS=$5
 SUCCESSFUL_COMMITS=$6
 SUCCESSFUL_PRS=$7
-TIMESTAMP=$8
+FAILED_PRS=$8
+TIMESTAMP=$9
+COMMIT_AUTHOR=${10}
+COMMIT_MESSAGE=${11}
 
-# HTML Template for Activity Summary Email
+CURRENT_TIME=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+
 read -r -d '' HTML_BODY <<EOF
 <!DOCTYPE html>
 <html>
@@ -18,15 +22,17 @@ read -r -d '' HTML_BODY <<EOF
 </head>
 <body>
   <h1>Activity Summary</h1>
-  <p><strong>Commits:</strong> ${SUCCESSFUL_COMMITS}</p>
-  <p><strong>Pull Requests Merged:</strong> ${SUCCESSFUL_PRS}</p>
-  <p>Last checked at: ${TIMESTAMP}</p>
-  <p>Thank you for your contributions!</p>
+  <p><strong>Commits Verified:</strong> ${SUCCESSFUL_COMMITS}</p>
+  <p><strong>Merged Pull Requests:</strong> ${SUCCESSFUL_PRS}</p>
+  <p><strong>Failed PR Builds:</strong> ${FAILED_PRS}</p>
+  <p><strong>Last Commit Author:</strong> ${COMMIT_AUTHOR}</p>
+  <p><strong>Last Commit Message:</strong> ${COMMIT_MESSAGE}</p>
+  <p>Checked at: ${CURRENT_TIME}</p>
+  <p>Keep up the great work!</p>
 </body>
 </html>
 EOF
 
-# Prepare MIME-formatted email
 read -r -d '' MIME_EMAIL <<EOF
 From: "Build Tracker" <${SMTP_USERNAME}>
 To: ${EMAILS}
@@ -36,12 +42,11 @@ Content-Type: text/html; charset=UTF-8
 ${HTML_BODY}
 EOF
 
-# Loop through email list and send each email
-IFS=',' read -r -a email_array <<< "$EMAILS"
+IFS=',' read -r -a email_array <<< "${EMAILS}"
 for email in "${email_array[@]}"; do
   echo "$MIME_EMAIL" | curl --verbose --ssl-reqd \
     --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
-    --mail-from "$SMTP_USERNAME" \
+    --mail-from "${SMTP_USERNAME}" \
     --mail-rcpt "$email" \
     --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
     --upload-file -

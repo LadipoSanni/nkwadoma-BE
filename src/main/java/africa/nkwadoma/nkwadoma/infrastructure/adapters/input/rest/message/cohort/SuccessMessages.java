@@ -1,0 +1,5 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort;
+
+public class SuccessMessages {
+    public static final String COHORT_CREATED  = "Cohort Created";
+ }

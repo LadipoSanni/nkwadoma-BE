@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -36,9 +37,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
         validateDataElement(programName);
+        programName = programName.trim();
         ProgramEntity programEntity = programRepository.findByName(programName).
                 orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-
         return programMapper.toProgram(programEntity);
     }
 
@@ -48,9 +49,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        if (organizationIdentity.getServiceOffering() != null &&
-                organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION
-        ) {
+        if (organizationIdentity.getServiceOffering() != null
+                && organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION) {
             throw new EducationException(ProgramMessages.WRONG_INDUSTRY.getMessage());
         }
 
@@ -60,6 +60,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
+
 
         return programMapper.toProgram(programEntity);
     }
@@ -92,4 +93,5 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
+
 }

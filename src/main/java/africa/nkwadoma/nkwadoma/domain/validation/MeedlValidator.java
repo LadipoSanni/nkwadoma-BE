@@ -12,6 +12,8 @@ import org.hibernate.validator.internal.constraintvalidators.hv.*;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
+
 @Slf4j
 public class MeedlValidator {
 
@@ -21,8 +23,13 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateUUID(String UUID) throws MeedlException {
-        //TODO
+    public static void validateUUID(String dataElement) throws MeedlException {
+        validateDataElement(dataElement);
+        try {
+            UUID.fromString(dataElement);
+        } catch (IllegalArgumentException e) {
+            throw new MeedlException(UUID_NOT_VALID.getMessage());
+        }
     }
     public static void validateDataElement(String dataElement) throws MeedlException {
         if (StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement)) {

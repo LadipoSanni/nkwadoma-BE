@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -20,21 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Months;
 import static africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType.Years;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class LoanProductServiceTest {
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
 
@@ -68,22 +72,7 @@ class LoanProductServiceTest {
             log.error(exception.getMessage());
         }
     }
-    @Test
-    void createLoanProductWithNonExistingActor() {
 
-    }
-    @Test
-    void createLoanProductWithDisabledUser(){
-
-    }
-    @Test
-    void viewAllLoanProductWithNonExistingActor() {
-
-    }
-    @Test
-    void viewAllLoanProductWithDisabledUser(){
-
-    }
 
     @Test
     void createLoanProductWithNullLoanProduct(){
@@ -129,6 +118,8 @@ class LoanProductServiceTest {
     void viewAllPrograms() {
         int pageNumber = 2;
         int pageSize = 10;
+
+        Page<LoanProduct> expectedPage = new PageImpl<>(Collections.singletonList(loanProduct), PageRequest.of(pageNumber, pageSize), 1);
             when(loanService.viewAllLoanProduct( pageSize, pageNumber)).
                     thenReturn(new PageImpl<>(List.of(loanProduct)));
             Page<LoanProduct> loanProductPage = loanService.viewAllLoanProduct(pageSize, pageNumber);

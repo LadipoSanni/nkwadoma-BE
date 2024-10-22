@@ -2,10 +2,12 @@ name: Commit and PR Status Tracker
 
 on:
   schedule:
-    - cron: "0 10 * * *"
-    - cron: "0 17 * * *"
+    - cron: "0 9 * * *"
+    - cron: "0 11 * * *"
+    - cron: "0 13 * * *"
     - cron: "0 14 * * *"
-    - cron: "0 23 * * *"
+    - cron: "0 17 * * *"
+    
 
 jobs:
   commit-pr-tracker:
@@ -18,39 +20,39 @@ jobs:
       - name: Set Environment Variables
         id: vars
         run: |
-          TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          TIMESTAMP=$(date --utc --date='4 hours ago' +%Y-%m-%dT%H:%M:%SZ)
           PROJECT_NAME="Nkwadoma Backend"
           DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
           TASK_BRANCH=${{ github.head_ref || github.ref_name }}
           TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${TASK_BRANCH}"
-          
-          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
 
           echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "JAR_NAME=myapp-${TAG}.jar" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
-          echo "COMMIT_MESSAGE=${COMMIT_MESSAGE}" >> $GITHUB_ENV
           echo "SMTP_SERVER=semicolon.africa" >> $GITHUB_ENV
           echo "SMTP_PORT=465" >> $GITHUB_ENV
           echo "SMTP_USERNAME=builds@semicolon.africa" >> $GITHUB_ENV
-          echo "EMAILS=ladipo@semicolon.africa,joshua.o@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa" >> $GITHUB_ENV
+          echo "EMAILS=ladipo@semicolon.africa,joshua.o@semicolon.africa" >> $GITHUB_ENV
 
-          SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
-            --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
-            --since "$TIMESTAMP" | wc -l)
-
+      - name: Get Recent PR and Build Activity
+        id: activity
+        run: |
+          # Fetch merged PRs in the last 4 hours
           SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
-            --paginate -q '.[] | select(.merged_at != null) | .user.login' \
-            --state merged --since "$TIMESTAMP" | wc -l)
+            --paginate -q '.[] | select(.merged_at > "'$TIMESTAMP'") | .number' | wc -l)
 
-          echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
+          # Fetch successful builds in the last 4 hours using Actions API
+          SUCCESSFUL_BUILDS=$(gh api repos/${{ github.repository }}/actions/runs \
+            --paginate -q '.workflow_runs[] | select(.conclusion == "success" and .created_at > "'$TIMESTAMP'") | .id' | wc -l)
+
+          # Fetch failed builds in the last 4 hours
+          FAILED_BUILDS=$(gh api repos/${{ github.repository }}/actions/runs \
+            --paginate -q '.workflow_runs[] | select(.conclusion == "failure" and .created_at > "'$TIMESTAMP'") | .id' | wc -l)
+
           echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
+          echo "SUCCESSFUL_BUILDS=${SUCCESSFUL_BUILDS}" >> $GITHUB_ENV
+          echo "FAILED_BUILDS=${FAILED_BUILDS}" >> $GITHUB_ENV
 
       - name: Send Inactivity Email
-        if: ${{ env.SUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' }}
+        if: ${{ env.SUCCESSFUL_PRS == '0' && env.SUCCESSFUL_BUILDS == '0' && env.FAILED_BUILDS == '0' }}
         env:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
@@ -61,7 +63,7 @@ jobs:
             "${{ env.EMAILS }}" "${{ env.TIMESTAMP }}"
 
       - name: Send Activity Summary Email
-        if: ${{ env.SUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' }}
+        if: ${{ env.SUCCESSFUL_PRS != '0' || env.SUCCESSFUL_BUILDS != '0' || env.FAILED_BUILDS != '0' }}
         env:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
@@ -69,6 +71,5 @@ jobs:
           .github/workflows/scripts/activity_email.sh \
             "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" \
             "${{ env.SMTP_USERNAME }}" "${{ env.SMTP_PASSWORD }}" \
-            "${{ env.EMAILS }}" "${{ env.SUCCESSFUL_COMMITS }}" \
-            "${{ env.SUCCESSFUL_PRS }}" "${{ env.TIMESTAMP }}" \
-            "${{ env.COMMIT_AUTHOR }}" "${{ env.COMMIT_MESSAGE }}"
+            "${{ env.EMAILS }}" "${{ env.SUCCESSFUL_PRS }}" \
+            "${{ env.SUCCESSFUL_BUILDS }}" "${{ env.FAILED_BUILDS }}" "${{ env.TIMESTAMP }}"
