@@ -75,13 +75,16 @@ public class UserIdentityService implements CreateUserUseCase {
         else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
-
-
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
         UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
+    }
+
+    @Override
+    public void logout(UserIdentity userIdentity) throws MeedlException {
+        identityManagerOutPutPort.logout(userIdentity);
     }
 
     @Override

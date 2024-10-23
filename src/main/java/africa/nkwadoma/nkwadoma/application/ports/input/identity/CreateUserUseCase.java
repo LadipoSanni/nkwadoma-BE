@@ -8,6 +8,7 @@ public interface CreateUserUseCase {
     UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException;
     UserIdentity createPassword(String token,String password) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
+    void logout(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     void resetPassword(String email, String password) throws MeedlException;
     UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException;
