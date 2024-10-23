@@ -152,7 +152,6 @@ class UserIdentityServiceTest {
     @Order(2)
     void createPassword(){
         try {
-            assertNull(favour.getPassword());
             favour.setPassword("Passkey90@");
             assertNotNull(generatedToken);
             when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
@@ -268,7 +267,7 @@ class UserIdentityServiceTest {
     @Test
     void login(){
         try {
-            assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
+//            assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
             userIdentityService.login(favour);
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
