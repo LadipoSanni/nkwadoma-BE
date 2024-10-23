@@ -114,9 +114,10 @@ public class BeanConfiguration {
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
-            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper
+            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper,
+            UserIdentityOutputPort userIdentityOutputPort
     ){
-        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper);
+        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper,userIdentityOutputPort);
     }
 
     @Bean

@@ -14,7 +14,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;

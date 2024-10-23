@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -51,8 +50,8 @@ public class CohortPersistenceAdapterTest {
     private  OrganizationEmployeeIdentity employeeIdentity;
     private  OrganizationIdentity organizationIdentity;
     private   Program program;
-    private String cohortOne;
-    private String cohortTwo;
+    private String cohortOneId;
+    private String cohortTwoId;
 
 
 
@@ -136,40 +135,112 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
 
+
+    @Order(1)
     @Test
     void saveCohort() {
         try {
-            Cohort cohort = cohortOutputPort.saveCohort(xplorers);
-            assertEquals(cohort.getName(), xplorers.getName());
-            cohortOne = cohort.getId();
+            Cohort cohort = cohortOutputPort.saveCohort(elites);
+            assertEquals(cohort.getName(), elites.getName());
+            cohortOneId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
+    @Order(2)
     @Test
     void saveCohortWithExistingCohortName() {
         assertThrows(MeedlException.class,() ->cohortOutputPort.saveCohort(cohort));
     }
 
 
+    @Order(3)
     @Test
     void saveAnotherCohortInProgram() {
         try {
-            Cohort cohort = cohortOutputPort.saveCohort(elites);
-            assertEquals(cohort.getName(), elites.getName());
-            assertEquals(ActivationStatus.ACTIVE.name(),cohort.getCohortStatus().name());
-            cohortTwo = cohort.getId();
+            Cohort cohort = cohortOutputPort.saveCohort(xplorers);
+            assertEquals(cohort.getName(), xplorers.getName());
+            assertEquals(ActivationStatus.ACTIVE.name(),cohort.getActivationStatus().name());
+            assertEquals(CohortStatus.CURRENT.name(),cohort.getCohortStatus().name());
+            cohortTwoId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOne);
-        cohortRepository.deleteById(cohortTwo);
+
+    @Order(4)
+    @Test
+    void viewCohortDetails(){
+        try{
+            Cohort cohort = cohortOutputPort.viewCohortDetails(xplorers.getCreatedBy(),program.getId(), cohortTwoId);
+            assertEquals(cohort.getName(),xplorers.getName());
+            assertEquals(cohort.getCreatedBy(),xplorers.getCreatedBy());
+        }catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
     }
+
+    @Order(5)
+
+    @Test
+    void viewCohortWithNullUserId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(null,
+                program.getId(),
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullProgramId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                null,
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullCohortId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                program.getId(),
+                null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyUserId(String userId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(userId,
+                        program.getId(),
+                        cohortTwoId));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyProgramId(String programId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                        programId,
+                        cohortTwoId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyCohortId(String cohortId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                        program.getId(),
+                        cohortId));
+    }
+
+
+//    @AfterAll
+//    void cleanUp() throws MeedlException {
+//        programOutputPort.deleteProgram(program.getId());
+//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+//        cohortRepository.deleteById(cohortOneId);
+//        cohortRepository.deleteById(cohortTwoId);
+//    }
 }

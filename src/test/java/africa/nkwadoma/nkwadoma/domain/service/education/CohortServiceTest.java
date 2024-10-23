@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -15,7 +14,10 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -38,8 +40,8 @@ public class CohortServiceTest {
     private Cohort elites;
     private Cohort xplorers;
     private Cohort cohort;
-    private String cohortOne;
-    private String cohortTwo;
+    private String cohortOneId;
+    private String cohortTwoId;
 
     @Autowired
     private ProgramOutputPort programOutputPort;
@@ -102,32 +104,101 @@ public class CohortServiceTest {
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
     }
 
+    @Order(1)
     @Test
     void saveCohort() {
         try {
-            Cohort cohort = cohortUseCase.createCohort(xplorers);
-            assertEquals(cohort.getName(), xplorers.getName());
-            cohortOne = cohort.getId();
+            Cohort cohort = cohortUseCase.createCohort(elites);
+            assertEquals(cohort.getName(), elites.getName());
+            cohortOneId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
+    @Order(2)
     @Test
     void saveCohortWithExistingCohortName() {
         assertThrows(MeedlException.class,() ->cohortUseCase.createCohort(cohort));
     }
 
 
+    @Order(3)
     @Test
     void saveAnotherCohortInProgram() {
         try {
-            Cohort cohort = cohortUseCase.createCohort(elites);
-            assertEquals(cohort.getName(), elites.getName());
-            cohortTwo = cohort.getId();
+            Cohort cohort = cohortUseCase.createCohort(xplorers);
+            assertEquals(cohort.getName(), xplorers.getName());
+            assertEquals(ActivationStatus.ACTIVE.name(),cohort.getActivationStatus().name());
+            assertEquals(CohortStatus.CURRENT.name(),cohort.getCohortStatus().name());
+            cohortTwoId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+    }
+
+    @Order(4)
+    @Test
+    void viewCohortDetails(){
+        try{
+            Cohort cohort = cohortUseCase.viewCohortDetails(xplorers.getCreatedBy(),program.getId(), cohortTwoId);
+            assertEquals(cohort.getName(),xplorers.getName());
+            assertEquals(cohort.getCreatedBy(),xplorers.getCreatedBy());
+        }catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+
+    @Test
+    void viewCohortWithNullUserId(){
+        assertThrows(MeedlException.class, () -> cohortUseCase.viewCohortDetails(null,
+                program.getId(),
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullProgramId(){
+        assertThrows(MeedlException.class, () -> cohortUseCase.viewCohortDetails(elites.getCreatedBy(),
+                null,
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullCohortId(){
+        assertThrows(MeedlException.class, () -> cohortUseCase.viewCohortDetails(elites.getCreatedBy(),
+                program.getId(),
+                null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyUserId(String userId){
+        assertThrows(MeedlException.class, ()->
+                cohortUseCase.viewCohortDetails(userId,
+                        program.getId(),
+                        cohortTwoId));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyProgramId(String programId){
+        assertThrows(MeedlException.class, ()->
+                cohortUseCase.viewCohortDetails(elites.getCreatedBy(),
+                        programId,
+                        cohortTwoId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyCohortId(String cohortId){
+        assertThrows(MeedlException.class, ()->
+                cohortUseCase.viewCohortDetails(elites.getCreatedBy(),
+                        program.getId(),
+                        cohortId));
     }
 
 
@@ -135,8 +206,8 @@ public class CohortServiceTest {
     void cleanUp() throws MeedlException {
         programOutputPort.deleteProgram(program.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOne);
-        cohortRepository.deleteById(cohortTwo);
+        cohortRepository.deleteById(cohortOneId);
+        cohortRepository.deleteById(cohortTwoId);
     }
 
 }
