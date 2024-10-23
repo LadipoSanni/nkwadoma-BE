@@ -1,11 +1,12 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.*;
-import java.util.*;
+
 @Getter
 @Setter
 @ToString
@@ -17,12 +18,11 @@ public class ServiceOfferingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String serviceOfferingId;
+    private String name;
     @Enumerated(EnumType.STRING)
     private Industry industry;
-    @Enumerated(EnumType.STRING)
-    private ServiceOfferingType serviceOfferingType;
+//    @Enumerated(EnumType.STRING)
+//    private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound = BigDecimal.ZERO;
     private BigDecimal transactionUpperBound = BigDecimal.ZERO;
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> serviceOfferings = new ArrayList<>();
 }

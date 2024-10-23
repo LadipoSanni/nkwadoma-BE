@@ -1,19 +1,29 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
 
 
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import org.mapstruct.*;
+
+import java.util.*;
 
 @Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class)
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
-    @Mapping(source = "serviceOffering", target = "serviceOfferingEntity")
     @Mapping(source = "numberOfPrograms", target = "numberOfPrograms", defaultValue = "0")
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration
-    @Mapping(source = "serviceOfferingEntity", target = "serviceOffering")
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
+
+//    @Mapping(source = "serviceOfferingId", target = "id")
+//    ServiceOffering toServiceOffering(ServiceOfferingEntity serviceOfferingEntity);
+
+    List<ServiceOfferingEntity> toServiceOfferingEntity(List<ServiceOffering> serviceOfferings);
+
+    @Mapping(source = "serviceOfferingEntity", target = ".")
+    ServiceOffering toServiceOfferingModel(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
+    List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 }
