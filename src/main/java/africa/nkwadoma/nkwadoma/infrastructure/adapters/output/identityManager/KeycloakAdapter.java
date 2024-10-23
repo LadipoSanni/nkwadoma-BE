@@ -309,7 +309,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(userIdentity.getEmail(),exactMatch)
+                .search(userIdentity.getEmail(), exactMatch)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
