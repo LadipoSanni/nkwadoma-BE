@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +44,10 @@ class OrganizationIdentityAdapterTest {
         joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
         joel.setCreatedBy("Ayo");
 
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+        organizationEmployeeIdentity.setMiddlUser(joel);
+
+        List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
         amazingGrace = new OrganizationIdentity();
         amazingGrace.setName("Amazing Grace Enterprises");
         amazingGrace.setEmail("rachel@gmail.com");
@@ -53,35 +59,41 @@ class OrganizationIdentityAdapterTest {
         amazingGrace.setServiceOffering(new ServiceOffering());
         amazingGrace.getServiceOffering().setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
+        amazingGrace.setOrganizationEmployees(userIdentities);
         }
 
     @Test
-    void saveOrganization(){
-            try{
-                assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
-                OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
-                assertNotNull(savedOrganization);
-                OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
-                assertEquals(foundOrganization.getName(),savedOrganization.getName());
-                assertEquals(foundOrganization.getServiceOffering().getIndustry(),savedOrganization.getServiceOffering().getIndustry());
-             }catch (MeedlException exception){
-                log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-            }
+    void saveOrganization() {
+        OrganizationIdentity foundOrganization = null;
+        OrganizationIdentity savedOrganization = null;
+        try {
+            assertThrows(ResourceNotFoundException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
+            savedOrganization = organizationOutputPort.save(amazingGrace);
+            assertNotNull(savedOrganization);
+            foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(foundOrganization);
+        assertNotNull(foundOrganization.getServiceOffering());
+        assertEquals(foundOrganization.getServiceOffering().getIndustry(), savedOrganization.getServiceOffering().getIndustry());
+        assertEquals(foundOrganization.getName(), savedOrganization.getName());
 
-       }
-
+    }
 
    @Test
-    void saveOrganizationWithExistingRcNumber(){
-        try{
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
-            assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
-            assertEquals(amazingGrace.getId(),savedOrganization.getId());
-        }catch (MeedlException exception){
-            log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
-        }
-    }
+    void saveOrganizationWithExistingRcNumber() {
+       OrganizationIdentity savedOrganization = null;
+       try {
+           OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
+           assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
+           savedOrganization = organizationOutputPort.save(amazingGrace);
+       } catch (MeedlException exception) {
+           log.info("{} {}->", exception.getClass().getName(), exception.getMessage());
+       }
+       assertNotNull(savedOrganization);
+       assertEquals(amazingGrace.getId(), savedOrganization.getId());
+   }
 
     @Test
     void saveOrganizationWithNullOrganizationIdentity(){

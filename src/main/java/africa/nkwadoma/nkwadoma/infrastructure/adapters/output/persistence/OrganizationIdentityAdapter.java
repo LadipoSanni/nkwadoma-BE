@@ -28,6 +28,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("Organization identity before saving {}", organizationIdentity);
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
@@ -36,7 +37,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         serviceOfferEntityRepository.save(serviceOfferingEntity);
         log.info("Service offering entity saved successfully {}", serviceOfferingEntity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
-        log.info("Organization entity saved successfully");
+        log.info("Organization entity saved successfully {}", organizationEntity);
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 

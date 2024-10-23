@@ -24,7 +24,6 @@ public enum IdentityMessages{
     WEAK_PASSWORD("Password should be up to 8 characters and must contain at least 1 alphabet, number and special characters."),
     INVALID_CREDENTIALS("invalid credentials"),
     ERROR_FETCHING_USER_INFORMATION("Error fetching user information"),
-    PASSWORD_HISTORY_EMPTY("password history is empty"),
     PASSWORD_NOT_ACCEPTED("password not accepted"),
     ACCOUNT_ALREADY_ENABLED("Account has been enabled"),
     ACCOUNT_ALREADY_DISABLED("Account is not currently enabled"),
