@@ -103,16 +103,6 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.save(null));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"non-existing loan product" })
-    void existsByNameWithNonExistingName(String name) {
-        gemsLoanProduct.setName(name);
-        try {
-            assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
-        } catch (MeedlException exception) {
-           log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
-        }
-    }
     @Test
     void createLoanProductWithNoTermsAndConditions(){
         gemsLoanProduct.setTermsAndCondition(null);
@@ -126,6 +116,16 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
         gemsLoanProduct.setName(null);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"non-existing loan product"})
+    void existsByNameWithNonExistingName(String name) {
+        gemsLoanProduct.setName(name);
+        try {
+            assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+        } catch (MeedlException exception) {
+            log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
+        }
     }
     @Test
     @Order(3)

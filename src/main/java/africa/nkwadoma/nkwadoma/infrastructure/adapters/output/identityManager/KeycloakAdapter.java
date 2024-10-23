@@ -345,10 +345,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return roleRepresentation;
     }
+
+    @Override
+    public void logout(UserIdentity userIdentity) throws MeedlException {
+        UserResource userResource = getUserResource(userIdentity);
+        userResource.logout();
+    }
+
     private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
-        log.info("Validating userIdentity {}",userIdentity);
-        if (userIdentity == null)
-            throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
+        log.info("Validating userIdentity object {}",userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
     }
     private void validateUserIdentityDetails(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);

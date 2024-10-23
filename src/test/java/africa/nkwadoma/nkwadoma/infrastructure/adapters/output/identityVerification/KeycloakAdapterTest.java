@@ -15,6 +15,7 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -73,7 +74,7 @@ class KeycloakAdapterTest {
     }
     @Test
     void createUserWithNullUserIdentity(){
-        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(null));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createUser(null));
     }
     @Test
     void createUserWithExistingEmail(){
@@ -235,6 +236,11 @@ class KeycloakAdapterTest {
         Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
         log.info(exception.getMessage());
     }
+
+    @Test
+    void logoutWithNull(){
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.logout(null));
+    }
     @Test
     void verifyUserExists() {
         UserIdentity userIdentity = null;
@@ -258,7 +264,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void changePasswordWithValidPassword() {
         String newPassword = "neWpasswordJ@345";
         AccessTokenResponse accessTokenResponse = null;
@@ -306,7 +312,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -339,7 +345,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(6)
+    @Order(7)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -353,12 +359,11 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(7)
+    @Order(8)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
     }
-
     @Test
     void getUserRepresentation()  {
         try {
