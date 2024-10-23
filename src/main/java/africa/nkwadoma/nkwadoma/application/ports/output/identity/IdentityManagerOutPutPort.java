@@ -33,5 +33,5 @@ public interface IdentityManagerOutPutPort {
     UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
-    UserIdentity resetPassword(UserIdentity userIdentity) throws MeedlException;
+    UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException;
 }

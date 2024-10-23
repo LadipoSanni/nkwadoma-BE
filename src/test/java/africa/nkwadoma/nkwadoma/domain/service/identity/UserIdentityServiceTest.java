@@ -344,7 +344,7 @@ class UserIdentityServiceTest {
             AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
             accessTokenResponse.setToken("token");
         when(identityManagerOutPutPort.login(favour)).thenReturn(accessTokenResponse);
-        when(identityManagerOutPutPort.resetPassword(any())).thenReturn(favour);
+        when(identityManagerOutPutPort.verifyUserExists(any())).thenReturn(favour);
 
         when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenAnswer(invocation->{
             favour.setEmailVerified(true);
@@ -357,28 +357,17 @@ class UserIdentityServiceTest {
             assertNotNull(loginResponse);
             favour.setPassword("pAssworDR3S@t");
 
-            userIdentityService.resetPassword(favour.getEmail());
-            when(tokenUtils.decodeJWT(accessTokenResponse.getToken())).thenReturn(favour.getEmail());
-            userIdentityService.createPassword(accessTokenResponse.getToken(),favour.getPassword());
+            userIdentityService.forgotPassword(favour.getEmail());
+//            when(tokenUtils.decodeJWT(accessTokenResponse.getToken())).thenReturn(favour.getEmail());
 
         } catch (MeedlException meedlException) {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
-
-    @Test
-    void resetPasswordWithInvalidEmail() {
-        try {
-            favour.setPassword(newPassword);
-            userIdentityService.login(favour);
-
-            favour.setPassword("Reset@123");
-            favour.setEmail("Invalid@gmail.com");
-            assertThrows(MeedlException.class,()-> userIdentityService.resetPassword(favour.getEmail()));
-
-        } catch (MeedlException meedlException) {
-            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
-        }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
+    void forgotPasswordWithInvalidEmail(String email) {
+        assertThrows(MeedlException.class, ()-> userIdentityService.forgotPassword(email));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})

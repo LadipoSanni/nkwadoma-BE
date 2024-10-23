@@ -16,9 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -101,13 +99,14 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String email){
+    public void forgotPassword(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-            identityManagerOutPutPort.resetPassword(foundUser);
+            identityManagerOutPutPort.verifyUserExists(foundUser);
             sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
 
     }

@@ -157,11 +157,11 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
     }
     @Override
-    public UserIdentity resetPassword(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
+    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, true);
+        MeedlValidator.validateUUID(userRepresentation.getId());
         userIdentity.setId(userRepresentation.getId());
-
         return userIdentity;
     }
 
