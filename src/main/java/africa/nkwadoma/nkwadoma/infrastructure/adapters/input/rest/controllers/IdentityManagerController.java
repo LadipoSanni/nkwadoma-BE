@@ -42,7 +42,7 @@ public class IdentityManagerController {
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
         createUserUseCase.logout(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
-                body(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
+                message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
