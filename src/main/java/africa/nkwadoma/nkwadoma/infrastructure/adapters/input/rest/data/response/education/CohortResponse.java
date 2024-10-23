@@ -1,34 +1,28 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CohortEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+@NoArgsConstructor
+public class CohortResponse {
+
     private String id;
-    private String name;
     private String programId;
     private String cohortDescription;
+    private String name;
     private ActivationStatus cohortStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
-    private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
 
