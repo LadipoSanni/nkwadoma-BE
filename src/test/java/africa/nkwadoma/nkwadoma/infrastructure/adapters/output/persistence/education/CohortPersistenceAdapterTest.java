@@ -21,6 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,6 +44,8 @@ public class CohortPersistenceAdapterTest {
     @Autowired
     private CohortRepository cohortRepository;
 
+    private int pageSize = 2;
+    private int pageNumber = 0;
 
     @Autowired
     private ProgramOutputPort programOutputPort;
@@ -164,6 +167,18 @@ public class CohortPersistenceAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
+
+    @Test
+    void viewAllCohortInAProgram(){
+        try{
+            Page<Cohort> allCohortInAProgram = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
+            List<Cohort> cohorts = allCohortInAProgram.toList();
+            assertEquals(2,cohorts.size());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
 
     @AfterAll
     void cleanUp() throws MeedlException {

@@ -9,14 +9,21 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.COHORT_EXIST;
@@ -46,6 +53,19 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         Optional<Cohort> retrievedCohort = retrieveCohortFromProgram(cohort, savedProgram);
         CohortEntity cohortEntity = cohortMapper.toCohortEntity(retrievedCohort.get());
         return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public Page<Cohort> findAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
+        Program program = programOutputPort.findProgramById(id);
+        List<Cohort> cohort = program.getCohorts();
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), cohort.size());
+        if (start >= cohort.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageRequest, cohort.size());
+        }
+        return new PageImpl<>(cohort.subList(start, end), pageRequest, cohort.size());
     }
 
     private void updateOrAddCohortToProgram(Cohort cohort, Optional<Cohort> existingCohort, Program program) throws CohortExistException {

@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
@@ -15,5 +16,10 @@ public class CohortService implements CohortUseCase {
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
         return cohortOutputPort.saveCohort(cohort);
+    }
+
+    @Override
+    public Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
+        return cohortOutputPort.findAllCohortInAProgram(id,pageSize,pageNumber);
     }
 }
