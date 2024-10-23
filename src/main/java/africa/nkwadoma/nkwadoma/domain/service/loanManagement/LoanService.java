@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.ViewLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -29,10 +29,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
+        MeedlValidator.validateDataElement(loanProduct.getId());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
     @Override
-    public Page<LoanProduct> viewAllLoanProduct(int pageSize, int pageNumber) {
-        return loanProductOutputPort.findAllLoanProduct(pageSize, pageNumber);
+    public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
+        return loanProductOutputPort.findAllLoanProduct(loanProduct);
+    }
+
+    @Override
+    public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
+        MeedlValidator.validateDataElement(loanProductId);
+        return loanProductOutputPort.findById(loanProductId);
     }
 }

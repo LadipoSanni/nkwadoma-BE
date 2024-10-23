@@ -31,6 +31,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
+        log.info("UserIdentity saved {}", userIdentity);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 

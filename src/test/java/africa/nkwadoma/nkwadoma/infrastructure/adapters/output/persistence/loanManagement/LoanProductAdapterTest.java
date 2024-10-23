@@ -27,12 +27,11 @@ class LoanProductAdapterTest {
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
     private LoanProduct gemsLoanProduct;
-    private int pageSize = 10;
-    private int pageNumber = 0;
-
     @BeforeEach
     void setUp() {
         gemsLoanProduct = new LoanProduct();
+        gemsLoanProduct.setPageSize(10);
+        gemsLoanProduct.setPageNumber(0);
         gemsLoanProduct.setName("Test Loan Product 2");
         gemsLoanProduct.setMandate("Test: A new mandate for test");
         gemsLoanProduct.setSponsors(List.of("Mark", "Jack"));
@@ -108,16 +107,6 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.save(null));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"non-existing loan product" })
-    void existsByNameWithNonExistingName(String name) {
-        gemsLoanProduct.setName(name);
-        try {
-            assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
-        } catch (MeedlException exception) {
-           log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
-        }
-    }
     @Test
     void createLoanProductWithNoTermsAndConditions(){
         gemsLoanProduct.setTermsAndCondition(null);
@@ -131,6 +120,16 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
         gemsLoanProduct.setName(null);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"non-existing loan product"})
+    void existsByNameWithNonExistingName(String name) {
+        gemsLoanProduct.setName(name);
+        try {
+            assertFalse(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
+        } catch (MeedlException exception) {
+            log.error("existsByNameFalse method failed to check if exist: {}",exception.getMessage());
+        }
     }
     @Test
     @Order(3)
@@ -190,7 +189,7 @@ class LoanProductAdapterTest {
     @Test
     @Order(6)
     void findAllLoanProduct() {
-            Page<LoanProduct> foundLoanProducts = loanProductOutputPort.findAllLoanProduct(pageSize, pageNumber);
+            Page<LoanProduct> foundLoanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
             List<LoanProduct> loanProductList = foundLoanProducts.toList();
 
             assertEquals(1, foundLoanProducts.getTotalElements());

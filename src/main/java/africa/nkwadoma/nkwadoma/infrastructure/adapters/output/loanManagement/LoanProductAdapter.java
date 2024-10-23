@@ -67,10 +67,10 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     }
 
     @Override
-    public Page<LoanProduct> findAllLoanProduct(int pageSize, int pageNumber) {
+    public Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct) {
         int defaultPageSize = BigInteger.TEN.intValue();
-        int size = pageSize <= BigInteger.ZERO.intValue() ? defaultPageSize : pageSize;
-        Pageable pageRequest = PageRequest.of(pageNumber, size);
+        int size = loanProduct.getPageSize() <= BigInteger.ZERO.intValue() ? defaultPageSize : loanProduct.getPageSize();
+        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size);
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }

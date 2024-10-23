@@ -16,5 +16,5 @@ public interface LoanProductOutputPort {
 
     LoanProduct findByName(String name) throws MeedlException;
 
-    Page<LoanProduct> findAllLoanProduct(int pageSize, int pageNumber);
+    Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct);
 }

@@ -48,6 +48,9 @@ public class LoanProduct {
     private String fundProductId;
     private int totalNumberOfLoanees;
 
+    private int pageSize;
+    private int pageNumber;
+
     public void validateLoanProductDetails() throws MeedlException {
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateDataElement(termsAndCondition);

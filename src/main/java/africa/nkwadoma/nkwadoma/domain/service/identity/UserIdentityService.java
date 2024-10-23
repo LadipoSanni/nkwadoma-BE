@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
@@ -108,10 +109,12 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
         validateDataElement(userIdentity.getId());
-        userIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
+        validateDataElement(userIdentity.getReactivationReason());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setReactivationReason(userIdentity.getReactivationReason());
+        userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
@@ -119,19 +122,17 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
-        validateDataElement(userIdentity.getEmail());
-        userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
+        validateDataElement(userIdentity.getId());
+        validateDataElement(userIdentity.getDeactivationReason());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
+        userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
 
-    @Override
-    public UserIdentity forgotPassword(String email) throws MeedlException {
-       validateEmail(email);
-      return userIdentityOutputPort.findByEmail(email);
-    }
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
