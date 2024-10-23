@@ -174,10 +174,9 @@ class KeycloakAdapterTest {
             assertNotNull(accessTokenResponse.getToken());
             assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException meedlException){
-            log.error("Error logging in user", meedlException);
+            log.error("Error logging in user {}", meedlException.getMessage());
         }
     }
-
     @Test
     void loginWithValidEmailAddressAndInvalidPassword() {
         john.setPassword("invalid-password");
@@ -301,11 +300,27 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    void enableAccountWithWrongEmail() {
-        john.setEmail("wrong@gmail.com");
+    void enableAccountWithNonExistingEmail() {
+        john.setEmail("nonexisting@gmail.com");
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ebuefh", " osisiogubjh@mailinator.com"})
+    void enableAccountWithInvalidEmail(String email) {
+        john.setEmail(email);
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        log.info(exception.getMessage());
+    }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void reactivateWithOutReason(String reactivateReason) {
+        john.setReactivationReason(reactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+    }
     @Test
     @Order(7)
     void disAbleAccount() {
@@ -401,6 +416,16 @@ class KeycloakAdapterTest {
         } catch (MeedlException e) {
             e.printStackTrace();
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deactivateWithInvalidReason(String deactivateReason) {
+        john.setReactivationReason(deactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
     }
     @Test
     void getUserResourceWithInvalidUserId() {
