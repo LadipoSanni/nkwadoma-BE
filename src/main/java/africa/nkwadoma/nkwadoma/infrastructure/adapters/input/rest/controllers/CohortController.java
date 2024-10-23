@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_CREATED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.VIEWED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_VIEWED;
 
 @Slf4j
 @RestController
@@ -66,7 +66,7 @@ public class CohortController {
                     cohortMapper.toCohortResponse(cohort);
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                     .body(cohortResponse)
-                    .message(VIEWED)
+                    .message(COHORT_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);

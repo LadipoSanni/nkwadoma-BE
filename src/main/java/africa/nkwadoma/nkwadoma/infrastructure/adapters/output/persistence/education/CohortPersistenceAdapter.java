@@ -95,9 +95,6 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
-        if (userId == null || programId == null || cohortId == null){
-            throw new CohortException(INPUT_CANNOT_BE_NULL.getMessage());
-        }
         validateDataElement(userId);
         validateDataElement(programId);
         validateDataElement(cohortId);
