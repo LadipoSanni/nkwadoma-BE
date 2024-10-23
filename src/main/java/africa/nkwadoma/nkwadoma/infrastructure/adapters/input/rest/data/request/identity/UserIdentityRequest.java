@@ -20,4 +20,6 @@ public class UserIdentityRequest {
     private String password;
     private String newPassword;
     private String organizationDomain;
+    private String reactivationReason;
+    private String deactivationReason;
 }
