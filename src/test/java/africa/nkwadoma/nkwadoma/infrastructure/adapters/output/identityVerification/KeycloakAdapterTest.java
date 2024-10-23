@@ -242,6 +242,28 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.logout(null));
     }
     @Test
+    void verifyUserExists() {
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = identityManagementOutputPort.verifyUserExists(john);
+        } catch (MeedlException e) {
+           log.info("Failed to reset password {}", e.getMessage());
+        }
+        assertNotNull(userIdentity);
+        assertNotNull(userIdentity.getId());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "dibfjhd"})
+    void verifyUserExistsInvalidEmail(String email) {
+        john.setEmail(email);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(john));
+    }
+    @Test
+    void verifyUserExistsInvalidEmail() {
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(null));
+    }
+
+    @Test
     @Order(5)
     void changePasswordWithValidPassword() {
         String newPassword = "neWpasswordJ@345";
@@ -295,6 +317,7 @@ class KeycloakAdapterTest {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
+    @Test
     void enableAccountWithNull() {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(null));
     }

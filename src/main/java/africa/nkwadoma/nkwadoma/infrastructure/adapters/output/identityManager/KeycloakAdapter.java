@@ -156,6 +156,14 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
+    @Override
+    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity);
+        UserRepresentation userRepresentation = getUserRepresentation(userIdentity, true);
+        MeedlValidator.validateUUID(userRepresentation.getId());
+        userIdentity.setId(userRepresentation.getId());
+        return userIdentity;
+    }
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
@@ -312,7 +320,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(userIdentity.getEmail(),exactMatch)
+                .search(userIdentity.getEmail(), exactMatch)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {

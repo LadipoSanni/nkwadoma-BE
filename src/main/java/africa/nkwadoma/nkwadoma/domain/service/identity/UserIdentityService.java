@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -15,9 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -34,6 +33,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final TokenUtils tokenUtils;
     private final PasswordEncoder passwordEncoder;
     private final SendColleagueEmailUseCase sendEmail;
@@ -102,12 +102,16 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String email, String password) throws MeedlException {
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        validatePassword(password);
-        identityManagerOutPutPort.createPassword(foundUser.getEmail(),password);
-        foundUser.setPassword(password);
-        userIdentityOutputPort.save(foundUser);
+    public void forgotPassword(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        try {
+            UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
+            identityManagerOutPutPort.verifyUserExists(foundUser);
+            sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
+        } catch (MeedlException e) {
+            log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
+        }
+
     }
 
     @Override
