@@ -32,7 +32,8 @@ public class UserIdentityValidator extends MeedlValidator {
      }
 
      public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
-         validateUserIdentityObject(userIdentity);
+         log.info("Started validating for user identity in validation class : {}", userIdentity);
+         MeedlValidator.validateObjectInstance(userIdentity);
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
 
@@ -41,13 +42,6 @@ public class UserIdentityValidator extends MeedlValidator {
          validateDataElement(userIdentity.getLastName());
          validateDataElement(userIdentity.getCreatedBy());
      }
-
-    public static void validateUserIdentityObject(UserIdentity userIdentity) throws IdentityException {
-        if (ObjectUtils.isEmpty(userIdentity)){
-            log.error("{} - {}",USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentity);
-            throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
-        }
-    }
 
     private static void validateUserEmail(String email) throws IdentityException {
             if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email)) {
