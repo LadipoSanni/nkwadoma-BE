@@ -3,9 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
@@ -13,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.*;
 
 
 import java.util.*;
@@ -34,23 +34,29 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
+        List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
+        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
+
+        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+    }
+
+    private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
         List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
-        log.info("Found Service offerings: {}", serviceOfferings);
         List<ServiceOfferingEntity> serviceOfferingEntity = organizationIdentityMapper.toServiceOfferingEntity(serviceOfferings);
-        log.info("Mapped Service offerings: {}", serviceOfferingEntity);
-        List<ServiceOfferingEntity> serviceOfferingEntities = serviceOfferEntityRepository.saveAll(serviceOfferingEntity);
-        log.info("Service offerings saved successfully");
+        return serviceOfferEntityRepository.saveAll(serviceOfferingEntity);
+    }
+
+    private void saveOrganizationServiceOfferings(List<ServiceOfferingEntity> serviceOfferingEntities, OrganizationEntity organizationEntity) {
         for (ServiceOfferingEntity foundServiceOffering : serviceOfferingEntities) {
             OrganizationServiceOfferingEntity organizationServiceOfferingEntity =
                     OrganizationServiceOfferingEntity.builder().organizationId(organizationEntity.getId()).
                             serviceOfferingEntity(foundServiceOffering).build();
             organizationServiceOfferingRepository.save(organizationServiceOfferingEntity);
         }
-        log.info("Organization entity saved successfully");
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 
     @Override
@@ -69,8 +75,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationEntityRepository.delete(organizationEntity);
     }
 
-
-
     @Override
     public OrganizationIdentity findById(String id) throws MeedlException {
         validateDataElement(id);
@@ -85,7 +89,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<ServiceOffering> findServiceOfferingById(String id) {
+    public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings = organizationServiceOfferingRepository.findByOrganizationId(id);
         log.info("Found organization service offerings in DB: {}", organizationServiceOfferings);
         List<ServiceOffering> serviceOfferings = organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
@@ -93,6 +98,36 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return serviceOfferings;
     }
 
+    @Override
+    public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException {
+        MeedlValidator.validateDataElement(organizationId);
+        List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
+                organizationServiceOfferingRepository.findByOrganizationId(organizationId);
+        return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
+    }
+
+    @Override
+    public void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException {
+        MeedlValidator.validateDataElement(organizationServiceOfferingId);
+        Optional<OrganizationServiceOfferingEntity> organizationServiceOffering =
+                organizationServiceOfferingRepository.findById(organizationServiceOfferingId);
+        if (organizationServiceOffering.isPresent()) {
+            log.info("Found organization service offering: {}", organizationServiceOffering.get());
+            organizationServiceOfferingRepository.deleteById(organizationServiceOffering.get().getId());
+            log.info("Deleted organization service offering: {}", organizationServiceOffering.get());
+        }
+    }
+
+    @Override
+    public void deleteServiceOffering(String serviceOfferingId) throws MeedlException {
+        MeedlValidator.validateDataElement(serviceOfferingId);
+        Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.findById(serviceOfferingId);
+        if (serviceOfferingEntity.isPresent()) {
+            log.info("Found service offering: {}", serviceOfferingEntity.get());
+            serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getServiceOfferingId());
+            log.info("Deleted service offering: {}", serviceOfferingEntity.get());
+        }
+    }
 
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);

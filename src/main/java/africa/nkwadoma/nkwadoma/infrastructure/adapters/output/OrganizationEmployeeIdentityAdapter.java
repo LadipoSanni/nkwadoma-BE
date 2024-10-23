@@ -4,12 +4,15 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
@@ -47,5 +50,25 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
           return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
       }
         throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+    }
+
+    @Override
+    public Optional<OrganizationEmployeeIdentity> findByCreatedBy(String createdBy) throws MeedlException {
+        MeedlValidator.validateDataElement(createdBy);
+        Optional<OrganizationEmployeeEntity> employeeEntity = employeeAdminEntityRepository.findByMiddlUser_CreatedBy(createdBy);
+        if (employeeEntity.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity.get()));
+    }
+
+    @Override
+    public void delete(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
+        Optional<OrganizationEmployeeEntity> employeeEntity = employeeAdminEntityRepository.findById(id);
+        if (employeeEntity.isEmpty()) {
+            throw new IdentityException(USER_NOT_FOUND.getMessage());
+        }
+        employeeAdminEntityRepository.delete(employeeEntity.get());
     }
 }

@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import org.mapstruct.*;
 
@@ -18,12 +18,13 @@ public interface OrganizationIdentityMapper {
     @InheritInverseConfiguration
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
 
-//    @Mapping(source = "serviceOfferingId", target = "id")
-//    ServiceOffering toServiceOffering(ServiceOfferingEntity serviceOfferingEntity);
-
     List<ServiceOfferingEntity> toServiceOfferingEntity(List<ServiceOffering> serviceOfferings);
 
     @Mapping(source = "serviceOfferingEntity", target = ".")
     ServiceOffering toServiceOfferingModel(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
     List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
+
+
+    OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
+    List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 }

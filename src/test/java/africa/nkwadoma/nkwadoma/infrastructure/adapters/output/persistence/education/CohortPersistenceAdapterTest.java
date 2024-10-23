@@ -170,7 +170,7 @@ public class CohortPersistenceAdapterTest {
 //        programOutputPort.deleteProgram(program.getId());
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
         organizationIdentityOutputPort.delete(foundOrganization.getId());
-//        cohortRepository.deleteById(cohortOne);
-//        cohortRepository.deleteById(cohortTwo);
+//        cohortRepository.deleteOrganizationServiceOffering(cohortOne);
+//        cohortRepository.deleteOrganizationServiceOffering(cohortTwo);
     }
 }

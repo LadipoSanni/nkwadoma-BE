@@ -1,13 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
@@ -15,7 +15,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.*;
 import java.util.*;
-import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
@@ -38,6 +36,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
+    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
 
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
@@ -53,8 +52,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        Optional<OrganizationEmployeeIdentity> employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (employeeIdentity.isEmpty()) {
+            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        }
 
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         log.info("Service offering list: {}", serviceOfferings);
         if(CollectionUtils.isEmpty(serviceOfferings) ||
