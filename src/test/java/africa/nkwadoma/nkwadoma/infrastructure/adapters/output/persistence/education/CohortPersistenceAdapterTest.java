@@ -236,11 +236,11 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-//    @AfterAll
-//    void cleanUp() throws MeedlException {
-//        programOutputPort.deleteProgram(program.getId());
-//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-//        cohortRepository.deleteById(cohortOneId);
-//        cohortRepository.deleteById(cohortTwoId);
-//    }
+    @AfterAll
+    void cleanUp() throws MeedlException {
+        programOutputPort.deleteProgram(program.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        cohortRepository.deleteById(cohortOneId);
+        cohortRepository.deleteById(cohortTwoId);
+    }
 }
