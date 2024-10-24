@@ -92,7 +92,7 @@ class ProgramPersistenceAdapterTest {
             organizationIdentity.setTin("Tin5678");
             organizationIdentity.setNumberOfPrograms(0);
             ServiceOffering serviceOffering = new ServiceOffering();
-//            serviceOffering.setName(ServiceOfferingType.TRAINING.name());
+            serviceOffering.setName(ServiceOfferingType.TRAINING.name());
             serviceOffering.setIndustry(Industry.EDUCATION);
             organizationIdentity.setServiceOfferings(List.of(serviceOffering));
             organizationIdentity.setWebsiteAddress("webaddress.org");
@@ -115,9 +115,6 @@ class ProgramPersistenceAdapterTest {
     void saveProgram() {
         try {
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            foundOrganization.setId(foundOrganization.getId());
-            foundOrganization.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
-            organizationOutputPort.save(foundOrganization);
 
             program.setOrganizationId(foundOrganization.getId());
             program.setCreatedBy("Ayo");
@@ -144,7 +141,6 @@ class ProgramPersistenceAdapterTest {
         try {
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             organizationIdentity.setId(organization.getId());
-//            List<ServiceOffering> serviceOfferings = organizationOutputPort.findServiceOfferingById(organization.getId());
 
             organizationIdentity.setServiceOfferings(List.of(ServiceOffering.builder()
                     .name("NON_TRAINING").industry(Industry.BANKING).build()));
@@ -156,9 +152,6 @@ class ProgramPersistenceAdapterTest {
             program.setCreatedBy("Ayo");
             assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(program));
 
-//            employeeIdentityOutputPort.delete(organizationEmployeeIdentity.getId());
-//            userIdentityOutputPort.deleteUserById(foundUserIdentity.getId());
-//
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(savedOrganization.getId());
 
@@ -308,18 +301,8 @@ class ProgramPersistenceAdapterTest {
     @Order(2)
     void findProgramByName() {
         try {
-            assertThrows(ResourceNotFoundException.class,
-                    ()->programOutputPort.findProgramByName(program.getName()));
-
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
                     organizationIdentity.getEmail());
-            organizationIdentity.setId(foundOrganization.getId());
-            List<ServiceOffering> serviceOfferings = organizationOutputPort.findServiceOfferingById(foundOrganization.getId());
-            organizationIdentity.setServiceOfferings(
-                    List.of(ServiceOffering.builder().id(serviceOfferings.get(0).getId()).industry(Industry.EDUCATION).
-                            name(ServiceOfferingType.TRAINING.name()).build())
-            );
-            organizationOutputPort.save(organizationIdentity);
 
             designThinking.setCreatedBy("Ayo");
             designThinking.setOrganizationId(foundOrganization.getId());
@@ -424,28 +407,42 @@ class ProgramPersistenceAdapterTest {
     @Order(5)
     void deleteProgram() {
         try {
-            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            Program foundProgram = programOutputPort.findProgramByName(designThinking.getName());
             assertNotNull(foundProgram);
             assertNotNull(foundProgram.getId());
 
             programOutputPort.deleteProgram(foundProgram.getId());
 
-            MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(program.getId()));
+            MeedlException meedlException = assertThrows(MeedlException.class,
+                    () -> programOutputPort.findProgramByName(designThinking.getName()));
             assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown()  {
         try {
+            Program foundProgram = programOutputPort.findProgramByName(program.getName());
+            programOutputPort.deleteProgram(foundProgram.getId());
+
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByEmployeeId(userIdentity.getId());
             employeeIdentityOutputPort.delete(employeeIdentity.getId());
-            userIdentityOutputPort.deleteUserByEmail(this.userIdentity.getEmail());
+            userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
 
             OrganizationIdentity organization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
             assertNotNull(organization);
+
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(organization.getId());
+
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
 
             organizationOutputPort.delete(organization.getId());
             assertThrows(ResourceNotFoundException.class, ()-> organizationOutputPort.findById(organization.getId()));
