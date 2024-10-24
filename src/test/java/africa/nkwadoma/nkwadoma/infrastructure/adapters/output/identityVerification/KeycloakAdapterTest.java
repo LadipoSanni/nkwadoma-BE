@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +12,12 @@ import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -309,6 +311,64 @@ class KeycloakAdapterTest {
         john.setPassword(password);
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
 
+    }
+    @Test
+    void disableOrganizationWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableOrganization(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
+    void disableOrganizationWithInvalidId(String id) {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+                megaOrganization.setId(id);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableOrganization(megaOrganization));
+    }
+    @Test
+    void disableOrganizationWithValidDetails() throws MeedlException {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+        megaOrganization.setName("rose couture6");
+        identityManagementOutputPort.disableOrganization(megaOrganization);
+    }
+    @Test
+    void getClientRepresentationById() {
+        ClientRepresentation clientRepresentation = null;
+        try {
+            clientRepresentation = identityManagementOutputPort.getClientRepresentationByClientId("rose couture6");
+        } catch (MeedlException e) {
+            log.error("Error getting client representation {}", e.getMessage());
+        }
+        assertNotNull(clientRepresentation);
+        assertNotNull(clientRepresentation.getName());
+//        assertEquals(clientRepresentation.getName(), );
+        log.info("Client representation {}", clientRepresentation.getName());
+    }
+    @Test
+    void getClientReSourceById() {
+        ClientResource clientResource = null;
+        try {
+            clientResource = identityManagementOutputPort.getClientResourceClientId("rose couture6");
+        } catch (MeedlException e) {
+            log.error("Error getting client resource {}", e.getMessage());
+        }
+        assertNotNull(clientResource);
+        ClientRepresentation clientRepresentation = clientResource.toRepresentation();
+        assertNotNull(clientRepresentation.getName());
+//        assertEquals(clientRepresentation.getName(), );
+        log.info("Client resource {}", clientRepresentation.getName());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void getClientRepresentationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId(id));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void getClientResourceWithInvalidId(String id) {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientResourceClientId(id));
+    }
+    @Test
+    void getClientRepresentationWithNoneExistingId() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));
     }
 
     @Test

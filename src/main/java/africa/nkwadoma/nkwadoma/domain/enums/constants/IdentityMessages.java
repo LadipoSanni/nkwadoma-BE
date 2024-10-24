@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum IdentityMessages{
 
     USER_NOT_FOUND("User not found!"),
+    CLIENT_NOT_FOUND("Client not found!"),
     COLLEAGUE_EXIST("colleague exist!"),
     USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be null"),
     ORGANIZATION_IDENTITY_CANNOT_BE_NULL("Organization identity cannot be null"),
