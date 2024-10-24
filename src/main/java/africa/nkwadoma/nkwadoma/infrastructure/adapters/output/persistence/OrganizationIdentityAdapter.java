@@ -12,7 +12,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.*;
 
 
 import java.util.*;
@@ -91,11 +90,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
         MeedlValidator.validateDataElement(id);
-        List<OrganizationServiceOfferingEntity> organizationServiceOfferings = organizationServiceOfferingRepository.findByOrganizationId(id);
-        log.info("Found organization service offerings in DB: {}", organizationServiceOfferings);
-        List<ServiceOffering> serviceOfferings = organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
-        log.info("Mapped service offerings: {}", serviceOfferings);
-        return serviceOfferings;
+        List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
+                organizationServiceOfferingRepository.findByOrganizationId(id);
+        if (organizationServiceOfferings.isEmpty()){
+            log.info("Found nothing while searching for service  offerings...");
+        }
+        return organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
     }
 
     @Override
@@ -103,6 +103,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateDataElement(organizationId);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(organizationId);
+        log.info("Found org sev offerings in db: {}", organizationServiceOfferings);
         return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
     }
 
@@ -124,7 +125,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.findById(serviceOfferingId);
         if (serviceOfferingEntity.isPresent()) {
             log.info("Found service offering: {}", serviceOfferingEntity.get());
-            serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getServiceOfferingId());
+            serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getId());
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
     }

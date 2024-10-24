@@ -42,7 +42,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program findProgramByName(String programName) throws MeedlException {
         validateDataElement(programName);
         programName = programName.trim();
-        log.info("Program name: {}", programName);
         ProgramEntity programEntity = programRepository.findByName(programName).
                 orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         return programMapper.toProgram(programEntity);
@@ -52,18 +51,11 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
-        Optional<OrganizationEmployeeIdentity> employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
-        if (employeeIdentity.isEmpty()) {
-            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
-        }
+        validateCreatedBy(program);
 
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
-        log.info("Service offering list: {}", serviceOfferings);
-        if(CollectionUtils.isEmpty(serviceOfferings) ||
-                !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
-            throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());
-        }
+        ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
 
@@ -76,6 +68,14 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         organizationEntityRepository.save(organizationEntity);
         return programMapper.toProgram(programEntity);
     }
+
+    private void validateCreatedBy(Program program) throws MeedlException {
+        Optional<OrganizationEmployeeIdentity> employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (employeeIdentity.isEmpty()) {
+            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        }
+    }
+
 
     @Override
     public boolean programExists(String programName) throws MeedlException {
@@ -106,4 +106,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         return programEntities.map(programMapper::toProgram);
     }
 
+    private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
+        if(CollectionUtils.isEmpty(serviceOfferings) ||
+                !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+            throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());
+        }
+    }
 }

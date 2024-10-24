@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -157,7 +156,6 @@ class ProgramPersistenceAdapterTest {
         OrganizationIdentity foundOrganization = null;
         try {
             foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-
         } catch (MeedlException e) {
             try {
                 foundOrganization = organizationOutputPort.save(organizationIdentity);
@@ -169,8 +167,15 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(foundOrganization);
             assertNotNull(foundOrganization.getId());
 
+            UserIdentity foundUserIdentity = userIdentityOutputPort.save(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
+            assertEquals(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser().getCreatedBy(), foundUserIdentity.getCreatedBy());
+
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = employeeIdentityOutputPort.save(
+                    organizationIdentity.getOrganizationEmployees().get(0));
+
             program.setOrganizationId(foundOrganization.getId());
             program.setName(programName);
+            program.setCreatedBy(organizationEmployeeIdentity.getMiddlUser().getCreatedBy());
             Program savedProgram = programOutputPort.saveProgram(program);
 
             assertNotNull(savedProgram);
@@ -178,6 +183,19 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programName.trim(), savedProgram.getName());
 
             programOutputPort.deleteProgram(savedProgram.getId());
+            employeeIdentityOutputPort.delete(organizationEmployeeIdentity.getId());
+            userIdentityOutputPort.deleteUserById(foundUserIdentity.getId());
+
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(foundOrganization.getId());
+
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
+            organizationOutputPort.delete(foundOrganization.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -234,27 +252,18 @@ class ProgramPersistenceAdapterTest {
 
             MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(program));
             assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
-
-
+            
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(savedOrganization.getId());
-            log.info("Organization Service offerings==========>: {}", organizationServiceOfferings);
+
+            String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-                String organizationServiceOfferingId = organizationServiceOffering.getId();
-                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOfferingId);
-                organizationOutputPort.deleteServiceOffering(organizationServiceOffering.getServiceOfferingEntity().getServiceOfferingId());
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
             }
+            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
 
-//            List<ServiceOffering> serviceOfferings = organizationOutputPort.findServiceOfferingById(savedOrganization.getId());
-//            log.info("Service offerings==========>: {}", serviceOfferings);
-//            for (ServiceOffering serviceOffering : serviceOfferings) {
-//                String serviceOfferingId = serviceOffering.getId();
-//                log.info("service offering==========>: {}", serviceOffering);
-//                organizationOutputPort.deleteServiceOffering(serviceOfferingId);
-//                log.info("Deleted service offering==========>: {}", serviceOffering);
-//            }
-//            organizationOutputPort.delete(savedOrganization.getId());
-
+            organizationOutputPort.delete(savedOrganization.getId());
         } catch (MeedlException e) {
             log.error("Error finding organization", e);
         }

@@ -17,8 +17,7 @@ import java.math.*;
 public class ServiceOfferingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String serviceOfferingId;
-    @Column(name = "name")
+    private String id;
     private String name;
     @Enumerated(EnumType.STRING)
     private Industry industry;

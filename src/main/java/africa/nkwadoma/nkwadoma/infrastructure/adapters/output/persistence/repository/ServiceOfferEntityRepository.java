@@ -7,5 +7,4 @@ import java.util.*;
 
 public interface ServiceOfferEntityRepository extends JpaRepository<ServiceOfferingEntity, String> {
 
-    List<ServiceOfferingEntity> findBy(String id);
 }

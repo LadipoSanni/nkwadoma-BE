@@ -25,6 +25,8 @@ public interface OrganizationIdentityMapper {
     List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
 
+    @Mapping(target = "serviceOffering", source = "serviceOfferingEntity")
     OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
+
 }
