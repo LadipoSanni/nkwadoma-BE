@@ -47,6 +47,7 @@ public class InviteOrganizationController {
             List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
             OrganizationIdentity organizationIdentity = inviteOrganizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
             organizationIdentity.setOrganizationEmployees(orgEmployee);
+            organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = inviteOrganizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -78,7 +79,7 @@ public class InviteOrganizationController {
         return UserIdentity.builder()
                 .firstName(inviteOrganizationRequest.getAdminFirstName())
                 .lastName(inviteOrganizationRequest.getAdminLastName())
-                .email(inviteOrganizationRequest.getEmail())
+                .email(inviteOrganizationRequest.getAdminEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
                 .build();
     }
