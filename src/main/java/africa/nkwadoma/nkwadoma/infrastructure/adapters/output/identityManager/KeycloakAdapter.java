@@ -173,7 +173,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         UserResource userResource = getUserResource(userIdentity);
         userResource.resetPassword(credential);
     }
-
     private static CredentialRepresentation createCredentialRepresentation(String password)  {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(Boolean.FALSE);
