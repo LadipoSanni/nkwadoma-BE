@@ -23,6 +23,7 @@ public class OrganizationEntity {
     private String registrationNumber;
     private String taxIdentity;
     private String phoneNumber;
+    private String createdBy;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
 //    @ElementCollection(fetch = FetchType.EAGER)
