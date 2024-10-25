@@ -54,7 +54,7 @@ class UserIdentityAdapterTest {
             assertEquals(findJohn.getLastName(),savedJohn.getLastName());
             assertEquals(findJohn.getCreatedBy(),savedJohn.getCreatedBy());
         }catch (MeedlException exception){
-            log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
+            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
         }
     }
     @ParameterizedTest
