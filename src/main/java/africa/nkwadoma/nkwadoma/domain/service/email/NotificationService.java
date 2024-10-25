@@ -33,7 +33,6 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-
         sendMail(userIdentity, email);
 
     }
@@ -47,7 +46,6 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-
         sendMail(userIdentity, email);
     }
 
