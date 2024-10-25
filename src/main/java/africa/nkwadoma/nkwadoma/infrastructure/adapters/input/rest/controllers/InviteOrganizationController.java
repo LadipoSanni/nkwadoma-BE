@@ -47,6 +47,7 @@ public class InviteOrganizationController {
             List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
             OrganizationIdentity organizationIdentity = inviteOrganizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
             organizationIdentity.setOrganizationEmployees(orgEmployee);
+            organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = inviteOrganizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -56,7 +57,7 @@ public class InviteOrganizationController {
                     .build();
             return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
         }catch (Exception exception){
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>( null ,exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -78,7 +79,7 @@ public class InviteOrganizationController {
         return UserIdentity.builder()
                 .firstName(inviteOrganizationRequest.getAdminFirstName())
                 .lastName(inviteOrganizationRequest.getAdminLastName())
-                .email(inviteOrganizationRequest.getEmail())
+                .email(inviteOrganizationRequest.getAdminEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
                 .build();
     }

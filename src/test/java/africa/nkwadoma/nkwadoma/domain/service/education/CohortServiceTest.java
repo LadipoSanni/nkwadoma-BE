@@ -59,8 +59,9 @@ public class CohortServiceTest {
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOffering(
-                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
+                name("My Organization").rcNumber("56767").
+                serviceOfferings(
+                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
@@ -133,10 +134,8 @@ public class CohortServiceTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOne);
-        cohortRepository.deleteById(cohortTwo);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+        organizationIdentityOutputPort.delete(foundOrganization.getId());
     }
 
 }

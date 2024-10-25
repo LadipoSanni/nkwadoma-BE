@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant.LOGOUT_SUCCESSFUL;
 
 @Slf4j
 @RestController
@@ -54,8 +52,8 @@ public class IdentityManagerController {
             log.info("The user id of user inviting a colleague : {} ",meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                    body(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                    statusCode(HttpStatus.OK.name()).build());
+                    body(createdUserIdentity).message(ControllerConstant.COLLEAGUE_INVITED.getMessage()).
+                    statusCode(HttpStatus.CREATED.name()).build());
     }
 
     @PostMapping("auth/password/create")
