@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import lombok.extern.slf4j.*;
@@ -35,7 +36,7 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().name("My program").durationType(DurationType.YEARS).
+        program = Program.builder().id("yw9u9-vcc9wb-b9cne").name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
                 objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
@@ -94,8 +95,64 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getMode(), program.getMode());
             assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
         } catch (MeedlException e) {
-            log.info("Error creating program: {}", e.getMessage());
+            log.error("Error creating program: {}", e.getMessage());
         }
+    }
+
+    @Test
+    void updateProgram() {
+        try {
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            Program addedProgram = programService.createProgram(program);
+
+            log.info("Program: {}", addedProgram);
+            addedProgram.setProgramDescription("New program description");
+            addedProgram.setDuration(3);
+            addedProgram.setMode(ProgramMode.PART_TIME);
+            addedProgram.setDeliveryType(DeliveryType.ONLINE);
+
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(addedProgram);
+            when(programOutputPort.saveProgram(addedProgram)).thenReturn(addedProgram);
+            Program updatedProgram = programService.updateProgram(addedProgram);
+
+            verify(programOutputPort, times(2)).saveProgram(addedProgram);
+            assertNotNull(updatedProgram);
+            assertEquals(updatedProgram.getProgramDescription(), addedProgram.getProgramDescription());
+        } catch (MeedlException e) {
+            log.error("Error updating program", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void updateProgramWithEmptyProgramId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()->programService.updateProgram(program));
+    }
+
+    @Test
+    void updateProgramWithNullProgramId() {
+        program.setId(null);
+        MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((program)));
+        assertEquals(exception.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+    }
+
+    @Test
+    void updateProgramWithNullProgram() {
+        MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((null)));
+        assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
+    }
+
+
+    @Test
+    void updateNonExistingProgram() {
+        Program nonexistingProgram = Program.builder().id("non existing id").name("Non existing name").build();
+        try {
+            when(programOutputPort.findProgramById(nonexistingProgram.getId())).thenThrow(ResourceNotFoundException.class);
+        } catch (MeedlException e) {
+            log.error("Error finding program", e);
+        }
+        assertThrows(MeedlException.class, () -> programService.updateProgram((nonexistingProgram)));
     }
 
     @Test
@@ -207,6 +264,6 @@ class ProgramServiceTest {
     void viewProgramWithNullOrEmptyName(String programWithSpace) {
         program.setName(programWithSpace);
         MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
-        log.info(meedlException.getMessage());
+        log.error(meedlException.getMessage());
     }
 }

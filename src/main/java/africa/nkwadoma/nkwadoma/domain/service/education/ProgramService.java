@@ -34,6 +34,14 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
+    public Program updateProgram(Program program) throws MeedlException {
+        MeedlValidator.validateObjectInstance(program);
+        MeedlValidator.validateDataElement(program.getId());
+        Program foundProgram = programOutputPort.findProgramById(program.getId());
+        return programOutputPort.saveProgram(foundProgram);
+    }
+
+    @Override
     public Program viewProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateDataElement(program.getName());
         String programName = program.getName().trim();
