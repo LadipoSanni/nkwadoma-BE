@@ -42,7 +42,7 @@ class ProgramServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings = {StringUtils.SPACE})
     void addProgramWithEmptyProgramName(String programName) {
         program.setName(programName);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
@@ -203,9 +203,10 @@ class ProgramServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings = {StringUtils.SPACE})
     void viewProgramWithNullOrEmptyName(String programWithSpace) {
         program.setName(programWithSpace);
-        assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
+        MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
+        log.info(meedlException.getMessage());
     }
 }

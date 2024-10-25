@@ -19,14 +19,14 @@ public class OrganizationIdentityValidator extends MeedlValidator {
         if (ObjectUtils.isEmpty(organizationIdentity)){
             throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
         }
-        log.info("{}",organizationIdentity.getServiceOffering());
-        if (organizationIdentity.getServiceOffering() == null
-            || organizationIdentity.getServiceOffering().getIndustry() == null) {
+        log.info("{}",organizationIdentity.getServiceOfferings());
+        if (organizationIdentity.getServiceOfferings() == null
+            || organizationIdentity.getServiceOfferings().get(0).getIndustry() == null) {
             throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
         }
         validateEmail(organizationIdentity.getEmail());
         validateDataElement(organizationIdentity.getName());
-        validateDataElement(organizationIdentity.getServiceOffering().getIndustry().name());
+        validateDataElement(organizationIdentity.getServiceOfferings().get(0).getIndustry().name());
         validateDataElement(organizationIdentity.getRcNumber());
         validateDataElement(organizationIdentity.getPhoneNumber());
         log.info("Organization identity validation completed successfully {}", organizationIdentity);
