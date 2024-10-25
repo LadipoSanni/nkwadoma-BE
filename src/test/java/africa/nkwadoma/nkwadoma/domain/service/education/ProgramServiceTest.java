@@ -209,4 +209,47 @@ class ProgramServiceTest {
         MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
         log.info(meedlException.getMessage());
     }
+
+    @Test
+    void viewProgramById() {
+        try {
+            program.setId("727nf-b978-n92");
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            Program foundProgram = programService.viewProgramById(program);
+            assertNotNull(foundProgram);
+            assertEquals(foundProgram, program);
+            verify(programOutputPort, times(1)).findProgramById(program.getId());
+        } catch (MeedlException e) {
+            log.error("Error viewing program by name", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE})
+    void viewProgramWithEmptyId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
+    }
+
+    @Test
+    void viewProgramWithNullId() {
+        program.setId(null);
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    void viewProgramByIdWithSpaces(String programId) {
+        try {
+            program.setId(programId);
+            when(programOutputPort.findProgramById(programId.trim())).thenReturn(program);
+
+            Program foundProgram = programService.viewProgramById(program);
+            assertNotNull(foundProgram);
+            verify(programOutputPort, times(1)).findProgramById(program.getId().trim());
+        } catch (MeedlException e) {
+            log.error("Error viewing program by ID", e);
+        }
+    }
+
 }

@@ -83,9 +83,9 @@ class LoanControllerTest {
         assertNotNull(apiResponse.getBody());
         assertEquals(apiResponse.getStatusCode(), HttpStatus.CREATED);
         assertEquals(apiResponse.getBody().getStatusCode(), HttpStatus.CREATED.toString());
-        assertNotNull(apiResponse.getBody().getBody());
+        assertNotNull(apiResponse.getBody().getData());
 
-        LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getBody();
+        LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getData();
         assertEquals(loanProductResponse.getName(), responseBody.getName());
         verify(loanProductMapper, times(1)).mapToLoanProduct(loanProductRequest);
         verify(loanProductMapper, times(1)).mapToLoanProductResponse(loanProduct);
@@ -125,9 +125,9 @@ class LoanControllerTest {
         assertNotNull(apiResponse.getBody());
         assertEquals(apiResponse.getStatusCode(), HttpStatus.FOUND);
         assertEquals(apiResponse.getBody().getStatusCode(), HttpStatus.FOUND.toString());
-        assertNotNull(apiResponse.getBody().getBody());
+        assertNotNull(apiResponse.getBody().getData());
 
-        LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getBody();
+        LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getData();
         assertEquals(loanProductResponse.getName(), responseBody.getName());
         verify(loanProductMapper, times(1)).mapToLoanProductResponse(loanProduct);
         try {

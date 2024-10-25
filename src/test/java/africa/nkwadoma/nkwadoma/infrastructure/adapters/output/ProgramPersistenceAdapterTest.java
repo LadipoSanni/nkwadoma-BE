@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.UUID_NOT_VALID;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -127,7 +128,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
-            programOutputPort.deleteProgram(savedProgram.getId());
+//            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -331,7 +332,7 @@ class ProgramPersistenceAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void findProgramWithInvalidId(String id){
+    void findProgramByNullId(String id){
         program.setId(id);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(program.getId()));
     }
@@ -408,7 +409,7 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByEmployeeId(userIdentity.getId());

@@ -40,7 +40,7 @@ public class InvestmentVehicleController {
             InvestmentVehicleResponse investmentVehicleResponse  =
                     investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
-                    .body(investmentVehicleResponse)
+                    .data(investmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_CREATED)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
@@ -62,7 +62,7 @@ public class InvestmentVehicleController {
             InvestmentVehicleResponse updateInvestmentVehicleResponse =
                     investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<InvestmentVehicleResponse> apiResponse =ApiResponse.<InvestmentVehicleResponse>builder()
-                    .body(updateInvestmentVehicleResponse)
+                    .data(updateInvestmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_UPDATED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
@@ -82,7 +82,7 @@ public class InvestmentVehicleController {
             InvestmentVehicleResponse investmentVehicleResponse =
                     investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
             ApiResponse<InvestmentVehicleResponse> apiResponse =ApiResponse.<InvestmentVehicleResponse>builder()
-                    .body(investmentVehicleResponse)
+                    .data(investmentVehicleResponse)
                     .message(INVESTMENT_VEHICLE_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
