@@ -1,7 +1,7 @@
 name: Deploy Systest to Amazon EC2
 
 on:
-  pull_request:
+  push:
     branches:
       - dev
       
