@@ -111,7 +111,7 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
-        identityManagerOutPutPort.changePassword(userIdentity);
+        identityManagerOutPutPort.setPassword(userIdentity);
     }
 
     @Override

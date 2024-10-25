@@ -25,7 +25,7 @@ public interface IdentityManagerOutPutPort {
 
     void resetPassword(UserIdentity userIdentity) throws MeedlException;
 
-    void changePassword(UserIdentity userIdentity)throws MeedlException;
+    void setPassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 

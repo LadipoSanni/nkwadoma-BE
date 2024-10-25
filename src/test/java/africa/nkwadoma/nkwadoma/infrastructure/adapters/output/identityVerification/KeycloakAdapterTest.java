@@ -15,7 +15,6 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -222,18 +221,18 @@ class KeycloakAdapterTest {
 
     @Test
     void changePasswordWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(null));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(null));
     }
     @Test
     void changePasswordWithNullNewPassword() {
         john.setNewPassword(null);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(john));
     }
     @ParameterizedTest
     @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "rniejfkn", "  ADKFDJHFD", "ADKFDJHFD  ", "@ndnue90 -  f"})
     void changePasswordWithInvalidPassword(String password) {
         john.setNewPassword(password);
-        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(john));
         log.info(exception.getMessage());
     }
 
@@ -314,7 +313,7 @@ class KeycloakAdapterTest {
         john.setId(existingUser.get().getId());
         log.info("user id is {}", john.getId());
         try {
-            identityManagementOutputPort.changePassword(john);
+            identityManagementOutputPort.setPassword(john);
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }

@@ -147,7 +147,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
         }
         userIdentity = enableUserAccount(userIdentity);
-        changePassword(userIdentity);
+        setPassword(userIdentity);
 
         return userIdentity;
     }
@@ -163,10 +163,10 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(USER_NOT_VERIFIED.getMessage());
         }
         foundUser.setNewPassword(userIdentity.getNewPassword());
-        changePassword(foundUser);
+        setPassword(foundUser);
     }
     @Override
-    public void changePassword(UserIdentity userIdentity) throws MeedlException {
+    public void setPassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validatePassword(userIdentity.getNewPassword());
         CredentialRepresentation credential = createCredentialRepresentation(userIdentity.getNewPassword());
