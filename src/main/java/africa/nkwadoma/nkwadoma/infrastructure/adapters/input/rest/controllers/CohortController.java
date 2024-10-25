@@ -43,7 +43,7 @@ public class CohortController {
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .body(cohortResponse)
+                    .data(cohortResponse)
                     .message(COHORT_CREATED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();

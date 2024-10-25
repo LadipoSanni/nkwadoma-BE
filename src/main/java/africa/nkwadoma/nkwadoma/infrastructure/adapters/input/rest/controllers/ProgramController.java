@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -24,7 +23,6 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -47,7 +45,7 @@ public class ProgramController {
         program = addProgramUseCase.createProgram(program);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
-                body(programRestMapper.toProgramResponse(program)).
+                data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.CREATED
         );
@@ -68,7 +66,7 @@ public class ProgramController {
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                body(response).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
@@ -83,8 +81,23 @@ public class ProgramController {
         program = addProgramUseCase.viewProgramByName(program);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                body(programRestMapper.toProgramResponse(program)).
+                data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete a program by it's ID")
+    public ResponseEntity<ApiResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
+            throws MeedlException {
+        Program program = new Program();
+        program.setId(id.trim());
+        addProgramUseCase.deleteProgram(program);
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                message("Program " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
         );
     }

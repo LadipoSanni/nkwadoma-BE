@@ -11,4 +11,6 @@ public interface AddProgramUseCase {
     Page<Program> viewAllPrograms(Program program) throws MeedlException;
 
     Program viewProgramByName(Program program) throws MeedlException;
+
+    void deleteProgram(Program program) throws MeedlException;
 }

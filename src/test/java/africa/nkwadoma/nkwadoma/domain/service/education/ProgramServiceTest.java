@@ -35,10 +35,30 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().name("My program").durationType(DurationType.YEARS).
+        program = Program.builder().id("78fi2-9-02f83").name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
                 objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
+    }
+
+    @Test
+    void addProgram() {
+        try {
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            Program addedProgram = programService.createProgram(program);
+            verify(programOutputPort, times(1)).saveProgram(program);
+
+            assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
+            assertEquals(addedProgram.getDurationType(), program.getDurationType());
+            assertEquals(addedProgram.getName(), program.getName());
+            assertEquals(addedProgram.getObjectives(), program.getObjectives());
+            assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
+            assertEquals(addedProgram.getDuration(), program.getDuration());
+            assertEquals(addedProgram.getMode(), program.getMode());
+            assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
+        } catch (MeedlException e) {
+            log.info("Error creating program: {}", e.getMessage());
+        }
     }
 
     @ParameterizedTest
@@ -78,25 +98,6 @@ class ProgramServiceTest {
         }
     }
 
-    @Test
-    void addProgram() {
-        try {
-            when(programOutputPort.saveProgram(program)).thenReturn(program);
-            Program addedProgram = programService.createProgram(program);
-            verify(programOutputPort, times(1)).saveProgram(program);
-
-            assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
-            assertEquals(addedProgram.getDurationType(), program.getDurationType());
-            assertEquals(addedProgram.getName(), program.getName());
-            assertEquals(addedProgram.getObjectives(), program.getObjectives());
-            assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
-            assertEquals(addedProgram.getDuration(), program.getDuration());
-            assertEquals(addedProgram.getMode(), program.getMode());
-            assertEquals(addedProgram.getCreatedAt(), program.getCreatedAt());
-        } catch (MeedlException e) {
-            log.info("Error creating program: {}", e.getMessage());
-        }
-    }
 
     @Test
     void viewAllPrograms() {
@@ -208,5 +209,62 @@ class ProgramServiceTest {
         program.setName(programWithSpace);
         MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
         log.info(meedlException.getMessage());
+    }
+
+    @Test
+    void deleteProgram() {
+        try {
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+
+            programService.deleteProgram(program);
+            verify(programOutputPort, times(1)).deleteProgram(program.getId());
+        } catch (MeedlException e) {
+            log.error("Error deleting program", e);
+        }
+    }
+
+    @Test
+    void deleteNonExistingProgram() {
+        program.setId("non existing id");
+        try {
+            when(programOutputPort.findProgramById(program.getId())).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
+        try {
+            verify(programOutputPort, times(1)).findProgramById(program.getId());
+        } catch (MeedlException e) {
+            log.error("Error finding program by ID", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    void deleteProgramWithSpaces(String programWithSpace) {
+        try {
+            program.setId(programWithSpace);
+
+            when(programOutputPort.findProgramById(program.getId().trim())).thenReturn(program);
+            programService.deleteProgram(program);
+
+            verify(programOutputPort, times(1)).deleteProgram(program.getId());
+            assertNull(programOutputPort.findProgramById(program.getId()));
+        } catch (MeedlException e) {
+            log.error("Error viewing program by name", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE})
+    void deleteProgramWithEmptyId(String programWithSpace) {
+        program.setId(programWithSpace);
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
+    }
+
+    @Test
+    void deleteNullProgram() {
+        program.setId(null);
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
     }
 }

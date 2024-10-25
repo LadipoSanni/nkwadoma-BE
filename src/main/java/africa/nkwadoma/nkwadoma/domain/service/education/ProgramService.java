@@ -40,4 +40,12 @@ public class ProgramService implements AddProgramUseCase {
         return programOutputPort.findProgramByName(programName);
     }
 
+    @Override
+    public void deleteProgram(Program program) throws MeedlException {
+        MeedlValidator.validateDataElement(program.getId());
+        String programId = program.getId().trim();
+        Program foundProgram = programOutputPort.findProgramById(programId);
+        programOutputPort.deleteProgram(foundProgram.getId());
+    }
+
 }

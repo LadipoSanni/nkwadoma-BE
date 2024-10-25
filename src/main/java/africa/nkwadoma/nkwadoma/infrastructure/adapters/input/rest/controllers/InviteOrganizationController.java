@@ -50,7 +50,7 @@ public class InviteOrganizationController {
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = inviteOrganizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
-                    .body(inviteOrganizationResponse)
+                    .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();

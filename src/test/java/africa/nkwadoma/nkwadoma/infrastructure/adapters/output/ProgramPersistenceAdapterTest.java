@@ -5,8 +5,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -31,15 +35,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProgramPersistenceAdapterTest {
     @Autowired
     private ProgramOutputPort programOutputPort;
-    private Program program;
-    private Program designThinking;
-    private OrganizationIdentity organizationIdentity;
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    @Autowired
+    private CohortRepository cohortRepository;
+    @Autowired
+    private CohortMapper cohortMapper;
+    private Cohort elites;
+    private Program program;
+    private Program designThinking;
+    private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
     private int pageSize = 10;
     private int pageNumber = 0;
@@ -63,6 +72,12 @@ class ProgramPersistenceAdapterTest {
         designThinking.setDuration(1);
         designThinking.setDeliveryType(DeliveryType.ONSITE);
         designThinking.setDurationType(DurationType.YEARS);
+
+        elites = new Cohort();
+        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
+        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setName("Elite");
+        elites.setCreatedBy(userIdentity.getCreatedBy());
     }
 
 
@@ -127,7 +142,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
-            programOutputPort.deleteProgram(savedProgram.getId());
+//            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -405,6 +420,54 @@ class ProgramPersistenceAdapterTest {
             assertEquals(exception.getMessage(), (PROGRAM_NOT_FOUND.getMessage()));
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
+        }
+    }
+
+    @Test
+    void deleteNonExistingProgram() {
+        program.setId("invalid id");
+        assertThrows(ResourceNotFoundException.class, ()->programOutputPort.deleteProgram(program.getId()));
+    }
+
+    @Test
+    void deleteProgramWithNullId() {
+        program.setId(null);
+        assertThrows(MeedlException.class, ()->programOutputPort.deleteProgram(program.getId()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deleteProgramByEmptyId(String id) {
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
+        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+    }
+
+    @Test
+    void deleteProgramWithCohort() {
+        Program savedProgram = new Program();
+        CohortEntity savedCohort = new CohortEntity();
+        try {
+            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            program.setOrganizationId(foundOrganization.getId());
+            program.setCreatedBy(userIdentity.getCreatedBy());
+            savedProgram = programOutputPort.saveProgram(program);
+            assertNotNull(savedProgram);
+
+            elites.setProgramId(savedProgram.getId());
+
+            savedCohort = cohortRepository.save(cohortMapper.toCohortEntity(elites));
+            assertNotNull(savedCohort);
+        } catch (MeedlException e) {
+            log.error("Error while creating program", e);
+        }
+        String id = savedProgram.getId();
+        assertThrows(EducationException.class, ()->programOutputPort.deleteProgram(id));
+
+        cohortRepository.delete(savedCohort);
+        try {
+            programOutputPort.deleteProgram(savedProgram.getId());
+        } catch (MeedlException e) {
+            log.error("Error deleting program", e);
         }
     }
 
