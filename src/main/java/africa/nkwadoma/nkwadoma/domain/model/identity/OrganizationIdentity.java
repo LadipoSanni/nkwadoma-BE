@@ -21,6 +21,7 @@ public class OrganizationIdentity {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
+    private String createdBy;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
 }
