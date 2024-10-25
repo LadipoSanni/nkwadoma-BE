@@ -166,7 +166,6 @@ class UserIdentityServiceTest {
     @Test
     void login(){
         try {
-//            assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
             userIdentityService.login(favour);
         }catch (MeedlException meedlException){
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
