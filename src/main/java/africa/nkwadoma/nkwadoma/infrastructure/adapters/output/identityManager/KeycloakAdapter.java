@@ -351,7 +351,6 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public void logout(UserIdentity userIdentity) throws MeedlException {
         UserResource userResource = getUserResource(userIdentity);
         userResource.logout();
-        TokenManager tokenManager = getKeycloak(userIdentity).tokenManager();
     }
 
     private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
