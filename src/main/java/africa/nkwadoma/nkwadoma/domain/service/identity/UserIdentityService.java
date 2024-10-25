@@ -69,14 +69,6 @@ public class UserIdentityService implements CreateUserUseCase {
     public void logout(UserIdentity userIdentity) throws MeedlException {
         identityManagerOutPutPort.logout(userIdentity);
     }
-
-    public UserIdentity setUpNewUserAccount(String email, String password) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        log.info("Create : The user found by the email is: {}", userIdentity);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
-        return userIdentity;
-    }
-
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
