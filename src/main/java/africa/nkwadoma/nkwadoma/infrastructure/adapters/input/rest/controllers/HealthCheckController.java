@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthCheckController {
 
     @GetMapping
-    public String healthCheck() {
-        System.out.println(Health.up());
-        return "OK";
+    public Health healthCheck() {
+
+        return Health.up().build();
     }
 }

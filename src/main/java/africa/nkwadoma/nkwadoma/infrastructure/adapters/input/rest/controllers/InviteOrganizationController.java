@@ -57,7 +57,7 @@ public class InviteOrganizationController {
                     .build();
             return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
         }catch (Exception exception){
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>( null ,exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
 
     }
