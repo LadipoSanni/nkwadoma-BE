@@ -13,10 +13,10 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceOffering {
-    private String serviceOfferingId;
+    private String id;
+    private String name;
     private Industry industry;
-    private ServiceOfferingType serviceOfferingType;
+//    private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound;
     private BigDecimal transactionUpperBound;
-    private List<String> serviceOfferings = new ArrayList<>();
 }

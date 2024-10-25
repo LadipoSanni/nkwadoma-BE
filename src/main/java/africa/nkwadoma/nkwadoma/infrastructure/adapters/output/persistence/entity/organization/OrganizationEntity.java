@@ -1,10 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.ServiceOfferingEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.*;
 
 @Setter
 @Getter
@@ -12,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString
 @Table(name = "organization")
 public class OrganizationEntity {
     @Id
@@ -27,6 +26,8 @@ public class OrganizationEntity {
     private String createdBy;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
-    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-    private ServiceOfferingEntity serviceOfferingEntity;
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    private List<String> serviceOfferings = new ArrayList<>();
+//    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+//    private ServiceOfferingEntity serviceOfferingEntity;
 }
