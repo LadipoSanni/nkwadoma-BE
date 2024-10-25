@@ -7,9 +7,9 @@ SMTP_PASSWORD=$4
 EMAILS=$5
 LAST_TIMESTAMP=$6
 
-CURRENT_TIME=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+CURRENT_TIME=$7
 
-TIME_DIFF=$(( ($(date -d "$CURRENT_TIME" +%s) - $(date -d "$LAST_TIMESTAMP" +%s)) / 3600 ))
+TIME_DIFF=$8
 
 read -r -d '' HTML_BODY <<EOF
 <!DOCTYPE html>
@@ -23,8 +23,10 @@ read -r -d '' HTML_BODY <<EOF
   <p>Last activity was at: ${LAST_TIMESTAMP}</p>
   <p>Checked at: ${CURRENT_TIME}</p>
   <p>Please engage with your tasks!</p>
-  <p>Or Speak with your PM, you just can't do Nothing!</p>
-  <p>T for Phanks!</p>
+  <p>Or Speak with your PM</p>
+  <p>Thanks!</p>
+  <p>The Cloud Team.</p>
+  
 </body>
 </html>
 EOF
