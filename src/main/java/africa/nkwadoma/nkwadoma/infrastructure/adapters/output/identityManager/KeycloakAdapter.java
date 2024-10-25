@@ -133,25 +133,47 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
+//    @Override
+//    public UserIdentity createPassword(String email, String password) throws MeedlException {
+//        MeedlValidator.validateDataElement(email);
+//        MeedlValidator.validateDataElement(password);
+//        password = password.trim();
+//        UserRepresentation userRepresentation =
+//                getUserRepresentation(UserIdentity.builder().email(email).build(), Boolean.TRUE);
+//        log.info("User ID for user creating password : {}", userRepresentation.getId());
+//
+//        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+//        UserResource userResource = getUserResource(userIdentity);
+//
+//        CredentialRepresentation credential = createCredentialRepresentation(password);
+//        userResource.resetPassword(credential);
+//
+//        userRepresentation.setEnabled(Boolean.TRUE);
+//        userRepresentation.setEmailVerified(Boolean.TRUE);
+//        userResource.update(userRepresentation);
+//        userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+//
+//        return userIdentity;
+//    }
+
+    private void validateEmailAndPassword(String email, String password) throws MeedlException {
+        MeedlValidator.validateDataElement(email);
+        MeedlValidator.validatePassword(password);
+    }
     @Override
     public UserIdentity createPassword(String email, String password) throws MeedlException {
-        MeedlValidator.validateDataElement(email);
-        MeedlValidator.validateDataElement(password);
+        email = email.trim();
+        validateEmailAndPassword(email, password);
         password = password.trim();
-        UserRepresentation userRepresentation =
-                getUserRepresentation(UserIdentity.builder().email(email).build(), Boolean.TRUE);
-        log.info("User ID for user creating password : {}", userRepresentation.getId());
-
-        UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
-        UserResource userResource = getUserResource(userIdentity);
-
-        CredentialRepresentation credential = createCredentialRepresentation(password);
-        userResource.resetPassword(credential);
-
-        userRepresentation.setEnabled(Boolean.TRUE);
-        userRepresentation.setEmailVerified(Boolean.TRUE);
-        userResource.update(userRepresentation);
-        userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        UserIdentity userIdentity = getUserByEmail(email.trim()).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        log.info("User ID for user creating password : {}", userIdentity.getId());
+        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()){
+            log.error("User already verified can not create new password for this user {}", userIdentity.getEmail());
+            throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
+        }
+        userIdentity.setNewPassword(password);
+        userIdentity = enableUserAccount(userIdentity);
+        changePassword(userIdentity);
 
         return userIdentity;
     }
@@ -159,7 +181,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public void resetPassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateEmail(userIdentity.getEmail());
+        validateEmailAndPassword(userIdentity.getEmail(), userIdentity.getPassword());
+
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (!(foundUser.isEmailVerified() && foundUser.isEnabled())){
@@ -172,18 +195,20 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        UserIdentityValidator.validatePassword(userIdentity.getNewPassword());
+        MeedlValidator.validatePassword(userIdentity.getNewPassword());
         CredentialRepresentation credential = createCredentialRepresentation(userIdentity.getNewPassword());
-        updateUserCredentialOnKeyCloak(userIdentity, credential);
+        UserResource userResource = getUserResource(userIdentity);
+        userResource.resetPassword(credential);
+
+//        updateUserCredentialOnKeyCloak(userIdentity, credential);
     }
 
-    private void updateUserCredentialOnKeyCloak(UserIdentity userIdentity, CredentialRepresentation credential) throws IdentityException {
-        List<UserRepresentation> userRepresentations = getUserRepresentations(userIdentity);
-        for (UserRepresentation userRepresentation : userRepresentations){
-        userRepresentation.setCredentials(List.of(credential));
-        UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());
-        userResource.update(userRepresentation);}
-    }
+//    private void updateUserCredentialOnKeyCloak(UserIdentity userIdentity, CredentialRepresentation credential) throws MeedlException {
+//        UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
+//        userRepresentation.setCredentials(List.of(credential));
+//        UserResource userResource = getUserResourceByKeycloakId(userIdentity.getId());hjj
+//        userResource.update(userRepresentation);
+//    }
 
     private static CredentialRepresentation createCredentialRepresentation(String password)  {
         CredentialRepresentation credential = new CredentialRepresentation();

@@ -66,15 +66,6 @@ public class UserIdentityValidator extends MeedlValidator {
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
 
-    public static void validatePassword(String password) throws MeedlException {
-        validateDataElement(password);
-        Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
-        if (!pattern.matcher(password).matches()){
-            throw new IdentityException(WEAK_PASSWORD.getMessage());
-        }
-    }
-
-
 
 
 

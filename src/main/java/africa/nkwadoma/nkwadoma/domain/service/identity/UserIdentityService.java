@@ -70,39 +70,41 @@ public class UserIdentityService implements CreateUserUseCase {
         identityManagerOutPutPort.logout(userIdentity);
     }
 
+    public UserIdentity setUpNewUserAccount(String email, String password) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        log.info("Create : The user found by the email is: {}", userIdentity);
+        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+        return userIdentity;
+    }
+
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
-        validatePassword(password);
+        MeedlValidator.validatePassword(password);
         validateDataElement(token);
         String email = tokenUtils.decodeJWT(token);
         log.info("The email of the user is: {} creating password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
         log.info("Create : The user found by the email is: {}", userIdentity);
-        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
-            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
-            return userIdentity;
-        }
-        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
+        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+        return userIdentity;
     }
+
     @Override
     public void resetPassword(String token, String password) throws MeedlException {
-        validatePassword(password);
+        MeedlValidator.validatePassword(password);
         validateDataElement(token);
         String email = tokenUtils.decodeJWT(token);
         log.info("The email of the user is: {} reseting password", email);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
         log.info("Reset : The user found by the email is: {}", userIdentity);
-        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()) {
-            userIdentity.setNewPassword(password);
-            identityManagerOutPutPort.resetPassword(userIdentity);
-        }
-        else throw new MeedlException(USER_NOT_VERIFIED.getMessage());
+        userIdentity.setNewPassword(password);
+        identityManagerOutPutPort.resetPassword(userIdentity);
     }
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        validatePassword(userIdentity.getNewPassword());
+        MeedlValidator.validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
         if(checkNewPasswordMatchLastFive(userIdentity)){
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());

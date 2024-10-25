@@ -7,6 +7,7 @@ public enum IdentityMessages{
 
     USER_NOT_FOUND("User not found!"),
     USER_NOT_VERIFIED("User not verified."),
+    USER_PREVIOUSLY_VERIFIED("User has added password before. Try forgot password"),
     COLLEAGUE_EXIST("colleague exist!"),
     USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be null"),
     ORGANIZATION_IDENTITY_CANNOT_BE_NULL("Organization identity cannot be null"),
