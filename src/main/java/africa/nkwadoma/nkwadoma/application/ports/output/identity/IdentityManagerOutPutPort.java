@@ -22,6 +22,9 @@ public interface IdentityManagerOutPutPort {
     UserIdentity createPassword(String email, String password) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
+
+    void resetPassword(UserIdentity userIdentity) throws MeedlException;
+
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;

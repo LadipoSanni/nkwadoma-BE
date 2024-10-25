@@ -25,7 +25,7 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private IdentityRole role;
     private String createdBy;
-    private String password;
+//    private String password;
 
     private String reactivationReason;
     private String deactivationReason;

@@ -23,8 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
 @Slf4j
@@ -59,22 +58,6 @@ public class UserIdentityService implements CreateUserUseCase {
 
         return userIdentity;
     }
-
-    @Override
-    public UserIdentity createPassword(String token, String password) throws MeedlException {
-        validatePassword(password);
-        validateDataElement(token);
-        String email = tokenUtils.decodeJWT(token);
-        log.info("The email of the user is: {} creating password", email);
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        log.info("The user found by the email is: {}", userIdentity);
-        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
-            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
-            return userIdentity;
-        }
-        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
-    }
-
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
@@ -88,7 +71,37 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
+    public UserIdentity createPassword(String token, String password) throws MeedlException {
+        validatePassword(password);
+        validateDataElement(token);
+        String email = tokenUtils.decodeJWT(token);
+        log.info("The email of the user is: {} creating password", email);
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        log.info("Create : The user found by the email is: {}", userIdentity);
+        if (!userIdentity.isEmailVerified() && !userIdentity.isEnabled()) {
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+            return userIdentity;
+        }
+        else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
+    }
+    @Override
+    public void resetPassword(String token, String password) throws MeedlException {
+        validatePassword(password);
+        validateDataElement(token);
+        String email = tokenUtils.decodeJWT(token);
+        log.info("The email of the user is: {} reseting password", email);
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        log.info("Reset : The user found by the email is: {}", userIdentity);
+        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()) {
+            userIdentity.setNewPassword(password);
+            identityManagerOutPutPort.resetPassword(userIdentity);
+        }
+        else throw new MeedlException(USER_NOT_VERIFIED.getMessage());
+    }
+
+    @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity);
         validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
         if(checkNewPasswordMatchLastFive(userIdentity)){
@@ -111,8 +124,8 @@ public class UserIdentityService implements CreateUserUseCase {
         } catch (MeedlException e) {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
-
     }
+
 
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {

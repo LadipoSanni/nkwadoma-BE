@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum IdentityMessages{
 
     USER_NOT_FOUND("User not found!"),
+    USER_NOT_VERIFIED("User not verified."),
     COLLEAGUE_EXIST("colleague exist!"),
     USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be null"),
     ORGANIZATION_IDENTITY_CANNOT_BE_NULL("Organization identity cannot be null"),
@@ -20,7 +21,7 @@ public enum IdentityMessages{
     CONTEXT_FIRST_NAME("firstName"),
     CONTEXT_CURRENT_YEAR("currentYear"),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),
-    PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$"),
+    PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%-=()*?&]{8,16}$"),
     WEAK_PASSWORD("Password should be up to 8 characters and must contain at least 1 alphabet, number and special characters."),
     INVALID_CREDENTIALS("invalid credentials"),
     ERROR_FETCHING_USER_INFORMATION("Error fetching user information"),

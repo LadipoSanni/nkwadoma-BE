@@ -10,6 +10,7 @@ public class WhiteList {
             "/v3/api-docs",
             "/webjars/**",
             "/api/v1/auth/password/create",
-            "/api/v1/auth/password/forgotPassword"
+            "/api/v1/auth/password/forgotPassword",
+            "/api/v1/auth/password/reset"
     };
 }
