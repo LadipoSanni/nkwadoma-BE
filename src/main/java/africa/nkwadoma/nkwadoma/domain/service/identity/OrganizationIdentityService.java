@@ -34,10 +34,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
         organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
-        //save entities to DB
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        //send invite email to organization admin
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
 
         log.info("sent email");
