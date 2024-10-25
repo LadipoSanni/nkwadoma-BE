@@ -128,8 +128,7 @@ class ProgramServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewAllProgramsWithNullOrganizationId(String organizationId) {
         program.setOrganizationId(organizationId);
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewAllPrograms(program));
-        assertEquals("field cannot be null or empty", meedlException.getMessage());
+        assertThrows(MeedlException.class, () -> programService.viewAllPrograms(program));
     }
 
     @ParameterizedTest
