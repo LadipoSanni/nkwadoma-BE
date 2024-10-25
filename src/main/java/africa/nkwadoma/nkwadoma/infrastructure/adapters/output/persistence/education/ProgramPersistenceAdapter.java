@@ -1,24 +1,28 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
+
+import java.math.*;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
@@ -32,7 +36,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
-    private final ServiceOfferEntityRepository serviceOfferEntityRepository;
+    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
 
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
@@ -45,25 +49,32 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program saveProgram(Program program) throws MeedlException {
+        MeedlValidator.validateObjectInstance(program);
+        program.validate();
+        validateCreatedBy(program);
+
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
-        ProgramEntity programEntity = programMapper.toProgramEntity(program);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
+        ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        if (organizationIdentity.getServiceOffering() != null
-                && organizationIdentity.getServiceOffering().getIndustry() != Industry.EDUCATION) {
-            throw new EducationException(ProgramMessages.WRONG_INDUSTRY.getMessage());
-        }
 
-        serviceOfferEntityRepository.save(organizationEntity.getServiceOfferingEntity());
-        organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + 1);
-        organizationEntity = organizationEntityRepository.save(organizationEntity);
-
+        ProgramEntity programEntity = programMapper.toProgramEntity(program);
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
 
-
+        organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
+        organizationEntityRepository.save(organizationEntity);
         return programMapper.toProgram(programEntity);
     }
+
+    private void validateCreatedBy(Program program) throws MeedlException {
+        Optional<OrganizationEmployeeIdentity> employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (employeeIdentity.isEmpty()) {
+            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        }
+    }
+
 
     @Override
     public boolean programExists(String programName) throws MeedlException {
@@ -94,4 +105,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         return programEntities.map(programMapper::toProgram);
     }
 
+    private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
+        if(CollectionUtils.isEmpty(serviceOfferings) ||
+                !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+            throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());
+        }
+    }
 }
