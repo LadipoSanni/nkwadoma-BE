@@ -11,7 +11,7 @@ public class HealthCheckController {
 
     @GetMapping
     public String healthCheck() {
-        Health.up();
+        System.out.println(Health.up());
         return "OK";
     }
 }

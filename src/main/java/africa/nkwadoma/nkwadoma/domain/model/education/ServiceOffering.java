@@ -13,7 +13,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceOffering {
-    private String id;
+    private String serviceOfferingId;
     private Industry industry;
     private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound;
