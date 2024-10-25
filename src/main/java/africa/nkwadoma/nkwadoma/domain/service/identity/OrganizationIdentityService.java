@@ -10,12 +10,14 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -43,6 +45,18 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
        return organizationIdentity;
     }
 
+    @Override
+    public void deactivateOrganization(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        List<OrganizationEmployeeIdentity> organizationEmployees = organizationIdentityOutputPort.findById(organizationId).getOrganizationEmployees();
+        organizationEmployees.forEach(employee -> {
+            try {
+                identityManagerOutPutPort.disableUserAccount(employee.getMiddlUser());
+            } catch (MeedlException e) {
+                log.error("");
+            }
+        });
+    }
 
     @Override
     public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {

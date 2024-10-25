@@ -33,10 +33,4 @@ public class OrganizationIdentityValidator extends MeedlValidator {
 
     }
 
-    private static void validateEmail(OrganizationIdentity organizationIdentity) throws IdentityException {
-        if (StringUtils.isEmpty(organizationIdentity.getEmail()) || !EmailValidator.getInstance().isValid(organizationIdentity.getEmail().trim())) {
-            throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());
-        }
-    }
-
 }
