@@ -244,8 +244,13 @@ class InvestmentVehicleAdapterTest {
 
     @AfterAll
     void cleanUp(){
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+
+        try {
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+        } catch (MeedlException e) {
+            log.error("{}", e.getClass().getName());
+        }
     }
 
 }
