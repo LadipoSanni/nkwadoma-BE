@@ -17,13 +17,13 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+    public ResponseEntity<Map<String, ExceptionResponse>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, ExceptionResponse> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errors.put(fieldName, errorResponseBuilder(errorMessage));
         });
         log.info("Validation errors: {}", errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
         return ExceptionResponse.builder()
                 .message(message)
                 .timeStamp(LocalDateTime.now())
-                .status(false)
+                .status(Boolean.FALSE)
                 .build();
     }
 }
