@@ -134,12 +134,8 @@ public class CohortServiceTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-//        programOutputPort.deleteProgram(foundProgram.getId());
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
         organizationIdentityOutputPort.delete(foundOrganization.getId());
-//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-//        cohortRepository.deleteOrganizationServiceOffering(cohortOne);
-//        cohortRepository.deleteOrganizationServiceOffering(cohortTwo);
     }
 
 }

@@ -13,8 +13,6 @@ public interface ServiceOfferingMapper {
     @Mapping(target = "industry", source = "industry")
     ServiceOfferingEntity toServiceOfferingEntity(ServiceOffering serviceOffering);
 
-//    List<String> toServiceOfferingIds(List<ServiceOffering> serviceOfferings);
-
     default List<String> mapServiceOffering(List<ServiceOffering> serviceOfferings) {
         return serviceOfferings.stream().map(ServiceOffering::getId).toList();
     }

@@ -65,10 +65,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateDataElement(id);
-        Optional<OrganizationEmployeeEntity> employeeEntity = employeeAdminEntityRepository.findById(id);
-        if (employeeEntity.isEmpty()) {
-            throw new IdentityException(USER_NOT_FOUND.getMessage());
-        }
-        employeeAdminEntityRepository.delete(employeeEntity.get());
+        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findById(id).
+                orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
+        employeeAdminEntityRepository.delete(employeeEntity);
     }
 }
