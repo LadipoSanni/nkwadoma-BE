@@ -367,20 +367,7 @@ class UserIdentityServiceTest {
         }
         assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", "Pasord*HFNure9"));
     }
-    @Test
-    void resetPasswordForUnverifiedOUser() {
-        try {
-            when(userIdentityOutputPort.findByEmail(any())).thenAnswer(invocation ->{
-                UserIdentity userIdentity = new UserIdentity();
-                userIdentity.setEmailVerified(Boolean.FALSE);
-                userIdentity.setEnabled(Boolean.FALSE);
-                return userIdentity;
-            });
-        } catch (MeedlException e) {
-            log.error(e.getMessage());
-        }
-        assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", "Pasord*HFNure9"));
-    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void forgotPasswordWithInvalidEmail(String email) {

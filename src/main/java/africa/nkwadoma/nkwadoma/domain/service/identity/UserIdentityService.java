@@ -79,26 +79,24 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
-        MeedlValidator.validatePassword(password);
-        validateDataElement(token);
-        String email = tokenUtils.decodeJWT(token);
-        log.info("The email of the user is: {} creating password", email);
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        log.info("Create : The user found by the email is: {}", userIdentity);
+        UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
         return userIdentity;
     }
 
     @Override
     public void resetPassword(String token, String password) throws MeedlException {
+        UserIdentity userIdentity = getUserIdentityFromToken(password, token);
+        userIdentity.setNewPassword(password);
+        identityManagerOutPutPort.resetPassword(userIdentity);
+    }
+
+    private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
         validateDataElement(token);
         String email = tokenUtils.decodeJWT(token);
-        log.info("The email of the user is: {} reseting password", email);
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        log.info("Reset : The user found by the email is: {}", userIdentity);
-        userIdentity.setNewPassword(password);
-        identityManagerOutPutPort.resetPassword(userIdentity);
+        log.info("User email from token {}", email);
+        return userIdentityOutputPort.findByEmail(email);
     }
 
     @Override
@@ -132,12 +130,11 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        validateDataElement(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId());
         validateDataElement(userIdentity.getReactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        foundUserIdentity.setReactivationReason(userIdentity.getReactivationReason());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
-        userIdentityOutputPort.save(userIdentity);
+//        userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
@@ -145,12 +142,12 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        validateDataElement(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId());
         validateDataElement(userIdentity.getDeactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
-        userIdentityOutputPort.save(userIdentity);
+//        userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
