@@ -167,10 +167,7 @@ public class CohortPersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-//        programOutputPort.deleteProgram(program.getId());
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
         organizationIdentityOutputPort.delete(foundOrganization.getId());
-//        cohortRepository.deleteOrganizationServiceOffering(cohortOne);
-//        cohortRepository.deleteOrganizationServiceOffering(cohortTwo);
     }
 }
