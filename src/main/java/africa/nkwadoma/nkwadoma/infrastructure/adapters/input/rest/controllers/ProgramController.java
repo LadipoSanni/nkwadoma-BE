@@ -88,7 +88,7 @@ public class ProgramController {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Update an existing proGram")
+    @Operation(summary = "Update an existing program")
     public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         Program program = programRestMapper.toUpdatedProgram(programUpdateRequest);
