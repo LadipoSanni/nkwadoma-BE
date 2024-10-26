@@ -128,7 +128,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
-//            programOutputPort.deleteProgram(savedProgram.getId());
+            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -180,7 +180,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    Design Thinking", "Data Science      "})
+    @ValueSource(strings = {"    Electrical Engineering", "Data Science      "})
     void createProgramWithSpacesInProgramName(String programName){
         try{
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
