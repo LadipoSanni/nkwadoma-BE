@@ -106,6 +106,7 @@ class ProgramServiceTest {
             Program addedProgram = programService.createProgram(program);
 
             log.info("Program: {}", addedProgram);
+            addedProgram.setName("New program name");
             addedProgram.setProgramDescription("New program description");
             addedProgram.setDuration(3);
             addedProgram.setMode(ProgramMode.PART_TIME);
@@ -263,7 +264,6 @@ class ProgramServiceTest {
     @ValueSource(strings = {StringUtils.SPACE})
     void viewProgramWithNullOrEmptyName(String programWithSpace) {
         program.setName(programWithSpace);
-        MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
-        log.error(meedlException.getMessage());
+        assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
     }
 }

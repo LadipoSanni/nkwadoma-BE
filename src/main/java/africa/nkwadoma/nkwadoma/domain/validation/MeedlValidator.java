@@ -35,7 +35,6 @@ public class MeedlValidator {
         if (isEmptyString(dataElement)) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
-
     }
 
     private static boolean isEmptyString(String dataElement) {

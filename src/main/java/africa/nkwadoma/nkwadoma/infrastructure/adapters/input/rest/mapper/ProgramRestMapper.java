@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
+import jakarta.validation.*;
 import org.mapstruct.*;
 import org.springframework.cglib.core.*;
 
@@ -25,4 +26,6 @@ public interface ProgramRestMapper {
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")
     ProgramResponse toProgramResponse(Program program);
+
+    Program toUpdatedProgram(ProgramUpdateRequest programUpdateRequest);
 }

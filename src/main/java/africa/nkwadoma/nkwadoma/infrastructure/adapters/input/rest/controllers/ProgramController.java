@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -24,7 +23,6 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -38,7 +36,7 @@ public class ProgramController {
     private final ProgramRestMapper programRestMapper;
 
     @PostMapping("")
-    @Operation(summary = "Add a proram to an Institute")
+    @Operation(summary = "Add a program to an Institute")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         log.info("Meedl User{}", meedlUser.getClaimAsString("sub"));
@@ -47,7 +45,7 @@ public class ProgramController {
         program = addProgramUseCase.createProgram(program);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
-                body(programRestMapper.toProgramResponse(program)).
+                data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.CREATED
         );
@@ -68,7 +66,7 @@ public class ProgramController {
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                body(response).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
@@ -83,8 +81,24 @@ public class ProgramController {
         program = addProgramUseCase.viewProgramByName(program);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                body(programRestMapper.toProgramResponse(program)).
+                data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update an existing proGram")
+    public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
+                                                        @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Program program = programRestMapper.toUpdatedProgram(programUpdateRequest);
+        program.setCreatedBy(meedlUser.getClaim("sub"));
+        log.info("Program at controller level: ========>{}", program);
+        program = addProgramUseCase.updateProgram(program);
+
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                data(programRestMapper.toProgramResponse(program)).
+                message(String.format("Program %s", ControllerConstant.UPDATED_SUCCESSFULLY.getMessage())).build(),
                 HttpStatus.OK
         );
     }

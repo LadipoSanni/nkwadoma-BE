@@ -13,4 +13,9 @@ public interface DurationTypeMapper {
             @ValueMapping(target = "YEARS", source = "Years")
     })
     DurationType toDurationType(String durationType);
+
+    default DurationType maptoDurationType(String durationType) {
+        durationType = durationType.trim().toUpperCase();
+        return DurationType.valueOf(durationType);
+    }
 }

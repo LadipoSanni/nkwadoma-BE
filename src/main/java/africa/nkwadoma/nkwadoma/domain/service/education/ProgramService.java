@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
 
@@ -38,6 +40,7 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getId());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
+        log.info("Program at service layer: ========>{}", program);
         return programOutputPort.saveProgram(foundProgram);
     }
 

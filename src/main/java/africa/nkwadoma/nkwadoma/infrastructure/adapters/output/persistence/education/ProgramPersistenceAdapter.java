@@ -53,6 +53,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         program.validate();
         validateCreatedBy(program);
 
+        log.info("Program at persistence layer: ========>{}", program);
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);

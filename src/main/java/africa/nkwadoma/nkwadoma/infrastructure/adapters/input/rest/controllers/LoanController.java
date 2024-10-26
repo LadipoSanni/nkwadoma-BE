@@ -39,7 +39,7 @@ public class LoanController {
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
             LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
             ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                    .body(loanProductResponse)
+                    .data(loanProductResponse)
                     .message(CREATE_LOAN_PRODUCT_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
@@ -54,7 +54,7 @@ public class LoanController {
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .body(loanProductResponse)
+                .data(loanProductResponse)
                 .message(LOAN_PRODUCT_FOUND_SUCCESSFULLY)
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
