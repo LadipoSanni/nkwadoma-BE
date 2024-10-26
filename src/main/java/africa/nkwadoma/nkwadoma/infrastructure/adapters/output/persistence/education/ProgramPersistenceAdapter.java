@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
@@ -63,10 +64,16 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
+        updateOrganization(program, organizationEntity);
 
-        organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
-        organizationEntityRepository.save(organizationEntity);
         return programMapper.toProgram(programEntity);
+    }
+
+    private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
+        if (StringUtils.isEmpty(program.getId())) {
+            organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
+            organizationEntityRepository.save(organizationEntity);
+        }
     }
 
     private void validateCreatedBy(Program program) throws MeedlException {

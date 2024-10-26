@@ -106,14 +106,13 @@ class ProgramServiceTest {
             Program addedProgram = programService.createProgram(program);
 
             log.info("Program: {}", addedProgram);
+            addedProgram.setId(program.getId());
             addedProgram.setName("New program name");
             addedProgram.setProgramDescription("New program description");
             addedProgram.setDuration(3);
             addedProgram.setMode(ProgramMode.PART_TIME);
             addedProgram.setDeliveryType(DeliveryType.ONLINE);
 
-            when(programOutputPort.findProgramById(program.getId())).thenReturn(addedProgram);
-            when(programOutputPort.saveProgram(addedProgram)).thenReturn(addedProgram);
             Program updatedProgram = programService.updateProgram(addedProgram);
 
             verify(programOutputPort, times(2)).saveProgram(addedProgram);
@@ -151,7 +150,7 @@ class ProgramServiceTest {
         try {
             when(programOutputPort.findProgramById(nonexistingProgram.getId())).thenThrow(ResourceNotFoundException.class);
         } catch (MeedlException e) {
-            log.error("Error finding program", e);
+            log.error("", e);
         }
         assertThrows(MeedlException.class, () -> programService.updateProgram((nonexistingProgram)));
     }

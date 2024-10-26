@@ -2,15 +2,19 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +44,11 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getId());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
+        if (ObjectUtils.isNotEmpty(foundProgram)) {
+            program.setOrganizationId(foundProgram.getOrganizationId());
+        }
         log.info("Program at service layer: ========>{}", program);
-        return programOutputPort.saveProgram(foundProgram);
+        return programOutputPort.saveProgram(program);
     }
 
     @Override

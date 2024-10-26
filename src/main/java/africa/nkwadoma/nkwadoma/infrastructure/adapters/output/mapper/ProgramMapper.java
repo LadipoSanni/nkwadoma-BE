@@ -17,6 +17,5 @@ public interface ProgramMapper {
     ProgramEntity toProgramEntity(Program program);
 
     @InheritInverseConfiguration
-//    @Mapping(source = "organizationEntity.id", target = "organizationId")
     Program toProgram(ProgramEntity programEntity);
 }
