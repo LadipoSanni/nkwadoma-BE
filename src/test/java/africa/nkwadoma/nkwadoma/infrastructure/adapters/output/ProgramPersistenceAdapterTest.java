@@ -425,7 +425,7 @@ class ProgramPersistenceAdapterTest {
 
     @Test
     void deleteNonExistingProgram() {
-        program.setId("invalid id");
+        program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
         assertThrows(ResourceNotFoundException.class, ()->programOutputPort.deleteProgram(program.getId()));
     }
 
@@ -433,6 +433,12 @@ class ProgramPersistenceAdapterTest {
     void deleteProgramWithNullId() {
         program.setId(null);
         assertThrows(MeedlException.class, ()->programOutputPort.deleteProgram(program.getId()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"009837", "non-uuid"})
+    void deleteProgramWithNonUUID(String programId) {
+        assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(programId));
     }
 
     @ParameterizedTest

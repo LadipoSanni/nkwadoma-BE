@@ -148,11 +148,13 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getPassword());
+        log.info("User login credentials: {}, {}", userIdentity.getEmail(), userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
+            log.info("Error logging in user: {}", exception.getMessage());
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }

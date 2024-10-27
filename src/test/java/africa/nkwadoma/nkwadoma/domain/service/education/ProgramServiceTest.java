@@ -263,8 +263,14 @@ class ProgramServiceTest {
     }
 
     @Test
-    void deleteNullProgram() {
+    void deleteProgramWithNullId() {
         program.setId(null);
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
+    }
+
+    @Test
+    void deleteNullProgram() {
+        Program program = null;
         assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
     }
 }
