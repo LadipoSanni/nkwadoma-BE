@@ -1,4 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,8 +27,9 @@ public class OrganizationEntity {
     private String createdBy;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
-//    @ElementCollection(fetch = FetchType.EAGER)
 //    private List<String> serviceOfferings = new ArrayList<>();
+
+
 //    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
 //    private ServiceOfferingEntity serviceOfferingEntity;
 }
