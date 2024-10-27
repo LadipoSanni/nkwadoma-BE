@@ -42,8 +42,10 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public Program viewProgramById(Program program) throws MeedlException {
+        MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getId());
         String programId = program.getId().trim();
+        MeedlValidator.validateUUID(programId);
         return programOutputPort.findProgramById(programId);
     }
 

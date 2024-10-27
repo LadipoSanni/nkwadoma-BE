@@ -332,7 +332,7 @@ class ProgramPersistenceAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void findProgramByNullId(String id){
+    void findProgramByEmptyId(String id){
         program.setId(id);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(program.getId()));
     }
@@ -341,6 +341,14 @@ class ProgramPersistenceAdapterTest {
     void findProgramWithNullProgramId(){
         program.setId(null);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById((program.getId())));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid", "3657679"})
+    void viewProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
+        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
     }
 
     @Test
@@ -409,7 +417,7 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByEmployeeId(userIdentity.getId());

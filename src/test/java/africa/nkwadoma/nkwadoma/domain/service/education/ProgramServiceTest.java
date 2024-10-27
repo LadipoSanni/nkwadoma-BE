@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import lombok.extern.slf4j.*;
@@ -213,7 +214,7 @@ class ProgramServiceTest {
     @Test
     void viewProgramById() {
         try {
-            program.setId("727nf-b978-n92");
+            program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
             when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
             Program foundProgram = programService.viewProgramById(program);
             assertNotNull(foundProgram);
@@ -231,19 +232,32 @@ class ProgramServiceTest {
         assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid", "3657679"})
+    void viewProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewProgramById(program));
+        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+    }
+
+    @Test
+    void viewNullProgram() {
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(null));
+    }
+
     @Test
     void viewProgramWithNullId() {
         program.setId(null);
         assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
     }
 
+
     @ParameterizedTest
-    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    @ValueSource(strings = {"   a4f6873c-9158-4a05-a79c-901b4afc04a9", "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa    "})
     void viewProgramByIdWithSpaces(String programId) {
         try {
             program.setId(programId);
-            when(programOutputPort.findProgramById(programId.trim())).thenReturn(program);
-
+            when(programOutputPort.findProgramById(program.getId().trim())).thenReturn(program);
             Program foundProgram = programService.viewProgramById(program);
             assertNotNull(foundProgram);
             verify(programOutputPort, times(1)).findProgramById(program.getId().trim());
