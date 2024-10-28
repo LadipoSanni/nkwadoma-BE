@@ -22,6 +22,7 @@ public class OrganizationIdentityValidator extends MeedlValidator {
         log.info("{}",organizationIdentity.getServiceOfferings());
         if (organizationIdentity.getServiceOfferings() == null
             || organizationIdentity.getServiceOfferings().get(0).getIndustry() == null) {
+            log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), organizationIdentity);
             throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
         }
         validateEmail(organizationIdentity.getEmail());

@@ -45,7 +45,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
-        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMiddlUser().getEmail().trim());
+//        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMiddlUser().getEmail().trim());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
