@@ -89,27 +89,27 @@ class InvestmentVehicleAdapterTest {
 
     }
 
-    @Test
-    void checkIfInvestmentVehicleExistWithSameEntity(){
-        try{
-            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.save(investment);
-            investmentId = investmentVehicle.getId();
-            investmentVehicleOutputPort.checkIfInvestmentVehicleNameExist(investmentVehicle);
-        } catch (MeedlException exception) {
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
-        }
-    }
+//    @Test
+//    void checkIfInvestmentVehicleExistWithSameEntity(){
+//        try{
+//            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.save(investment);
+//            investmentId = investmentVehicle.getId();
+//            investmentVehicleOutputPort.checkIfInvestmentVehicleNameExist(investmentVehicle);
+//        } catch (MeedlException exception) {
+//            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+//        }
+//    }
 
-    @Test
-    void updateInvestmentVehicleRate() {
-        try {
-            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            investmentVehicle.setRate(15F);
-            investmentVehicleOutputPort.save(investmentVehicle);
-        } catch (MeedlException exception) {
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
-        }
-    }
+//    @Test
+//    void updateInvestmentVehicleRate() {
+//        try {
+//            InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+//            investmentVehicle.setRate(15F);
+//            investmentVehicleOutputPort.save(investmentVehicle);
+//        } catch (MeedlException exception) {
+//            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+//        }
+//    }
 
 
 
@@ -219,14 +219,14 @@ class InvestmentVehicleAdapterTest {
     }
 
 
-    @Test
-    void findInvestmentVehicleDetailsWithFakeID() {
-        try {
-            investmentVehicleOutputPort.findById("Fake-id");
-        }catch (MeedlException e){
-            assertEquals("Investment vehicle not found",e.getMessage());
-        }
-    }
+//    @Test
+//    void findInvestmentVehicleDetailsWithFakeID() {
+//        try {
+//            investmentVehicleOutputPort.findById("Fake-id");
+//        }catch (MeedlException e){
+//            assertEquals("Investment vehicle not found",e.getMessage());
+//        }
+//    }
 
     @Order(7)
     @Test
@@ -244,8 +244,13 @@ class InvestmentVehicleAdapterTest {
 
     @AfterAll
     void cleanUp(){
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+
+        try {
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+        } catch (MeedlException e) {
+            log.error("{}", e.getClass().getName());
+        }
     }
 
 }

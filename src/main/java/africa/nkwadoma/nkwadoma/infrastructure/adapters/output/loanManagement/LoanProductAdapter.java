@@ -8,16 +8,21 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
@@ -109,4 +114,14 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
+
+    @Override
+    public Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct) {
+        int defaultPageSize = BigInteger.TEN.intValue();
+        int size = loanProduct.getPageSize() <= BigInteger.ZERO.intValue() ? defaultPageSize : loanProduct.getPageSize();
+        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size);
+        Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
+        return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
+    }
+
 }

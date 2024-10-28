@@ -20,6 +20,7 @@ import java.util.List;
 @ToString
 public class LoanProduct {
     private String id;
+    private String actorId;
     private String name;
     private int moratorium;
     private ActivationStatus loanProductStatus;
@@ -47,6 +48,9 @@ public class LoanProduct {
     private String fundProductId;
     private int totalNumberOfLoanees;
     private int totalNumberOfLoanProduct;
+
+    private int pageSize;
+    private int pageNumber;
 
     public void validateLoanProductDetails() throws MeedlException {
         MeedlValidator.validateDataElement(name);
