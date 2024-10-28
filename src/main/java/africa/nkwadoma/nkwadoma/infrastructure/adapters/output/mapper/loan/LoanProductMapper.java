@@ -18,4 +18,6 @@ public interface LoanProductMapper {
     LoanProductEntity mapLoanProductToEntity(LoanProduct loanProduct);
 
     LoanProduct mapEntityToLoanProduct(LoanProductEntity entity);
+
+    LoanProduct mapLoanProductToLoanProduct(LoanProduct loanProduct);
 }

@@ -45,7 +45,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
 
     @PostMapping("/loan-product/create")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+//    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
@@ -60,7 +60,20 @@ public class LoanController {
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
-
+    @PostMapping("/loan-product/update")
+    @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
+        log.info("Update loan product called with id .... {}", request.getId());
+        LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
+        LoanProduct updatedLoanProduct = createLoanProductUseCase.updateLoanProduct(loanProduct);
+        LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(updatedLoanProduct);
+        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
+                .body(loanProductResponse)
+                .message(UPDATED_LOAN_PRODUCT_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
     @GetMapping("/loan-product/all")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
@@ -82,20 +95,6 @@ public class LoanController {
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
-    }
-    @PostMapping("/loan-product/update")
-    @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
-        log.info("Update loan product called with id .... {}", request.getLoanProductId());
-        LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
-        LoanProduct updatedLoanProduct = createLoanProductUseCase.updateLoanProduct(loanProduct);
-        LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(updatedLoanProduct);
-        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .body(loanProductResponse)
-                .message(UPDATED_LOAN_PRODUCT_SUCCESS)
-                .statusCode(HttpStatus.CREATED.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @GetMapping("/loan-product/view-details-by-id")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)

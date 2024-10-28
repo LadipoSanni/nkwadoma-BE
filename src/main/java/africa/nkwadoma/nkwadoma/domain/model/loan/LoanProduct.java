@@ -9,12 +9,19 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
+
+@Slf4j
 @Getter
 @Setter
 @ToString
@@ -105,4 +112,48 @@ public class LoanProduct {
         }
     }
 
+    public void updateValues(LoanProduct existingLoanProduct) {
+        if (isEmptyString(this.name)) {
+            this.setName(existingLoanProduct.getName());
+        }
+        if (isEmptyString(this.termsAndCondition)) {
+            this.setTermsAndCondition(existingLoanProduct.getTermsAndCondition());
+        }
+        if (isEmptyString(this.mandate)) {
+            this.setMandate(existingLoanProduct.getMandate());
+        }
+        if (this.loanProductSize.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
+            this.setLoanProductSize(existingLoanProduct.getLoanProductSize());
+        }
+        if (this.obligorLoanLimit.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
+            this.setObligorLoanLimit(existingLoanProduct.getObligorLoanLimit());
+        }
+
+        if (isEmptyString(this.disbursementTerms)) {
+            this.setDisbursementTerms(existingLoanProduct.getDisbursementTerms());
+        }
+
+        if (this.moratorium < BigInteger.ZERO.intValue()) {
+            this.setMoratorium(existingLoanProduct.getMoratorium()) ;
+        }
+
+        if (ObjectUtils.isEmpty(this.loanProductStatus)) {
+            this.setLoanProductStatus(existingLoanProduct.getLoanProductStatus());
+        }
+
+        if (this.tenor < BigInteger.ZERO.intValue()) {
+            this.setTenor(existingLoanProduct.getTenor());
+        }
+
+        if (this.interestRate < BigInteger.ZERO.intValue()) {
+            this.setInterestRate(existingLoanProduct.getInterestRate());
+        }
+
+        if (this.costOfFund < BigDecimal.ZERO.intValue()) {
+            this.costOfFund = existingLoanProduct.getCostOfFund();
+        }
+        if (ObjectUtils.isEmpty(this.sponsors)) {
+            this.setSponsors(existingLoanProduct.getSponsors());
+        }
+    }
 }

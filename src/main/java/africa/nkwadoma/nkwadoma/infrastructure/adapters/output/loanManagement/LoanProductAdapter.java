@@ -1,14 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
@@ -18,11 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
@@ -53,40 +48,20 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
         LoanProduct foundLoanProduct = findById(loanProduct.getId());
-        updateValues(foundLoanProduct, loanProduct);
+        log.info("Loan product to be updated {}", foundLoanProduct);
+
+        loanProduct.updateValues(foundLoanProduct);
         loanProduct.validateLoanProductDetails();
+
         if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(foundLoanProduct);
+        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setUpdatedAt(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
         log.info("Loan product updated {}",  loanProduct);
 
         return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
-    }
-
-    private void updateValues(LoanProduct foundLoanProduct, LoanProduct loanProduct) {
-        if (isEmptyString(loanProduct.getName())) {
-            loanProduct.setName(foundLoanProduct.getName());
-        }
-        if (isEmptyString(loanProduct.getTermsAndCondition())) {
-            loanProduct.setTermsAndCondition(foundLoanProduct.getTermsAndCondition());
-        }
-        if (isEmptyString(loanProduct.getMandate())) {
-            loanProduct.setMandate(foundLoanProduct.getMandate());
-        }
-        if(ObjectUtils.isEmpty(loanProduct.getLoanProductSize())){
-            if (loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-                loanProduct.setLoanProductSize(foundLoanProduct.getLoanProductSize());
-            }
-        }
-        if(ObjectUtils.isEmpty(loanProduct.getObligorLoanLimit())){
-            if (loanProduct.getObligorLoanLimit().compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-                loanProduct.setObligorLoanLimit(foundLoanProduct.getObligorLoanLimit());
-            }
-        }
-
     }
 
     @Override
