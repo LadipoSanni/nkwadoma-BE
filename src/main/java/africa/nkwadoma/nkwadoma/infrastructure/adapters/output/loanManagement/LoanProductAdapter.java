@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
@@ -11,10 +13,15 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,8 +47,9 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
-        loanProduct.validateLoanProductDetails();
         LoanProduct foundLoanProduct = findById(loanProduct.getId());
+        updateValues(foundLoanProduct, loanProduct);
+        loanProduct.validateLoanProductDetails();
         if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
@@ -51,6 +59,29 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         log.info("Loan product updated {}",  loanProduct);
 
         return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+    }
+
+    private void updateValues(LoanProduct foundLoanProduct, LoanProduct loanProduct) {
+        if (isEmptyString(loanProduct.getName())) {
+            loanProduct.setName(foundLoanProduct.getName());
+        }
+        if (isEmptyString(loanProduct.getTermsAndCondition())) {
+            loanProduct.setTermsAndCondition(foundLoanProduct.getTermsAndCondition());
+        }
+        if (isEmptyString(loanProduct.getMandate())) {
+            loanProduct.setMandate(foundLoanProduct.getMandate());
+        }
+        if(ObjectUtils.isEmpty(loanProduct.getLoanProductSize())){
+            if (loanProduct.getLoanProductSize().compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
+                loanProduct.setLoanProductSize(foundLoanProduct.getLoanProductSize());
+            }
+        }
+        if(ObjectUtils.isEmpty(loanProduct.getObligorLoanLimit())){
+            if (loanProduct.getObligorLoanLimit().compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
+                loanProduct.setObligorLoanLimit(foundLoanProduct.getObligorLoanLimit());
+            }
+        }
+
     }
 
     @Override

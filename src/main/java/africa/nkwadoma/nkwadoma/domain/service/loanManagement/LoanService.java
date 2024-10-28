@@ -36,7 +36,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
-        loanProduct.validateLoanProductDetails();
         return loanProductOutputPort.updateLoanProduct(loanProduct);
     }
 
