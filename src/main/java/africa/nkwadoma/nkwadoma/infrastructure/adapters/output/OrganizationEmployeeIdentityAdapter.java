@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -54,8 +55,13 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
-        return null;
+    public Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        Page<OrganizationEmployeeEntity> organizationEmployees =
+                employeeAdminEntityRepository.findAllByOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
+        return organizationEmployees.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
     @Override

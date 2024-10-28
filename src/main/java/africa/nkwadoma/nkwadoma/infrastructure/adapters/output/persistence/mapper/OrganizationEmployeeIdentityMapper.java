@@ -11,7 +11,6 @@ public interface OrganizationEmployeeIdentityMapper {
     OrganizationEmployeeEntity toOrganizationEmployeeEntity(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
 
-//    @Mapping(target = "organization",ignore = true)
     @InheritInverseConfiguration
     OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeEntity organizationEmployeeEntity);
 }

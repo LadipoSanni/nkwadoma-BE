@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +62,18 @@ public class MeedlValidator {
     public static void validateObjectInstance(Object instance) throws MeedlException {
         if (ObjectUtils.isEmpty(instance)){
             throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
+        }
+    }
+
+    public static void validatePageNumber(int pageNumber) throws MeedlException {
+        if (pageNumber < 0) {
+            throw new MeedlException(MeedlMessages.PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+        }
+    }
+
+    public static void validatePageSize(int pageSize) throws MeedlException {
+        if (pageSize < 1) {
+            throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
 }
