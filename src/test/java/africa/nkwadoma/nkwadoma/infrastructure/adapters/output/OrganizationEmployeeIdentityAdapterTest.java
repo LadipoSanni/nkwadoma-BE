@@ -18,6 +18,7 @@ import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @Slf4j
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -32,43 +33,35 @@ class OrganizationEmployeeIdentityAdapterTest {
     private OrganizationIdentity amazingGrace;
     private  UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
-    private String organizationId;
     private int pageNumber = 0;
     private int pageSize = 10;
 
-
-    @BeforeEach
-    void setUp() {
-
-    }
-
-
     @BeforeAll
     void init() {
-        joel = new UserIdentity();
-        joel.setFirstName("Joel");
-        joel.setLastName("Jacobs");
-        joel.setEmail("joel@johnson.com");
-        joel.setId(joel.getEmail());
-        joel.setPhoneNumber("098647748393");
-        joel.setEmailVerified(Boolean.TRUE);
-        joel.setEnabled(Boolean.TRUE);
-        joel.setCreatedAt(LocalDateTime.now().toString());
-        joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        joel.setCreatedBy("Ayo");
-
-        amazingGrace = new OrganizationIdentity();
-        amazingGrace.setName("Amazing Grace Enterprises");
-        amazingGrace.setEmail("rachel@gmail.com");
-        amazingGrace.setInvitedDate(LocalDateTime.now().toString());
-        amazingGrace.setRcNumber("RC345677");
-        amazingGrace.setPhoneNumber("0907658483");
-        amazingGrace.setTin("Tin5678");
-        amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
-                industry(Industry.EDUCATION).build()));
-        amazingGrace.setWebsiteAddress("webaddress.org");
-        amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(joel).build()));
         try {
+            joel = new UserIdentity();
+            joel.setFirstName("Joel");
+            joel.setLastName("Jacobs");
+            joel.setEmail("joel@johnson.com");
+            joel.setId(joel.getEmail());
+            joel.setPhoneNumber("098647748393");
+            joel.setEmailVerified(Boolean.TRUE);
+            joel.setEnabled(Boolean.TRUE);
+            joel.setCreatedAt(LocalDateTime.now().toString());
+            joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            joel.setCreatedBy("Ayo");
+
+            amazingGrace = new OrganizationIdentity();
+            amazingGrace.setName("Amazing Grace Enterprises");
+            amazingGrace.setEmail("rachel@gmail.com");
+            amazingGrace.setInvitedDate(LocalDateTime.now().toString());
+            amazingGrace.setRcNumber("RC345677");
+            amazingGrace.setPhoneNumber("0907658483");
+            amazingGrace.setTin("Tin5678");
+            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
+                    industry(Industry.EDUCATION).build()));
+            amazingGrace.setWebsiteAddress("webaddress.org");
+            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(joel).build()));
 
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
@@ -82,14 +75,14 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Test
     void findAllOrganizationEmployees() {
         try {
-            OrganizationEmployeeIdentity savedEmployeeIdentity;
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
             UserIdentity userIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
+
             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
             organizationEmployeeIdentity.setMiddlUser(userIdentity);
-
-            savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+                    save(organizationEmployeeIdentity);
             assertNotNull(savedEmployeeIdentity);
 
             Page<OrganizationEmployeeIdentity> organizationEmployees =
@@ -147,16 +140,27 @@ class OrganizationEmployeeIdentityAdapterTest {
 
 
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         try {
-//            OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.(amazingGrace.getId());
-//            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentity.getId());
+            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByEmployeeId(joel.getId());
+            organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+            userIdentityOutputPort.deleteUserByEmail(joel.getEmail());
 
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-            organizationIdentityOutputPort.delete(organizationIdentity.getId());
+            OrganizationIdentity organization = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(organization.getId());
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
+
+            organizationIdentityOutputPort.delete(organization.getId());
         } catch (MeedlException e) {
-            log.error("Error deleting organization from the DB", e);
+            log.error("Error occurred cleaning up", e);
         }
     }
 }
