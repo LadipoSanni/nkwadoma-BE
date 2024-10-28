@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
@@ -69,6 +71,15 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         userEntityRepository.delete(userEntity);
+    }
+
+    @Override
+    public void verifyUser(String actorId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId);
+        UserIdentity userIdentity = findById(actorId);
+        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
+            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+        }
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {

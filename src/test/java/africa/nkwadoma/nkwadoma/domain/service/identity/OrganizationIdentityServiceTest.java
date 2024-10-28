@@ -64,8 +64,8 @@ class OrganizationIdentityServiceTest {
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");
             roseCouture.setRcNumber("RC87899");
-            roseCouture.setServiceOffering(new ServiceOffering());
-            roseCouture.getServiceOffering().setIndustry(Industry.EDUCATION);
+            roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
+            roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
             roseCouture.setPhoneNumber("09876365713");
             roseCouture.setInvitedDate(LocalDateTime.now().toString());
             roseCouture.setWebsiteAddress("rosecouture.org");

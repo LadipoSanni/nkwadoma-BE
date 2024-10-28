@@ -4,12 +4,13 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
 import org.mapstruct.*;
+import org.springframework.cglib.core.*;
 
 @Mapper(componentModel = "spring", uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")
-    @Mapping(source = "programCreateRequest.createdAt", target = "createdAt")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(source = "programCreateRequest.programDuration", target = "duration")
     @Mapping(source = "programCreateRequest.programMode", target = "mode")
     @Mapping(source = "programCreateRequest.durationStatus", target = "durationType")

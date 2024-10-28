@@ -9,6 +9,8 @@ public class WhiteList {
             "/swagger-resources/**",
             "/v3/api-docs",
             "/webjars/**",
-            "/api/v1/auth/password/create"
+            "/actuator/health",
+            "/api/v1/auth/password/create",
+            "/api/v1/auth/password/forgotPassword"
     };
 }

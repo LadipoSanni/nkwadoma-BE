@@ -60,8 +60,7 @@ public class CohortServiceTest {
     private CohortRepository cohortRepository;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
-    @Autowired
-    private UserEntityRepository userEntityRepository;
+
 
 
     @BeforeAll
@@ -71,8 +70,9 @@ public class CohortServiceTest {
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOffering(
-                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
+                name("My Organization").rcNumber("56767").
+                serviceOfferings(
+                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
@@ -118,6 +118,7 @@ public class CohortServiceTest {
     @Order(1)
     @Test
     void saveCohort() {
+        log.info("{} program Id,= =",program.getId());
         try {
             Cohort cohort = cohortUseCase.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
@@ -215,6 +216,7 @@ public class CohortServiceTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
+        log.info("{} program Id,= =",program.getId());
         programOutputPort.deleteProgram(program.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         cohortRepository.deleteById(cohortOneId);

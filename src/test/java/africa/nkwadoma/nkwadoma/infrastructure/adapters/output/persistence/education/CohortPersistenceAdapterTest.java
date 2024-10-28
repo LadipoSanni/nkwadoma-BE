@@ -54,7 +54,7 @@ public class CohortPersistenceAdapterTest {
     private  OrganizationIdentity organizationIdentity;
     @Autowired
     private OrganizationIdentityService organizationIdentityService;
-    private   Program program;
+    private Program program;
     private String cohortOneId;
     private String cohortTwoId;
 
@@ -67,8 +67,8 @@ public class CohortPersistenceAdapterTest {
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization123").rcNumber("56767").serviceOffering(
-                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
+                name("My Organization").rcNumber("56767").serviceOfferings(
+                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
