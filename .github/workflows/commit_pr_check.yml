@@ -97,8 +97,8 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS" \
+            "${{ SMTP_SERVER }}" "${{ SMTP_PORT }}" "${{ SMTP_USERNAME }}" \
+            "${{ SMTP_PASSWORD }}" "${{ EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
       - name: Send Activity Summary Email
@@ -113,7 +113,7 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
           .github/workflows/scripts/activity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS" \
+            "${{ SMTP_SERVER }}" "${{ SMTP_PORT }}" "${{ SMTP_USERNAME }}" \
+            "${{ SMTP_PASSWORD }}" "${{ EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}" \
             "${{ env.builds }}"
