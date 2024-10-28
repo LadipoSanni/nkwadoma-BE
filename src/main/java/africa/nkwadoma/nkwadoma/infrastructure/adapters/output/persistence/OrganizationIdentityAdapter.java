@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
@@ -35,6 +36,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        organizationEntity.setInvitedDate(LocalDateTime.now());
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);

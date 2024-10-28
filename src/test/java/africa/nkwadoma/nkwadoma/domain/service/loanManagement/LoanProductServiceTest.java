@@ -121,6 +121,34 @@ class LoanProductServiceTest {
             throw new RuntimeException(e);
         }
     }
+    @ParameterizedTest
+    @ValueSource(strings = {"non-existing loan product", StringUtils.SPACE, StringUtils.EMPTY })
+    void updateByIdWithAndInvalidId(String id) {
+        loanProduct.setId(id);
+        assertThrows(MeedlException.class , ()->loanService.updateLoanProduct(loanProduct));
+    }
+    @Test
+    void updateLoanProduct(){
+        try {
+            when(loanProductOutputPort.findByName(loanProduct.getName())).thenReturn(loanProduct);
+        } catch (MeedlException e) {
+            log.error("Failed to update loan product");
+        }
+        try {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(loanProduct.getName());
+            foundLoanProduct.setDisbursementTerms("Updated Gemini Loan Product");
+            LoanProduct loanProduct = loanService.updateLoanProduct(foundLoanProduct);
+            LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+            assertNotNull(updatedLoanProduct);
+            assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());
+        } catch (MeedlException e) {
+            log.error("Failed to update loan product");
+        }
+    }
+    @Test
+    void updateByIdWithNull() {
+        assertThrows(MeedlException.class , ()->loanService.updateLoanProduct(null));
+    }
     @Test
     void deleteLoanProductWithNullRequest(){
         assertThrows(MeedlException.class, ()-> loanService.deleteLoanProductById(null));

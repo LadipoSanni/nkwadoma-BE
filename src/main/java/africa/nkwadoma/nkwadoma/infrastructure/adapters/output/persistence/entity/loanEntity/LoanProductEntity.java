@@ -52,4 +52,5 @@ public class LoanProductEntity {
     private String fundProductId;
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
     private int totalNumberOfLoanees;
+    private int totalNumberOfLoanProduct;
 }

@@ -8,4 +8,5 @@ public interface CreateLoanProductUseCase {
 
     void deleteLoanProductById(LoanProduct loanProduct ) throws MeedlException;
 
+    LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException;
 }

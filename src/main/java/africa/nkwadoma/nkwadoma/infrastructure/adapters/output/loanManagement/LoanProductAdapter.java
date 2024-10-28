@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -30,8 +31,25 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         }
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAt(LocalDateTime.now());
+        loanProductEntity.setTotalNumberOfLoanProduct(loanProductEntity.getTotalNumberOfLoanProduct() +BigInteger.ONE.intValue());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
-        log.info("Loan product {}",  loanProduct);
+        log.info("Loan product created {}",  loanProduct);
+        return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+    }
+    @Override
+    public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanProduct);
+        MeedlValidator.validateUUID(loanProduct.getId());
+        loanProduct.validateLoanProductDetails();
+        LoanProduct foundLoanProduct = findById(loanProduct.getId());
+        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
+            throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
+        }
+        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(foundLoanProduct);
+        loanProductEntity.setUpdatedAt(LocalDateTime.now());
+        LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
+        log.info("Loan product updated {}",  loanProduct);
+
         return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
     }
 
@@ -60,5 +78,4 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
-
 }

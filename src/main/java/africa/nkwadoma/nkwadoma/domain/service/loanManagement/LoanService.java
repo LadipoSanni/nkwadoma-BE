@@ -33,6 +33,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
+    public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanProduct);
+        MeedlValidator.validateUUID(loanProduct.getId());
+        loanProduct.validateLoanProductDetails();
+        return loanProductOutputPort.updateLoanProduct(loanProduct);
+    }
+
+    @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductId);
         return loanProductOutputPort.findById(loanProductId);

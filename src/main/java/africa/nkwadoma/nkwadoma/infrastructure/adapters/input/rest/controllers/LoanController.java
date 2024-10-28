@@ -45,6 +45,20 @@ public class LoanController {
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
+    @PostMapping("/loan-product/update")
+    @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
+        log.info("Update loan product called with id .... {}", request.getLoanProductId());
+        LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
+        LoanProduct updatedLoanProduct = createLoanProductUseCase.updateLoanProduct(loanProduct);
+        LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(updatedLoanProduct);
+        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
+                .body(loanProductResponse)
+                .message(UPDATED_LOAN_PRODUCT_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
     @GetMapping("/loan-product/view-details-by-id")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam

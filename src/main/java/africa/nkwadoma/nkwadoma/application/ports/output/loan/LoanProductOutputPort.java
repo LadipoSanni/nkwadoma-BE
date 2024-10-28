@@ -14,4 +14,6 @@ public interface LoanProductOutputPort {
     LoanProduct findById(String id) throws MeedlException;
 
     LoanProduct findByName(String name) throws MeedlException;
+
+    LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException;
 }

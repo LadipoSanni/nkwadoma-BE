@@ -46,6 +46,7 @@ public class LoanProduct {
     private String disbursementTerms;
     private String fundProductId;
     private int totalNumberOfLoanees;
+    private int totalNumberOfLoanProduct;
 
     public void validateLoanProductDetails() throws MeedlException {
         MeedlValidator.validateDataElement(name);
