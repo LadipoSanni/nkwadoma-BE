@@ -98,10 +98,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         validateDataElement(userId);
         validateDataElement(programId);
         validateDataElement(cohortId);
-//        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-//        if (userIdentity == null){
-//            throw new IdentityException(USER_NOT_FOUND.getMessage());
-//        }
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity == null){
+            throw new IdentityException(USER_NOT_FOUND.getMessage());
+        }
         Program program = programOutputPort.findProgramById(programId);
         return getCohort(cohortId, program);
     }

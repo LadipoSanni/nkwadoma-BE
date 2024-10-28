@@ -4,6 +4,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -12,6 +13,8 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,21 +45,28 @@ public class CohortServiceTest {
     private Cohort cohort;
     private String cohortOneId;
     private String cohortTwoId;
+    private String meedleUser;
 
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private OrganizationIdentityService organizationIdentityService;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
     private Program program;
     @Autowired
     private CohortRepository cohortRepository;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private UserEntityRepository userEntityRepository;
 
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 2").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .middlUser(userIdentity).build();
@@ -71,7 +81,8 @@ public class CohortServiceTest {
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
         try {
-            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            organizationIdentity = organizationIdentityService.inviteOrganization(organizationIdentity);
+            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
             program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
@@ -85,21 +96,21 @@ public class CohortServiceTest {
         elites = new Cohort();
         elites.setProgramId(program.getId());
         elites.setName("Elite");
-        elites.setCreatedBy(program.getId());
+        elites.setCreatedBy(meedleUser);
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
 
         cohort = new Cohort();
         cohort.setProgramId(program.getId());
         cohort.setName("Elite");
-        cohort.setCreatedBy(program.getId());
+        cohort.setCreatedBy(meedleUser);
         cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
         xplorers.setProgramId(program.getId());
-        xplorers.setCreatedBy(program.getId());
+        xplorers.setCreatedBy(meedleUser);
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
     }
@@ -141,9 +152,9 @@ public class CohortServiceTest {
     @Test
     void viewCohortDetails(){
         try{
-            Cohort cohort = cohortUseCase.viewCohortDetails(xplorers.getCreatedBy(),program.getId(), cohortTwoId);
+            Cohort cohort = cohortUseCase.viewCohortDetails(meedleUser,program.getId(), cohortTwoId);
             assertEquals(cohort.getName(),xplorers.getName());
-            assertEquals(cohort.getCreatedBy(),xplorers.getCreatedBy());
+            assertEquals(cohort.getCreatedBy(),meedleUser);
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -208,6 +219,7 @@ public class CohortServiceTest {
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         cohortRepository.deleteById(cohortOneId);
         cohortRepository.deleteById(cohortTwoId);
+        userIdentityOutputPort.deleteUserById(meedleUser);
     }
 
 }
