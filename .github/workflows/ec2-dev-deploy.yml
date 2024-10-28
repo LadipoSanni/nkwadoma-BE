@@ -113,9 +113,8 @@ jobs:
              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
            echo "Container started successfully!"
           
-          # Clean up dangling images to save additional space
           docker system prune -f
-        
+
           EOF
          
   send_notification:
