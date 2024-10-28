@@ -3,11 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
-import jakarta.validation.*;
 import org.mapstruct.*;
-import org.springframework.cglib.core.*;
 
-@Mapper(componentModel = "spring", uses = DurationTypeMapper.class)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")

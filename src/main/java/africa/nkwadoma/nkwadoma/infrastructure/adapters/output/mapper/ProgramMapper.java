@@ -2,13 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper;
 
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
-import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
-import java.util.*;
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProgramMapper {
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
@@ -18,4 +14,7 @@ public interface ProgramMapper {
 
     @InheritInverseConfiguration
     Program toProgram(ProgramEntity programEntity);
+
+    Program updateProgram(Program program, @MappingTarget Program foundProgram);
+
 }

@@ -2,11 +2,10 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -14,13 +13,13 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
+    private final ProgramMapper programMapper;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
@@ -42,14 +41,13 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateDataElement(program.getId());
         MeedlValidator.validateUUID(program.getId());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
-            program.setOrganizationId(foundProgram.getOrganizationId());
+            foundProgram = programMapper.updateProgram(program, foundProgram);
+            log.info("Program at service layer: ========>{}", foundProgram);
         }
-        log.info("Program at service layer: ========>{}", program);
-        return programOutputPort.saveProgram(program);
+        return programOutputPort.saveProgram(foundProgram);
     }
 
     @Override

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,8 @@ class ProgramServiceTest {
     private ProgramService programService;
     @Mock
     private ProgramOutputPort programOutputPort;
+    @Mock
+    private ProgramMapper programMapper;
     private Program program;
     private int pageSize = 10;
     private int pageNumber = 0;
@@ -113,6 +116,9 @@ class ProgramServiceTest {
             addedProgram.setMode(ProgramMode.PART_TIME);
             addedProgram.setDeliveryType(DeliveryType.ONLINE);
 
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programMapper.updateProgram(addedProgram, program)).thenReturn(program);
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program updatedProgram = programService.updateProgram(addedProgram);
 
             verify(programOutputPort, times(2)).saveProgram(addedProgram);
