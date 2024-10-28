@@ -93,7 +93,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
@@ -108,7 +108,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
           BUILDS: ${{ env.builds }}
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
