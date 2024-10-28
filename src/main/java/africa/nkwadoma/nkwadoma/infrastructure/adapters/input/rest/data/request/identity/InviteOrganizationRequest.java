@@ -5,6 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 public class InviteOrganizationRequest {
@@ -18,5 +20,5 @@ public class InviteOrganizationRequest {
     private String adminLastName;
     private String adminEmail;
     private IdentityRole adminRole;
-    private ServiceOffering serviceOffering;
+    private List<ServiceOffering> serviceOfferings;
 }
