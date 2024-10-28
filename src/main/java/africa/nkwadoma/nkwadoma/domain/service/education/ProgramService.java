@@ -43,6 +43,7 @@ public class ProgramService implements AddProgramUseCase {
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getId());
+        MeedlValidator.validateUUID(program.getId());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
             program.setOrganizationId(foundProgram.getOrganizationId());

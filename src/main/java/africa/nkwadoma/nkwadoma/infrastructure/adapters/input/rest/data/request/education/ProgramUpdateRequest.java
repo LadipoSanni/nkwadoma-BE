@@ -30,25 +30,4 @@ public class ProgramUpdateRequest {
     public void setName(String name) {
         this.name = name.trim();
     }
-
-    public void setDurationType(DurationType durationType) {
-        if (durationType!= null) {
-            String programDurationType = durationType.name().trim().toUpperCase();
-            this.durationType = DurationType.valueOf(programDurationType);
-        }
-    }
-
-    public void setMode(ProgramMode mode) {
-        if (mode != null) {
-            String programMode = mode.name().trim().toUpperCase();
-            this.mode = ProgramMode.valueOf(programMode);
-        }
-    }
-
-    public void setDeliveryType(DeliveryType deliveryType) {
-        if (deliveryType!= null) {
-            String programDeliveryType = deliveryType.name().trim().toUpperCase();
-            this.deliveryType = DeliveryType.valueOf(programDeliveryType);
-        }
-    }
 }
