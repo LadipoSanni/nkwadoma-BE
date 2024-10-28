@@ -90,10 +90,11 @@ jobs:
           # Pull the latest Docker image
           echo "Pulling the latest image..."
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
+
               
-          # Free port 8080 if it's in use
-          echo "Freeing port 8081 if in use..."
-          sudo fuser -k 8081/tcp || true
+          # Free port 8768 if it's in use
+          echo "Freeing port 8768 if in use..."
+          sudo fuser -k 8768/tcp || true
               
           # Check if the container exists
           if [ "$(docker ps -aq -f name=meca-dev-container)" ]; then
@@ -107,11 +108,14 @@ jobs:
               
           # Run the new container with environment variables
           echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 8081:8081 \
+          docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file .env \
              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
            echo "Container started successfully!"
+          # Clean up dangling images to save additional space
+          docker system prune -f
           EOF
+         
   send_notification:
     name: Send Email Notification
     needs: [build-and-push, deploy]
