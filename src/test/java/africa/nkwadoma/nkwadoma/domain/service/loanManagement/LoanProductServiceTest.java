@@ -1,8 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,8 @@ class LoanProductServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
+    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    @Mock
     private LoanProductOutputPort loanProductOutputPort;
 
     @InjectMocks
@@ -56,6 +60,9 @@ class LoanProductServiceTest {
     void createLoanProduct() {
         try {
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
+           doNothing().when(identityManagerOutPutPort).verifyUserIsEnable(any());
+
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
@@ -131,20 +138,18 @@ class LoanProductServiceTest {
     }
     @Test
     void updateLoanProduct(){
+
+        loanProduct.setDisbursementTerms("Updated Gemini Loan Product");
+        loanProduct.setId("80123f3b-b8d9-4e7f-876b-df442bfa02c4");
         try {
-            when(loanProductOutputPort.findByName(loanProduct.getName())).thenReturn(loanProduct);
-        } catch (MeedlException e) {
-            log.error("Failed to update loan product");
-        }
-        try {
-            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(loanProduct.getName());
-            foundLoanProduct.setDisbursementTerms("Updated Gemini Loan Product");
-            LoanProduct loanProduct = loanService.updateLoanProduct(foundLoanProduct);
+            when(loanProductOutputPort.updateLoanProduct(loanProduct)).thenReturn(loanProduct);
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            loanProduct = loanService.updateLoanProduct(loanProduct);
             LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
             assertNotNull(updatedLoanProduct);
             assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());
         } catch (MeedlException e) {
-            log.error("Failed to update loan product");
+            log.error("Failed to update loan product {}", e.getMessage());
         }
     }
     @Test

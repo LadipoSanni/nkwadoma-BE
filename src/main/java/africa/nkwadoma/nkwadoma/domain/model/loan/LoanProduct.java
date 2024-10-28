@@ -15,8 +15,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
@@ -27,7 +25,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyS
 @ToString
 public class LoanProduct {
     private String id;
-    private String actorId;
+    private String createdBy;
     private String name;
     private int moratorium;
     private ActivationStatus loanProductStatus;

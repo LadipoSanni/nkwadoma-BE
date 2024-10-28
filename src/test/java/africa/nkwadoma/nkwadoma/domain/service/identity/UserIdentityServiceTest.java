@@ -21,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -343,7 +345,7 @@ class UserIdentityServiceTest {
             AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
             accessTokenResponse.setToken("token");
         when(identityManagerOutPutPort.login(favour)).thenReturn(accessTokenResponse);
-        when(identityManagerOutPutPort.verifyUserExists(any())).thenReturn(favour);
+        when(identityManagerOutPutPort.getUserByEmail(any())).thenReturn(Optional.of(favour));
 
         when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenAnswer(invocation->{
             favour.setEmailVerified(true);
@@ -363,6 +365,7 @@ class UserIdentityServiceTest {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void forgotPasswordWithInvalidEmail(String email) {

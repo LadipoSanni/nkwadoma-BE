@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
@@ -106,7 +107,7 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateEmail(email);
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-            identityManagerOutPutPort.verifyUserExists(foundUser);
+            identityManagerOutPutPort.getUserByEmail(foundUser.getEmail());
             sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
         } catch (MeedlException e) {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());

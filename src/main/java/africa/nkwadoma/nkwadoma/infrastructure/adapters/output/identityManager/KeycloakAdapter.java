@@ -156,13 +156,15 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
+
     @Override
-    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
-        UserRepresentation userRepresentation = getUserRepresentation(userIdentity, true);
-        MeedlValidator.validateUUID(userRepresentation.getId());
-        userIdentity.setId(userRepresentation.getId());
-        return userIdentity;
+    public void verifyUserIsEnable(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        UserRepresentation userRepresentation = findUserByEmail(email);
+
+        if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
+            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+        }
     }
 
     @Override

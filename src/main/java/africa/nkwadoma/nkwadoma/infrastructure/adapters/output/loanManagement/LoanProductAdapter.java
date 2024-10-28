@@ -14,14 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
 
 @RequiredArgsConstructor
 @Slf4j

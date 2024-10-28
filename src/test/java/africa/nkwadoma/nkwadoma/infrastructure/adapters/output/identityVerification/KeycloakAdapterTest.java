@@ -15,7 +15,6 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -241,28 +240,15 @@ class KeycloakAdapterTest {
     void logoutWithNull(){
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.logout(null));
     }
-    @Test
-    void verifyUserExists() {
-        UserIdentity userIdentity = null;
-        try {
-            userIdentity = identityManagementOutputPort.verifyUserExists(john);
-        } catch (MeedlException e) {
-           log.info("Failed to reset password {}", e.getMessage());
-        }
-        assertNotNull(userIdentity);
-        assertNotNull(userIdentity.getId());
-    }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "dibfjhd"})
-    void verifyUserExistsInvalidEmail(String email) {
-        john.setEmail(email);
-        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(john));
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "fndjnke"})
+    void verifyUserWithInvalidId(String userId){
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserIsEnable(userId));
     }
     @Test
-    void verifyUserExistsInvalidEmail() {
-        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(null));
+    void verifyUserWithValidIdNotFound(){
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserIsEnable("2c521720-563a-4449-a4bc-459bd5a2d4d7"));
     }
-
     @Test
     @Order(5)
     void changePasswordWithValidPassword() {

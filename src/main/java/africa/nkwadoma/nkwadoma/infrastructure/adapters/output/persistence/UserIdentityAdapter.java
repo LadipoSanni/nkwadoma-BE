@@ -37,11 +37,9 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findById(String id) throws MeedlException {
-        if (StringUtils.isNotEmpty(id)){
-            UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-            return userIdentityMapper.toUserIdentity(userEntity);
-        }
-        throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(id);
+        UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        return userIdentityMapper.toUserIdentity(userEntity);
     }
 
     @Override
