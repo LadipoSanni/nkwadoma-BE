@@ -1,18 +1,24 @@
-#!/bin/bash
+#!/bin/bash 
 
 SMTP_SERVER=$1
 SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
-SUCCESSFUL_COMMITS=$6
-SUCCESSFUL_PRS=$7
-FAILED_PRS=$8
-TIMESTAMP=$9
-COMMIT_AUTHOR=${10}
-COMMIT_MESSAGE=${11}
+TIMESTAMP=$6
+LAST_TIMESTAMP=$7
+TIME_DIFF=$8
+BUILDS=$9
 
 CURRENT_TIME=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+
+# Prepare builds summary
+BUILD_SUMMARY=$(echo "$BUILDS" | jq -c '.[]' | while read -r build; do
+    BRANCH=$(echo "$build" | jq -r '.branch')
+    AUTHOR=$(echo "$build" | jq -r '.author')
+    TIMESTAMP=$(echo "$build" | jq -r '.timestamp')
+    echo "<tr><td>$BRANCH</td><td>$AUTHOR</td><td>$TIMESTAMP</td></tr>"
+done)
 
 read -r -d '' HTML_BODY <<EOF
 <!DOCTYPE html>
@@ -22,12 +28,15 @@ read -r -d '' HTML_BODY <<EOF
 </head>
 <body>
   <h1>Activity Summary</h1>
-  <p><strong>Commits Verified:</strong> ${SUCCESSFUL_COMMITS}</p>
-  <p><strong>Merged Pull Requests:</strong> ${SUCCESSFUL_PRS}</p>
-  <p><strong>Failed PR Builds:</strong> ${FAILED_PRS}</p>
-  <p><strong>Last Commit Author:</strong> ${COMMIT_AUTHOR}</p>
-  <p><strong>Last Commit Message:</strong> ${COMMIT_MESSAGE}</p>
-  <p>Checked at: ${CURRENT_TIME}</p>
+  <p><strong>Last Checked:</strong> $CURRENT_TIME</p>
+  <table border="1">
+    <tr>
+      <th>Branch</th>
+      <th>Author</th>
+      <th>Timestamp</th>
+    </tr>
+    $BUILD_SUMMARY
+  </table>
   <p>Keep up the great work!</p>
 </body>
 </html>
