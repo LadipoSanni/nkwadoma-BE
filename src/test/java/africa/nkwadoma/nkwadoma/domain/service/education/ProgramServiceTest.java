@@ -35,7 +35,7 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().id("78fi2-9-02f83").name("My program").durationType(DurationType.YEARS).
+        program = Program.builder().id("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa").name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
                 objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
@@ -226,21 +226,11 @@ class ProgramServiceTest {
     @Test
     void deleteNonExistingProgram() {
         program.setId("non existing id");
-        try {
-            when(programOutputPort.findProgramById(program.getId())).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
         assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
-        try {
-            verify(programOutputPort, times(1)).findProgramById(program.getId());
-        } catch (MeedlException e) {
-            log.error("Error finding program by ID", e);
-        }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+    @ValueSource(strings = {"   1de71eaa-de6d-4cdf-8f93-aa7be533f4aa", "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa    "})
     void deleteProgramWithSpaces(String programWithSpace) {
         try {
             program.setId(programWithSpace);
@@ -262,6 +252,13 @@ class ProgramServiceTest {
         assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid"})
+    void deleteProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
+    }
+
     @Test
     void deleteProgramWithNullId() {
         program.setId(null);
@@ -270,7 +267,6 @@ class ProgramServiceTest {
 
     @Test
     void deleteNullProgram() {
-        Program program = null;
-        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
+        assertThrows(MeedlException.class, ()->programService.deleteProgram(null));
     }
 }

@@ -45,6 +45,7 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getId());
         String programId = program.getId().trim();
+        MeedlValidator.validateUUID(programId);
         Program foundProgram = programOutputPort.findProgramById(programId);
         programOutputPort.deleteProgram(foundProgram.getId());
     }
