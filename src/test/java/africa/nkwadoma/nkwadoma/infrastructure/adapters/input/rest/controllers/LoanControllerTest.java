@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -40,6 +41,7 @@ class LoanControllerTest {
     private LoanProductRequest loanProductRequest;
     private LoanProduct loanProduct;
     private LoanProductResponse loanProductResponse;
+    private Jwt jwt;
     @BeforeEach
     void setUp() {
         loanProductRequest = new LoanProductRequest();
@@ -65,6 +67,8 @@ class LoanControllerTest {
         loanProductResponse.setObligorLoanLimit(new BigDecimal("100"));
         loanProductResponse.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProductResponse.setLoanProductSize(new BigDecimal("1000"));
+
+        jwt = mock(Jwt.class);
     }
 
     @Test
@@ -75,7 +79,7 @@ class LoanControllerTest {
         ResponseEntity<ApiResponse<?>> apiResponse  = null;
         try {
             when(createLoanProductUseCase.createLoanProduct(loanProduct)).thenReturn(loanProduct);
-            apiResponse = loanController.createLoanProduct(loanProductRequest);
+            apiResponse = loanController.createLoanProduct(jwt, loanProductRequest);
         } catch (MeedlException e) {
             log.error("Failed to create loan product {}", e.getMessage());
         }
@@ -105,7 +109,7 @@ class LoanControllerTest {
         when(loanProductMapper.mapToLoanProduct(loanProductRequest)).thenReturn(loanProduct);
         try {
             when(createLoanProductUseCase.createLoanProduct(loanProduct)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, ()-> loanController.createLoanProduct(loanProductRequest));
+            assertThrows(MeedlException.class, ()-> loanController.createLoanProduct(jwt, loanProductRequest));
             verify(loanProductMapper, times(1)).mapToLoanProduct(loanProductRequest);
         } catch (MeedlException e) {
             log.error("Failed to create loan product with invalid details {}", e.getMessage());
