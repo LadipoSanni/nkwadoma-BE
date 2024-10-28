@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.*;
 
 import java.util.*;
 
@@ -50,6 +51,11 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
           return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
       }
         throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
+        return null;
     }
 
     @Override
