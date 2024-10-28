@@ -48,7 +48,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
         LoanProduct foundLoanProduct = findById(loanProduct.getId());
-        log.info("Loan product to be updated {}", foundLoanProduct);
+        log.info("Loan product found to be updated {}", foundLoanProduct);
 
         loanProduct.updateValues(foundLoanProduct);
         loanProduct.validateLoanProductDetails();
