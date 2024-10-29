@@ -95,7 +95,7 @@ jobs:
 
           # Free port 8768 if it's in use
           echo "Freeing port 8768 if in use..."
-          sudo fuser -k 8080/tcp || true
+          sudo fuser -k 8768/tcp || true
               
           # Check if the container exists
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
@@ -107,7 +107,7 @@ jobs:
               
           # Run the new container
           echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 8080:8080 \
+          docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file .env \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
 
