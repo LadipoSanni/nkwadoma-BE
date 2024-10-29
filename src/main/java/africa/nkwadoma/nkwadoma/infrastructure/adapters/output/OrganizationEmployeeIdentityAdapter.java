@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
@@ -31,11 +32,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
-        if(!StringUtils.isEmpty(id)){
-            OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
-            return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
-        }
-        throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(id);
+        OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
     }
 
     @Override
@@ -68,5 +67,14 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findById(id).
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeAdminEntityRepository.delete(employeeEntity);
+    }
+
+    @Override
+    public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        List<OrganizationEmployeeEntity> employeeEntities = employeeAdminEntityRepository.findAllByOrganization(organizationId);
+        return employeeEntities.stream()
+                .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
+                .toList();
     }
 }

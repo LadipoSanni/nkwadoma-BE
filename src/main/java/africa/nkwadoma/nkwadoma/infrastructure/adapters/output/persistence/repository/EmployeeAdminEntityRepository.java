@@ -10,4 +10,5 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
     Optional<OrganizationEmployeeEntity> findByMiddlUser_CreatedBy(String createdBy);
 
+    List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 }

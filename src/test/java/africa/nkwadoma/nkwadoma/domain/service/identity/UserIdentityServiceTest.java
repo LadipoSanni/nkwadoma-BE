@@ -71,7 +71,7 @@ class UserIdentityServiceTest {
         try {
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenThrow(MeedlException.class);
             assertThrows(MeedlException.class, () -> userIdentityOutputPort.findByEmail(favour.getEmail()));
-            favour.setCreatedBy("mock id for created by");
+            favour.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
             favour.setPassword(null);
 
             when(organizationEmployeeIdentityOutputPort.findByEmployeeId(favour.getCreatedBy())).thenReturn(employeeIdentity);
@@ -105,7 +105,7 @@ class UserIdentityServiceTest {
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
-        favour.setCreatedBy("notexisting");
+        favour.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
         assertThrows(MeedlException.class,()-> userIdentityService.inviteColleague(favour));
     }
 

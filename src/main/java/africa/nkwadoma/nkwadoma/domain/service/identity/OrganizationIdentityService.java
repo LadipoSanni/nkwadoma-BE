@@ -46,20 +46,26 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     }
 
     @Override
-    public void deactivateOrganization(String organizationId) throws MeedlException {
+    public OrganizationIdentity deactivateOrganization(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        List<OrganizationEmployeeIdentity> organizationEmployees = organizationIdentityOutputPort.findById(organizationId).getOrganizationEmployees();
-        organizationEmployees.forEach(employee -> {
-            try {
-                identityManagerOutPutPort.disableUserAccount(employee.getMiddlUser());
-            } catch (MeedlException e) {
-                log.error("");
-            }
-        });
+        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        organizationEmployees
+                .forEach(organizationEmployeeIdentity -> {
+                            try {
+                                identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMiddlUser());
+                            } catch (MeedlException e) {
+                                log.error("Error disabling organization user : {}", e.getMessage());
+                            }
+                        });
+
+        identityManagerOutPutPort.disableOrganization(foundOrganization);
+        foundOrganization.setEnabled(Boolean.FALSE);
+        return organizationIdentityOutputPort.save(foundOrganization);
+
     }
 
-    @Override
-    public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
+    private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
@@ -76,6 +82,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     }
 
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
+        organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());

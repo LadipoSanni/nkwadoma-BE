@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -15,24 +16,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.INVITE_ORGANIZATION_SUCCESS;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_DESCRIPTION;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_TITLE;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.ORGANIZATION_DEACTIVATION_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
-public class InviteOrganizationController {
+public class OrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
@@ -61,7 +58,16 @@ public class InviteOrganizationController {
         }
 
     }
-
+    @PostMapping("organization/deactivate")
+    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestParam @Valid String organizationId) throws MeedlException {
+            createOrganizationUseCase.deactivateOrganization(organizationId);
+            ApiResponse<Object> apiResponse = ApiResponse.builder()
+                    .message(ORGANIZATION_DEACTIVATION_SUCCESS)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
     private static List<OrganizationEmployeeIdentity> getOrganizationEmployeeIdentities(OrganizationEmployeeIdentity organizationEmployeeIdentity) {
         List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
         orgEmployee.add(organizationEmployeeIdentity);

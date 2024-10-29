@@ -166,8 +166,12 @@ public class CohortPersistenceAdapterTest {
     }
 
     @AfterAll
-    void cleanUp() throws MeedlException {
-        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
-        organizationIdentityOutputPort.delete(foundOrganization.getId());
+    void cleanUp() {
+        try {
+            OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+            organizationIdentityOutputPort.delete(foundOrganization.getId());
+        } catch (MeedlException e) {
+            log.error("{} {}", e.getClass().getName(), e.getMessage());
+        }
     }
 }

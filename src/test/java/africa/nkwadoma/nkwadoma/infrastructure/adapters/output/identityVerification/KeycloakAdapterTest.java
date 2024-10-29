@@ -12,7 +12,6 @@ import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
-import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -342,30 +341,13 @@ class KeycloakAdapterTest {
 //        assertEquals(clientRepresentation.getName(), );
         log.info("Client representation {}", clientRepresentation.getName());
     }
-    @Test
-    void getClientReSourceById() {
-        ClientResource clientResource = null;
-        try {
-            clientResource = identityManagementOutputPort.getClientResourceClientId("rose couture6");
-        } catch (MeedlException e) {
-            log.error("Error getting client resource {}", e.getMessage());
-        }
-        assertNotNull(clientResource);
-        ClientRepresentation clientRepresentation = clientResource.toRepresentation();
-        assertNotNull(clientRepresentation.getName());
-//        assertEquals(clientRepresentation.getName(), );
-        log.info("Client resource {}", clientRepresentation.getName());
-    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void getClientRepresentationWithInvalidId(String id) {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId(id));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void getClientResourceWithInvalidId(String id) {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientResourceClientId(id));
-    }
+
     @Test
     void getClientRepresentationWithNoneExistingId() {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));

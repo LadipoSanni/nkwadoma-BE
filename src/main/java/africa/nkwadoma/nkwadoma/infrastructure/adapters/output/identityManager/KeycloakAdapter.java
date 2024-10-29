@@ -126,22 +126,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         MeedlValidator.validateDataElement(organizationIdentity.getName());
         ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
         clientRepresentation.setEnabled(Boolean.FALSE);
-        ClientResource clientResource = getClientResourceClientId(organizationIdentity.getName());
-        clientResource.update(clientRepresentation);
-    }
-    @Override
-    public ClientResource getClientResourceClientId(String clientId) throws MeedlException {
-        MeedlValidator.validateDataElement(clientId);
-        Keycloak foundKeycloak = KeycloakBuilder.builder()
-                .grantType(OAuth2Constants.PASSWORD)
-                .realm(KEYCLOAK_REALM)
-                .clientId(clientId)
-                .serverUrl(SERVER_URL)
-                .username("")
-                .password("")
-                .build();
-        ClientsResource clientsResource = getClients(foundKeycloak);
-        return clientsResource.get(clientId);
+
+        //Todo -- The client is yet to be updated on keycloak as disabled.
     }
     @Override
     public ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException {

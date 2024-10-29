@@ -24,8 +24,6 @@ public interface IdentityManagerOutPutPort {
 
     void disableOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    ClientResource getClientResourceClientId(String clientId) throws MeedlException;
-
     ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
 
     UserIdentity createPassword(String email, String password) throws MeedlException;

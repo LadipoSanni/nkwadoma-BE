@@ -37,10 +37,10 @@ public class UserIdentityValidator extends MeedlValidator {
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
 
-         validateEmail(userIdentity.getEmail());
-         validateDataElement(userIdentity.getFirstName());
-         validateDataElement(userIdentity.getLastName());
-         validateDataElement(userIdentity.getCreatedBy());
+         MeedlValidator.validateEmail(userIdentity.getEmail());
+         MeedlValidator.validateDataElement(userIdentity.getFirstName());
+         MeedlValidator.validateDataElement(userIdentity.getLastName());
+         MeedlValidator.validateUUID(userIdentity.getCreatedBy());
      }
 
     private static void validateUserEmail(String email) throws IdentityException {

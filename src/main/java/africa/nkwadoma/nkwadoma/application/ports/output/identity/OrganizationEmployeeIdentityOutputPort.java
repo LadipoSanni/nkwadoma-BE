@@ -13,4 +13,6 @@ public interface OrganizationEmployeeIdentityOutputPort {
     Optional<OrganizationEmployeeIdentity> findByCreatedBy(String createdBy) throws MeedlException;
 
     void delete(String id) throws MeedlException;
+
+    List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
 }
