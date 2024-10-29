@@ -46,6 +46,7 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setTenure(12);
     }
 
+    @Order(1)
     @Test
     void createInvestmentVehicle() {
        try {
@@ -59,6 +60,7 @@ class InvestmentVehicleServiceTest {
     }
 
 
+    @Order(2)
     @Test
     void updateInvestmentVehicleFundRaisingStatus() {
         try {
@@ -74,6 +76,8 @@ class InvestmentVehicleServiceTest {
         }
     }
 
+
+    @Order(3)
     @Test
     void updateInvestmentVehicleName() {
         try{
@@ -88,6 +92,7 @@ class InvestmentVehicleServiceTest {
         }
     }
 
+    @Order(4)
     @Test
     void updateInvestmentVehicleRate() {
         try{
@@ -103,6 +108,7 @@ class InvestmentVehicleServiceTest {
     }
 
 
+    @Order(5)
     @Test
     void updateInvestmentVehicleType()  {
         try{
@@ -120,6 +126,7 @@ class InvestmentVehicleServiceTest {
     }
 
 
+    @Order(6)
     @Test
     void updateInvestmentVehicleMandate() {
         try {
@@ -135,6 +142,7 @@ class InvestmentVehicleServiceTest {
     }
 
 
+    @Order(7)
     @Test
     void viewInvestmentVehicleDetails() {
         try {
@@ -147,6 +155,8 @@ class InvestmentVehicleServiceTest {
 
     }
 
+
+    @Order(8)
     @Test
     void viewAllInvestmentVehicle(){
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicle(

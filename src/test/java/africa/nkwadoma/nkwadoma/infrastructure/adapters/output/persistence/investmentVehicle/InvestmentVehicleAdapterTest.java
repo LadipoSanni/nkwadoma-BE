@@ -55,6 +55,8 @@ class InvestmentVehicleAdapterTest {
         fundGrowth.setTenure(12);
     }
 
+
+    @Order(1)
     @Test
     void createInvestmentVehicle() {
         try {
@@ -71,6 +73,8 @@ class InvestmentVehicleAdapterTest {
         }
     }
 
+
+    @Order(2)
     @Test
     void updateInvestmentVehicleRate() {
         try {
@@ -120,6 +124,8 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
     }
 
+
+    @Order(3)
     @Test
     void UpdateInvestmentVehicleToCommercial() {
         try {
@@ -135,6 +141,7 @@ class InvestmentVehicleAdapterTest {
         }
     }
 
+    @Order(4)
     @Test
     void updateInvestmentVehicleName()  {
         try {
@@ -150,7 +157,7 @@ class InvestmentVehicleAdapterTest {
         }
     }
 
-
+    @Order(5)
     @Test
     void updateInvestmentVehicleNameWithExistingInvestmentVehicleNameButTheSameEntity() {
         try {
@@ -193,6 +200,8 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById("Fake-id"));
     }
 
+
+    @Order(6)
     @Test
     void findInvestmentVehicleDetailsById() {
         try {
@@ -205,6 +214,7 @@ class InvestmentVehicleAdapterTest {
 
     }
 
+    @Order(7)
     @Test
     void findAllInvestmentVehicleInvestmentVehicle(){
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicle(
