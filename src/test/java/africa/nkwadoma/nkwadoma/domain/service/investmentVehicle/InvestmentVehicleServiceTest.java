@@ -167,8 +167,12 @@ class InvestmentVehicleServiceTest {
 
     
     @AfterAll
-    void cleanUp(){
-        investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+    void cleanUp() {
+        try {
+            investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
     }
 
 }

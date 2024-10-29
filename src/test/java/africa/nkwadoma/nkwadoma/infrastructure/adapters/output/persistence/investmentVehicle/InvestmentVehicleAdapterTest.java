@@ -179,14 +179,7 @@ class InvestmentVehicleAdapterTest {
 
     @Test
     void updateNonExistentInvestmentVehicle() {
-        try {
-            InvestmentVehicle nonExistent = investmentVehicleOutputPort.findById("fake-id");
-            nonExistent.setRate(20F);
-            assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(nonExistent));
-        }catch (MeedlException e){
-            log.info("{} {}",e.getClass().getName(), e.getMessage());
-        }
-
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById("fake-id"));
     }
 
     @Test
