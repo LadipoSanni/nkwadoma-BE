@@ -12,23 +12,34 @@ import org.hibernate.validator.internal.constraintvalidators.hv.*;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
+
 @Slf4j
 public class MeedlValidator {
 
     public static void validateEmail(String email) throws MeedlException {
-        if (StringUtils.isEmpty(email) || !EmailValidator.getInstance().isValid(email.trim())) {
+        if (isEmptyString(email) || !EmailValidator.getInstance().isValid(email.trim())) {
             throw new MeedlException(MeedlMessages.INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
 
-    public static void validateUUID(String UUID) throws MeedlException {
-        //TODO
+    public static void validateUUID(String dataElement) throws MeedlException {
+            validateDataElement(dataElement);
+        try {
+            UUID.fromString(dataElement);
+        } catch (IllegalArgumentException e) {
+            throw new MeedlException(UUID_NOT_VALID.getMessage());
+        }
     }
     public static void validateDataElement(String dataElement) throws MeedlException {
-        if (StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement)) {
+        if (isEmptyString(dataElement)) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
 
+    }
+
+    private static boolean isEmptyString(String dataElement) {
+        return StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement);
     }
 
     public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MeedlException {

@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +25,8 @@ import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.INVITE_ORGANIZATION_SUCCESS;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.INVITE_ORGANIZATION_DESCRIPTION;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.INVITE_ORGANIZATION_TITLE;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_DESCRIPTION;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_TITLE;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
@@ -34,15 +36,18 @@ public class InviteOrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
-    @PostMapping("invite-organization")
+    @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> inviteOrganization(@RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
+    public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
         try{
             UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
+            userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
             List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
             OrganizationIdentity organizationIdentity = inviteOrganizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
             organizationIdentity.setOrganizationEmployees(orgEmployee);
+            organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = inviteOrganizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -52,7 +57,7 @@ public class InviteOrganizationController {
                     .build();
             return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
         }catch (Exception exception){
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>( null ,exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -74,9 +79,8 @@ public class InviteOrganizationController {
         return UserIdentity.builder()
                 .firstName(inviteOrganizationRequest.getAdminFirstName())
                 .lastName(inviteOrganizationRequest.getAdminLastName())
-                .email(inviteOrganizationRequest.getEmail())
+                .email(inviteOrganizationRequest.getAdminEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
-                .createdBy(inviteOrganizationRequest.getCreatedBy())
                 .build();
     }
 }

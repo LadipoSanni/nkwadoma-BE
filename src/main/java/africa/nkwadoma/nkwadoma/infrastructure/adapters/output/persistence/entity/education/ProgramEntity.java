@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -50,6 +51,9 @@ public class ProgramEntity {
     @Column(nullable = false)
     private String createdBy;
     private String updatedBy;
+    private String organizationId;
     @ManyToOne(cascade = CascadeType.MERGE)
     private OrganizationEntity organizationEntity;
+    @OneToMany(cascade = CascadeType.MERGE , fetch = FetchType.EAGER)
+    private List<CohortEntity> cohorts;
 }

@@ -29,17 +29,14 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
 
     @Override
-    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
 
-        organizationIdentity = createOrganizationIdentityOnkeycloak(organizationIdentity);
+        organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
-        //save entities to DB
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        //send invite email to organization admin
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
-
         log.info("sent email");
         log.info("organization identity saved is : {}",organizationIdentity);
        return organizationIdentity;
@@ -53,9 +50,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         log.info("Organization service validated is : {}",organizationIdentity);
     }
 
-    private OrganizationIdentity createOrganizationIdentityOnkeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
+    private OrganizationIdentity createOrganizationIdentityOnKeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
         employeeIdentity.setMiddlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
@@ -67,7 +65,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMiddlUser());
-        organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
 
         return organizationEmployeeIdentity;
     }

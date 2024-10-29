@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -15,6 +15,7 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -67,12 +68,13 @@ class KeycloakAdapterTest {
             assertEquals(createdUser.getFirstName(), john.getFirstName());
             assertEquals(createdUser.getLastName(), john.getLastName());
         }catch (MeedlException exception){
+            log.error("Failed to create user in keycloak", exception);
             log.info("{} {}", exception.getClass().getName(),exception.getMessage());
         }
     }
     @Test
     void createUserWithNullUserIdentity(){
-        assertThrows(IdentityException.class,()-> identityManagementOutputPort.createUser(null));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createUser(null));
     }
     @Test
     void createUserWithExistingEmail(){
@@ -142,10 +144,9 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"fgdgffdfdfdf    ", "    dddfdsfdsfsfd"})
+    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
     void createPasswordWithSpaces(String password) {
         try {
-
             UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), password);
             assertNotNull(userIdentity);
             assertNotNull(userIdentity.getId());
@@ -168,17 +169,55 @@ class KeycloakAdapterTest {
         try {
             john.setPassword(password);
             identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
-            identityManagementOutputPort.login(john);
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException meedlException){
-            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
+            log.error("Error logging in user {}", meedlException.getMessage());
         }
     }
     @Test
-    void loginWithWrongDetails() {
-        john.setEmail("wrong@gmail.com");
+    void loginWithValidEmailAddressAndInvalidPassword() {
+        john.setPassword("invalid-password");
+        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+    }
+    @Test
+    void loginWithInvalidEmailAndValidPassword() {
+        john.setEmail("invalid-email");
         john.setPassword("passwordJ@345");
-        john.setFirstName("wrong firstname");
-        assertThrows(IdentityException.class,()->identityManagementOutputPort.login(john));
+        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
+    void loginWithNullPassword(String password) {
+        john.setPassword(password);
+        MeedlException meedlException = assertThrows(MeedlException.class, () ->
+                identityManagementOutputPort.login(john));
+        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345", "    passwordJ@345    "})
+    void loginWithValidPasswordWithSpaces(String password) {
+        john.setPassword(password);
+        try {
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+        } catch (MeedlException e) {
+            log.error("Failed to login with spaces", e);
+
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"wrongpasswordJ@348625"})
+    void loginWithInvalidPassword(String password) {
+        john.setPassword(password);
+        IdentityException exception = assertThrows(IdentityException.class, () -> identityManagementOutputPort.login(john));
+        assertEquals(exception.getMessage(), IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
     }
 
     @Test
@@ -197,8 +236,35 @@ class KeycloakAdapterTest {
         Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
         log.info(exception.getMessage());
     }
+
     @Test
-    @Order(4)
+    void logoutWithNull(){
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.logout(null));
+    }
+    @Test
+    void verifyUserExists() {
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = identityManagementOutputPort.verifyUserExists(john);
+        } catch (MeedlException e) {
+           log.info("Failed to reset password {}", e.getMessage());
+        }
+        assertNotNull(userIdentity);
+        assertNotNull(userIdentity.getId());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "dibfjhd"})
+    void verifyUserExistsInvalidEmail(String email) {
+        john.setEmail(email);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(john));
+    }
+    @Test
+    void verifyUserExistsInvalidEmail() {
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(null));
+    }
+
+    @Test
+    @Order(5)
     void changePasswordWithValidPassword() {
         String newPassword = "neWpasswordJ@345";
         AccessTokenResponse accessTokenResponse = null;
@@ -246,20 +312,40 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
     }
-
     @Test
-    void enableAccountWithWrongEmail() {
-        john.setEmail("wrong@gmail.com");
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    void enableAccountWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(null));
     }
 
     @Test
-    @Order(6)
+    void enableAccountWithNonExistingEmail() {
+        john.setEmail("nonexisting@gmail.com");
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ebuefh", " osisiogubjh@mailinator.com"})
+    void enableAccountWithInvalidEmail(String email) {
+        john.setEmail(email);
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
+        log.info(exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void reactivateWithOutReason(String reactivateReason) {
+        john.setReactivationReason(reactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
+    }
+    @Test
+    @Order(7)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -273,12 +359,11 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(7)
+    @Order(8)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
     }
-
     @Test
     void getUserRepresentation()  {
         try {
@@ -354,6 +439,16 @@ class KeycloakAdapterTest {
         } catch (MeedlException e) {
             e.printStackTrace();
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deactivateWithInvalidReason(String deactivateReason) {
+        john.setReactivationReason(deactivateReason);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
+
+        john.setReactivationReason(null);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.disableUserAccount(john));
     }
     @Test
     void getUserResourceWithInvalidUserId() {

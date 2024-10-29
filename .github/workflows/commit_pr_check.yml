@@ -1,70 +1,122 @@
-name: Commit and PR Status Tracker
+name: Commit and PR Tracker
 
 on:
   pull_request:
     branches:
       - dev
   schedule:
-    - cron: "0 10 * * *"
+    - cron: "0 9 * * *"
+    - cron: "0 11 * * *"
+    - cron: "0 13 * * *"
     - cron: "0 17 * * *"
-    - cron: "0 14 * * *"
-    - cron: "0 23 * * *"
 
 jobs:
-  commit-pr-tracker:
+  track-build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set environment variables
-        id: vars
+      - name: Load Previous Build Count and Details
+        uses: actions/download-artifact@v3
+        with:
+          name: build-tracker
+          path: ./build_tracker.json
+        continue-on-error: true  # Allow missing artifact gracefully
+
+      - name: Initialize or Increment Build Count
+        id: build_count
         run: |
-          TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          PROJECT_NAME="Nkwadoma Backend"
-          DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-          TASK_BRANCH=${{ github.head_ref || github.ref_name }}
-          TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${TASK_BRANCH}"
-          echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "JAR_NAME=myapp-${TAG}.jar" >> $GITHUB_ENV
+          # Function to initialize the build tracker file if it doesn't exist
+          initialize_tracker() {
+            echo "Initializing build tracker..."
+            local initial_data='{"count": 1, "builds": []}'
+            echo "$initial_data" > ./build_tracker.json
+            echo "::set-output name=count::1"
+          }
 
-          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+          # Function to update the tracker with the latest build information
+          update_tracker() {
+            local new_count=$1
+            local builds=$2
+            local new_build=$3
 
-          SMTP_SERVER="semicolon.africa"
-          SMTP_PORT="465"
-          SMTP_USERNAME="builds@semicolon.africa"
-          SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
-          EMAILS="ladipo@semicolon.africa,sam@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa"
+            # Append the new build to the existing list
+            builds=$(echo "$builds" | jq ". + [$new_build]")
+            echo "{\"count\": $new_count, \"builds\": $builds}" > ./build_tracker.json
+            echo "::set-output name=count::$new_count"
+          }
 
-          SUCCESSFUL_COMMITS=$(gh api repos/${{ github.repository }}/commits \
-            --paginate -q '.[].commit | select(.verification.verified) | .author.name' \
-            --since "$TIMESTAMP" | wc -l)
-          
-          SUCCESSFUL_PRS=$(gh api repos/${{ github.repository }}/pulls \
-            --paginate -q '.[] | select(.merged_at != null) | .user.login' \
-            --state merged --since "$TIMESTAMP" | wc -l)
+          # Load existing data or initialize if missing
+          if [ -f "./build_tracker.json" ]; then
+            count=$(jq '.count' ./build_tracker.json)
+            builds=$(jq '.builds' ./build_tracker.json)
+            last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json)
+            new_count=$((count + 1))
+          else
+            initialize_tracker
+            last_timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+            new_count=1
+            builds="[]"
+          fi
 
-          echo "SUCCESSFUL_COMMITS=${SUCCESSFUL_COMMITS}" >> $GITHUB_ENV
-          echo "SUCCESSFUL_PRS=${SUCCESSFUL_PRS}" >> $GITHUB_ENV
+          # Collect build details
+          BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
+          new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
+
+          update_tracker $new_count "$builds" "$new_build"
+
+          # Calculate time difference in hours between builds
+          TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
+
+          # Export variables to environment
+          echo "count=$new_count" >> $GITHUB_ENV
+          echo "builds=$builds" >> $GITHUB_ENV
+          echo "timestamp=$BUILD_TIMESTAMP" >> $GITHUB_ENV
+          echo "author=$AUTHOR" >> $GITHUB_ENV
+          echo "last_timestamp=$last_timestamp" >> $GITHUB_ENV
+          echo "time_diff=$TIME_DIFF" >> $GITHUB_ENV
+
+      - name: Upload Updated Build Tracker
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-tracker
+          path: ./build_tracker.json
 
       - name: Send Inactivity Email
-        if: ${{ env.SUCCESSFUL_COMMITS == '0' && env.SUCCESSFUL_PRS == '0' }}
+        if: ${{ env.count == 0 }}
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS"
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
+            "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
       - name: Send Activity Summary Email
-        if: ${{ env.SUCCESSFUL_COMMITS != '0' || env.SUCCESSFUL_PRS != '0' }}
+        if: ${{ env.count > 0 }}  # Fixed comparison condition
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          BUILDS: ${{ env.builds }}
+          LAST_COMMIT_AUTHOR: ${{ env.author }}
+          LAST_COMMIT_MESSAGE: $(jq -r '.[-1].message' <<< ${{ env.builds }})
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
           .github/workflows/scripts/activity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS" \
-            "${{ env.SUCCESSFUL_COMMITS }}" 0 \
-            "${{ env.SUCCESSFUL_PRS }}" 0
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
+            "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}" \
+            "${{ env.builds }}" "${{ env.LAST_COMMIT_AUTHOR }}" "${{ env.LAST_COMMIT_MESSAGE }}"

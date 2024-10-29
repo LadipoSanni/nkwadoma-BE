@@ -224,7 +224,7 @@ class InvestmentVehicleAdapterTest {
     }
 
     @AfterAll
-    void cleanUp(){
+    void cleanUp() throws MeedlException {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
     }
 

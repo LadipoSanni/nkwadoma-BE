@@ -21,7 +21,7 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     }
 
     @Override
-    public void deleteInvestmentVehicle(String investmentId) {
+    public void deleteInvestmentVehicle(String investmentId) throws MeedlException {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
     }
 

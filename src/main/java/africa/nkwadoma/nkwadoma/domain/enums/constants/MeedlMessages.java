@@ -16,7 +16,10 @@ public enum MeedlMessages {
     DOMAIN_EMAIL_DOES_NOT_MATCH("domain email does not match"),
     EMAIL_INDEX("@"),
     INVALID_CREATED_BY("created by id not valid"),
-    INVALID_OBJECT("Object not found"),;
+    INVALID_OBJECT("Object not found"),
+    NON_EXISTING_CREATED_BY("Creator not found"),
+    UUID_NOT_VALID("uuid not valid"),
+    USER_NOT_ENABLED("User not enabled");
 
 
     private final String message;

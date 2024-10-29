@@ -20,18 +20,21 @@ public class ProgramCreateRequest {
     @NotBlank(message = "Program name is required")
     private String programName;
     private String objectives;
-    @NotNull(message = "Organization ID is required")
-    @Positive(message = "Organization ID must be a positive number")
+    @NotBlank(message = "Organization ID is required")
     private String instituteId;
-    private String creatorId;
-    private LocalDateTime createdAt;
-    private String updatedBy;
     private String programDescription;
     private ActivationStatus programStatus;
-    @Positive(message = "Duration must be a positive number")
+    @Positive(message = "Program duration must be a positive number")
     private int programDuration;
     private DeliveryType deliveryType;
     private ProgramMode programMode;
-    private ProgramType programType;
     private String durationStatus;
+
+    public void setProgramName(@NotBlank(message = "Program name is required") String programName) {
+        this.programName = programName.trim();
+    }
+
+    public void setInstituteId(@NotBlank(message = "Organization ID is required") @Positive(message = "Organization ID must be a positive number") String instituteId) {
+        this.instituteId = instituteId.trim();
+    }
 }

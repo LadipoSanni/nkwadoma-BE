@@ -2,13 +2,16 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.commons.lang3.*;
 
 import java.math.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,7 +22,6 @@ import java.time.LocalDateTime;
 public class Program {
     private String id;
     private String programDescription;
-    @Column(unique = true)
     private String name;
     private String objectives;
     private DurationType durationType;
@@ -35,6 +37,7 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
+    private List<Cohort> cohorts;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
@@ -50,6 +53,12 @@ public class Program {
         MeedlValidator.validateDataElement(this.name);
         MeedlValidator.validateDataElement(this.createdBy);
         MeedlValidator.validateDataElement(this.organizationId);
+    }
+
+    public void setName(String name) {
+       if (StringUtils.isNotEmpty(name)) {
+           this.name = name.trim();
+       }
     }
 
     public BigDecimal getTotalAmountRepaid() {
