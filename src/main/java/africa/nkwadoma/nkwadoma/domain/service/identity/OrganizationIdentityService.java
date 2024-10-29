@@ -68,6 +68,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
 
+
         return organizationEmployeeIdentity;
     }
 

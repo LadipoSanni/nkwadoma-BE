@@ -60,7 +60,7 @@ public class CohortPersistenceAdapterTest {
 
 
 
-    @BeforeAll
+    @Test
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson").email("fred20@example.com").createdBy("8937-b9897g3-bv38").build();
@@ -92,14 +92,14 @@ public class CohortPersistenceAdapterTest {
         elites = new Cohort();
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-        elites.setProgramId(program.getId());
+//        elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUser);
 
         cohort = new Cohort();
         cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-        cohort.setProgramId(program.getId());
+//        cohort.setProgramId(program.getId());
         cohort.setName("Elite");
         cohort.setCreatedBy(meedleUser);
 
@@ -107,7 +107,7 @@ public class CohortPersistenceAdapterTest {
         xplorers.setName("xplorers");
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-        xplorers.setProgramId(program.getId());
+//        xplorers.setProgramId(program.getId());
         xplorers.setCreatedBy(meedleUser);
     }
 
@@ -242,12 +242,12 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOneId);
-        cohortRepository.deleteById(cohortTwoId);
-        userIdentityOutputPort.deleteUserById(meedleUser);
-    }
+//    @AfterAll
+//    void cleanUp() throws MeedlException {
+//        programOutputPort.deleteProgram(program.getId());
+//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+//        cohortRepository.deleteById(cohortOneId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        userIdentityOutputPort.deleteUserById(meedleUser);
+//    }
 }
