@@ -83,7 +83,7 @@ jobs:
           # Fetch the environment file from S3
           echo "Fetching environment variables from S3..."
           rm -f .env
-          aws s3 cp s3://semicolon-delivery/learnspace/backend/systest/nkwadoma.env .env --region eu-west-1
+          aws s3 cp s3://semicolon-delivery/learnspace/backend/systest/nkwadoma.env nkwadoma-dev.env --region eu-west-1
               
           # Export environment variables
           echo "Sourcing environment variables..."
