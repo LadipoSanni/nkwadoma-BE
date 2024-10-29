@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -10,9 +11,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
@@ -46,20 +46,21 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
               log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
           }
-
           return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
       }
         throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
 
     @Override
-    public Optional<OrganizationEmployeeIdentity> findByCreatedBy(String createdBy) throws MeedlException {
-        MeedlValidator.validateDataElement(createdBy);
-        Optional<OrganizationEmployeeEntity> employeeEntity = employeeAdminEntityRepository.findByMiddlUser_CreatedBy(createdBy);
-        if (employeeEntity.isEmpty()) {
-            return Optional.empty();
+    public OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException {
+        MeedlValidator.validateUUID(createdBy);
+        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMiddlUserId(createdBy);
+        if(ObjectUtils.isEmpty(employeeEntity)){
+            log.error("creator not found : ---- while search for organization by createdBy : {}", createdBy);
+            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
         }
-        return Optional.of(organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity.get()));
+        log.info("The employee found using the created by:  {}", employeeEntity.getId());
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity);
     }
 
     @Override
