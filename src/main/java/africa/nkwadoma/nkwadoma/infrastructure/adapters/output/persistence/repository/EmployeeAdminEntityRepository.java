@@ -7,7 +7,4 @@ import java.util.*;
 
 public interface EmployeeAdminEntityRepository extends JpaRepository<OrganizationEmployeeEntity,String> {
     OrganizationEmployeeEntity findByMiddlUserId(String userId);
-
-    Optional<OrganizationEmployeeEntity> findByMiddlUser_CreatedBy(String createdBy);
-
 }
