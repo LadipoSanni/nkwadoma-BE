@@ -103,22 +103,18 @@ public class InvestmentVehicleController {
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
             @RequestParam int pageSize,
             @RequestParam int pageNumber) {
-        try {
-            Page<InvestmentVehicle> investmentVehicles =
-                    investmentVehicleUseCase.viewAllInvestmentVehicle(pageSize, pageNumber);
-            List<InvestmentVehicleResponse> investmentVehicleResponse =
-                    investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
-            ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                    .body(investmentVehicleResponse)
-                    .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build();
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicle(pageSize, pageNumber);
+        List<InvestmentVehicleResponse> investmentVehicleResponse =
+                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
-            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, e.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
+        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
+                .body(investmentVehicleResponse)
+                .message(VIEW_ALL_INVESTMENT_VEHICLE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
