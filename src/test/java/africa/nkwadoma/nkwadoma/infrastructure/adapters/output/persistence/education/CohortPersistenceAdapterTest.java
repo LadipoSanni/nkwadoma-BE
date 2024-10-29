@@ -60,26 +60,27 @@ public class CohortPersistenceAdapterTest {
 
 
 
-    @Test
+    @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson").email("fred20@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity).build();
+                .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
                 name("My Organization").rcNumber("56767").serviceOfferings(
-                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).build())).
+                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
+                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
             organizationIdentity = organizationIdentityService.inviteOrganization(organizationIdentity);
-            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser().getId();
+            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
+            program.setCreatedBy(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getCreatedBy());
             program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
             e.printStackTrace();
@@ -92,14 +93,14 @@ public class CohortPersistenceAdapterTest {
         elites = new Cohort();
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-//        elites.setProgramId(program.getId());
+        elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUser);
 
         cohort = new Cohort();
         cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-//        cohort.setProgramId(program.getId());
+        cohort.setProgramId(program.getId());
         cohort.setName("Elite");
         cohort.setCreatedBy(meedleUser);
 
@@ -107,7 +108,7 @@ public class CohortPersistenceAdapterTest {
         xplorers.setName("xplorers");
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-//        xplorers.setProgramId(program.getId());
+        xplorers.setProgramId(program.getId());
         xplorers.setCreatedBy(meedleUser);
     }
 
@@ -242,12 +243,12 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-//    @AfterAll
-//    void cleanUp() throws MeedlException {
-//        programOutputPort.deleteProgram(program.getId());
-//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-//        cohortRepository.deleteById(cohortOneId);
-//        cohortRepository.deleteById(cohortTwoId);
-//        userIdentityOutputPort.deleteUserById(meedleUser);
-//    }
+    @AfterAll
+    void cleanUp() throws MeedlException {
+        programOutputPort.deleteProgram(program.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        cohortRepository.deleteById(cohortOneId);
+        cohortRepository.deleteById(cohortTwoId);
+        userIdentityOutputPort.deleteUserById(meedleUser);
+    }
 }

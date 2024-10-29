@@ -82,7 +82,7 @@ class ProgramPersistenceAdapterTest {
             userIdentity.setCreatedBy("Ayo");
 
             OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
-                    middlUser(userIdentity).build();
+                    meedlUser(userIdentity).build();
             organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setName("Amazing Grace Enterprises");
             organizationIdentity.setEmail("rachel@gmail.com");
