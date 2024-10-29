@@ -83,7 +83,7 @@ jobs:
           # Fetch the environment file from S3
           echo "Fetching environment variables from S3..."
           rm -f .env
-          aws s3 cp s3://semicolon-delivery/learnspace/backend/systest/nkwadoma.env nkwadoma-dev.env --region eu-west-1
+          aws s3 cp s3://semicolon-delivery/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region eu-west-1
               
           # Export environment variables
           echo "Sourcing environment variables..."
@@ -108,7 +108,7 @@ jobs:
           # Run the new container
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
-              --env-file .env \
+              --env-file nkwadoma-dev.env \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
 
           echo "Container started successfully!"
