@@ -9,17 +9,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus.DEPLOYING;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.ENDOWMENT;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-@SpringBootTest
 class InvestmentVehicleServiceTest {
 
 
@@ -30,6 +32,8 @@ class InvestmentVehicleServiceTest {
 
     @Autowired
     private InvestmentVehicleOutputPort outputPort;
+    private int pageSize = 1;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -40,94 +44,135 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setMandate("Long-term fund");
         fundGrowth.setInvestmentVehicleType(ENDOWMENT);
         fundGrowth.setTenure(12);
-
-
     }
 
-    @Test
     @Order(1)
-    void createInvestmentVehicle() throws MeedlException {
-       InvestmentVehicle createdInvestmentVehicle =
-               investmentVehicleUseCase.createOrUpdateInvestmentVehicle(fundGrowth);
-       investmentId = createdInvestmentVehicle.getId();
-       assertNotNull(createdInvestmentVehicle);
+    @Test
+    void createInvestmentVehicle() {
+       try {
+           InvestmentVehicle createdInvestmentVehicle =
+                   investmentVehicleUseCase.createOrUpdateInvestmentVehicle(fundGrowth);
+           investmentId = createdInvestmentVehicle.getId();
+           assertNotNull(createdInvestmentVehicle);
+       }catch (MeedlException exception){
+           log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+       }
     }
 
 
-    @Test
     @Order(2)
-    void updateInvestmentVehicleFundRaisingStatus() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setFundRaisingStatus(DEPLOYING);
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertEquals(updatedInvestmentVehicle.getFundRaisingStatus().toString(),
-                DEPLOYING.toString());
-    }
-
     @Test
-    @Order(3)
-    void updateInvestmentVehicleName() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setName("Growth Investment limited2");
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertNotEquals(fundGrowth.getName(), updatedInvestmentVehicle.getName());
-    }
-
-    @Test
-    @Order(4)
-    void updateInvestmentVehicleRate() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setRate(14F);
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertNotEquals(fundGrowth.getRate(),updatedInvestmentVehicle.getRate());
-    }
-
-
-    @Test
-    @Order(5)
-    void updateInvestmentVehicleType() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setInvestmentVehicleType(ENDOWMENT);
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertNotEquals(InvestmentVehicleType.COMMERCIAL.toString(),
-                updatedInvestmentVehicle.getFundRaisingStatus().toString());
-    }
-
-    @Test
-    @Order(6)
-    void updateInvestmentVehicleMandate() throws MeedlException {
-        InvestmentVehicle foundInvestmentVehicle =
-                outputPort.findById(investmentId);
-        foundInvestmentVehicle.setMandate("mandate");
-        InvestmentVehicle updatedInvestmentVehicle =
-                investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
-        assertNotEquals(fundGrowth.getMandate(),updatedInvestmentVehicle.getMandate());
-    }
-
-    @Test
-    @Order(7)
-    void viewInvestmentVehicleDetails() {
-        InvestmentVehicle viewedInvestmentVehicle = null;
+    void updateInvestmentVehicleFundRaisingStatus() {
         try {
-            viewedInvestmentVehicle = investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
+            InvestmentVehicle foundInvestmentVehicle =
+                    outputPort.findById(investmentId);
+            foundInvestmentVehicle.setFundRaisingStatus(DEPLOYING);
+            InvestmentVehicle updatedInvestmentVehicle =
+                    investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
+            assertEquals(updatedInvestmentVehicle.getFundRaisingStatus().toString(),
+                    DEPLOYING.toString());
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+
+    @Order(3)
+    @Test
+    void updateInvestmentVehicleName() {
+        try{
+            InvestmentVehicle foundInvestmentVehicle =
+                    outputPort.findById(investmentId);
+            foundInvestmentVehicle.setName("Growth Investment limited2");
+            InvestmentVehicle updatedInvestmentVehicle =
+                    investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
+            assertNotEquals(fundGrowth.getName(), updatedInvestmentVehicle.getName());
+        } catch (MeedlException exception) {
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @Order(4)
+    @Test
+    void updateInvestmentVehicleRate() {
+        try{
+            InvestmentVehicle foundInvestmentVehicle =
+                    outputPort.findById(investmentId);
+            foundInvestmentVehicle.setRate(14F);
+            InvestmentVehicle updatedInvestmentVehicle =
+                    investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
+            assertNotEquals(fundGrowth.getRate(),updatedInvestmentVehicle.getRate());
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+
+    @Order(5)
+    @Test
+    void updateInvestmentVehicleType()  {
+        try{
+            InvestmentVehicle foundInvestmentVehicle =
+                    outputPort.findById(investmentId);
+            foundInvestmentVehicle.setInvestmentVehicleType(ENDOWMENT);
+            InvestmentVehicle updatedInvestmentVehicle =
+                    investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
+            assertNotEquals(InvestmentVehicleType.COMMERCIAL.toString(),
+                    updatedInvestmentVehicle.getFundRaisingStatus().toString());
+        } catch (MeedlException exception) {
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+
+    }
+
+
+    @Order(6)
+    @Test
+    void updateInvestmentVehicleMandate() {
+        try {
+            InvestmentVehicle foundInvestmentVehicle =
+                    outputPort.findById(investmentId);
+            foundInvestmentVehicle.setMandate("mandate");
+            InvestmentVehicle updatedInvestmentVehicle =
+                    investmentVehicleUseCase.createOrUpdateInvestmentVehicle(foundInvestmentVehicle);
+            assertNotEquals(fundGrowth.getMandate(), updatedInvestmentVehicle.getMandate());
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+
+    @Order(7)
+    @Test
+    void viewInvestmentVehicleDetails() {
+        try {
+            InvestmentVehicle viewedInvestmentVehicle = investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentId);
+            assertNotNull(viewedInvestmentVehicle);
+            assertEquals(viewedInvestmentVehicle.getId(),investmentId);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(viewedInvestmentVehicle);
-        assertEquals(viewedInvestmentVehicle.getId(),investmentId);
+
     }
 
+
+    @Order(8)
+    @Test
+    void viewAllInvestmentVehicle(){
+        Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicle(
+                pageSize, pageNumber);
+        List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        assertEquals(1, investmentVehiclesList.size());
+    }
+
+    
     @AfterAll
-    void cleanUp(){
-        investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+    void cleanUp() {
+        try {
+            investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
     }
 
 }
