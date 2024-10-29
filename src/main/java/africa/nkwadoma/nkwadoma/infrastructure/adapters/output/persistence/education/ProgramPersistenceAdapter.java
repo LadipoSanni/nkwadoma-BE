@@ -103,7 +103,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
-
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
         log.info("Validating service offerings: {}", serviceOfferings);
         if(CollectionUtils.isEmpty(serviceOfferings) ||
