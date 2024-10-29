@@ -9,14 +9,14 @@ on:
       [ 'dev', 'main', 'prod-support']
 
 env:
-  EMAILS: 'solomon@semicolon.africa,'
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/meca-backend-uat
-  ECR_REPOSITORY: meca-backend
-  ECR_REPOSITORY_SYSTEST: meca-backend-systest
+  EMAILS: 'ladipo@semicolon.africa,joshua.o@semicolon.africa'
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/nkwadoma
+  ECR_REPOSITORY: nkwadoma
+  ECR_REPOSITORY_SYSTEST: learnspace-backend-systest
   AWS_REGION: eu-west-1
-  CLUSTER: meca
-  SERVICE: meca-backend
-  SYSTEST_SERVICE: meca-backend-systest
+  CLUSTER: learnspace.africa
+  SERVICE: learnspace-backend-systest
+  SYSTEST_SERVICE: learnspace-backend-systest
   SONARQUBE_URL_SET: false
   MAVEN_REPORT_URL_SET: false
   AUTOMATION_TEST_URL_SET: false
@@ -74,7 +74,7 @@ jobs:
           .github/workflows/scripts/deploy.sh
         env:
           S3_BUCKET: semicolon-build-reports
-          PROJECT_NAME: meca/meca-backend/maven-reports
+          PROJECT_NAME: nkwadoma/learnspace-backend-systest/maven-reports
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -133,8 +133,8 @@ jobs:
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SONARQUBE_URL:  ${{ secrets.SONAR_HOST_URL }}
-          MAVEN_REPORT_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/meca/meca-backend/maven-reports/new-reports/index.html
-          AUTOMATION_TEST_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/meca/meca-backend/automation-tests-result/report-pytest-results.html
+          MAVEN_REPORT_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/nkwadoma/learnspace-backend-systest/maven-reports/new-reports/index.html
+          AUTOMATION_TEST_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/nkwadoma/learnspace-backend-systest/automation-tests-result/report-pytest-results.html
         run: |
           echo "Sending success email with the following details:"
           echo "SonarQube URL Set: $SONARQUBE_URL_SET"
