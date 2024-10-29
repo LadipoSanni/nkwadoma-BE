@@ -39,17 +39,6 @@ class OrganizationEmployeeIdentityAdapterTest {
     @BeforeAll
     void init() {
         try {
-            joel = new UserIdentity();
-            joel.setFirstName("Joel");
-            joel.setLastName("Jacobs");
-            joel.setEmail("joel@johnson.com");
-            joel.setId(joel.getEmail());
-            joel.setPhoneNumber("098647748393");
-            joel.setEmailVerified(Boolean.TRUE);
-            joel.setEnabled(Boolean.TRUE);
-            joel.setCreatedAt(LocalDateTime.now().toString());
-            joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-
             amazingGrace = new OrganizationIdentity();
             amazingGrace.setName("Amazing Grace Enterprises");
             amazingGrace.setEmail("rachel@gmail.com");
@@ -61,12 +50,23 @@ class OrganizationEmployeeIdentityAdapterTest {
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
             amazingGrace.setWebsiteAddress("webaddress.org");
-            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(joel).build()));
 
+            joel = new UserIdentity();
+            joel.setFirstName("Joel");
+            joel.setLastName("Jacobs");
+            joel.setEmail("joel@johnson.com");
+            joel.setId(amazingGrace.getCreatedBy());
+            joel.setPhoneNumber("098647748393");
+            joel.setEmailVerified(Boolean.TRUE);
+            joel.setEnabled(Boolean.TRUE);
+            joel.setCreatedAt(LocalDateTime.now().toString());
+            joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
+            joel.setCreatedBy(amazingGrace.getCreatedBy());
+
+            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(joel).build()));
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
 
-            joel.setCreatedBy(savedOrganization.getCreatedBy());
             UserIdentity userIdentity = userIdentityOutputPort.save(joel);
             assertNotNull(userIdentity);
         } catch (MeedlException e) {

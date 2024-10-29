@@ -80,6 +80,14 @@ class OrganizationEmployeeServiceTest {
         assertThrows(MeedlException.class, ()->organizationEmployeeService.
                 viewOrganizationEmployees(organizationEmployeeIdentity));
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1})
+    void viewAllOrganizationEmployeesWithInvalidPageSize(int pageSize) {
+        organizationEmployeeIdentity.setPageNumber(pageSize);
+        assertThrows(MeedlException.class, ()->organizationEmployeeService.
+                viewOrganizationEmployees(organizationEmployeeIdentity));
+    }
     
     @Test
     void viewAllOrganizationEmployeesWithNullEmployeeIdentity() {

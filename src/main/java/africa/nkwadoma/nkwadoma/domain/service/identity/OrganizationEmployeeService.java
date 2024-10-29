@@ -22,6 +22,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
         MeedlValidator.validateUUID(organizationEmployeeIdentity.getOrganization());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
+        MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
         return organizationEmployeeOutputPort.findAllOrganizationEmployees(organizationEmployeeIdentity.getOrganization(),
                 organizationEmployeeIdentity.getPageNumber(), organizationEmployeeIdentity.getPageSize());
     }
