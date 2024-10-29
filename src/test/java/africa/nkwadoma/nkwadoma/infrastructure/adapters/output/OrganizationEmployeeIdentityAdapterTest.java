@@ -117,6 +117,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             assertNull(organizationEmployeeIdentityOutputPort.findByEmployeeId(employeeJackId));
 
             assertNull(userIdentityOutputPort.findByEmail(jack.getEmail()));
+            userIdentityOutputPort.deleteUserByEmail(angela.getEmail());
             assertNull(userIdentityOutputPort.findByEmail(angela.getEmail()));
         } catch (MeedlException e) {
             log.error("Error deleting user identity {}", e.getMessage());

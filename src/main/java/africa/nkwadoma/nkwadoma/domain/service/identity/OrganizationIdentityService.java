@@ -53,6 +53,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
                 .forEach(organizationEmployeeIdentity -> {
                             try {
                                 identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMiddlUser());
+                                log.info("deactivated user {}", organizationEmployeeIdentity.getMiddlUser());
                             } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
                             }
