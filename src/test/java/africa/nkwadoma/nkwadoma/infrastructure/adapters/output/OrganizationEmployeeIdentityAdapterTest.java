@@ -49,7 +49,6 @@ class OrganizationEmployeeIdentityAdapterTest {
             joel.setEnabled(Boolean.TRUE);
             joel.setCreatedAt(LocalDateTime.now().toString());
             joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            joel.setCreatedBy("Ayo");
 
             amazingGrace = new OrganizationIdentity();
             amazingGrace.setName("Amazing Grace Enterprises");
@@ -58,6 +57,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             amazingGrace.setRcNumber("RC345677");
             amazingGrace.setPhoneNumber("0907658483");
             amazingGrace.setTin("Tin5678");
+            amazingGrace.setCreatedBy("0e08ce92-60dc-4374-8d5f-19b31cd8c781");
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
             amazingGrace.setWebsiteAddress("webaddress.org");
@@ -65,6 +65,8 @@ class OrganizationEmployeeIdentityAdapterTest {
 
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
+
+            joel.setCreatedBy(savedOrganization.getCreatedBy());
             UserIdentity userIdentity = userIdentityOutputPort.save(joel);
             assertNotNull(userIdentity);
         } catch (MeedlException e) {
@@ -139,11 +141,17 @@ class OrganizationEmployeeIdentityAdapterTest {
     }
 
 
+    @ParameterizedTest
+    @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
+    void viewAllOrganizationEmployeesWithNonExistingOrganizationId(String organizationId) {
+        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.
+                findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
+    }
 
     @AfterAll
     void tearDown() {
         try {
-            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByEmployeeId(joel.getId());
+            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByCreatedBy(joel.getCreatedBy());
             organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
             userIdentityOutputPort.deleteUserByEmail(joel.getEmail());
 

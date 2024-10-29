@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
@@ -72,6 +73,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void validateCreatedBy(Program program) throws MeedlException {
         log.info("Validating the created by: {}",program.getCreatedBy());
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (ObjectUtils.isEmpty(employeeIdentity)) {
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+        }
     }
 
 

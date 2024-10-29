@@ -60,6 +60,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validatePageSize(pageSize);
         Page<OrganizationEmployeeEntity> organizationEmployees =
                 employeeAdminEntityRepository.findAllByOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
+        if (organizationEmployees.isEmpty()) {
+            throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
+        }
         return organizationEmployees.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
