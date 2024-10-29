@@ -54,6 +54,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         validateCreatedBy(program);
 
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        log.info("The organization identity found when saving program is: {}", organizationIdentity);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
 
@@ -69,10 +70,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     private void validateCreatedBy(Program program) throws MeedlException {
-        Optional<OrganizationEmployeeIdentity> employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
-        if (employeeIdentity.isEmpty()) {
-            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
-        }
+        log.info("Validating the created by: {}",program.getCreatedBy());
+        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
     }
 
 
@@ -104,8 +103,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
-
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
+        log.info("Validating service offerings: {}", serviceOfferings);
         if(CollectionUtils.isEmpty(serviceOfferings) ||
                 !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
             throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());

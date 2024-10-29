@@ -91,7 +91,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
