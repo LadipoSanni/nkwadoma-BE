@@ -108,7 +108,7 @@ jobs:
           # Run the new container
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
-              --env-file .env \
+              --env-file nkwadoma-dev.env \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:latest
 
           echo "Container started successfully!"
