@@ -64,7 +64,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
         identityManagerOutPutPort.disableOrganization(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
-        return organizationIdentityOutputPort.save(foundOrganization);
+        return foundOrganization;
     }
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
