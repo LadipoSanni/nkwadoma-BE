@@ -12,16 +12,26 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.BlackListedTokenAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_HAS_BEEN_CREATED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_NOT_ACCEPTED;
@@ -38,7 +48,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final PasswordEncoder passwordEncoder;
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
-
+    private final BlackListedTokenAdapter blackListedTokenAdapter;
 
 
     @Override
@@ -83,8 +93,36 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void logout(UserIdentity userIdentity) throws MeedlException {
+    public void logout(UserIdentity userIdentity, HttpServletRequest httpServletRequest) throws MeedlException {
         identityManagerOutPutPort.logout(userIdentity);
+        String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
+        blackListedTokenAdapter.saveBlackListedToken(createBlackList(accessToken));
+    }
+    private BlackListedToken createBlackList(String accessToken){
+        BlackListedToken blackListedToken = new BlackListedToken();
+        blackListedToken.setAccess_token(accessToken);
+        return blackListedToken;
+    }
+    @Scheduled(cron = "0 0 8,20 * * *") // Runs at 8 AM and 8 PM every day
+    public void clearBlackListedToken() throws MeedlException {
+        if(!blackListedTokenAdapter.findAll().isEmpty()) {
+            for (BlackListedToken blackListedToken : blackListedTokenAdapter.findAll()) {
+                if (isExpired(blackListedToken.getAccess_token())) {
+                    blackListedTokenAdapter.deleteToken(blackListedToken);
+                }
+            }
+            log.info("cron is running....");
+        }
+    }
+
+    private boolean isExpired(String accessToken) throws MeedlException {
+        try {
+            JWT jwt = JWTParser.parse(accessToken);
+            Date expirationDate = jwt.getJWTClaimsSet().getExpirationTime();
+            return Objects.requireNonNull(expirationDate).toInstant().isBefore(Instant.now());
+        } catch (ParseException e) {
+            throw new MeedlException("Parse error...  : "+ e.getMessage());
+        }
     }
 
     @Override

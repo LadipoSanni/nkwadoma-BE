@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,9 @@ public class IdentityManagerController {
         );
     }
     @PostMapping("auth/logout")
-    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
-        createUserUseCase.logout(userIdentity);
+        createUserUseCase.logout(userIdentity, httpServletRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
