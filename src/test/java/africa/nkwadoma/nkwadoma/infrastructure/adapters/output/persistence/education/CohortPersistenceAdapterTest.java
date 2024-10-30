@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -53,7 +54,7 @@ public class CohortPersistenceAdapterTest {
     private  OrganizationEmployeeIdentity employeeIdentity;
     private  OrganizationIdentity organizationIdentity;
     @Autowired
-    private OrganizationIdentityService organizationIdentityService;
+    private CreateOrganizationUseCase organizationUseCase;
     private Program program;
     private String cohortOneId;
     private String cohortTwoId;
@@ -77,7 +78,7 @@ public class CohortPersistenceAdapterTest {
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
-            organizationIdentity = organizationIdentityService.inviteOrganization(organizationIdentity);
+            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
             meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
              program.setCreatedBy(meedleUser);
