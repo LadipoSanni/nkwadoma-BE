@@ -96,8 +96,8 @@ public class BeanConfiguration {
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
                                                    UserIdentityMapper userIdentityMapper,
-                                                   OrganizationEmployeeIdentityAdapter employeeIdentityAdapter){
-        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper,employeeIdentityAdapter);
+                                                   OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort){
+        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper,employeeIdentityOutputPort);
     }
 
     @Bean
