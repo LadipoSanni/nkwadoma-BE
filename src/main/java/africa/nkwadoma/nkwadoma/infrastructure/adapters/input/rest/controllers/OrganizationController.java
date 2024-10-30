@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteOrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
@@ -60,8 +61,8 @@ public class OrganizationController {
     }
     @PostMapping("organization/deactivate")
     @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestParam @Valid String organizationId) throws MeedlException {
-            createOrganizationUseCase.deactivateOrganization(organizationId);
+    public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
+            createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .message(ORGANIZATION_DEACTIVATION_SUCCESS)
                     .statusCode(HttpStatus.OK.toString())

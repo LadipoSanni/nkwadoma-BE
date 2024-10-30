@@ -39,7 +39,7 @@ class UserIdentityAdapterTest {
         john.setEnabled(false);
         john.setCreatedAt(LocalDateTime.now().toString());
         john.setRole(TRAINEE);
-        john.setCreatedBy("Smart");
+        john.setCreatedBy("2c521790-563a-4449-a4bd-459bd5a2d4d7");
 
     }
 

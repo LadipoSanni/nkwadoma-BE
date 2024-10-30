@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,15 +46,17 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     }
 
     @Override
-    public OrganizationIdentity deactivateOrganization(String organizationId) throws MeedlException {
+    public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        log.info("found organization employees: {}",organizationEmployees);
         organizationEmployees
                 .forEach(organizationEmployeeIdentity -> {
                             try {
+                                log.info("Deactivating user {}", organizationEmployeeIdentity.getMiddlUser());
+                                organizationEmployeeIdentity.getMiddlUser().setDeactivationReason(reason);
                                 identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMiddlUser());
-                                log.info("deactivated user {}", organizationEmployeeIdentity.getMiddlUser());
                             } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
                             }
@@ -61,7 +64,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
         identityManagerOutPutPort.disableOrganization(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
-        return organizationIdentityOutputPort.save(foundOrganization);
+//        return organizationIdentityOutputPort.save(foundOrganization);
+        return null;
 
     }
 

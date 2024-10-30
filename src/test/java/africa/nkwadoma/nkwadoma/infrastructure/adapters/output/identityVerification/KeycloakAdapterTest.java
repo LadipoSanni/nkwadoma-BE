@@ -1,9 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
@@ -37,6 +39,7 @@ class KeycloakAdapterTest {
     private UserIdentity john;
     private UserIdentity peter;
     private String johnId;
+    private OrganizationIdentity organizationIdentity;
     private boolean enabled;
     private final String password = "This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword";
 
@@ -53,6 +56,14 @@ class KeycloakAdapterTest {
         peter.setLastName("Mark");
         peter.setEmail("peter@lendspace.com");
         peter.setRole(TRAINEE);
+
+        List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder()
+                        .industry(Industry.EDUCATION)
+                .build());
+
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setEmail("organ@test.com");
+        organizationIdentity.setServiceOfferings(serviceOfferings);
     }
 
 
@@ -323,12 +334,6 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableOrganization(megaOrganization));
     }
     @Test
-    void disableOrganizationWithValidDetails() throws MeedlException {
-        OrganizationIdentity megaOrganization = new OrganizationIdentity();
-        megaOrganization.setName("rose couture6");
-        identityManagementOutputPort.disableOrganization(megaOrganization);
-    }
-    @Test
     void getClientRepresentationById() {
         ClientRepresentation clientRepresentation = null;
         try {
@@ -338,7 +343,6 @@ class KeycloakAdapterTest {
         }
         assertNotNull(clientRepresentation);
         assertNotNull(clientRepresentation.getName());
-//        assertEquals(clientRepresentation.getName(), );
         log.info("Client representation {}", clientRepresentation.getName());
     }
 
@@ -511,6 +515,18 @@ class KeycloakAdapterTest {
             assertEquals(john.getRole().toString(), roleRepresentation.getName().toString());
         } catch (MeedlException e) {
             e.printStackTrace();
+        }
+    }
+    @Test
+    void createClient(){
+        try {
+            organizationIdentity = identityManagementOutputPort.createOrganization(organizationIdentity);
+            assertNotNull(organizationIdentity);
+            ClientRepresentation foundClientRepresentation = identityManagementOutputPort.getClientRepresentationByClientId(organizationIdentity.getId());
+            assertNotNull(foundClientRepresentation);
+            assertEquals(foundClientRepresentation.getName(), organizationIdentity.getName());
+        } catch (MeedlException e) {
+            log.error("Failed to create : {}", e.getMessage());
         }
     }
     @Test

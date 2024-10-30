@@ -10,7 +10,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
     OrganizationEmployeeIdentity findById(String id) throws MeedlException;
     OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException;
 
-    Optional<OrganizationEmployeeIdentity> findByCreatedBy(String createdBy) throws MeedlException;
+    OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException;
 
     void delete(String id) throws MeedlException;
 
