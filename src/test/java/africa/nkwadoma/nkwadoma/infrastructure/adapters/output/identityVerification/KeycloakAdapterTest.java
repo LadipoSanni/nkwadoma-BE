@@ -59,11 +59,13 @@ class KeycloakAdapterTest {
 
         List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder()
                         .industry(Industry.EDUCATION)
+                        .name("TRAINING")
                 .build());
 
-        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setEmail("organ@test.com");
         organizationIdentity.setServiceOfferings(serviceOfferings);
+        organizationIdentity.setName("Till the end");
     }
 
 
@@ -527,6 +529,17 @@ class KeycloakAdapterTest {
             assertEquals(foundClientRepresentation.getName(), organizationIdentity.getName());
         } catch (MeedlException e) {
             log.error("Failed to create : {}", e.getMessage());
+        }
+    }
+    @Test
+    void disableClient(){
+        try {
+            identityManagementOutputPort.disableOrganization(organizationIdentity);
+            ClientRepresentation foundClientRepresentation = identityManagementOutputPort.getClientRepresentationByClientId(organizationIdentity.getId());
+            assertNotNull(foundClientRepresentation);
+            assertFalse(foundClientRepresentation.isEnabled());
+        } catch (MeedlException e) {
+            log.error("Failed to disable : {}", e.getMessage());
         }
     }
     @Test
