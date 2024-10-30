@@ -38,8 +38,9 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/logout")
     public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
+        String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
-        createUserUseCase.logout(userIdentity, httpServletRequest);
+        createUserUseCase.logout(userIdentity, accessToken);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()

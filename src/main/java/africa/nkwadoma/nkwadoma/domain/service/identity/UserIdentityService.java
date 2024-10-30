@@ -18,7 +18,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
@@ -93,10 +92,9 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void logout(UserIdentity userIdentity, HttpServletRequest httpServletRequest) throws MeedlException {
+    public void logout(UserIdentity userIdentity, String accessToken) throws MeedlException {
         identityManagerOutPutPort.logout(userIdentity);
-        String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
-        blackListedTokenAdapter.saveBlackListedToken(createBlackList(accessToken));
+        blackListedTokenAdapter.blackListToken(createBlackList(accessToken));
     }
     private BlackListedToken createBlackList(String accessToken){
         BlackListedToken blackListedToken = new BlackListedToken();

@@ -17,7 +17,7 @@ public class BlackListedTokenAdapter {
         return blackListedTokenRepository.findAll();
     }
 
-    public BlackListedToken saveBlackListedToken(BlackListedToken accessToken){
+    public BlackListedToken blackListToken(BlackListedToken accessToken){
         return blackListedTokenRepository.save(accessToken);
     }
 

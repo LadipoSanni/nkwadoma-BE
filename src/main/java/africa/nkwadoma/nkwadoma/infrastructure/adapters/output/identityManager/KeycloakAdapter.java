@@ -325,6 +325,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
+        MeedlValidator.validateUUID(userIdentity.getId());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
