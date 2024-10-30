@@ -15,7 +15,7 @@ public class UpdateInvestmentVehicleRequest {
     private String investmentVehicleType;
     private String mandate;
     private String sponsors;
-    private String tenure;
+    private int tenure;
     private Float rate;
     private String fundRaisingStatus;
     private BigDecimal size;

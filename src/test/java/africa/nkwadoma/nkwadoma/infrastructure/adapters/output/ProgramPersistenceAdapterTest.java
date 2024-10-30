@@ -241,7 +241,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Non existing created by"})
+    @ValueSource(strings = {"d5bf6a6c-7102-48b2-8ce9-7cd41919f074"})
     void createProgramWithNonExistingCreatedBy(String createdBy){
         try {
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());

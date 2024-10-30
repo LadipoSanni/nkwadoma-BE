@@ -80,7 +80,7 @@ public class CohortPersistenceAdapterTest {
             organizationIdentity = organizationIdentityService.inviteOrganization(organizationIdentity);
             meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
-            program.setCreatedBy(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getCreatedBy());
+            program.setCreatedBy(meedleUser);
             program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
             e.printStackTrace();

@@ -90,7 +90,7 @@ public class CohortServiceTest {
             meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
             log.info("Program before saving {}", program);
-            program.setCreatedBy(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getCreatedBy());
+            program.setCreatedBy(meedleUser);
             program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
             e.printStackTrace();
