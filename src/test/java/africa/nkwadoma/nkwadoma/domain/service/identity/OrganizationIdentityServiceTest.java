@@ -143,7 +143,6 @@ class OrganizationIdentityServiceTest {
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
             roseCouture.setEnabled(Boolean.FALSE);
-            when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
 
             OrganizationIdentity deactivatedOrganization = organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
