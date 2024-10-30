@@ -244,7 +244,8 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-    @AfterAll
+    @Order(6)
+    @Test
     void cleanUp() throws MeedlException {
         programOutputPort.deleteProgram(program.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());

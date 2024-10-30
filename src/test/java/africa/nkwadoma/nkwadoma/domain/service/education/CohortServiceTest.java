@@ -221,7 +221,8 @@ public class CohortServiceTest {
     }
 
 
-    @AfterAll
+    @Order(5)
+    @Test
     void cleanUp() throws MeedlException {
         programOutputPort.deleteProgram(program.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
