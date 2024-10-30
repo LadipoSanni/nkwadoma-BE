@@ -66,7 +66,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         foundOrganization.setEnabled(Boolean.FALSE);
         return foundOrganization;
     }
-
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
