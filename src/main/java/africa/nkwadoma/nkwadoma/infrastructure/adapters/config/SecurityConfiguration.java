@@ -27,7 +27,6 @@ import java.util.Arrays;
 @Slf4j
 public class SecurityConfiguration {
     private final AllowedHost allowedHost;
-
     @Bean
     SecurityFilterChain resourceServerSecurityFilterChain(
             HttpSecurity http,
