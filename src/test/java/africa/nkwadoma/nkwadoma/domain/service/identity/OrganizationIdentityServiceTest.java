@@ -52,7 +52,7 @@ class OrganizationIdentityServiceTest {
             sarah.setCreatedBy("joseph");
 
             OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
-            employeeIdentity.setMiddlUser(sarah);
+            employeeIdentity.setMeedlUser(sarah);
 
             List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
             orgEmployee.add(employeeIdentity);
@@ -64,8 +64,8 @@ class OrganizationIdentityServiceTest {
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");
             roseCouture.setRcNumber("RC87899");
-            roseCouture.setServiceOffering(new ServiceOffering());
-            roseCouture.getServiceOffering().setIndustry(Industry.EDUCATION);
+            roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
+            roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
             roseCouture.setPhoneNumber("09876365713");
             roseCouture.setInvitedDate(LocalDateTime.now().toString());
             roseCouture.setWebsiteAddress("rosecouture.org");
@@ -103,13 +103,13 @@ class OrganizationIdentityServiceTest {
             List<OrganizationEmployeeIdentity> organizationEmployees = roseCouture.getOrganizationEmployees();
 
             for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployees){
-                UserIdentity foundUser =organizationEmployeeIdentity.getMiddlUser();
+                UserIdentity foundUser =organizationEmployeeIdentity.getMeedlUser();
                 assertNull(foundUser.getPassword());
                 foundUser.setPassword("Password@123");
                 String generatedToken = tokenUtils.generateToken(foundUser.getEmail());
                 assertNotNull(generatedToken);
                 createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
-                log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMiddlUser());
+                log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMeedlUser());
             }}catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }

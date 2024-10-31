@@ -38,9 +38,10 @@ public class ProgramController {
     private final ProgramRestMapper programRestMapper;
 
     @PostMapping("")
-    @Operation(summary = "Add a proram to an Institute", description = "Fetch a program by its ID.")
+    @Operation(summary = "Add a proram to an Institute")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        log.info("Meedl User: {}", meedlUser.getClaimAsString("sub"));
         Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
 
         program = addProgramUseCase.createProgram(program);

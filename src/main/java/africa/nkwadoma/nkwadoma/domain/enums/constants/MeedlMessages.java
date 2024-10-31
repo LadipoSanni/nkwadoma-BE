@@ -17,7 +17,9 @@ public enum MeedlMessages {
     EMAIL_INDEX("@"),
     INVALID_CREATED_BY("created by id not valid"),
     INVALID_OBJECT("Object not found"),
-    UUID_NOT_VALID("uuid not valid");
+    NON_EXISTING_CREATED_BY("Creator not found"),
+    UUID_NOT_VALID("uuid not valid"),
+    USER_NOT_ENABLED("User not enabled");
 
 
     private final String message;

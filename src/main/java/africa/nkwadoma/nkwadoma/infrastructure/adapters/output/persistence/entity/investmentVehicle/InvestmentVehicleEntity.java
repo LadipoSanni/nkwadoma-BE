@@ -33,7 +33,7 @@ public class InvestmentVehicleEntity {
     private InvestmentVehicleType investmentVehicleType;
     private String mandate;
     private String sponsors;
-    private String tenure;
+    private int tenure;
     private BigDecimal size;
     private Float rate;
     @Enumerated(EnumType.STRING)

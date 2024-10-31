@@ -19,6 +19,11 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
+    public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
+        return cohortOutputPort.viewCohortDetails(userId,programId,cohortId);
+    }
+
+    @Override
     public Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
         return cohortOutputPort.findAllCohortInAProgram(id,pageSize,pageNumber);
     }

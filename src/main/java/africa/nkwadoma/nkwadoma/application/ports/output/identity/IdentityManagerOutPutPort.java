@@ -20,6 +20,7 @@ public interface IdentityManagerOutPutPort {
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     UserIdentity createPassword(String email, String password) throws MeedlException;
+    void logout(UserIdentity userIdentity) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
@@ -33,4 +34,5 @@ public interface IdentityManagerOutPutPort {
     UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
+    UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException;
 }

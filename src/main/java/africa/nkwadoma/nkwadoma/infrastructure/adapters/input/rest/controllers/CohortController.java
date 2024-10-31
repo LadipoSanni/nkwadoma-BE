@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.CohortRestMapper;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,11 +19,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.ALL_COHORT;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_CREATED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_VIEWED;
 
 @Slf4j
 @RestController
@@ -37,7 +40,7 @@ public class CohortController {
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest){
+    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) {
         try {
             Cohort cohort =
                     cohortMapper.toCohort(createCohortRequest);
@@ -49,10 +52,33 @@ public class CohortController {
                     .message(COHORT_CREATED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
-            return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         } catch (MeedlException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION,exception.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("cohort-details")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewCohortDetails(
+            @RequestParam @NotBlank(message = "User ID is required") String userId,
+            @RequestParam @NotBlank(message = "Program ID is required") String programId,
+            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId)
+    {
+        try {
+            Cohort cohort = cohortUseCase.viewCohortDetails(userId, programId, cohortId);
+            CohortResponse cohortResponse =
+                    cohortMapper.toCohortResponse(cohort);
+            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                    .body(cohortResponse)
+                    .message(COHORT_VIEWED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (MeedlException exception) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
     }
 

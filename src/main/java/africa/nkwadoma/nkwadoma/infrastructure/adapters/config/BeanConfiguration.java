@@ -35,6 +35,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import org.keycloak.admin.client.Keycloak;
@@ -63,11 +64,12 @@ public class BeanConfiguration {
                                                    IdentityManagerOutPutPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenUtils tokenUtils,
+                                                   SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper);
     }
 
     @Bean
@@ -88,13 +90,14 @@ public class BeanConfiguration {
     @Bean
     public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository,
                                                                    OrganizationIdentityMapper organizationIdentityMapper,
-                                                                   ServiceOfferEntityRepository serviceOfferEntityRepository){
-        return new OrganizationIdentityAdapter(organizationEntityRepository, serviceOfferEntityRepository, organizationIdentityMapper);
+                                                                   ServiceOfferEntityRepository serviceOfferEntityRepository, OrganizationServiceOfferingRepository organizationServiceOfferingRepository){
+        return new OrganizationIdentityAdapter(organizationEntityRepository, serviceOfferEntityRepository, organizationIdentityMapper, organizationServiceOfferingRepository);
     }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
-                                                   UserIdentityMapper userIdentityMapper){
-        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper);
+                                                   UserIdentityMapper userIdentityMapper,
+                                                   OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort){
+        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper,employeeIdentityOutputPort);
     }
 
     @Bean
@@ -114,9 +117,10 @@ public class BeanConfiguration {
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
-            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper
+            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper,
+            UserIdentityOutputPort userIdentityOutputPort
     ){
-        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper);
+        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper,userIdentityOutputPort);
     }
 
     @Bean
