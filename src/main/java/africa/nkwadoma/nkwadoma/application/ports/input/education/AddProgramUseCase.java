@@ -13,4 +13,6 @@ public interface AddProgramUseCase {
     Program viewProgramByName(Program program) throws MeedlException;
 
     Program viewProgramById(Program program) throws MeedlException;
+
+    void deleteProgram(Program program) throws MeedlException;
 }
