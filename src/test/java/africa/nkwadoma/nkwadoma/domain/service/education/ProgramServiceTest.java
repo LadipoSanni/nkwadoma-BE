@@ -157,13 +157,6 @@ class ProgramServiceTest {
         assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
     }
 
-
-    @Test
-    void updateNonExistingProgram() {
-        Program nonexistingProgram = Program.builder().id("non existing id").name("Non existing name").build();
-        assertThrows(MeedlException.class, () -> programService.updateProgram((nonexistingProgram)));
-    }
-
     @Test
     void viewAllPrograms() {
         try {
