@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -28,6 +29,8 @@ public interface IdentityManagerOutPutPort {
 
 
     UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
+
+    ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 

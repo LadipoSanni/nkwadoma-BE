@@ -32,7 +32,6 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -278,6 +277,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .search(email);
     }
 
+    @Override
     public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
