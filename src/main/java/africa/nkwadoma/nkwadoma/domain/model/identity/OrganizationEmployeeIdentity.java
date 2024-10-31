@@ -10,6 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 public class OrganizationEmployeeIdentity {
     private String id;
-    private UserIdentity middlUser;
+    private UserIdentity meedlUser;
     private String organization;
 }
