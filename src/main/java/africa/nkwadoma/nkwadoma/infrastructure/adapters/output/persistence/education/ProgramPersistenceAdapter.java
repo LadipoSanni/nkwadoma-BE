@@ -88,7 +88,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateDataElement(programId);
-        programId = programId.trim();
         MeedlValidator.validateUUID(programId);
         Optional<CohortEntity> cohortEntity = cohortRepository.findByProgramId(programId);
         if (cohortEntity.isPresent()) {
