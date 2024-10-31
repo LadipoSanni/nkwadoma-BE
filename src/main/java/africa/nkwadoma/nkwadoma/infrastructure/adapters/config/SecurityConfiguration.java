@@ -49,8 +49,8 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
-        configuration.setAllowedOrigins(Arrays.asList("**", "*", "/*" ,"/**","http://localhost:3000", "http://localhost:3000/"));
+        configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
+//        configuration.setAllowedOrigins(Arrays.asList("**", "*", "/*" ,"/**","http://localhost:3000", "http://localhost:3000/"));
         configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
