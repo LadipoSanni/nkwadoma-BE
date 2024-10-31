@@ -229,21 +229,21 @@ class LoanProductAdapterTest {
         gemsLoanProduct.setId(null);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.deleteById(gemsLoanProduct.getId()));
     }
-//    @Test
-//    @Order(7)
-//    void deleteLoanProduct() {
-//        try {
-//            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
-//            assertNotNull(foundLoanProduct);
-//            assertNotNull(foundLoanProduct.getId());
-//            assertEquals(gemsLoanProduct.getName(), foundLoanProduct.getName());
-//            loanProductOutputPort.deleteById(foundLoanProduct.getId());
-//
-//            assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(foundLoanProduct.getId()));
-//        } catch (MeedlException e) {
-//            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
-//        }
-//    }
+    @Test
+    @Order(7)
+    void deleteLoanProduct() {
+        try {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            assertNotNull(foundLoanProduct);
+            assertNotNull(foundLoanProduct.getId());
+            assertEquals(gemsLoanProduct.getName(), foundLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundLoanProduct.getId());
+
+            assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(foundLoanProduct.getId()));
+        } catch (MeedlException e) {
+            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
+        }
+    }
 
     @AfterAll
     void cleanUp() {

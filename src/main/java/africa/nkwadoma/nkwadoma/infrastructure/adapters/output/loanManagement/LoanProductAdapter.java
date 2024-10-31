@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -79,9 +80,12 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         return null;
     }
 
+    @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {
         MeedlValidator.validateDataElement(id);
+        LoanProductEntity loanProductEntity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
+        loanProductVendorRepository.deleteAllByLoanProductEntity(loanProductEntity);
         loanProductEntityRepository.deleteById(id);
     }
 
