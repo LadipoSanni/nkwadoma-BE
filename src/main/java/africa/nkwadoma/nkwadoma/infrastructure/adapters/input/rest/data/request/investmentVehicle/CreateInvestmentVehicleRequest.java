@@ -13,7 +13,7 @@ public class CreateInvestmentVehicleRequest {
     private String investmentVehicleType;
     private String mandate;
     private String sponsors;
-    private String tenure;
+    private int tenure;
     private BigDecimal size;
     private Float rate;
 }

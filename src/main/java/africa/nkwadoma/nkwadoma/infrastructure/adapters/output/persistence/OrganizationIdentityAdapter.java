@@ -39,10 +39,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
         saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-
+        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
 
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity.setServiceOfferings(savedServiceOfferings);
+        return organizationIdentity;
     }
 
     private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
@@ -78,7 +80,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findById(String id) throws MeedlException {
-        validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
@@ -91,7 +93,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){

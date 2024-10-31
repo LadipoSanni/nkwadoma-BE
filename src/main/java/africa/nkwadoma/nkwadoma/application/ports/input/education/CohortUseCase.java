@@ -6,4 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 public interface CohortUseCase {
 
     Cohort createCohort(Cohort cohort) throws MeedlException;
+
+
+    Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
 }

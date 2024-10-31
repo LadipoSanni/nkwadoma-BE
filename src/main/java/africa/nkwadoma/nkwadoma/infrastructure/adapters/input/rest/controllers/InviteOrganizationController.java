@@ -69,7 +69,7 @@ public class InviteOrganizationController {
 
     private static OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(UserIdentity userIdentity) {
         return OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity)
+                .meedlUser(userIdentity)
                 .build();
     }
 

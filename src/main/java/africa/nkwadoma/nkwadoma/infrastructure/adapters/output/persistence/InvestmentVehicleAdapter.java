@@ -12,6 +12,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -36,12 +39,12 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         InvestmentVehicleEntity investmentEntity =
                 investmentVehicleMapper.toInvestmentVehicleEntity(investmentVehicle);
         investmentEntity = investmentVehicleRepository.save(investmentEntity);
-        return investmentVehicleMapper.toInvestmentVehicleIdentity(investmentEntity);
+        return investmentVehicleMapper.toInvestmentVehicle(investmentEntity);
     }
 
 
-    @Override
-    public void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
+
+    private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleEntity> existingVehicle = investmentVehicleRepository.findByName(investmentVehicle.getName());
         if (existingVehicle.isPresent() && !existingVehicle.get().getId().equals(investmentVehicle.getId())) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
@@ -49,11 +52,18 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicle(int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAll(pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    @Override
     public InvestmentVehicle findById(String id) throws MeedlException {
         if (id != null){
             InvestmentVehicleEntity investmentVehicleEntity =
                     investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
-            return investmentVehicleMapper.toInvestmentVehicleIdentity(investmentVehicleEntity);
+            return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
         }
         throw new InvestmentException(INVESTMENT_IDENTITY_CANNOT_BE_NULL.getMessage());
     }

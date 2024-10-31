@@ -273,4 +273,60 @@ class ProgramServiceTest {
         program.setName(programWithSpace);
         assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
     }
+
+    @Test
+    void viewProgramById() {
+        try {
+            program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            Program foundProgram = programService.viewProgramById(program);
+            assertNotNull(foundProgram);
+            assertEquals(foundProgram, program);
+            verify(programOutputPort, times(1)).findProgramById(program.getId());
+        } catch (MeedlException e) {
+            log.error("Error viewing program by name", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE})
+    void viewProgramWithEmptyId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid", "3657679"})
+    void viewProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewProgramById(program));
+        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+    }
+
+    @Test
+    void viewNullProgram() {
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(null));
+    }
+
+    @Test
+    void viewProgramWithNullId() {
+        program.setId(null);
+        assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   a4f6873c-9158-4a05-a79c-901b4afc04a9", "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa    "})
+    void viewProgramByIdWithSpaces(String programId) {
+        try {
+            program.setId(programId);
+            when(programOutputPort.findProgramById(program.getId().trim())).thenReturn(program);
+            Program foundProgram = programService.viewProgramById(program);
+            assertNotNull(foundProgram);
+            verify(programOutputPort, times(1)).findProgramById(program.getId().trim());
+        } catch (MeedlException e) {
+            log.error("Error viewing program by ID", e);
+        }
+    }
+
 }
