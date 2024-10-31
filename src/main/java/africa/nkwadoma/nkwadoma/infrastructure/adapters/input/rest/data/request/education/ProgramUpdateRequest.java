@@ -19,14 +19,6 @@ public class ProgramUpdateRequest {
     private ProgramMode mode;
     private DeliveryType deliveryType;
 
-    public void setId(String id) {
-        this.id = id.trim();
-    }
-
-    public void setProgramDescription(String programDescription) {
-        this.programDescription = programDescription.trim();
-    }
-
     public void setName(String name) {
         this.name = name.trim();
     }
