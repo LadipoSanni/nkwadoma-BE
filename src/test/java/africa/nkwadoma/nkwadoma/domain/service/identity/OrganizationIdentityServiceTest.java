@@ -59,7 +59,7 @@ class OrganizationIdentityServiceTest {
 
 
             roseCouture = new OrganizationIdentity();
-            roseCouture.setId("576867");
+            roseCouture.setId("5bc2ef97-1035-4e42-bc8b-22a90b809f7c");
             roseCouture.setName("rose couture6");
             roseCouture.setEmail("iamoluchimercy@gmail.com");
             roseCouture.setTin("7682-5627");

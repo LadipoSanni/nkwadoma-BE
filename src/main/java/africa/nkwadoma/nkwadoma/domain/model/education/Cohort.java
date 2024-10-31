@@ -38,9 +38,9 @@ public class Cohort {
     private List<UserIdentity> trainees;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateUUID(programId);
         MeedlValidator.validateDataElement(name);
-        MeedlValidator.validateDataElement(createdBy);
+        MeedlValidator.validateUUID(createdBy);
         if (EmailValidator.getInstance().isValid(createdBy)) {
             throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
         }
