@@ -52,8 +52,8 @@ public class IdentityManagerController {
             log.info("The user id of user inviting a colleague : {} ",meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                    data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                    statusCode(HttpStatus.OK.name()).build());
+                    data(createdUserIdentity).message(ControllerConstant.COLLEAGUE_INVITED.getMessage()).
+                    statusCode(HttpStatus.CREATED.name()).build());
     }
 
     @PostMapping("auth/password/create")

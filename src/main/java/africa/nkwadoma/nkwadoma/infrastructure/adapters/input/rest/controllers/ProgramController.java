@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
@@ -39,7 +40,7 @@ public class ProgramController {
     @Operation(summary = "Add a proram to an Institute")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        log.info("Meedl User{}", meedlUser.getClaimAsString("sub"));
+        log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
         Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
 
         program = addProgramUseCase.createProgram(program);
@@ -72,13 +73,28 @@ public class ProgramController {
         );
     }
 
-    @GetMapping("/{name}")
+    @GetMapping
     @Operation(summary = "Search a program by name")
-    public ResponseEntity<ApiResponse<?>> searchProgramByName(@PathVariable @Valid @NotBlank(message = "Program name is required") String name)
+    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name)
             throws MeedlException {
         Program program = new Program();
         program.setName(name.trim());
         program = addProgramUseCase.viewProgramByName(program);
+
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                data(programRestMapper.toProgramResponse(program)).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "View a program by ID")
+    public ResponseEntity<ApiResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
+            throws MeedlException {
+        Program program = new Program();
+        program.setId(id.trim());
+        program = addProgramUseCase.viewProgramById(program);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).

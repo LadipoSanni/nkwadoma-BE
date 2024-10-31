@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.UUID_NOT_VALID;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -97,7 +98,7 @@ class ProgramPersistenceAdapterTest {
             userIdentity.setCreatedBy("Ayo");
 
             OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
-                    middlUser(userIdentity).build();
+                    meedlUser(userIdentity).build();
             organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setName("Amazing Grace Enterprises");
             organizationIdentity.setEmail("rachel@gmail.com");
@@ -194,7 +195,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    Design Thinking", "Data Science      "})
+    @ValueSource(strings = {"    Electrical Engineering", "Data Science      "})
     void createProgramWithSpacesInProgramName(String programName){
         try{
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
@@ -256,7 +257,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Non existing created by"})
+    @ValueSource(strings = {"d5bf6a6c-7102-48b2-8ce9-7cd41919f074"})
     void createProgramWithNonExistingCreatedBy(String createdBy){
         try {
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -346,7 +347,7 @@ class ProgramPersistenceAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void findProgramWithInvalidId(String id){
+    void findProgramByEmptyId(String id){
         program.setId(id);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(program.getId()));
     }
@@ -355,6 +356,14 @@ class ProgramPersistenceAdapterTest {
     void findProgramWithNullProgramId(){
         program.setId(null);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById((program.getId())));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid", "3657679"})
+    void viewProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
+        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
     }
 
     @Test
