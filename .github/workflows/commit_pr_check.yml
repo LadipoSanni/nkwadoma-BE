@@ -65,7 +65,8 @@ jobs:
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           BRANCH="${{ github.head_ref || github.ref_name }}"
-          new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\"}"
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
+          new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
 
           update_tracker $new_count "$builds" "$new_build"
 
@@ -93,12 +94,12 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS" \
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
       - name: Send Activity Summary Email
@@ -108,12 +109,14 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
           BUILDS: ${{ env.builds }}
+          LAST_COMMIT_AUTHOR: ${{ env.author }}
+          LAST_COMMIT_MESSAGE: $(jq -r '.[-1].message' <<< ${{ env.builds }})
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
           .github/workflows/scripts/activity_email.sh \
-            "$SMTP_SERVER" "$SMTP_PORT" "$SMTP_USERNAME" \
-            "$SMTP_PASSWORD" "$EMAILS" \
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}" \
-            "${{ env.builds }}"
+            "${{ env.builds }}" "${{ env.LAST_COMMIT_AUTHOR }}" "${{ env.LAST_COMMIT_MESSAGE }}"

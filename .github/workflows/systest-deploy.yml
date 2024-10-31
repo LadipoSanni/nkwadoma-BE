@@ -1,17 +1,17 @@
-name: Deploy Systest to AWS ECS
-
+name: Deploy Learnspace Systest to AWS ECS
 
 on:
   push:
     branches:
       - dev
+
 env:
   ECR_REPOSITORY: learnspace-backend-systest
   CLUSTER: learnspace-africa
   ECS: learnspace-backend-systest
   AWS_REGION: eu-west-1
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/learnspace-backend-systest
-  EMAILS: 'ladipo@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+  EMAILS: 'ladipo@semicolon.africa,joshua.o@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
 
 jobs:
   build-and-deploy:
@@ -55,21 +55,25 @@ jobs:
           COMMIT_HASH=$(git rev-parse --short HEAD)
           PROJECT_NAME="Nkwadoma Backend"
           DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-          TASK_BRANCH=${{ github.head_ref }}
-          TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${TASK_BRANCH}"
-          echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "JAR_NAME=myapp-${TAG}.jar" >> $GITHUB_ENV
           BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+
+          # Escape special characters in commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B | tr -d '\n\r' | sed 's/"/\\"/g; s/'\''/\\'\''/g')
+
+          TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${BRANCH_NAME}-${COMMIT_HASH}"
+
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
-          
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE=${COMMIT_MESSAGE}" >> $GITHUB_ENV
 
       - name: Debug Environment Variables
         run: |
           echo "TAG=${{ env.TAG }}"
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
           echo "COMMIT_AUTHOR=${{ env.COMMIT_AUTHOR }}"
+          echo "COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}"
           echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
 
       - name: Login to Amazon ECR
@@ -96,30 +100,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set environment variables for notifications
-        run: |
-          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-            BRANCH_NAME="${GITHUB_HEAD_REF}"
-          else
-            BRANCH_NAME=$(git symbolic-ref --short -q HEAD || echo "$GITHUB_REF_NAME")
-          fi
-
-          echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GITHUB_ENV
-
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B | tr -d '\r' | sed ':a;N;$!ba;s/\n/\\n/g')
-          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
-          echo "$COMMIT_MESSAGE" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Debug - Print environment variables
-        run: |
-          echo "TAG: ${{ env.TAG }}"
-          echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
-          echo "COMMIT_AUTHOR: ${{ env.COMMIT_AUTHOR }}"
-          echo "COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}"
 
       - name: Send build success email notification
         if: success()

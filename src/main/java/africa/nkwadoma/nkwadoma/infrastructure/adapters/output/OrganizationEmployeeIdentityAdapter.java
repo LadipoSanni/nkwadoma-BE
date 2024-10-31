@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -10,11 +11,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +43,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException {
       if(!StringUtils.isEmpty(employeeId)){
-          OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMiddlUserId(employeeId);
+          OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
           if (organization == null){
               log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
@@ -53,13 +55,15 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public Optional<OrganizationEmployeeIdentity> findByCreatedBy(String createdBy) throws MeedlException {
-        MeedlValidator.validateDataElement(createdBy);
-        Optional<OrganizationEmployeeEntity> employeeEntity = employeeAdminEntityRepository.findByMiddlUser_CreatedBy(createdBy);
-        if (employeeEntity.isEmpty()) {
-            return Optional.empty();
+    public OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException {
+        MeedlValidator.validateUUID(createdBy);
+        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(createdBy);
+        if(ObjectUtils.isEmpty(employeeEntity)){
+            log.error("creator not found : ---- while search for organization by createdBy : {}", createdBy);
+            throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
         }
-        return Optional.of(organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity.get()));
+        log.info("The employee found using the created by:  {}", employeeEntity.getId());
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity);
     }
 
     @Override
@@ -69,4 +73,15 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeAdminEntityRepository.delete(employeeEntity);
     }
+
+    @Transactional
+    @Override
+    public void deleteEmployee(String id) throws IdentityException {
+        if (StringUtils.isEmpty(id)){
+            throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+        employeeAdminEntityRepository.deleteByMeedlUserId(id);
+    }
+
+
 }

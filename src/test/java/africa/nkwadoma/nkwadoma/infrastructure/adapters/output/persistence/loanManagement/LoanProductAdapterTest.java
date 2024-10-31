@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,15 +27,16 @@ class LoanProductAdapterTest {
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
     private LoanProduct gemsLoanProduct;
-
     @BeforeEach
     void setUp() {
         gemsLoanProduct = new LoanProduct();
+        gemsLoanProduct.setPageSize(10);
+        gemsLoanProduct.setPageNumber(0);
         gemsLoanProduct.setName("Test Loan Product 2");
         gemsLoanProduct.setMandate("Test: A new mandate for test");
         gemsLoanProduct.setSponsors(List.of("Mark", "Jack"));
-        gemsLoanProduct.setLoanProductSize(new BigDecimal(1000));
-        gemsLoanProduct.setObligorLoanLimit(new BigDecimal(1000));
+        gemsLoanProduct.setLoanProductSize(new BigDecimal("1000.00"));
+        gemsLoanProduct.setObligorLoanLimit(new BigDecimal("1000.00"));
         gemsLoanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
     }
 
@@ -182,7 +186,24 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.findById(gemsLoanProduct.getId()));
     }
 
+    @Test
+    @Order(6)
+    void findAllLoanProduct() {
+            Page<LoanProduct> foundLoanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
+            List<LoanProduct> loanProductList = foundLoanProducts.toList();
 
+            assertEquals(1, foundLoanProducts.getTotalElements());
+            assertEquals(1, foundLoanProducts.getTotalPages());
+            assertTrue(foundLoanProducts.isFirst());
+            assertTrue(foundLoanProducts.isLast());
+
+            assertNotNull(loanProductList);
+            assertEquals(1, loanProductList.size());
+            assertEquals(gemsLoanProduct.getName(), loanProductList.get(0).getName());
+            assertEquals(gemsLoanProduct.getTermsAndCondition(), loanProductList.get(0).getTermsAndCondition());
+            assertEquals(gemsLoanProduct.getObligorLoanLimit(), loanProductList.get(0).getObligorLoanLimit());
+
+    }
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void deleteWithEmptyId(String id) {
@@ -192,7 +213,7 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.deleteById(gemsLoanProduct.getId()));
     }
     @Test
-    @Order(6)
+    @Order(7)
     void deleteLoanProduct() {
         try {
             LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
