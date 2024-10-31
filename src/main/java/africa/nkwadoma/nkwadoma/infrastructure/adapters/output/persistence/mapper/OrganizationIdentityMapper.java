@@ -22,11 +22,12 @@ public interface OrganizationIdentityMapper {
 
     @Mapping(source = "serviceOfferingEntity", target = ".")
     ServiceOffering toServiceOfferingModel(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
-    List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
+    List<ServiceOffering> toServiceOfferingEntitiesServiceOfferings(List<ServiceOfferingEntity> serviceOfferingEntities);
 
+    List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
     @Mapping(target = "serviceOffering", source = "serviceOfferingEntity")
     OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
-    List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
+    List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 }
