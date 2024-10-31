@@ -199,7 +199,11 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345", "    passwordJ@345    "})
+    @ValueSource(strings = {
+            "This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword    ",
+            "    This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword",
+            "    This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword    "
+    })
     void loginWithValidPasswordWithSpaces(String password) {
         john.setPassword(password);
         try {
@@ -208,7 +212,6 @@ class KeycloakAdapterTest {
             assertNotNull(accessTokenResponse.getRefreshToken());
         } catch (MeedlException e) {
             log.error("Failed to login with spaces", e);
-
         }
     }
 

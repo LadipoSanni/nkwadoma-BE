@@ -10,7 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
@@ -39,6 +39,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    private final CohortRepository cohortRepository;
 
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
@@ -86,9 +87,14 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public void deleteProgram(String programId) throws MeedlException {
-        validateDataElement(programId);
+        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateUUID(programId);
+        Optional<CohortEntity> cohortEntity = cohortRepository.findByProgramId(programId);
+        if (cohortEntity.isPresent()) {
+            throw new EducationException(ProgramMessages.COHORT_EXISTS.getMessage());
+        }
         ProgramEntity program = programRepository.findById(programId).
-                orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
+                orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         programRepository.delete(program);
     }
 

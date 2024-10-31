@@ -102,4 +102,19 @@ public class ProgramController {
                 HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete a program by it's ID")
+    public ResponseEntity<ApiResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
+            throws MeedlException {
+        Program program = new Program();
+        program.setId(id.trim());
+        addProgramUseCase.deleteProgram(program);
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                message("Program " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
 }
