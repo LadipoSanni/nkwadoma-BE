@@ -77,15 +77,15 @@ public class CohortPersistenceAdapterTest {
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-        try {
-            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
-            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
-            program.setOrganizationId(organizationIdentity.getId());
-             program.setCreatedBy(meedleUser);
-            program = programOutputPort.saveProgram(program);
-        } catch (MeedlException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+//            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
+//            program.setOrganizationId(organizationIdentity.getId());
+//             program.setCreatedBy(meedleUser);
+//            program = programOutputPort.saveProgram(program);
+//        } catch (MeedlException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -247,10 +247,11 @@ public class CohortPersistenceAdapterTest {
     @Order(6)
     @Test
     void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOneId);
-        cohortRepository.deleteById(cohortTwoId);
-        userIdentityOutputPort.deleteUserById(meedleUser);
+//        Program foundProgram = programOutputPort.findProgramByName(program.getName());
+//        programOutputPort.deleteProgram(foundProgram.getId());
+//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+//        cohortRepository.deleteById(cohortOneId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        userIdentityOutputPort.deleteUserById(meedleUser);
     }
 }
