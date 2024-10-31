@@ -27,6 +27,7 @@ import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateUUID;
 
 @RequiredArgsConstructor
 @Component
@@ -93,7 +94,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program findProgramById(String programId) throws MeedlException {
-        validateDataElement(programId);
+        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateUUID(programId);
+        programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         return programMapper.toProgram(programEntity);
