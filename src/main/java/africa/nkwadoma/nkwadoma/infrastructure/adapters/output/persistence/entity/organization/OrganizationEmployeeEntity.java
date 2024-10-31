@@ -18,7 +18,7 @@ public class OrganizationEmployeeEntity {
     @UuidGenerator
     private String id;
     @ManyToOne
-    private UserEntity middlUser;
+    private UserEntity meedlUser;
     private String organization;
 
 
