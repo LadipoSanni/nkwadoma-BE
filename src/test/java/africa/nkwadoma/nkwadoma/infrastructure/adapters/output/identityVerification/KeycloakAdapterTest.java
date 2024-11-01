@@ -1,9 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +15,16 @@ import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
@@ -38,6 +44,8 @@ class KeycloakAdapterTest {
     private String johnId;
     private boolean enabled;
     private final String password = "This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword";
+    private OrganizationIdentity rizzGallery;
+    private String rizzGalleryId ;
 
     @BeforeEach
     void setUp() {
@@ -52,8 +60,26 @@ class KeycloakAdapterTest {
         peter.setLastName("Mark");
         peter.setEmail("peter@lendspace.com");
         peter.setRole(TRAINEE);
-    }
 
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setMeedlUser(peter);
+
+        List<OrganizationEmployeeIdentity> employeePeter = new ArrayList<>();
+        employeePeter.add(employeeIdentity);
+
+        rizzGallery = new OrganizationIdentity();
+//        rizzGallery.setId("5bc2ef97-1035-4e42-bc8b-22a90b809f7c");
+        rizzGallery.setName("Rizz Gallery");
+        rizzGallery.setEmail("rizzyJane@gmail.com");
+        rizzGallery.setTin("7682-5627");
+        rizzGallery.setRcNumber("RC87899");
+        rizzGallery.setServiceOfferings(List.of(new ServiceOffering()));
+        rizzGallery.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        rizzGallery.setPhoneNumber("09876365713");
+        rizzGallery.setInvitedDate(LocalDateTime.now().toString());
+        rizzGallery.setWebsiteAddress("rizzgallery.org");
+        rizzGallery.setOrganizationEmployees(employeePeter);
+    }
 
     @Test
     @Order(1)
@@ -134,7 +160,65 @@ class KeycloakAdapterTest {
             log.info("{} {}",e.getClass().getName(),e.getMessage());
         }
     }
+    @Test
+    @Order(3)
+    void createClient(){
+        try {
+            OrganizationIdentity organizationIdentity = identityManagementOutputPort.createOrganization(rizzGallery);
+            assertNotNull(organizationIdentity);
+            assertNotNull(organizationIdentity.getId());
+            log.info(organizationIdentity.getId());
+            rizzGalleryId = organizationIdentity.getId();
+            assertEquals(rizzGallery.getName(), organizationIdentity.getName());
+        } catch (MeedlException e) {
+            log.error("{}",e.getMessage());
+        }
+    }
+    @Test
+    void createClientWithNullOrganizationIdentity(){
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createOrganization(null));
+    }
+    @Test
+    @Order(4)
+    void getClientResource(){
+            ClientResource clientResource = identityManagementOutputPort.getClientResource(rizzGalleryId);
+            assertNotNull(clientResource);
+            ClientRepresentation clientRepresentation = clientResource.toRepresentation();
+            log.info("{}", clientRepresentation.getName());
+            assertEquals(rizzGallery.getName(), clientRepresentation.getName());
+            assertEquals(rizzGallery.getName(), clientRepresentation.getClientId());
+            assertEquals(rizzGalleryId, clientRepresentation.getId());
 
+    }
+
+    @Test
+    @Order(5)
+    void getClientRepresentation(){
+        try {
+            ClientRepresentation representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            log.info("{}", representation.getId());
+            assertEquals(rizzGallery.getName(), representation.getName());
+            assertEquals(rizzGallery.getName(), representation.getClientId());
+            assertEquals(rizzGalleryId, representation.getId());
+        } catch (MeedlException e) {
+            log.error("{}",e.getMessage());
+        }
+    }
+    @Test
+    @Order(6)
+    void deleteClient(){
+        try {
+            ClientRepresentation clientRepresentation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(clientRepresentation);
+            assertEquals(rizzGallery.getName(), clientRepresentation.getName());
+            assertEquals(rizzGalleryId, clientRepresentation.getId());
+            identityManagementOutputPort.deleteClient(rizzGalleryId);
+            assertThrows(MeedlException.class, ()->identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName()));
+        } catch (MeedlException e) {
+            log.error("{}",e.getMessage());
+        }
+    }
     @ParameterizedTest
     @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
     void createPasswordWithNullPassword(String password) {
@@ -164,7 +248,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(3)
+    @Order(7)
     void login(){
         try {
             john.setPassword(password);
@@ -267,7 +351,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(5)
+    @Order(8)
     void changePasswordWithValidPassword() {
         String newPassword = "neWpasswordJ@345";
         AccessTokenResponse accessTokenResponse = null;
@@ -313,9 +397,8 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
 
     }
-
     @Test
-    @Order(6)
+    @Order(9)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -348,7 +431,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(7)
+    @Order(10)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -362,7 +445,7 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(8)
+    @Order(11)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
