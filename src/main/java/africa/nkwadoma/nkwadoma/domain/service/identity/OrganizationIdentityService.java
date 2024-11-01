@@ -43,7 +43,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
        return organizationIdentity;
     }
 
-
     @Override
     public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
