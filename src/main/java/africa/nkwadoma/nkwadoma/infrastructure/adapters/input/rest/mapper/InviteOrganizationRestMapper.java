@@ -10,6 +10,5 @@ import org.mapstruct.Mapper;
 public interface InviteOrganizationRestMapper {
     OrganizationIdentity toOrganizationIdentity(InviteOrganizationRequest inviteOrganizationRequest);
     InviteOrganizationResponse toInviteOrganizationresponse(OrganizationIdentity organizationIdentity);
-
     OrganizationResponse toOrganizationResponse(OrganizationIdentity organizationIdentity);
 }
