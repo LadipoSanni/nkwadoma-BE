@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,8 @@ class ProgramServiceTest {
     private ProgramService programService;
     @Mock
     private ProgramOutputPort programOutputPort;
+    @Mock
+    private ProgramMapper programMapper;
     private Program program;
     private int pageSize = 10;
     private int pageNumber = 0;
@@ -100,6 +103,59 @@ class ProgramServiceTest {
     }
 
 
+    @Test
+    void updateProgram() {
+        try {
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            Program addedProgram = programService.createProgram(program);
+
+            log.info("Program: {}", addedProgram);
+            addedProgram.setId(program.getId());
+            addedProgram.setName("New program name");
+            addedProgram.setProgramDescription("New program description");
+            addedProgram.setDuration(3);
+            addedProgram.setMode(ProgramMode.PART_TIME);
+            addedProgram.setDeliveryType(DeliveryType.ONLINE);
+
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programMapper.updateProgram(addedProgram, program)).thenReturn(program);
+            when(programOutputPort.saveProgram(program)).thenReturn(program);
+            Program updatedProgram = programService.updateProgram(addedProgram);
+
+            verify(programOutputPort, times(2)).saveProgram(addedProgram);
+            assertNotNull(updatedProgram);
+            assertEquals(updatedProgram.getProgramDescription(), addedProgram.getProgramDescription());
+        } catch (MeedlException e) {
+            log.error("Error updating program", e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void updateProgramWithEmptyProgramId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()->programService.updateProgram(program));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"4089874209", "non-uuid"})
+    void updateProgramWithNonUUIDProgramId(String programId) {
+        program.setId(programId);
+        assertThrows(MeedlException.class, ()->programService.updateProgram(program));
+    }
+
+    @Test
+    void updateProgramWithNullProgramId() {
+        program.setId(null);
+        MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((program)));
+        assertEquals(exception.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+    }
+
+    @Test
+    void updateProgramWithNullProgram() {
+        MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((null)));
+        assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
+    }
     @Test
     void viewAllPrograms() {
         try {
@@ -208,8 +264,7 @@ class ProgramServiceTest {
     @ValueSource(strings = {StringUtils.SPACE})
     void viewProgramWithNullOrEmptyName(String programWithSpace) {
         program.setName(programWithSpace);
-        MeedlException meedlException = assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
-        log.info(meedlException.getMessage());
+        assertThrows(MeedlException.class, ()-> programService.viewProgramByName(program));
     }
 
     @Test

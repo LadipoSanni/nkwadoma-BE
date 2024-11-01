@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.INVITE_ORGANIZATION_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_DESCRIPTION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_TITLE;

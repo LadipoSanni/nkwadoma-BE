@@ -1,9 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education;
 
-import africa.nkwadoma.nkwadoma.domain.enums.DeliveryType;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramMode;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.ProgramType;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +25,7 @@ public class ProgramCreateRequest {
     private int programDuration;
     private DeliveryType deliveryType;
     private ProgramMode programMode;
-    private String durationStatus;
+    private DurationType durationStatus;
 
     public void setProgramName(@NotBlank(message = "Program name is required") String programName) {
         this.programName = programName.trim();

@@ -97,7 +97,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
-            log.info("Found nothing while searching for service  offerings...");
+            throw new IdentityException("Service offering not found");
         }
         return organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
     }
