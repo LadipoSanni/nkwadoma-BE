@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.*;
+import org.hibernate.annotations.UuidGenerator;
 
 @Setter
 @Getter
@@ -15,6 +13,7 @@ import java.util.*;
 @Table(name = "organization")
 public class OrganizationEntity {
     @Id
+    @UuidGenerator
     private String id;
     private String name;
     private String email;

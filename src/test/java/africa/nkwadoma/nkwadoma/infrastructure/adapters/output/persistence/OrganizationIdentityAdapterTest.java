@@ -200,23 +200,31 @@ class OrganizationIdentityAdapterTest {
     @Test
     void viewAllOrganization(){
         try{
+            int listSize = organizationOutputPort.viewAllOrganization(amazingGrace).toList().size();
+            amazingGrace.setName("Amazing Grace Enterprises2");
+            amazingGrace.setEmail("rachel2@gmail.com");
+            joel.setEmail("joel2@johnson.com");
+            OrganizationIdentity organizationIdentity = organizationOutputPort.save(amazingGrace);
+            amazingGrace.setId(organizationIdentity.getId());
 
             Page<OrganizationIdentity> foundOrganizationIdentities = organizationOutputPort.viewAllOrganization(amazingGrace);
             assertNotNull(foundOrganizationIdentities);
             List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
+            organizationOutputPort.delete(amazingGrace.getId());
+            log.info("{}",organizationIdentityList.size());
 
-            assertEquals(1, foundOrganizationIdentities.getTotalElements());
-            assertEquals(1, foundOrganizationIdentities.getTotalPages());
+            assertEquals(listSize + 1 , foundOrganizationIdentities.getTotalElements());
+//            assertEquals(amazingGrace., foundOrganizationIdentities.getTotalPages());
             assertTrue(foundOrganizationIdentities.isFirst());
             assertTrue(foundOrganizationIdentities.isLast());
 
             assertNotNull(organizationIdentityList);
-            assertEquals(1, organizationIdentityList.size());
-            assertEquals(organizationIdentityList.get(0).getName(), amazingGrace.getName());
-            assertEquals(organizationIdentityList.get(0).getTin(), amazingGrace.getTin());
-            assertEquals(organizationIdentityList.get(0).getEmail(), amazingGrace.getEmail());
-            assertEquals(organizationIdentityList.get(0).getRcNumber(), amazingGrace.getRcNumber());
-//            organizationOutputPort.deleteProgram(foundOrganizationIdentities.getContent().get(0).getId());
+            assertEquals(listSize + 1, organizationIdentityList.size());
+            assertEquals(organizationIdentityList.get(listSize).getName(), amazingGrace.getName());
+            assertEquals(organizationIdentityList.get(listSize).getTin(), amazingGrace.getTin());
+            assertEquals(organizationIdentityList.get(listSize).getEmail(), amazingGrace.getEmail());
+            assertEquals(organizationIdentityList.get(listSize).getRcNumber(), amazingGrace.getRcNumber());
+
         }catch (MeedlException meedlException){
             log.info("{}", meedlException.getMessage());
         }

@@ -111,10 +111,11 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         log.info("Client created --- {}", response.getStatusInfo() );
-        if (response.getStatusInfo().equals(Response.Status.CREATED)) {
-            clientRepresentation = getClientRepresentation(organizationIdentity);
-            organizationIdentity.setId(clientRepresentation.getId());
-        }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+//        if (response.getStatusInfo().equals(Response.Status.CREATED)) {
+//            clientRepresentation = getClientRepresentation(organizationIdentity);
+//            organizationIdentity.setId(clientRepresentation.getId());
+//        }else
+            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
@@ -282,7 +283,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
-                .findByClientId(organizationIdentity.getId())
+                .findByClientId(organizationIdentity.getName())
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
     }
 
