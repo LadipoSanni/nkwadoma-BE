@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -14,13 +15,14 @@ import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 
 
 @RequiredArgsConstructor
 @Slf4j
-public class OrganizationIdentityService implements CreateOrganizationUseCase {
+public class OrganizationIdentityService implements CreateOrganizationUseCase , ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
@@ -72,7 +74,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
         return organizationEmployeeIdentity;
     }
-
+    @Override
+    public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
+    }
 
 
 }

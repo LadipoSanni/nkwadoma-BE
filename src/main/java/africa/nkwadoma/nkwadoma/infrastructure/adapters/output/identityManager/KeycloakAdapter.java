@@ -110,6 +110,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
+        log.info("Client created --- {}", response.getStatusInfo() );
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
             clientRepresentation = getClientRepresentation(organizationIdentity);
             organizationIdentity.setId(clientRepresentation.getId());

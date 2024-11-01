@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -59,6 +61,8 @@ class OrganizationIdentityAdapterTest {
         amazingGrace.getServiceOfferings().get(0).setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
         amazingGrace.setOrganizationEmployees(List.of(employeeJoel));
+        amazingGrace.setPageSize(10);
+        amazingGrace.setPageNumber(0);
         }
 
     @Test
@@ -67,6 +71,7 @@ class OrganizationIdentityAdapterTest {
                 assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
                 assertNotNull(savedOrganization);
+                log.info("Organization saved successfully {}", savedOrganization);
                 assertEquals(amazingGrace.getName(),savedOrganization.getName());
                 assertNotNull(savedOrganization.getServiceOfferings());
                 assertNotNull(savedOrganization.getServiceOfferings().get(0));
@@ -190,6 +195,36 @@ class OrganizationIdentityAdapterTest {
        }catch (MeedlException meedlException){
            log.info("{}", meedlException.getMessage());
        }
+    }
+
+    @Test
+    void viewAllOrganization(){
+        try{
+
+            Page<OrganizationIdentity> foundOrganizationIdentities = organizationOutputPort.viewAllOrganization(amazingGrace);
+            assertNotNull(foundOrganizationIdentities);
+            List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
+
+            assertEquals(1, foundOrganizationIdentities.getTotalElements());
+            assertEquals(1, foundOrganizationIdentities.getTotalPages());
+            assertTrue(foundOrganizationIdentities.isFirst());
+            assertTrue(foundOrganizationIdentities.isLast());
+
+            assertNotNull(organizationIdentityList);
+            assertEquals(1, organizationIdentityList.size());
+            assertEquals(organizationIdentityList.get(0).getName(), amazingGrace.getName());
+            assertEquals(organizationIdentityList.get(0).getTin(), amazingGrace.getTin());
+            assertEquals(organizationIdentityList.get(0).getEmail(), amazingGrace.getEmail());
+            assertEquals(organizationIdentityList.get(0).getRcNumber(), amazingGrace.getRcNumber());
+//            organizationOutputPort.deleteProgram(foundOrganizationIdentities.getContent().get(0).getId());
+        }catch (MeedlException meedlException){
+            log.info("{}", meedlException.getMessage());
+        }
+    }
+    @Test
+    void viewAllOrganizationWithNull(){
+        assertThrows(MeedlException.class , ()-> organizationOutputPort.viewAllOrganization(null));
+
     }
 
     @Test
