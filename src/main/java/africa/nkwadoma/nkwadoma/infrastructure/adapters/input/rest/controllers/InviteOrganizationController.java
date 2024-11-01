@@ -68,7 +68,7 @@ public class InviteOrganizationController {
        List<OrganizationIdentity> organizationIdentities = createOrganizationUseCase.search(name);
 
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                data(programRestMapper.toProgramResponse(program)).
+                data(organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );
