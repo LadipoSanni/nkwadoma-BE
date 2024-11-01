@@ -1,80 +1,115 @@
 #!/bin/bash
 
+PROJECT_NAME="Enum"
+TASK_ID="task-${BRANCH_NAME}"
+
+TAG="${PROJECT_NAME}-${BRANCH_NAME}-${TASK_ID}"
+# Set the branch name based on the event type
+if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+    # For pull requests, use GITHUB_HEAD_REF to get the branch being merged from
+    BRANCH_NAME=${GITHUB_HEAD_REF}
+else
+    # For direct pushes, use the branch name from git
+    BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+fi
+
+echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+
 SMTP_SERVER=$1
 SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
-TAG=$6
 BRANCH_NAME=$7
-COMMIT_AUTHOR=$8
-SONARQUBE_URL_SET=$9
+COMMIT_AUTHOR=${8}
+SONARQUBE_URL=http://sonarqube.enum.africa/dashboard?id=EnumVerse
+MAVEN_REPORT_URL=s3://semicolon-build-reports/enum/enumverse-backend/maven-report/new-reports/surefire-report.html
+AUTOMATION_TEST_URL=s3://semicolon-build-reports/enum/enumverse-backend/maven-report/automation-test-report/report-pytest-results.html
+
+SONARQUBE_URL_SET=${9}
 MAVEN_REPORT_URL_SET=${10}
 AUTOMATION_TEST_URL_SET=${11}
 COMMIT_MESSAGE=${12}
+# Debug output
+echo "Debug: COMMIT_MESSAGE received as: $COMMIT_MESSAGE"
 
-# Debugging outputs for validation
-echo "Debug: COMMIT_AUTHOR = $COMMIT_AUTHOR"
-echo "Debug: COMMIT_MESSAGE (raw) = $COMMIT_MESSAGE"
-
-# Unescape any special characters in commit message
+# Unescape the commit message
 COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/\\(/(/g; s/\\)/)/g; s/\\#/#/g')
-echo "Debug: COMMIT_MESSAGE (unescaped) = $COMMIT_MESSAGE"
 
-# Extract engineer's name from commit author
+# More debug output
+echo "Debug: COMMIT_MESSAGE after unescaping: $COMMIT_MESSAGE"
+
+
+
+# Extract only the name from the COMMIT_AUTHOR
 ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
 
-# Split email addresses by comma
-IFS=',' read -r -a email_array <<< "$EMAILS"
+IFS=',' read -r -a email_array <<< "${EMAILS}"
+for email in "${email_array[@]}"
+do
+  echo "Sending email to: $email" # Debug output
 
-# Create HTML email content
-cat << EOF > /tmp/email.html
+  cat << EOF > /tmp/email.html
 From: builds@semicolon.africa
-To: ${EMAILS}
-Subject: Build Failure Notification
-Content-Type: text/html; charset=UTF-8
+To: $email
+Subject: Build Failure for Enumverse
+Content-Type: text/html
+MIME-Version: 1.0
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Build Failure</title>
+    <title>Build Failure for Enumverse</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; padding: 20px;">
+    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; padding: 20px; margin-bottom: 20px;">
         <h1 style="color: #721c24; margin-top: 0;">Build Failure</h1>
-        <p>Oooops, the recent build in Nkwadoma Backend was unsuccessful. Please check the details below:</p>
-        <p><strong>Engineer:</strong> ${ENGINEER_NAME}</p>
-        <p><strong>Branch:</strong> ${BRANCH_NAME}</p>
-        <p><strong>Tag:</strong> ${TAG}</p>
-        <p><strong>Commit Message:</strong> ${COMMIT_MESSAGE}</p>
+        <p style="margin-bottom: 10px;">Oooops, Your recent build in Enumverse Backend was unsuccessful, kindly check the build details and fix.</p>
+    </div>
+    
+    <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 5px; padding: 20px; margin-bottom: 20px;">
+        <h2 style="margin-top: 0;">Build Details</h2>
+        <p><strong>ENGINEER:</strong> ${ENGINEER_NAME}</p>
+        <p><strong>BRANCH:</strong> ${BRANCH_NAME}</p>
+        <p><strong>TAG:</strong> ${TAG}</p>
+        <p><strong>COMMIT MESSAGE:</strong> ${COMMIT_MESSAGE}</p>
     </div>
 
-    <h2>Reports</h2>
-    <ul>
+    <div style="background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 5px; padding: 20px;">
+        <h2 style="margin-top: 0;">Reports</h2>
+        <p>Click on the links below to view your reports:</p>
+        <ul style="padding-left: 20px;">
 EOF
 
-# Append report links if set
-[ "$SONARQUBE_URL_SET" = "true" ] && echo "<li><a href='${SONARQUBE_URL}' target='_blank'>SonarQube Report</a></li>" >> /tmp/email.html
-[ "$MAVEN_REPORT_URL_SET" = "true" ] && echo "<li><a href='${MAVEN_REPORT_URL}' target='_blank'>Maven Report</a></li>" >> /tmp/email.html
-[ "$AUTOMATION_TEST_URL_SET" = "true" ] && echo "<li><a href='${AUTOMATION_TEST_URL}' target='_blank'>Automation Test Report</a></li>" >> /tmp/email.html
+  if [ "$SONARQUBE_URL_SET" = "true" ]; then
+    echo "<li><a href=\"$SONARQUBE_URL\" style=\"color: #007bff; text-decoration: none;\">Sonarqube Report</a></li>" >> /tmp/email.html
+  fi
+  if [ "$MAVEN_REPORT_URL_SET" = "true" ]; then
+    echo "<li><a href=\"$MAVEN_REPORT_URL\" style=\"color: #007bff; text-decoration: none;\">Maven Build Report</a></li>" >> /tmp/email.html
+  fi
+  if [ "$AUTOMATION_TEST_URL_SET" = "true" ]; then
+    echo "<li><a href=\"$AUTOMATION_TEST_URL\" style=\"color: #007bff; text-decoration: none;\">Automation Test Report</a></li>" >> /tmp/email.html
+  fi
 
-cat << EOF >> /tmp/email.html
-    </ul>
-    <p>Regards,<br><strong>The Cloud Team</strong></p>
+  cat << EOF >> /tmp/email.html
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ced4da;">
+        <p style="margin-bottom: 5px;">Regards,</p>
+        <p style="margin-top: 0;"><strong>The Cloud Team</strong></p>
+    </div>
 </body>
 </html>
 EOF
 
-# Send emails to all recipients
-for email in "${email_array[@]}"; do
-  echo "Sending email to: $email" # Debug output
-
-  curl --verbose --ssl-reqd \
+  curl --ssl-reqd \
     --url "smtps://${SMTP_SERVER}:${SMTP_PORT}" \
     --mail-from "builds@semicolon.africa" \
     --mail-rcpt "$email" \
     --user "${SMTP_USERNAME}:${SMTP_PASSWORD}" \
-    --upload-file /tmp/email.html
+    --upload-file /tmp/email.html \
+    --verbose # Add verbose output for debugging
 done
