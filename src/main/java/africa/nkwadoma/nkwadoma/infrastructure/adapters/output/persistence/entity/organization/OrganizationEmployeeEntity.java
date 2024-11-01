@@ -11,14 +11,14 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "organization_employee", uniqueConstraints = {@UniqueConstraint(columnNames = {"organization", "middl_user_id"},
+@Table(name = "organization_employee", uniqueConstraints = {@UniqueConstraint(columnNames = {"organization", "meedl_user_id"},
         name = "uk_organization_employee")})
 public class OrganizationEmployeeEntity {
     @Id
     @UuidGenerator
     private String id;
     @ManyToOne
-    private UserEntity middlUser;
+    private UserEntity meedlUser;
     private String organization;
 
 

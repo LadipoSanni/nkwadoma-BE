@@ -51,8 +51,8 @@ public class PremblyNinResponse {
         @JsonProperty("maritalstatus")
         private String maritalStatus;
 
-        @JsonProperty("middleName")
-        private String middleName;
+        @JsonProperty("meedlName")
+        private String meedlName;
 
         @JsonProperty("nin")
         private String nin;
@@ -69,8 +69,8 @@ public class PremblyNinResponse {
         @JsonProperty("nok_lga")
         private String nokLga;
 
-        @JsonProperty("nok_middlename")
-        private String nokMiddlename;
+        @JsonProperty("nok_meedlname")
+        private String nokMeedlname;
 
         @JsonProperty("nok_state")
         private String nokState;
@@ -132,8 +132,8 @@ public class PremblyNinResponse {
         @JsonProperty("nok_postalcode")
         private String nokPostalCode;
 
-        @JsonProperty("pmiddlename")
-        private String pMiddleName;
+        @JsonProperty("pmeedlname")
+        private String pMeedlName;
 
         @JsonProperty("birthlga")
         private String birthLga;

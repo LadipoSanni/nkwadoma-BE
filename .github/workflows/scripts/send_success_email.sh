@@ -9,14 +9,14 @@ SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
-ENGINEER_NAME=$6
+COMMIT_AUTHOR=$6
 BRANCH_NAME=$7
 COMMIT_AUTHOR=$8
 SONARQUBE_URL_SET=$9
 MAVEN_REPORT_URL_SET=${10}
 AUTOMATION_TEST_URL_SET=${11}
 COMMIT_MESSAGE=${12}
-ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
+COMMIT_AUTHOR=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
 SONARQUBE_URL=http://52.2.188.133:9000/
 MAVEN_REPORT_URL=
 AUTOMATION_TEST_URL=
@@ -49,7 +49,7 @@ echo "Commit messages after merge: $COMMITS"
 
 
 # Extract engineer's name from commit author
-ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
+COMMIT_AUTHOR=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
 
 # Read email recipients into an array
 IFS=',' read -r -a email_array <<< "${EMAILS}"

@@ -10,7 +10,7 @@ public interface InvestmentVehicleMapper {
 
 
     InvestmentVehicleEntity toInvestmentVehicleEntity(InvestmentVehicle investmentVehicle);
-    InvestmentVehicle toInvestmentVehicleIdentity(InvestmentVehicleEntity investmentEntity);
+    InvestmentVehicle toInvestmentVehicle(InvestmentVehicleEntity investmentEntity);
 
 
 }

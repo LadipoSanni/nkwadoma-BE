@@ -6,11 +6,4 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface DurationTypeMapper {
-    @EnumMapping(nameTransformationStrategy = MappingConstants.CASE_TRANSFORMATION, configuration = "upper")
-    @ValueMappings({
-            @ValueMapping(target = "MONTHS", source = "Months"),
-            @ValueMapping(target = "WEEKS", source = "Weeks"),
-            @ValueMapping(target = "YEARS", source = "Years")
-    })
-    DurationType toDurationType(String durationType);
 }

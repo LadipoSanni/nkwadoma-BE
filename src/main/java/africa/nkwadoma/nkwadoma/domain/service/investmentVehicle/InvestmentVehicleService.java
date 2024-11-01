@@ -5,6 +5,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 
@@ -27,6 +30,11 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         return investmentVehicleOutputPort.findById(id);
     }
 
+
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize , int pageNumber) {
+        return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize,pageNumber);
+    }
 
 
 }

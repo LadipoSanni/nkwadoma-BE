@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -23,7 +24,8 @@ public class Cohort {
     private String programId;
     private String cohortDescription;
     private String name;
-    private ActivationStatus cohortStatus;
+    private ActivationStatus activationStatus;
+    private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -33,9 +35,9 @@ public class Cohort {
     private LocalDateTime expectedEndDate;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateUUID(programId);
         MeedlValidator.validateDataElement(name);
-        MeedlValidator.validateDataElement(createdBy);
+        MeedlValidator.validateUUID(createdBy);
         if (EmailValidator.getInstance().isValid(createdBy)) {
             throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
         }

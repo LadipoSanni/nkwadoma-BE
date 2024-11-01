@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "middl_user")
+@Table(name = "meedl_user")
 public class UserEntity {
     @Id
     private String id;

@@ -16,4 +16,11 @@ public class CohortService implements CohortUseCase {
     public Cohort createCohort(Cohort cohort) throws MeedlException {
         return cohortOutputPort.saveCohort(cohort);
     }
+
+    @Override
+    public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
+        return cohortOutputPort.viewCohortDetails(userId,programId,cohortId);
+    }
+
+
 }
