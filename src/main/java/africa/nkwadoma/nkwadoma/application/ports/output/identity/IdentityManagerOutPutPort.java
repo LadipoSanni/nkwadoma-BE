@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -30,7 +31,7 @@ public interface IdentityManagerOutPutPort {
 
     UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
 
-    ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException;
+    ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
@@ -38,4 +39,8 @@ public interface IdentityManagerOutPutPort {
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException;
+
+    ClientResource getClientResource(String clientId);
+
+    void deleteClient(String clientId);
 }
