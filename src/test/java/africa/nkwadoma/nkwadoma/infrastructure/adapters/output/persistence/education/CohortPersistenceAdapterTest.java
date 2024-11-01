@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -46,28 +47,27 @@ public class CohortPersistenceAdapterTest {
     private CohortRepository cohortRepository;
     private String meedleUser;
     @Autowired
-    private UserIdentityOutputPort userIdentityOutputPort;
-    @Autowired
-    private ProgramOutputPort programOutputPort;
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private  OrganizationEmployeeIdentity employeeIdentity;
     private  OrganizationIdentity organizationIdentity;
     @Autowired
-    private CreateOrganizationUseCase organizationUseCase;
+    private ProgramOutputPort programOutputPort;
     private Program program;
     private String cohortOneId;
     private String cohortTwoId;
 
 
 
-    @BeforeAll
+//    @BeforeAll
+    @Test
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson").email("fred20@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
+        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").id("23jhdy733").
                 name("My Organization").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
@@ -77,19 +77,23 @@ public class CohortPersistenceAdapterTest {
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-//        try {
+        try {
+            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            employeeIdentity.setOrganization(organizationIdentity.getId());
+            organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            meedleUser = employeeIdentity.getMeedlUser().getId();
 //            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
 //            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
-//            program.setOrganizationId(organizationIdentity.getId());
-//             program.setCreatedBy(meedleUser);
-//            program = programOutputPort.saveProgram(program);
-//        } catch (MeedlException e) {
-//            e.printStackTrace();
-//        }
+            program.setOrganizationId(organizationIdentity.getId());
+             program.setCreatedBy(meedleUser);
+            program = programOutputPort.saveProgram(program);
+        } catch (MeedlException e) {
+            e.printStackTrace();
+        }
     }
 
 
-    @BeforeEach
+//    @BeforeEach
     public void setUp(){
         elites = new Cohort();
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
@@ -245,6 +249,21 @@ public class CohortPersistenceAdapterTest {
 
 
     @Order(6)
+    @Test
+    void searchForCohort(){
+        Cohort searchedCohort = new Cohort();
+        try{
+            searchedCohort =
+                    cohortOutputPort.searchForCohortInAProgram(cohort.getName(),cohort.getProgramId());
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+       assertEquals(searchedCohort.getName(),cohort.getName());
+       assertEquals(searchedCohort.getProgramId(),cohort.getProgramId());
+    }
+
+
+    @AfterAll
     @Test
     void cleanUp() throws MeedlException {
 //        Program foundProgram = programOutputPort.findProgramByName(program.getName());

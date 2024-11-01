@@ -8,6 +8,8 @@ public interface CohortOutputPort {
     Cohort  saveCohort(Cohort cohort) throws MeedlException;
 
     Cohort viewCohortDetails(String userId, String id, String cohortId) throws MeedlException;
+
+    Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
 //    Program findProgramByName(String programName) throws ResourceNotFoundException;
 //    boolean programExists(String programName) throws MeedlException;
 //

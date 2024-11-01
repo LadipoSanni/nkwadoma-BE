@@ -106,6 +106,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return getCohort(cohortId, program);
     }
 
+    @Override
+    public Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException {
+        Program program = programOutputPort.findProgramById(programId);
+        return program.getCohorts().stream()
+                .filter(eachCohort -> eachCohort.getName().equals(name))
+                .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+    }
+
     private static Cohort getCohort(String cohortId, Program program) throws CohortException {
         return program.getCohorts().stream()
                 .filter(eachCohort -> eachCohort.getId().equals(cohortId))
