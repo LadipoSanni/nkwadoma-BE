@@ -424,7 +424,7 @@ class KeycloakAdapterTest {
 
     }
     @Test
-    @Order(6)
+    @Order(9)
     void resetPasswordWithValidPassword() {
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(newPassword);
@@ -467,8 +467,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(7)
-    @Order(9)
+    @Order(10)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -501,7 +500,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(10)
+    @Order(11)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -515,7 +514,7 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(11)
+    @Order(12)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
