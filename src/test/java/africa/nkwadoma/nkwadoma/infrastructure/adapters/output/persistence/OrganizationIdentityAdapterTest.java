@@ -12,12 +12,15 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -180,7 +183,23 @@ class OrganizationIdentityAdapterTest {
         joel.setCreatedBy(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void searchOrganizationWithInvalidName(String name) {
+         assertThrows(MeedlException.class, () -> organizationOutputPort.search(name));
+    }
 
+    @Test
+    void searchOrganizationByValidName(){
+        try{
+            List<OrganizationIdentity> organizationIdentities = organizationOutputPort.search(amazingGrace.getName());
+            assertNotNull(organizationIdentities);
+            assertFalse(organizationIdentities.isEmpty());
+            assertNotNull(organizationIdentities.getFirst());
+        }catch (MeedlException meedlException){
+            log.info("{}", meedlException.getMessage());
+        }
+    }
     @Test
     void findOrganization(){
        try{

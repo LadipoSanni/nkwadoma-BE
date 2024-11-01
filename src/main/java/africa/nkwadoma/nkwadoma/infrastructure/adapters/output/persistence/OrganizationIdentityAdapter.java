@@ -134,6 +134,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         }
     }
 
+    @Override
+    public List<OrganizationIdentity> search(String name) {
+//        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByName(name);
+        return List.of();
+    }
+
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
