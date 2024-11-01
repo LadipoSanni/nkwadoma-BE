@@ -487,6 +487,7 @@ class KeycloakAdapterTest {
             e.printStackTrace();
         }
     }
+
     @Test
     void getUserRepresentationWithExactMatchForMultipleUsers()  {
         john.setEmail("lendspace.com");
