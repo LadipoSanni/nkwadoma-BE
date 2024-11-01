@@ -156,7 +156,6 @@ class ProgramServiceTest {
         MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((null)));
         assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
     }
-
     @Test
     void viewAllPrograms() {
         try {
