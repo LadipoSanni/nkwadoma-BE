@@ -1,9 +1,7 @@
 name: Commit and PR Tracker
 
 on:
-  pull_request:
-    branches:
-      - dev
+  
   schedule:
     - cron: "0 9 * * *"
     - cron: "0 11 * * *"
@@ -11,6 +9,8 @@ on:
     - cron: "0 17 * * *"
 
 jobs:
+
+
   track-build:
     runs-on: ubuntu-latest
 
