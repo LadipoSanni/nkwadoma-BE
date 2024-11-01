@@ -16,6 +16,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 public class OrganizationIdentityValidator extends MeedlValidator {
 
     public static void validateOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("The organization being validated : {}", organizationIdentity);
         if (ObjectUtils.isEmpty(organizationIdentity)){
             throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
         }

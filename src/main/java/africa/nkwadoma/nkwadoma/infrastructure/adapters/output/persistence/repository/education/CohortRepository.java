@@ -4,5 +4,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.*;
+
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
+    Optional<CohortEntity> findByProgramId(String programId);
 }
