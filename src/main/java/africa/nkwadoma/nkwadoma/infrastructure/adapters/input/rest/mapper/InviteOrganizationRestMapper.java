@@ -11,5 +11,5 @@ public interface InviteOrganizationRestMapper {
     OrganizationIdentity toOrganizationIdentity(InviteOrganizationRequest inviteOrganizationRequest);
     InviteOrganizationResponse toInviteOrganizationresponse(OrganizationIdentity organizationIdentity);
 
-    OrganizationResponse toOrganizationresponse(OrganizationIdentity organizationIdentity);
+    OrganizationResponse toOrganizationResponse(OrganizationIdentity organizationIdentity);
 }
