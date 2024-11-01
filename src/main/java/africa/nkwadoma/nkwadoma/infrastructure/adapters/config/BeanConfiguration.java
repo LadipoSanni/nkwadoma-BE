@@ -95,8 +95,9 @@ public class BeanConfiguration {
     }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
-                                                   UserIdentityMapper userIdentityMapper){
-        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper);
+                                                   UserIdentityMapper userIdentityMapper,
+                                                   OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort){
+        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper,employeeIdentityOutputPort);
     }
 
     @Bean
@@ -116,9 +117,10 @@ public class BeanConfiguration {
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
-            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper
+            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper,
+            UserIdentityOutputPort userIdentityOutputPort
     ){
-        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper);
+        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper,userIdentityOutputPort);
     }
 
     @Bean

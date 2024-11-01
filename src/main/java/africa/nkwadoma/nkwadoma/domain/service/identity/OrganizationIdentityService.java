@@ -36,7 +36,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMiddlUser());
+//        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
+        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}",organizationIdentity);
        return organizationIdentity;
@@ -54,8 +55,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
-        UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMiddlUser());
-        employeeIdentity.setMiddlUser(newUser);
+        UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMeedlUser());
+        employeeIdentity.setMeedlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         return organizationIdentity;
     }
@@ -63,10 +64,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
-        organizationEmployeeIdentity.getMiddlUser().setCreatedAt(LocalDateTime.now().toString());
-        userIdentityOutputPort.save(organizationEmployeeIdentity.getMiddlUser());
+        organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now().toString());
+        userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
+
 
         return organizationEmployeeIdentity;
     }

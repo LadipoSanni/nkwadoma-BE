@@ -24,7 +24,7 @@ public class MeedlValidator {
     }
 
     public static void validateUUID(String dataElement) throws MeedlException {
-            validateDataElement(dataElement);
+        validateDataElement(dataElement);
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
@@ -35,7 +35,6 @@ public class MeedlValidator {
         if (isEmptyString(dataElement)) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
-
     }
 
     public static boolean isEmptyString(String dataElement) {
