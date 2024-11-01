@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +33,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
+@Slf4j
 public class InviteOrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
@@ -61,12 +63,12 @@ public class InviteOrganizationController {
         }
 
     }
-    @GetMapping
+    @GetMapping("organization/search")
     @Operation(summary = "Search for organization by name")
     public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Organization name is required") String name)
             throws MeedlException {
        List<OrganizationIdentity> organizationIdentities = createOrganizationUseCase.search(name);
-
+       log.info("Organization {}", organizationIdentities);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
