@@ -68,7 +68,7 @@ public class LoanController {
         LoanProduct updatedLoanProduct = createLoanProductUseCase.updateLoanProduct(loanProduct);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(updatedLoanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .body(loanProductResponse)
+                .data(loanProductResponse)
                 .message(UPDATED_LOAN_PRODUCT_SUCCESS)
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
