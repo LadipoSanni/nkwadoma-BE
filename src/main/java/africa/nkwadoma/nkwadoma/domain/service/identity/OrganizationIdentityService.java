@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -73,6 +74,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         return organizationEmployeeIdentity;
     }
 
+    @Override
+    public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
+        return organizationIdentityOutputPort.search(organizationName);
+    }
 
 
 }

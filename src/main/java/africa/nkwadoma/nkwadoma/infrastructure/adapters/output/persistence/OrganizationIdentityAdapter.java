@@ -135,9 +135,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationIdentity> search(String name) {
-//        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByName(name);
-        return List.of();
+    public List<OrganizationIdentity> search(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByName(name.trim());
+        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
     }
 
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {

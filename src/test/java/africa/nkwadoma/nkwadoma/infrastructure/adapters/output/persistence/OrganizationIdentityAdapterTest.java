@@ -65,6 +65,7 @@ class OrganizationIdentityAdapterTest {
         }
 
     @Test
+    @Order(1)
     void saveOrganization(){
             try{
                 assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
@@ -190,15 +191,17 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
+    @Order(2)
     void searchOrganizationByValidName(){
-        try{
-            List<OrganizationIdentity> organizationIdentities = organizationOutputPort.search(amazingGrace.getName());
-            assertNotNull(organizationIdentities);
-            assertFalse(organizationIdentities.isEmpty());
-            assertNotNull(organizationIdentities.getFirst());
-        }catch (MeedlException meedlException){
-            log.info("{}", meedlException.getMessage());
+        List<OrganizationIdentity> organizationIdentities = null;
+        try {
+            organizationIdentities = organizationOutputPort.search(amazingGrace.getName());
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
         }
+        assertNotNull(organizationIdentities);
+        assertFalse(organizationIdentities.isEmpty());
+        log.info("{}", organizationIdentities);
     }
     @Test
     void findOrganization(){
