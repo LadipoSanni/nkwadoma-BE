@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -111,8 +112,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
-            clientRepresentation = getClientRepresentation(organizationIdentity);
+            clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
             organizationIdentity.setId(clientRepresentation.getId());
+            log.info("Client created successfully. Name: {}", organizationIdentity.getName());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
@@ -165,6 +167,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userIdentity.setId(userRepresentation.getId());
         return userIdentity;
     }
+
+
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
@@ -276,12 +280,24 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(email);
     }
-
     @Override
-    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public ClientResource getClientResource(String clientId) {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
-                .findByClientId(organizationIdentity.getId())
+                .get(clientId);
+    }
+
+    @Override
+    public void deleteClient(String clientId) {
+        ClientResource clientResource = getClientResource(clientId);
+        clientResource.remove();
+    }
+
+    @Override
+    public ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException {
+        return keycloak.realm(KEYCLOAK_REALM)
+                .clients()
+                .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
     }
 
