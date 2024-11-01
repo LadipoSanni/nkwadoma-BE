@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteOrganizationRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import org.mapstruct.Mapper;
 
@@ -9,4 +10,5 @@ import org.mapstruct.Mapper;
 public interface InviteOrganizationRestMapper {
     OrganizationIdentity toOrganizationIdentity(InviteOrganizationRequest inviteOrganizationRequest);
     InviteOrganizationResponse toInviteOrganizationresponse(OrganizationIdentity organizationIdentity);
+    OrganizationResponse toOrganizationResponse(OrganizationIdentity organizationIdentity);
 }
