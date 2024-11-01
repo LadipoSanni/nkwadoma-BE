@@ -157,7 +157,6 @@ class OrganizationIdentityAdapterTest {
         amazingGrace.setPhoneNumber(StringUtils.EMPTY);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
-
     @Test
     void saveOrganizationWithNullPhoneNumber(){
         amazingGrace.setPhoneNumber(null);
