@@ -13,4 +13,5 @@ public interface ProgramCohortRepository extends JpaRepository<ProgramCohortEnti
 
     List<ProgramCohortEntity> findAllByProgram(String programId);
 
+    void deleteAllByProgram(String id);
 }

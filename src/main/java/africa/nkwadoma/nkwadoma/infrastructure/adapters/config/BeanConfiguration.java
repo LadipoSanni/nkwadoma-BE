@@ -152,7 +152,7 @@ public class BeanConfiguration {
 
     @Bean
     public ProgramCohortPersistenceAdapter programCohortPersistenceAdapter(ProgramCohortRepository programCohortRepository,
-    ProgramCohortMapper programCohortMapper){
-        return new ProgramCohortPersistenceAdapter(programCohortRepository,programCohortMapper);
+    ProgramCohortMapper programCohortMapper,ProgramOutputPort programOutputPort){
+        return new ProgramCohortPersistenceAdapter(programCohortRepository,programCohortMapper,programOutputPort);
     }
 }

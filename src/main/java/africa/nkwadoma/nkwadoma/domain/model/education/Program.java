@@ -37,7 +37,6 @@ public class Program {
     private String createdBy;
     private String updatedBy;
     private String organizationId;
-    private List<ProgramCohort> programCohorts;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;

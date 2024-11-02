@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -55,6 +56,8 @@ public class CohortPersistenceAdapterTest {
     private  OrganizationIdentity organizationIdentity;
     @Autowired
     private CreateOrganizationUseCase organizationUseCase;
+    @Autowired
+    private ProgramCohortOutputPort programCohortOutputPort;
     private Program program;
     private String cohortOneId;
     private String cohortTwoId;
@@ -248,8 +251,7 @@ public class CohortPersistenceAdapterTest {
     @Order(6)
     @Test
     void cleanUp() throws MeedlException {
-        Program foundProgram = programOutputPort.findProgramByName(program.getName());
-        programOutputPort.deleteProgram(foundProgram.getId());
+        programCohortOutputPort.delete(program.getId());
         organizationIdentityOutputPort.delete(organizationIdentity.getId());
         cohortRepository.deleteById(cohortOneId);
         cohortRepository.deleteById(cohortTwoId);

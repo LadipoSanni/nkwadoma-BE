@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -18,7 +19,7 @@ public class ProgramCohortEntity{
     @Id
     @UuidGenerator
     private String id;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private CohortEntity cohort;
     private String program;
 
