@@ -97,10 +97,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateDataElement(programId);
         MeedlValidator.validateUUID(programId);
-        Optional<CohortEntity> cohortEntity = cohortRepository.findByProgramId(programId);
-        if (cohortEntity.isPresent()) {
-            throw new EducationException(ProgramMessages.COHORT_EXISTS.getMessage());
-        }
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         programRepository.delete(program);
