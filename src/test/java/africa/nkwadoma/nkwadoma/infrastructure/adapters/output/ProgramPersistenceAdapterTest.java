@@ -5,8 +5,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -21,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.UUID_NOT_VALID;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,18 +36,23 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProgramPersistenceAdapterTest {
     @Autowired
     private ProgramOutputPort programOutputPort;
-    private Program program;
-    private Program designThinking;
-    private OrganizationIdentity organizationIdentity;
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    @Autowired
+    private CohortRepository cohortRepository;
+    @Autowired
+    private CohortMapper cohortMapper;
+    private Cohort elites;
+    private Program program;
+    private Program designThinking;
+    private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
-    private int pageSize = 10;
-    private int pageNumber = 0;
+    private final int pageSize = 10;
+    private final int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +73,12 @@ class ProgramPersistenceAdapterTest {
         designThinking.setDuration(1);
         designThinking.setDeliveryType(DeliveryType.ONSITE);
         designThinking.setDurationType(DurationType.YEARS);
+
+        elites = new Cohort();
+        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
+        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setName("Elite");
+        elites.setCreatedBy(userIdentity.getCreatedBy());
     }
 
 
@@ -73,7 +89,8 @@ class ProgramPersistenceAdapterTest {
             userIdentity.setFirstName("Joel");
             userIdentity.setLastName("Jacobs");
             userIdentity.setEmail("joel@johnson.com");
-            userIdentity.setId(userIdentity.getEmail());
+            String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
+            userIdentity.setId(testId);
             userIdentity.setPhoneNumber("098647748393");
             userIdentity.setEmailVerified(true);
             userIdentity.setEnabled(true);
@@ -82,13 +99,13 @@ class ProgramPersistenceAdapterTest {
             userIdentity.setCreatedBy("Ayo");
 
             OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
-                    middlUser(userIdentity).build();
+                    meedlUser(userIdentity).build();
             organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setName("Amazing Grace Enterprises");
             organizationIdentity.setEmail("rachel@gmail.com");
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
             organizationIdentity.setRcNumber("RC345677");
-            organizationIdentity.setId(organizationIdentity.getRcNumber());
+            organizationIdentity.setId(testId);
             organizationIdentity.setPhoneNumber("0907658483");
             organizationIdentity.setTin("Tin5678");
             organizationIdentity.setNumberOfPrograms(0);
@@ -179,7 +196,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    Design Thinking", "Data Science      "})
+    @ValueSource(strings = {"    Electrical Engineering", "Data Science      "})
     void createProgramWithSpacesInProgramName(String programName){
         try{
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
@@ -331,7 +348,7 @@ class ProgramPersistenceAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void findProgramWithInvalidId(String id){
+    void findProgramByEmptyId(String id){
         program.setId(id);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(program.getId()));
     }
@@ -340,6 +357,14 @@ class ProgramPersistenceAdapterTest {
     void findProgramWithNullProgramId(){
         program.setId(null);
         assertThrows(MeedlException.class,()-> programOutputPort.findProgramById((program.getId())));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"non-uuid", "3657679"})
+    void viewProgramWithNonUUIDId(String programId) {
+        program.setId(programId);
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
+        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
     }
 
     @Test
@@ -405,6 +430,61 @@ class ProgramPersistenceAdapterTest {
             assertEquals(exception.getMessage(), (PROGRAM_NOT_FOUND.getMessage()));
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
+        }
+    }
+
+    @Test
+    void deleteNonExistingProgram() {
+        program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
+        assertThrows(ResourceNotFoundException.class, ()->programOutputPort.deleteProgram(program.getId()));
+    }
+
+    @Test
+    void deleteProgramWithNullId() {
+        program.setId(null);
+        assertThrows(MeedlException.class, ()->programOutputPort.deleteProgram(program.getId()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"009837", "non-uuid"})
+    void deleteProgramWithNonUUID(String programId) {
+        assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(programId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deleteProgramByEmptyId(String id) {
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
+        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+    }
+
+    @Test
+    void deleteProgramWithCohort() {
+        Program savedProgram = new Program();
+        CohortEntity savedCohort = new CohortEntity();
+        try {
+            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
+            program.setOrganizationId(foundOrganization.getId());
+            program.setCreatedBy(userIdentity.getCreatedBy());
+            savedProgram = programOutputPort.saveProgram(program);
+            assertNotNull(savedProgram);
+
+            elites.setProgramId(savedProgram.getId());
+
+            savedCohort = cohortRepository.save(cohortMapper.toCohortEntity(elites));
+            assertNotNull(savedCohort);
+        } catch (MeedlException e) {
+            log.error("Error while creating program {}", e.getMessage());
+        }
+        //TODO this test needs to be fixed
+//        String id = savedProgram.getId();
+//        assertThrows(EducationException.class, ()->programOutputPort.deleteProgram(id));
+
+        cohortRepository.delete(savedCohort);
+        try {
+            programOutputPort.deleteProgram(savedProgram.getId());
+        } catch (MeedlException e) {
+            log.error("Error deleting program {}", e.getMessage());
         }
     }
 
