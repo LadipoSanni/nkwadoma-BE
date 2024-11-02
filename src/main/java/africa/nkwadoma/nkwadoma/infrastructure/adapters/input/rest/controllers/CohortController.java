@@ -98,7 +98,7 @@ public class CohortController {
 
             ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                     .statusCode(HttpStatus.OK.toString())
-                    .body(response)
+                    .data(response)
                     .message(ALL_COHORT)
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);

@@ -251,7 +251,6 @@ public class CohortPersistenceAdapterTest {
 
     @Order(6)
     @Test
-    @Test
     void viewAllCohortInAProgram(){
         try{
             Page<Cohort> allCohortInAProgram = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);

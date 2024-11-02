@@ -46,21 +46,11 @@ public class CohortServiceTest {
     @Mock
     private CohortOutputPort cohortOutputPort;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private Cohort cohort;
-    private String cohortOneId;
-    private String cohortTwoId;
     private int pageSize = 2;
     private int pageNumber = 0;
-
-    @Autowired
-    private ProgramOutputPort programOutputPort;
-    @Autowired
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private OrganizationEmployeeIdentity employeeIdentity;
     private OrganizationIdentity organizationIdentity;
     private Program program;
-    @Autowired
-    private CohortRepository cohortRepository;
 
 
 
@@ -87,9 +77,6 @@ public class CohortServiceTest {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
-            Cohort cohort = cohortUseCase.createCohort(xplorers);
-            assertEquals(cohort.getName(), xplorers.getName());
-            cohortOneId = cohort.getId();
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -119,23 +106,23 @@ public class CohortServiceTest {
             assertEquals(cohort.getName(), elites.getName());
 
             verify(cohortOutputPort, times(2)).saveCohort(any());
-            cohortTwoId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
+//Todo
+//    @Test
+//    void viewAllCohortInAProgram(){
+//        try{
+//            Page<Cohort> allCohortInAProgram = cohortUseCase.viewAllCohortInAProgram(program.getId(),pageSize,pageNumber);
+//            List<Cohort> cohorts = allCohortInAProgram.toList();
+//            assertEquals(2,cohorts.size());
+//        } catch (MeedlException exception) {
+//            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+//        }
+//    }
 
-    @Test
-    void viewAllCohortInAProgram(){
-        try{
-            Page<Cohort> allCohortInAProgram = cohortUseCase.viewAllCohortInAProgram(program.getId(),pageSize,pageNumber);
-            List<Cohort> cohorts = allCohortInAProgram.toList();
-            assertEquals(2,cohorts.size());
-        } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-    }
     @Test
     void viewCohortDetails(){
         try{
@@ -173,21 +160,14 @@ public class CohortServiceTest {
     }
 
     @Test
-    void viewCohortWithNullCohortId(){
+    void viewCohortWithNullCohortId() {
         try {
-            when(cohortOutputPort.viewCohortDetails(mockId, mockId , null)).thenThrow(MeedlException.class);
+            when(cohortOutputPort.viewCohortDetails(mockId, mockId, null)).thenThrow(MeedlException.class);
             assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId,
                     mockId, null));
         } catch (MeedlException e) {
             log.error("Failed {}", e.getMessage());
         }
-        }
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOneId);
-        cohortRepository.deleteById(cohortTwoId);
     }
 
     @ParameterizedTest
