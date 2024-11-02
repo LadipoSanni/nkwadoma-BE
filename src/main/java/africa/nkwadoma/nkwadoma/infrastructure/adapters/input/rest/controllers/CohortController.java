@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_CREATED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_VIEWED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j
 @RestController
@@ -75,4 +74,27 @@ public class CohortController {
                     HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("searchCohort")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
+            @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
+            @RequestParam @NotBlank(message = "Program ID is required") String programId){
+
+        try {
+            Cohort cohort = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
+            CohortResponse cohortResponse =
+                    cohortMapper.toCohortResponse(cohort);
+            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                    .data(cohortResponse)
+                    .message(COHORT_RETRIEVED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (MeedlException exception) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
