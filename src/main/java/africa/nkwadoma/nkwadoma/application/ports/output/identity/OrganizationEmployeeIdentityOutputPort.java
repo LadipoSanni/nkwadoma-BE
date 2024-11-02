@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 
@@ -13,6 +14,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
     OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException;
 
     void delete(String id) throws MeedlException;
+    void deleteEmployee(String id) throws IdentityException;
 
     List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
 }

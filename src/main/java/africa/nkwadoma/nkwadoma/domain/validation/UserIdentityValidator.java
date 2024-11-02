@@ -26,7 +26,7 @@ public class UserIdentityValidator extends MeedlValidator {
              throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
          }
          for(OrganizationEmployeeIdentity userIdentity : userIdentities){
-             validateUserIdentity(userIdentity.getMiddlUser());
+             validateUserIdentity(userIdentity.getMeedlUser());
          }
          log.info("Users identity validation completed... for user {} ", userIdentities);
      }

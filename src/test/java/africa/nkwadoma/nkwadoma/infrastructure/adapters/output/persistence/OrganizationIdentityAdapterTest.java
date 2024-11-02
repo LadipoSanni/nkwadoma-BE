@@ -48,21 +48,39 @@ class OrganizationIdentityAdapterTest {
         organizationEmployeeIdentity.setMiddlUser(joel);
 
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
+        OrganizationEmployeeIdentity employeeJoel = new OrganizationEmployeeIdentity();
+        employeeJoel.setMeedlUser(joel);
+
         amazingGrace = new OrganizationIdentity();
         amazingGrace.setName("Amazing Grace Enterprises");
         amazingGrace.setEmail("rachel@gmail.com");
         amazingGrace.setInvitedDate(LocalDateTime.now().toString());
         amazingGrace.setRcNumber("RC345677");
-        amazingGrace.setId(amazingGrace.getRcNumber());
+        amazingGrace.setId("ead0f7cb-5483-4bb8-b271-813970a9c368");
         amazingGrace.setPhoneNumber("0907658483");
         amazingGrace.setTin("Tin5678");
         amazingGrace.setServiceOfferings(List.of(new ServiceOffering()));
         amazingGrace.getServiceOfferings().get(0).setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
         amazingGrace.setOrganizationEmployees(userIdentities);
+        amazingGrace.setOrganizationEmployees(List.of(employeeJoel));
         }
 
     @Test
+    void saveOrganization(){
+            try{
+                assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
+                OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
+                assertNotNull(savedOrganization);
+                assertEquals(amazingGrace.getName(),savedOrganization.getName());
+                assertNotNull(savedOrganization.getServiceOfferings());
+                assertNotNull(savedOrganization.getServiceOfferings().get(0));
+                assertEquals(amazingGrace.getServiceOfferings().get(0).getIndustry(),savedOrganization.getServiceOfferings().get(0).getIndustry());
+             }catch (MeedlException exception){
+                log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            }
+
+       }
     void saveOrganization() {
         OrganizationIdentity foundOrganization = null;
         OrganizationIdentity savedOrganization = null;
@@ -166,15 +184,15 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullAdmin(){
-//        amazingGrace.setOrganizationAdmins(null);
-        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(null));
+        amazingGrace.setOrganizationEmployees(null);
+        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
-//    @Test
-//    void saveOrganizationWithEmptyAdmin(){
-//        amazingGrace.setOrganizationAdmins(Collections.EMPTY_LIST);
-//        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
-//    }
+    @Test
+    void saveOrganizationWithEmptyAdmin(){
+        amazingGrace.setOrganizationEmployees(Collections.emptyList());
+        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
 
     @Test
     void saveOrganizationWithIncompleteAdminField(){
@@ -219,7 +237,7 @@ class OrganizationIdentityAdapterTest {
             OrganizationIdentity foundUser = organizationOutputPort.findById(amazingGrace.getId());
             assertEquals(foundUser.getTin(), amazingGrace.getTin());
             organizationOutputPort.delete(amazingGrace.getId());
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
+            assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
         } catch (MeedlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }

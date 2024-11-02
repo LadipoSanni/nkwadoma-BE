@@ -62,7 +62,7 @@ class UserIdentityServiceTest {
 
         employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setId("1234");
-        employeeIdentity.setMiddlUser(favour);
+        employeeIdentity.setMeedlUser(favour);
 
     }
 
@@ -138,7 +138,7 @@ class UserIdentityServiceTest {
     void inviteColleagueWithDifferentDomainEmail(){
         try {
             favour.setEmail("favour@gmail.com");
-            employeeIdentity.setMiddlUser(favour);
+            employeeIdentity.setMeedlUser(favour);
             when(userIdentityService.inviteColleague(favour)).thenThrow(MeedlException.class);
         } catch (MeedlException e) {
             log.error(e.getMessage());

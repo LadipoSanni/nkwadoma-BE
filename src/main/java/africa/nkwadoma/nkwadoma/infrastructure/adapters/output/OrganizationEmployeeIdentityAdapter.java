@@ -13,10 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +43,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException {
       if(!StringUtils.isEmpty(employeeId)){
-          OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMiddlUserId(employeeId);
+          OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
           if (organization == null){
               log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
@@ -54,7 +56,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException {
         MeedlValidator.validateUUID(createdBy);
-        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMiddlUserId(createdBy);
+        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(createdBy);
         if(ObjectUtils.isEmpty(employeeEntity)){
             log.error("creator not found : ---- while search for organization by createdBy : {}", createdBy);
             throw new IdentityException(MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
@@ -70,6 +72,17 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeAdminEntityRepository.delete(employeeEntity);
     }
+
+    @Transactional
+    @Override
+    public void deleteEmployee(String id) throws IdentityException {
+        if (StringUtils.isEmpty(id)){
+            throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+        employeeAdminEntityRepository.deleteByMeedlUserId(id);
+    }
+
+
 
     @Override
     public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {

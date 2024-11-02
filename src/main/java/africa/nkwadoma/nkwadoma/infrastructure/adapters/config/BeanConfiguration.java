@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -25,6 +26,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.Inves
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.CohortPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.ProgramCohortPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
@@ -95,8 +97,9 @@ public class BeanConfiguration {
     }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
-                                                   UserIdentityMapper userIdentityMapper){
-        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper);
+                                                   UserIdentityMapper userIdentityMapper,
+                                                   OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort){
+        return new UserIdentityAdapter(userEntityRepository,userIdentityMapper,employeeIdentityOutputPort);
     }
 
     @Bean
@@ -116,9 +119,11 @@ public class BeanConfiguration {
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
-            ProgramOutputPort programOutputPort,CohortRepository cohortRepository, CohortMapper cohortMapper
+            ProgramOutputPort programOutputPort, CohortRepository cohortRepository, CohortMapper cohortMapper,
+            UserIdentityOutputPort userIdentityOutputPort, ProgramCohortOutputPort programCohortOutputPort
     ){
-        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,cohortMapper);
+        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
+                cohortMapper,userIdentityOutputPort,programCohortOutputPort);
     }
 
     @Bean
@@ -143,5 +148,11 @@ public class BeanConfiguration {
     @Bean
     public JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter() {
         return new JwtGrantedAuthoritiesConverter();
+    }
+
+    @Bean
+    public ProgramCohortPersistenceAdapter programCohortPersistenceAdapter(ProgramCohortRepository programCohortRepository,
+    ProgramCohortMapper programCohortMapper,ProgramOutputPort programOutputPort){
+        return new ProgramCohortPersistenceAdapter(programCohortRepository,programCohortMapper,programOutputPort);
     }
 }
