@@ -66,11 +66,11 @@ class OrganizationEmployeeIdentityAdapterTest {
         }
 
         employeeJack = OrganizationEmployeeIdentity.builder()
-                .middlUser(jack)
+                .meedlUser(jack)
                 .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
                .build();
         employeeAngela = OrganizationEmployeeIdentity.builder()
-                .middlUser(angela)
+                .meedlUser(angela)
                 .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
                 .build();
 
@@ -83,7 +83,7 @@ class OrganizationEmployeeIdentityAdapterTest {
         employeeJackId = jackSavedEmployee.getId();
         OrganizationEmployeeIdentity angelaSavedEmployee = organizationEmployeeIdentityOutputPort.save(employeeAngela);
         employeeAngelaId = angelaSavedEmployee.getId();
-        assertEquals(jackSavedEmployee.getMiddlUser().getEmail(), employeeJack.getMiddlUser().getEmail());
+        assertEquals(jackSavedEmployee.getMeedlUser().getEmail(), employeeJack.getMeedlUser().getEmail());
     }
     @Test
     @Order(2)

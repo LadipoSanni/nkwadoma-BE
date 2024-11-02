@@ -13,7 +13,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,15 +54,15 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         organizationEmployees
                 .forEach(organizationEmployeeIdentity -> {
                             try {
-                                log.info("Deactivating user {}", organizationEmployeeIdentity.getMiddlUser());
-                                organizationEmployeeIdentity.getMiddlUser().setDeactivationReason(reason);
-                                identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMiddlUser());
+                                log.info("Deactivating user {}", organizationEmployeeIdentity.getMeedlUser());
+                                organizationEmployeeIdentity.getMeedlUser().setDeactivationReason(reason);
+                                identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMeedlUser());
                             } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
                             }
                         });
 
-        identityManagerOutPutPort.disableOrganization(foundOrganization);
+        identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
         return foundOrganization;
     }

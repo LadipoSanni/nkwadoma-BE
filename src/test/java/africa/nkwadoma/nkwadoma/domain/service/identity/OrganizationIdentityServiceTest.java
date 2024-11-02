@@ -67,7 +67,7 @@ class OrganizationIdentityServiceTest {
             sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
 
             employeeSarah = new OrganizationEmployeeIdentity();
-            employeeSarah.setMiddlUser(sarah);
+            employeeSarah.setMeedlUser(sarah);
             OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
             employeeIdentity.setMeedlUser(sarah);
 
@@ -139,27 +139,16 @@ class OrganizationIdentityServiceTest {
     @Test
     void deactivateOrganization(){
         try {
-            doNothing().when(identityManagerOutPutPort).disableOrganization(roseCouture);
+            doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
                     .thenReturn(orgEmployee);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
             roseCouture.setEnabled(Boolean.FALSE);
-
-            for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployees){
-                UserIdentity foundUser =organizationEmployeeIdentity.getMeedlUser();
-                assertNull(foundUser.getPassword());
-                foundUser.setPassword("Password@123");
-                String generatedToken = tokenUtils.generateToken(foundUser.getEmail());
-                assertNotNull(generatedToken);
-                createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
-                log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMeedlUser());
-            }}catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
             OrganizationIdentity deactivatedOrganization = organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
-        } catch (MeedlException exception) {
+            }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
-    }
+}

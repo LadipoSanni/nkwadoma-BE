@@ -22,7 +22,7 @@ public interface IdentityManagerOutPutPort {
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    void disableOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
+    void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
 

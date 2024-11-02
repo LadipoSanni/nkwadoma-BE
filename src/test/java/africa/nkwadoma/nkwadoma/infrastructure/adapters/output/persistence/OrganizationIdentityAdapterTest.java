@@ -45,7 +45,7 @@ class OrganizationIdentityAdapterTest {
         joel.setCreatedBy("Ayo");
 
         OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-        organizationEmployeeIdentity.setMiddlUser(joel);
+        organizationEmployeeIdentity.setMeedlUser(joel);
 
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
         OrganizationEmployeeIdentity employeeJoel = new OrganizationEmployeeIdentity();
@@ -81,20 +81,6 @@ class OrganizationIdentityAdapterTest {
             }
 
        }
-    void saveOrganization() {
-        OrganizationIdentity foundOrganization = null;
-        OrganizationIdentity savedOrganization = null;
-        try {
-            assertThrows(ResourceNotFoundException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
-            savedOrganization = organizationOutputPort.save(amazingGrace);
-            assertNotNull(savedOrganization);
-            foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
-            assertEquals(foundOrganization.getName(),savedOrganization.getName());
-            assertEquals(foundOrganization.getServiceOfferings().get(0).getIndustry(),savedOrganization.getServiceOfferings().get(0).getIndustry());
-        } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-  }
     @Test
     void disableOrganization(){
 

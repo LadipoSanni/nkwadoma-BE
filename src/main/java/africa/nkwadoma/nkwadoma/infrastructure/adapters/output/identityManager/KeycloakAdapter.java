@@ -123,13 +123,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return organizationIdentity;
     }
     @Override
-    public void disableOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
-        MeedlValidator.validateDataElement(organizationIdentity.getName());
+        MeedlValidator.validateUUID(organizationIdentity.getId());
         ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
+        log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
         clientRepresentation.setEnabled(Boolean.FALSE);
 
-        //Todo -- The client is yet to be updated on keycloak as disabled.
+        ClientResource clientResource = getClientResource(organizationIdentity.getId());
+        clientResource.update(clientRepresentation);
+        log.info("Client disabled on keycloak {}", organizationIdentity.getName());
     }
     @Override
     public ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException {
@@ -318,13 +321,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
                 .findByClientId(clientName)
-
-    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
-        return getClients(keycloak)
-                .findByClientId(organizationIdentity.getId())
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
-    }
 
+    }
     private ClientRepresentation createClientRepresentation(OrganizationIdentity organizationIdentity) {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());

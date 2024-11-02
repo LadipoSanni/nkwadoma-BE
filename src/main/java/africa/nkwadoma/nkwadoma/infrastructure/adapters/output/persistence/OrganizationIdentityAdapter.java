@@ -41,7 +41,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
         saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
         log.info("Organization entity saved successfully {}", organizationEntity);
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+//        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
 

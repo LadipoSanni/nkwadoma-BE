@@ -7,9 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -65,8 +63,8 @@ class KeycloakAdapterTest {
         peter.setRole(TRAINEE);
 
         List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder()
-                        .industry(Industry.EDUCATION)
-                        .name("TRAINING")
+                .industry(Industry.EDUCATION)
+                .name("TRAINING")
                 .build());
 
         organizationIdentity = new OrganizationIdentity();
@@ -195,13 +193,13 @@ class KeycloakAdapterTest {
     @Test
     @Order(4)
     void getClientResource(){
-            ClientResource clientResource = identityManagementOutputPort.getClientResource(rizzGalleryId);
-            assertNotNull(clientResource);
-            ClientRepresentation clientRepresentation = clientResource.toRepresentation();
-            log.info("{}", clientRepresentation.getName());
-            assertEquals(rizzGallery.getName(), clientRepresentation.getName());
-            assertEquals(rizzGallery.getName(), clientRepresentation.getClientId());
-            assertEquals(rizzGalleryId, clientRepresentation.getId());
+        ClientResource clientResource = identityManagementOutputPort.getClientResource(rizzGalleryId);
+        assertNotNull(clientResource);
+        ClientRepresentation clientRepresentation = clientResource.toRepresentation();
+        log.info("{}", clientRepresentation.getName());
+        assertEquals(rizzGallery.getName(), clientRepresentation.getName());
+        assertEquals(rizzGallery.getName(), clientRepresentation.getClientId());
+        assertEquals(rizzGalleryId, clientRepresentation.getId());
 
     }
 
@@ -217,6 +215,22 @@ class KeycloakAdapterTest {
             assertEquals(rizzGalleryId, representation.getId());
         } catch (MeedlException e) {
             log.error("{}",e.getMessage());
+        }
+    }
+    @Test
+    @Order(6)
+    void disableClient(){
+        try {
+            ClientRepresentation representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertTrue(representation.isEnabled());
+            rizzGallery.setId(rizzGalleryId);
+            identityManagementOutputPort.disableClient(rizzGallery);
+            representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertFalse(representation.isEnabled());
+        }catch (MeedlException e){
+            log.error("Failed to disable organization identity {} ", e.getMessage());
         }
     }
     @Test
@@ -413,14 +427,14 @@ class KeycloakAdapterTest {
     }
     @Test
     void disableOrganizationWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableOrganization(null));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
     void disableOrganizationWithInvalidId(String id) {
         OrganizationIdentity megaOrganization = new OrganizationIdentity();
                 megaOrganization.setId(id);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableOrganization(megaOrganization));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
     }
     @Test
     void getClientRepresentationById() {
@@ -604,29 +618,6 @@ class KeycloakAdapterTest {
             assertEquals(john.getRole().toString(), roleRepresentation.getName().toString());
         } catch (MeedlException e) {
             e.printStackTrace();
-        }
-    }
-    @Test
-    void createClient(){
-        try {
-            organizationIdentity = identityManagementOutputPort.createOrganization(organizationIdentity);
-            assertNotNull(organizationIdentity);
-            ClientRepresentation foundClientRepresentation = identityManagementOutputPort.getClientRepresentationByClientId(organizationIdentity.getId());
-            assertNotNull(foundClientRepresentation);
-            assertEquals(foundClientRepresentation.getName(), organizationIdentity.getName());
-        } catch (MeedlException e) {
-            log.error("Failed to create : {}", e.getMessage());
-        }
-    }
-    @Test
-    void disableClient(){
-        try {
-            identityManagementOutputPort.disableOrganization(organizationIdentity);
-            ClientRepresentation foundClientRepresentation = identityManagementOutputPort.getClientRepresentationByClientId(organizationIdentity.getId());
-            assertNotNull(foundClientRepresentation);
-            assertFalse(foundClientRepresentation.isEnabled());
-        } catch (MeedlException e) {
-            log.error("Failed to disable : {}", e.getMessage());
         }
     }
     @Test
