@@ -54,7 +54,7 @@ public class LoanController {
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
             LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
             ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                    .body(loanProductResponse)
+                    .data(loanProductResponse)
                     .message(CREATE_LOAN_PRODUCT_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
@@ -78,7 +78,7 @@ public class LoanController {
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                body(response).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
@@ -92,7 +92,7 @@ public class LoanController {
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .body(loanProductResponse)
+                .data(loanProductResponse)
                 .message(LOAN_PRODUCT_FOUND_SUCCESSFULLY)
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();

@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.config.allowedHosts;
 
 
 public interface AllowedHost {

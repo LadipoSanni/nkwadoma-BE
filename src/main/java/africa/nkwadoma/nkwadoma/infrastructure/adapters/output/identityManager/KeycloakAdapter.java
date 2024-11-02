@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -32,7 +33,6 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
@@ -112,8 +112,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
-            clientRepresentation = getClientRepresentation(organizationIdentity);
+            clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
             organizationIdentity.setId(clientRepresentation.getId());
+            log.info("Client created successfully. Name: {}", organizationIdentity.getName());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
@@ -148,11 +149,13 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getPassword());
+        log.info("User login credentials: {}, {}", userIdentity.getEmail(), userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
+            log.info("Error logging in user: {}", exception.getMessage());
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
@@ -164,6 +167,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userIdentity.setId(userRepresentation.getId());
         return userIdentity;
     }
+
+
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
@@ -275,11 +280,24 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(email);
     }
-
-    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
+    @Override
+    public ClientResource getClientResource(String clientId) {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
-                .findByClientId(organizationIdentity.getId())
+                .get(clientId);
+    }
+
+    @Override
+    public void deleteClient(String clientId) {
+        ClientResource clientResource = getClientResource(clientId);
+        clientResource.remove();
+    }
+
+    @Override
+    public ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException {
+        return keycloak.realm(KEYCLOAK_REALM)
+                .clients()
+                .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
     }
 

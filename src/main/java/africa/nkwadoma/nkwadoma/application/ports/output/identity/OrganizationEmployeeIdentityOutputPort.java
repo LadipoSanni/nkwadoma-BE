@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import org.springframework.data.domain.*;
@@ -11,4 +12,5 @@ public interface OrganizationEmployeeIdentityOutputPort {
     Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId, int pageNumber, int pageSize) throws MeedlException;
     OrganizationEmployeeIdentity findByCreatedBy(String createdBy) throws MeedlException;
     void delete(String id) throws MeedlException;
+    void deleteEmployee(String id) throws IdentityException;
 }

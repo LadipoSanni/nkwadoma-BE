@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -13,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,39 +45,46 @@ public class CohortPersistenceAdapterTest {
     private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
-
-
+    private String meedleUser;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private  OrganizationEmployeeIdentity employeeIdentity;
     private  OrganizationIdentity organizationIdentity;
-    private   Program program;
-    private String cohortOne;
-    private String cohortTwo;
+    @Autowired
+    private CreateOrganizationUseCase organizationUseCase;
+    @Autowired
+    private ProgramCohortOutputPort programCohortOutputPort;
+    private Program program;
+    private String cohortOneId;
+    private String cohortTwoId;
 
 
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
+        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+                lastName("Benson").email("fred210@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity).build();
+                .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOfferings(
-                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).build())).
+                name("My Organization12").rcNumber("56767").serviceOfferings(
+                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
         program = Program.builder().name("My program").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
+                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
-            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
+             program.setCreatedBy(meedleUser);
             program = programOutputPort.saveProgram(program);
         } catch (MeedlException e) {
             e.printStackTrace();
@@ -89,24 +99,24 @@ public class CohortPersistenceAdapterTest {
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         elites.setProgramId(program.getId());
         elites.setName("Elite");
-        elites.setCreatedBy("76154431-8764-415a-8bb5-70dab8e45111");
+        elites.setCreatedBy(meedleUser);
 
         cohort = new Cohort();
         cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         cohort.setProgramId(program.getId());
         cohort.setName("Elite");
-        cohort.setCreatedBy("76154431-8764-415a-8bb5-70dab8e45111");
+        cohort.setCreatedBy(meedleUser);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         xplorers.setProgramId(program.getId());
-        xplorers.setCreatedBy("76154431-8764-415a-8bb5-70dab8e45111");
+        xplorers.setCreatedBy(meedleUser);
     }
-    
-    
+
+
     @Test
     void saveCohortWithNullCohort(){
         assertThrows(EducationException.class, ()-> cohortOutputPort.saveCohort(null));
@@ -136,38 +146,115 @@ public class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
 
+
+    @Order(1)
     @Test
     void saveCohort() {
         try {
-            Cohort cohort = cohortOutputPort.saveCohort(xplorers);
-            assertEquals(cohort.getName(), xplorers.getName());
-            cohortOne = cohort.getId();
+            Cohort cohort = cohortOutputPort.saveCohort(elites);
+            assertEquals(cohort.getName(), elites.getName());
+            cohortOneId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
+    @Order(2)
     @Test
     void saveCohortWithExistingCohortName() {
         assertThrows(MeedlException.class,() ->cohortOutputPort.saveCohort(cohort));
     }
 
 
+    @Order(3)
     @Test
     void saveAnotherCohortInProgram() {
         try {
-            Cohort cohort = cohortOutputPort.saveCohort(elites);
-            assertEquals(cohort.getName(), elites.getName());
-            assertEquals(ActivationStatus.ACTIVE.name(),cohort.getCohortStatus().name());
-            cohortTwo = cohort.getId();
+            Cohort cohort = cohortOutputPort.saveCohort(xplorers);
+            assertEquals(cohort.getName(), xplorers.getName());
+            assertEquals(ActivationStatus.ACTIVE.name(),cohort.getActivationStatus().name());
+            assertEquals(CohortStatus.CURRENT.name(),cohort.getCohortStatus().name());
+            cohortTwoId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
-    @AfterAll
+
+    @Order(4)
+    @Test
+    void viewCohortDetails(){
+        Cohort viewedCohort = new Cohort() ;
+        try{
+            viewedCohort = cohortOutputPort.viewCohortDetails(meedleUser,program.getId(), cohortTwoId);
+        }catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(viewedCohort.getName(),xplorers.getName());
+        assertEquals(viewedCohort.getCreatedBy(),xplorers.getCreatedBy());
+    }
+
+    @Order(5)
+
+    @Test
+    void viewCohortWithNullUserId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(null,
+                program.getId(),
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullProgramId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                null,
+                cohortTwoId));
+    }
+
+
+    @Test
+    void viewCohortWithNullCohortId(){
+        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                program.getId(),
+                null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyUserId(String userId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(userId,
+                        program.getId(),
+                        cohortTwoId));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyProgramId(String programId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                        programId,
+                        cohortTwoId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyCohortId(String cohortId){
+        assertThrows(MeedlException.class, ()->
+                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
+                        program.getId(),
+                        cohortId));
+    }
+
+
+    @Order(6)
+    @Test
     void cleanUp() throws MeedlException {
-        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
-        organizationIdentityOutputPort.delete(foundOrganization.getId());
+        programCohortOutputPort.delete(program.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        cohortRepository.deleteById(cohortOneId);
+        cohortRepository.deleteById(cohortTwoId);
+        userIdentityOutputPort.deleteUserById(meedleUser);
     }
 }

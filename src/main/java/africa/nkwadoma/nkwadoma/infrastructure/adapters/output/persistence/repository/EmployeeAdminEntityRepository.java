@@ -12,4 +12,8 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     Optional<OrganizationEmployeeEntity> findByMiddlUser_CreatedBy(String createdBy);
 
     Page<OrganizationEmployeeEntity> findAllByOrganization(String organizationId, Pageable pageable);
+    OrganizationEmployeeEntity findByMeedlUserId(String userId);
+    void deleteByMeedlUserId(String id);
+    Optional<OrganizationEmployeeEntity> findByMeedlUser_CreatedBy(String createdBy);
+
 }

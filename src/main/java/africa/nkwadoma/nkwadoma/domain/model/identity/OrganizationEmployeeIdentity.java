@@ -12,7 +12,7 @@ import java.math.*;
 @NoArgsConstructor
 public class OrganizationEmployeeIdentity {
     private String id;
-    private UserIdentity middlUser;
+    private UserIdentity meedlUser;
     private String organization;
     private int pageNumber;
     private int pageSize;
