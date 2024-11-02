@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -111,17 +112,6 @@ public class CohortServiceTest {
         }
     }
 
-//Todo
-//    @Test
-//    void viewAllCohortInAProgram(){
-//        try{
-//            Page<Cohort> allCohortInAProgram = cohortUseCase.viewAllCohortInAProgram(program.getId(),pageSize,pageNumber);
-//            List<Cohort> cohorts = allCohortInAProgram.toList();
-//            assertEquals(2,cohorts.size());
-//        } catch (MeedlException exception) {
-//            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-//        }
-//    }
 
     @Test
     void viewCohortDetails(){
@@ -209,5 +199,22 @@ public class CohortServiceTest {
                 cohortService.viewCohortDetails(mockId,
                         mockId,
                         cohortId));
+    }
+
+
+    @Test
+    void viewAllCohortInAProgram() {
+        Page<Cohort> mockedPage = new PageImpl<>(List.of(new Cohort(), new Cohort()));
+
+        Page<Cohort> allCohortInAProgram = null;
+        try {
+            when(cohortOutputPort.findAllCohortInAProgram(mockId, pageSize, pageNumber))
+                    .thenReturn(mockedPage);
+            allCohortInAProgram = cohortService.viewAllCohortInAProgram(mockId, pageSize, pageNumber);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        List<Cohort> cohorts = allCohortInAProgram.toList();
+        assertEquals(2, cohorts.size());
     }
 }

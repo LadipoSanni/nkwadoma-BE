@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,6 +62,8 @@ public class CohortPersistenceAdapterTest {
     private  OrganizationIdentity organizationIdentity;
     @Autowired
     private CreateOrganizationUseCase organizationUseCase;
+    @Autowired
+    private ProgramCohortOutputPort programCohortOutputPort;
     private Program program;
     private String cohortOneId;
     private String cohortTwoId;
@@ -69,11 +73,11 @@ public class CohortPersistenceAdapterTest {
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson").email("fred20@example.com").createdBy("8937-b9897g3-bv38").build();
+                lastName("Benson").email("fred210@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOfferings(
+                name("My Organization12").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
@@ -82,15 +86,15 @@ public class CohortPersistenceAdapterTest {
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-//        try {
-//            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
-//            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
-//            program.setOrganizationId(organizationIdentity.getId());
-//             program.setCreatedBy(meedleUser);
-//            program = programOutputPort.saveProgram(program);
-//        } catch (MeedlException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
+            program.setOrganizationId(organizationIdentity.getId());
+             program.setCreatedBy(meedleUser);
+            program = programOutputPort.saveProgram(program);
+        } catch (MeedlException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -186,13 +190,14 @@ public class CohortPersistenceAdapterTest {
     @Order(4)
     @Test
     void viewCohortDetails(){
+        Cohort viewedCohort = new Cohort() ;
         try{
-            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUser,program.getId(), cohortTwoId);
-            assertEquals(cohort.getName(),xplorers.getName());
-            assertEquals(cohort.getCreatedBy(),xplorers.getCreatedBy());
+            viewedCohort = cohortOutputPort.viewCohortDetails(meedleUser,program.getId(), cohortTwoId);
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertEquals(viewedCohort.getName(),xplorers.getName());
+        assertEquals(viewedCohort.getCreatedBy(),xplorers.getCreatedBy());
     }
 
     @Order(5)
@@ -252,23 +257,24 @@ public class CohortPersistenceAdapterTest {
     @Order(6)
     @Test
     void viewAllCohortInAProgram(){
+        List<Cohort> cohorts = new ArrayList<>();
         try{
             Page<Cohort> allCohortInAProgram = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
-            List<Cohort> cohorts = allCohortInAProgram.toList();
-            assertEquals(2,cohorts.size());
+             cohorts = allCohortInAProgram.toList();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertEquals(2,cohorts.size());
+
     }
 
 
     @AfterAll
     void cleanUp() throws MeedlException {
-//        Program foundProgram = programOutputPort.findProgramByName(program.getName());
-//        programOutputPort.deleteProgram(foundProgram.getId());
-//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-//        cohortRepository.deleteById(cohortOneId);
-//        cohortRepository.deleteById(cohortTwoId);
-//        userIdentityOutputPort.deleteUserById(meedleUser);
+        programCohortOutputPort.delete(program.getId());
+        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        cohortRepository.deleteById(cohortOneId);
+        cohortRepository.deleteById(cohortTwoId);
+        userIdentityOutputPort.deleteUserById(meedleUser);
     }
 }

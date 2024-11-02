@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 public interface CohortOutputPort {
     Cohort  saveCohort(Cohort cohort) throws MeedlException;
 
+    Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException;
     Page<Cohort> findAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException;
 
-    Cohort viewCohortDetails(String userId, String id, String cohortId) throws MeedlException;
 //    Program findProgramByName(String programName) throws ResourceNotFoundException;
 //    boolean programExists(String programName) throws MeedlException;
 //
