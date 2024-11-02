@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
@@ -69,10 +70,17 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
 
-
         return organizationEmployeeIdentity;
     }
+    @Override
+    public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+        MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
 
+        organizationIdentity.setTimeUpdated(LocalDateTime.now());
+        return organizationIdentityOutputPort.save(organizationIdentity);
+    }
 
 
 }

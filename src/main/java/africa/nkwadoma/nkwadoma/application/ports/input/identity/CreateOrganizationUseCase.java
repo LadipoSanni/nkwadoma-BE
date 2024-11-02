@@ -8,4 +8,5 @@ public interface CreateOrganizationUseCase {
 
     void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException;
 
+    OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 }

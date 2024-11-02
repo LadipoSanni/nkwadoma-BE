@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Setter
@@ -25,8 +26,16 @@ public class OrganizationEntity {
     private String taxIdentity;
     private String phoneNumber;
     private String createdBy;
+    private String updatedBy;
+    private LocalDateTime timeUpdated;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
+
+
+    private String logoImage;
+    private String bannerImage;
+    private String address;
+    private String officeAddress;
 //    private List<String> serviceOfferings = new ArrayList<>();
 
 
