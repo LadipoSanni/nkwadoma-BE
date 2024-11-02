@@ -11,11 +11,7 @@ import java.util.List;
 @Setter
 @Getter
 public class InviteOrganizationResponse {
-
-    private String firstName;
-    private String lastName;
     private String createdBy;
-    private String role;
     private String email;
     private ServiceOffering serviceOffering;
     private List<OrganizationEmployeeIdentity> organizationEmployees;

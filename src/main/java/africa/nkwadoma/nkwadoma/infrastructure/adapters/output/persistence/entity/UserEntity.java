@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "middl_user")
+@Table(name = "meedl_user")
 public class UserEntity {
     @Id
     private String id;
@@ -25,4 +25,8 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private IdentityRole role;
     private String createdBy;
+    private String password;
+
+    private String reactivationReason;
+    private String deactivationReason;
 }

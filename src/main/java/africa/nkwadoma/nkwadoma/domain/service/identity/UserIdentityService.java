@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -9,14 +10,13 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.*;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -33,6 +33,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final TokenUtils tokenUtils;
     private final PasswordEncoder passwordEncoder;
     private final SendColleagueEmailUseCase sendEmail;
@@ -44,14 +45,14 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
-        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMiddlUser().getEmail().trim());
+        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMeedlUser().getEmail().trim());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
 
         OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
         organizationEmployeeIdentity.setOrganization(foundEmployee.getOrganization());
-        organizationEmployeeIdentity.setMiddlUser(userIdentity);
+        organizationEmployeeIdentity.setMeedlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
         sendEmail.sendColleagueEmail(userIdentity);
@@ -74,13 +75,16 @@ public class UserIdentityService implements CreateUserUseCase {
         else throw new MeedlException(PASSWORD_HAS_BEEN_CREATED.getMessage());
     }
 
-
-
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
         UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
+    }
+
+    @Override
+    public void logout(UserIdentity userIdentity) throws MeedlException {
+        identityManagerOutPutPort.logout(userIdentity);
     }
 
     @Override
@@ -98,20 +102,26 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String email, String password) throws MeedlException {
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        validatePassword(password);
-        identityManagerOutPutPort.createPassword(foundUser.getEmail(),password);
-        foundUser.setPassword(password);
-        userIdentityOutputPort.save(foundUser);
+    public void forgotPassword(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        try {
+            UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
+            identityManagerOutPutPort.verifyUserExists(foundUser);
+            sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
+        } catch (MeedlException e) {
+            log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
+        }
+
     }
 
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
         validateDataElement(userIdentity.getId());
-        userIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        userIdentity = identityManagerOutPutPort.enableUserAccount(userIdentity);
+        validateDataElement(userIdentity.getReactivationReason());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setReactivationReason(userIdentity.getReactivationReason());
+        userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
@@ -119,19 +129,17 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
-        validateDataElement(userIdentity.getEmail());
-        userIdentity = identityManagerOutPutPort.disableUserAccount(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
+        validateDataElement(userIdentity.getId());
+        validateDataElement(userIdentity.getDeactivationReason());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
+        userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
         userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
 
-    @Override
-    public UserIdentity forgotPassword(String email) throws MeedlException {
-       validateEmail(email);
-      return userIdentityOutputPort.findByEmail(email);
-    }
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){

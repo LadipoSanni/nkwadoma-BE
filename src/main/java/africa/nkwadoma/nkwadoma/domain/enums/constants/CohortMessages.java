@@ -5,7 +5,9 @@ import lombok.Getter;
 
 @Getter
 public enum CohortMessages {
-    COHORT_EXIST("cohort exist");
+    COHORT_EXIST("cohort exist"),
+    INPUT_CANNOT_BE_NULL("input cannot be empty or null"),
+    COHORT_DOES_NOT_EXIST("cohort does not exist");
 
     private final String message;
 

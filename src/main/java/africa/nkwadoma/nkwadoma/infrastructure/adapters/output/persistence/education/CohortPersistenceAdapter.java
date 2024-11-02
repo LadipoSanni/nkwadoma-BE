@@ -2,17 +2,21 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.CohortExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -26,7 +30,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.COHORT_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
 
 @Slf4j
@@ -36,6 +42,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final ProgramOutputPort programOutputPort;
     private final CohortRepository cohortRepository;
     private final CohortMapper cohortMapper;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
 
     @Override
@@ -68,7 +75,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return new PageImpl<>(cohort.subList(start, end), pageRequest, cohort.size());
     }
 
-    private void updateOrAddCohortToProgram(Cohort cohort, Optional<Cohort> existingCohort, Program program) throws CohortExistException {
+//    private void updateOrAddCohortToProgram(Cohort cohort, Optional<Cohort> existingCohort, Program program) throws CohortExistException {
+    private void updateOrAddCohortToProgram(Cohort cohort, Optional<Cohort> existingCohort, Program program) throws CohortException {
         if (existingCohort.isPresent()) {
             Cohort cohortToUpdate = existingCohort.get();
             if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
@@ -76,7 +84,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 cohortToUpdate.setUpdatedAt(LocalDateTime.now());
                 activateStatus(cohortToUpdate);
             } else {
-                throw new CohortExistException(COHORT_EXIST.getMessage());
+                throw new CohortException(COHORT_EXIST.getMessage());
             }
         } else {
             cohort.setCreatedAt(LocalDateTime.now());
@@ -94,11 +102,36 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     private static void activateStatus(Cohort cohort) {
         LocalDateTime now = LocalDateTime.now();
-        if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)) {
-            cohort.setCohortStatus(ActivationStatus.ACTIVE);
-        } else {
-            cohort.setCohortStatus(ActivationStatus.INACTIVE);
+        if (cohort.getStartDate().isAfter(now)) {
+            cohort.setActivationStatus(ActivationStatus.INACTIVE);
+            cohort.setCohortStatus(CohortStatus.INCOMING);
+        } else if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)) {
+            cohort.setActivationStatus(ActivationStatus.ACTIVE);
+            cohort.setCohortStatus(CohortStatus.CURRENT);
+        } else if (cohort.getExpectedEndDate().isBefore(now) || cohort.getExpectedEndDate().isEqual(now)) {
+            cohort.setActivationStatus(ActivationStatus.INACTIVE);
+            cohort.setCohortStatus(CohortStatus.GRADUATED);
         }
+    }
+
+    @Override
+    public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
+        validateDataElement(userId);
+        validateDataElement(programId);
+        validateDataElement(cohortId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity == null){
+            throw new IdentityException(USER_NOT_FOUND.getMessage());
+        }
+        Program program = programOutputPort.findProgramById(programId);
+        return getCohort(cohortId, program);
+    }
+
+    private static Cohort getCohort(String cohortId, Program program) throws CohortException {
+        return program.getCohorts().stream()
+                .filter(eachCohort -> eachCohort.getId().equals(cohortId))
+                .findFirst()
+                .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
     }
 
 }

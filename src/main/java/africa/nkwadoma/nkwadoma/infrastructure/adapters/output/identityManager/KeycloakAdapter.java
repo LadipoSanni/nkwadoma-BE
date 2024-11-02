@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -32,9 +33,7 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
-import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.validateUserIdentityObject;
 
 
 @RequiredArgsConstructor
@@ -113,8 +112,9 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
-            clientRepresentation = getClientRepresentation(organizationIdentity);
+            clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
             organizationIdentity.setId(clientRepresentation.getId());
+            log.info("Client created successfully. Name: {}", organizationIdentity.getName());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
@@ -149,14 +149,26 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
     public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getPassword());
+        log.info("User login credentials: {}, {}", userIdentity.getEmail(), userIdentity.getPassword());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
+            log.info("Error logging in user: {}", exception.getMessage());
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
+    @Override
+    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity);
+        UserRepresentation userRepresentation = getUserRepresentation(userIdentity, true);
+        MeedlValidator.validateUUID(userRepresentation.getId());
+        userIdentity.setId(userRepresentation.getId());
+        return userIdentity;
+    }
+
+
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
@@ -186,9 +198,10 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
-        validateDataElement(userIdentity.getEmail());
-        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getReactivationReason());
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         if (foundUser.isEnabled()) {
             throw new IdentityException(ACCOUNT_ALREADY_ENABLED.getMessage());
@@ -204,16 +217,21 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         userRepresentation.setEmailVerified(Boolean.TRUE);
         UserResource userResource = getUserResource(userIdentity);
         userResource.update(userRepresentation);
-        foundUser.setEnabled(Boolean.TRUE);
-        return foundUser;
+        userIdentity.setEnabled(Boolean.TRUE);
+        userIdentity.setEmailVerified(Boolean.TRUE);
+        return userIdentity;
     }
 
     @Override
     public UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentityObject(userIdentity);
-        validateDataElement(userIdentity.getEmail());
-        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail())
+        MeedlValidator.validateObjectInstance(userIdentity);
+        log.info("validate user email  {}", userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
+
+        UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+
         if (!foundUser.isEnabled()) {
             log.warn("The status of the found user is...  {} id : {}", foundUser.isEnabled(), foundUser.getId() );
             throw new IdentityException(ACCOUNT_ALREADY_DISABLED.getMessage());
@@ -224,8 +242,10 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
             userRepresentation.setEnabled(Boolean.FALSE);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
             userResource.update(userRepresentation);}
-        foundUser.setEnabled(Boolean.FALSE);
-        return foundUser;
+        userIdentity.setEnabled(Boolean.FALSE);
+        userIdentity.setEmailVerified(Boolean.FALSE);
+        log.info("after deactivation on keycloak {}", userIdentity);
+        return userIdentity;
 
     }
 
@@ -260,11 +280,24 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
                 .users()
                 .search(email);
     }
-
-    public ClientRepresentation getClientRepresentation(OrganizationIdentity organizationIdentity) throws MeedlException {
+    @Override
+    public ClientResource getClientResource(String clientId) {
         return keycloak.realm(KEYCLOAK_REALM)
                 .clients()
-                .findByClientId(organizationIdentity.getId())
+                .get(clientId);
+    }
+
+    @Override
+    public void deleteClient(String clientId) {
+        ClientResource clientResource = getClientResource(clientId);
+        clientResource.remove();
+    }
+
+    @Override
+    public ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException {
+        return keycloak.realm(KEYCLOAK_REALM)
+                .clients()
+                .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
     }
 
@@ -305,7 +338,7 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
-                .search(userIdentity.getEmail(),exactMatch)
+                .search(userIdentity.getEmail(), exactMatch)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
@@ -330,10 +363,16 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
         }
         return roleRepresentation;
     }
+
+    @Override
+    public void logout(UserIdentity userIdentity) throws MeedlException {
+        UserResource userResource = getUserResource(userIdentity);
+        userResource.logout();
+    }
+
     private void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
-        log.info("Validating userIdentity {}",userIdentity);
-        if (userIdentity == null)
-            throw new IdentityException(INVALID_REGISTRATION_DETAILS.getMessage());
+        log.info("Validating userIdentity object {}",userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
     }
     private void validateUserIdentityDetails(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);

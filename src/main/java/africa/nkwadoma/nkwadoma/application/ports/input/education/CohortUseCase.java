@@ -9,4 +9,7 @@ public interface CohortUseCase {
     Cohort createCohort(Cohort cohort) throws MeedlException;
     Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException;
 
+
+
+    Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
 }

@@ -2,9 +2,11 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.commons.lang3.*;
 
 import java.math.*;
 import java.time.LocalDate;
@@ -20,7 +22,6 @@ import java.util.List;
 public class Program {
     private String id;
     private String programDescription;
-    @Column(unique = true)
     private String name;
     private String objectives;
     private DurationType durationType;
@@ -52,6 +53,12 @@ public class Program {
         MeedlValidator.validateDataElement(this.name);
         MeedlValidator.validateDataElement(this.createdBy);
         MeedlValidator.validateDataElement(this.organizationId);
+    }
+
+    public void setName(String name) {
+       if (StringUtils.isNotEmpty(name)) {
+           this.name = name.trim();
+       }
     }
 
     public BigDecimal getTotalAmountRepaid() {

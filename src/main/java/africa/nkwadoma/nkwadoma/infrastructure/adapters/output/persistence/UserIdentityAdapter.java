@@ -1,11 +1,17 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +29,14 @@ import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validate
 public class UserIdentityAdapter implements UserIdentityOutputPort {
     private final UserEntityRepository userEntityRepository;
     private final UserIdentityMapper userIdentityMapper;
+    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort ;
 
     @Override
     public UserIdentity save(UserIdentity userIdentity) throws MeedlException {
         UserIdentityValidator.validateUserIdentity(userIdentity);
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
+        log.info("UserIdentity saved {}", userIdentity);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 
@@ -46,7 +54,9 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         if (StringUtils.isEmpty(id)){
             throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
+
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        employeeIdentityOutputPort.deleteEmployee(id);
         userEntityRepository.delete(userEntity);
     }
 
@@ -62,6 +72,15 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         validateEmail(email);
         UserEntity userEntity = getUserEntityByEmail(email);
         userEntityRepository.delete(userEntity);
+    }
+
+    @Override
+    public void verifyUser(String actorId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId);
+        UserIdentity userIdentity = findById(actorId);
+        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
+            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+        }
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {

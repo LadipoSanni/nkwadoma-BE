@@ -5,7 +5,11 @@ import lombok.*;
 @Getter
 public enum ControllerConstant {
     RESPONSE_IS_SUCCESSFUL("Response is successful"),
-    PASSWORD_CREATED_SUCCESSFULLY("Password has been created successfully"),;
+    COLLEAGUE_INVITED("Colleague invited successfully"),
+    LOGOUT_SUCCESSFUL("Logout successful"),
+    PASSWORD_CREATED_SUCCESSFULLY("Password has been created successfully"),
+    DELETED_SUCCESSFULLY("Deleted successfully"),
+    UPDATED_SUCCESSFULLY("updated successfully");
     private final String message;
 
     ControllerConstant(String message) {

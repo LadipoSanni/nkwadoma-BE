@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,17 +44,21 @@ class OrganizationIdentityAdapterTest {
         joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
         joel.setCreatedBy("Ayo");
 
+        OrganizationEmployeeIdentity employeeJoel = new OrganizationEmployeeIdentity();
+        employeeJoel.setMeedlUser(joel);
+
         amazingGrace = new OrganizationIdentity();
         amazingGrace.setName("Amazing Grace Enterprises");
         amazingGrace.setEmail("rachel@gmail.com");
         amazingGrace.setInvitedDate(LocalDateTime.now().toString());
         amazingGrace.setRcNumber("RC345677");
-        amazingGrace.setId(amazingGrace.getRcNumber());
+        amazingGrace.setId("ead0f7cb-5483-4bb8-b271-813970a9c368");
         amazingGrace.setPhoneNumber("0907658483");
         amazingGrace.setTin("Tin5678");
-        amazingGrace.setServiceOffering(new ServiceOffering());
-        amazingGrace.getServiceOffering().setIndustry(Industry.BANKING);
+        amazingGrace.setServiceOfferings(List.of(new ServiceOffering()));
+        amazingGrace.getServiceOfferings().get(0).setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
+        amazingGrace.setOrganizationEmployees(List.of(employeeJoel));
         }
 
     @Test
@@ -61,9 +67,10 @@ class OrganizationIdentityAdapterTest {
                 assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
                 assertNotNull(savedOrganization);
-                OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
-                assertEquals(foundOrganization.getName(),savedOrganization.getName());
-                assertEquals(foundOrganization.getServiceOffering().getIndustry(),savedOrganization.getServiceOffering().getIndustry());
+                assertEquals(amazingGrace.getName(),savedOrganization.getName());
+                assertNotNull(savedOrganization.getServiceOfferings());
+                assertNotNull(savedOrganization.getServiceOfferings().get(0));
+                assertEquals(amazingGrace.getServiceOfferings().get(0).getIndustry(),savedOrganization.getServiceOfferings().get(0).getIndustry());
              }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
@@ -120,12 +127,12 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullIndustry(){
-        amazingGrace.getServiceOffering().setIndustry(null);
+        amazingGrace.getServiceOfferings().get(0).setIndustry(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
     @Test
     void saveOrganizationWithNullServiceOffering(){
-        amazingGrace.setServiceOffering(null);
+        amazingGrace.setServiceOfferings(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
     @Test
@@ -154,15 +161,15 @@ class OrganizationIdentityAdapterTest {
 
     @Test
     void saveOrganizationWithNullAdmin(){
-//        amazingGrace.setOrganizationAdmins(null);
+        amazingGrace.setOrganizationEmployees(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
 
-//    @Test
-//    void saveOrganizationWithEmptyAdmin(){
-//        amazingGrace.setOrganizationAdmins(Collections.EMPTY_LIST);
-//        assertThrows(MiddlException.class, ()-> organizationOutputPort.save(amazingGrace));
-//    }
+    @Test
+    void saveOrganizationWithEmptyAdmin(){
+        amazingGrace.setOrganizationEmployees(Collections.emptyList());
+        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
+    }
 
     @Test
     void saveOrganizationWithIncompleteAdminField(){
@@ -207,7 +214,7 @@ class OrganizationIdentityAdapterTest {
             OrganizationIdentity foundUser = organizationOutputPort.findById(amazingGrace.getId());
             assertEquals(foundUser.getTin(), amazingGrace.getTin());
             organizationOutputPort.delete(amazingGrace.getId());
-            assertThrows(IdentityException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
+            assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
         } catch (MeedlException e) {
             log.info("{} {}", e.getClass().getName(),e.getMessage());
         }
@@ -233,7 +240,7 @@ class OrganizationIdentityAdapterTest {
         try {
             OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
             assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
-            assertNotNull(existingUser.getServiceOffering().getIndustry());
+            assertNotNull(existingUser.getServiceOfferings().get(0).getIndustry());
 
             existingUser.setName("Felicia");
             OrganizationIdentity updatedUser = organizationOutputPort.save(existingUser);

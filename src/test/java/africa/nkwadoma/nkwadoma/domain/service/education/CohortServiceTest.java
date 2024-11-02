@@ -2,8 +2,10 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -12,9 +14,17 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -23,20 +33,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class CohortServiceTest {
-
-
-    @Autowired
-    private CohortUseCase cohortUseCase;
+    @InjectMocks
+    private CohortService cohortService;
     private Cohort elites;
     private Cohort xplorers;
+    @Mock
+    private CohortOutputPort cohortOutputPort;
+    private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private Cohort cohort;
     private String cohortOneId;
     private String cohortTwoId;
@@ -54,52 +63,20 @@ public class CohortServiceTest {
     private CohortRepository cohortRepository;
 
 
-    @BeforeAll
-    void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson").email("fred@example.com").createdBy("8937-b9897g3-bv38").build();
-        employeeIdentity = OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization").rcNumber("56767").serviceOffering(
-                        ServiceOffering.builder().industry(Industry.EDUCATION).build()).
-                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
-
-        program = Program.builder().name("My program").
-                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).createdBy("68379").programStartDate(LocalDate.now()).build();
-        try {
-            organizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
-            program.setOrganizationId(organizationIdentity.getId());
-            program = programOutputPort.saveProgram(program);
-        } catch (MeedlException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     @BeforeEach
-    public void setUp(){
+    void setUp() {
         elites = new Cohort();
-        elites.setProgramId(program.getId());
+        elites.setProgramId(mockId);
         elites.setName("Elite");
-        elites.setCreatedBy(program.getId());
+        elites.setCreatedBy(mockId);
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
 
-        cohort = new Cohort();
-        cohort.setProgramId(program.getId());
-        cohort.setName("Elite");
-        cohort.setCreatedBy(program.getId());
-        cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-
         xplorers = new Cohort();
         xplorers.setName("xplorers");
-        xplorers.setProgramId(program.getId());
-        xplorers.setCreatedBy(program.getId());
+        xplorers.setProgramId(mockId);
+        xplorers.setCreatedBy(mockId);
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
     }
@@ -107,25 +84,41 @@ public class CohortServiceTest {
     @Test
     void saveCohort() {
         try {
+            when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
+            Cohort cohort = cohortService.createCohort(elites);
+            assertEquals(cohort.getName(), elites.getName());
             Cohort cohort = cohortUseCase.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             cohortOneId = cohort.getId();
         } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
     @Test
     void saveCohortWithExistingCohortName() {
-        assertThrows(MeedlException.class,() ->cohortUseCase.createCohort(cohort));
+        try {
+            when(cohortOutputPort.saveCohort(xplorers)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertThrows(MeedlException.class,() -> cohortService.createCohort(xplorers));
     }
 
 
     @Test
     void saveAnotherCohortInProgram() {
         try {
-            Cohort cohort = cohortUseCase.createCohort(elites);
+            when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
+            when(cohortOutputPort.saveCohort(xplorers)).thenReturn(xplorers);
+
+            Cohort cohort = cohortService.createCohort(elites);
+            Cohort secondCohort = cohortService.createCohort(xplorers);
+
+            assertEquals(secondCohort.getName(), xplorers.getName());
             assertEquals(cohort.getName(), elites.getName());
+
+            verify(cohortOutputPort, times(2)).saveCohort(any());
             cohortTwoId = cohort.getId();
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -143,7 +136,52 @@ public class CohortServiceTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
+    @Test
+    void viewCohortDetails(){
+        try{
+            when(cohortOutputPort.viewCohortDetails(mockId,mockId,mockId)).thenReturn(xplorers);
+            Cohort cohort = cohortService
+                    .viewCohortDetails(mockId,mockId, mockId);
+            assertNotNull(cohort);
+            assertEquals(cohort.getName(),xplorers.getName());
+            verify(cohortOutputPort, times(1)).viewCohortDetails(any(), any(), any());
+        }catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
 
+
+    @Test
+    void viewCohortWithNullUserId(){
+        try {
+            when(cohortOutputPort.viewCohortDetails(null,mockId, mockId)).thenThrow(MeedlException.class);
+            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null,
+                    mockId, mockId));
+        } catch (MeedlException e) {
+            log.error("Failed {}", e.getMessage());
+        }
+    }
+    @Test
+    void viewCohortWithNullProgramId(){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId,null, mockId )).thenThrow(MeedlException.class);
+            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId,
+                    null,mockId));
+        } catch (MeedlException e) {
+            log.error("Failed {}", e.getMessage());
+        }
+    }
+
+    @Test
+    void viewCohortWithNullCohortId(){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId, mockId , null)).thenThrow(MeedlException.class);
+            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId,
+                    mockId, null));
+        } catch (MeedlException e) {
+            log.error("Failed {}", e.getMessage());
+        }
+        }
     @AfterAll
     void cleanUp() throws MeedlException {
         programOutputPort.deleteProgram(program.getId());
@@ -152,4 +190,44 @@ public class CohortServiceTest {
         cohortRepository.deleteById(cohortTwoId);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyUserId(String userId){
+        try {
+            when(cohortOutputPort.viewCohortDetails(userId, mockId, mockId)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertThrows(MeedlException.class, ()->
+                cohortService.viewCohortDetails(userId,
+                        mockId,
+                        mockId));
+    }
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyProgramId(String programId){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId, programId , mockId)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertThrows(MeedlException.class, ()->
+                cohortService.viewCohortDetails(mockId,
+                        programId,
+                        mockId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewCohortWithEmptyCohortId(String cohortId){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId, mockId, cohortId)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertThrows(MeedlException.class, ()->
+                cohortService.viewCohortDetails(mockId,
+                        mockId,
+                        cohortId));
+    }
 }

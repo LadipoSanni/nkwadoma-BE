@@ -9,11 +9,18 @@ SMTP_PORT=$2
 SMTP_USERNAME=$3
 SMTP_PASSWORD=$4
 EMAILS=$5
+COMMIT_AUTHOR=$6
+BRANCH_NAME=$7
 COMMIT_AUTHOR=$8
 SONARQUBE_URL_SET=$9
 MAVEN_REPORT_URL_SET=${10}
 AUTOMATION_TEST_URL_SET=${11}
 COMMIT_MESSAGE=${12}
+COMMIT_AUTHOR=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
+SONARQUBE_URL=http://52.2.188.133:9000/
+MAVEN_REPORT_URL=
+AUTOMATION_TEST_URL=
+COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/\\(/(/g; s/\\)/)/g; s/\\#/#/g')
 
 # Fixing unescaped characters in commit message
 COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/\\(/(/g; s/\\)/)/g; s/\\#/#/g')
@@ -40,12 +47,9 @@ fi
 
 echo "Commit messages after merge: $COMMITS"
 
-# Define URLs (skip Maven for Node.js)
-SONARQUBE_URL=http://sonarqube.example.com/dashboard?id=my-nodejs-project
-AUTOMATION_TEST_URL=http://example.com/path/to/automation-test-report.html
 
 # Extract engineer's name from commit author
-ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
+COMMIT_AUTHOR=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
 
 # Read email recipients into an array
 IFS=',' read -r -a email_array <<< "${EMAILS}"

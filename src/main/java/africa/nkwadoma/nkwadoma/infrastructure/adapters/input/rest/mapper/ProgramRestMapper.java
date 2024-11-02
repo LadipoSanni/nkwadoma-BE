@@ -5,11 +5,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = DurationTypeMapper.class)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")
-    @Mapping(source = "programCreateRequest.createdAt", target = "createdAt")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(source = "programCreateRequest.programDuration", target = "duration")
     @Mapping(source = "programCreateRequest.programMode", target = "mode")
     @Mapping(source = "programCreateRequest.durationStatus", target = "durationType")
@@ -24,4 +24,6 @@ public interface ProgramRestMapper {
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")
     ProgramResponse toProgramResponse(Program program);
+
+    Program toUpdatedProgram(ProgramUpdateRequest programUpdateRequest);
 }

@@ -23,10 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.INVITE_ORGANIZATION_SUCCESS;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.INVITE_ORGANIZATION_DESCRIPTION;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SwaggerUiConstant.INVITE_ORGANIZATION_TITLE;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_DESCRIPTION;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.INVITE_ORGANIZATION_TITLE;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
@@ -47,16 +46,17 @@ public class InviteOrganizationController {
             List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
             OrganizationIdentity organizationIdentity = inviteOrganizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
             organizationIdentity.setOrganizationEmployees(orgEmployee);
+            organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = inviteOrganizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
-                    .body(inviteOrganizationResponse)
+                    .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
         }catch (Exception exception){
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>( null ,exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -69,7 +69,7 @@ public class InviteOrganizationController {
 
     private static OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(UserIdentity userIdentity) {
         return OrganizationEmployeeIdentity.builder()
-                .middlUser(userIdentity)
+                .meedlUser(userIdentity)
                 .build();
     }
 
@@ -78,7 +78,7 @@ public class InviteOrganizationController {
         return UserIdentity.builder()
                 .firstName(inviteOrganizationRequest.getAdminFirstName())
                 .lastName(inviteOrganizationRequest.getAdminLastName())
-                .email(inviteOrganizationRequest.getEmail())
+                .email(inviteOrganizationRequest.getAdminEmail())
                 .role(inviteOrganizationRequest.getAdminRole())
                 .build();
     }
