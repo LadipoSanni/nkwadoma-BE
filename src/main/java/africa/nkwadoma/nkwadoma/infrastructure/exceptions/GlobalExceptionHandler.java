@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
         return ExceptionResponse.builder()
                 .message(message)
                 .timeStamp(LocalDateTime.now())
-                .status(false)
+                .status(Boolean.FALSE)
                 .build();
     }
 }

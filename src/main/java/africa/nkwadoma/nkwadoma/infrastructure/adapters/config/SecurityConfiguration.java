@@ -39,7 +39,6 @@ public class SecurityConfiguration {
 
         http.authorizeHttpRequests(requests -> {
             requests.requestMatchers(WhiteList.patterns).permitAll();
-            requests.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
             requests.anyRequest().authenticated();
         });
 
@@ -49,11 +48,11 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
-        configuration.setAllowedOrigins(Arrays.asList("**", "*", "/*" ,"/**","http://localhost:3000", "http://localhost:3000/"));
+        configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
+//        configuration.setAllowedOrigins(Arrays.asList("**", "*", "/*" ,"/**","http://localhost:3000", "http://localhost:3000/"));
         configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
+//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

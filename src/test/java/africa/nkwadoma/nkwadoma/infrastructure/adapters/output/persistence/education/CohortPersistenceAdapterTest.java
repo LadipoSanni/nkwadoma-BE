@@ -45,13 +45,13 @@ public class CohortPersistenceAdapterTest {
     private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
-    private String meedleUser;
-    @Autowired
-    private UserIdentityOutputPort userIdentityOutputPort;
 
     private int pageSize = 2;
     private int pageNumber = 0;
 
+    private String meedleUser;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -82,15 +82,15 @@ public class CohortPersistenceAdapterTest {
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-        try {
-            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
-            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
-            program.setOrganizationId(organizationIdentity.getId());
-             program.setCreatedBy(meedleUser);
-            program = programOutputPort.saveProgram(program);
-        } catch (MeedlException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+//            meedleUser = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
+//            program.setOrganizationId(organizationIdentity.getId());
+//             program.setCreatedBy(meedleUser);
+//            program = programOutputPort.saveProgram(program);
+//        } catch (MeedlException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -264,10 +264,11 @@ public class CohortPersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        programOutputPort.deleteProgram(program.getId());
-        organizationIdentityOutputPort.delete(organizationIdentity.getId());
-        cohortRepository.deleteById(cohortOneId);
-        cohortRepository.deleteById(cohortTwoId);
-        userIdentityOutputPort.deleteUserById(meedleUser);
+//        Program foundProgram = programOutputPort.findProgramByName(program.getName());
+//        programOutputPort.deleteProgram(foundProgram.getId());
+//        organizationIdentityOutputPort.delete(organizationIdentity.getId());
+//        cohortRepository.deleteById(cohortOneId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        userIdentityOutputPort.deleteUserById(meedleUser);
     }
 }

@@ -17,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +51,7 @@ public class CohortController {
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .body(cohortResponse)
+                    .data(cohortResponse)
                     .message(COHORT_CREATED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
@@ -71,7 +74,7 @@ public class CohortController {
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .body(cohortResponse)
+                    .data(cohortResponse)
                     .message(COHORT_VIEWED)
                     .statusCode(HttpStatus.OK.toString())
                     .build();
@@ -98,7 +101,7 @@ public class CohortController {
 
             ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                     .statusCode(HttpStatus.OK.toString())
-                    .body(response)
+                    .data(response)
                     .message(ALL_COHORT)
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);

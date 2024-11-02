@@ -39,10 +39,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
         saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-
+        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
 
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity.setServiceOfferings(savedServiceOfferings);
+        return organizationIdentity;
     }
 
     private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
@@ -78,7 +80,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findById(String id) throws MeedlException {
-        validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
@@ -95,7 +97,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
-            log.info("Found nothing while searching for service  offerings...");
+            throw new IdentityException("Service offering not found");
         }
         return organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
     }
