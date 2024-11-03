@@ -54,6 +54,4 @@ public class ProgramEntity {
     private String organizationId;
     @ManyToOne(cascade = CascadeType.MERGE)
     private OrganizationEntity organizationEntity;
-    @OneToMany(cascade = CascadeType.MERGE , fetch = FetchType.EAGER)
-    private List<CohortEntity> cohorts;
 }
