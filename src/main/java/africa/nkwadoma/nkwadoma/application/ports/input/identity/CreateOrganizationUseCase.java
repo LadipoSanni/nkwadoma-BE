@@ -10,5 +10,4 @@ public interface CreateOrganizationUseCase {
 
     void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException;
 
-    List<OrganizationIdentity> search(String organizationName) throws MeedlException;
 }

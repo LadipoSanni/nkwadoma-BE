@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -36,6 +37,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Slf4j
 public class InviteOrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
     @PostMapping("organization/invite")
@@ -67,7 +69,7 @@ public class InviteOrganizationController {
     @Operation(summary = "Search for organization by name")
     public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Organization name is required") String name)
             throws MeedlException {
-       List<OrganizationIdentity> organizationIdentities = createOrganizationUseCase.search(name);
+       List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
        log.info("Organization {}", organizationIdentities);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList()).
@@ -75,7 +77,18 @@ public class InviteOrganizationController {
                 HttpStatus.OK
         );
     }
-
+    @GetMapping("organization/{id}")
+    @Operation(summary = "Search for organization by name")
+    public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@PathVariable @Valid @NotBlank(message = "Organization id is required") String id )
+            throws MeedlException {
+        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
+        log.info("Organization {}", organizationIdentity);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                data(inviteOrganizationRestMapper.toOrganizationResponse(organizationIdentity)).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
     private static List<OrganizationEmployeeIdentity> getOrganizationEmployeeIdentities(OrganizationEmployeeIdentity organizationEmployeeIdentity) {
         List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
         orgEmployee.add(organizationEmployeeIdentity);

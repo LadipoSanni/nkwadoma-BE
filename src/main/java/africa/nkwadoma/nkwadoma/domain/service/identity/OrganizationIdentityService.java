@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -10,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
-public class OrganizationIdentityService implements CreateOrganizationUseCase {
+public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutPutPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
@@ -76,7 +78,13 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
+        MeedlValidator.validateDataElement(organizationName);
         return organizationIdentityOutputPort.search(organizationName);
+    }
+    @Override
+    public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        return organizationIdentityOutputPort.findById(organizationId);
     }
 
 

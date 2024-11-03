@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -13,7 +14,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.K
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -27,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class OrganizationIdentityServiceTest {
 
+    @Autowired
+    private ViewOrganizationUseCase viewOrganizationUseCase;
     @Autowired
     private CreateOrganizationUseCase createOrganizationUseCase;
 
@@ -116,4 +122,15 @@ class OrganizationIdentityServiceTest {
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void searchOrganizationWithInvalidName(String name) {
+        assertThrows(MeedlException.class, ()->viewOrganizationUseCase.search(name));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
+    void viewOrganizationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, ()->viewOrganizationUseCase.viewOrganizationDetails(id));
+    }
+}
