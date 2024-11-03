@@ -35,6 +35,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
+    private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
 
     @BeforeAll
     void init() {
@@ -46,7 +47,8 @@ class OrganizationEmployeeIdentityAdapterTest {
             amazingGrace.setRcNumber("RC345677");
             amazingGrace.setPhoneNumber("0907658483");
             amazingGrace.setTin("Tin5678");
-            amazingGrace.setCreatedBy("0e08ce92-60dc-4374-8d5f-19b31cd8c781");
+            amazingGrace.setCreatedBy(testId);
+            amazingGrace.setId(testId);
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
             amazingGrace.setWebsiteAddress("webaddress.org");
@@ -63,7 +65,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
             joel.setCreatedBy(amazingGrace.getCreatedBy());
 
-            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().middlUser(joel).build()));
+            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().meedlUser(joel).build()));
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
 
@@ -82,7 +84,7 @@ class OrganizationEmployeeIdentityAdapterTest {
 
             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
-            organizationEmployeeIdentity.setMiddlUser(userIdentity);
+            organizationEmployeeIdentity.setMeedlUser(userIdentity);
             OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
             assertNotNull(savedEmployeeIdentity);

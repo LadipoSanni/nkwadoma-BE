@@ -38,7 +38,7 @@ class OrganizationEmployeeServiceTest {
         organizationEmployeeIdentity.setOrganization("5756faf2-f3c8-40c4-9af5-5946adcfebd9");
         organizationEmployeeIdentity.setPageNumber(0);
         organizationEmployeeIdentity.setPageSize(10);
-        organizationEmployeeIdentity.setMiddlUser(userIdentity);
+        organizationEmployeeIdentity.setMeedlUser(userIdentity);
         organizationEmployeeIdentity.setId("79a44827-ba7a-4d42-be8a-62b357ac4148");
     }
 

@@ -53,6 +53,7 @@ class ProgramPersistenceAdapterTest {
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
+    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";;
 
     @BeforeEach
     void setUp() {
@@ -85,29 +86,13 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setLastName("Jacobs");
         userIdentity.setEmail("joel@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
+        userIdentity.setId(testId);
+        userIdentity.setCreatedBy(testId);
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity.setRole(PORTFOLIO_MANAGER);
     }
-/
-//    @BeforeAll
-//    void init() {
-//        try {
-//            userIdentity = new UserIdentity();
-//            userIdentity.setFirstName("Joel");
-//            userIdentity.setLastName("Jacobs");
-//            userIdentity.setEmail("joel@johnson.com");
-//            String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
-//            userIdentity.setId(testId);
-//            userIdentity.setPhoneNumber("098647748393");
-//            userIdentity.setEmailVerified(true);
-//            userIdentity.setEnabled(true);
-//            userIdentity.setCreatedAt(LocalDateTime.now().toString());
-//            userIdentity.setRole(PORTFOLIO_MANAGER);
-//            userIdentity.setCreatedBy("Ayo");
-//    }
-//        }
 
     @BeforeAll
     void init() {
@@ -144,7 +129,7 @@ class ProgramPersistenceAdapterTest {
             userIdentity.setCreatedBy(organizationIdentity.getCreatedBy());
 
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    middlUser(userIdentity).build()));
+                    meedlUser(userIdentity).build()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
             userIdentityOutputPort.save(userIdentity);
             organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
@@ -201,7 +186,7 @@ class ProgramPersistenceAdapterTest {
             foundUserIdentity.setId(foundOrganizationIdentity.getCreatedBy());
 
             foundOrganizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    middlUser(foundUserIdentity).build()));
+                    meedlUser(foundUserIdentity).build()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(foundOrganizationIdentity);
 
             userIdentityOutputPort.save(foundUserIdentity);
@@ -256,7 +241,7 @@ class ProgramPersistenceAdapterTest {
             foundUserIdentity.setId(foundOrganizationIdentity.getCreatedBy());
 
             foundOrganizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    middlUser(foundUserIdentity).build()));
+                    meedlUser(foundUserIdentity).build()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(foundOrganizationIdentity);
 
             userIdentityOutputPort.save(foundUserIdentity);

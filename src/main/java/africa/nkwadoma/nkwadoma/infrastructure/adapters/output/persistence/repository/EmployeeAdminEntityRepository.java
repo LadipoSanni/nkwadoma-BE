@@ -7,10 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.*;
 
 public interface EmployeeAdminEntityRepository extends JpaRepository<OrganizationEmployeeEntity,String> {
-    OrganizationEmployeeEntity findByMiddlUserId(String userId);
-
-    Optional<OrganizationEmployeeEntity> findByMiddlUser_CreatedBy(String createdBy);
-
     Page<OrganizationEmployeeEntity> findAllByOrganization(String organizationId, Pageable pageable);
     OrganizationEmployeeEntity findByMeedlUserId(String userId);
     void deleteByMeedlUserId(String id);
