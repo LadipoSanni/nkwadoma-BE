@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -38,7 +38,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityVal
 
 @RequiredArgsConstructor
 @Slf4j
-public class KeycloakAdapter implements IdentityManagerOutPutPort {
+public class KeycloakAdapter implements IdentityManagerOutputPort {
     private final Keycloak keycloak;
     private final KeyCloakMapper mapper;
     @Value("${realm}")
@@ -80,11 +80,8 @@ public class KeycloakAdapter implements IdentityManagerOutPutPort {
 
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
-        validateUserIdentity(userIdentity);
-        if (StringUtils.isEmpty(userIdentity.getId())) {
-            log.error("User id is empty");
-            throw new MeedlException("User does not exist");
-        }
+//        validateUserIdentity(userIdentity);
+        MeedlValidator.validateUUID(userIdentity.getId());
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();

@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +20,9 @@ public class CohortService implements CohortUseCase {
     public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
         return cohortOutputPort.viewCohortDetails(userId,programId,cohortId);
     }
-
+    @Override
+    public void deleteCohort(String id) throws MeedlException {
+        cohortOutputPort.deleteCohort(id);
+    }
 
 }
