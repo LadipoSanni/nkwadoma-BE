@@ -79,7 +79,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
 
         organizationIdentity.setTimeUpdated(LocalDateTime.now());
-        return organizationIdentityOutputPort.save(organizationIdentity);
+        return organizationIdentityOutputPort.updateOrganization(organizationIdentity);
     }
 
 

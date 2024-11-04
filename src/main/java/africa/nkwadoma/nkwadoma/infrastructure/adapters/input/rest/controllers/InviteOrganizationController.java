@@ -63,7 +63,7 @@ public class InviteOrganizationController {
     }
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
+//    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationRequest organizationRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(organizationRequest);

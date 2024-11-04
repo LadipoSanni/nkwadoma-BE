@@ -31,9 +31,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
-        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-
+        validate(organizationIdentity);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
@@ -46,6 +44,22 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
+    @Override
+    public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+
+        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        organizationEntity = organizationEntityRepository.save(organizationEntity);
+        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+    }
+
+    public void validate(OrganizationIdentity organizationIdentity) throws MeedlException {
+        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
+        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+    }
+
+
 
     private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
         List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
@@ -133,7 +147,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
     }
-
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
