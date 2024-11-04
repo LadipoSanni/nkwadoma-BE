@@ -84,6 +84,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void validateCreatedBy(Program program) throws MeedlException {
         log.info("Validating the created by: {}",program.getCreatedBy());
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (ObjectUtils.isEmpty(employeeIdentity)) {
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+        }
     }
 
 

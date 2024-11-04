@@ -29,15 +29,12 @@ class AdminInitializerTest {
     @Test
     @Order(1)
     void initializeFirstUser(){
-        UserIdentity userIdentity = null;
         try {
-            userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
+            UserIdentity userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
+            assertNotNull(userIdentity);
+            assertNotNull(userIdentity.getId());
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
-        }finally {
-            log.error("finally block initiated...");
-                assertNotNull(userIdentity);
-                assertNotNull(userIdentity.getId());
         }
     }
     @Test
