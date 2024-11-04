@@ -80,7 +80,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
-//        validateUserIdentity(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
         UserResource userResource = getUserResource(userIdentity);
         try{
