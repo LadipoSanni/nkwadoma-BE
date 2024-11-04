@@ -77,6 +77,7 @@ public class AdminInitializer {
     private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) throws MeedlException {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
+            log.info("User created successfully on keycloak sending email to user");
             sendEmail.sendColleagueEmail(userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
