@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class OrganizationIdentityService implements CreateOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final IdentityManagerOutPutPort identityManagerOutPutPort;
+    private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;

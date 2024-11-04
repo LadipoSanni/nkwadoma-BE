@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class KeycloakAdapterTest {
     @Autowired
-    private IdentityManagerOutPutPort identityManagementOutputPort;
+    private IdentityManagerOutputPort identityManagementOutputPort;
     private UserIdentity john;
     private UserIdentity peter;
     private String johnId;
