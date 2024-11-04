@@ -30,7 +30,8 @@ public enum IdentityMessages{
     PASSWORD_NOT_ACCEPTED("password not accepted"),
     ACCOUNT_ALREADY_ENABLED("Account has been enabled"),
     ACCOUNT_ALREADY_DISABLED("Account is not currently enabled"),
-    INVALID_EMAIL_OR_PASSWORD("Invalid email or password");
+    INVALID_EMAIL_OR_PASSWORD("Invalid email or password"),
+    ORGANIZATION_EMPLOYEE_NOT_FOUND("Organization employee not found!");
     private final String message;
 
     IdentityMessages(String message){

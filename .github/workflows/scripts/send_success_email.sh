@@ -49,7 +49,7 @@ echo "Commit messages after merge: $COMMITS"
 
 
 # Extract engineer's name from commit author
-COMMIT_AUTHOR=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
+ENGINEER_NAME=$(echo "$COMMIT_AUTHOR" | sed 's/ <.*//')
 
 # Read email recipients into an array
 IFS=',' read -r -a email_array <<< "${EMAILS}"
