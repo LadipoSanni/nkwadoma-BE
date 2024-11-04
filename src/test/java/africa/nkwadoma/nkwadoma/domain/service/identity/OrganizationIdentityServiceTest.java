@@ -148,7 +148,7 @@ class OrganizationIdentityServiceTest {
     @Test
     void updateOrganization(){
         try {
-            when(organizationIdentityOutputPort.save(roseCouture)).thenAnswer(invocation -> {
+            when(organizationIdentityOutputPort.updateOrganization(roseCouture)).thenAnswer(invocation -> {
                 roseCouture.setTimeUpdated(LocalDateTime.now());
                 roseCouture.setUpdatedBy(mockId);
                 roseCouture.setWebsiteAddress("newwebsite");
