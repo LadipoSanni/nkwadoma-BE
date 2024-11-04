@@ -50,7 +50,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
         configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
