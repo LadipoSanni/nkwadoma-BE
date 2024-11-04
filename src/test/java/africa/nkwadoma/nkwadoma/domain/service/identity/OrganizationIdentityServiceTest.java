@@ -43,6 +43,18 @@ class OrganizationIdentityServiceTest {
 
     @InjectMocks
     private OrganizationIdentityService organizationIdentityService;
+    @InjectMocks
+    private OrganizationIdentityService organizationIdentityService;
+
+    @Mock
+    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
 
     @Mock
     private IdentityManagerOutPutPort identityManagerOutPutPort;
@@ -55,8 +67,13 @@ class OrganizationIdentityServiceTest {
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
+    private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+
 
     private OrganizationIdentity roseCouture;
+    private UserIdentity sarah;
+    private OrganizationEmployeeIdentity employeeSarah ;
+    private List<OrganizationEmployeeIdentity> orgEmployee;
     private UserIdentity sarah;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
     private OrganizationEmployeeIdentity employeeSarah ;
@@ -65,6 +82,13 @@ class OrganizationIdentityServiceTest {
     @BeforeEach
     void setUp(){
 
+        sarah = new UserIdentity();
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        sarah.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah.setFirstName("Sarah");
+        sarah.setLastName("Jacobs");
+        sarah.setEmail("divinemercy601@gmail.com");
+        sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
         sarah = new UserIdentity();
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
         sarah.setId(mockId);
@@ -130,6 +154,7 @@ class OrganizationIdentityServiceTest {
     void inviteOrganizationWithNullEmail(){
         roseCouture.setEmail(null);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
 
     @ParameterizedTest
@@ -141,6 +166,16 @@ class OrganizationIdentityServiceTest {
 
 
     @Test
+    void inviteOrganizationWithNullEmail(){
+        roseCouture.setEmail(null);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void inviteOrganizationWithInvalidEmail(String email){
+        roseCouture.setEmail(email);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
     void updateOrganizationWithNullOrganization(){
         assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(null));
     }
