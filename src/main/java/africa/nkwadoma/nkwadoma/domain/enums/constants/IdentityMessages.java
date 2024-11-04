@@ -12,6 +12,7 @@ public enum IdentityMessages{
     ORGANIZATION_IDENTITY_CANNOT_BE_NULL("Organization identity cannot be null"),
     RC_NUMBER_NOT_FOUND("Rc number not found!"),
     ORGANIZATION_NOT_FOUND("Organization not found"),
+    ORGANIZATION_RC_NUMBER_ALREADY_EXIST("Organization with this rcnumber already exists "),
     CLIENT_EXIST("Client already exists"),
     INVALID_REGISTRATION_DETAILS("Invalid registration details"),
     INVALID_VALID_ROLE("Role is required"),

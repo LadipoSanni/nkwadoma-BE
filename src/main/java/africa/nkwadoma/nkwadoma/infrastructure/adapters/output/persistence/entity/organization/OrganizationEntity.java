@@ -24,6 +24,7 @@ public class OrganizationEntity {
     private String registrationNumber;
     private String taxIdentity;
     private String phoneNumber;
+    private String rcNumber;
     private String createdBy;
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")

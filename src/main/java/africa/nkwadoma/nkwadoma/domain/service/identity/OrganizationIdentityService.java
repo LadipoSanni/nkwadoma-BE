@@ -48,6 +48,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(reason);
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         log.info("found organization employees: {}",organizationEmployees);
