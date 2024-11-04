@@ -6,10 +6,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -54,7 +53,7 @@ public class BeanConfiguration {
     @Bean
     public OrganizationIdentityService organizationIdentityService(
             OrganizationIdentityOutputPort organizationIdentityOutputPort,
-            IdentityManagerOutPutPort identityManagerOutPutPort,
+            IdentityManagerOutputPort identityManagerOutPutPort,
             UserIdentityOutputPort userIdentityOutputPort,
             OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
             SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase
@@ -63,7 +62,7 @@ public class BeanConfiguration {
     }
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
-                                                   IdentityManagerOutPutPort identityManagerOutPutPort,
+                                                   IdentityManagerOutputPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenUtils tokenUtils,
                                                    SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,

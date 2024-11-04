@@ -65,11 +65,17 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/forgotPassword")
-    public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        String email = userIdentityRequest.getEmail();
+    public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
         createUserUseCase.forgotPassword(email);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message("Please check your email to create new password. "+email).
+                statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/password/reset")
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
+        createUserUseCase.resetPassword(passwordCreateRequest.getToken(), passwordCreateRequest.getPassword());
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
+                message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/reactivate")

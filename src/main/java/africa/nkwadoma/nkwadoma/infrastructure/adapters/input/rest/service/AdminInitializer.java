@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -24,7 +24,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAG
 public class AdminInitializer {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final IdentityManagerOutPutPort identityManagerOutPutPort;
+    private final IdentityManagerOutputPort identityManagerOutPutPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -77,6 +77,7 @@ public class AdminInitializer {
     private UserIdentity saveUserToKeycloak(UserIdentity userIdentity) throws MeedlException {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
+            log.info("User created successfully on keycloak sending email to user");
             sendEmail.sendColleagueEmail(userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());

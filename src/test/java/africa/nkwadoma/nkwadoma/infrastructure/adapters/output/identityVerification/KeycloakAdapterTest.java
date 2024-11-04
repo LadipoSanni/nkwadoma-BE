@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -38,13 +38,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class KeycloakAdapterTest {
     @Autowired
-    private IdentityManagerOutPutPort identityManagementOutputPort;
+    private IdentityManagerOutputPort identityManagementOutputPort;
     private UserIdentity john;
     private UserIdentity peter;
     private String johnId;
     private OrganizationIdentity organizationIdentity;
     private boolean enabled;
-    private final String password = "This-P@ssw0rd-Is-USed-In-Both-Ch@nge-and-CreatePassword";
+    private final String password = "P@ssw0rd-4-Test";
+    private final String newPassword = "neWpasswordJ@345";
     private OrganizationIdentity rizzGallery;
     private String rizzGalleryId ;
 
@@ -337,18 +338,18 @@ class KeycloakAdapterTest {
 
     @Test
     void changePasswordWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(null));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(null));
     }
     @Test
     void changePasswordWithNullNewPassword() {
         john.setNewPassword(null);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(john));
     }
     @ParameterizedTest
     @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "rniejfkn", "  ADKFDJHFD", "ADKFDJHFD  ", "@ndnue90 -  f"})
     void changePasswordWithInvalidPassword(String password) {
         john.setNewPassword(password);
-        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.changePassword(john));
+        Exception exception = assertThrows(MeedlException.class, () -> identityManagementOutputPort.setPassword(john));
         log.info(exception.getMessage());
     }
 
@@ -362,7 +363,7 @@ class KeycloakAdapterTest {
         try {
             userIdentity = identityManagementOutputPort.verifyUserExists(john);
         } catch (MeedlException e) {
-           log.info("Failed to reset password {}", e.getMessage());
+           log.info("Failed to verifyUser password {}", e.getMessage());
         }
         assertNotNull(userIdentity);
         assertNotNull(userIdentity.getId());
@@ -377,21 +378,46 @@ class KeycloakAdapterTest {
     void verifyUserExistsInvalidEmail() {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.verifyUserExists(null));
     }
+    @Test
+    void resetPasswordWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.resetPassword(null));
+    }
+    @Test
+    void resetPasswordWithNullPassword() {
+        john.setEmail(null);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.resetPassword(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "njdfkjn"})
+    void resetPasswordWithNullEmail(String email) {
+        john.setEmail(email);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.resetPassword(john));
+    }
+    @Test
+    void resetPasswordWithNullNewPassword() {
+        john.setNewPassword(null);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.resetPassword(john));
+    }
+    @ParameterizedTest
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "rniejfkn", "  ADKFDJHFD", "ADKFDJHFD  ", "@ndnue90 -  f"})
+    void resetPasswordWithInvalidPassword(String password) {
+        john.setNewPassword(password);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.resetPassword(john));
+    }
 
     @Test
     @Order(8)
     void changePasswordWithValidPassword() {
-        String newPassword = "neWpasswordJ@345";
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(password);
 
         log.info(john.getEmail());
-        Optional<UserIdentity> existingUser;
+        Optional<UserIdentity> existingUser = Optional.empty();
         try {
             accessTokenResponse = identityManagementOutputPort.login(john);
             existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("{}", e.getMessage());
         }
 
         assertNotNull(accessTokenResponse);
@@ -404,18 +430,18 @@ class KeycloakAdapterTest {
         john.setId(existingUser.get().getId());
         log.info("user id is {}", john.getId());
         try {
-            identityManagementOutputPort.changePassword(john);
+            identityManagementOutputPort.setPassword(john);
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("{}", e.getMessage());
         }
 
         john.setPassword(newPassword);
 
-        AccessTokenResponse newAccessTokenResponse;
+        AccessTokenResponse newAccessTokenResponse = null;
         try {
             newAccessTokenResponse = identityManagementOutputPort.login(john);
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("{}", e.getMessage());
         }
 
         assertNotNull(newAccessTokenResponse);
@@ -462,6 +488,49 @@ class KeycloakAdapterTest {
 
     @Test
     @Order(9)
+    void resetPasswordWithValidPassword() {
+        AccessTokenResponse accessTokenResponse = null;
+        john.setPassword(newPassword);
+
+        log.info(john.getEmail());
+        Optional<UserIdentity> existingUser = Optional.empty();
+        try {
+            accessTokenResponse = identityManagementOutputPort.login(john);
+            existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+
+        assertNotNull(accessTokenResponse);
+        assertNotNull(accessTokenResponse.getToken());
+        assertTrue(existingUser.isPresent());
+        assertNotNull(existingUser.get().getId());
+
+        john.setNewPassword(password);
+        john.setId(existingUser.get().getId());
+        try {
+            identityManagementOutputPort.resetPassword(john);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+
+        john.setPassword(password);
+        AccessTokenResponse newAccessTokenResponse = null;
+        try {
+            newAccessTokenResponse = identityManagementOutputPort.login(john);
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertNotNull(newAccessTokenResponse);
+        assertNotNull(newAccessTokenResponse.getToken());
+
+        john.setPassword(newPassword);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
+
+    }
+
+    @Test
+    @Order(10)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -494,7 +563,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(10)
+    @Order(11)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -508,7 +577,7 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(11)
+    @Order(12)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 

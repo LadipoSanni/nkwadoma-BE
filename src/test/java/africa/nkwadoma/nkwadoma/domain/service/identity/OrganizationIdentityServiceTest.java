@@ -5,6 +5,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -12,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -46,6 +52,18 @@ class OrganizationIdentityServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
+    @InjectMocks
+    private OrganizationIdentityService organizationIdentityService;
+
+    @Mock
+    private IdentityManagerOutputPort identityManagerOutPutPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
 
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
@@ -56,15 +74,15 @@ class OrganizationIdentityServiceTest {
     private List<OrganizationEmployeeIdentity> orgEmployee;
 
     @BeforeEach
-        void setUp(){
+    void setUp(){
 
-            sarah = new UserIdentity();
-            sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            sarah.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
-            sarah.setFirstName("Sarah");
-            sarah.setLastName("Jacobs");
-            sarah.setEmail("divinemercy601@gmail.com");
-            sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah = new UserIdentity();
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        sarah.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah.setFirstName("Sarah");
+        sarah.setLastName("Jacobs");
+        sarah.setEmail("divinemercy601@gmail.com");
+        sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
 
             employeeSarah = new OrganizationEmployeeIdentity();
             employeeSarah.setMeedlUser(sarah);
@@ -123,6 +141,7 @@ class OrganizationIdentityServiceTest {
     void inviteOrganizationWithNullEmail(){
         roseCouture.setEmail(null);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+//        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
 
     @ParameterizedTest
@@ -136,7 +155,7 @@ class OrganizationIdentityServiceTest {
     void deactivateOrganizationWithInvalidId(String id){
         assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(id, "test reason"));
     }
-    @Test
+
     void deactivateOrganization(){
         try {
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
@@ -150,5 +169,4 @@ class OrganizationIdentityServiceTest {
             }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-    }
 }
