@@ -45,7 +45,6 @@ public class CohortPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
-    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
@@ -72,15 +71,15 @@ public class CohortPersistenceAdapterTest {
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ade").email("fred210@example.com").createdBy("8937-b9897g3-bv38").build();
+                lastName("Benson Ayo").email("fred2110@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").
-                name("My Organization21").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com").
+                name("My Organization21 Test").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
 
-        program = Program.builder().name("My program").
+        program = Program.builder().name("My program Test").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
@@ -106,15 +105,8 @@ public class CohortPersistenceAdapterTest {
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         elites.setProgramId(program.getId());
-        elites.setName("Elite");
+        elites.setName("Elite ");
         elites.setCreatedBy(meedleUserId);
-
-        cohort = new Cohort();
-        cohort.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        cohort.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
-        cohort.setProgramId(program.getId());
-        cohort.setName("Elite");
-        cohort.setCreatedBy(meedleUserId);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -187,7 +179,6 @@ public class CohortPersistenceAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
-
 
     @Order(4)
     @Test
