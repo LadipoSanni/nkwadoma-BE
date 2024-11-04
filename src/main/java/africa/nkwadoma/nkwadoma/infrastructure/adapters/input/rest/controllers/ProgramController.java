@@ -73,7 +73,7 @@ public class ProgramController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/search")
     @Operation(summary = "Search a program by name")
     public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name)
             throws MeedlException {
