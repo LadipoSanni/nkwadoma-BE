@@ -10,9 +10,13 @@ on:
 
 jobs:
 
+  check-all-workflows:
+    uses: ./.github/workflows/check_all_workflows.yml
 
   track-build:
+    needs: check-all-workflows
     runs-on: ubuntu-latest
+    if: always()  # Runs regardless of success or failure of the previous job
 
     steps:
       - name: Checkout Code
