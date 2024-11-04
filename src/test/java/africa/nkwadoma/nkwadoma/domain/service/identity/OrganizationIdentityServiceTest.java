@@ -1,8 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
-
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -15,22 +12,15 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -44,10 +34,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
 
-    @Autowired
-    private ViewOrganizationUseCase viewOrganizationUseCase;
-    @Autowired
-    private CreateOrganizationUseCase createOrganizationUseCase;
     @InjectMocks
     private OrganizationIdentityService organizationIdentityService;
 
@@ -62,7 +48,6 @@ class OrganizationIdentityServiceTest {
     @Mock
 
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
-
 
     private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
@@ -124,7 +109,6 @@ class OrganizationIdentityServiceTest {
         }
 
     }
-
     @Test
     void inviteOrganizationWithEmptyOrganization(){
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
@@ -145,17 +129,18 @@ class OrganizationIdentityServiceTest {
         roseCouture.setEmail(email);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
     }
-}
-
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void searchOrganizationWithInvalidName(String name) {
-        assertThrows(MeedlException.class, ()->viewOrganizationUseCase.search(name));
+        assertThrows(MeedlException.class, ()->organizationIdentityService.search(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
     void viewOrganizationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, ()->viewOrganizationUseCase.viewOrganizationDetails(id));
+        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id));
     }
 }
+
+
+
