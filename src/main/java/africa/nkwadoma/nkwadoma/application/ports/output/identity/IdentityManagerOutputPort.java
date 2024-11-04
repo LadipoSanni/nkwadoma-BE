@@ -13,7 +13,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.List;
 import java.util.Optional;
 
-public interface IdentityManagerOutPutPort {
+public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;

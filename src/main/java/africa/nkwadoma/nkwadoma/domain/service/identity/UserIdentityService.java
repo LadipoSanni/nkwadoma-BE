@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -30,7 +30,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*
 @RequiredArgsConstructor
 public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final IdentityManagerOutPutPort identityManagerOutPutPort;
+    private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final TokenUtils tokenUtils;

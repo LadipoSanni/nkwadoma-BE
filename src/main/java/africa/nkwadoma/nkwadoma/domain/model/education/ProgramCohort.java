@@ -13,5 +13,5 @@ public class ProgramCohort {
 
     private String id;
     private Cohort cohort;
-    private String program;
+    private String programId;
 }
