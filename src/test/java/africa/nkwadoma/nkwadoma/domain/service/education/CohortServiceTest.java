@@ -193,11 +193,6 @@ public class CohortServiceTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){
-        try {
-            doThrow(MeedlException.class).when(cohortOutputPort).deleteCohort(cohortId);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()-> cohortService.deleteCohort(cohortId));
     }
     @Test
