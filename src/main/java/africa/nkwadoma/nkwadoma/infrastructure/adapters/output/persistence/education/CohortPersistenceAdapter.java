@@ -72,38 +72,48 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         CohortEntity cohortEntity;
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
-
-            if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
-                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-                CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
-                if (cohortLoanDetail != null){
-                    throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
-                }
-                cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
-                cohortToUpdate.setUpdatedAt(LocalDateTime.now());
-                cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
-                activateStatus(cohortToUpdate);
-                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-                cohortRepository.save(cohortEntity);
-
-            } else {
-                throw new CohortException(COHORT_EXIST.getMessage());
-            }
+            cohortEntity = updateCohort(cohort, cohortToUpdate);
         } else {
-            cohort.setCreatedAt(LocalDateTime.now());
-            activateStatus(cohort);
-            ProgramCohort newProgramCohort = new ProgramCohort();
-            cohortEntity = cohortMapper.toCohortEntity(cohort);
-            cohortRepository.save(cohortEntity);
-            cohort = cohortMapper.toCohort(cohortEntity);
-            program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-
-            newProgramCohort.setCohort(cohort);
-            newProgramCohort.setProgramId(program.getId());
-            log.info("The program id is {}", newProgramCohort.getProgramId());
-            programCohortOutputPort.save(newProgramCohort);
+            cohortEntity = newCohort(cohort, program);
         }
         return cohortMapper.toCohort(cohortEntity);
+    }
+
+    private CohortEntity updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
+        CohortEntity cohortEntity;
+        if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
+            cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+            CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
+            if (cohortLoanDetail != null){
+                throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+            }
+            cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
+            cohortToUpdate.setUpdatedAt(LocalDateTime.now());
+            cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
+            activateStatus(cohortToUpdate);
+            cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+            cohortRepository.save(cohortEntity);
+
+        } else {
+            throw new CohortException(COHORT_EXIST.getMessage());
+        }
+        return cohortEntity;
+    }
+
+    private CohortEntity newCohort(Cohort cohort, Program program) {
+        CohortEntity cohortEntity;
+        cohort.setCreatedAt(LocalDateTime.now());
+        activateStatus(cohort);
+        ProgramCohort newProgramCohort = new ProgramCohort();
+        cohortEntity = cohortMapper.toCohortEntity(cohort);
+        cohortRepository.save(cohortEntity);
+        cohort = cohortMapper.toCohort(cohortEntity);
+        program.setNumberOfCohort(program.getNumberOfCohort() + 1);
+        newProgramCohort.setCohort(cohort);
+        newProgramCohort.setProgramId(program.getId());
+        log.info("The program id is {}", newProgramCohort.getProgramId());
+        programCohortOutputPort.save(newProgramCohort);
+        return cohortEntity;
     }
 
     private static void activateStatus(Cohort cohort) {
