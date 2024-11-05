@@ -31,6 +31,7 @@ public class SecurityConfiguration {
     SecurityFilterChain resourceServerSecurityFilterChain(
             HttpSecurity http,
             Converter<Jwt, AbstractAuthenticationToken> authenticationConverter) throws Exception {
+        http.cors(cors -> corsConfigurationSource());
         http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtDecoder -> jwtDecoder.jwtAuthenticationConverter(authenticationConverter)));
 
         http.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
