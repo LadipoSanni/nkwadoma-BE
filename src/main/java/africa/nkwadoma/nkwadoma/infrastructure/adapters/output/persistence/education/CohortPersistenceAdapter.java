@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
@@ -132,6 +134,22 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .filter(eachCohort -> eachCohort.getCohort().getId().equals(cohortId))
                 .findFirst()
                 .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
+    }
+    private void saveLoanBreakdown(Cohort cohortRequest, Cohort savedCohort) {
+        List<LoanBreakdown> loanBreakdowns = cohortRequest.getLoanBreakdowns().stream()
+                .map(loanBreakdownObject -> LoanBreakdown.builder()
+                        .itemName(loanBreakdownObject.getItemName())
+                        .itemAmount(loanBreakdownObject.getItemAmount())
+                        .currency(loanBreakdownObject.getCurrency())
+                        .cohort(savedCohort)
+                        .build()
+                )
+                .collect(Collectors.toList());
+        loanBreakdownManager.saveAll(loanBreakdowns);
+
+        calculateTotalLoanBreakdownAmount(cohortRequest);
+        savedCohort.setTuition(cohortRequest.getTuitionAmount());
+        cohortRepository.save(savedCohort);
     }
 
 }

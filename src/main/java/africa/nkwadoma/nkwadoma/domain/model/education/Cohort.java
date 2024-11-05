@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,6 +35,7 @@ public class Cohort {
     private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);
