@@ -83,8 +83,11 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                         @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .reactivationReason(accountActivationRequest.getReason())
+                .id(accountActivationRequest.getId())
+                .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.reactivateUserAccount(userIdentity);
@@ -94,8 +97,11 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/user/deactivate")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .deactivationReason(accountActivationRequest.getReason())
+                .id(accountActivationRequest.getId())
+                .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);

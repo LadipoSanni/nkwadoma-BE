@@ -65,7 +65,6 @@ public class CohortServiceTest {
 
     @Test
     void saveCohort() {
-
         try {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);

@@ -12,4 +12,5 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     void deleteByMeedlUserId(String id);
     Optional<OrganizationEmployeeEntity> findByMeedlUser_CreatedBy(String createdBy);
 
+    List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 }

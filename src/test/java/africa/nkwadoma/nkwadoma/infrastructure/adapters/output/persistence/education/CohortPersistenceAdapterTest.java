@@ -51,6 +51,8 @@ public class CohortPersistenceAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
+    private IdentityManagerOutputPort identityManagementOutputPort;
+    @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
@@ -60,24 +62,24 @@ public class CohortPersistenceAdapterTest {
     private CreateOrganizationUseCase organizationUseCase;
     @Autowired
     private ProgramCohortOutputPort programCohortOutputPort;
-    @Autowired
-    private IdentityManagerOutputPort identityManagementOutputPort;
     private Program program;
-    private String cohortOneId;
     private String programId;
+    private String cohortOneId;
     private String cohortTwoId;
     private String organizationId;
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("fred2110@example.com").createdBy("8937-b9897g3-bv38").build();
+        UserIdentity userIdentity = UserIdentity.builder()
+                .firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+                lastName("Benson Ayo").email("fred2110@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com").
-                name("My Organization21 Test").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com")
+                .name("My Organization21 Test").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
-                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
+                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
+                .build();
 
         program = Program.builder().name("My program Test").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
@@ -86,6 +88,7 @@ public class CohortPersistenceAdapterTest {
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
             organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+            log.info("Organization identity saved before program {}",organizationIdentity);
             organizationId = organizationIdentity.getId();
             meedleUserId = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
@@ -94,6 +97,7 @@ public class CohortPersistenceAdapterTest {
             programId = program.getId();
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -185,12 +189,13 @@ public class CohortPersistenceAdapterTest {
     void viewCohortDetails(){
         Cohort viewedCohort = new Cohort() ;
         try{
+            log.info("{} {} {}", meedleUserId,programId, cohortTwoId );
             viewedCohort = cohortOutputPort.viewCohortDetails(meedleUserId, programId, cohortTwoId);
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(viewedCohort.getName(),xplorers.getName());
-        assertEquals(viewedCohort.getCreatedBy(),xplorers.getCreatedBy());
+        assertEquals(xplorers.getName(), viewedCohort.getName());
+        assertEquals(xplorers.getCreatedBy(), viewedCohort.getCreatedBy());
     }
 
     @Order(5)
@@ -263,7 +268,7 @@ void deleteCohort(){
     @Order(7)
     @Test
     void cleanUp() throws MeedlException {
-//        log.info("{} {} {} {} ",meedleUserId, programId, cohortTwoId, organizationId);
+        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
         programOutputPort.deleteProgram(programId);
