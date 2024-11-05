@@ -1,15 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -17,7 +12,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -44,37 +38,24 @@ class OrganizationIdentityServiceTest {
     private OrganizationIdentityService organizationIdentityService;
 
     @Mock
-    private IdentityManagerOutPutPort identityManagerOutPutPort;
-    @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
-    @InjectMocks
-    private OrganizationIdentityService organizationIdentityService;
-
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
-    private UserIdentityOutputPort userIdentityOutputPort;
-    @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Mock
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
-
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
 
     private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
-    private OrganizationEmployeeIdentity employeeSarah ;
+    private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
 
         sarah = new UserIdentity();
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
@@ -84,28 +65,28 @@ class OrganizationIdentityServiceTest {
         sarah.setEmail("divinemercy601@gmail.com");
         sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
 
-            employeeSarah = new OrganizationEmployeeIdentity();
-            employeeSarah.setMeedlUser(sarah);
-            OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
-            employeeIdentity.setMeedlUser(sarah);
+        employeeSarah = new OrganizationEmployeeIdentity();
+        employeeSarah.setMeedlUser(sarah);
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setMeedlUser(sarah);
 
-            orgEmployee = new ArrayList<>();
-            orgEmployee.add(employeeSarah);
+        orgEmployee = new ArrayList<>();
+        orgEmployee.add(employeeSarah);
 
 
-            roseCouture = new OrganizationIdentity();
-            roseCouture.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
-            roseCouture.setName("rose couture6");
-            roseCouture.setEmail("iamoluchimercy@gmail.com");
-            roseCouture.setTin("7682-5627");
-            roseCouture.setRcNumber("RC87899");
-            roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
-            roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
-            roseCouture.setPhoneNumber("09876365713");
-            roseCouture.setInvitedDate(LocalDateTime.now().toString());
-            roseCouture.setWebsiteAddress("rosecouture.org");
-            roseCouture.setOrganizationEmployees(orgEmployee);
-            roseCouture.setEnabled(Boolean.TRUE);
+        roseCouture = new OrganizationIdentity();
+        roseCouture.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        roseCouture.setName("rose couture6");
+        roseCouture.setEmail("iamoluchimercy@gmail.com");
+        roseCouture.setTin("7682-5627");
+        roseCouture.setRcNumber("RC87899");
+        roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
+        roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        roseCouture.setPhoneNumber("09876365713");
+        roseCouture.setInvitedDate(LocalDateTime.now().toString());
+        roseCouture.setWebsiteAddress("rosecouture.org");
+        roseCouture.setOrganizationEmployees(orgEmployee);
+        roseCouture.setEnabled(Boolean.TRUE);
 
     }
 
@@ -130,15 +111,17 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void inviteOrganizationWithEmptyOrganization(){
+    void inviteOrganizationWithEmptyOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
+
     @Test
-    void inviteOrganizationWithNullOrganization(){
+    void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
+
     @Test
-    void inviteOrganizationWithNullEmail(){
+    void inviteOrganizationWithNullEmail() {
         roseCouture.setEmail(null);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
 //        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
@@ -146,17 +129,18 @@ class OrganizationIdentityServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
-    void inviteOrganizationWithInvalidEmail(String email){
+    void inviteOrganizationWithInvalidEmail(String email) {
         roseCouture.setEmail(email);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
     }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
-    void deactivateOrganizationWithInvalidId(String id){
+    void deactivateOrganizationWithInvalidId(String id) {
         assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(id, "test reason"));
     }
 
-    void deactivateOrganization(){
+    void deactivateOrganization() {
         try {
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
@@ -166,7 +150,8 @@ class OrganizationIdentityServiceTest {
             roseCouture.setEnabled(Boolean.FALSE);
             OrganizationIdentity deactivatedOrganization = organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
-            }catch (MeedlException exception) {
+        } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+    }
 }

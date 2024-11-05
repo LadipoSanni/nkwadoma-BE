@@ -50,6 +50,7 @@ public class CohortPersistenceAdapterTest {
     private String meedleUserId;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
     private IdentityManagerOutputPort identityManagementOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
@@ -71,7 +72,7 @@ public class CohortPersistenceAdapterTest {
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
                 .firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("fred2110@example.com").createdBy("8937-b9897g3-bv38").build();
+                lastName("Benson Ayo").email("fred2110@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("org1@example.com")
@@ -87,6 +88,7 @@ public class CohortPersistenceAdapterTest {
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
             organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+            log.info("Organization identity saved before program {}",organizationIdentity);
             organizationId = organizationIdentity.getId();
             meedleUserId = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
             program.setOrganizationId(organizationIdentity.getId());
@@ -95,6 +97,7 @@ public class CohortPersistenceAdapterTest {
             programId = program.getId();
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -265,7 +268,7 @@ void deleteCohort(){
     @Order(7)
     @Test
     void cleanUp() throws MeedlException {
-//        log.info("{} {} {} {} ",meedleUserId, programId, cohortTwoId, organizationId);
+        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
         programOutputPort.deleteProgram(programId);

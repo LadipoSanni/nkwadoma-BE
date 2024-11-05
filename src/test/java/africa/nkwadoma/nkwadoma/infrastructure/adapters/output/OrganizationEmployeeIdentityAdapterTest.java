@@ -1,12 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import lombok.extern.slf4j.Slf4j;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -20,13 +13,9 @@ import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.*;
 import java.util.*;
-import java.math.BigInteger;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,47 +30,12 @@ class OrganizationEmployeeIdentityAdapterTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
-    private UserIdentity jack;
-    private UserIdentity angela;
-    private OrganizationEmployeeIdentity employeeJack;
-    private OrganizationEmployeeIdentity employeeAngela;
-    private String employeeJackId;
-    private String employeeAngelaId;
     private OrganizationIdentity amazingGrace;
-    private UserIdentity joel;
+    private  UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
     private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
-
-    @BeforeEach
-    void setUp() {
-
-        jack = new UserIdentity();
-        jack.setFirstName("Jack");
-        jack.setLastName("Smith");
-        jack.setEmail("jack@example.com");
-        jack.setId(jack.getEmail());
-        jack.setPhoneNumber("0987654321");
-        jack.setEmailVerified(true);
-        jack.setEnabled(true);
-        jack.setCreatedAt(null);
-        jack.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        jack.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
-
-        angela = new UserIdentity();
-        angela.setFirstName("Angela");
-        angela.setLastName("Johnson");
-        angela.setEmail("angela@example.com");
-        angela.setId(angela.getEmail());
-        angela.setPhoneNumber("09876543210");
-        angela.setEmailVerified(true);
-        angela.setEnabled(true);
-        angela.setCreatedAt(null);
-        angela.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        angela.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
-
-    }
 
     @BeforeAll
     void init() {
@@ -117,81 +71,41 @@ class OrganizationEmployeeIdentityAdapterTest {
 
             UserIdentity userIdentity = userIdentityOutputPort.save(joel);
             assertNotNull(userIdentity);
-            jack = userIdentityOutputPort.save(jack);
-            angela = userIdentityOutputPort.save(angela);
         } catch (MeedlException e) {
-            log.error("Error saving user identity {}", e.getMessage());
+            log.error("Error saving organization", e);
         }
-
-        employeeJack = OrganizationEmployeeIdentity.builder()
-                .meedlUser(jack)
-                .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
-                .build();
-        employeeAngela = OrganizationEmployeeIdentity.builder()
-                .meedlUser(angela)
-                .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
-                .build();
-
     }
 
-        @Test
-        void findAllOrganizationEmployees() {
-            try {
-                OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
-                UserIdentity userIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
-
-                organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-                organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
-                organizationEmployeeIdentity.setMeedlUser(userIdentity);
-                OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
-                        save(organizationEmployeeIdentity);
-                assertNotNull(savedEmployeeIdentity);
-
-                Page<OrganizationEmployeeIdentity> organizationEmployees =
-                        organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
-                                pageNumber, pageSize);
-
-                assertNotNull(organizationEmployees);
-            } catch (MeedlException e) {
-                log.error("Error saving organization to the DB", e);
-            }
-
-        }
-
     @Test
-    @Order(1)
-    void save() {
-        OrganizationEmployeeIdentity jackSavedEmployee = organizationEmployeeIdentityOutputPort.save(employeeJack);
-        employeeJackId = jackSavedEmployee.getId();
-        OrganizationEmployeeIdentity angelaSavedEmployee = organizationEmployeeIdentityOutputPort.save(employeeAngela);
-        employeeAngelaId = angelaSavedEmployee.getId();
-        assertEquals(jackSavedEmployee.getMeedlUser().getEmail(), employeeJack.getMeedlUser().getEmail());
-    }
-    @Test
-    @Order(2)
-    void findAllByOrganization() {
-        List<OrganizationEmployeeIdentity> organizationEmployees = null;
+    void findAllOrganizationEmployees() {
         try {
-            organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(employeeAngela.getOrganization());
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            UserIdentity userIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
+
+            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+            organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
+            organizationEmployeeIdentity.setMeedlUser(userIdentity);
+            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+                    save(organizationEmployeeIdentity);
+            assertNotNull(savedEmployeeIdentity);
+
+            Page<OrganizationEmployeeIdentity> organizationEmployees =
+                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
+                            pageNumber, pageSize);
+
+            assertNotNull(organizationEmployees);
         } catch (MeedlException e) {
-            log.error("Could not find organization employee {}", e.getMessage());
+            log.error("Error saving organization to the DB", e);
         }
-        assertNotNull(organizationEmployees);
-        assertFalse(organizationEmployees.isEmpty());
-        assertTrue(organizationEmployees.size() > BigInteger.ONE.intValue());
+
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewAllOrganizationEmployeesWithNullId(String id) {
-        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(id, pageNumber, pageSize));
+        assertThrows(MeedlException.class, ()->organizationEmployeeIdentityOutputPort.
+                findAllOrganizationEmployees(id, pageNumber, pageSize));
     }
-
-    @Test
-    void findAllByInvalidOrganizationUuid(){
-        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.findAllByOrganization("invalid uuid "));
-    }
-
 
     @ParameterizedTest
     @ValueSource(strings = {"03945988", "non-uuid"})
@@ -213,15 +127,19 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
                 findAllOrganizationEmployees(id, pageNumber, pageSize));
     }
+
     @ParameterizedTest
     @ValueSource(ints = {0})
     void viewAllOrganizationEmployeesWithInvalidPageSize(int pageSize) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        try {
             organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+        } catch (MeedlException e) {
             log.error("Error finding organization", e);
         }
         String id = organizationIdentity.getId();
-        assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(id, pageNumber, pageSize));
+        assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
+                findAllOrganizationEmployees(id, pageNumber, pageSize));
     }
 
 
@@ -231,24 +149,28 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.
                 findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
     }
-@Test
-@Order(3)
-void delete() {
-    try {
-        organizationEmployeeIdentityOutputPort.delete(employeeJackId);
-        userIdentityOutputPort.deleteUserByEmail(jack.getEmail());
 
-        organizationEmployeeIdentityOutputPort.delete(employeeAngelaId);
-        userIdentityOutputPort.deleteUserByEmail(angela.getEmail());
+    @AfterAll
+    void tearDown() {
+        try {
+            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByCreatedBy(joel.getCreatedBy());
+            organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
+            userIdentityOutputPort.deleteUserByEmail(joel.getEmail());
 
-        assertNull(organizationEmployeeIdentityOutputPort.findByEmployeeId(employeeAngelaId));
-        assertNull(organizationEmployeeIdentityOutputPort.findByEmployeeId(employeeJackId));
+            OrganizationIdentity organization = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
 
-        assertNull(userIdentityOutputPort.findByEmail(jack.getEmail()));
-        userIdentityOutputPort.deleteUserByEmail(angela.getEmail());
-        assertNull(userIdentityOutputPort.findByEmail(angela.getEmail()));
-    } catch (MeedlException e) {
-        log.error("Error deleting user identity {}", e.getMessage());
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(organization.getId());
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
+
+            organizationIdentityOutputPort.delete(organization.getId());
+        } catch (MeedlException e) {
+            log.error("Error occurred cleaning up", e);
+        }
     }
-}
 }
