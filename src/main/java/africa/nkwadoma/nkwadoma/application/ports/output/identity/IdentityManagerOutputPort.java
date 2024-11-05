@@ -14,7 +14,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.List;
 import java.util.Optional;
 
-public interface IdentityManagerOutPutPort {
+public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
@@ -25,7 +25,10 @@ public interface IdentityManagerOutPutPort {
     UserIdentity createPassword(String email, String password) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
-    void changePassword(UserIdentity userIdentity)throws MeedlException;
+
+    void resetPassword(UserIdentity userIdentity) throws MeedlException;
+
+    void setPassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 

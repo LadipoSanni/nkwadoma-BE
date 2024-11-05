@@ -3,63 +3,54 @@ name: Deploy to Dev Environment
 on:
   push:
     branches:
-      [ 'dev', 'main', 'prod-support']
-  pull_request:
-    branches:
-      [ 'dev', 'main', 'prod-support']
+      - dev
+      - main
+      - prod-support
+
 
 env:
-  EMAILS: 'ladipo@semicolon.africa,joshua.o@semicolon.africa'
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/nkwadoma
-  ECR_REPOSITORY: nkwadoma
-  ECR_REPOSITORY_SYSTEST: learnspace-backend-systest
-  AWS_REGION: eu-west-1
-  CLUSTER: learnspace.africa
-  SERVICE: learnspace-backend-systest
-  SYSTEST_SERVICE: learnspace-backend-systest
+  ECR_REPO: learnspace-backend-systest
+  CLUSTER: nkwadoma
+  ECS: learnspace-backend-systest
+  EMAILS: "joshua.o@semicolon.africa, ladipo@semicolon.africa, prince@semicolon.africa, t.lemon@semicolon.africa, divinemercy601@gmail.com, qudusa55@gmail.com, o.koleaje@semicolon.africa, ned@semicolon.africa, tade@semicolon.africa, moyinoluwa@semicolon.africa, mariam@semicolon.africa, i.james@semicolon.africa, david@semicolon.africa, abigail@semicolon.africa, precious@semicolon.africa, dapo@semicolon.africa, pauline@semicolon.africa, davidoso@semicolon.africa, henry@semicolon.africa"
   SONARQUBE_URL_SET: false
   MAVEN_REPORT_URL_SET: false
   AUTOMATION_TEST_URL_SET: false
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_REGION: eu-west-1
 
 jobs:
-
-  build_and_analyze:
-    name: Build and Analyze
+  sonarcloud:
+    name: SonarCloud
     runs-on: ubuntu-latest
-    outputs:
-      sonarqube_url_set: ${{ steps.get_sonarqube_url.outputs.sonarqube_url_set }}
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - name: Run build and analyze script
-        run: |
-          chmod +x .github/workflows/scripts/build_and_analyze.sh
-          .github/workflows/scripts/build_and_analyze.sh
+      - name: Build and SonarCloud Scan
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Get SonarQube URL
-        id: get_sonarqube_url
-        if: always()
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_CLOUD }}
         run: |
-          echo "sonarqube_url_set=true" >> $GITHUB_OUTPUT
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=semicolon-delivery_enumverse \
+          -Dsonar.organization=semicolon-delivery \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN_CLOUD }}
+
+  
 
   deploy:
     name: Deploy to Dev
-    # needs: build_and_analyze
     runs-on: ubuntu-latest
     outputs:
       maven_report_url_set: ${{ steps.get_maven_report_url.outputs.maven_report_url_set }}
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -77,6 +68,29 @@ jobs:
           PROJECT_NAME: nkwadoma/learnspace-backend-systest/maven-reports
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+          KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
+          KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
+          PROFILE: dev
+          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
+          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
+          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
+          CREATED_BY: ${{ secrets.CREATED_BY }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+  
 
       - name: Get Maven Report URL
         id: get_maven_report_url
@@ -84,70 +98,62 @@ jobs:
         run: |
           echo "maven_report_url_set=true" >> $GITHUB_OUTPUT
 
-  run_tests:
-    name: Run Automation Tests
-    needs: deploy
-    runs-on: ubuntu-latest
-    outputs:
-      automation_test_url_set: ${{ steps.get_automation_test_url.outputs.automation_test_url_set }}
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run tests script
-        run: |
-          chmod +x .github/workflows/scripts/run_tests.sh
-          .github/workflows/scripts/run_tests.sh "${{ secrets.REPO_PAT }}"
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Get Automation Test URL
-        id: get_automation_test_url
-        if: always()
-        run: |
-          echo "automation_test_url_set=true" >> $GITHUB_OUTPUT
+ 
 
   send_notification:
     name: Send Email Notification
-    #needs: [build_and_analyze, deploy, run_tests]
-    needs: [ deploy, run_tests]
-    runs-on: ubuntu-latest
+    needs: [build_and_analyze, deploy, run_tests]
     if: always()
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set environment variables
         run: |
           echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+             BRANCH_NAME=$(echo "${GITHUB_HEAD_REF}")
+          else
+             BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          fi
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GITHUB_ENV
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\\/\\\\}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\"/\\\"}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\(/\\(}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\)/\\)}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//#/\\#}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\n'/\\n}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\r'/}"
+          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "This is the Commit Message: $COMMIT_MESSAGE"
           echo "SONARQUBE_URL_SET=${{ needs.build_and_analyze.outputs.sonarqube_url_set }}" >> $GITHUB_ENV
           echo "MAVEN_REPORT_URL_SET=${{ needs.deploy.outputs.maven_report_url_set }}" >> $GITHUB_ENV
           echo "AUTOMATION_TEST_URL_SET=${{ needs.run_tests.outputs.automation_test_url_set }}" >> $GITHUB_ENV
 
+      - name: Debug - Print environment variables
+        run: |
+          echo "TAG: ${{ env.TAG }}"
+          echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
+          echo "COMMIT_AUTHOR: ${{ env.COMMIT_AUTHOR }}"
+          echo "COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}"
+
       - name: Send build success email notification
-        if: success()
+        if: >
+          success() &&
+          needs.build_and_analyze.result == 'success' &&
+          needs.deploy.result == 'success' &&
+          needs.run_tests.result == 'success'
         env:
           SMTP_SERVER: semicolon.africa
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          SONARQUBE_URL:  ${{ secrets.SONAR_HOST_URL }}
-          MAVEN_REPORT_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/nkwadoma/learnspace-backend-systest/maven-reports/new-reports/index.html
-          AUTOMATION_TEST_URL: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/nkwadoma/learnspace-backend-systest/automation-tests-result/report-pytest-results.html
         run: |
-          echo "Sending success email with the following details:"
-          echo "SonarQube URL Set: $SONARQUBE_URL_SET"
-          echo "SonarQube URL: $SONARQUBE_URL"
-          echo "Maven Report URL Set: $MAVEN_REPORT_URL_SET"
-          echo "Maven Report URL: $MAVEN_REPORT_URL"
-          echo "Automation Test URL Set: $AUTOMATION_TEST_URL_SET"
-          echo "Automation Test URL: $AUTOMATION_TEST_URL"
           chmod +x .github/workflows/scripts/send_success_email.sh
           .github/workflows/scripts/send_success_email.sh \
-            "$SONARQUBE_URL" \
-            "$AUTOMATION_TEST_URL" \
-            "$MAVEN_REPORT_URL" \
             "$SMTP_SERVER" \
             "$SMTP_PORT" \
             "$SMTP_USERNAME" \
@@ -158,20 +164,21 @@ jobs:
             "${{ env.COMMIT_AUTHOR }}" \
             "$SONARQUBE_URL_SET" \
             "$MAVEN_REPORT_URL_SET" \
-            "$AUTOMATION_TEST_URL_SET"
+            "$AUTOMATION_TEST_URL_SET" \
+            "${{ env.COMMIT_MESSAGE }}"
 
       - name: Send build failure email notification
-        if: failure()
+        if: >
+          failure() ||
+          needs.build_and_analyze.result == 'failure' ||
+          needs.deploy.result == 'failure' ||
+          needs.run_tests.result == 'failure'
         env:
           SMTP_SERVER: semicolon.africa
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
-          echo "Sending failure email with the following details:"
-          echo "SonarQube URL Set: $SONARQUBE_URL_SET"
-          echo "Maven Report URL Set: $MAVEN_REPORT_URL_SET"
-          echo "Automation Test URL Set: $AUTOMATION_TEST_URL_SET"
           chmod +x .github/workflows/scripts/send_failure_email.sh
           .github/workflows/scripts/send_failure_email.sh \
             "$SMTP_SERVER" \
@@ -184,4 +191,5 @@ jobs:
             "${{ env.COMMIT_AUTHOR }}" \
             "$SONARQUBE_URL_SET" \
             "$MAVEN_REPORT_URL_SET" \
-            "$AUTOMATION_TEST_URL_SET"
+            "$AUTOMATION_TEST_URL_SET" \
+            "${{ env.COMMIT_MESSAGE }}"

@@ -51,10 +51,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public void deleteUserById(String id) throws MeedlException {
-        if (StringUtils.isEmpty(id)){
-            throw new IdentityException(EMPTY_INPUT_FIELD_ERROR.getMessage());
-        }
-
+        MeedlValidator.validateUUID(id);
+        log.info("Deleting user {}", id);
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeIdentityOutputPort.deleteEmployee(id);
         userEntityRepository.delete(userEntity);
