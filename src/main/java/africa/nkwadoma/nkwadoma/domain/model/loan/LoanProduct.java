@@ -53,6 +53,7 @@ public class LoanProduct {
     private String fundProductId;
     private int totalNumberOfLoanees;
     private int totalNumberOfLoanProduct;
+    private List<Vendor> vendors;
 
     private int pageSize;
     private int pageNumber;

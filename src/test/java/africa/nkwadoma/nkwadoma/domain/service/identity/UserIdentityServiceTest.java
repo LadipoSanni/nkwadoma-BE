@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -37,7 +37,7 @@ class UserIdentityServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
-    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private SendColleagueEmailUseCase sendColleagueEmailUseCase;
     @Mock
@@ -73,7 +73,7 @@ class UserIdentityServiceTest {
         try {
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenThrow(MeedlException.class);
             assertThrows(MeedlException.class, () -> userIdentityOutputPort.findByEmail(favour.getEmail()));
-            favour.setCreatedBy("mock id for created by");
+            favour.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
             favour.setPassword(null);
 
             when(organizationEmployeeIdentityOutputPort.findByEmployeeId(favour.getCreatedBy())).thenReturn(employeeIdentity);
@@ -107,7 +107,7 @@ class UserIdentityServiceTest {
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
-        favour.setCreatedBy("notexisting");
+        favour.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
         assertThrows(MeedlException.class,()-> userIdentityService.inviteColleague(favour));
     }
 
@@ -163,7 +163,38 @@ class UserIdentityServiceTest {
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
+    }
 
+    @Test
+    void login(){
+        try {
+            userIdentityService.login(favour);
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
+        }
+    }
+
+    @Test
+    void loginWithInvalidPassword(){
+        favour.setPassword("Invalid@456");
+        try {
+            doThrow(MeedlException.class).when(identityManagerOutPutPort).login(favour);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+        assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
+    }
+
+    @Test
+    void loginWithNullPassword(){
+        favour.setPassword(null);
+        assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
+    }
+
+    @Test
+    void loginWithEmptyPassword(){
+        favour.setPassword(StringUtils.EMPTY);
+        assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
     }
 
     @Test
@@ -267,38 +298,6 @@ class UserIdentityServiceTest {
     }
 
     @Test
-    void login(){
-        try {
-//            assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
-            userIdentityService.login(favour);
-        }catch (MeedlException meedlException){
-            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
-        }
-    }
-
-    @Test
-    void loginWithInvalidPassword(){
-       favour.setPassword("Invalid@456");
-        try {
-            doThrow(MeedlException.class).when(identityManagerOutPutPort).login(favour);
-        } catch (MeedlException e) {
-            log.error(e.getMessage());
-        }
-        assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
-    }
-
-    @Test
-    void loginWithNullPassword(){
-       favour.setPassword(null);
-       assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
-    }
-
-    @Test
-    void loginWithEmptyPassword(){
-       favour.setPassword(StringUtils.EMPTY);
-       assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
-    }
-    @Test
     void changePassword() {
         try {
             userIdentityService.login(favour);
@@ -314,6 +313,10 @@ class UserIdentityServiceTest {
         } catch (MeedlException meedlException) {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
+    }
+    @Test
+    void changePasswordWithNull() {
+        assertThrows(MeedlException.class, ()-> userIdentityService.changePassword(null));
     }
 
     @Test
@@ -338,32 +341,33 @@ class UserIdentityServiceTest {
             log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
         }
     }
+    @Test
+    void resetPassword(){
+        try {
+            assertNotNull(generatedToken);
+            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            doNothing().when(identityManagerOutPutPort).resetPassword(any());
+            favour.setEnabled(Boolean.TRUE);
+            favour.setEmailVerified(Boolean.TRUE);
+            when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
+            userIdentityService.resetPassword(generatedToken,"Passkey90@");
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
+    }
 
     @Test
-    void resetPassword() {
+    void resetPasswordWithInvalidPassword() {
+        assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", "Pasord"));
+    }
+    @Test
+    void resetPasswordForNoneExistingUser() {
         try {
-            AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
-            accessTokenResponse.setToken("token");
-        when(identityManagerOutPutPort.login(favour)).thenReturn(accessTokenResponse);
-        when(identityManagerOutPutPort.getUserByEmail(any())).thenReturn(Optional.of(favour));
-
-        when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenAnswer(invocation->{
-            favour.setEmailVerified(true);
-            favour.setEnabled(true);
-            return favour;
-        });
-        doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(any());
-
-            AccessTokenResponse loginResponse = userIdentityService.login(favour);
-            assertNotNull(loginResponse);
-            favour.setPassword("pAssworDR3S@t");
-
-            userIdentityService.forgotPassword(favour.getEmail());
-//            when(tokenUtils.decodeJWT(accessTokenResponse.getToken())).thenReturn(favour.getEmail());
-
-        } catch (MeedlException meedlException) {
-            log.info("Exception occurred: {} {}", meedlException.getClass().getName(), meedlException.getMessage());
+            doThrow(MeedlException.class).when(userIdentityOutputPort).findByEmail(any());
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
         }
+        assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", "Pasord*HFNure9"));
     }
 
     @ParameterizedTest

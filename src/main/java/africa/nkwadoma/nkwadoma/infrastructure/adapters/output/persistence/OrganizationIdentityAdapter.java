@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
@@ -32,21 +33,31 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("Organization identity before saving {}", organizationIdentity);
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-
+        Optional<OrganizationEntity> foundOrganizationEntity = findByRcNumber(organizationIdentity.getRcNumber());
+        if (foundOrganizationEntity.isPresent()) {
+            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
+        }
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity.setInvitedDate(LocalDateTime.now());
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
         saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
+        log.info("Organization entity saved successfully {}", organizationEntity);
+//        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
 
         organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
+    }
+
+    private Optional<OrganizationEntity> findByRcNumber(String rcNumber) {
+        return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 
     private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {

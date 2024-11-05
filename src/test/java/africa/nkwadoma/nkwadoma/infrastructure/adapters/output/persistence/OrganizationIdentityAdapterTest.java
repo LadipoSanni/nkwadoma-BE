@@ -29,9 +29,11 @@ class OrganizationIdentityAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
     private OrganizationIdentity amazingGrace;
+    private String amazingGraceId;
     private  UserIdentity joel;
     @BeforeEach
         void setUp(){
+        String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
         joel = new UserIdentity();
         joel.setFirstName("Joel");
         joel.setLastName("Jacobs");
@@ -42,8 +44,12 @@ class OrganizationIdentityAdapterTest {
         joel.setEnabled(true);
         joel.setCreatedAt(LocalDateTime.now().toString());
         joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        joel.setCreatedBy("Ayo");
+        joel.setCreatedBy(testId);
 
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+        organizationEmployeeIdentity.setMeedlUser(joel);
+
+        List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
         OrganizationEmployeeIdentity employeeJoel = new OrganizationEmployeeIdentity();
         employeeJoel.setMeedlUser(joel);
 
@@ -52,20 +58,23 @@ class OrganizationIdentityAdapterTest {
         amazingGrace.setEmail("rachel@gmail.com");
         amazingGrace.setInvitedDate(LocalDateTime.now().toString());
         amazingGrace.setRcNumber("RC345677");
-        amazingGrace.setId("ead0f7cb-5483-4bb8-b271-813970a9c368");
+        amazingGrace.setId(testId);
         amazingGrace.setPhoneNumber("0907658483");
         amazingGrace.setTin("Tin5678");
         amazingGrace.setServiceOfferings(List.of(new ServiceOffering()));
         amazingGrace.getServiceOfferings().get(0).setIndustry(Industry.BANKING);
         amazingGrace.setWebsiteAddress("webaddress.org");
+        amazingGrace.setOrganizationEmployees(userIdentities);
         amazingGrace.setOrganizationEmployees(List.of(employeeJoel));
         }
 
     @Test
     void saveOrganization(){
             try{
-                assertThrows(ResourceNotFoundException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
+                assertThrows(MeedlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
+                log.info("Organization saved id is : {}", savedOrganization.getId());
+                amazingGraceId = savedOrganization.getId();
                 assertNotNull(savedOrganization);
                 assertEquals(amazingGrace.getName(),savedOrganization.getName());
                 assertNotNull(savedOrganization.getServiceOfferings());
@@ -77,18 +86,17 @@ class OrganizationIdentityAdapterTest {
 
        }
 
-
    @Test
-    void saveOrganizationWithExistingRcNumber(){
-        try{
-            OrganizationIdentity foundOrganization = organizationOutputPort.findById(amazingGrace.getId());
-            assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
-            OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
-            assertEquals(amazingGrace.getId(),savedOrganization.getId());
-        }catch (MeedlException exception){
-            log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
-        }
-    }
+    void saveOrganizationWithExistingRcNumber() {
+       try {
+           OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(amazingGrace.getEmail());
+           log.info("Save organization with existing rc. id is {} ", foundOrganization);
+           assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
+           assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
+       } catch (MeedlException exception) {
+           log.info("{} {}->", exception.getClass().getName(), exception.getMessage());
+       }
+   }
 
     @Test
     void saveOrganizationWithNullOrganizationIdentity(){

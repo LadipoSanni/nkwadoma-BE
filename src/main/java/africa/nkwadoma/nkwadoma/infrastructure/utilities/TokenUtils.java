@@ -43,6 +43,9 @@ public class TokenUtils {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+        if (expiration == null || claims.getExpiration().before(new Date())) {
+            throw new MeedlException("Token has expired");
+        }
         return claims.getSubject();
     }
 }
