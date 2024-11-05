@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.context.annotation.*;
 import org.springframework.core.convert.converter.*;
-import org.springframework.http.*;
 import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.method.configuration.*;
 import org.springframework.security.config.annotation.web.builders.*;
@@ -49,7 +48,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
         configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(Boolean.TRUE);
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
