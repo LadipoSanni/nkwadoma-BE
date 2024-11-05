@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,6 +29,8 @@ public class CohortEntity {
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private BigDecimal tuitionAmount = BigDecimal.ZERO;
+    private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private String createdBy;
     private String updatedBy;
     private String imageUrl;

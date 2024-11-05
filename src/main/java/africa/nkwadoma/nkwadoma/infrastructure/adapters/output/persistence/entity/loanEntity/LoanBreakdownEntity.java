@@ -1,24 +1,26 @@
-package africa.nkwadoma.nkwadoma.domain.model.education;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
 @ToString
-public class LoanBreakdown {
+public class LoanBreakdownEntity {
+    @Id
+    @UuidGenerator
     private String loanBreakdownId;
     private String itemName;
     private BigDecimal itemAmount = BigDecimal.ZERO;
     private String currency;
-
-    private Cohort cohort;
+    @ManyToOne
+    private CohortEntity cohort;
 }
