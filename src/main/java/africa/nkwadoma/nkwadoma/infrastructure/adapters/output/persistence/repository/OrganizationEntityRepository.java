@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface OrganizationEntityRepository extends JpaRepository<OrganizationEntity,String> {
     Optional<OrganizationEntity> findByEmail(String email);
+
+    Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 }

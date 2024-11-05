@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +37,10 @@ public class IdentityManagerController {
         );
     }
     @PostMapping("auth/logout")
-    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
+        String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
+        userIdentity.setAccessToken(accessToken);
         createUserUseCase.logout(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
@@ -80,8 +83,11 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                         @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .reactivationReason(accountActivationRequest.getReason())
+                .id(accountActivationRequest.getId())
+                .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.reactivateUserAccount(userIdentity);
@@ -91,8 +97,11 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/user/deactivate")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder()
+                .deactivationReason(accountActivationRequest.getReason())
+                .id(accountActivationRequest.getId())
+                .build();
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);

@@ -21,6 +21,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapte
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
@@ -69,9 +70,10 @@ public class BeanConfiguration {
                                                    SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
-                                                   UserIdentityMapper userIdentityMapper
+                                                   UserIdentityMapper userIdentityMapper,
+                                                   BlackListedTokenAdapter blackListedTokenAdapter
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter);
     }
 
     @Bean

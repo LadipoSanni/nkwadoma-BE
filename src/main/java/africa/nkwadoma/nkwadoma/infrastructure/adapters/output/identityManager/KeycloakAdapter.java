@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.ClientResource;
+import org.keycloak.admin.client.resource.ClientResource;
+import org.keycloak.admin.client.resource.ClientsResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -108,7 +111,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         validateOrganizationIdentity(organizationIdentity);
         log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
-        Response response = keycloak.realm(KEYCLOAK_REALM).clients().create(clientRepresentation);
+        Response response = getClients(keycloak).create(clientRepresentation);
         if (response.getStatusInfo().equals(Response.Status.CREATED)) {
             clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
             organizationIdentity.setId(clientRepresentation.getId());
@@ -117,6 +120,29 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
+    }
+    @Override
+    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+        ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
+        log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
+        clientRepresentation.setEnabled(Boolean.FALSE);
+
+        ClientResource clientResource = getClientResource(organizationIdentity.getId());
+        clientResource.update(clientRepresentation);
+        log.info("Client disabled on keycloak {}", organizationIdentity.getName());
+    }
+    @Override
+    public ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
+        List<ClientRepresentation> clientRepresentations = getClients(keycloak).findByClientId(id);
+        if (clientRepresentations.isEmpty()) throw new MeedlException(CLIENT_NOT_FOUND.getMessage());
+        return clientRepresentations.get(0);
+    }
+
+    private ClientsResource getClients(Keycloak keycloak) {
+        return keycloak.realm(KEYCLOAK_REALM).clients();
     }
 
     @Override
@@ -152,8 +178,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
         return userIdentity;
     }
-
-
 
     @Override
     public void resetPassword(UserIdentity userIdentity) throws MeedlException {
@@ -293,8 +317,8 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .clients()
                 .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
-    }
 
+    }
     private ClientRepresentation createClientRepresentation(OrganizationIdentity organizationIdentity) {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());
@@ -331,6 +355,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
+        MeedlValidator.validateUUID(userIdentity.getId());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()

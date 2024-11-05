@@ -98,7 +98,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public void deleteProgram(String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
         MeedlValidator.validateUUID(programId);
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
