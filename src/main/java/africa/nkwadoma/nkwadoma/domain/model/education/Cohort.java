@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import jakarta.persistence.Lob;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,6 +32,7 @@ public class Cohort {
     private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private CohortLoanDetail cohortLoanDetail;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);

@@ -13,7 +13,7 @@ public class CohortService implements CohortUseCase {
     private final CohortOutputPort cohortOutputPort;
 
     @Override
-    public Cohort createCohort(Cohort cohort) throws MeedlException {
+    public Cohort createOrEditCohort(Cohort cohort) throws MeedlException {
         return cohortOutputPort.saveCohort(cohort);
     }
 

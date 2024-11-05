@@ -2,19 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -24,11 +13,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -68,7 +54,7 @@ public class CohortServiceTest {
 
         try {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
-            Cohort cohort = cohortService.createCohort(elites);
+            Cohort cohort = cohortService.createOrEditCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -82,7 +68,7 @@ public class CohortServiceTest {
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }
-        assertThrows(MeedlException.class,() -> cohortService.createCohort(xplorers));
+        assertThrows(MeedlException.class,() -> cohortService.createOrEditCohort(xplorers));
     }
 
 
@@ -92,8 +78,8 @@ public class CohortServiceTest {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             when(cohortOutputPort.saveCohort(xplorers)).thenReturn(xplorers);
 
-            Cohort cohort = cohortService.createCohort(elites);
-            Cohort secondCohort = cohortService.createCohort(xplorers);
+            Cohort cohort = cohortService.createOrEditCohort(elites);
+            Cohort secondCohort = cohortService.createOrEditCohort(xplorers);
 
             assertEquals(secondCohort.getName(), xplorers.getName());
             assertEquals(cohort.getName(), elites.getName());
@@ -190,4 +176,9 @@ public class CohortServiceTest {
                         mockId,
                         cohortId));
     }
+
+
+//    @Test
+//    void editCohort
 }
+

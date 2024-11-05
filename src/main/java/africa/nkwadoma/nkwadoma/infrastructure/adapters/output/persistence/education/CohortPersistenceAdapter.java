@@ -1,11 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -13,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -41,6 +44,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
+    private final CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort;
 
 
     @Override
@@ -58,7 +62,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
         Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
-         programOutputPort.saveProgram(program);
+        if (cohort.getCohortLoanDetail() != null){
+           CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.saveCohortLoanDetails(cohort,retrievedCohort.getId());
+            retrievedCohort.setCohortLoanDetail(cohortLoanDetail);
+        }
+        programOutputPort.saveProgram(program);
         return retrievedCohort;
     }
 
@@ -68,8 +76,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
 
             if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
+                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+                CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
+                if (cohortLoanDetail != null){
+                    throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+                }
                 cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
                 cohortToUpdate.setUpdatedAt(LocalDateTime.now());
+                cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
                 activateStatus(cohortToUpdate);
                 cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
                 cohortRepository.save(cohortEntity);

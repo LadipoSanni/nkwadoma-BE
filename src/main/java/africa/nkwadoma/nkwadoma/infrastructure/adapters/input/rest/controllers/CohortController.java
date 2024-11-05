@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.CreateCohortRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditCohortLoanDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.CohortRestMapper;
@@ -18,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_CREATED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_VIEWED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j
 @RestController
@@ -38,7 +38,7 @@ public class CohortController {
         try {
             Cohort cohort =
                     cohortMapper.toCohort(createCohortRequest);
-            cohort = cohortUseCase.createCohort(cohort);
+            cohort = cohortUseCase.createOrEditCohort(cohort);
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
@@ -75,4 +75,29 @@ public class CohortController {
                     HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
     }
+
+
+    @PostMapping("edit-cohort")
+    public ResponseEntity<ApiResponse<?>> editCohort(@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) {
+
+        try {
+            Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
+            cohortUseCase.createOrEditCohort(cohort);
+            CohortResponse cohortResponse =
+                    cohortMapper.toCohortResponse(cohort);
+            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                    .data(cohortResponse)
+                    .message(COHORT_EDITED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        }catch (MeedlException meedlException){
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, meedlException.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }
+
+
