@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.CreateCohortRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.CohortRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +46,9 @@ public class CohortController {
             cohort = cohortUseCase.createCohort(cohort);
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
+            cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
+                                                    .map(cohortMapper::toLoanBreakdownResponse)
+                                                    .toList());
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                     .data(cohortResponse)
                     .message(COHORT_CREATED)

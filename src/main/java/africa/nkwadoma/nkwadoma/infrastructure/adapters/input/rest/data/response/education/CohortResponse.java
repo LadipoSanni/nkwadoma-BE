@@ -2,12 +2,17 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,11 +26,14 @@ public class CohortResponse {
     private String name;
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
+    private BigDecimal tuitionAmount = BigDecimal.ZERO;
+    private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
 
 }
