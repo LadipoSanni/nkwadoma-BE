@@ -12,7 +12,7 @@ public interface CreateUserUseCase {
 
     void resetPassword(String token, String password) throws MeedlException;
 
-    void logout(UserIdentity userIdentity, String accessToken) throws MeedlException;
+    void logout(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     void forgotPassword(String email) throws MeedlException;
     UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException;

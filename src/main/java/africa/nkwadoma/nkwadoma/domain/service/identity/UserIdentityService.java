@@ -75,9 +75,9 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void logout(UserIdentity userIdentity, String accessToken) throws MeedlException {
+    public void logout(UserIdentity userIdentity) throws MeedlException {
         identityManagerOutPutPort.logout(userIdentity);
-        blackListedTokenAdapter.blackListToken(createBlackList(accessToken));
+        blackListedTokenAdapter.blackListToken(createBlackList(userIdentity.getAccessToken()));
     }
     private BlackListedToken createBlackList(String accessToken){
         BlackListedToken blackListedToken = new BlackListedToken();

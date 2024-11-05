@@ -40,7 +40,8 @@ public class IdentityManagerController {
     public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
         String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
-        createUserUseCase.logout(userIdentity, accessToken);
+        userIdentity.setAccessToken(accessToken);
+        createUserUseCase.logout(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
