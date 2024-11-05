@@ -4,10 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -20,6 +19,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapte
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
@@ -54,7 +54,7 @@ public class BeanConfiguration {
     @Bean
     public OrganizationIdentityService organizationIdentityService(
             OrganizationIdentityOutputPort organizationIdentityOutputPort,
-            IdentityManagerOutPutPort identityManagerOutPutPort,
+            IdentityManagerOutputPort identityManagerOutPutPort,
             UserIdentityOutputPort userIdentityOutputPort,
             OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
             SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase
@@ -63,15 +63,16 @@ public class BeanConfiguration {
     }
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
-                                                   IdentityManagerOutPutPort identityManagerOutPutPort,
+                                                   IdentityManagerOutputPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenUtils tokenUtils,
                                                    SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
-                                                   UserIdentityMapper userIdentityMapper
+                                                   UserIdentityMapper userIdentityMapper,
+                                                   BlackListedTokenAdapter blackListedTokenAdapter
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter);
     }
 
     @Bean

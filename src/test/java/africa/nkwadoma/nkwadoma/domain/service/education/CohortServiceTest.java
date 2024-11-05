@@ -4,6 +4,8 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -14,7 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,7 +55,6 @@ public class CohortServiceTest {
 
     @Test
     void saveCohort() {
-
         try {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createOrEditCohort(elites);
@@ -176,9 +179,84 @@ public class CohortServiceTest {
                         mockId,
                         cohortId));
     }
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
+    void deleteCohortWithInvalidId(String cohortId){
+        assertThrows(MeedlException.class, ()-> cohortService.deleteCohort(cohortId));
+    }
+    @Test
+    void deleteCohort(){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId,mockId,mockId)).thenReturn(xplorers);
+            Cohort cohort = cohortService.viewCohortDetails(mockId,mockId, mockId);
+            assertNotNull(cohort);
 
+            doNothing().when(cohortOutputPort).deleteCohort(mockId);
+            cohortService.deleteCohort(mockId);
 
-//    @Test
-//    void editCohort
+            doThrow(MeedlException.class).when(cohortOutputPort).viewCohortDetails(mockId, mockId, mockId);
+            assertThrows(MeedlException.class, ()-> cohortService.viewCohortDetails(mockId,mockId,mockId));
+        } catch (MeedlException e) {
+            log.error("Error deleting cohort {}",e.getMessage());
+        }
+    }
+
+    @Test
+    void cannotEditCohortWithLoanDetails() {
+        try{
+            Cohort elites = new Cohort();
+            elites.setId(mockId);
+            elites.setCohortLoanDetail(new CohortLoanDetail());
+            when(cohortOutputPort.saveCohort(elites)).thenThrow( MeedlException.class);
+            assertThrows(MeedlException.class, () -> cohortService.createOrEditCohort(elites));
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+    }
+
+    @Test
+    void cohortWithoutLoanDetailsCanBeEdited() {
+        try {
+            Cohort elites = new Cohort();
+            elites.setId(mockId);
+            elites.setName("edited cohort");
+            when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
+            Cohort editedCohort = cohortService.createOrEditCohort(elites);
+            assertEquals("edited cohort", editedCohort.getName());
+        }catch (MeedlException e){
+            log.error("{}", e.getMessage());
+        }
+
+    }
+
+    @Order(9)
+    @Test
+    void addLoanDetailsToCohort() {
+       try{
+            CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
+            elites.setCohortLoanDetail(cohortLoanDetail);
+            when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
+            Cohort editedCohort = cohortService.createOrEditCohort(elites);
+            assertNotNull(editedCohort.getCohortLoanDetail());
+       }catch (MeedlException e){
+           log.error("{}", e.getMessage());
+       }
+    }
+
+    private static CohortLoanDetail getCohortLoanDetail() {
+        CohortLoanDetail cohortLoanDetail = new CohortLoanDetail();
+        LoanDetail loanDetail = new LoanDetail();
+        loanDetail.setDebtPercentage(0.34);
+        loanDetail.setRepaymentPercentage(0.67);
+        loanDetail.setMonthlyExpected(BigDecimal.valueOf(450));
+        loanDetail.setTotalAmountRepaid(BigDecimal.valueOf(500));
+        loanDetail.setTotalInterestIncurred(BigDecimal.valueOf(600));
+        loanDetail.setLastMonthActual(BigDecimal.valueOf(200));
+        loanDetail.setTotalAmountDisbursed(BigDecimal.valueOf(50000));
+        loanDetail.setTotalOutstanding(BigDecimal.valueOf(450));
+        cohortLoanDetail.setLoanDetail(loanDetail);
+        return cohortLoanDetail;
+    }
+
 }
 
