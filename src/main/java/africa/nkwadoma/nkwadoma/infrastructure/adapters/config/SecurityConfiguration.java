@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.context.annotation.*;
 import org.springframework.core.convert.converter.*;
-import org.springframework.http.*;
 import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.method.configuration.*;
 import org.springframework.security.config.annotation.web.builders.*;
@@ -32,7 +31,6 @@ public class SecurityConfiguration {
     SecurityFilterChain resourceServerSecurityFilterChain(
             HttpSecurity http,
             Converter<Jwt, AbstractAuthenticationToken> authenticationConverter) throws Exception {
-//        http.cors(cors -> cors .configurationSource(corsConfigurationSource()));
         http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtDecoder -> jwtDecoder.jwtAuthenticationConverter(authenticationConverter)));
 
         http.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
