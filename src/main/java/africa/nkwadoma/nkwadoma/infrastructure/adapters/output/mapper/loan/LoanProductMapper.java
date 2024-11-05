@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,4 +20,8 @@ public interface LoanProductMapper {
     LoanProductEntity mapLoanProductToEntity(LoanProduct loanProduct);
 
     LoanProduct mapEntityToLoanProduct(LoanProductEntity entity);
+
+    VendorEntity mapVendorToVendorEntity(Vendor vendor);
+
+    Vendor mapVendorEntityToVendor(VendorEntity vendorEntity);
 }
