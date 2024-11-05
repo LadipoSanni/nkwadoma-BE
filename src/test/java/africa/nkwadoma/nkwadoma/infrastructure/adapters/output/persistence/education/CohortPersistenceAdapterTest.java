@@ -50,6 +50,7 @@ public class CohortPersistenceAdapterTest {
     private String meedleUserId;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    private IdentityManagerOutputPort identityManagementOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -60,27 +61,24 @@ public class CohortPersistenceAdapterTest {
     private CreateOrganizationUseCase organizationUseCase;
     @Autowired
     private ProgramCohortOutputPort programCohortOutputPort;
-    @Autowired
-    private IdentityManagerOutputPort identityManagementOutputPort;
     private Program program;
     private String programId;
     private String cohortOneId;
-    private String programId;
     private String cohortTwoId;
     private String organizationId;
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder().firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+        UserIdentity userIdentity = UserIdentity.builder()
+                .firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson Ayo").email("fred2110@example.com").createdBy("8937-b9897g3-bv38").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com").
-                name("My Organization21 Test").rcNumber("56767").serviceOfferings(
-        organizationIdentity = OrganizationIdentity.builder().email("org@example.com").id("ae81b51f-5fba-4d75-b9a8-6d51dc0ef0cb").
-                name("My Organization12").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com")
+                .name("My Organization21 Test").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
-                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).build();
+                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
+                .build();
 
         program = Program.builder().name("My program Test").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
@@ -188,7 +186,7 @@ public class CohortPersistenceAdapterTest {
     void viewCohortDetails(){
         Cohort viewedCohort = new Cohort() ;
         try{
-            log.info("{} {} {}", meedleUser,programId, cohortTwoId );
+            log.info("{} {} {}", meedleUserId,programId, cohortTwoId );
             viewedCohort = cohortOutputPort.viewCohortDetails(meedleUserId, programId, cohortTwoId);
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());

@@ -48,7 +48,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     private String employeeJackId;
     private String employeeAngelaId;
     private OrganizationIdentity amazingGrace;
-    private  UserIdentity joel;
+    private UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
@@ -81,7 +81,8 @@ class OrganizationEmployeeIdentityAdapterTest {
         angela.setRole(IdentityRole.PORTFOLIO_MANAGER);
         angela.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
 
-        }
+    }
+
     @BeforeAll
     void init() {
         try {
@@ -125,13 +126,14 @@ class OrganizationEmployeeIdentityAdapterTest {
         employeeJack = OrganizationEmployeeIdentity.builder()
                 .meedlUser(jack)
                 .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
-               .build();
+                .build();
         employeeAngela = OrganizationEmployeeIdentity.builder()
                 .meedlUser(angela)
                 .organization("83f744df-78a2-4db6-bb04-b81545e78e49")
                 .build();
 
     }
+
         @Test
         void findAllOrganizationEmployees() {
             try {
@@ -182,12 +184,13 @@ class OrganizationEmployeeIdentityAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewAllOrganizationEmployeesWithNullId(String id) {
-        assertThrows(MeedlException.class, ()->organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(id, pageNumber, pageSize));
-        }
+        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(id, pageNumber, pageSize));
+    }
+
     @Test
     void findAllByInvalidOrganizationUuid(){
-        assertThrows(MeedlException.class, ()->organizationEmployeeIdentityOutputPort.findAllByOrganization("invalid uuid "));
-        }
+        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.findAllByOrganization("invalid uuid "));
+    }
 
 
     @ParameterizedTest
@@ -218,8 +221,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             log.error("Error finding organization", e);
         }
         String id = organizationIdentity.getId();
-        assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
-                findAllOrganizationEmployees(id, pageNumber, pageSize));
+        assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(id, pageNumber, pageSize));
     }
 
 

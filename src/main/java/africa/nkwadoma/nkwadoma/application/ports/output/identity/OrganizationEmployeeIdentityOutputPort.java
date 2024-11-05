@@ -5,6 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import org.springframework.data.domain.*;
 
+import java.util.List;
+
 public interface OrganizationEmployeeIdentityOutputPort {
     OrganizationEmployeeIdentity save(OrganizationEmployeeIdentity organizationEmployeeIdentity);
     OrganizationEmployeeIdentity findById(String id) throws MeedlException;
