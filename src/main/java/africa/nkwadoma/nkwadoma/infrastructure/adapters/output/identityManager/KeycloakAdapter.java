@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -331,6 +332,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         validateUserIdentity(userIdentity);
+        MeedlValidator.validateUUID(userIdentity.getId());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
