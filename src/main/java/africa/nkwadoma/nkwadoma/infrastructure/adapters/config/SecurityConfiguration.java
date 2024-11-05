@@ -16,6 +16,8 @@ import org.springframework.security.web.*;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.*;
 
@@ -31,7 +33,7 @@ public class SecurityConfiguration {
     SecurityFilterChain resourceServerSecurityFilterChain(
             HttpSecurity http,
             Converter<Jwt, AbstractAuthenticationToken> authenticationConverter) throws Exception {
-        http.cors(cors -> corsConfigurationSource());
+//        http.cors(cors -> corsConfigurationSource());
         http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtDecoder -> jwtDecoder.jwtAuthenticationConverter(authenticationConverter)));
 
         http.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
@@ -44,7 +46,7 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-    @Bean
+//    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));
@@ -55,4 +57,15 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    @Bean
+    WebMvcConfigurer corsConfigurer(){
+        return new WebMvcConfigurer() {
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry.addMapping("/**").allowedOrigins("*")
+                    .allowedMethods("*").allowedHeaders("*")
+                    .exposedHeaders("*");
+         }};
+    }
+
 }
