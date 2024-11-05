@@ -361,7 +361,7 @@ class KeycloakAdapterTest {
     void verifyUserExists() {
         UserIdentity userIdentity = null;
         try {
-            userIdentity = identityManagementOutputPort.verifyUserExists(john);
+            userIdentity = identityManagementOutputPort.verifyUserExistsAndIsEnabled(john);
         } catch (MeedlException e) {
            log.info("Failed to verifyUser password {}", e.getMessage());
         }
@@ -370,12 +370,14 @@ class KeycloakAdapterTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "fndjnke"})
-    void verifyUserWithInvalidId(String userId){
-        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserIsEnable(userId));
+    void verifyUserWithInvalidEmail(String email){
+        john.setEmail(email);
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserExistsAndIsEnabled(john));
     }
     @Test
     void verifyUserWithValidIdNotFound(){
-        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserIsEnable("2c521720-563a-4449-a4bc-459bd5a2d4d7"));
+        john.setEmail("validemail@gmail.com");
+        assertThrows(MeedlException.class,()->identityManagementOutputPort.verifyUserExistsAndIsEnabled(john));
     }
     @Test
     void resetPasswordWithNull() {

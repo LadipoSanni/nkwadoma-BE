@@ -56,25 +56,27 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         LoanProduct foundLoanProduct = findById(loanProduct.getId());
         log.info("Loan product found to be updated {}", foundLoanProduct);
 
-        loanProduct.updateValues(foundLoanProduct);
-        loanProduct.validateLoanProductDetails();
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
+        log.info("The updated loan product updated {}", foundLoanProduct);
+        foundLoanProduct.validateLoanProductDetails();
+//        loanProduct.updateValues(foundLoanProduct);
 
         if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
+        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(foundLoanProduct);
         loanProductEntity.setUpdatedAt(LocalDateTime.now());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
-        log.info("Loan product updated {}",  loanProduct);
+        log.info("Loan product updated {}",  foundLoanProduct);
 
-        return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
-        List<Vendor> vendors = saveVendors(loanProduct);
+//        return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+        List<Vendor> vendors = saveVendors(foundLoanProduct);
         List<LoanProductVendor> loanProductVendors = savedLoanProductVendors(vendors, savedLoanProductEntity);
 
-        log.info("Loan product {}",  loanProduct);
-        loanProduct =  loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
-        loanProduct.setVendors(vendors);
-        return loanProduct;
+        log.info("Loan product {}",  foundLoanProduct);
+        foundLoanProduct =  loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+        foundLoanProduct.setVendors(vendors);
+        return foundLoanProduct;
     }
 
     private List<LoanProductVendor> savedLoanProductVendors(List<Vendor> vendors, LoanProductEntity savedLoanProductEntity) {

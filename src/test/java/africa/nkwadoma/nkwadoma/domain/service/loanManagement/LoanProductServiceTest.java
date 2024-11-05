@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -33,7 +33,7 @@ class LoanProductServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
-    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
 
@@ -61,7 +61,7 @@ class LoanProductServiceTest {
         try {
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
-           doNothing().when(identityManagerOutPutPort).verifyUserIsEnable(any());
+           doNothing().when(identityManagerOutPutPort).verifyUserExistsAndIsEnabled(any());
 
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);

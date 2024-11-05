@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.ClientsResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -168,7 +166,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         userIdentity.setNewPassword(password);
         log.info("User ID for user creating password : {}", userIdentity);
-        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()){
+        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()) {
             log.error("User already verified can not create new password for this user {}", userIdentity.getEmail());
             throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
         }
@@ -177,14 +175,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
         return userIdentity;
     }
-    public void verifyUserIsEnable(String email) throws MeedlException {
-        MeedlValidator.validateEmail(email);
-        UserRepresentation userRepresentation = findUserByEmail(email);
 
-        if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
-            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
-        }
-    }
 
     @Override
     public void resetPassword(UserIdentity userIdentity) throws MeedlException {
@@ -215,10 +206,13 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         return credential;
     }
     @Override
-    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
+    public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
         MeedlValidator.validateUUID(userRepresentation.getId());
+        if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
+            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+        }
         userIdentity.setId(userRepresentation.getId());
         return userIdentity;
     }

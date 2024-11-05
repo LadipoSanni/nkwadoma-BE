@@ -2,7 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -19,14 +20,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
-    private final IdentityManagerOutPutPort identityManagerOutPutPort;
+    private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         loanProduct.validateLoanProductDetails();
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
-        identityManagerOutPutPort.verifyUserIsEnable(foundUser.getEmail());
+        identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("Loan product {} created successfully", loanProduct.getName());
         return loanProductOutputPort.save(loanProduct);
     }
