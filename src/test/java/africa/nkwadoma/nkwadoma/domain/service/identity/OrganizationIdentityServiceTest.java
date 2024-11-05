@@ -1,7 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -9,67 +12,83 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 
 @Slf4j
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
 
-    @Autowired
-    private CreateOrganizationUseCase createOrganizationUseCase;
+    @InjectMocks
+    private OrganizationIdentityService organizationIdentityService;
 
-    @Autowired
-    private OrganizationIdentityAdapter organizationAdapter;
-    @Autowired
-    private KeycloakAdapter keycloakAutowiredAdapter;
-    @Autowired
-    private TokenUtils tokenUtils;
-    @Autowired
-    private CreateUserUseCase createUserUseCase;
+    @Mock
+    private IdentityManagerOutputPort identityManagerOutPutPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+
+    private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+
 
     private OrganizationIdentity roseCouture;
+    private UserIdentity sarah;
+    private OrganizationEmployeeIdentity employeeSarah ;
+    private List<OrganizationEmployeeIdentity> orgEmployee;
 
     @BeforeEach
-        void setUp(){
+    void setUp(){
 
-            UserIdentity sarah = new UserIdentity();
-            sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            sarah.setFirstName("Sarah");
-            sarah.setLastName("Jacobs");
-            sarah.setEmail("divinemercy601@gmail.com");
-            sarah.setCreatedBy("joseph");
+        sarah = new UserIdentity();
+        sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        sarah.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah.setFirstName("Sarah");
+        sarah.setLastName("Jacobs");
+        sarah.setEmail("divinemercy601@gmail.com");
+        sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
 
-            OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
-            employeeIdentity.setMeedlUser(sarah);
+        employeeSarah = new OrganizationEmployeeIdentity();
+        employeeSarah.setMeedlUser(sarah);
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setMeedlUser(sarah);
 
-            List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
-            orgEmployee.add(employeeIdentity);
+        orgEmployee = new ArrayList<>();
+        orgEmployee.add(employeeSarah);
 
 
-            roseCouture = new OrganizationIdentity();
-            roseCouture.setId("5bc2ef97-1035-4e42-bc8b-22a90b809f7c");
-            roseCouture.setName("rose couture6");
-            roseCouture.setEmail("iamoluchimercy@gmail.com");
-            roseCouture.setTin("7682-5627");
-            roseCouture.setRcNumber("RC87899");
-            roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
-            roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
-            roseCouture.setPhoneNumber("09876365713");
-            roseCouture.setInvitedDate(LocalDateTime.now().toString());
-            roseCouture.setWebsiteAddress("rosecouture.org");
-            roseCouture.setOrganizationEmployees(orgEmployee);
+        roseCouture = new OrganizationIdentity();
+        roseCouture.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        roseCouture.setName("rose couture6");
+        roseCouture.setEmail("iamoluchimercy@gmail.com");
+        roseCouture.setTin("7682-5627");
+        roseCouture.setRcNumber("RC87899");
+        roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
+        roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        roseCouture.setPhoneNumber("09876365713");
+        roseCouture.setInvitedDate(LocalDateTime.now().toString());
+        roseCouture.setWebsiteAddress("rosecouture.org");
+        roseCouture.setOrganizationEmployees(orgEmployee);
+//        roseCouture.setEnabled(Boolean.TRUE);
 
     }
 
@@ -77,11 +96,16 @@ class OrganizationIdentityServiceTest {
     void inviteOrganization() {
         OrganizationIdentity invitedOrganisation = null;
         try {
-            assertThrows(ResourceNotFoundException.class, () -> organizationAdapter.findById(roseCouture.getId()));
-            invitedOrganisation = createOrganizationUseCase.inviteOrganization(roseCouture);
-            OrganizationIdentity foundOrganization = organizationAdapter.findById(roseCouture.getId());
-            assertEquals(roseCouture.getName(), foundOrganization.getName());
+            when(identityManagerOutPutPort.createOrganization(roseCouture)).thenReturn(roseCouture);
+            when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
+            when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
+            when(userIdentityOutputPort.save(sarah)).thenReturn(sarah);
+            when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
+            doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
+
+            invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
             assertNotNull(invitedOrganisation);
+            assertEquals(roseCouture.getName(), invitedOrganisation.getName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -90,30 +114,22 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganizationWithEmptyOrganization(){
-        assertThrows(MeedlException.class, () -> createOrganizationUseCase.inviteOrganization(new OrganizationIdentity()));
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
     @Test
     void inviteOrganizationWithNullOrganization(){
-        assertThrows(MeedlException.class, () -> createOrganizationUseCase.inviteOrganization(null));
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
-
     @Test
-    void createPassword(){
-        try {
-            List<OrganizationEmployeeIdentity> organizationEmployees = roseCouture.getOrganizationEmployees();
-
-            for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployees){
-                UserIdentity foundUser =organizationEmployeeIdentity.getMeedlUser();
-                assertNull(foundUser.getPassword());
-                foundUser.setPassword("Password@123");
-                String generatedToken = tokenUtils.generateToken(foundUser.getEmail());
-                assertNotNull(generatedToken);
-                createUserUseCase.createPassword(generatedToken,foundUser.getPassword());
-                log.info("{}",roseCouture.getOrganizationEmployees().get(0).getMeedlUser());
-            }}catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
-        }
-
+    void inviteOrganizationWithNullEmail(){
+        roseCouture.setEmail(null);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void inviteOrganizationWithInvalidEmail(String email){
+        roseCouture.setEmail(email);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
     }
+}

@@ -10,7 +10,7 @@ import lombok.*;
 public class ApiResponse<T>{
     private String message;
 
-    private T body;
+    private T data;
 
     private String statusCode;
 }

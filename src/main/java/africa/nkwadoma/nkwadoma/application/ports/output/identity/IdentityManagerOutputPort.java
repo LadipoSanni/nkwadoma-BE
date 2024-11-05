@@ -3,15 +3,17 @@ package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IdentityManagerOutPutPort {
+public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
@@ -22,12 +24,17 @@ public interface IdentityManagerOutPutPort {
     UserIdentity createPassword(String email, String password) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
-    void changePassword(UserIdentity userIdentity)throws MeedlException;
+
+    void resetPassword(UserIdentity userIdentity) throws MeedlException;
+
+    void setPassword(UserIdentity userIdentity)throws MeedlException;
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
 
     UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
+
+    ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException;
 
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
@@ -35,4 +42,8 @@ public interface IdentityManagerOutPutPort {
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException;
+
+    ClientResource getClientResource(String clientId);
+
+    void deleteClient(String clientId);
 }

@@ -1,26 +1,29 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
@@ -36,47 +39,56 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final CohortRepository cohortRepository;
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final ProgramCohortOutputPort programCohortOutputPort;
 
 
     @Override
     public Cohort saveCohort(Cohort cohort) throws MeedlException {
-        if (ObjectUtils.isEmpty(cohort)) {
-            throw new EducationException(MeedlMessages.INVALID_REQUEST.getMessage());
-        }
+        MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        Optional<Cohort> existingCohort = program.getCohorts().stream()
-                .filter(eachCohort -> eachCohort.getName().equals(cohort.getName()))
+        if (program == null) {
+            throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
+        }
+        List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
+        Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
+                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
-        updateOrAddCohortToProgram(cohort, existingCohort, program);
-        Program savedProgram = programOutputPort.saveProgram(program);
-        Optional<Cohort> retrievedCohort = retrieveCohortFromProgram(cohort, savedProgram);
-        CohortEntity cohortEntity = cohortMapper.toCohortEntity(retrievedCohort.get());
-        return cohortMapper.toCohort(cohortEntity);
+        Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
+         programOutputPort.saveProgram(program);
+        return retrievedCohort;
     }
 
-    private void updateOrAddCohortToProgram(Cohort cohort, Optional<Cohort> existingCohort, Program program) throws CohortException {
-        if (existingCohort.isPresent()) {
-            Cohort cohortToUpdate = existingCohort.get();
+    private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
+        CohortEntity cohortEntity;
+        if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
+            Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
+
             if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
-                cohortToUpdate =  cohortMapper.cohortToUpdateCohort(cohort);
+                cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
                 cohortToUpdate.setUpdatedAt(LocalDateTime.now());
                 activateStatus(cohortToUpdate);
+                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+                cohortRepository.save(cohortEntity);
+
             } else {
                 throw new CohortException(COHORT_EXIST.getMessage());
             }
         } else {
             cohort.setCreatedAt(LocalDateTime.now());
             activateStatus(cohort);
-            program.getCohorts().add(cohort);
+            ProgramCohort newProgramCohort = new ProgramCohort();
+            cohortEntity = cohortMapper.toCohortEntity(cohort);
+            cohortRepository.save(cohortEntity);
+            cohort = cohortMapper.toCohort(cohortEntity);
             program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-        }
-    }
 
-    private static Optional<Cohort> retrieveCohortFromProgram(Cohort cohort, Program program) {
-        return program.getCohorts().stream()
-                .filter(cohort1 -> cohort1.getName().equals(cohort.getName()))
-                .findFirst();
+            newProgramCohort.setCohort(cohort);
+            newProgramCohort.setProgramId(program.getId());
+            log.info("The program id is {}", newProgramCohort.getProgramId());
+            programCohortOutputPort.save(newProgramCohort);
+        }
+        return cohortMapper.toCohort(cohortEntity);
     }
 
     private static void activateStatus(Cohort cohort) {
@@ -102,15 +114,24 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         if (userIdentity == null){
             throw new IdentityException(USER_NOT_FOUND.getMessage());
         }
-        Program program = programOutputPort.findProgramById(programId);
-        return getCohort(cohortId, program);
+        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
+        return getCohort(cohortId,programCohorts );
     }
 
-    private static Cohort getCohort(String cohortId, Program program) throws CohortException {
-        return program.getCohorts().stream()
-                .filter(eachCohort -> eachCohort.getId().equals(cohortId))
+    @Transactional
+    @Override
+    public void deleteCohort(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
+        CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+            programCohortOutputPort.deleteAllByCohort(cohortEntity);
+        cohortRepository.deleteById(id);
+    }
+
+    private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {
+        return programCohorts.stream()
+                .filter(eachCohort -> eachCohort.getCohort().getId().equals(cohortId))
                 .findFirst()
-                .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+                .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
 
 }

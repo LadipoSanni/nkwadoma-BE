@@ -4,9 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.ProgramResponse;
 import org.mapstruct.*;
-import org.springframework.cglib.core.*;
 
-@Mapper(componentModel = "spring", uses = DurationTypeMapper.class)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")
@@ -25,4 +24,6 @@ public interface ProgramRestMapper {
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")
     ProgramResponse toProgramResponse(Program program);
+
+    Program toUpdatedProgram(ProgramUpdateRequest programUpdateRequest);
 }
