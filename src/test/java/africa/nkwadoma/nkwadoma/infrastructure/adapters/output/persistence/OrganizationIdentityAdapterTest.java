@@ -13,6 +13,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -73,6 +75,7 @@ class OrganizationIdentityAdapterTest {
         }
 
     @Test
+    @Order(1)
     void saveOrganization(){
             try{
                 assertThrows(MeedlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
@@ -192,7 +195,25 @@ class OrganizationIdentityAdapterTest {
         joel.setCreatedBy(null);
         assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void searchOrganizationWithInvalidName(String name) {
+         assertThrows(MeedlException.class, () -> organizationOutputPort.findByName(name));
+    }
 
+    @Test
+    @Order(2)
+    void searchOrganizationByValidName(){
+        List<OrganizationIdentity> organizationIdentities = null;
+        try {
+            organizationIdentities = organizationOutputPort.findByName(amazingGrace.getName());
+        } catch (MeedlException e) {
+            log.error("{}", e.getMessage());
+        }
+        assertNotNull(organizationIdentities);
+        assertFalse(organizationIdentities.isEmpty());
+        log.info("{}", organizationIdentities);
+    }
     @Test
     void findOrganization(){
        try{

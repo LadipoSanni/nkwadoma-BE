@@ -3,6 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -17,7 +20,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.Invite
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +41,14 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
+@Slf4j
 public class OrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
     @PostMapping("organization/invite")
-    @Operation(summary = INVITE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
+    @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
         try{
@@ -60,14 +66,41 @@ public class OrganizationController {
                     .message(INVITE_ORGANIZATION_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
-            return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
-        }catch (Exception exception){
-            return new ResponseEntity<>(new ApiResponse<>( null ,exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        } catch (Exception exception) {
+            return new ResponseEntity<>(new ApiResponse<>(null, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
         }
 
     }
+
+    @GetMapping("organization/search")
+    @Operation(summary = "Search for organization by name")
+    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Organization name is required") String name)
+            throws MeedlException {
+        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
+        log.info("Organization {}", organizationIdentities);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                data(organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList()).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("organization/{id}")
+    @Operation(summary = "Search for organization by name")
+    public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@PathVariable @Valid @NotBlank(message = "Organization id is required") String id)
+            throws MeedlException {
+        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
+        log.info("Organization {}", organizationIdentity);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+                data(inviteOrganizationRestMapper.toOrganizationResponse(organizationIdentity)).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
     @PostMapping("organization/deactivate")
-    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE,description = INVITE_ORGANIZATION_DESCRIPTION)
+    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -121,4 +154,5 @@ public class OrganizationController {
                 .build();
     }
 }
+
 

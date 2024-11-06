@@ -24,7 +24,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
-public class OrganizationIdentityService implements CreateOrganizationUseCase , ViewOrganizationUseCase {
+public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
@@ -100,6 +100,16 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase , 
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
+    }
+    @Override
+    public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
+        MeedlValidator.validateDataElement(organizationName);
+        return organizationIdentityOutputPort.findByName(organizationName);
+    }
+    @Override
+    public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        return organizationIdentityOutputPort.findById(organizationId);
     }
 
 

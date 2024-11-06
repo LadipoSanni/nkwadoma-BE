@@ -20,5 +20,7 @@ public interface OrganizationIdentityOutputPort {
     List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException;
     void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException;
     void deleteServiceOffering(String serviceOfferingId) throws MeedlException;
+
+    List<OrganizationIdentity> findByName(String name) throws MeedlException;
 }
 
