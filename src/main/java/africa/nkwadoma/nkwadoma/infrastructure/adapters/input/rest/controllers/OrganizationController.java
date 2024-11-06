@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -11,7 +13,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteOrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InviteOrganizationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +23,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,8 +50,8 @@ public class OrganizationController {
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                             @RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest) {
-        try {
+                                                             @RequestBody @Valid InviteOrganizationRequest inviteOrganizationRequest){
+        try{
             UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
@@ -97,12 +102,34 @@ public class OrganizationController {
     @PostMapping("organization/deactivate")
     @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
-        createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .message(ORGANIZATION_DEACTIVATION_SUCCESS)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+            createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
+            ApiResponse<Object> apiResponse = ApiResponse.builder()
+                    .message(ORGANIZATION_DEACTIVATION_SUCCESS)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @GetMapping("organization/all")
+    @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
+    public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
+            throws MeedlException {
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
+                                                                .viewAllOrganization(OrganizationIdentity.builder()
+                                                                .pageNumber(pageNumber)
+                                                                .pageSize(pageSize)
+                                                                .build());
+        List<OrganizationResponse> programResponses = organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList();
+        PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
+                programResponses, organizationIdentities.hasNext(),
+                organizationIdentities.getTotalPages(), pageNumber,
+                pageSize
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
     }
 
     private static List<OrganizationEmployeeIdentity> getOrganizationEmployeeIdentities(OrganizationEmployeeIdentity organizationEmployeeIdentity) {

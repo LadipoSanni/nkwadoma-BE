@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +40,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-//        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}",organizationIdentity);
@@ -96,6 +96,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
 
         return organizationEmployeeIdentity;
+    }
+    @Override
+    public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
     }
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
