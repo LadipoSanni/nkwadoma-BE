@@ -23,6 +23,7 @@ public class OrganizationIdentityValidator extends MeedlValidator {
         log.info("{}",organizationIdentity.getServiceOfferings());
         if (organizationIdentity.getServiceOfferings() == null
             || organizationIdentity.getServiceOfferings().get(0).getIndustry() == null) {
+            log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), organizationIdentity);
             throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
         }
         validateEmail(organizationIdentity.getEmail());
@@ -32,12 +33,6 @@ public class OrganizationIdentityValidator extends MeedlValidator {
         validateDataElement(organizationIdentity.getPhoneNumber());
         log.info("Organization identity validation completed successfully {}", organizationIdentity);
 
-    }
-
-    private static void validateEmail(OrganizationIdentity organizationIdentity) throws IdentityException {
-        if (StringUtils.isEmpty(organizationIdentity.getEmail()) || !EmailValidator.getInstance().isValid(organizationIdentity.getEmail().trim())) {
-            throw new IdentityException(INVALID_EMAIL_ADDRESS.getMessage());
-        }
     }
 
 }

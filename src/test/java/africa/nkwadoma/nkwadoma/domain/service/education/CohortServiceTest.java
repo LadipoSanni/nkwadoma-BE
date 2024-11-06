@@ -65,7 +65,6 @@ public class CohortServiceTest {
 
     @Test
     void saveCohort() {
-
         try {
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
@@ -190,4 +189,26 @@ public class CohortServiceTest {
                         mockId,
                         cohortId));
     }
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
+    void deleteCohortWithInvalidId(String cohortId){
+        assertThrows(MeedlException.class, ()-> cohortService.deleteCohort(cohortId));
+    }
+    @Test
+    void deleteCohort(){
+        try {
+            when(cohortOutputPort.viewCohortDetails(mockId,mockId,mockId)).thenReturn(xplorers);
+            Cohort cohort = cohortService.viewCohortDetails(mockId,mockId, mockId);
+            assertNotNull(cohort);
+
+            doNothing().when(cohortOutputPort).deleteCohort(mockId);
+            cohortService.deleteCohort(mockId);
+
+            doThrow(MeedlException.class).when(cohortOutputPort).viewCohortDetails(mockId, mockId, mockId);
+            assertThrows(MeedlException.class, ()-> cohortService.viewCohortDetails(mockId,mockId,mockId));
+        } catch (MeedlException e) {
+            log.error("Error deleting cohort {}",e.getMessage());
+        }
+    }
+
 }
