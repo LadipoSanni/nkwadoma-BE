@@ -97,7 +97,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
         return organizationEmployeeIdentity;
     }
-
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
         MeedlValidator.validateDataElement(organizationName);
