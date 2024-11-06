@@ -89,7 +89,6 @@ public class CohortController {
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
-
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 message("Cohort " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
