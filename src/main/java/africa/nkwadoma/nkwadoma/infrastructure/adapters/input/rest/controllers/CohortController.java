@@ -96,10 +96,10 @@ public class CohortController {
     @GetMapping("invite-cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteCohort(
-            @AuthenticationPrincipal Jwt meedle,
+            @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
-            cohortUseCase.inviteCohort(meedle.getClaimAsString("sub"), programId, cohortId);
+            cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
             return new ResponseEntity<>(ApiResponse.<String>builder()
                     .message(COHORT_INVITED)
                     .statusCode(HttpStatus.OK.toString())
