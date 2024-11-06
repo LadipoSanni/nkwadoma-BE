@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -8,11 +10,15 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.InviteOrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.InviteOrganizationRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +38,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class OrganizationController {
     private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final InviteOrganizationRestMapper inviteOrganizationRestMapper;
 
     @PostMapping("organization/invite")
@@ -69,6 +76,29 @@ public class OrganizationController {
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @GetMapping("organization/all")
+    @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
+    public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
+            throws MeedlException {
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
+                                                                .viewAllOrganization(OrganizationIdentity.builder()
+                                                                .pageNumber(pageNumber)
+                                                                .pageSize(pageSize)
+                                                                .build());
+        List<OrganizationResponse> programResponses = organizationIdentities.stream().map(inviteOrganizationRestMapper::toOrganizationResponse).toList();
+        PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
+                programResponses, organizationIdentities.hasNext(),
+                organizationIdentities.getTotalPages(), pageNumber,
+                pageSize
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
+
     private static List<OrganizationEmployeeIdentity> getOrganizationEmployeeIdentities(OrganizationEmployeeIdentity organizationEmployeeIdentity) {
         List<OrganizationEmployeeIdentity> orgEmployee = new ArrayList<>();
         orgEmployee.add(organizationEmployeeIdentity);

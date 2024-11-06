@@ -1,17 +1,15 @@
-package africa.nkwadoma.nkwadoma.domain.model.identity;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
-import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import lombok.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Setter
 @Getter
-@ToString
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrganizationIdentity {
+@Setter
+public class OrganizationResponse {
     private String id;
     private String name;
     private String email;
@@ -21,11 +19,7 @@ public class OrganizationIdentity {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
-    private boolean isEnabled;
     private String createdBy;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
-
-    private int pageSize;
-    private int pageNumber;
 }
