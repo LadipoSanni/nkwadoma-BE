@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -11,7 +13,10 @@ import org.hibernate.validator.internal.constraintvalidators.hv.*;
 
 import java.math.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_PATTERN;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.WEAK_PASSWORD;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @Slf4j
@@ -73,6 +78,13 @@ public class MeedlValidator {
     public static void validatePageSize(int pageSize) throws MeedlException {
         if (pageSize < BigInteger.ONE.intValue()) {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
+        }
+    }
+    public static void validatePassword(String password) throws MeedlException {
+        validateDataElement(password);
+        Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
+        if (!pattern.matcher(password).matches()) {
+            throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
 }

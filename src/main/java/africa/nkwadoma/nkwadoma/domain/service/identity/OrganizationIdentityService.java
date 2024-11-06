@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -15,13 +17,15 @@ import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RequiredArgsConstructor
 @Slf4j
-public class OrganizationIdentityService implements CreateOrganizationUseCase {
+public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
@@ -37,16 +41,36 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-//        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationIdentity.getOrganizationEmployees().get(0).getMiddlUser());
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}",organizationIdentity);
        return organizationIdentity;
     }
 
-
     @Override
-    public void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(reason);
+        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        log.info("found organization employees: {}",organizationEmployees);
+        organizationEmployees
+                .forEach(organizationEmployeeIdentity -> {
+                            try {
+                                log.info("Deactivating user {}", organizationEmployeeIdentity.getMeedlUser());
+                                organizationEmployeeIdentity.getMeedlUser().setDeactivationReason(reason);
+                                identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMeedlUser());
+                            } catch (MeedlException e) {
+                                log.error("Error disabling organization user : {}", e.getMessage());
+                            }
+                        });
+
+        identityManagerOutPutPort.disableClient(foundOrganization);
+        foundOrganization.setEnabled(Boolean.FALSE);
+        return foundOrganization;
+    }
+
+    private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
@@ -63,6 +87,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
     }
 
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
+        organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now().toString());
@@ -80,6 +105,20 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase {
 
         organizationIdentity.setTimeUpdated(LocalDateTime.now());
         return organizationIdentityOutputPort.updateOrganization(organizationIdentity);
+    }
+    @Override
+    public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
+    }
+    @Override
+    public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
+        MeedlValidator.validateDataElement(organizationName);
+        return organizationIdentityOutputPort.findByName(organizationName);
+    }
+    @Override
+    public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        return organizationIdentityOutputPort.findById(organizationId);
     }
 
 

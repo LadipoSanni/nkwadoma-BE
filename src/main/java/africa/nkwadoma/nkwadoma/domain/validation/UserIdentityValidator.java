@@ -37,10 +37,10 @@ public class UserIdentityValidator extends MeedlValidator {
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
 
-         validateEmail(userIdentity.getEmail());
-         validateDataElement(userIdentity.getFirstName());
-         validateDataElement(userIdentity.getLastName());
-         validateDataElement(userIdentity.getCreatedBy());
+         MeedlValidator.validateEmail(userIdentity.getEmail());
+         MeedlValidator.validateDataElement(userIdentity.getFirstName());
+         MeedlValidator.validateDataElement(userIdentity.getLastName());
+         MeedlValidator.validateUUID(userIdentity.getCreatedBy());
      }
 
     private static void validateUserEmail(String email) throws IdentityException {
@@ -65,15 +65,6 @@ public class UserIdentityValidator extends MeedlValidator {
         String inviterEmailDomain = inviterEmail.substring(inviterEmail.indexOf(EMAIL_INDEX.getMessage()));
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
-
-    public static void validatePassword(String password) throws MeedlException {
-        validateDataElement(password);
-        Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
-        if (!pattern.matcher(password).matches()){
-            throw new IdentityException(WEAK_PASSWORD.getMessage());
-        }
-    }
-
 
 
 

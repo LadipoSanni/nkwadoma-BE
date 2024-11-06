@@ -47,6 +47,7 @@ public class LoanProduct {
     private String disbursementTerms;
     private String fundProductId;
     private int totalNumberOfLoanees;
+    private List<Vendor> vendors;
 
     private int pageSize;
     private int pageNumber;
@@ -103,5 +104,4 @@ public class LoanProduct {
             this.interestRate = interestRate;
         }
     }
-
 }
