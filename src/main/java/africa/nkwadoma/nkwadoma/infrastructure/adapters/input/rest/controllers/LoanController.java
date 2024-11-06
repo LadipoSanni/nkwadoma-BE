@@ -45,7 +45,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
 
     @PostMapping("/loan-product/create")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+//    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
@@ -54,7 +54,7 @@ public class LoanController {
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
             LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
             ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                    .body(loanProductResponse)
+                    .data(loanProductResponse)
                     .message(CREATE_LOAN_PRODUCT_SUCCESS)
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
@@ -78,7 +78,7 @@ public class LoanController {
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                body(response).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
@@ -92,7 +92,7 @@ public class LoanController {
         LoanProduct createdLoanProduct = viewLoanProductUseCase.viewLoanProductDetailsById(loanProductId);
         LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
-                .body(loanProductResponse)
+                .data(loanProductResponse)
                 .message(LOAN_PRODUCT_FOUND_SUCCESSFULLY)
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();

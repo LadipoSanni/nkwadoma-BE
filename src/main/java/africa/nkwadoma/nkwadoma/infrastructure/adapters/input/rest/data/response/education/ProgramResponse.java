@@ -23,7 +23,6 @@ public class ProgramResponse{
     private LocalDate programStartDate;
     private int duration;
     private ProgramMode mode;
-    private ProgramType programType;
     private DeliveryType deliveryType;
     private ActivationStatus programStatus;
     private LocalDateTime createdAt;

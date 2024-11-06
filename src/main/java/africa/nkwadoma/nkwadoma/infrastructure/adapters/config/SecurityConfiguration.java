@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.context.annotation.*;
 import org.springframework.core.convert.converter.*;
-import org.springframework.http.*;
 import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.method.configuration.*;
 import org.springframework.security.config.annotation.web.builders.*;
@@ -17,8 +16,10 @@ import org.springframework.security.web.*;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Arrays;
+import java.util.*;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,23 +40,23 @@ public class SecurityConfiguration {
 
         http.authorizeHttpRequests(requests -> {
             requests.requestMatchers(WhiteList.patterns).permitAll();
-            requests.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
             requests.anyRequest().authenticated();
         });
 
         return http.build();
     }
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList(allowedHost.getPatterns()));
-        configuration.setAllowedOrigins(Arrays.asList("**", "*", "/*" ,"/**","http://localhost:3000", "http://localhost:3000/"));
-        configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+    @Bean
+    WebMvcConfigurer corsConfigurer(){
+        return new WebMvcConfigurer() {
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry.addMapping("/**")
+                    .allowedOrigins(allowedHost.getPatterns())
+                    .allowedMethods(allowedHost.getMethods())
+                    .allowedHeaders("*")
+                    .exposedHeaders("*");
+         }};
     }
+
 }
