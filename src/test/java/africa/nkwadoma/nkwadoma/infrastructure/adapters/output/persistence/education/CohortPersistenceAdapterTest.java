@@ -72,11 +72,11 @@ public class CohortPersistenceAdapterTest {
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
                 .firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("fred2110@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                lastName("Benson Ayo").email("fred21101@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("org1@example.com")
-                .name("My Organization21 Test").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("org11@example.com")
+                .name("My Organization21 Test2").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
