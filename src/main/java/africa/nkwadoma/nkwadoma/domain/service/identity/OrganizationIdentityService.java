@@ -64,7 +64,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                             }
                         });
 
-//        identityManagerOutPutPort.disableClient(foundOrganization);
+        identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
         return foundOrganization;
     }
@@ -101,7 +101,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
         MeedlValidator.validateDataElement(organizationName);
-        return organizationIdentityOutputPort.search(organizationName);
+        return organizationIdentityOutputPort.findByName(organizationName);
     }
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {

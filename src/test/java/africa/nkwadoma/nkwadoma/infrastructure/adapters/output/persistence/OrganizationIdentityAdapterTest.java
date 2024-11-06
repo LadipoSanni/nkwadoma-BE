@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -20,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -195,7 +193,7 @@ class OrganizationIdentityAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void searchOrganizationWithInvalidName(String name) {
-         assertThrows(MeedlException.class, () -> organizationOutputPort.search(name));
+         assertThrows(MeedlException.class, () -> organizationOutputPort.findByName(name));
     }
 
     @Test
@@ -203,7 +201,7 @@ class OrganizationIdentityAdapterTest {
     void searchOrganizationByValidName(){
         List<OrganizationIdentity> organizationIdentities = null;
         try {
-            organizationIdentities = organizationOutputPort.search(amazingGrace.getName());
+            organizationIdentities = organizationOutputPort.findByName(amazingGrace.getName());
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }
