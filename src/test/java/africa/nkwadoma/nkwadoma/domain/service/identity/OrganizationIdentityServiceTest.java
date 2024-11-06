@@ -45,8 +45,6 @@ class OrganizationIdentityServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
-    private IdentityManagerOutputPort identityManagerOutPutPort;
-    @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
     private OrganizationIdentity roseCouture;
@@ -146,7 +144,7 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
     }
     @Test
-    void updateOrganization(){
+    void updateOrganization() {
         try {
             when(organizationIdentityOutputPort.updateOrganization(roseCouture)).thenAnswer(invocation -> {
                 roseCouture.setTimeUpdated(LocalDateTime.now());
@@ -166,11 +164,6 @@ class OrganizationIdentityServiceTest {
             log.error("Failed to update organization {}", e.getMessage());
         }
     }
-    void inviteOrganizationWithInvalidEmail(String email) {
-        roseCouture.setEmail(email);
-        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
     void deactivateOrganizationWithInvalidId(String id) {
