@@ -4,5 +4,5 @@ public class SuccessMessages {
     public static final String COHORT_CREATED  = "Cohort Created";
     public static final String COHORT_VIEWED = "viewed";
     public static final String COHORT_INVITED= "All members of this cohort has been invited successfully";
-    public static final String COHORT_EDITED = "Cohort Edited";
+    public static final String COHORT_EDITED_SUCCESSFULLY = "Cohort Edited Successfully";
  }
