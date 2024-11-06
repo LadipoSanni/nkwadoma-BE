@@ -33,7 +33,6 @@ public class SecurityConfiguration {
     SecurityFilterChain resourceServerSecurityFilterChain(
             HttpSecurity http,
             Converter<Jwt, AbstractAuthenticationToken> authenticationConverter) throws Exception {
-//        http.cors(cors -> corsConfigurationSource());
         http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtDecoder -> jwtDecoder.jwtAuthenticationConverter(authenticationConverter)));
 
         http.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
@@ -46,24 +45,16 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-//    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList(allowedHost.getMethods()));
-        configuration.setAllowCredentials(Boolean.TRUE);
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+
     @Bean
     WebMvcConfigurer corsConfigurer(){
         return new WebMvcConfigurer() {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**").allowedOrigins("*")
-                    .allowedMethods("*").allowedHeaders("*")
+            registry.addMapping("/**")
+                    .allowedOrigins(allowedHost.getPatterns())
+                    .allowedMethods(allowedHost.getMethods())
+                    .allowedHeaders("*")
                     .exposedHeaders("*");
          }};
     }
