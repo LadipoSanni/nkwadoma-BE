@@ -62,8 +62,10 @@ public class SecurityConfiguration {
         return new WebMvcConfigurer() {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**").allowedOrigins("*")
-                    .allowedMethods("*").allowedHeaders("*")
+            registry.addMapping("/**")
+                    .allowedOrigins(allowedHost.getPatterns())
+                    .allowedMethods(allowedHost.getMethods())
+                    .allowedHeaders("Authorization", "Requestor-Type", "Origin", "X-Requested-With", "Accept",  "Content-Type", "Cache-Control")
                     .exposedHeaders("*");
          }};
     }
