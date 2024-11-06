@@ -19,6 +19,8 @@ import org.springframework.data.domain.*;
 import java.util.*;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 
@@ -37,11 +39,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
-        if(!StringUtils.isEmpty(id)){
-            OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
-            return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
-        }
-        throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(id);
+        OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
     }
 
     @Override
@@ -100,4 +100,13 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
 
+
+    @Override
+    public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        List<OrganizationEmployeeEntity> employeeEntities = employeeAdminEntityRepository.findAllByOrganization(organizationId);
+        return employeeEntities.stream()
+                .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
+                .toList();
+    }
 }

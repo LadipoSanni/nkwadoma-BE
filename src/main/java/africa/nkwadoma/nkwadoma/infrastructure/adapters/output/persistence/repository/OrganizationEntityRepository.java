@@ -10,4 +10,6 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     Optional<OrganizationEntity> findByEmail(String email);
 
     List<OrganizationEntity> findAllByName(String name);
+
+    Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 }

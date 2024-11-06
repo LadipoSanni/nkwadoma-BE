@@ -1,10 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.Product;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -26,9 +29,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanProductAdapterTest {
     @Autowired
     private LoanProductOutputPort loanProductOutputPort;
+    @Autowired
+    private LoanProductVendorRepository loanProductVendorRepository;
+    @Autowired
+    private VendorEntityRepository vendorEntityRepository;
     private LoanProduct gemsLoanProduct;
+    private Vendor vendor;
     @BeforeEach
     void setUp() {
+        vendor = new Vendor();
+        vendor.setVendorName("Test Vendor");
+        vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
+        vendor.setProduct(Product.ACCOMMODATION);
+
         gemsLoanProduct = new LoanProduct();
         gemsLoanProduct.setPageSize(10);
         gemsLoanProduct.setPageNumber(0);
@@ -38,6 +51,7 @@ class LoanProductAdapterTest {
         gemsLoanProduct.setLoanProductSize(new BigDecimal("1000.00"));
         gemsLoanProduct.setObligorLoanLimit(new BigDecimal("1000.00"));
         gemsLoanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
+        gemsLoanProduct.setVendors(List.of(vendor));
     }
 
     @Test
@@ -53,6 +67,9 @@ class LoanProductAdapterTest {
             assertNotNull(foundLoanProduct);
             assertEquals(foundLoanProduct.getName(),gemsLoanProduct.getName());
             assertEquals(foundLoanProduct.getTermsAndCondition(), gemsLoanProduct.getTermsAndCondition());
+            assertNotNull(createdLoanProduct.getVendors());
+            assertEquals(createdLoanProduct.getVendors().get(0).getVendorName(), gemsLoanProduct.getVendors().get(0).getVendorName());
+            assertNotNull(createdLoanProduct.getVendors().get(0).getId());
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -231,6 +248,9 @@ class LoanProductAdapterTest {
     @AfterAll
     void cleanUp() {
         try {
+            VendorEntity foundVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
+            loanProductVendorRepository.deleteAllByVendorEntity(foundVendorEntity);
+            vendorEntityRepository.deleteById(foundVendorEntity.getId());
             LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
             loanProductOutputPort.deleteById(foundLoanProduct.getId());
         } catch (MeedlException e) {

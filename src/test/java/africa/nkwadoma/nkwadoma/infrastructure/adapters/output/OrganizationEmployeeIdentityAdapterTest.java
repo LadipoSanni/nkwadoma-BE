@@ -90,8 +90,8 @@ class OrganizationEmployeeIdentityAdapterTest {
             assertNotNull(savedEmployeeIdentity);
 
             Page<OrganizationEmployeeIdentity> organizationEmployees =
-                organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
-                        pageNumber, pageSize);
+                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
+                            pageNumber, pageSize);
 
             assertNotNull(organizationEmployees);
         } catch (MeedlException e) {

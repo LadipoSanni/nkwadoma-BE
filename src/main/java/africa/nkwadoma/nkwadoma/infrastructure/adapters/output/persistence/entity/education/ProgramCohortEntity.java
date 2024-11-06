@@ -21,7 +21,7 @@ public class ProgramCohortEntity{
     private String id;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private CohortEntity cohort;
-    private String program;
+    private String programId;
 
 
 }

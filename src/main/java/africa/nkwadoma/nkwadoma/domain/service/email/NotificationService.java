@@ -33,7 +33,6 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-
         sendMail(userIdentity, email);
 
     }
@@ -47,12 +46,12 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .template(COLLEAGUE_INVITATION_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
-
         sendMail(userIdentity, email);
     }
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
+        log.info("Generated token {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 
