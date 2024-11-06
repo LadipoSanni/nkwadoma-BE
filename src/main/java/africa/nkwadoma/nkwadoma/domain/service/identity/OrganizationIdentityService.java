@@ -110,6 +110,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
     }
+
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
         MeedlValidator.validateDataElement(organizationName);
