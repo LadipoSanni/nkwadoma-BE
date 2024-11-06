@@ -121,6 +121,4 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateUUID(organizationId);
         return organizationIdentityOutputPort.findById(organizationId);
     }
-
-
 }
