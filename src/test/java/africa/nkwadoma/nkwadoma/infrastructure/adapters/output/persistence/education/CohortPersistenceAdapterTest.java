@@ -101,7 +101,6 @@ public class CohortPersistenceAdapterTest {
         }
     }
 
-
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
