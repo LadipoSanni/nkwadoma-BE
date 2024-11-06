@@ -31,16 +31,13 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class CohortController {
-
-
     private final CohortUseCase cohortUseCase;
     private final CohortRestMapper cohortMapper;
 
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) {
-        try {
+    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
             Cohort cohort =
                     cohortMapper.toCohort(createCohortRequest);
             cohort = cohortUseCase.createOrEditCohort(cohort);
@@ -52,10 +49,6 @@ public class CohortController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-        } catch (MeedlException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
     }
 
     @GetMapping("cohort-details")
@@ -63,9 +56,7 @@ public class CohortController {
     public ResponseEntity<ApiResponse<?>> viewCohortDetails(
             @RequestParam @NotBlank(message = "User ID is required") String userId,
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
-            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId)
-    {
-        try {
+            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
             Cohort cohort = cohortUseCase.viewCohortDetails(userId, programId, cohortId);
             CohortResponse cohortResponse =
                     cohortMapper.toCohortResponse(cohort);
@@ -75,16 +66,11 @@ public class CohortController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-        } catch (MeedlException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
     }
 
 
     @PostMapping("cohort/edit")
-    public ResponseEntity<ApiResponse<?>> editCohort(@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) {
-        try {
+    public ResponseEntity<ApiResponse<?>> editCohort(@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
             Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
             cohortUseCase.createOrEditCohort(cohort);
             CohortResponse cohortResponse =
@@ -95,10 +81,6 @@ public class CohortController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-        }catch (MeedlException meedlException){
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, meedlException.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
     }
 
 
