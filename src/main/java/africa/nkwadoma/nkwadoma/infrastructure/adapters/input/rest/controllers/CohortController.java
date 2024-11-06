@@ -18,12 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_CREATED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_VIEWED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j
 @RestController
@@ -90,5 +91,18 @@ public class CohortController {
                 message("Cohort " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
         );
+    }
+
+    @GetMapping("invite-cohort")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> inviteCohort(
+            @AuthenticationPrincipal Jwt meedl,
+            @RequestParam @NotBlank(message = "Program ID is required") String programId,
+            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
+            cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
+            return new ResponseEntity<>(ApiResponse.<String>builder()
+                    .message(COHORT_INVITED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build(), HttpStatus.OK);
     }
 }
