@@ -15,4 +15,5 @@ public class LoanBreakdown {
     private BigDecimal itemAmount = BigDecimal.ZERO;
     private String currency;
     private Cohort cohort;
+
 }
