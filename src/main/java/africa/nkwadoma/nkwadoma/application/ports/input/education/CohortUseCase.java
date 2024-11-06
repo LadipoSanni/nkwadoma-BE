@@ -10,4 +10,6 @@ public interface CohortUseCase {
     Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
 
     void deleteCohort(String id) throws MeedlException;
+
+    void inviteCohort(String userId, String programId, String cohortId) throws MeedlException;
 }

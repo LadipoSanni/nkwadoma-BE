@@ -1,10 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
-
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -15,9 +14,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,7 +46,6 @@ class OrganizationIdentityServiceTest {
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
-
 
     private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
@@ -109,22 +107,18 @@ class OrganizationIdentityServiceTest {
         }
 
     }
-
     @Test
     void inviteOrganizationWithEmptyOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
-
     @Test
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
-
     @Test
     void inviteOrganizationWithNullEmail() {
         roseCouture.setEmail(null);
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
-//        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
 
     @ParameterizedTest
@@ -153,5 +147,16 @@ class OrganizationIdentityServiceTest {
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void searchOrganizationWithInvalidName(String name) {
+        assertThrows(MeedlException.class, ()->organizationIdentityService.search(name));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "nfkjdnjnf"})
+    void viewOrganizationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, ()->organizationIdentityService.viewOrganizationDetails(id));
     }
 }
