@@ -16,7 +16,6 @@ import java.util.*;
 @Table(name = "organization")
 public class OrganizationEntity {
     @Id
-    @UuidGenerator
     private String id;
     private String name;
     private String email;
