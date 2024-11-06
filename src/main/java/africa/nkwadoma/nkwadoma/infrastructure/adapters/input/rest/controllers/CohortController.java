@@ -34,7 +34,6 @@ public class CohortController {
     private final CohortUseCase cohortUseCase;
     private final CohortRestMapper cohortMapper;
 
-
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
