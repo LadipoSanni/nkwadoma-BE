@@ -45,12 +45,12 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
 
     @PostMapping("/loan-product/create")
-//    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
         LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
-        loanProduct.setActorId(meedlUser.getClaimAsString("sub"));
+        loanProduct.setCreatedBy(meedlUser.getClaimAsString("sub"));
             LoanProduct createdLoanProduct = createLoanProductUseCase.createLoanProduct(loanProduct);
             LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(createdLoanProduct);
             ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
@@ -60,7 +60,20 @@ public class LoanController {
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
-
+    @PostMapping("/loan-product/update")
+    @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
+        log.info("Update loan product called with id .... {}", request.getId());
+        LoanProduct loanProduct = loanProductMapper.mapToLoanProduct(request);
+        LoanProduct updatedLoanProduct = createLoanProductUseCase.updateLoanProduct(loanProduct);
+        LoanProductResponse loanProductResponse = loanProductMapper.mapToLoanProductResponse(updatedLoanProduct);
+        ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
+                .data(loanProductResponse)
+                .message(UPDATED_LOAN_PRODUCT_SUCCESS)
+                .statusCode(HttpStatus.CREATED.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
     @GetMapping("/loan-product/all")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )

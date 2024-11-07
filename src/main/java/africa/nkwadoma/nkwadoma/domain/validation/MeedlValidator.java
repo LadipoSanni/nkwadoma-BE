@@ -42,7 +42,7 @@ public class MeedlValidator {
         }
     }
 
-    private static boolean isEmptyString(String dataElement) {
+    public static boolean isEmptyString(String dataElement) {
         return StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement);
     }
 

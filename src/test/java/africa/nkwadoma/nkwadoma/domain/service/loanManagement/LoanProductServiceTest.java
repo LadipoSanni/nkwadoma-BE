@@ -1,9 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +35,10 @@ class LoanProductServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
+    private LoanProductMapper loanProductMapper;
+    @Mock
+    private IdentityManagerOutputPort identityManagerOutPutPort;
+    @Mock
     private LoanProductOutputPort loanProductOutputPort;
 
     @InjectMocks
@@ -40,6 +48,7 @@ class LoanProductServiceTest {
 
     @BeforeEach
     void setUp() {
+        Vendor vendor = new Vendor();
         loanProduct = new LoanProduct();
         loanProduct.setName("Test Loan Product: unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
@@ -50,12 +59,17 @@ class LoanProductServiceTest {
         loanProduct.setId("uuid.idfortesting");
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
+        loanProduct.setVendors(List.of(vendor));
+
 
     }
     @Test
     void createLoanProduct() {
         try {
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
+            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
+
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
@@ -122,6 +136,33 @@ class LoanProductServiceTest {
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"non-existing loan product", StringUtils.SPACE, StringUtils.EMPTY })
+    void updateByIdWithAndInvalidId(String id) {
+        loanProduct.setId(id);
+        assertThrows(MeedlException.class , ()->loanService.updateLoanProduct(loanProduct));
+    }
+    @Test
+    void updateLoanProduct(){
+
+        loanProduct.setDisbursementTerms("Updated Gemini Loan Product");
+        loanProduct.setId("80123f3b-b8d9-4e7f-876b-df442bfa02c4");
+        try {
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(loanProductMapper.updateLoanProduct(any(), any())).thenReturn(loanProduct);
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            loanProduct = loanService.updateLoanProduct(loanProduct);
+            LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+            assertNotNull(updatedLoanProduct);
+            assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());
+        } catch (MeedlException e) {
+            log.error("Failed to update loan product {}", e.getMessage());
+        }
+    }
+    @Test
+    void updateByIdWithNull() {
+        assertThrows(MeedlException.class , ()->loanService.updateLoanProduct(null));
     }
     @Test
     void deleteLoanProductWithNullRequest(){

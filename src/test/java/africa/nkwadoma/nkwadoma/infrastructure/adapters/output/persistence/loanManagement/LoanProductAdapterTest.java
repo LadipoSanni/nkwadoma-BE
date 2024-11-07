@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -228,6 +229,20 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.deleteById(gemsLoanProduct.getId()));
         gemsLoanProduct.setId(null);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.deleteById(gemsLoanProduct.getId()));
+    }
+
+    @Test
+    void updateLoanProduct(){
+        try {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            foundLoanProduct.setDisbursementTerms("Updated Gemini Loan Product");
+            LoanProduct loanProduct = loanProductOutputPort.save(foundLoanProduct);
+            LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+            assertNotNull(updatedLoanProduct);
+            assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());
+        } catch (MeedlException e) {
+            log.error("Failed to update loan product");
+        }
     }
     @Test
     @Order(7)

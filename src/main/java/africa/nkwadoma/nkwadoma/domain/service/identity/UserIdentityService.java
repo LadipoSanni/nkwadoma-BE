@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
@@ -147,7 +148,7 @@ public class UserIdentityService implements CreateUserUseCase {
         MeedlValidator.validateEmail(email);
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-            identityManagerOutPutPort.verifyUserExists(foundUser);
+            identityManagerOutPutPort.getUserByEmail(foundUser.getEmail());
             sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
         } catch (MeedlException e) {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());

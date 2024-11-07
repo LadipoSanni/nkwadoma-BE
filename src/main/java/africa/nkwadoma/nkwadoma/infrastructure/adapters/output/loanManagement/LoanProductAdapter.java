@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
@@ -43,14 +42,14 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         if (existsByName(loanProduct.getName())){
             throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
         }
+        List<Vendor> vendors = saveVendors(loanProduct);
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAt(LocalDateTime.now());
+        loanProductEntity.setTotalNumberOfLoanProduct(loanProductEntity.getTotalNumberOfLoanProduct() +BigInteger.ONE.intValue());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
-        List<Vendor> vendors = saveVendors(loanProduct);
-        List<LoanProductVendor> loanProductVendors = savedLoanProductVendors(vendors, savedLoanProductEntity);
-
-        log.info("Loan product {}",  loanProduct);
-        loanProduct =  loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+        savedLoanProductVendors(vendors, savedLoanProductEntity);
+        log.info("Loan product created {}",  loanProduct);
+        loanProduct = loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
         loanProduct.setVendors(vendors);
         return loanProduct;
     }
@@ -74,7 +73,6 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                     .map(vendorEntityRepository::save)
                     .map(loanProductMapper::mapVendorEntityToVendor)
                     .toList();
-
         }
         return null;
     }

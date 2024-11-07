@@ -9,18 +9,23 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
+
+@Slf4j
 @Getter
 @Setter
 @ToString
 public class LoanProduct {
     private String id;
-    private String actorId;
+    private String createdBy;
     private String name;
     private int moratorium;
     private ActivationStatus loanProductStatus;
@@ -47,6 +52,7 @@ public class LoanProduct {
     private String disbursementTerms;
     private String fundProductId;
     private int totalNumberOfLoanees;
+    private int totalNumberOfLoanProduct;
     private List<Vendor> vendors;
 
     private int pageSize;
