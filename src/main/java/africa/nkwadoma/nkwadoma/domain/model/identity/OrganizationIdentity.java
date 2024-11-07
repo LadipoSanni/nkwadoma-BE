@@ -21,7 +21,11 @@ public class OrganizationIdentity {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
+    private boolean isEnabled;
     private String createdBy;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
+
+    private int pageSize;
+    private int pageNumber;
 }

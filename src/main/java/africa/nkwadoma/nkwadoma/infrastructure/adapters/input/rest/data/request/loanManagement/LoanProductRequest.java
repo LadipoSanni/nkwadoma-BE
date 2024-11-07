@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Getter
 @Setter
 public class LoanProductRequest {
+    private String id;
     private String fundProductId;
     private BigDecimal totalAmountAvailable;
     private BigDecimal totalAmountEarned;
@@ -43,4 +45,5 @@ public class LoanProductRequest {
 
     @NotBlank(message = LOAN_PRODUCT_TERMS_AND_CONDITIONS_REQUIRED)
     private String termsAndCondition;
+    private List<Vendor> vendors;
 }

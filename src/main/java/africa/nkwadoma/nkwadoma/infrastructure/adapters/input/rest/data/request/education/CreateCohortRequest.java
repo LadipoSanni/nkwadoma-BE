@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 @Getter
 public class CreateCohortRequest {
 
+
     private String programId;
     private String cohortDescription;
     private String createdBy;
     private String name;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private CohortLoanDetailRequest cohortLoanDetail;
 }

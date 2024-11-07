@@ -5,10 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 
 public interface CohortUseCase {
 
-    Cohort createCohort(Cohort cohort) throws MeedlException;
-
+    Cohort createOrEditCohort(Cohort cohort) throws MeedlException;
 
     Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
+
+    void deleteCohort(String id) throws MeedlException;
+
+    void inviteCohort(String userId, String programId, String cohortId) throws MeedlException;
 
     Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
 }
