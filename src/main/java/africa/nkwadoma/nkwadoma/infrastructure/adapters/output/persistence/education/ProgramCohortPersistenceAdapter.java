@@ -39,12 +39,11 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
 
     @Override
     public List<ProgramCohort> findAllByProgramId(String programId) throws ProgramCohortException {
-        List<ProgramCohortEntity> programCohortEntities =
-         programCohortRepository.findAllByProgram(programId);
+        List<ProgramCohortEntity> programCohortEntities = programCohortRepository.findAllByProgramId(programId);
         if (programCohortEntities == null){
             throw new ProgramCohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
-         programCohortRepository.findAllByProgramId(programId);
+
         return programCohortMapper.toProgramCohortList(programCohortEntities);
     }
 

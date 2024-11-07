@@ -203,9 +203,6 @@ public class CohortServiceTest {
         assertEquals(expectedCohort.getProgramId(), searchedCohort.getProgramId());
     }
 
-
-
-}
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){

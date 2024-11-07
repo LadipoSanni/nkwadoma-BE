@@ -93,6 +93,7 @@ public class CohortPersistenceAdapterTest {
             program.setOrganizationId(organizationIdentity.getId());
             program.setCreatedBy(meedleUserId);
             program = programOutputPort.saveProgram(program);
+            log.info("Program saved {}",program);
             programId = program.getId();
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
@@ -263,52 +264,51 @@ public class CohortPersistenceAdapterTest {
                         program.getId(),
                         cohortId));
     }
-@Order(6)
-@Test
-void deleteCohort(){
+    @Order(6)
+    @Test
+    void searchForCohort(){
+        Cohort searchedCohort = new Cohort();
+        try{
+            searchedCohort =
+                    cohortOutputPort.searchForCohortInAProgram(elites.getName(),elites.getProgramId());
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+       assertEquals(searchedCohort.getName(),elites.getName());
+       assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
+    }
+    @Order(7)
+    @Test
+    void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
         assertTrue(foundCohort.isPresent());
-    try {
-        cohortOutputPort.deleteCohort(cohortOneId);
-    } catch (MeedlException e) {
-        throw new RuntimeException(e);
-    }
-    foundCohort = cohortRepository.findById(cohortOneId);
+        try {
+            cohortOutputPort.deleteCohort(cohortOneId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        foundCohort = cohortRepository.findById(cohortOneId);
         assertFalse(foundCohort.isPresent());
-}
+    }
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){
         assertThrows(MeedlException.class, ()-> cohortOutputPort.deleteCohort(cohortId));
     }
 
-    @Order(7)
-    @Test
-    void searchForCohort(){
-        Cohort searchedCohort = new Cohort();
-        try{
-            searchedCohort =
-                    cohortOutputPort.searchForCohortInAProgram(cohort.getName(),cohort.getProgramId());
-        }catch (MeedlException exception){
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-       assertEquals(searchedCohort.getName(),cohort.getName());
-       assertEquals(searchedCohort.getProgramId(),cohort.getProgramId());
-    }
-
-    @Order(7)
     @ParameterizedTest
     @ValueSource(strings= {"wrong cohort 1", "wrong cohort 2"})
     void searchForCohortWithWrongCohortName(String cohortName){
         assertThrows(MeedlException.class, ()->
-                     cohortOutputPort.searchForCohortInAProgram(cohortName,cohort.getProgramId()));
+                     cohortOutputPort.searchForCohortInAProgram(cohortName,elites.getProgramId()));
     }
 
 
-    @AfterAll
+    @Test
     void cannotEditCohortWithLoanDetails(){
         try {
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId, program.getId(), cohortOneId);
+            log.info("Cohort found : {}" , cohort);
             assertThrows(MeedlException.class, () -> cohortOutputPort.saveCohort(cohort));
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -349,7 +349,7 @@ void deleteCohort(){
     }
 
 
-    @AfterAll
+//    @AfterAll
     void cleanUp() throws MeedlException {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
