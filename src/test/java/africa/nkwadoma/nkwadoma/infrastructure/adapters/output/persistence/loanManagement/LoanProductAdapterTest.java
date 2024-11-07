@@ -230,23 +230,13 @@ class LoanProductAdapterTest {
         gemsLoanProduct.setId(null);
         assertThrows(MeedlException.class, () -> loanProductOutputPort.deleteById(gemsLoanProduct.getId()));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {"non-existing loan product", StringUtils.SPACE, StringUtils.EMPTY, "bcb565fd-71ae-41e3-acd8-2fbbd11fdd05" })
-    void updateByIdWithNonExistingAndInvalidId(String id) {
-        gemsLoanProduct.setId(id);
-        assertThrows(MeedlException.class , ()->loanProductOutputPort.updateLoanProduct(gemsLoanProduct));
 
-    }
-    @Test
-    void updateByIdWithNull() {
-        assertThrows(MeedlException.class , ()->loanProductOutputPort.updateLoanProduct(null));
-    }
     @Test
     void updateLoanProduct(){
         try {
             LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
             foundLoanProduct.setDisbursementTerms("Updated Gemini Loan Product");
-            LoanProduct loanProduct = loanProductOutputPort.updateLoanProduct(foundLoanProduct);
+            LoanProduct loanProduct = loanProductOutputPort.save(foundLoanProduct);
             LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
             assertNotNull(updatedLoanProduct);
             assertEquals("Updated Gemini Loan Product", updatedLoanProduct.getDisbursementTerms());

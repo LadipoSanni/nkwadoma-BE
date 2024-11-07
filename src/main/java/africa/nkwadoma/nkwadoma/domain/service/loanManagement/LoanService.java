@@ -10,16 +10,22 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Slf4j
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     @Override
@@ -46,7 +52,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
-        return loanProductOutputPort.updateLoanProduct(loanProduct);
+        LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
+        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
+            throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
+        }
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
+        foundLoanProduct.setUpdatedAt(LocalDateTime.now());
+        log.info("Loan product updated {}",  foundLoanProduct);
+
+        return loanProductOutputPort.save(foundLoanProduct);
     }
 
     @Override

@@ -53,35 +53,6 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         loanProduct.setVendors(vendors);
         return loanProduct;
     }
-    @Override
-    public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct);
-        MeedlValidator.validateUUID(loanProduct.getId());
-        LoanProduct foundLoanProduct = findById(loanProduct.getId());
-        log.info("Loan product found to be updated {}", foundLoanProduct);
-
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
-        log.info("The updated loan product updated {}", foundLoanProduct);
-        foundLoanProduct.validateLoanProductDetails();
-//        loanProduct.updateValues(foundLoanProduct);
-
-        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
-            throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
-        }
-        LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(foundLoanProduct);
-        loanProductEntity.setUpdatedAt(LocalDateTime.now());
-        LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
-        log.info("Loan product updated {}",  foundLoanProduct);
-
-//        return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
-        List<Vendor> vendors = saveVendors(foundLoanProduct);
-        List<LoanProductVendor> loanProductVendors = savedLoanProductVendors(vendors, savedLoanProductEntity);
-
-        log.info("Loan product {}",  foundLoanProduct);
-        foundLoanProduct =  loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
-        foundLoanProduct.setVendors(vendors);
-        return foundLoanProduct;
-    }
 
     private List<LoanProductVendor> savedLoanProductVendors(List<Vendor> vendors, LoanProductEntity savedLoanProductEntity) {
         if (vendors != null) {
@@ -103,7 +74,6 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                     .map(vendorEntityRepository::save)
                     .map(loanProductMapper::mapVendorEntityToVendor)
                     .toList();
-
         }
         return null;
     }

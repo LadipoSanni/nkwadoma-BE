@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.*;
 class LoanProductServiceTest {
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private LoanProductMapper loanProductMapper;
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
@@ -146,7 +149,8 @@ class LoanProductServiceTest {
         loanProduct.setDisbursementTerms("Updated Gemini Loan Product");
         loanProduct.setId("80123f3b-b8d9-4e7f-876b-df442bfa02c4");
         try {
-            when(loanProductOutputPort.updateLoanProduct(loanProduct)).thenReturn(loanProduct);
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
+            when(loanProductMapper.updateLoanProduct(any(), any())).thenReturn(loanProduct);
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
             loanProduct = loanService.updateLoanProduct(loanProduct);
             LoanProduct updatedLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
