@@ -1,30 +1,29 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,7 +33,6 @@ import java.util.stream.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
-import static java.util.stream.Collectors.toList;
 
 
 @Slf4j
@@ -46,13 +44,12 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
+    private final CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort;
 
 
     @Override
     public Cohort saveCohort(Cohort cohort) throws MeedlException {
-        if (ObjectUtils.isEmpty(cohort)) {
-            throw new EducationException(MeedlMessages.INVALID_REQUEST.getMessage());
-        }
+        MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if (program == null) {
@@ -63,7 +60,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
         Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
-         programOutputPort.saveProgram(program);
+        if (cohort.getCohortLoanDetail() != null){
+           CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.saveCohortLoanDetails(cohort,retrievedCohort.getId());
+            retrievedCohort.setCohortLoanDetail(cohortLoanDetail);
+        }
+        programOutputPort.saveProgram(program);
         return retrievedCohort;
     }
 
@@ -71,31 +72,48 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         CohortEntity cohortEntity;
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
-
-            if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
-                cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
-                cohortToUpdate.setUpdatedAt(LocalDateTime.now());
-                activateStatus(cohortToUpdate);
-                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-                cohortRepository.save(cohortEntity);
-
-            } else {
-                throw new CohortException(COHORT_EXIST.getMessage());
-            }
+            cohortEntity = updateCohort(cohort, cohortToUpdate);
         } else {
-            cohort.setCreatedAt(LocalDateTime.now());
-            activateStatus(cohort);
-            ProgramCohort newProgramCohort = new ProgramCohort();
-            cohortEntity = cohortMapper.toCohortEntity(cohort);
-            cohortRepository.save(cohortEntity);
-            cohort = cohortMapper.toCohort(cohortEntity);
-            program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-
-            newProgramCohort.setCohort(cohort);
-            newProgramCohort.setProgram(program.getId());
-            programCohortOutputPort.save(newProgramCohort);
+            cohortEntity = newCohort(cohort, program);
         }
         return cohortMapper.toCohort(cohortEntity);
+    }
+
+    private CohortEntity updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
+        CohortEntity cohortEntity;
+        if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
+            cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+            CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
+            if (cohortLoanDetail != null){
+                throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+            }
+            cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
+            cohortToUpdate.setUpdatedAt(LocalDateTime.now());
+            cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
+            activateStatus(cohortToUpdate);
+            cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
+            cohortRepository.save(cohortEntity);
+
+        } else {
+            throw new CohortException(COHORT_EXIST.getMessage());
+        }
+        return cohortEntity;
+    }
+
+    private CohortEntity newCohort(Cohort cohort, Program program) {
+        CohortEntity cohortEntity;
+        cohort.setCreatedAt(LocalDateTime.now());
+        activateStatus(cohort);
+        ProgramCohort newProgramCohort = new ProgramCohort();
+        cohortEntity = cohortMapper.toCohortEntity(cohort);
+        cohortRepository.save(cohortEntity);
+        cohort = cohortMapper.toCohort(cohortEntity);
+        program.setNumberOfCohort(program.getNumberOfCohort() + 1);
+        newProgramCohort.setCohort(cohort);
+        newProgramCohort.setProgramId(program.getId());
+        log.info("The program id is {}", newProgramCohort.getProgramId());
+        programCohortOutputPort.save(newProgramCohort);
+        return cohortEntity;
     }
 
     private static void activateStatus(Cohort cohort) {
@@ -123,6 +141,15 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         }
         List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
         return getCohort(cohortId,programCohorts );
+    }
+
+    @Transactional
+    @Override
+    public void deleteCohort(String id) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
+        CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+            programCohortOutputPort.deleteAllByCohort(cohortEntity);
+        cohortRepository.deleteById(id);
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {

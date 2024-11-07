@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutPutPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -20,7 +20,7 @@ class AdminInitializerTest {
     @Autowired
     private AdminInitializer adminInitializer;
     @Autowired
-    private IdentityManagerOutPutPort identityManagerOutPutPort;
+    private IdentityManagerOutputPort identityManagerOutPutPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @BeforeEach
@@ -29,15 +29,12 @@ class AdminInitializerTest {
     @Test
     @Order(1)
     void initializeFirstUser(){
-        UserIdentity userIdentity = null;
         try {
-            userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
+            UserIdentity userIdentity = adminInitializer.inviteFirstUser(getUserIdentity());
+            assertNotNull(userIdentity);
+            assertNotNull(userIdentity.getId());
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
-        }finally {
-            log.error("finally block initiated...");
-                assertNotNull(userIdentity);
-                assertNotNull(userIdentity.getId());
         }
     }
     @Test

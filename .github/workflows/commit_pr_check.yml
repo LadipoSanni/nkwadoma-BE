@@ -1,9 +1,6 @@
 name: Commit and PR Tracker
 
 on:
-  pull_request:
-    branches:
-      - dev
   schedule:
     - cron: "0 9 * * *"
     - cron: "0 11 * * *"
@@ -11,8 +8,21 @@ on:
     - cron: "0 17 * * *"
 
 jobs:
-  track-build:
+  check-all-workflows:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Check All Workflows Script
+        run: |
+          chmod +x .github/workflows/scripts/check-all-workflows.sh
+          .github/workflows/scripts/check-all-workflows.sh
+
+  track-build:
+    needs: check-all-workflows
+    runs-on: ubuntu-latest
+    if: always()  # Runs regardless of success or failure of the previous job
 
     steps:
       - name: Checkout Code
@@ -28,27 +38,17 @@ jobs:
       - name: Initialize or Increment Build Count
         id: build_count
         run: |
-          # Function to initialize the build tracker file if it doesn't exist
           initialize_tracker() {
+            # Remove build_tracker.json directory if it exists
+            if [ -d "./build_tracker.json" ]; then
+              rm -rf ./build_tracker.json
+            fi
+      
             echo "Initializing build tracker..."
-            local initial_data='{"count": 1, "builds": []}'
-            echo "$initial_data" > ./build_tracker.json
+            echo '{"count": 1, "builds": []}' > ./build_tracker.json
             echo "::set-output name=count::1"
           }
 
-          # Function to update the tracker with the latest build information
-          update_tracker() {
-            local new_count=$1
-            local builds=$2
-            local new_build=$3
-
-            # Append the new build to the existing list
-            builds=$(echo "$builds" | jq ". + [$new_build]")
-            echo "{\"count\": $new_count, \"builds\": $builds}" > ./build_tracker.json
-            echo "::set-output name=count::$new_count"
-          }
-
-          # Load existing data or initialize if missing
           if [ -f "./build_tracker.json" ]; then
             count=$(jq '.count' ./build_tracker.json)
             builds=$(jq '.builds' ./build_tracker.json)
@@ -61,7 +61,6 @@ jobs:
             builds="[]"
           fi
 
-          # Collect build details
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           BRANCH="${{ github.head_ref || github.ref_name }}"
@@ -70,10 +69,8 @@ jobs:
 
           update_tracker $new_count "$builds" "$new_build"
 
-          # Calculate time difference in hours between builds
           TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
 
-          # Export variables to environment
           echo "count=$new_count" >> $GITHUB_ENV
           echo "builds=$builds" >> $GITHUB_ENV
           echo "timestamp=$BUILD_TIMESTAMP" >> $GITHUB_ENV
@@ -94,7 +91,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
@@ -103,7 +100,7 @@ jobs:
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
       - name: Send Activity Summary Email
-        if: ${{ env.count > 0 }}  # Fixed comparison condition
+        if: ${{ env.count > 0 }}
         env:
           SMTP_SERVER: semicolon.africa
           SMTP_PORT: 465

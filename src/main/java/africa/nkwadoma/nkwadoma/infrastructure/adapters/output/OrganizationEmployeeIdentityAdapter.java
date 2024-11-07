@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -13,7 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.*;
+
+import java.util.*;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
@@ -33,11 +39,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public OrganizationEmployeeIdentity findById(String id)throws MeedlException {
-        if(!StringUtils.isEmpty(id)){
-            OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
-            return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
-        }
-        throw new IdentityException(ORGANIZATION_IDENTITY_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(id);
+        OrganizationEmployeeEntity organizationEmployeeIdentity = employeeAdminEntityRepository.findById(id).orElseThrow(()->new IdentityException(USER_NOT_FOUND.getMessage()));
+        return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployeeIdentity);
     }
 
     @Override
@@ -48,10 +52,22 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
               log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
               throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
           }
-
           return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
       }
         throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        Page<OrganizationEmployeeEntity> organizationEmployees =
+                employeeAdminEntityRepository.findAllByOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
+        if (organizationEmployees.isEmpty()) {
+            throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
+        }
+        return organizationEmployees.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
     @Override
@@ -84,4 +100,13 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
 
+
+    @Override
+    public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        List<OrganizationEmployeeEntity> employeeEntities = employeeAdminEntityRepository.findAllByOrganization(organizationId);
+        return employeeEntities.stream()
+                .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
+                .toList();
+    }
 }

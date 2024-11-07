@@ -4,15 +4,18 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohort
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramCohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.ProgramCohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramCohortRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort {
 
@@ -30,7 +33,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     public ProgramCohort findByProgramId(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         ProgramCohortEntity programCohortEntity =
-                programCohortRepository.findByProgram(programId);
+                programCohortRepository.findByProgramId(programId);
         return programCohortMapper.toProgramCohort(programCohortEntity);
     }
 
@@ -38,7 +41,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     public List<ProgramCohort> findAllByProgramId(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         List<ProgramCohortEntity> programCohortEntities =
-         programCohortRepository.findAllByProgram(programId);
+         programCohortRepository.findAllByProgramId(programId);
         return programCohortMapper.toProgramCohortList(programCohortEntities);
     }
 
@@ -46,9 +49,9 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     public void save(ProgramCohort programCohort1) throws MeedlException {
         MeedlValidator.validateObjectInstance(programCohort1);
         ProgramCohortEntity programCohortEntity =
-                programCohortMapper.toProgramCohortEntity(programCohort1);
-        programCohortRepository.save(programCohortEntity);
-
+                programCohortMapper.toProgramCohortEntity(programCohort);
+        log.info("mappeed program cohort entity {}", programCohortEntity.getProgramId());
+        programCohortEntity = programCohortRepository.save(programCohortEntity);
     }
 
     @Transactional
@@ -59,5 +62,8 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
         programOutputPort.deleteProgram(id);
     }
 
-
+    @Override
+    public void deleteAllByCohort(CohortEntity cohort) {
+        programCohortRepository.deleteAllByCohort(cohort);
+    }
 }

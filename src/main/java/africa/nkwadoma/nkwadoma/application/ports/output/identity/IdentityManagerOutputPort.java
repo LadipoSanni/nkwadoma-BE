@@ -13,7 +13,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.List;
 import java.util.Optional;
 
-public interface IdentityManagerOutPutPort {
+public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
@@ -23,8 +23,19 @@ public interface IdentityManagerOutPutPort {
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     UserIdentity createPassword(String email, String password) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
+
+    void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
+
+    ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
+
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
-    void changePassword(UserIdentity userIdentity)throws MeedlException;
+
+    void resetPassword(UserIdentity userIdentity) throws MeedlException;
+
+    void setPassword(UserIdentity userIdentity)throws MeedlException;
+
+    UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException;
+
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
@@ -37,8 +48,6 @@ public interface IdentityManagerOutPutPort {
 
     UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
-
-    UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException;
 
     ClientResource getClientResource(String clientId);
 

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -21,7 +22,18 @@ public class OrganizationIdentity {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
+    private boolean isEnabled;
     private String createdBy;
+    private String updatedBy;
+    private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
+
+    private int pageSize;
+    private int pageNumber;
+
+    private String logoImage;
+    private String bannerImage;
+    private String address;
+    private String officeAddress;
 }

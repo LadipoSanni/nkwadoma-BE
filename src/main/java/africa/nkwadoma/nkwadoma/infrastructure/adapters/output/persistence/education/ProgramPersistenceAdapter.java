@@ -84,6 +84,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void validateCreatedBy(Program program) throws MeedlException {
         log.info("Validating the created by: {}",program.getCreatedBy());
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+        if (ObjectUtils.isEmpty(employeeIdentity)) {
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+        }
     }
 
 
@@ -95,7 +98,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public void deleteProgram(String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
         MeedlValidator.validateUUID(programId);
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));

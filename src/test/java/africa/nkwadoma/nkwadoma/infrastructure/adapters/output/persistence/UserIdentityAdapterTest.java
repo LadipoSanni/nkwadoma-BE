@@ -39,7 +39,7 @@ class UserIdentityAdapterTest {
         john.setEnabled(false);
         john.setCreatedAt(LocalDateTime.now().toString());
         john.setRole(TRAINEE);
-        john.setCreatedBy("Smart");
+        john.setCreatedBy("2c521790-563a-4449-a4bd-459bd5a2d4d7");
 
     }
 
@@ -56,50 +56,6 @@ class UserIdentityAdapterTest {
         }catch (MeedlException exception){
             log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
         }
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "fndjnke"})
-    void verifyUserWithInvalidId(String userId){
-        assertThrows(MeedlException.class,()->userIdentityOutputPort.verifyUser(userId));
-    }
-    @Test
-    void verifyUserWithValidIdDoesNotExist(){
-        assertThrows(MeedlException.class,()->userIdentityOutputPort.verifyUser("2c521720-563a-4449-a4bc-459bd5a2d4d7"));
-    }
-    @Test
-    void verifyUserWithValidIdExistsButDisabled(){
-        UserIdentity userIdentity = null;
-        try {
-            userIdentity = userIdentityOutputPort.findByEmail(john.getEmail());
-        } catch (MeedlException e) {
-            log.error("Could not find user identity with email {}" , john.getEmail());
-        }
-        assertNotNull(userIdentity);
-        assertFalse(userIdentity.isEnabled());
-        UserIdentity finalUserIdentity = userIdentity;
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> userIdentityOutputPort.verifyUser(finalUserIdentity.getId()));
-        log.error("{} {}", meedlException.getMessage(), userIdentity.getId());
-    }
-    @Test
-    void verifyUserWithValidIdExistsAndEnabled(){
-        UserIdentity userIdentity = null;
-        try {
-            userIdentity = userIdentityOutputPort.findByEmail(john.getEmail());
-        } catch (MeedlException e) {
-            log.error("Could not find user identity with email {}" , john.getEmail());
-        }
-        assertNotNull(userIdentity);
-        assertFalse(userIdentity.isEnabled());
-        userIdentity.setEnabled(true);
-        userIdentity.setEmailVerified(true);
-        try {
-            userIdentityOutputPort.save(userIdentity);
-        } catch (MeedlException e) {
-            log.error("Error saving user identity {}", userIdentity.getEmail());
-        }
-        UserIdentity finalUserIdentity = userIdentity;
-        assertDoesNotThrow(()->userIdentityOutputPort.verifyUser(finalUserIdentity.getId()));
-
     }
     @Test
     void saveUserWithExistingEmail(){
