@@ -100,7 +100,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohortEntity;
     }
 
-    private CohortEntity newCohort(Cohort cohort, Program program) {
+    private CohortEntity newCohort(Cohort cohort, Program program) throws MeedlException {
         CohortEntity cohortEntity;
         cohort.setCreatedAt(LocalDateTime.now());
         activateStatus(cohort);
@@ -148,7 +148,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateDataElement(id);
         CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
-            programCohortOutputPort.deleteAllByCohort(cohortEntity);
+        programCohortOutputPort.deleteAllByCohort(cohortEntity);
         cohortRepository.deleteById(id);
     }
 

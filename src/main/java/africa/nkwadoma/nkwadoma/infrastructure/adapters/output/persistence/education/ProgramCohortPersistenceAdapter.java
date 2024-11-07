@@ -49,7 +49,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     public void save(ProgramCohort programCohort1) throws MeedlException {
         MeedlValidator.validateObjectInstance(programCohort1);
         ProgramCohortEntity programCohortEntity =
-                programCohortMapper.toProgramCohortEntity(programCohort);
+                programCohortMapper.toProgramCohortEntity(programCohort1);
         log.info("mappeed program cohort entity {}", programCohortEntity.getProgramId());
         programCohortEntity = programCohortRepository.save(programCohortEntity);
     }
@@ -58,7 +58,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     @Override
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
-        programCohortRepository.deleteAllByProgram(id);
+        programCohortRepository.deleteAllByProgramId(id);
         programOutputPort.deleteProgram(id);
     }
 
