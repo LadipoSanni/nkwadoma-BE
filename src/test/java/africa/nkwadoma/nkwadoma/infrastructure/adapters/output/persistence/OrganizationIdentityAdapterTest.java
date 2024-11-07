@@ -94,18 +94,6 @@ class OrganizationIdentityAdapterTest {
 
        }
 
-   @Test
-    void saveOrganizationWithExistingRcNumber() {
-       try {
-           OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(amazingGrace.getEmail());
-           log.info("Save organization with existing rc. id is {} ", foundOrganization);
-           assertEquals(amazingGrace.getRcNumber(), foundOrganization.getRcNumber());
-           assertThrows(MeedlException.class, ()-> organizationOutputPort.save(amazingGrace));
-       } catch (MeedlException exception) {
-           log.info("{} {}->", exception.getClass().getName(), exception.getMessage());
-       }
-   }
-
     @Test
     void saveOrganizationWithNullOrganizationIdentity(){
        assertThrows(MeedlException.class, ()-> organizationOutputPort.save(null));

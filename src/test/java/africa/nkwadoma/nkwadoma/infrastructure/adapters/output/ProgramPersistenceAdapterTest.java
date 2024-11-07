@@ -93,7 +93,6 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity.setRole(PORTFOLIO_MANAGER);
     }
-
     @BeforeAll
     void init() {
         try {

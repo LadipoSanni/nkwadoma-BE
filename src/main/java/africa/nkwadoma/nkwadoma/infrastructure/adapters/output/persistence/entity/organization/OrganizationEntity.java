@@ -1,4 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -27,9 +28,17 @@ public class OrganizationEntity {
     private String phoneNumber;
     private String rcNumber;
     private String createdBy;
+    private String updatedBy;
+    private LocalDateTime timeUpdated;
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
+
+
+    private String logoImage;
+    private String bannerImage;
+    private String address;
+    private String officeAddress;
 //    private List<String> serviceOfferings = new ArrayList<>();
 
 
