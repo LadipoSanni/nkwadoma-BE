@@ -54,30 +54,30 @@ public class CohortController {
             @RequestParam @NotBlank(message = "User ID is required") String userId,
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
-            Cohort cohort = cohortUseCase.viewCohortDetails(userId, programId, cohortId);
-            CohortResponse cohortResponse =
-                    cohortMapper.toCohortResponse(cohort);
-            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .data(cohortResponse)
-                    .message(COHORT_VIEWED)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        Cohort cohort = cohortUseCase.viewCohortDetails(userId, programId, cohortId);
+        CohortResponse cohortResponse =
+                cohortMapper.toCohortResponse(cohort);
+        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                .data(cohortResponse)
+                .message(COHORT_VIEWED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 
     @PostMapping("cohort/edit")
     public ResponseEntity<ApiResponse<?>> editCohort(@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
-            Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
-            cohortUseCase.createOrEditCohort(cohort);
-            CohortResponse cohortResponse =
-                    cohortMapper.toCohortResponse(cohort);
-            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .data(cohortResponse)
-                    .message(COHORT_EDITED_SUCCESSFULLY)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
+        cohortUseCase.createOrEditCohort(cohort);
+        CohortResponse cohortResponse =
+                cohortMapper.toCohortResponse(cohort);
+        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                .data(cohortResponse)
+                .message(COHORT_EDITED_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 
@@ -99,11 +99,11 @@ public class CohortController {
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
-            cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
-            return new ResponseEntity<>(ApiResponse.<String>builder()
-                    .message(COHORT_INVITED)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build(), HttpStatus.OK);
+        cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
+        return new ResponseEntity<>(ApiResponse.<String>builder()
+                .message(COHORT_INVITED)
+                .statusCode(HttpStatus.OK.toString())
+                .build(), HttpStatus.OK);
     }
 }
 
