@@ -110,49 +110,4 @@ public class LoanProduct {
             this.interestRate = interestRate;
         }
     }
-
-    public void updateValues(LoanProduct existingLoanProduct) {
-        if (isEmptyString(this.name)) {
-            this.setName(existingLoanProduct.getName());
-        }
-        if (isEmptyString(this.termsAndCondition)) {
-            this.setTermsAndCondition(existingLoanProduct.getTermsAndCondition());
-        }
-        if (isEmptyString(this.mandate)) {
-            this.setMandate(existingLoanProduct.getMandate());
-        }
-        if (this.loanProductSize.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-            this.setLoanProductSize(existingLoanProduct.getLoanProductSize());
-        }
-        if (this.obligorLoanLimit.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
-            this.setObligorLoanLimit(existingLoanProduct.getObligorLoanLimit());
-        }
-
-        if (isEmptyString(this.disbursementTerms)) {
-            this.setDisbursementTerms(existingLoanProduct.getDisbursementTerms());
-        }
-
-        if (this.moratorium < BigInteger.ZERO.intValue()) {
-            this.setMoratorium(existingLoanProduct.getMoratorium()) ;
-        }
-
-        if (ObjectUtils.isEmpty(this.loanProductStatus)) {
-            this.setLoanProductStatus(existingLoanProduct.getLoanProductStatus());
-        }
-
-        if (this.tenor < BigInteger.ZERO.intValue()) {
-            this.setTenor(existingLoanProduct.getTenor());
-        }
-
-        if (this.interestRate < BigInteger.ZERO.intValue()) {
-            this.setInterestRate(existingLoanProduct.getInterestRate());
-        }
-
-        if (this.costOfFund < BigDecimal.ZERO.intValue()) {
-            this.costOfFund = existingLoanProduct.getCostOfFund();
-        }
-        if (ObjectUtils.isEmpty(this.sponsors)) {
-            this.setSponsors(existingLoanProduct.getSponsors());
-        }
-    }
 }
