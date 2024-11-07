@@ -169,7 +169,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         userIdentity.setNewPassword(password);
         log.info("User ID for user creating password : {}", userIdentity);
-        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()){
+        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()) {
             log.error("User already verified can not create new password for this user {}", userIdentity.getEmail());
             throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
         }
@@ -208,10 +208,13 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         return credential;
     }
     @Override
-    public UserIdentity verifyUserExists(UserIdentity userIdentity) throws MeedlException {
+    public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
         MeedlValidator.validateUUID(userRepresentation.getId());
+        if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
+            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+        }
         userIdentity.setId(userRepresentation.getId());
         return userIdentity;
     }
@@ -317,7 +320,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .clients()
                 .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
-
     }
     private ClientRepresentation createClientRepresentation(OrganizationIdentity organizationIdentity) {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
@@ -376,6 +378,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         }
         return roleRepresentation;
     }
+
 
     @Override
     public void logout(UserIdentity userIdentity) throws MeedlException {

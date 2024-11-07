@@ -42,11 +42,9 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findById(String id) throws MeedlException {
-        if (StringUtils.isNotEmpty(id)){
-            UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-            return userIdentityMapper.toUserIdentity(userEntity);
-        }
-        throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(id);
+        UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        return userIdentityMapper.toUserIdentity(userEntity);
     }
 
     @Override
@@ -76,9 +74,10 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public void verifyUser(String actorId) throws MeedlException {
         MeedlValidator.validateUUID(actorId);
         UserIdentity userIdentity = findById(actorId);
-        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
-            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
-        }
+
+//        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
+//            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
+//        }
     }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {

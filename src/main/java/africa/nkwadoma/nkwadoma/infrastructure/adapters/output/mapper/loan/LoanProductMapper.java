@@ -4,9 +4,9 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
-import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -21,7 +21,11 @@ public interface LoanProductMapper {
 
     LoanProduct mapEntityToLoanProduct(LoanProductEntity entity);
 
+    LoanProduct mapLoanProductToLoanProduct(LoanProduct loanProduct);
+
     VendorEntity mapVendorToVendorEntity(Vendor vendor);
 
     Vendor mapVendorEntityToVendor(VendorEntity vendorEntity);
+
+    LoanProduct updateLoanProduct(@MappingTarget LoanProduct loanProduct, LoanProduct product);
 }
