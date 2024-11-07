@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -25,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +43,8 @@ class OrganizationIdentityServiceTest {
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityMapper organizationIdentityMapper;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
@@ -144,8 +149,17 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
     }
     @Test
+    void updateOrganizationWithNewName(){
+        roseCouture.setName("orgId");
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
+    }
+    @Test
     void updateOrganization() {
         try {
+            roseCouture.setName(null);
+            roseCouture.setRcNumber(null);
+            when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
+            when(organizationIdentityMapper.updateOrganizationIdentity(roseCouture,roseCouture)).thenReturn(roseCouture);
             when(organizationIdentityOutputPort.save(roseCouture)).thenAnswer(invocation -> {
                 roseCouture.setTimeUpdated(LocalDateTime.now());
                 roseCouture.setUpdatedBy(mockId);

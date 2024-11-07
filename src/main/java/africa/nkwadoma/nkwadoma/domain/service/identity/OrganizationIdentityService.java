@@ -126,9 +126,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         if (StringUtils.isNotEmpty(organizationIdentity.getRcNumber())) {
             throw new MeedlException("Rc number cannot be updated!");
         }
-        if (StringUtils.isNotEmpty(organizationIdentity.getEmail())) {
-            throw new MeedlException("Email cannot be updated!");
-        }
     }
 
     @Override

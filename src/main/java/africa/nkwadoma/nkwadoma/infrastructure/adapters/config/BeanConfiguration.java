@@ -57,9 +57,10 @@ public class BeanConfiguration {
             IdentityManagerOutputPort identityManagerOutPutPort,
             UserIdentityOutputPort userIdentityOutputPort,
             OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase
+            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
+            OrganizationIdentityMapper organizationIdentityMapper
             ){
-        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
+        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,organizationIdentityMapper, userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
     }
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
