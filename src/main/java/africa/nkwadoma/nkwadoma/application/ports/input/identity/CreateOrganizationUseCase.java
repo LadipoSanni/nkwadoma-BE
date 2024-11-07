@@ -11,4 +11,5 @@ public interface CreateOrganizationUseCase {
 
     OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException;
 
+    OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 }

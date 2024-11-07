@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -25,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -37,13 +40,15 @@ class OrganizationIdentityServiceTest {
     private OrganizationIdentityService organizationIdentityService;
 
     @Mock
+    private IdentityManagerOutputPort identityManagerOutPutPort;
+    @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityMapper organizationIdentityMapper;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
-    private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
@@ -51,17 +56,18 @@ class OrganizationIdentityServiceTest {
     private UserIdentity sarah;
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
+    private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
 
     @BeforeEach
     void setUp() {
 
         sarah = new UserIdentity();
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        sarah.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah.setId(mockId);
         sarah.setFirstName("Sarah");
         sarah.setLastName("Jacobs");
         sarah.setEmail("divinemercy601@gmail.com");
-        sarah.setCreatedBy("83f744df-78a2-4db6-bb04-b81545e78e49");
+        sarah.setCreatedBy(mockId);
 
         employeeSarah = new OrganizationEmployeeIdentity();
         employeeSarah.setMeedlUser(sarah);
@@ -115,6 +121,15 @@ class OrganizationIdentityServiceTest {
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void inviteOrganizationWithInvalidEmail(String email){
+        roseCouture.setEmail(email);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
+
     @Test
     void inviteOrganizationWithNullEmail() {
         roseCouture.setEmail(null);
@@ -123,11 +138,51 @@ class OrganizationIdentityServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
-    void inviteOrganizationWithInvalidEmail(String email) {
-        roseCouture.setEmail(email);
-        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    void updateOrganizationWithInvalidOrganizationId(String orgId){
+        roseCouture.setId(orgId);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
     }
-
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void updateOrganizationWithInvalidOrganizationUpdatedBy(String orgId){
+        roseCouture.setUpdatedBy(orgId);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
+    }
+    @Test
+    void updateOrganizationWithNewName(){
+        roseCouture.setName("orgId");
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
+    }
+    @Test
+    void updateOrganizationWithNewRcNumber(){
+        roseCouture.setRcNumber("orgId");
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
+    }
+    @Test
+    void updateOrganization() {
+        try {
+            roseCouture.setName(null);
+            roseCouture.setRcNumber(null);
+            when(organizationIdentityOutputPort.findById(anyString())).thenReturn(roseCouture);
+            when(organizationIdentityMapper.updateOrganizationIdentity(roseCouture,roseCouture)).thenReturn(roseCouture);
+            when(organizationIdentityOutputPort.save(roseCouture)).thenAnswer(invocation -> {
+                roseCouture.setTimeUpdated(LocalDateTime.now());
+                roseCouture.setUpdatedBy(mockId);
+                roseCouture.setWebsiteAddress("newwebsite");
+                return roseCouture;
+            });
+            roseCouture.setUpdatedBy(mockId);
+            roseCouture.setId(mockId);
+            OrganizationIdentity updateOrganization = organizationIdentityService.updateOrganization(roseCouture);
+            assertNotNull(updateOrganization);
+            assertNotNull(updateOrganization.getUpdatedBy());
+            assertNotNull(updateOrganization.getTimeUpdated());
+            assertEquals(roseCouture.getWebsiteAddress(), updateOrganization.getWebsiteAddress());
+            assertEquals(roseCouture.getName(), updateOrganization.getName());
+        } catch (Exception e) {
+            log.error("Failed to update organization {}", e.getMessage());
+        }
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
     void deactivateOrganizationWithInvalidId(String id) {
