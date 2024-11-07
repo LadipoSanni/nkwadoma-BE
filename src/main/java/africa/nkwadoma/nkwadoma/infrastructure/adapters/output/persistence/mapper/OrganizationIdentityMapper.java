@@ -31,5 +31,5 @@ public interface OrganizationIdentityMapper {
 
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
-    OrganizationIdentity updateOrganizationIdentity(OrganizationIdentity organizationIdentityMapFrom, OrganizationIdentity organizationIdentityMapTo);
+    OrganizationIdentity updateOrganizationIdentity(@MappingTarget OrganizationIdentity organizationIdentityMapTo, OrganizationIdentity organizationIdentityMapFrom);
 }

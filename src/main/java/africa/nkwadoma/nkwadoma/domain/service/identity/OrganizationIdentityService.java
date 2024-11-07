@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -111,11 +112,25 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
+        validateNonUpdatableValues(organizationIdentity);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
         foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization,organizationIdentity);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
         return organizationIdentityOutputPort.save(foundOrganization);
     }
+
+    private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {
+        if (StringUtils.isNotEmpty(organizationIdentity.getName())) {
+            throw new MeedlException("Company name cannot be updated!");
+        }
+        if (StringUtils.isNotEmpty(organizationIdentity.getRcNumber())) {
+            throw new MeedlException("Rc number cannot be updated!");
+        }
+        if (StringUtils.isNotEmpty(organizationIdentity.getEmail())) {
+            throw new MeedlException("Email cannot be updated!");
+        }
+    }
+
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
