@@ -42,12 +42,16 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         if (existsByName(loanProduct.getName())){
             throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
         }
+        List<Vendor> vendors = saveVendors(loanProduct);
         LoanProductEntity loanProductEntity = loanProductMapper.mapLoanProductToEntity(loanProduct);
         loanProductEntity.setCreatedAt(LocalDateTime.now());
         loanProductEntity.setTotalNumberOfLoanProduct(loanProductEntity.getTotalNumberOfLoanProduct() +BigInteger.ONE.intValue());
         LoanProductEntity savedLoanProductEntity = loanProductEntityRepository.save(loanProductEntity);
+        savedLoanProductVendors(vendors, savedLoanProductEntity);
         log.info("Loan product created {}",  loanProduct);
-        return loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+        loanProduct = loanProductMapper.mapEntityToLoanProduct(savedLoanProductEntity);
+        loanProduct.setVendors(vendors);
+        return loanProduct;
     }
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {

@@ -379,6 +379,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         return roleRepresentation;
     }
 
+
     @Override
     public void logout(UserIdentity userIdentity) throws MeedlException {
         UserResource userResource = getUserResource(userIdentity);
