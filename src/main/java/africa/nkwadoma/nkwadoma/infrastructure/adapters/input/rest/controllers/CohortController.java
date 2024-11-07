@@ -44,13 +44,6 @@ public class CohortController {
             Cohort cohort = cohortMapper.toCohort(createCohortRequest);
             cohort = cohortUseCase.createOrEditCohort(cohort);
             CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
-    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) {
-        try {
-            Cohort cohort =
-                    cohortMapper.toCohort(createCohortRequest);
-            cohort = cohortUseCase.createCohort(cohort);
-            CohortResponse cohortResponse =
-                    cohortMapper.toCohortResponse(cohort);
             cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
                                                     .map(cohortMapper::toLoanBreakdownResponse)
                                                     .toList());
