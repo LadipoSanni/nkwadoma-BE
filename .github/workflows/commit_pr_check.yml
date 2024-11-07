@@ -39,19 +39,14 @@ jobs:
         id: build_count
         run: |
           initialize_tracker() {
+            # Remove build_tracker.json directory if it exists
+            if [ -d "./build_tracker.json" ]; then
+              rm -rf ./build_tracker.json
+            fi
+      
             echo "Initializing build tracker..."
             echo '{"count": 1, "builds": []}' > ./build_tracker.json
             echo "::set-output name=count::1"
-          }
-
-          update_tracker() {
-            local new_count=$1
-            local builds=$2
-            local new_build=$3
-
-            builds=$(echo "$builds" | jq ". + [$new_build]")
-            echo "{\"count\": $new_count, \"builds\": $builds}" > ./build_tracker.json
-            echo "::set-output name=count::$new_count"
           }
 
           if [ -f "./build_tracker.json" ]; then
