@@ -57,7 +57,7 @@ class UserIdentityServiceTest {
         favour.setLastName("gabriel");
         favour.setPassword("Passkey90@");
         favour.setEmail("favour@gmail.com");
-        favour.setRole(IdentityRole.INSTITUTE_ADMIN);
+        favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
         favour.setId("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
         favour.setReactivationReason("Reason for reactivation is to test");
         favour.setDeactivationReason("Reason for deactivation is to test");;

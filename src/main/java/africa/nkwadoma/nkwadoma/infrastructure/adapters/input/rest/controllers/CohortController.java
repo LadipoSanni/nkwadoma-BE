@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditCohortLoanDetailRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.CohortRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +36,11 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class CohortController {
+
+
     private final CohortUseCase cohortUseCase;
     private final CohortRestMapper cohortMapper;
+
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
@@ -44,6 +48,9 @@ public class CohortController {
             Cohort cohort = cohortMapper.toCohort(createCohortRequest);
             cohort = cohortUseCase.createOrEditCohort(cohort);
             CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
+            cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
+                                                    .map(cohortMapper::toLoanBreakdownResponse)
+                                                    .toList());
             ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                     .data(cohortResponse)
                     .message(COHORT_CREATED)
@@ -83,8 +90,6 @@ public class CohortController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
-
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
@@ -110,5 +115,3 @@ public class CohortController {
                 .build(), HttpStatus.OK);
     }
 }
-
-

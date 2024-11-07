@@ -53,7 +53,6 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         loanProduct.setVendors(vendors);
         return loanProduct;
     }
-
     private List<LoanProductVendor> savedLoanProductVendors(List<Vendor> vendors, LoanProductEntity savedLoanProductEntity) {
         if (vendors != null) {
             return vendors.stream()

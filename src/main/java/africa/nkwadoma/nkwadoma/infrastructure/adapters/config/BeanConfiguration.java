@@ -38,6 +38,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import org.keycloak.admin.client.Keycloak;
@@ -123,10 +124,11 @@ public class BeanConfiguration {
     public CohortPersistenceAdapter cohortPersistenceAdapter(
             ProgramOutputPort programOutputPort, CohortRepository cohortRepository, CohortMapper cohortMapper,
             UserIdentityOutputPort userIdentityOutputPort, ProgramCohortOutputPort programCohortOutputPort,
-            CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort
+            LoanBreakdownRepository loanBreakdownRepository, CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort
     ){
         return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
-                cohortMapper,userIdentityOutputPort,programCohortOutputPort,cohortLoanDetailsOutputPort);
+                cohortMapper,userIdentityOutputPort,programCohortOutputPort,
+                cohortLoanDetailsOutputPort, loanBreakdownRepository);
     }
 
     @Bean

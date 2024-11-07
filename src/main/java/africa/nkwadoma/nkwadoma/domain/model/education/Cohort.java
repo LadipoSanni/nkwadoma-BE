@@ -14,7 +14,10 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 
 @Getter
@@ -29,12 +32,15 @@ public class Cohort {
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
+    private BigDecimal tuitionAmount = BigDecimal.ZERO;
+    private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private List<UserIdentity> trainees;
     private CohortLoanDetail cohortLoanDetail;
 
