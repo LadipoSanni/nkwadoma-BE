@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
@@ -39,10 +37,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         log.info("Organization identity before saving {}", organizationIdentity);
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-        Optional<OrganizationEntity> foundOrganizationEntity = findByRcNumber(organizationIdentity.getRcNumber());
-        if (foundOrganizationEntity.isPresent()) {
-            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
-        }
+
         validate(organizationIdentity);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
@@ -58,24 +53,13 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
-    @Override
-    public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity);
-        MeedlValidator.validateUUID(organizationIdentity.getId());
-
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        organizationEntity = organizationEntityRepository.save(organizationEntity);
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-    }
 
     public void validate(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
         UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
     }
-
-
-
-    private Optional<OrganizationEntity> findByRcNumber(String rcNumber) {
+    @Override
+    public Optional<OrganizationEntity> findByRcNumber(String rcNumber) {
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 

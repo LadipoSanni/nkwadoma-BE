@@ -15,12 +15,17 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
 
 
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ import java.util.List;
 public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
+    private final OrganizationIdentityMapper organizationIdentityMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
@@ -36,7 +42,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
         public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
-
+        Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        if (foundOrganizationEntity.isPresent()) {
+            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
+        }
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -102,9 +111,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
-
-        organizationIdentity.setTimeUpdated(LocalDateTime.now());
-        return organizationIdentityOutputPort.updateOrganization(organizationIdentity);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
+        foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization,organizationIdentity);
+        foundOrganization.setTimeUpdated(LocalDateTime.now());
+        return organizationIdentityOutputPort.save(foundOrganization);
     }
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {

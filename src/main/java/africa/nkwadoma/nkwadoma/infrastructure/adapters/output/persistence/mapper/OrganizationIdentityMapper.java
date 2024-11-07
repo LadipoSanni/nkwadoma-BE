@@ -30,4 +30,6 @@ public interface OrganizationIdentityMapper {
     OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
 
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
+
+    OrganizationIdentity updateOrganizationIdentity(OrganizationIdentity organizationIdentityMapFrom, OrganizationIdentity organizationIdentityMapTo);
 }
