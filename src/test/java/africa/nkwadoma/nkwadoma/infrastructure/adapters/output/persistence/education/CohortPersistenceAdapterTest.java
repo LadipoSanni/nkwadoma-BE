@@ -9,6 +9,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -102,12 +107,18 @@ public class CohortPersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
+        LoanBreakdown loanBreakdown = new LoanBreakdown();
+        loanBreakdown.setCurrency("USD");
+        loanBreakdown.setItemAmount(new BigDecimal("50000"));
+        loanBreakdown.setItemName("Loan Break");
+
         elites = new Cohort();
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
+        elites.setLoanBreakdowns(List.of(loanBreakdown));
 
         CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
 
@@ -119,6 +130,7 @@ public class CohortPersistenceAdapterTest {
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
+        xplorers.setLoanBreakdowns(List.of(loanBreakdown));
     }
 
     private static CohortLoanDetail getCohortLoanDetail() {
@@ -171,8 +183,12 @@ public class CohortPersistenceAdapterTest {
         try {
             Cohort cohort = cohortOutputPort.saveCohort(elites);
             assertNotNull(cohort);
-            assertEquals(cohort.getName(), elites.getName());
+            assertNotNull(cohort.getId());
             cohortOneId = cohort.getId();
+            assertEquals(cohort.getName(), elites.getName());
+            assertNotNull(elites.getLoanBreakdowns());
+            assertNotNull(elites.getLoanBreakdowns().get(0));
+            assertEquals(elites.getLoanBreakdowns().get(0).getItemName(), cohort.getLoanBreakdowns().get(0).getItemName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -332,11 +348,11 @@ void deleteCohort(){
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
         programOutputPort.deleteProgram(programId);
+        cohortOutputPort.deleteCohort(cohortTwoId);
         programCohortOutputPort.delete(programId);
         organizationIdentityOutputPort.delete(organizationId);
-        cohortRepository.deleteById(cohortTwoId);
         userIdentityOutputPort.deleteUserById(meedleUserId);
+        cohortRepository.deleteById(cohortTwoId);
         cohortRepository.deleteById(cohortOneId);
     }
 }
-
