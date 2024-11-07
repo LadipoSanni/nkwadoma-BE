@@ -154,6 +154,11 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
     }
     @Test
+    void updateOrganizationWithNewRcNumber(){
+        roseCouture.setRcNumber("orgId");
+        assertThrows(MeedlException.class, () -> organizationIdentityService.updateOrganization(roseCouture));
+    }
+    @Test
     void updateOrganization() {
         try {
             roseCouture.setName(null);
