@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,5 +28,6 @@ public class CohortResponse {
     private String updatedBy;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    private CohortLoanDetailResponse cohortLoanDetail;
 
 }

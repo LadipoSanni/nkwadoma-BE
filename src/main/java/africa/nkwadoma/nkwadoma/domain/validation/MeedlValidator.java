@@ -80,6 +80,12 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
+
+    public static void validateDoubleDataElement(Double dataElement) throws MeedlException {
+        if (dataElement == null){
+            throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+    }
     public static void validatePassword(String password) throws MeedlException {
         validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
