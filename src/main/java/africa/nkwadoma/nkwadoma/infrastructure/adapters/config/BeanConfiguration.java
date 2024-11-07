@@ -127,7 +127,7 @@ public class BeanConfiguration {
     ){
         return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
                 cohortMapper,userIdentityOutputPort,programCohortOutputPort,
-                loanBreakdownRepository, cohortLoanDetailsOutputPort);
+                cohortLoanDetailsOutputPort, loanBreakdownRepository);
     }
 
     @Bean

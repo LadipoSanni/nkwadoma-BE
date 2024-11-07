@@ -80,23 +80,16 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
-            cohortEntity = updateCohort(cohort, cohortToUpdate);
+            cohort = updateCohort(cohort, cohortToUpdate);
         } else {
-            cohortEntity = newCohort(cohort, program);
+            cohort = newCohort(cohort, program);
         }
-        return cohortMapper.toCohort(cohortEntity);
+        return cohort;
     }
 
-            if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
-                cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
-                cohortToUpdate.setUpdatedAt(LocalDateTime.now());
-                activateStatus(cohortToUpdate);
-                cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-                cohortEntity.setTotalCohortFee(totalCohortFee);
-                cohortEntity = cohortRepository.save(cohortEntity);
-                savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
-    private CohortEntity updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
+    private Cohort updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
         CohortEntity cohortEntity;
+        List<LoanBreakdown> savedLoanBreakdowns;
         if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
             CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
@@ -109,49 +102,31 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             activateStatus(cohortToUpdate);
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
             cohortRepository.save(cohortEntity);
-
+            savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
             } else {
                 throw new CohortException(COHORT_EXIST.getMessage());
             }
-        } else {
-            cohort.setCreatedAt(LocalDateTime.now());
-            activateStatus(cohort);
-            ProgramCohort newProgramCohort = new ProgramCohort();
-            cohortEntity = cohortMapper.toCohortEntity(cohort);
-            cohortEntity.setTotalCohortFee(totalCohortFee);
-            cohortEntity = cohortRepository.save(cohortEntity);
-            savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
-            cohort = cohortMapper.toCohort(cohortEntity);
-            program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-
-            newProgramCohort.setCohort(cohort);
-            newProgramCohort.setProgramId(program.getId());
-            log.info("The program id is {}", newProgramCohort.getProgramId());
-            programCohortOutputPort.save(newProgramCohort);
-        }
         cohort = cohortMapper.toCohort(cohortEntity);
         cohort.setLoanBreakdowns(savedLoanBreakdowns);
         return cohort;
-        } else {
-            throw new CohortException(COHORT_EXIST.getMessage());
-        }
-        return cohortEntity;
     }
 
-    private CohortEntity newCohort(Cohort cohort, Program program) {
-        CohortEntity cohortEntity;
+    private Cohort newCohort(Cohort cohort, Program program) {
         cohort.setCreatedAt(LocalDateTime.now());
         activateStatus(cohort);
         ProgramCohort newProgramCohort = new ProgramCohort();
-        cohortEntity = cohortMapper.toCohortEntity(cohort);
-        cohortRepository.save(cohortEntity);
+        CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
+        cohortEntity = cohortRepository.save(cohortEntity);
+        List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
         cohort = cohortMapper.toCohort(cohortEntity);
         program.setNumberOfCohort(program.getNumberOfCohort() + 1);
         newProgramCohort.setCohort(cohort);
         newProgramCohort.setProgramId(program.getId());
         log.info("The program id is {}", newProgramCohort.getProgramId());
         programCohortOutputPort.save(newProgramCohort);
-        return cohortEntity;
+        cohort = cohortMapper.toCohort(cohortEntity);
+        cohort.setLoanBreakdowns(savedLoanBreakdowns);
+        return cohort;
     }
 
     private static void activateStatus(Cohort cohort) {
