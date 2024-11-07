@@ -5,6 +5,7 @@ public interface AllowedHost {
     String[] methods = {
             "GET",
             "POST",
+            "PATCH",
             "DELETE",
             "OPTIONS",
             "HEAD"

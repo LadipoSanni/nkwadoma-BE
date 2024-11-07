@@ -157,6 +157,9 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
         }
     }
+
+
+
     @Override
     public UserIdentity createPassword(String email, String password) throws MeedlException {
         email = email.trim();
@@ -175,7 +178,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
         return userIdentity;
     }
-
 
     @Override
     public void resetPassword(UserIdentity userIdentity) throws MeedlException {
@@ -319,7 +321,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .findByClientId(clientName)
                 .stream().findFirst().orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
     }
-
     private ClientRepresentation createClientRepresentation(OrganizationIdentity organizationIdentity) {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(organizationIdentity.getName());

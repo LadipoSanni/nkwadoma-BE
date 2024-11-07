@@ -6,12 +6,16 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 
 import java.time.LocalDateTime;
@@ -98,6 +102,13 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
+    @Override
+    public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
+        Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
+        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+    }
 
     @Override
     public boolean existsById(String organizationId) {
@@ -145,6 +156,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
             serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getId());
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
+    }
+
+    @Override
+    public List<OrganizationIdentity> findByName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        log.info("Searching for organizations with name {}", name);
+        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByName(name.trim());
+        log.info("Found {} organizations", organizationEntities);
+        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
     }
 
     private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {

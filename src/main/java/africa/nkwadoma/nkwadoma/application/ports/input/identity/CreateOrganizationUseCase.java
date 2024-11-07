@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 public interface CreateOrganizationUseCase {
     OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity)throws MeedlException;
 
