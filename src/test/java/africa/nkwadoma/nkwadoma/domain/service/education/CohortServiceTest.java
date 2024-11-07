@@ -195,9 +195,9 @@ public class CohortServiceTest {
 
     @Test
     void viewAllCohortInAProgram() {
-        List<Cohort> foundCohorts = new ArrayList<>();
+        List<Cohort> foundCohorts = List.of(xplorers, elites);
 
-        Page<Cohort> allCohortInAProgram = null;
+        Page<Cohort> allCohortInAProgram = new PageImpl<>(foundCohorts);
         try {
             when(cohortOutputPort.findAllCohortInAProgram(mockId))
                     .thenReturn(foundCohorts);

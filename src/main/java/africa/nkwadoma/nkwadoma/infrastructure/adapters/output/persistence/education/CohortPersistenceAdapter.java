@@ -165,13 +165,6 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return programCohorts.stream()
                 .map(ProgramCohort::getCohort)
                 .toList();
-//        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-//        int start = (int) pageRequest.getOffset();
-//        int end = Math.min((start + pageRequest.getPageSize()), cohorts.size());
-//        if (start >= cohorts.size()) {
-//            return new PageImpl<>(Collections.emptyList(), pageRequest, cohorts.size());
-//        }
-//        return new PageImpl<>(cohorts.subList(start, end), pageRequest, cohorts.size());
     }
 
 }
