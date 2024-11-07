@@ -111,7 +111,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohort;
     }
 
-    private Cohort newCohort(Cohort cohort, Program program) {
+    private Cohort newCohort(Cohort cohort, Program program) throws MeedlException {
         cohort.setCreatedAt(LocalDateTime.now());
         activateStatus(cohort);
         ProgramCohort newProgramCohort = new ProgramCohort();
