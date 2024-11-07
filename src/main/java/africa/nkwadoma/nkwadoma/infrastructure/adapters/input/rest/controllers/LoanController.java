@@ -45,7 +45,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
 
     @PostMapping("/loan-product/create")
-//    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
