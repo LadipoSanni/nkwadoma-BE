@@ -42,6 +42,7 @@ public class Cohort {
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private List<UserIdentity> trainees;
+    private CohortLoanDetail cohortLoanDetail;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);

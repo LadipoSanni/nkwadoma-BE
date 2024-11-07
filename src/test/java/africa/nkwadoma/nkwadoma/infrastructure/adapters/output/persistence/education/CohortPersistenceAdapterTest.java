@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -115,9 +116,13 @@ public class CohortPersistenceAdapterTest {
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
         elites.setProgramId(program.getId());
-        elites.setName("Elite ");
+        elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(List.of(loanBreakdown));
+
+        CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
+
+        elites.setCohortLoanDetail(cohortLoanDetail);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -126,6 +131,21 @@ public class CohortPersistenceAdapterTest {
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(List.of(loanBreakdown));
+    }
+
+    private static CohortLoanDetail getCohortLoanDetail() {
+        CohortLoanDetail cohortLoanDetail = new CohortLoanDetail();
+        LoanDetail loanDetail = new LoanDetail();
+        loanDetail.setDebtPercentage(0.34);
+        loanDetail.setRepaymentPercentage(0.67);
+        loanDetail.setMonthlyExpected(BigDecimal.valueOf(450));
+        loanDetail.setTotalAmountRepaid(BigDecimal.valueOf(500));
+        loanDetail.setTotalInterestIncurred(BigDecimal.valueOf(600));
+        loanDetail.setLastMonthActual(BigDecimal.valueOf(200));
+        loanDetail.setTotalAmountDisbursed(BigDecimal.valueOf(50000));
+        loanDetail.setTotalOutstanding(BigDecimal.valueOf(450));
+        cohortLoanDetail.setLoanDetail(loanDetail);
+        return cohortLoanDetail;
     }
 
 
@@ -279,6 +299,50 @@ void deleteCohort(){
 
     @Order(7)
     @Test
+    void cannotEditCohortWithLoanDetails(){
+        try {
+            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId, program.getId(), cohortOneId);
+            assertThrows(MeedlException.class, () -> cohortOutputPort.saveCohort(cohort));
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @Order(8)
+    @Test
+    void cohortWithoutLoanDetailsCanBeEdited(){
+        Cohort editedCohort = new Cohort();
+        try{
+            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
+            cohort.setName("edited cohort");
+            editedCohort = cohortOutputPort.saveCohort(cohort);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(editedCohort.getName(),"edited cohort");
+    }
+
+
+    @Order(9)
+    @Test
+    void addLoanDetailsToCohort(){
+        Cohort editedCohort = new Cohort();
+        try{
+            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
+            assertNull(cohort.getCohortLoanDetail());
+            CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
+            cohort.setCohortLoanDetail(cohortLoanDetail);
+            log.info("{} = =",cohort);
+            editedCohort = cohortOutputPort.saveCohort(cohort);
+            log.info("{} = =",editedCohort);
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(editedCohort.getCohortLoanDetail());
+    }
+
+
+    @AfterAll
     void cleanUp() throws MeedlException {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
