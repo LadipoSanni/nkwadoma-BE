@@ -1,21 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -25,14 +16,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -204,12 +192,12 @@ public class CohortServiceTest {
 
     @Test
     void viewAllCohortInAProgram() {
-        Page<Cohort> mockedPage = new PageImpl<>(List.of(new Cohort(), new Cohort()));
+        List<Cohort> foundCohorts = new ArrayList<>();
 
         Page<Cohort> allCohortInAProgram = null;
         try {
-            when(cohortOutputPort.findAllCohortInAProgram(mockId, pageSize, pageNumber))
-                    .thenReturn(mockedPage);
+            when(cohortOutputPort.findAllCohortInAProgram(mockId))
+                    .thenReturn(foundCohorts);
             allCohortInAProgram = cohortService.viewAllCohortInAProgram(mockId, pageSize, pageNumber);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());

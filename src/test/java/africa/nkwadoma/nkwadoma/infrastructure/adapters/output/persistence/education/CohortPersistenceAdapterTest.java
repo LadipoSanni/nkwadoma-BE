@@ -15,7 +15,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class CohortPersistenceAdapterTest {
+class CohortPersistenceAdapterTest {
 
     @Autowired
     private CohortOutputPort cohortOutputPort;
@@ -259,8 +258,7 @@ public class CohortPersistenceAdapterTest {
     void viewAllCohortInAProgram(){
         List<Cohort> cohorts = new ArrayList<>();
         try{
-            Page<Cohort> allCohortInAProgram = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
-             cohorts = allCohortInAProgram.toList();
+            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }

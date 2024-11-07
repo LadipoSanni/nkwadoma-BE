@@ -17,13 +17,11 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +29,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
@@ -135,18 +133,18 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Page<Cohort> findAllCohortInAProgram(String programId, int pageSize, int pageNumber) throws MeedlException {
+    public List<Cohort> findAllCohortInAProgram(String programId) throws MeedlException {
         List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
-        List<Cohort> cohorts = programCohorts.stream()
+        return programCohorts.stream()
                 .map(ProgramCohort::getCohort)
-                .collect(toList());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), cohorts.size());
-        if (start >= cohorts.size()) {
-            return new PageImpl<>(Collections.emptyList(), pageRequest, cohorts.size());
-        }
-        return new PageImpl<>(cohorts.subList(start, end), pageRequest, cohorts.size());
+                .toList();
+//        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+//        int start = (int) pageRequest.getOffset();
+//        int end = Math.min((start + pageRequest.getPageSize()), cohorts.size());
+//        if (start >= cohorts.size()) {
+//            return new PageImpl<>(Collections.emptyList(), pageRequest, cohorts.size());
+//        }
+//        return new PageImpl<>(cohorts.subList(start, end), pageRequest, cohorts.size());
     }
 
 }
