@@ -349,7 +349,7 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-//    @AfterAll
+    @AfterAll
     void cleanUp() throws MeedlException {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
