@@ -116,8 +116,8 @@ public class BeanConfiguration {
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort){
-        return new CohortService(cohortOutputPort);
+    public CohortService cohortService(CohortOutputPort cohortOutputPort, ProgramOutputPort programOutputPort){
+        return new CohortService(cohortOutputPort, programOutputPort);
     }
 
     @Bean

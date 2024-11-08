@@ -1,7 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
@@ -21,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
-import java.math.BigDecimal;
+import java.math.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -30,26 +31,29 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class CohortServiceTest {
+class CohortServiceTest {
     @InjectMocks
     private CohortService cohortService;
     private Cohort elites;
     private Cohort xplorers;
     @Mock
     private CohortOutputPort cohortOutputPort;
+    @Mock
+    private ProgramOutputPort programOutputPort;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private int pageSize = 2;
     private int pageNumber = 0;
-    private OrganizationEmployeeIdentity employeeIdentity;
-    private OrganizationIdentity organizationIdentity;
     private Program program;
-
-
 
     @BeforeEach
     void setUp() {
+        program = Program.builder().id("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa").name("My program").durationType(DurationType.YEARS).
+                programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
+                objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
+                mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
+
         elites = new Cohort();
-        elites.setProgramId(mockId);
+        elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(mockId);
         elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
@@ -57,7 +61,7 @@ public class CohortServiceTest {
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
-        xplorers.setProgramId(mockId);
+        xplorers.setProgramId(program.getId());
         xplorers.setCreatedBy(mockId);
         xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
         xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
@@ -217,17 +221,53 @@ public class CohortServiceTest {
     @Test
     void viewAllCohortInAProgram() {
         List<Cohort> foundCohorts = List.of(xplorers, elites);
-
-        Page<Cohort> allCohortInAProgram = new PageImpl<>(foundCohorts);
         try {
-            when(cohortOutputPort.findAllCohortInAProgram(mockId))
-                    .thenReturn(foundCohorts);
-            allCohortInAProgram = cohortService.viewAllCohortInAProgram(mockId, pageSize, pageNumber);
-        } catch (MeedlException exception) {
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(cohortOutputPort.findAllCohortInAProgram(program.getId())).thenReturn(foundCohorts);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber);
+            List<Cohort> cohorts = allCohortInAProgram.toList();
+
+            assertEquals(2, cohorts.size());
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(program.getId());
+        }
+        catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        List<Cohort> cohorts = allCohortInAProgram.toList();
-        assertEquals(2, cohorts.size());
+    }
+
+    @Test
+    void viewCohortsInAProgramWithNullProgramId(){
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null, pageSize, pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"invalid uuid"})
+    void viewCohortsInAProgramWithNonUUIDProgramId(String programId) {
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId, pageSize, pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
+    void viewCohortsInAProgramWithInvalidProgramId(String programId){
+        try {
+            when(programOutputPort.findProgramById(programId)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error("Error finding program by ID", e);
+        }
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId, pageSize, pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void viewCohortsInAProgramWithInvalidPageSize(int pageSize) {
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1})
+    void viewCohortsInAProgramWithInvalidPageNumber(int pageNumber){
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber));
     }
 
     @ParameterizedTest

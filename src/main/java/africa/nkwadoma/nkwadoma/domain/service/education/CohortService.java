@@ -1,20 +1,24 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 
 import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
 
     private final CohortOutputPort cohortOutputPort;
+    private final ProgramOutputPort programOutputPort;
 
     @Override
     public Cohort createOrEditCohort(Cohort cohort) throws MeedlException {
@@ -28,6 +32,13 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        Program foundProgram = programOutputPort.findProgramById(id);
+        if (ObjectUtils.isEmpty(foundProgram)) {
+            throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
+        }
         List<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(id);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         int start = (int) pageRequest.getOffset();
