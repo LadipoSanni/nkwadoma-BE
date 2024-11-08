@@ -124,16 +124,15 @@ public class CohortController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("{programId}/cohorts")
+    @GetMapping("cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
-            @PathVariable @NotBlank(message = "Program ID is required") String programId,
-            @RequestParam(defaultValue = "0", required = false) int pageNumber,
-            @RequestParam(defaultValue = "10", required = false) int pageSize) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId.trim(), pageSize, pageNumber);
+            AllCohortsRequest allCohortsRequest) throws MeedlException {
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(allCohortsRequest.getProgramId(),
+                allCohortsRequest.getPageSize(), allCohortsRequest.getPageNumber());
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
-                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), allCohortsRequest.getPageNumber(), allCohortsRequest.getPageSize());
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
