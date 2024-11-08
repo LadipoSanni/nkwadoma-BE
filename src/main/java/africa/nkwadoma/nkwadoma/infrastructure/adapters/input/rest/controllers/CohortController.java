@@ -46,7 +46,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_CREATED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -63,7 +63,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_VIEWED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -78,7 +78,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_EDITED_SUCCESSFULLY)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -89,7 +89,7 @@ public class CohortController {
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
         return new ResponseEntity<>(ApiResponse.builder().
-                status(HttpStatus.OK.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 message("Cohort " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
         );
@@ -104,7 +104,7 @@ public class CohortController {
         cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
         return new ResponseEntity<>(ApiResponse.<String>builder()
                 .message(COHORT_INVITED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
 
@@ -119,7 +119,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_RETRIEVED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -137,7 +137,7 @@ public class CohortController {
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
-                .statusCode(200)
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

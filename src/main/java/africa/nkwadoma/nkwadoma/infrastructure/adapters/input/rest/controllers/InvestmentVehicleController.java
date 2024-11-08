@@ -41,7 +41,7 @@ public class InvestmentVehicleController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(investmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_CREATED)
-                .status(HttpStatus.CREATED.toString())
+                .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -58,7 +58,7 @@ public class InvestmentVehicleController {
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
                 .data(updateInvestmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_UPDATED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -73,7 +73,7 @@ public class InvestmentVehicleController {
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
                 .data(investmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_VIEWED)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
     }
@@ -92,7 +92,7 @@ public class InvestmentVehicleController {
         ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
                 .data(investmentVehicleResponse)
                 .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                .status(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

@@ -56,7 +56,7 @@ public class LoanController {
             ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                     .data(loanProductResponse)
                     .message(CREATE_LOAN_PRODUCT_SUCCESS)
-                    .status(HttpStatus.CREATED.toString())
+                    .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
@@ -70,7 +70,7 @@ public class LoanController {
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .data(loanProductResponse)
                 .message(UPDATED_LOAN_PRODUCT_SUCCESS)
-                .status(HttpStatus.CREATED.toString())
+                .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
@@ -90,7 +90,7 @@ public class LoanController {
                 request.getPageNumber()
         );
         return new ResponseEntity<>(ApiResponse.builder().
-                status(HttpStatus.OK.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
@@ -107,7 +107,7 @@ public class LoanController {
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .data(loanProductResponse)
                 .message(LOAN_PRODUCT_FOUND_SUCCESSFULLY)
-                .status(HttpStatus.FOUND.toString())
+                .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
     }

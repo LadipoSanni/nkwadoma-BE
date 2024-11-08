@@ -59,7 +59,7 @@ public class OrganizationController {
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
-                    .status(HttpStatus.CREATED.toString())
+                    .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
 
@@ -77,7 +77,7 @@ public class OrganizationController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
                 .message(UPDATE_ORGANIZATION_SUCCESS)
-                .status(HttpStatus.CREATED.toString())
+                .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
@@ -88,7 +88,7 @@ public class OrganizationController {
             throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
         log.info("Organization {}", organizationIdentities);
-        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -101,7 +101,7 @@ public class OrganizationController {
             throws MeedlException {
         OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
         log.info("Organization {}", organizationIdentity);
-        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -114,7 +114,7 @@ public class OrganizationController {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .message(ORGANIZATION_DEACTIVATION_SUCCESS)
-                    .status(HttpStatus.OK.toString())
+                    .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -134,7 +134,7 @@ public class OrganizationController {
                 pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
-                status(HttpStatus.OK.toString()).
+                statusCode(HttpStatus.OK.toString()).
                 data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
