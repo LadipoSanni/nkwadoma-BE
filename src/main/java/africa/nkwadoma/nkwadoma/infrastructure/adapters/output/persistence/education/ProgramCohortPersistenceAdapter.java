@@ -2,7 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.ProgramCohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramCohortEntity;
@@ -37,9 +39,12 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     }
 
     @Override
-    public List<ProgramCohort> findAllByProgramId(String programId) {
-        List<ProgramCohortEntity> programCohortEntities =
-         programCohortRepository.findAllByProgramId(programId);
+    public List<ProgramCohort> findAllByProgramId(String programId) throws ProgramCohortException {
+        List<ProgramCohortEntity> programCohortEntities = programCohortRepository.findAllByProgramId(programId);
+        if (programCohortEntities == null){
+            throw new ProgramCohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
+        }
+
         return programCohortMapper.toProgramCohortList(programCohortEntities);
     }
 
