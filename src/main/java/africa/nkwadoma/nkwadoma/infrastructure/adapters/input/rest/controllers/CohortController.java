@@ -14,11 +14,14 @@ import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.*;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
@@ -43,7 +46,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_CREATED)
-                .statusCode(HttpStatus.OK.toString())
+                .status(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -60,7 +63,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_VIEWED)
-                .statusCode(HttpStatus.OK.toString())
+                .status(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -75,7 +78,7 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_EDITED_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
+                .status(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -86,7 +89,7 @@ public class CohortController {
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
+                status(HttpStatus.OK.toString()).
                 message("Cohort " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
         );
@@ -101,7 +104,7 @@ public class CohortController {
         cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
         return new ResponseEntity<>(ApiResponse.<String>builder()
                 .message(COHORT_INVITED)
-                .statusCode(HttpStatus.OK.toString())
+                .status(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
 
@@ -116,7 +119,25 @@ public class CohortController {
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_RETRIEVED)
-                .statusCode(HttpStatus.OK.toString())
+                .status(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("{programId}/cohorts")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
+            @PathVariable @NotBlank(message = "Program ID is required") String programId,
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize) throws MeedlException {
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId, pageSize, pageNumber);
+        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
+        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+                .data(paginatedResponse)
+                .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY))
+                .statusCode(200)
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

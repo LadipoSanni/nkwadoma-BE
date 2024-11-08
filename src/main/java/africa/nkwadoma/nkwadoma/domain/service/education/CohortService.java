@@ -32,6 +32,8 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateDataElement(id);
+        id = id.trim();
         MeedlValidator.validateUUID(id);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);

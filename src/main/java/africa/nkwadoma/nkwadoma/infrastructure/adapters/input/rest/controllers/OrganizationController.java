@@ -46,8 +46,7 @@ public class OrganizationController {
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                             @RequestBody @Valid OrganizationRequest inviteOrganizationRequest){
-        try{
+                                                             @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
             UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
@@ -60,12 +59,9 @@ public class OrganizationController {
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
-                    .statusCode(HttpStatus.CREATED.toString())
+                    .status(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(new ApiResponse<>(null, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
 
     }
     @PatchMapping("organization/update")
@@ -81,7 +77,7 @@ public class OrganizationController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
                 .message(UPDATE_ORGANIZATION_SUCCESS)
-                .statusCode(HttpStatus.CREATED.toString())
+                .status(HttpStatus.CREATED.toString())
                 .build();
         return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
@@ -92,7 +88,7 @@ public class OrganizationController {
             throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
         log.info("Organization {}", organizationIdentities);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -105,7 +101,7 @@ public class OrganizationController {
             throws MeedlException {
         OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
         log.info("Organization {}", organizationIdentity);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -118,7 +114,7 @@ public class OrganizationController {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .message(ORGANIZATION_DEACTIVATION_SUCCESS)
-                    .statusCode(HttpStatus.OK.toString())
+                    .status(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -138,7 +134,7 @@ public class OrganizationController {
                 pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
+                status(HttpStatus.OK.toString()).
                 data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK

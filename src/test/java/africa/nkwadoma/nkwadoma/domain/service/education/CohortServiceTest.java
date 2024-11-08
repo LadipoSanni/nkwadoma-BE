@@ -8,8 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -20,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.math.*;
 import java.time.LocalDateTime;
@@ -268,6 +265,28 @@ class CohortServiceTest {
     @ValueSource(ints = {-1})
     void viewCohortsInAProgramWithInvalidPageNumber(int pageNumber){
         assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa     ",
+            "      1de71eaa-de6d-4cdf-8f93-aa7be533f4aa",
+            "    1de71eaa-de6d-4cdf-8f93-aa7be533f4aa     "
+    })
+    void viewCohortsInAProgramWithProgramIdWithSpaces(String programId){
+        List<Cohort> foundCohorts = List.of(xplorers, elites);
+        try {
+            when(programOutputPort.findProgramById(programId.trim())).thenReturn(program);
+            when(cohortOutputPort.findAllCohortInAProgram(programId.trim())).thenReturn(foundCohorts);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(programId.trim(), pageSize, pageNumber);
+            List<Cohort> cohorts = allCohortInAProgram.toList();
+
+            assertEquals(2, cohorts.size());
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(programId.trim());
+        }
+        catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
     }
 
     @ParameterizedTest

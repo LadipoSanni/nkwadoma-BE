@@ -86,7 +86,7 @@ class LoanControllerTest {
         assertNotNull(apiResponse);
         assertNotNull(apiResponse.getBody());
         assertEquals(apiResponse.getStatusCode(), HttpStatus.CREATED);
-        assertEquals(apiResponse.getBody().getStatusCode(), HttpStatus.CREATED.toString());
+        assertEquals(apiResponse.getBody().getStatus(), HttpStatus.CREATED.toString());
         assertNotNull(apiResponse.getBody().getData());
 
         LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getData();
@@ -128,7 +128,7 @@ class LoanControllerTest {
         assertNotNull(apiResponse);
         assertNotNull(apiResponse.getBody());
         assertEquals(apiResponse.getStatusCode(), HttpStatus.FOUND);
-        assertEquals(apiResponse.getBody().getStatusCode(), HttpStatus.FOUND.toString());
+        assertEquals(apiResponse.getBody().getStatus(), HttpStatus.FOUND.toString());
         assertNotNull(apiResponse.getBody().getData());
 
         LoanProductResponse responseBody = (LoanProductResponse) apiResponse.getBody().getData();

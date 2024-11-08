@@ -28,12 +28,12 @@ public class IdentityManagerController {
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toLoginUserIdentity(loginRequest);
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
                 data(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build()
+                status(HttpStatus.OK.name()).build()
         );
     }
     @PostMapping("auth/logout")
@@ -44,7 +44,7 @@ public class IdentityManagerController {
         createUserUseCase.logout(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build()
+                status(HttpStatus.OK.name()).build()
         );
     }
     @PostMapping("auth/colleague/invite")
@@ -56,7 +56,7 @@ public class IdentityManagerController {
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
             return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                     data(createdUserIdentity).message(ControllerConstant.COLLEAGUE_INVITED.getMessage()).
-                    statusCode(HttpStatus.CREATED.name()).build());
+                    status(HttpStatus.CREATED.name()).build());
     }
 
     @PostMapping("auth/password/create")
@@ -65,21 +65,21 @@ public class IdentityManagerController {
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword())).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/forgotPassword")
     public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
         createUserUseCase.forgotPassword(email);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 message("Please check your email to create new password. "+email).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/reset")
     public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
         createUserUseCase.resetPassword(passwordCreateRequest.getToken(), passwordCreateRequest.getPassword());
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
@@ -93,7 +93,7 @@ public class IdentityManagerController {
         UserIdentity createdUserIdentity = createUserUseCase.reactivateUserAccount(userIdentity);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/deactivate")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
@@ -107,7 +107,7 @@ public class IdentityManagerController {
         UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/change")
     public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
@@ -119,6 +119,6 @@ public class IdentityManagerController {
         createUserUseCase.changePassword(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 data("Password change successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
+                status(HttpStatus.OK.name()).build());
     }
 }

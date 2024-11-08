@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
@@ -45,7 +44,7 @@ public class ProgramController {
 
         program = addProgramUseCase.createProgram(program);
 
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.CREATED.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.CREATED
@@ -66,7 +65,7 @@ public class ProgramController {
                 programsRequest.getPageNumber()
         );
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
+                status(HttpStatus.OK.toString()).
                 data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
@@ -81,7 +80,7 @@ public class ProgramController {
         program.setName(name.trim());
         program = addProgramUseCase.viewProgramByName(program);
 
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -96,7 +95,7 @@ public class ProgramController {
         program.setId(id.trim());
         program = addProgramUseCase.viewProgramById(program);
 
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -112,7 +111,7 @@ public class ProgramController {
         log.info("Program at controller level: ========>{}", program);
         program = addProgramUseCase.updateProgram(program);
 
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().status(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(String.format("Program %s", ControllerConstant.UPDATED_SUCCESSFULLY.getMessage())).build(),
                 HttpStatus.OK
@@ -128,7 +127,7 @@ public class ProgramController {
         addProgramUseCase.deleteProgram(program);
 
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
+                status(HttpStatus.OK.toString()).
                 message("Program " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
         );
