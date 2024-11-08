@@ -35,8 +35,6 @@ class CohortServiceTest {
     private Cohort xplorers;
     @Mock
     private CohortOutputPort cohortOutputPort;
-    @Mock
-    private ProgramOutputPort programOutputPort;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private int pageSize = 2;
     private int pageNumber = 0;
@@ -217,11 +215,8 @@ class CohortServiceTest {
 
     @Test
     void viewAllCohortInAProgram() {
-        List<Cohort> foundCohorts = List.of(xplorers, elites);
         try {
-            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
-            when(cohortOutputPort.findAllCohortInAProgram(program.getId())).thenReturn(foundCohorts);
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(xplorers);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
@@ -234,37 +229,35 @@ class CohortServiceTest {
 
     @Test
     void viewCohortsInAProgramWithNullProgramId(){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null, pageSize, pageNumber));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid uuid"})
     void viewCohortsInAProgramWithNonUUIDProgramId(String programId) {
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId, pageSize, pageNumber));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
     void viewCohortsInAProgramWithInvalidProgramId(String programId){
-        try {
-            when(programOutputPort.findProgramById(programId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("Error finding program by ID", e);
-        }
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId, pageSize, pageNumber));
+        xplorers.setProgramId(programId);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void viewCohortsInAProgramWithInvalidPageSize(int pageSize) {
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber));
+        xplorers.setPageSize(pageSize);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
     }
 
 
     @ParameterizedTest
     @ValueSource(ints = {-1})
     void viewCohortsInAProgramWithInvalidPageNumber(int pageNumber){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(), pageSize, pageNumber));
+        xplorers.setPageNumber(pageNumber);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
     }
 
     @ParameterizedTest
@@ -274,11 +267,9 @@ class CohortServiceTest {
             "    1de71eaa-de6d-4cdf-8f93-aa7be533f4aa     "
     })
     void viewCohortsInAProgramWithProgramIdWithSpaces(String programId){
-        List<Cohort> foundCohorts = List.of(xplorers, elites);
+        xplorers.setProgramId(programId);
         try {
-            when(programOutputPort.findProgramById(programId.trim())).thenReturn(program);
-            when(cohortOutputPort.findAllCohortInAProgram(programId.trim())).thenReturn(foundCohorts);
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(programId.trim(), pageSize, pageNumber);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(xplorers);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());

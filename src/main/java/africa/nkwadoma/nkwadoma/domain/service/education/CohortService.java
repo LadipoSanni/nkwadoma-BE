@@ -31,18 +31,19 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
-        id = id.trim();
-        MeedlValidator.validateUUID(id);
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        Program foundProgram = programOutputPort.findProgramById(id);
+    public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateObjectInstance(cohort);
+        MeedlValidator.validateDataElement(cohort.getProgramId());
+        String programId = cohort.getProgramId().trim();
+        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validatePageNumber(cohort.getPageNumber());
+        MeedlValidator.validatePageSize(cohort.getPageSize());
+        Program foundProgram = programOutputPort.findProgramById(programId);
         if (ObjectUtils.isEmpty(foundProgram)) {
             throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
         }
-        List<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(id);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        List<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(programId);
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize());
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageRequest.getPageSize()), cohorts.size());
         if (start >= cohorts.size()) {

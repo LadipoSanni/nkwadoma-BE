@@ -13,6 +13,6 @@ public interface CohortUseCase {
     void deleteCohort(String id) throws MeedlException;
 
     void inviteCohort(String userId, String programId, String cohortId) throws MeedlException;
-    Page<Cohort> viewAllCohortInAProgram(String id, int pageSize, int pageNumber) throws MeedlException;
+    Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException;
     Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
 }
