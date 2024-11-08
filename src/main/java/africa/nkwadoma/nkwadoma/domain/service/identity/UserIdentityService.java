@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -31,7 +32,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
@@ -48,6 +48,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
+    private final IdentityVerificationOutputPort identityVerificationOutputPort;
 
 
     @Override
@@ -154,8 +155,17 @@ public class UserIdentityService implements CreateUserUseCase {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
     }
-
-
+    @Override
+    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
+        String email = tokenUtils.decodeJWT(token);
+        MeedlValidator.validateEmail(email);
+        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
+        boolean identityVerified = identityVerificationOutputPort.isIdentityVerified(foundUser);
+        if (identityVerified) {
+            return "Identity verified";
+        }
+        return "Identity not verified";
+    }
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
@@ -187,7 +197,6 @@ public class UserIdentityService implements CreateUserUseCase {
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
     }
-
 
 
 }

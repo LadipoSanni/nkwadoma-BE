@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerifica
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.PremblyVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.PremblyParameter;
@@ -35,6 +36,11 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyNinResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
         return getNinDetails(identityVerification);
+    }
+
+    @Override
+    public boolean isIdentityVerified(UserIdentity foundUser) {
+        return false;
     }
 
     public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -16,12 +17,9 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.keycloak.representations.AccessTokenResponse;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +32,8 @@ class UserIdentityServiceTest {
     private UserIdentityService userIdentityService;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private IdentityVerificationOutputPort identityVerificationOutputPort;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
@@ -374,6 +374,44 @@ class UserIdentityServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void forgotPasswordWithInvalidEmail(String email) {
         assertThrows(MeedlException.class, ()-> userIdentityService.forgotPassword(email));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
+    void verifyUserIdentityVerifiedByInvalidEmail(String token) {
+        assertThrows(MeedlException.class, ()-> userIdentityService.verifyByEmailUserIdentityVerified(token));
+    }
+
+    @Test
+    void verifyUserIdentityVerifiedByEmail() {
+        try {
+            when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
+            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            when(identityVerificationOutputPort.isIdentityVerified(favour)).thenReturn(true);
+            assertEquals("Identity verified", userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
+        } catch (MeedlException e) {
+            log.error("Error while verifying user identity {}", e.getMessage());
+        }
+    }
+    @Test
+    void verifyNonExistingUserIdentityIsVerifiedByEmail() {
+        try {
+            when(userIdentityOutputPort.findByEmail(any())).thenThrow(MeedlException.class);
+            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            assertThrows(MeedlException.class, ()-> userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
+        } catch (MeedlException e) {
+            log.error("Error while verifying user identity {}", e.getMessage());
+        }
+    }
+    @Test
+    void verifyUserIdentityNotVerifiedByEmail() {
+        try {
+            when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
+            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            when(identityVerificationOutputPort.isIdentityVerified(favour)).thenReturn(false);
+            assertEquals("Identity not verified", userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
+        } catch (MeedlException e) {
+            log.error("Error while verifying user identity {}", e.getMessage());
+        }
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})

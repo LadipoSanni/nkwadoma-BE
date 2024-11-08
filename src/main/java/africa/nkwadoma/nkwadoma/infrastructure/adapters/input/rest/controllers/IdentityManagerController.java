@@ -81,6 +81,12 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("auth/identity/confirmVerification")
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(createUserUseCase.verifyByEmailUserIdentityVerified(token))
+                .statusCode(HttpStatus.OK.name()).build());
+    }
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {

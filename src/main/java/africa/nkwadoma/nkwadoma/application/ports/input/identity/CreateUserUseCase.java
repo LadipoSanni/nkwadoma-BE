@@ -15,6 +15,9 @@ public interface CreateUserUseCase {
     void logout(UserIdentity userIdentity) throws MeedlException;
     void changePassword(UserIdentity userIdentity)throws MeedlException;
     void forgotPassword(String email) throws MeedlException;
+
+    String verifyByEmailUserIdentityVerified(String token) throws MeedlException;
+
     UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException;
 
