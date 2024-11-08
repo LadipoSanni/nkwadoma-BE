@@ -110,4 +110,27 @@ public class CohortController {
                 .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
+
+    @GetMapping("searchCohort")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
+            @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
+            @RequestParam @NotBlank(message = "Program ID is required") String programId){
+
+        try {
+            Cohort cohort = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
+            CohortResponse cohortResponse =
+                    cohortMapper.toCohortResponse(cohort);
+            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                    .data(cohortResponse)
+                    .message(COHORT_RETRIEVED)
+                    .statusCode(HttpStatus.OK.toString())
+                    .build();
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (MeedlException exception) {
+            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
+                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
