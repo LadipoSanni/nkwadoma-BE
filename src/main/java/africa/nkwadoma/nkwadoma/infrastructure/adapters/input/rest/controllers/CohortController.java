@@ -130,13 +130,13 @@ public class CohortController {
             @PathVariable @NotBlank(message = "Program ID is required") String programId,
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
             @RequestParam(defaultValue = "10", required = false) int pageSize) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId, pageSize, pageNumber);
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId.trim(), pageSize, pageNumber);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
-                .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY))
+                .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(200)
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
