@@ -1,14 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
@@ -23,7 +22,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, LoaneeUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
@@ -67,5 +66,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
         MeedlValidator.validateDataElement(loanProductId);
         return loanProductOutputPort.findById(loanProductId);
+    }
+
+    @Override
+    public Loanee saveAdditionalDetails(Loanee loanee) {
+        return null;
     }
 }
