@@ -45,6 +45,11 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
+    public Cohort searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
+        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
+    }
+
+    @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
         foundCohort.getTrainees().stream()

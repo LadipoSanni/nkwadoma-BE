@@ -188,6 +188,13 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .reduce(BigDecimal.ZERO, BigDecimal::add).add(cohort.getTuitionAmount());
     }
 
+    @Override
+    public Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException {
+        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
+        return programCohorts.stream()
+                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(name.trim()))
+                .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
+    }
 
     @Override
     public List<Cohort> findAllCohortInAProgram(String programId) throws MeedlException {

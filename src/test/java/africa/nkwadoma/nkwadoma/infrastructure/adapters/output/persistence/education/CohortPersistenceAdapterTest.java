@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -88,7 +89,7 @@ class CohortPersistenceAdapterTest {
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
 
-        program = Program.builder().name("My program Test2").
+        program = Program.builder().name("My program Ford").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
@@ -296,32 +297,52 @@ class CohortPersistenceAdapterTest {
         assertEquals(2,cohorts.size());
 
     }
-
+    
     @Order(6)
     @Test
-    void deleteCohort(){
-            Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-            assertTrue(foundCohort.isPresent());
-            try {
-                cohortOutputPort.deleteCohort(cohortOneId);
-            } catch (MeedlException e) {
-                log.error(e.getMessage(), e);
-            }
-            foundCohort = cohortRepository.findById(cohortOneId);
-            assertFalse(foundCohort.isPresent());
+    void searchForCohort(){
+        Cohort searchedCohort = new Cohort();
+        try{
+            searchedCohort =
+                    cohortOutputPort.searchForCohortInAProgram(elites.getName(),elites.getProgramId());
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-
+       assertEquals(searchedCohort.getName(),elites.getName());
+       assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
+    }
+    @Order(7)
+    @Test
+    void deleteCohort(){
+        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+        assertTrue(foundCohort.isPresent());
+        try {
+            cohortOutputPort.deleteCohort(cohortOneId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        foundCohort = cohortRepository.findById(cohortOneId);
+        assertFalse(foundCohort.isPresent());
+    }
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){
         assertThrows(MeedlException.class, ()-> cohortOutputPort.deleteCohort(cohortId));
     }
 
-    @Order(7)
+    @ParameterizedTest
+    @ValueSource(strings= {"wrong cohort 1", "wrong cohort 2"})
+    void searchForCohortWithWrongCohortName(String cohortName){
+        assertThrows(MeedlException.class, ()->
+                     cohortOutputPort.searchForCohortInAProgram(cohortName,elites.getProgramId()));
+    }
+
+
     @Test
     void cannotEditCohortWithLoanDetails(){
         try {
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId, program.getId(), cohortOneId);
+            log.info("Cohort found : {}" , cohort);
             assertThrows(MeedlException.class, () -> cohortOutputPort.saveCohort(cohort));
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());

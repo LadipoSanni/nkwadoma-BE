@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -191,6 +190,28 @@ public class CohortServiceTest {
                 cohortService.viewCohortDetails(mockId,
                         mockId,
                         cohortId));
+    }
+
+    @Order(6)
+    @Test
+    void searchForCohort() {
+        Cohort expectedCohort = new Cohort();
+        expectedCohort.setName(xplorers.getName());
+        expectedCohort.setProgramId(xplorers.getProgramId());
+        Cohort searchedCohort = new Cohort();
+        try{
+            when(cohortOutputPort.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId()))
+                    .thenReturn(expectedCohort);
+
+
+            searchedCohort = cohortService.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+
+        assertNotNull(searchedCohort);
+        assertEquals(expectedCohort.getName(), searchedCohort.getName());
+        assertEquals(expectedCohort.getProgramId(), searchedCohort.getProgramId());
     }
 
     @Test

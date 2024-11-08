@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramCohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.ProgramCohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramCohortRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +46,10 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     }
 
     @Override
-    public void save(ProgramCohort programCohort1) throws MeedlException {
-        MeedlValidator.validateObjectInstance(programCohort1);
+    public void save(ProgramCohort programCohort) {
+        log.info("The program id is second : {}", programCohort.getProgramId());
         ProgramCohortEntity programCohortEntity =
-                programCohortMapper.toProgramCohortEntity(programCohort1);
+                programCohortMapper.toProgramCohortEntity(programCohort);
         log.info("mappeed program cohort entity {}", programCohortEntity.getProgramId());
         programCohortEntity = programCohortRepository.save(programCohortEntity);
     }
