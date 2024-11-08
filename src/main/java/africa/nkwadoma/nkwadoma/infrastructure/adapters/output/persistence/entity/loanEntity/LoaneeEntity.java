@@ -15,6 +15,9 @@ public class LoaneeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    private String alternatePhoneNumber;
+    private String alternateContactAddress;
+    private String alternateEmail;
     private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;

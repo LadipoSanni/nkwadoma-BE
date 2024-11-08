@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import lombok.*;
 
-import java.io.*;
 
 @Getter
 @Setter
@@ -16,4 +15,5 @@ public class NextOfKin {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
+    private Loanee loanee;
 }

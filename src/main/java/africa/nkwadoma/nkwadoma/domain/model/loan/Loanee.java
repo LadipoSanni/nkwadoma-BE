@@ -9,12 +9,15 @@ import java.time.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Loanee {
     private String id;
+    private String alternatePhoneNumber;
+    private String alternateContactAddress;
+    private String alternateEmail;
     private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserIdentity userIdentity;
-    private NextOfKin nextOfKin;
 }
