@@ -54,10 +54,6 @@ class CohortPersistenceAdapterTest {
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
-
-    private int pageSize = 2;
-    private int pageNumber = 0;
-
     private String meedleUser;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
@@ -82,12 +78,12 @@ class CohortPersistenceAdapterTest {
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
-                .firstName("Fred 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("freddy21@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                .firstName("Ford 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+                lastName("Benson Ayo").email("freddy121@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("organization12@example.com")
-                .name("Organization21 Test3").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
+                .name("Organization21 Ford").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
@@ -300,19 +296,20 @@ class CohortPersistenceAdapterTest {
         assertEquals(2,cohorts.size());
 
     }
-@Order(6)
-@Test
-void deleteCohort(){
-        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-        assertTrue(foundCohort.isPresent());
-        try {
-            cohortOutputPort.deleteCohort(cohortOneId);
-        } catch (MeedlException e) {
-            log.error(e.getMessage(), e);
+
+    @Order(6)
+    @Test
+    void deleteCohort(){
+            Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+            assertTrue(foundCohort.isPresent());
+            try {
+                cohortOutputPort.deleteCohort(cohortOneId);
+            } catch (MeedlException e) {
+                log.error(e.getMessage(), e);
+            }
+            foundCohort = cohortRepository.findById(cohortOneId);
+            assertFalse(foundCohort.isPresent());
         }
-        foundCohort = cohortRepository.findById(cohortOneId);
-        assertFalse(foundCohort.isPresent());
-    }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
