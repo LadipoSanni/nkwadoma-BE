@@ -34,13 +34,18 @@ public class UserIdentityValidator extends MeedlValidator {
      public static void validateUserIdentity(UserIdentity userIdentity) throws MeedlException {
          log.info("Started validating for user identity in validation class : {}", userIdentity);
          MeedlValidator.validateObjectInstance(userIdentity);
+         log.info("one : {}",1);
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
-
+         log.info("two : {}",2);
          MeedlValidator.validateEmail(userIdentity.getEmail());
+         log.info("three : {}",3);
          MeedlValidator.validateDataElement(userIdentity.getFirstName());
+         log.info("four : {}",4);
          MeedlValidator.validateDataElement(userIdentity.getLastName());
+         log.info("one : {}",5);
          MeedlValidator.validateUUID(userIdentity.getCreatedBy());
+         log.info("one : {}",6);
      }
 
     private static void validateUserEmail(String email) throws IdentityException {

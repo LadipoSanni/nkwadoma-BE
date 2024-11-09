@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.UserIdentityRequest;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +16,6 @@ public class AddLoaneeToCohortRequest {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentityRequest user;
+    private UserIdentityRequest loanee;
     private LoaneeLoanDetailRequest loaneeLoanDetail;
 }

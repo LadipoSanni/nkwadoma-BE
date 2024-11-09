@@ -5,4 +5,5 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
+    LoaneeEntity findByLoaneeEmail(String email);
 }

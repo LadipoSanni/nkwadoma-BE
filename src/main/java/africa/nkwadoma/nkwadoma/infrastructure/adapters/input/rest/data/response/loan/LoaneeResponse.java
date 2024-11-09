@@ -15,7 +15,7 @@ public class LoaneeResponse {
     private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
-    private UserIdentityResponse user;
+    private UserIdentityResponse loanee;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
 
 }

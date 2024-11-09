@@ -14,6 +14,7 @@ public class UserIdentityRequest {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private String createdBy;
     private boolean emailVerified;
     private boolean enabled;
     private String role;

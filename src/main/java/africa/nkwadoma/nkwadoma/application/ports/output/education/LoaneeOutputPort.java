@@ -9,4 +9,6 @@ public interface LoaneeOutputPort {
     Loanee save(Loanee loanee) throws MeedlException;
 
     void deleteLoanee(String loaneeId);
+
+    Loanee findByLoaneeEmail(String email);
 }

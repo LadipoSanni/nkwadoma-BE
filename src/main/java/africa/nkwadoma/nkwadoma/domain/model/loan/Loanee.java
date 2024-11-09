@@ -22,14 +22,14 @@ public class Loanee {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentity user;
+    private UserIdentity loanee;
     private LoaneeLoanDetail loaneeLoanDetail;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(user);
-        MeedlValidator.validateEmail(user.getEmail());
-        MeedlValidator.validateDataElement(user.getFirstName());
-        MeedlValidator.validateDataElement(user.getLastName());
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateEmail(loanee.getEmail());
+        MeedlValidator.validateDataElement(loanee.getFirstName());
+        MeedlValidator.validateDataElement(loanee.getLastName());
         MeedlValidator.validateUUID(organizationId);
         MeedlValidator.validateUUID(programId);
         MeedlValidator.validateUUID(cohortId);

@@ -79,8 +79,8 @@ public class CohortLoaneePersistenceAdapterTest {
             log.error(e.getMessage());
         }
         assertEquals(cohortLoanee.getCohort(), savedCohortLoanee.getCohort());
-        assertEquals(cohortLoanee.getLoanee().getUser().getFirstName(),
-                savedCohortLoanee.getLoanee().getUser().getFirstName());
+        assertEquals(cohortLoanee.getLoanee().getLoanee().getFirstName(),
+                savedCohortLoanee.getLoanee().getLoanee().getFirstName());
     }
 
 
