@@ -5,12 +5,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -122,9 +120,9 @@ public class CohortPersistenceAdapterTest {
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(List.of(loanBreakdown));
 
-        CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
+        LoanDetail loanDetail = getLoanDetail();
 
-        elites.setCohortLoanDetail(cohortLoanDetail);
+        elites.setLoanDetail(loanDetail);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -135,8 +133,7 @@ public class CohortPersistenceAdapterTest {
         xplorers.setLoanBreakdowns(List.of(loanBreakdown));
     }
 
-    private static CohortLoanDetail getCohortLoanDetail() {
-        CohortLoanDetail cohortLoanDetail = new CohortLoanDetail();
+    private static LoanDetail getLoanDetail() {
         LoanDetail loanDetail = new LoanDetail();
         loanDetail.setDebtPercentage(0.34);
         loanDetail.setRepaymentPercentage(0.67);
@@ -146,8 +143,7 @@ public class CohortPersistenceAdapterTest {
         loanDetail.setLastMonthActual(BigDecimal.valueOf(200));
         loanDetail.setTotalAmountDisbursed(BigDecimal.valueOf(50000));
         loanDetail.setTotalOutstanding(BigDecimal.valueOf(450));
-        cohortLoanDetail.setLoanDetail(loanDetail);
-        return cohortLoanDetail;
+        return loanDetail;
     }
 
 
@@ -342,7 +338,7 @@ public class CohortPersistenceAdapterTest {
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(editedCohort.getName(),"edited cohort");
+        assertEquals("edited cohort",editedCohort.getName());
     }
 
 
@@ -352,30 +348,30 @@ public class CohortPersistenceAdapterTest {
         Cohort editedCohort = new Cohort();
         try{
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
-            assertNull(cohort.getCohortLoanDetail());
-            CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
-            cohort.setCohortLoanDetail(cohortLoanDetail);
+            assertNull(cohort.getLoanDetail());
+            LoanDetail loanDetail = getLoanDetail();
+            cohort.setLoanDetail(loanDetail);
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.saveCohort(cohort);
             log.info("{} = =",editedCohort);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(editedCohort.getCohortLoanDetail());
+        assertNotNull(editedCohort.getLoanDetail());
     }
 
 
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
-        identityManagementOutputPort.deleteClient(organizationId);
-        identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
-        programOutputPort.deleteProgram(programId);
-        cohortOutputPort.deleteCohort(cohortTwoId);
-        programCohortOutputPort.delete(programId);
-        organizationIdentityOutputPort.delete(organizationId);
-        userIdentityOutputPort.deleteUserById(meedleUserId);
-        cohortRepository.deleteById(cohortTwoId);
-        cohortRepository.deleteById(cohortOneId);
-    }
+//    @AfterAll
+//    void cleanUp() throws MeedlException {
+//        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
+//        identityManagementOutputPort.deleteClient(organizationId);
+//        identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
+//        programOutputPort.deleteProgram(programId);
+//        cohortOutputPort.deleteCohort(cohortTwoId);
+//        programCohortOutputPort.delete(programId);
+//        organizationIdentityOutputPort.delete(organizationId);
+//        userIdentityOutputPort.deleteUserById(meedleUserId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        cohortRepository.deleteById(cohortOneId);
+//    }
 }

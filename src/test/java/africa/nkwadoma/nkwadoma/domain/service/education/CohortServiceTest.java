@@ -4,7 +4,6 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -230,7 +229,7 @@ public class CohortServiceTest {
         try{
             Cohort elites = new Cohort();
             elites.setId(mockId);
-            elites.setCohortLoanDetail(new CohortLoanDetail());
+            elites.setLoanDetail(new LoanDetail());
             when(cohortOutputPort.saveCohort(elites)).thenThrow( MeedlException.class);
             assertThrows(MeedlException.class, () -> cohortService.createOrEditCohort(elites));
         } catch (MeedlException e) {
@@ -257,18 +256,17 @@ public class CohortServiceTest {
     @Test
     void addLoanDetailsToCohort() {
        try{
-            CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
-            elites.setCohortLoanDetail(cohortLoanDetail);
+            LoanDetail LoanDetail = getLoanDetail();
+            elites.setLoanDetail(LoanDetail);
             when(cohortOutputPort.saveCohort(elites)).thenReturn(elites);
             Cohort editedCohort = cohortService.createOrEditCohort(elites);
-            assertNotNull(editedCohort.getCohortLoanDetail());
+            assertNotNull(editedCohort.getLoanDetail());
        }catch (MeedlException e){
            log.error("{}", e.getMessage());
        }
     }
 
-    private static CohortLoanDetail getCohortLoanDetail() {
-        CohortLoanDetail cohortLoanDetail = new CohortLoanDetail();
+    private static LoanDetail getLoanDetail() {
         LoanDetail loanDetail = new LoanDetail();
         loanDetail.setDebtPercentage(0.34);
         loanDetail.setRepaymentPercentage(0.67);
@@ -278,8 +276,7 @@ public class CohortServiceTest {
         loanDetail.setLastMonthActual(BigDecimal.valueOf(200));
         loanDetail.setTotalAmountDisbursed(BigDecimal.valueOf(50000));
         loanDetail.setTotalOutstanding(BigDecimal.valueOf(450));
-        cohortLoanDetail.setLoanDetail(loanDetail);
-        return cohortLoanDetail;
+        return loanDetail;
     }
 
 }

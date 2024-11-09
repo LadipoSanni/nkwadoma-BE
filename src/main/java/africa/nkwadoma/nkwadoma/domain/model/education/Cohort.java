@@ -8,9 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import jakarta.persistence.Lob;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -22,8 +20,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@Slf4j
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Cohort {
     private String id;
     private String programId;
@@ -41,8 +41,9 @@ public class Cohort {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
-    private List<UserIdentity> trainees;
-    private CohortLoanDetail cohortLoanDetail;
+    private CohortLoanee Loanees;
+    private LoanDetail loanDetail;
+    private Integer numberOfLoanees = 0;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);
