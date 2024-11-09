@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -75,6 +73,8 @@ class CohortPersistenceAdapterTest {
     private String cohortOneId;
     private String cohortTwoId;
     private String organizationId;
+    private LoanBreakdown loanBreakdown;
+
 
     @BeforeAll
     void setUpOrg() {
@@ -113,7 +113,7 @@ class CohortPersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
-        LoanBreakdown loanBreakdown = new LoanBreakdown();
+        loanBreakdown = new LoanBreakdown();
         loanBreakdown.setCurrency("USD");
         loanBreakdown.setItemAmount(new BigDecimal("50000"));
         loanBreakdown.setItemName("Loan Break");
@@ -354,13 +354,15 @@ class CohortPersistenceAdapterTest {
     void cohortWithoutLoanDetailsCanBeEdited(){
         Cohort editedCohort = new Cohort();
         try{
-            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
-            cohort.setName("edited cohort");
-            editedCohort = cohortOutputPort.saveCohort(cohort);
+            Cohort foundCohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
+            foundCohort.setLoanBreakdowns(List.of(loanBreakdown));
+            log.info("Found cohort============>: {}", foundCohort);
+            foundCohort.setName("edited cohort");
+            editedCohort = cohortOutputPort.saveCohort(foundCohort);
         } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            log.info("{}", exception.getClass().getName(), exception);
         }
-        assertEquals(editedCohort.getName(),"edited cohort");
+        assertEquals("edited cohort", editedCohort.getName());
     }
 
 
@@ -373,6 +375,7 @@ class CohortPersistenceAdapterTest {
             assertNull(cohort.getCohortLoanDetail());
             CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
             cohort.setCohortLoanDetail(cohortLoanDetail);
+            cohort.setLoanBreakdowns(List.of(loanBreakdown));
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.saveCohort(cohort);
             log.info("{} = =",editedCohort);

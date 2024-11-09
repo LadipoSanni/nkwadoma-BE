@@ -62,10 +62,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
+        log.info("Found program cohort: {}", programCohortList);
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
-        Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
+        Cohort retrievedCohort  = updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
         if (cohort.getCohortLoanDetail() != null){
            CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.saveCohortLoanDetails(cohort,retrievedCohort.getId());
             retrievedCohort.setCohortLoanDetail(cohortLoanDetail);
@@ -76,8 +77,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
         CohortEntity cohortEntity;
-        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
-        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
+//        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
+//        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
             cohort = updateCohort(cohort, cohortToUpdate);
