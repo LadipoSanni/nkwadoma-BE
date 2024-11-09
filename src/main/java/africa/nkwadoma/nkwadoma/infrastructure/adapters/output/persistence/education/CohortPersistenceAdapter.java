@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -44,6 +45,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
+    private final LoanBreakdownOutputPort loanBreakdownOutputPort;
 
 
 
@@ -66,12 +68,15 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
         CohortEntity cohortEntity;
-        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
-        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
+
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
+            List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortToUpdate.getId());
+            BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(loanBreakdowns,cohortToUpdate.getTuitionAmount());
+            cohortToUpdate.setTotalCohortFee(totalCohortFee);
             cohort = updateCohort(cohort, cohortToUpdate);
         } else {
+            BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort.getLoanBreakdowns(),cohort.getTuitionAmount());
             cohort.setTotalCohortFee(totalCohortFee);
             cohort = newCohort(cohort, program);
         }
@@ -91,7 +96,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
             activateStatus(cohortToUpdate);
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-            cohortRepository.save(cohortEntity);
+            cohortEntity = cohortRepository.save(cohortEntity);
             savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
             } else {
                 throw new CohortException(COHORT_EXIST.getMessage());
@@ -173,10 +178,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
          loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
          return loanBreakdownEntities.stream().map(cohortMapper::mapToLoanBreakdown).toList();
     }
-    private BigDecimal calculateTotalLoanBreakdownAmount(Cohort cohort) {
-        return cohort.getLoanBreakdowns().stream()
+    private BigDecimal calculateTotalLoanBreakdownAmount(List<LoanBreakdown> loanBreakdowns,BigDecimal tutionFee) {
+        return loanBreakdowns.stream()
                 .map(LoanBreakdown::getItemAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add).add(cohort.getTuitionAmount());
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(tutionFee);
     }
 
     @Override

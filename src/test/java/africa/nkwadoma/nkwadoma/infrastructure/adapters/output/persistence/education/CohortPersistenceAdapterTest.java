@@ -347,6 +347,7 @@ public class CohortPersistenceAdapterTest {
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
         try{
+            //TODO FIND ALL BREAKDOWN RELATED TO COHORT
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
             assertNull(cohort.getLoanDetail());
             LoanDetail loanDetail = getLoanDetail();
