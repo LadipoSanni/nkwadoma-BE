@@ -158,8 +158,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         }
     }
 
-
-
     @Override
     public UserIdentity createPassword(String email, String password) throws MeedlException {
         email = email.trim();
@@ -175,6 +173,10 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         }
         userIdentity = enableUserAccount(userIdentity);
         setPassword(userIdentity);
+        userIdentity.setPassword(password);
+        userIdentity.setEmail(email);
+        AccessTokenResponse response = login(userIdentity);
+        userIdentity.setAccessToken(response.getToken());
 
         return userIdentity;
     }
