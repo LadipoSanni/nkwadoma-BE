@@ -44,11 +44,12 @@ public class Cohort {
     private CohortLoanee Loanees;
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
+    private int pageSize;
+    private int pageNumber;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateUUID(createdBy);
-
     }
 }

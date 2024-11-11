@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -26,10 +24,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,15 +41,17 @@ import static org.mockito.Mockito.doThrow;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class CohortPersistenceAdapterTest {
+class CohortPersistenceAdapterTest {
 
     @Autowired
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
+    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
+    private String meedleUser;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -69,16 +71,18 @@ public class CohortPersistenceAdapterTest {
     private String cohortOneId;
     private String cohortTwoId;
     private String organizationId;
+    private LoanBreakdown loanBreakdown;
+
 
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
-                .firstName("Ford 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("freddy121@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
+                lastName("Benson").email("freddy102@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
-                .name("Organization21 Ford").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("fordorganization012@example.com")
+                .name("Organization09 Ford").rcNumber("7576").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
@@ -107,7 +111,7 @@ public class CohortPersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
-        LoanBreakdown loanBreakdown = new LoanBreakdown();
+        loanBreakdown = new LoanBreakdown();
         loanBreakdown.setCurrency("USD");
         loanBreakdown.setItemAmount(new BigDecimal("50000"));
         loanBreakdown.setItemName("Loan Break");
@@ -276,6 +280,19 @@ public class CohortPersistenceAdapterTest {
                         program.getId(),
                         cohortId));
     }
+
+    @Test
+    void viewAllCohortInAProgram(){
+        List<Cohort> cohorts = new ArrayList<>();
+        try{
+            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(2,cohorts.size());
+
+    }
+
     @Order(6)
     @Test
     void searchForCohort(){
@@ -324,9 +341,9 @@ public class CohortPersistenceAdapterTest {
             cohort.setName("edited cohort");
             editedCohort = cohortOutputPort.saveCohort(cohort);
         } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            log.info("{}", exception.getClass().getName(), exception);
         }
-        assertEquals("edited cohort",editedCohort.getName());
+        assertEquals("edited cohort", editedCohort.getName());
     }
 
 

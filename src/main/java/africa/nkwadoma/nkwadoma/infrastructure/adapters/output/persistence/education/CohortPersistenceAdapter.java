@@ -27,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
@@ -60,6 +62,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
+        log.info("Found program cohort: {}", programCohortList);
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
@@ -221,6 +224,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return programCohorts.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(name.trim()))
                 .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
+    }
+
+    @Override
+    public List<Cohort> findAllCohortInAProgram(String programId) throws MeedlException {
+        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
+        return programCohorts.stream()
+                .map(ProgramCohort::getCohort)
+                .toList();
     }
 }
 
