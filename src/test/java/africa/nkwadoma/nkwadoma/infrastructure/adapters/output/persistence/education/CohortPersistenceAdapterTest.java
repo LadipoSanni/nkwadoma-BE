@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -28,10 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,15 +43,17 @@ import static org.mockito.Mockito.doThrow;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-public class CohortPersistenceAdapterTest {
+class CohortPersistenceAdapterTest {
 
     @Autowired
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
+    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
+    private String meedleUser;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -71,6 +73,8 @@ public class CohortPersistenceAdapterTest {
     private String cohortOneId;
     private String cohortTwoId;
     private String organizationId;
+    private LoanBreakdown loanBreakdown;
+
 
     @BeforeAll
     void setUpOrg() {
@@ -109,7 +113,7 @@ public class CohortPersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
-        LoanBreakdown loanBreakdown = new LoanBreakdown();
+        loanBreakdown = new LoanBreakdown();
         loanBreakdown.setCurrency("USD");
         loanBreakdown.setItemAmount(new BigDecimal("50000"));
         loanBreakdown.setItemName("Loan Break");
@@ -175,6 +179,7 @@ public class CohortPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com","3gdgttebdindndd673ydieyendjdljdh"})
     void saveCohortWithInvalidCreator(String createdBy){
+        //TODO validate for UUID
         elites.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
@@ -280,6 +285,19 @@ public class CohortPersistenceAdapterTest {
                         program.getId(),
                         cohortId));
     }
+
+    @Test
+    void viewAllCohortInAProgram(){
+        List<Cohort> cohorts = new ArrayList<>();
+        try{
+            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(2,cohorts.size());
+
+    }
+    
     @Order(6)
     @Test
     void searchForCohort(){
@@ -336,13 +354,15 @@ public class CohortPersistenceAdapterTest {
     void cohortWithoutLoanDetailsCanBeEdited(){
         Cohort editedCohort = new Cohort();
         try{
-            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
-            cohort.setName("edited cohort");
-            editedCohort = cohortOutputPort.saveCohort(cohort);
+            Cohort foundCohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
+            foundCohort.setLoanBreakdowns(List.of(loanBreakdown));
+            log.info("Found cohort============>: {}", foundCohort);
+            foundCohort.setName("edited cohort");
+            editedCohort = cohortOutputPort.saveCohort(foundCohort);
         } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            log.info("{}", exception.getClass().getName(), exception);
         }
-        assertEquals(editedCohort.getName(),"edited cohort");
+        assertEquals("edited cohort", editedCohort.getName());
     }
 
 
@@ -355,6 +375,7 @@ public class CohortPersistenceAdapterTest {
             assertNull(cohort.getCohortLoanDetail());
             CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
             cohort.setCohortLoanDetail(cohortLoanDetail);
+            cohort.setLoanBreakdowns(List.of(loanBreakdown));
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.saveCohort(cohort);
             log.info("{} = =",editedCohort);
@@ -370,7 +391,7 @@ public class CohortPersistenceAdapterTest {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
-        programOutputPort.deleteProgram(programId);
+//        programOutputPort.deleteProgram(programId);
         cohortOutputPort.deleteCohort(cohortTwoId);
         programCohortOutputPort.delete(programId);
         organizationIdentityOutputPort.delete(organizationId);

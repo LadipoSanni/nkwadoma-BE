@@ -28,7 +28,7 @@ public class IdentityManagerController {
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toLoginUserIdentity(loginRequest);
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
