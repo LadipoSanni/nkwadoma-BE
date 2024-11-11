@@ -22,6 +22,9 @@ public class UserIdentity {
     private String createdAt;
     private IdentityRole role;
     private String createdBy;
+    private String alternateEmail;
+    private String alternatePhoneNumber;
+    private String alternateContactAddress;
     private String password;
     private String accessToken;
     private String refreshToken;

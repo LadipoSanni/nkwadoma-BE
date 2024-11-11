@@ -20,9 +20,6 @@ public class LoaneeEntity {
     @UuidGenerator
     private String id;
     private String cohortId;
-    private String alternateEmail;
-    private String alternatePhoneNumber;
-    private String alternateContactAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

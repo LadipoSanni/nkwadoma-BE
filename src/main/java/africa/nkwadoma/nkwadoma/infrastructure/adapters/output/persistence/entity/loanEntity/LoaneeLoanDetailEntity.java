@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
 @Getter
 @Entity
 public class LoaneeLoanDetailEntity {
-
     @Id
     @UuidGenerator
     private String id;
