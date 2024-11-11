@@ -40,9 +40,8 @@ import java.util.Optional;
 public class LoaneeService implements LoaneeUsecase {
 
 
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final ProgramCohortOutputPort programCohortOutputPort;
     private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort identityOutputPort;
@@ -52,19 +51,12 @@ public class LoaneeService implements LoaneeUsecase {
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
-        log.info("{} organization",loanee.getOrganizationId());
         MeedlValidator.validateObjectInstance(loanee);
-        log.info("{} organization",loanee.getOrganizationId());
         loanee.validate();
-        log.info("{} organization",loanee.getOrganizationId());
-        loanee = checkIfLoaneeWithEmailExist(loanee);
-        log.info("{} organization 4",loanee.getOrganizationId());
-        OrganizationIdentity organizationIdentity = getOrganizationIdentity(loanee);
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
-        checkIfUserExistInOrganization(organizationIdentity, organizationEmployeeIdentity);
-        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(loanee.getProgramId());
+        checkIfLoaneeWithEmailExist(loanee);
+        getOrganizationEmployeeIdentity(loanee);
         String cohortId = loanee.getCohortId();
-        Cohort cohort = getCohort(programCohorts, cohortId);
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
         checkIfCohortTuitionDetailsHaveBeenUpdated(cohort);
         checkIfInitialDepositIsNotGreaterThanTotalCohortFee(loanee, cohort);
         checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(loanee, cohort);
@@ -74,17 +66,17 @@ public class LoaneeService implements LoaneeUsecase {
         log.info("= {} = = got here  ",loanee);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
-        cohortOutputPort.saveCohort(cohort);
+        cohortOutputPort.save(cohort);
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.save(loanee);
+        log.info("{} loanee ", cohortLoanee.getLoanee());
         return cohortLoanee.getLoanee();
     }
 
-    private Loanee checkIfLoaneeWithEmailExist(Loanee loanee) throws LoaneeException {
+    private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getLoanee().getEmail());
         if (existingLoanee != null) {
             throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST.getMessage());
         }
-        return loanee;
     }
 
     private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) {
@@ -99,13 +91,6 @@ public class LoaneeService implements LoaneeUsecase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static Cohort getCohort(List<ProgramCohort> programCohorts, String cohortId) throws CohortException {
-        return programCohorts.stream().filter(programCohort ->
-                        programCohort.getCohort().getId().equals(cohortId)).findFirst()
-                        .orElseThrow(() ->
-                                new CohortException(CohortMessages.COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
-    }
-
     private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getLoanee().getEmail());
         if (foundUserIdentity.isPresent()){
@@ -117,6 +102,7 @@ public class LoaneeService implements LoaneeUsecase {
         userIdentity = identityOutputPort.save(userIdentity);
         log.info("{} saved into db",userIdentity);
         loanee.setLoanee(userIdentity);
+
         loanee = loaneeOutputPort.save(loanee);
         return loanee;
     }
@@ -139,12 +125,6 @@ public class LoaneeService implements LoaneeUsecase {
         }
     }
 
-    private static void checkIfUserExistInOrganization(OrganizationIdentity organizationIdentity, OrganizationEmployeeIdentity organizationEmployeeIdentity) throws IdentityException {
-        if (! organizationIdentity.getId().equals(organizationEmployeeIdentity.getOrganization())) {
-            throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
-        }
-    }
-
     private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
         log.info("Fetching employee identity for createdBy: {}", loanee.getCreatedBy());
         OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
@@ -152,9 +132,7 @@ public class LoaneeService implements LoaneeUsecase {
         return employeeIdentity;
     }
 
-    private OrganizationIdentity getOrganizationIdentity(Loanee loanee) throws MeedlException {
-        return organizationIdentityOutputPort.findById(loanee.getOrganizationId());
-    }
+
 
 
 }

@@ -1,14 +1,19 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneeLoanDetailsPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,6 +44,7 @@ class LoaneePersistenceAdapterTest {
     private String loaneeId;
 
     private LoaneeLoanDetail loaneeLoanDetail;
+    private LoanBreakdown loanBreakdown;
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -46,6 +53,10 @@ class LoaneePersistenceAdapterTest {
     private UserIdentityOutputPort identityOutputPort;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
 
 
@@ -53,9 +64,17 @@ class LoaneePersistenceAdapterTest {
     void setUpUserIdentity(){
         userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
+        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+                .initialDeposit(BigDecimal.valueOf(200)).build();
+        loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
+                .currency("usd").build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
+            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
+            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -66,14 +85,9 @@ class LoaneePersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         firstLoanee = new Loanee();
-        firstLoanee.setOrganizationId(id);
-        firstLoanee.setProgramId(id);
         firstLoanee.setCohortId(id);
         firstLoanee.setCreatedBy(id);
         firstLoanee.setLoanee(userIdentity);
-        loaneeLoanDetail = new LoaneeLoanDetail();
-        loaneeLoanDetail.setAmountRequested(BigDecimal.valueOf(4000));
-        loaneeLoanDetail.setInitialDeposit(BigDecimal.valueOf(200));
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
 
@@ -125,13 +139,6 @@ class LoaneePersistenceAdapterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void saveLoaneeWithEmptyOrganizationId(String organizationId){
-        firstLoanee.setOrganizationId(organizationId);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void saveLoaneeWithEmptyUserId(String userId){
         firstLoanee.setCreatedBy(userId);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
@@ -145,32 +152,11 @@ class LoaneePersistenceAdapterTest {
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void saveLoaneeWithEmptyProgramId(String programId){
-        firstLoanee.setProgramId(programId);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
-
     @Test
     void saveLoaneeWithNullCohortId(){
         firstLoanee.setCohortId(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
-
-    @Test
-    void saveLoaneeWithNullProgramId(){
-        firstLoanee.setProgramId(null);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
-    @Test
-    void saveLoaneeWithNullOrganizationId(){
-        firstLoanee.setOrganizationId(null);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
     @Test
     void saveLoaneeWithNullMeedleUserId(){
         firstLoanee.setCreatedBy(null);
@@ -213,11 +199,7 @@ class LoaneePersistenceAdapterTest {
         assertEquals(loanee.getCohortId(),firstLoanee.getCohortId());
     }
 
-    @Order(2)
-    @Test
-    void cannotSaveLoaneeWithExistingEmail(){
-        assertThrows(MeedlException.class, ()-> loaneeOutputPort.save(firstLoanee));
-    }
+
 
 
 

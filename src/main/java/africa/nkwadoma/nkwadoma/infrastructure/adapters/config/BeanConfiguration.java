@@ -28,6 +28,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.Organ
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoanBreakdownPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneeLoanDetailsPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneePersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
@@ -41,6 +42,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
@@ -172,8 +174,9 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository){
-        return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository);
+    public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository,
+                                                             IdentityManagerOutputPort identityManagerOutputPort){
+        return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository,identityManagerOutputPort);
     }
 
 
@@ -184,16 +187,14 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LoaneeService loaneeService(OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                       OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                       ProgramCohortOutputPort programCohortOutputPort,
+    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                        CohortLoaneeOutputPort cohortLoaneeOutputPort,
                                        LoaneeOutputPort loaneeOutputPort,
                                        UserIdentityOutputPort userIdentityOutputPort,
                                        IdentityManagerOutputPort identityManagerOutputPort,
                                        CohortOutputPort cohortOutputPort){
-        return new LoaneeService(organizationIdentityOutputPort,organizationEmployeeIdentityOutputPort,
-                programCohortOutputPort,cohortLoaneeOutputPort,loaneeOutputPort,userIdentityOutputPort,
+        return new LoaneeService(organizationEmployeeIdentityOutputPort,
+                cohortLoaneeOutputPort,loaneeOutputPort,userIdentityOutputPort,
                 identityManagerOutputPort,cohortOutputPort);
     }
 
@@ -202,5 +203,11 @@ public class BeanConfiguration {
     LoanBreakdownMapper loanBreakdownMapper){
         return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper);
 
+    }
+
+    @Bean
+    public LoaneeLoanDetailsPersistenceAdapter loaneeLoanDetailsPersistenceAdapter(LoaneeLoanDetailRepository loaneeLoanDetailRepository,
+        LoaneeLoanDetailMapper loaneeLoanDetailMapper){
+        return new LoaneeLoanDetailsPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
     }
 }

@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
 public class Loanee {
 
     private String id;
-    private String organizationId;
     private String cohortId;
-    private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,8 +28,6 @@ public class Loanee {
         MeedlValidator.validateEmail(loanee.getEmail());
         MeedlValidator.validateDataElement(loanee.getFirstName());
         MeedlValidator.validateDataElement(loanee.getLastName());
-        MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateUUID(programId);
         MeedlValidator.validateUUID(cohortId);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);

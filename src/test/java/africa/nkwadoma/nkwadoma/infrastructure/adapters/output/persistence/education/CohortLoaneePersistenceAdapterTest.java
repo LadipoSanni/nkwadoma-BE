@@ -3,8 +3,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -15,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,27 +46,47 @@ public class CohortLoaneePersistenceAdapterTest {
     private String  cohortLoaneeId;
     private String  loaneeId;
     private UserIdentity userIdentity;
+    private LoanBreakdown loanBreakdown;
+    @Autowired
+    private UserIdentityOutputPort identityOutputPort;
+    @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
 
+
+
+    @BeforeAll
+    public void saveSetUp(){
+        userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+                .createdBy(id).role(IdentityRole.LOANEE).build();
+        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+                .initialDeposit(BigDecimal.valueOf(200)).build();
+        loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
+                .currency("usd").build();
+
+        try{
+            userIdentity = identityManagerOutputPort.createUser(userIdentity);
+            userIdentity = identityOutputPort.save(userIdentity);
+            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
+            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        }catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+
+
+    }
 
     @BeforeEach
     public void setUp(){
         firstLoanee = new Loanee();
-        firstLoanee.setOrganizationId(id);
-        firstLoanee.setProgramId(id);
         firstLoanee.setCohortId(id);
         firstLoanee.setCreatedBy(id);
-
-        userIdentity = new UserIdentity();
-        userIdentity.setEmail("qudusa55@gmail.com");
-        userIdentity.setFirstName("ned");
-        userIdentity.setLastName("tade");
-
-        loaneeLoanDetail = new LoaneeLoanDetail();
-        loaneeLoanDetail.setAmountRequested(BigDecimal.ZERO);
-        loaneeLoanDetail.setInitialDeposit(BigDecimal.ZERO);
-
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
-
+        firstLoanee.setLoanee(userIdentity);
         cohortLoanee = new CohortLoanee();
         cohortLoanee.setCohort(firstLoanee.getCohortId());
         cohortLoanee.setLoanee(firstLoanee);
@@ -85,8 +112,10 @@ public class CohortLoaneePersistenceAdapterTest {
 
 
     @AfterAll
-    void tearDown(){
+    void tearDown() throws MeedlException {
         cohortLoaneeRepository.deleteById(cohortLoaneeId);
         loaneeOutputPort.deleteLoanee(loaneeId);
+        identityOutputPort.deleteUserById(userIdentity.getId());
+        identityManagerOutputPort.deleteUser(userIdentity);
     }
 }

@@ -9,10 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class AddLoaneeToCohortRequest {
-    private String id;
-    private String organizationId;
     private String cohortId;
-    private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

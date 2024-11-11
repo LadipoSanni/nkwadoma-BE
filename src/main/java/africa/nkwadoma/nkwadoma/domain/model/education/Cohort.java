@@ -32,7 +32,7 @@ public class Cohort {
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
-    private BigDecimal tuitionAmount = BigDecimal.ZERO;
+    private BigDecimal tuitionAmount ;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime updatedAt;
     private String createdBy;

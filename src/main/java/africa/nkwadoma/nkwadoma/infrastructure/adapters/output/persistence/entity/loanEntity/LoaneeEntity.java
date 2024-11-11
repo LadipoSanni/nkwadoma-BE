@@ -20,14 +20,12 @@ public class LoaneeEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String organizationId;
     private String cohortId;
-    private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @OneToOne
     private UserEntity loanee;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

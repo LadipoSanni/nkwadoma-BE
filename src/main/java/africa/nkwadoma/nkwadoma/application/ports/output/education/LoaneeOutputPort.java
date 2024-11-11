@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.application.ports.output.education;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 
+import java.util.List;
+
 public interface LoaneeOutputPort {
 
 
@@ -10,5 +12,6 @@ public interface LoaneeOutputPort {
 
     void deleteLoanee(String loaneeId);
 
-    Loanee findByLoaneeEmail(String email);
+    Loanee findByLoaneeEmail(String email) throws MeedlException;
+
 }

@@ -10,11 +10,10 @@ import java.time.LocalDateTime;
 @Getter
 public class LoaneeResponse {
     private String id;
-    private String organizationId;
     private String cohortId;
-    private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private UserIdentityResponse loanee;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
 

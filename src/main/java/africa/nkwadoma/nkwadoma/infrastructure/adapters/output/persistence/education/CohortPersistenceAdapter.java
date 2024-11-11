@@ -78,13 +78,17 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
             List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortToUpdate.getId());
-            BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(loanBreakdowns,cohortToUpdate.getTuitionAmount());
-            cohortToUpdate.setTotalCohortFee(totalCohortFee);
+            if (cohortToUpdate.getTuitionAmount() != null) {
+                BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(loanBreakdowns, cohortToUpdate.getTuitionAmount());
+                cohortToUpdate.setTotalCohortFee(totalCohortFee);
+            }
             cohort.setLoanBreakdowns(loanBreakdowns);
             cohort = updateCohort(cohort, cohortToUpdate);
         } else {
-            BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort.getLoanBreakdowns(),cohort.getTuitionAmount());
-            cohort.setTotalCohortFee(totalCohortFee);
+            if (cohort.getTuitionAmount() != null) {
+                BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort.getLoanBreakdowns(), cohort.getTuitionAmount());
+                cohort.setTotalCohortFee(totalCohortFee);
+            }
             cohort = newCohort(cohort, program);
         }
         return cohort;
@@ -174,6 +178,19 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
         cohortRepository.deleteById(id);
+    }
+
+    @Override
+    public Cohort findCohort(String cohortId) throws CohortException {
+        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+        return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public Cohort save(Cohort cohort) {
+        CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
+        cohortEntity = cohortRepository.save(cohortEntity);
+        return cohortMapper.toCohort(cohortEntity);
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {

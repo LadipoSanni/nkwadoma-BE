@@ -2,10 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -34,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @Slf4j
@@ -45,45 +43,44 @@ public class LoaneeServiceTest {
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
-    private ProgramOutputPort programOutputPort;
-    @Mock
     private CohortOutputPort cohortOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Mock
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
-    private ProgramCohortOutputPort programCohortOutputPort;
+    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
 
     private ProgramCohort programCohort;
     private Cohort elites;
 
     private Loanee firstLoanee;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private UserIdentity loaneeUserIdentity;
+    private CohortLoanee cohortLoanee;
+    private LoaneeLoanDetail loaneeLoanDetails;
 
 
     @BeforeEach
     void setUpLoanee(){
-            UserIdentity loaneeUserIdentity = UserIdentity.builder()
+         loaneeUserIdentity = UserIdentity.builder()
                     .email("qudus55@gmail.com")
                     .firstName("qudus")
                     .lastName("lekan")
                     .role(IdentityRole.LOANEE)
+                    .createdAt(LocalDateTime.now().toString())
                     .build();
 
             firstLoanee = new Loanee();
             firstLoanee.setLoanee(loaneeUserIdentity);
             firstLoanee.setCreatedBy(mockId);
-            firstLoanee.setOrganizationId(mockId);
-            firstLoanee.setProgramId(mockId);
             firstLoanee.setCohortId(mockId);
 
             LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
             loaneeLoanDetail.setInitialDeposit(BigDecimal.valueOf(100));
+            loaneeLoanDetail.setAmountRequested(BigDecimal.valueOf(100));
 
             firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
 
@@ -95,12 +92,13 @@ public class LoaneeServiceTest {
         loanBreakdown1.setItemName("juno");
 
 
-        LoaneeLoanDetail loaneeLoanDetails = new LoaneeLoanDetail();
+        loaneeLoanDetails = new LoaneeLoanDetail();
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(3000));
         loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(100));
         loaneeLoanDetail.setLoanBreakdown(List.of(loanBreakdown1));
 
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        firstLoanee.setCreatedAt(LocalDateTime.now());
 
         elites = new Cohort();
         elites.setId(mockId);
@@ -111,12 +109,17 @@ public class LoaneeServiceTest {
         elites.setCreatedBy(mockId);
         elites.setLoanBreakdowns(List.of(loanBreakdown1));
         elites.setTuitionAmount(BigDecimal.valueOf(4000000));
+        elites.setTotalCohortFee(BigDecimal.valueOf(4000000));
 
         programCohort = new ProgramCohort();
         programCohort.setCohort(elites);
         programCohort.setProgramId(mockId);
         programCohort.setId(mockId);
 
+        cohortLoanee = new CohortLoanee();
+        cohortLoanee.setId(mockId);
+        cohortLoanee.setCohort(mockId);
+        cohortLoanee.setLoanee(firstLoanee);
 
     }
 
@@ -124,32 +127,66 @@ public class LoaneeServiceTest {
 
     @Test
     void addLoaneeToCohort() throws MeedlException {
-        OrganizationIdentity mockOrganizationIdentity = new OrganizationIdentity();
-        mockOrganizationIdentity.setId(mockId);
-        mockOrganizationIdentity.setName("org");
-        mockOrganizationIdentity.setEmail("qudusa55@gmail.com");
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
         mockEmployeeIdentity.setId(mockId);
-        mockEmployeeIdentity.setOrganization(mockOrganizationIdentity.getId());
-        mockOrganizationIdentity.setOrganizationEmployees(List.of(mockEmployeeIdentity));
-        lenient().when(organizationIdentityOutputPort.findById(firstLoanee.getOrganizationId()))
-                .thenReturn(mockOrganizationIdentity);
-        lenient().when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy()))
-                .thenReturn(mockEmployeeIdentity);
-        lenient().when(programCohortOutputPort.findAllByProgramId(firstLoanee.getProgramId()))
-                .thenReturn(List.of(programCohort));
-        when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
-        when(cohortOutputPort.saveCohort(any(Cohort.class))).thenReturn(elites);
+        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(identityManagerOutputPort.createUser(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
+        when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
+        when(cohortOutputPort.save(any())).thenReturn(elites);
+        when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
+        when(cohortLoaneeOutputPort.save(firstLoanee)).thenReturn(cohortLoanee);
         try {
             Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
             assertEquals(firstLoanee.getLoanee().getFirstName(), loanee.getLoanee().getFirstName());
             verify(loaneeOutputPort, times(1)).save(firstLoanee);
-            verify(cohortOutputPort, times(1)).saveCohort(any(Cohort.class));
+            verify(cohortOutputPort, times(1)).save(any(Cohort.class));
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
     }
 
+    @Test
+    void loaneeAmountRequestedCannotBeMoreThanCohortTotalFee() throws MeedlException {
+        loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(7000));
+        elites.setTotalCohortFee(BigDecimal.valueOf(200));
+        firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
+        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
+        mockEmployeeIdentity.setId(mockId);
+        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
+    }
+
+    @Test
+    void loaneeInitialDepositCannotBeGreaterThanCohortTotalFee() throws MeedlException {
+        loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(7000));
+        elites.setTotalCohortFee(BigDecimal.valueOf(200));
+        firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
+        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
+        mockEmployeeIdentity.setId(mockId);
+        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
+    }
+
+
+    @Test
+    void cohortTutionHaveToBeUpdatedBeforeAddingALoaneeToACohort() throws MeedlException {
+        elites.setTuitionAmount(null);
+        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
+        mockEmployeeIdentity.setId(mockId);
+        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
+    }
+
+
+    @Test
+    void cannotAddLoaneeToACohortWithExistingLoaneeEmail() throws MeedlException {
+        when(loaneeOutputPort.findByLoaneeEmail(loaneeUserIdentity.getEmail())).thenReturn(firstLoanee);
+        assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
+    }
 
 
 }
