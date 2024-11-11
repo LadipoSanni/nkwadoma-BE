@@ -1,25 +1,33 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-import jakarta.persistence.*;
-import lombok.*;
 
-import java.time.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
-@Entity
-@Getter
+import java.time.LocalDateTime;
+
 @Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Entity
 public class LoaneeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator
     private String id;
+    private String cohortId;
+    private String alternateEmail;
     private String alternatePhoneNumber;
     private String alternateContactAddress;
-    private String alternateEmail;
-    private String cohortId;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String createdBy;
+    @OneToOne
+    private UserEntity loanee;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

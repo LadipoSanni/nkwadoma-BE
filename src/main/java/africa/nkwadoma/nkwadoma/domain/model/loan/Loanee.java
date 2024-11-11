@@ -1,23 +1,41 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
-import java.time.*;
+import java.time.LocalDateTime;
 
-@Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@ToString
 @Builder
 public class Loanee {
     private String id;
+    private String organizationId;
+    private String cohortId;
+    private String programId;
+    private String createdBy;
+    private String alternateEmail;
     private String alternatePhoneNumber;
     private String alternateContactAddress;
-    private String alternateEmail;
-    private String cohortId;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentity userIdentity;
+    private UserIdentity loanee;
+    private LoaneeLoanDetail loaneeLoanDetail;
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateEmail(loanee.getEmail());
+        MeedlValidator.validateDataElement(loanee.getFirstName());
+        MeedlValidator.validateDataElement(loanee.getLastName());
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateObjectInstance(loaneeLoanDetail);
+    }
+
 }
