@@ -17,13 +17,17 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.KeyCloakMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -47,13 +51,15 @@ class CohortPersistenceAdapterTest {
 
     @Autowired
     private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private KeyCloakMapper keyCloakMapper;
     private Cohort elites;
     private Cohort xplorers;
     private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
-    private String meedleUser;
+    private UserIdentity meedleUser;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -78,24 +84,23 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        UserIdentity userIdentity = UserIdentity.builder()
+        meedleUser = UserIdentity.builder()
                 .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
-                lastName("Benson").email("freddy102@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                lastName("Benson Ayo").email("yanakix11h46@lineacr.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
-                .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("fordorganization012@example.com")
-                .name("Organization09 Ford").rcNumber("7576").serviceOfferings(
+                .meedlUser(meedleUser).build();
+        organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
+                .name("Organization test").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
-
         program = Program.builder().name("My program Ford").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         try {
-            organizationIdentity = organizationUseCase.inviteOrganization(organizationIdentity);
+            organizationIdentity = inviteOrganizationIdentity();
             log.info("Organization identity saved before program {}",organizationIdentity);
             organizationId = organizationIdentity.getId();
             meedleUserId = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
@@ -108,6 +113,27 @@ class CohortPersistenceAdapterTest {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+    private OrganizationIdentity inviteOrganizationIdentity() throws MeedlException {
+        ClientRepresentation clientRepresentation = null;
+        UserRepresentation userRepresentation = null;
+        try {
+            userRepresentation = identityManagementOutputPort.getUserRepresentation(meedleUser, Boolean.TRUE);
+        } catch (MeedlException e) {
+            log.warn("Failed to find user for test {} for user {} meaning user doesn't exist and its safe to create this user", e.getMessage(), meedleUser);
+        }
+        if (ObjectUtils.isNotEmpty(userRepresentation) && StringUtils.isNotEmpty(userRepresentation.getId())){
+            identityManagementOutputPort.deleteUser(keyCloakMapper.mapUserRepresentationToUserIdentity(userRepresentation));
+        }
+        try {
+            clientRepresentation = identityManagementOutputPort.getClientRepresentationByName(organizationIdentity.getName());
+        } catch (MeedlException e) {
+            log.warn("Failed to get client : {} client name: {}", e.getMessage(), organizationIdentity.getName());
+        }
+        if (!ObjectUtils.isEmpty(clientRepresentation)){
+            identityManagementOutputPort.deleteClient(clientRepresentation.getId());
+        }
+            return organizationUseCase.inviteOrganization(organizationIdentity);
     }
 
     @BeforeEach

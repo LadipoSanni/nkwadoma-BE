@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.*;
 import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
@@ -38,11 +39,18 @@ public class TokenUtils {
 
     public String decodeJWT(String token) throws MeedlException {
         MeedlValidator.validateDataElement(token);
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException exception) {
+            throw new MeedlException("Time allocated for this action has expired. Please refresh.");
+        } catch (SignatureException exception) {
+            throw new MeedlException("You are not authorized to perform this action. Invalid signature");
+        }
         if (expiration == null || claims.getExpiration().before(new Date())) {
             throw new MeedlException("Token has expired");
         }
