@@ -84,7 +84,7 @@ class CohortPersistenceAdapterTest {
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
-                .name("Organization Ford").rcNumber("56767").serviceOfferings(
+                .name("Organization21 Ford").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
