@@ -79,8 +79,8 @@ class CohortPersistenceAdapterTest {
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
-                .firstName("Ford 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("freddy121@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
+                lastName("Benson").email("freddy12@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
         organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
