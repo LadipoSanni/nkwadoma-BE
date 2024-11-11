@@ -39,7 +39,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*
 
 @Slf4j
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase , VerificationUseCase {
+public class UserIdentityService implements CreateUserUseCase  {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -184,20 +184,6 @@ public class UserIdentityService implements CreateUserUseCase , VerificationUseC
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
     }
-    @Override
-    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWT(token);
-        MeedlValidator.validateEmail(email);
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        boolean identityVerified = identityVerificationOutputPort.isIdentityVerified(foundUser);
-        if (identityVerified) {
-            log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
-            return IDENTITY_VERIFIED.getMessage();
-        }
-        log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
-        return IDENTITY_NOT_VERIFIED.getMessage();
-    }
-
 
 }
 

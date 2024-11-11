@@ -10,5 +10,4 @@ public interface IdentityVerificationOutputPort {
 
     PremblyNinResponse verifyIdentity (IdentityVerification identityVerification) throws InfrastructureException;
 
-    boolean isIdentityVerified(UserIdentity foundUser);
 }

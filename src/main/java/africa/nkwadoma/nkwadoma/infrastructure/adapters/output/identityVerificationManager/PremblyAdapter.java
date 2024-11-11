@@ -38,11 +38,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         return getNinDetails(identityVerification);
     }
 
-    @Override
-    public boolean isIdentityVerified(UserIdentity foundUser) {
-        return false;
-    }
-
     public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
         validateIdentityVerificationRequest(verificationRequest);
         ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);

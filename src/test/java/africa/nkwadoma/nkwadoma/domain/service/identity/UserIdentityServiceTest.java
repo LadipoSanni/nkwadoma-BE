@@ -375,44 +375,7 @@ class UserIdentityServiceTest {
     void forgotPasswordWithInvalidEmail(String email) {
         assertThrows(MeedlException.class, ()-> userIdentityService.forgotPassword(email));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
-    void verifyUserIdentityVerifiedByInvalidEmail(String token) {
-        assertThrows(MeedlException.class, ()-> userIdentityService.verifyByEmailUserIdentityVerified(token));
-    }
 
-    @Test
-    void verifyUserIdentityVerifiedByEmail() {
-        try {
-            when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
-            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            when(identityVerificationOutputPort.isIdentityVerified(favour)).thenReturn(true);
-            assertEquals("Identity verified", userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
-        } catch (MeedlException e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
-    @Test
-    void verifyNonExistingUserIdentityIsVerifiedByEmail() {
-        try {
-            when(userIdentityOutputPort.findByEmail(any())).thenThrow(MeedlException.class);
-            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            assertThrows(MeedlException.class, ()-> userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
-        } catch (MeedlException e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
-    @Test
-    void verifyUserIdentityNotVerifiedByEmail() {
-        try {
-            when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
-            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            when(identityVerificationOutputPort.isIdentityVerified(favour)).thenReturn(false);
-            assertEquals("Identity not verified", userIdentityService.verifyByEmailUserIdentityVerified(generatedToken));
-        } catch (MeedlException e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void reactivateWithOutReason(String reactivateReason) {
