@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -33,7 +34,22 @@ public class IdentityVerificationService implements VerificationUseCase {
         log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
+    public void verifyUser(IdentityVerification identityVerification) {
+        UserIdentity userIdentity = userIdentityOutputPort.findByBvnOrNin(identityVerification);
+        if (userIdentity == null) {
+            throw new RuntimeException("User not found");
+        }
+        if (userIdentity.isVerified()) {
+            throw new RuntimeException("User already verified");
+        }
+        userIdentity.setVerified(true);
+        userIdentityOutputPort.save(userIdentity);
+    }
+    public void isUserBvnOrNinAlreadyVerified(IdentityVerification identityVerification {
+        userIdentityOutputPort.findByBvnOrNin(identityVerification);
+    }
     private boolean isIdentityVerified(UserIdentity foundUser){
         return true;
     }
+
 }
