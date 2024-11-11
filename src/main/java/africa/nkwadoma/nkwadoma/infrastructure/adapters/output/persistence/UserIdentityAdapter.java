@@ -2,26 +2,19 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 
 @RequiredArgsConstructor
@@ -59,7 +52,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     @Override
     public UserIdentity findByEmail(String email) throws MeedlException {
         validateEmail(email);
-        UserEntity userEntity = getUserEntityByEmail(email);
+        UserEntity userEntity =
+                getUserEntityByEmail(email);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 
@@ -70,15 +64,6 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
-    @Override
-    public void verifyUser(String actorId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId);
-        UserIdentity userIdentity = findById(actorId);
-
-//        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
-//            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
-//        }
-    }
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));

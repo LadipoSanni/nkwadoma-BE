@@ -3,7 +3,9 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -31,14 +33,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
 @Slf4j
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase {
+public class UserIdentityService implements CreateUserUseCase  {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -48,6 +49,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
+    private final IdentityVerificationOutputPort identityVerificationOutputPort;
 
 
     @Override
@@ -154,8 +156,6 @@ public class UserIdentityService implements CreateUserUseCase {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
     }
-
-
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
@@ -163,7 +163,6 @@ public class UserIdentityService implements CreateUserUseCase {
         validateDataElement(userIdentity.getReactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
-//        userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
@@ -176,19 +175,15 @@ public class UserIdentityService implements CreateUserUseCase {
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
-//        userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
-
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
     }
-
-
 
 }
 

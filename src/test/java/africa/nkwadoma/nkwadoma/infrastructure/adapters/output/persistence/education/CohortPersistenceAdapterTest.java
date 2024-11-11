@@ -87,10 +87,16 @@ class CohortPersistenceAdapterTest {
         meedleUser = UserIdentity.builder()
                 .firstName("Ford 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
                 lastName("Benson Ayo").email("yanakix1146@lineacr.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+        UserIdentity userIdentity = UserIdentity.builder()
+                .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
+                lastName("Benson").email("freddy102@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(meedleUser).build();
         organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
                 .name("Organization test").rcNumber("56767").serviceOfferings(
+                .meedlUser(userIdentity).build();
+        organizationIdentity = OrganizationIdentity.builder().email("fordorganization012@example.com")
+                .name("Organization09 Ford").rcNumber("7576").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
