@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;

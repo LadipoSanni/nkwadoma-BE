@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.security.*;
 import org.springframework.context.annotation.*;
 
 @Configuration
+@Profile(value = {"dev"})
 public class SwaggerConfig {
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme().type(SecurityScheme.Type.HTTP)

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
@@ -25,10 +26,11 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
+    private final VerificationUseCase verificationUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toLoginUserIdentity(loginRequest);
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
@@ -81,6 +83,13 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("auth/identity/confirmVerification")
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(verificationUseCase.verifyByEmailUserIdentityVerified(token))
+                .statusCode(HttpStatus.OK.name()).build());
+    }
+
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {

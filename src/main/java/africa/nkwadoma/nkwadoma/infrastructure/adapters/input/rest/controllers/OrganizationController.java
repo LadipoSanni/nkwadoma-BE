@@ -46,8 +46,7 @@ public class OrganizationController {
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
-                                                             @RequestBody @Valid OrganizationRequest inviteOrganizationRequest){
-        try{
+                                                             @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
             UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
@@ -63,9 +62,6 @@ public class OrganizationController {
                     .statusCode(HttpStatus.CREATED.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(new ApiResponse<>(null, exception.getMessage(), HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
 
     }
     @PatchMapping("organization/update")

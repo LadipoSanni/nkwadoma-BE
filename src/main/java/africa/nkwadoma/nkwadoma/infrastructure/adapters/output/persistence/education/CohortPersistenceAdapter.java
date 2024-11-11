@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -32,8 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
@@ -62,10 +62,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
+        log.info("Found program cohort: {}", programCohortList);
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
-        Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
+        Cohort retrievedCohort  = updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
         if (cohort.getCohortLoanDetail() != null){
            CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.saveCohortLoanDetails(cohort,retrievedCohort.getId());
             retrievedCohort.setCohortLoanDetail(cohortLoanDetail);
@@ -76,8 +77,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
         CohortEntity cohortEntity;
-        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
-        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
+//        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
+//        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
             cohort = updateCohort(cohort, cohortToUpdate);
@@ -111,7 +112,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohort;
     }
 
-    private Cohort newCohort(Cohort cohort, Program program) {
+    private Cohort newCohort(Cohort cohort, Program program) throws MeedlException {
         cohort.setCreatedAt(LocalDateTime.now());
         activateStatus(cohort);
         ProgramCohort newProgramCohort = new ProgramCohort();
@@ -194,6 +195,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return programCohorts.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(name.trim()))
                 .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
+    }
+
+    @Override
+    public List<Cohort> findAllCohortInAProgram(String programId) throws MeedlException {
+        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
+        return programCohorts.stream()
+                .map(ProgramCohort::getCohort)
+                .toList();
     }
 }
 
