@@ -115,7 +115,6 @@ class CohortPersistenceAdapterTest {
             throw new RuntimeException(e);
         }
     }
-
     private OrganizationIdentity inviteOrganizationIdentity() throws MeedlException {
         ClientRepresentation clientRepresentation = null;
         UserRepresentation userRepresentation = null;
