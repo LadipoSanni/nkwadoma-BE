@@ -281,6 +281,7 @@ class CohortPersistenceAdapterTest {
                         cohortId));
     }
 
+    @Order(6)
     @Test
     void viewAllCohortInAProgram(){
         List<Cohort> cohorts = new ArrayList<>();
@@ -293,7 +294,7 @@ class CohortPersistenceAdapterTest {
 
     }
 
-    @Order(6)
+    @Order(7)
     @Test
     void searchForCohort(){
         Cohort searchedCohort = new Cohort();
@@ -332,7 +333,7 @@ class CohortPersistenceAdapterTest {
         }
     }
 
-    @Order(7)
+    @Order(8)
     @Test
     void cohortWithoutLoanDetailsCanBeEdited(){
         Cohort editedCohort = new Cohort();
@@ -347,7 +348,7 @@ class CohortPersistenceAdapterTest {
     }
 
 
-    @Order(8)
+    @Order(9)
     @Test
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
@@ -365,7 +366,7 @@ class CohortPersistenceAdapterTest {
         assertNotNull(editedCohort.getLoanDetail());
     }
 
-    @Order(9)
+    @Order(10)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
@@ -384,7 +385,6 @@ class CohortPersistenceAdapterTest {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
-        programOutputPort.deleteProgram(programId);
         cohortOutputPort.deleteCohort(cohortTwoId);
         programCohortOutputPort.delete(programId);
         organizationIdentityOutputPort.delete(organizationId);

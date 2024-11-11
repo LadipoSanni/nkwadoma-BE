@@ -9,6 +9,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
@@ -24,6 +26,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
@@ -47,6 +50,8 @@ public class LoaneeService implements LoaneeUsecase {
     private final UserIdentityOutputPort identityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortOutputPort cohortOutputPort;
+    private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private final LoanBreakdownOutputPort loanBreakdownOutputPort;
 
 
     @Override
@@ -63,13 +68,22 @@ public class LoaneeService implements LoaneeUsecase {
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         loanee.setCreatedAt(LocalDateTime.now());
-        log.info("= {} = = got here  ",loanee);
+        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown());
+        saveLoaneeLoanDetails(loanee, loanBreakdowns);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.save(loanee);
-        log.info("{} loanee ", cohortLoanee.getLoanee());
         return cohortLoanee.getLoanee();
+    }
+
+    private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
+        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+        loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
+        loaneeLoanDetail.setAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
+        loaneeLoanDetail.setLoanBreakdown(loanBreakdowns);
+        loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
 
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {

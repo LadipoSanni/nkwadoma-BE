@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.ProgramCohortException;
@@ -52,6 +54,10 @@ public class LoaneeServiceTest {
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private CohortLoaneeOutputPort cohortLoaneeOutputPort;
+    @Mock
+    private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Mock
+    private  LoanBreakdownOutputPort loanBreakdownOutputPort;
 
     private ProgramCohort programCohort;
     private Cohort elites;
@@ -61,6 +67,7 @@ public class LoaneeServiceTest {
     private UserIdentity loaneeUserIdentity;
     private CohortLoanee cohortLoanee;
     private LoaneeLoanDetail loaneeLoanDetails;
+    private LoanBreakdown loanBreakdown;
 
 
     @BeforeEach
@@ -85,17 +92,16 @@ public class LoaneeServiceTest {
             firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
 
 
-
-        LoanBreakdown loanBreakdown1 = new LoanBreakdown();
-        loanBreakdown1.setCurrency("usd");
-        loanBreakdown1.setItemAmount(BigDecimal.valueOf(30000));
-        loanBreakdown1.setItemName("juno");
+        loanBreakdown = new LoanBreakdown();
+        loanBreakdown.setCurrency("usd");
+        loanBreakdown.setItemAmount(BigDecimal.valueOf(30000));
+        loanBreakdown.setItemName("juno");
 
 
         loaneeLoanDetails = new LoaneeLoanDetail();
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(3000));
         loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(100));
-        loaneeLoanDetail.setLoanBreakdown(List.of(loanBreakdown1));
+        loaneeLoanDetail.setLoanBreakdown(List.of(loanBreakdown));
 
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
         firstLoanee.setCreatedAt(LocalDateTime.now());
@@ -107,7 +113,7 @@ public class LoaneeServiceTest {
         elites.setProgramId(mockId);
         elites.setName("Elite");
         elites.setCreatedBy(mockId);
-        elites.setLoanBreakdowns(List.of(loanBreakdown1));
+        elites.setLoanBreakdowns(List.of(loanBreakdown));
         elites.setTuitionAmount(BigDecimal.valueOf(4000000));
         elites.setTotalCohortFee(BigDecimal.valueOf(4000000));
 
@@ -133,6 +139,8 @@ public class LoaneeServiceTest {
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(identityManagerOutputPort.createUser(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
         when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
+        when(loanBreakdownOutputPort.saveAll(List.of(loanBreakdown))).thenReturn(List.of(loanBreakdown));
+        when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(loaneeLoanDetails);
         when(cohortOutputPort.save(any())).thenReturn(elites);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
         when(cohortLoaneeOutputPort.save(firstLoanee)).thenReturn(cohortLoanee);

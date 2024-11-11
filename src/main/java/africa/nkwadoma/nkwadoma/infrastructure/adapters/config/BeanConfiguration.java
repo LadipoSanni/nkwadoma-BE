@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
@@ -119,8 +120,9 @@ public class BeanConfiguration {
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort,CohortLoaneeOutputPort cohortLoaneeOutputPort){
-        return new CohortService(cohortOutputPort,cohortLoaneeOutputPort);
+    public CohortService cohortService(CohortOutputPort cohortOutputPort,CohortLoaneeOutputPort cohortLoaneeOutputPort,
+                                       ProgramOutputPort programOutputPort){
+        return new CohortService(cohortOutputPort,cohortLoaneeOutputPort,programOutputPort);
     }
 
     @Bean
@@ -190,10 +192,12 @@ public class BeanConfiguration {
                                        LoaneeOutputPort loaneeOutputPort,
                                        UserIdentityOutputPort userIdentityOutputPort,
                                        IdentityManagerOutputPort identityManagerOutputPort,
-                                       CohortOutputPort cohortOutputPort){
+                                       CohortOutputPort cohortOutputPort,
+                                       LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
+                                       LoanBreakdownOutputPort loanBreakdownOutputPort){
         return new LoaneeService(organizationEmployeeIdentityOutputPort,
                 cohortLoaneeOutputPort,loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort);
+                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
     }
 
     @Bean
