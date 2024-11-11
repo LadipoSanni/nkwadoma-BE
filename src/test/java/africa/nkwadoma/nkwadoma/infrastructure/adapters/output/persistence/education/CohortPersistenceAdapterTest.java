@@ -79,16 +79,15 @@ class CohortPersistenceAdapterTest {
     @BeforeAll
     void setUpOrg() {
         UserIdentity userIdentity = UserIdentity.builder()
-                .firstName("Ford 20").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
-                lastName("Benson Ayo").email("freddy121@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                .firstName("Ford 2001").role(IdentityRole.valueOf("PORTFOLIO_MANAGER")).
+                lastName("Benson Ayo").email("freddy1201tk@example.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(userIdentity).build();
-        organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
-                .name("Organization21 Ford").rcNumber("56767").serviceOfferings(
+        organizationIdentity = OrganizationIdentity.builder().email("ford_freakyorganization102@example.com")
+                .name("Organization21 tFord3").rcNumber("56767").serviceOfferings(
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity))
                 .build();
-
         program = Program.builder().name("My program Ford").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
