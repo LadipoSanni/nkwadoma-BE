@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                     .allowedOrigins(allowedHost.getPatterns())
                     .allowedMethods(allowedHost.getMethods())
                     .allowedHeaders("*")
-                    .exposedHeaders("*");
+                    .exposedHeaders("*").allowCredentials(true);
          }};
     }
 
