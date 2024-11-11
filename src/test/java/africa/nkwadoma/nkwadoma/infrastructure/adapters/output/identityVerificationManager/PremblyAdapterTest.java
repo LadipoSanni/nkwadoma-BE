@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +24,7 @@ class PremblyAdapterTest {
 
 
 @Autowired
+@Qualifier("premblyAdapter")
 private IdentityVerificationOutputPort identityVerificationOutPutPort;
 
     private IdentityVerification identityVerification;
@@ -32,10 +34,7 @@ private IdentityVerificationOutputPort identityVerificationOutPutPort;
     void setUp(){
         identityVerification =   IdentityVerification.builder().
                 identityId("12345678901").identityImage("WWW.imageUrl.com").build();
-
     }
-
-
 
     @Test
     void verifyIdentityWithNullIdentityVerification(){
@@ -65,8 +64,6 @@ private IdentityVerificationOutputPort identityVerificationOutPutPort;
        identityVerification.setIdentityImage(StringUtils.EMPTY);
        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
-
-
 
     @Test
     void verifyIdentity(){
