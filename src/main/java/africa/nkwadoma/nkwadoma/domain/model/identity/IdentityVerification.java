@@ -12,4 +12,10 @@ public class IdentityVerification {
 
     private String identityId;
     private String identityImage;
+    private IdentityVerificationEnum typeOfIdentity;
+
+    private enum IdentityVerificationEnum{
+        BVN, NIN
+    }
 }
+

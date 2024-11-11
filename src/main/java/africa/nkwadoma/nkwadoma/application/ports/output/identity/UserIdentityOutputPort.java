@@ -9,6 +9,4 @@ public interface UserIdentityOutputPort {
     void deleteUserById(String id) throws MeedlException;
     UserIdentity findByEmail(String email) throws MeedlException;
     void deleteUserByEmail(String email) throws MeedlException;
-
-    void verifyUser(String actorId) throws MeedlException;
 }

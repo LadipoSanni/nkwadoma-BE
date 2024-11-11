@@ -70,16 +70,6 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
-    @Override
-    public void verifyUser(String actorId) throws MeedlException {
-        MeedlValidator.validateUUID(actorId);
-        UserIdentity userIdentity = findById(actorId);
-
-//        if (!(userIdentity.isEnabled() && userIdentity.isEmailVerified())){
-//            throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
-//        }
-    }
-
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {
         return userEntityRepository.findByEmail(email).orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
     }
