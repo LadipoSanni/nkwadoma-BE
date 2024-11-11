@@ -2,15 +2,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.ProgramCohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramCohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.ProgramCohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramCohortRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,19 +30,18 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     }
 
     @Override
-    public ProgramCohort findByProgramId(String programId) {
+    public ProgramCohort findByProgramId(String programId) throws MeedlException {
+        MeedlValidator.validateUUID(programId);
         ProgramCohortEntity programCohortEntity =
                 programCohortRepository.findByProgramId(programId);
         return programCohortMapper.toProgramCohort(programCohortEntity);
     }
 
     @Override
-    public List<ProgramCohort> findAllByProgramId(String programId) throws ProgramCohortException {
-        List<ProgramCohortEntity> programCohortEntities = programCohortRepository.findAllByProgramId(programId);
-        if (programCohortEntities == null){
-            throw new ProgramCohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
-        }
-
+    public List<ProgramCohort> findAllByProgramId(String programId) throws MeedlException {
+        MeedlValidator.validateUUID(programId);
+        List<ProgramCohortEntity> programCohortEntities =
+         programCohortRepository.findAllByProgramId(programId);
         return programCohortMapper.toProgramCohortList(programCohortEntities);
     }
 
@@ -60,14 +57,13 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     @Transactional
     @Override
     public void delete(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
         programCohortRepository.deleteAllByProgramId(id);
-//        programOutputPort.deleteProgram(id);
+        programOutputPort.deleteProgram(id);
     }
 
     @Override
     public void deleteAllByCohort(CohortEntity cohort) {
         programCohortRepository.deleteAllByCohort(cohort);
     }
-
-
 }

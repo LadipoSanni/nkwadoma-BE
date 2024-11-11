@@ -10,7 +10,8 @@ public enum ControllerConstant {
     PASSWORD_CREATED_SUCCESSFULLY("Password has been created successfully"),
     DELETED_SUCCESSFULLY("Deleted successfully"),
     UPDATED_SUCCESSFULLY("updated successfully"),
-    PASSWORD_RESET_SUCCESSFUL("Password reset successful");
+    PASSWORD_RESET_SUCCESSFUL("Password reset successful"),
+    RETURNED_SUCCESSFULLY("returned successfulLy");
     private final String message;
 
     ControllerConstant(String message) {

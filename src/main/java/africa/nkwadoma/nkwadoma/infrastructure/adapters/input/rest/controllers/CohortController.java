@@ -1,30 +1,29 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.CreateCohortRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.EditCohortLoanDetailRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.CohortRestMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
-import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import io.swagger.v3.oas.annotations.*;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.*;
+import org.springframework.security.core.annotation.*;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages.INVALID_OPERATION;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.*;
 
 @Slf4j
@@ -32,27 +31,24 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class CohortController {
-
-
     private final CohortUseCase cohortUseCase;
     private final CohortRestMapper cohortMapper;
-
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
-            Cohort cohort = cohortMapper.toCohort(createCohortRequest);
-            cohort = cohortUseCase.createOrEditCohort(cohort);
-            CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
-            cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
-                                                    .map(cohortMapper::toLoanBreakdownResponse)
-                                                    .toList());
-            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .data(cohortResponse)
-                    .message(COHORT_CREATED)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        Cohort cohort = cohortMapper.toCohort(createCohortRequest);
+        cohort = cohortUseCase.createOrEditCohort(cohort);
+        CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
+        cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
+                .map(cohortMapper::toLoanBreakdownResponse)
+                .toList());
+        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                .data(cohortResponse)
+                .message(COHORT_CREATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("cohort-details")
@@ -86,6 +82,7 @@ public class CohortController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
     public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
@@ -115,22 +112,34 @@ public class CohortController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
-            @RequestParam @NotBlank(message = "Program ID is required") String programId){
+            @RequestParam @NotBlank(message = "Program ID is required") String programId) throws MeedlException {
+        Cohort cohort = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
+        CohortResponse cohortResponse =
+                cohortMapper.toCohortResponse(cohort);
+        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+                .data(cohortResponse)
+                .message(COHORT_RETRIEVED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
-        try {
-            Cohort cohort = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
-            CohortResponse cohortResponse =
-                    cohortMapper.toCohortResponse(cohort);
-            ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
-                    .data(cohortResponse)
-                    .message(COHORT_RETRIEVED)
-                    .statusCode(HttpStatus.OK.toString())
-                    .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-        } catch (MeedlException exception) {
-            return new ResponseEntity<>(new ApiResponse<>(INVALID_OPERATION, exception.getMessage(),
-                    HttpStatus.BAD_REQUEST.toString()), HttpStatus.BAD_REQUEST);
-        }
+    @GetMapping("cohort/all")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
+            AllCohortsRequest allCohortsRequest) throws MeedlException {
+        Cohort cohort = Cohort.builder().programId(allCohortsRequest.getProgramId()).
+                pageNumber(allCohortsRequest.getPageNumber()).pageSize(allCohortsRequest.getPageSize()).build();
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(cohort);
+        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
+        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), allCohortsRequest.getPageNumber(), allCohortsRequest.getPageSize());
+        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+                .data(paginatedResponse)
+                .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 }

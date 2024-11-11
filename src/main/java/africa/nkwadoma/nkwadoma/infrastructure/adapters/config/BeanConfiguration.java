@@ -4,12 +4,9 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmail
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
@@ -72,9 +69,10 @@ public class BeanConfiguration {
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper,
-                                                   BlackListedTokenAdapter blackListedTokenAdapter
+                                                   BlackListedTokenAdapter blackListedTokenAdapter,
+                                                   IdentityVerificationOutputPort identityVerificationOutputPort
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, identityVerificationOutputPort);
     }
 
     @Bean
@@ -116,8 +114,8 @@ public class BeanConfiguration {
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort){
-        return new CohortService(cohortOutputPort);
+    public CohortService cohortService(CohortOutputPort cohortOutputPort, ProgramOutputPort programOutputPort){
+        return new CohortService(cohortOutputPort, programOutputPort);
     }
 
     @Bean
