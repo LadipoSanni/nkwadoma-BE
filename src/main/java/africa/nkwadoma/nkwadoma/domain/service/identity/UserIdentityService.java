@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -38,7 +39,7 @@ import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*
 
 @Slf4j
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase {
+public class UserIdentityService implements CreateUserUseCase , VerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -156,24 +157,12 @@ public class UserIdentityService implements CreateUserUseCase {
         }
     }
     @Override
-    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWT(token);
-        MeedlValidator.validateEmail(email);
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        boolean identityVerified = identityVerificationOutputPort.isIdentityVerified(foundUser);
-        if (identityVerified) {
-            return "Identity verified";
-        }
-        return "Identity not verified";
-    }
-    @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
         validateDataElement(userIdentity.getReactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
-//        userIdentityOutputPort.save(userIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
@@ -186,16 +175,27 @@ public class UserIdentityService implements CreateUserUseCase {
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);
-//        userIdentityOutputPort.save(userIdentity);
         log.info("User deactivated successfully {}", userIdentity.getId());
         return userIdentity;
     }
-
 
     @Override
     public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
+    }
+    @Override
+    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
+        String email = tokenUtils.decodeJWT(token);
+        MeedlValidator.validateEmail(email);
+        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
+        boolean identityVerified = identityVerificationOutputPort.isIdentityVerified(foundUser);
+        if (identityVerified) {
+            log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
+            return IDENTITY_VERIFIED.getMessage();
+        }
+        log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
+        return IDENTITY_NOT_VERIFIED.getMessage();
     }
 
 

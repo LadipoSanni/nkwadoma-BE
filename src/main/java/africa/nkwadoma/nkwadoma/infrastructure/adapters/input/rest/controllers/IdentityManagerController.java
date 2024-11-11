@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
@@ -25,6 +26,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
+    private final VerificationUseCase verificationUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
@@ -84,7 +86,7 @@ public class IdentityManagerController {
     @PostMapping("auth/identity/confirmVerification")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(createUserUseCase.verifyByEmailUserIdentityVerified(token))
+                .data(verificationUseCase.verifyByEmailUserIdentityVerified(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
 
