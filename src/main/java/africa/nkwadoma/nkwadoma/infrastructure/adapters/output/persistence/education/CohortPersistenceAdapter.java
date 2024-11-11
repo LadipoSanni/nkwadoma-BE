@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +46,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final ProgramCohortOutputPort programCohortOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private final LoanDetailsOutputPort loanDetailsOutputPort;
+
 
 
 
@@ -61,19 +63,24 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
+        if (existingProgramCohort.isEmpty() && cohort.getId() != null) {
+            existingProgramCohort = programCohortList.stream()
+                    .filter(eachProgramCohort -> eachProgramCohort.getCohort().getId().equals(cohort.getId()))
+                    .findFirst();
+        }
         Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
         programOutputPort.saveProgram(program);
         return retrievedCohort;
     }
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
-        CohortEntity cohortEntity;
 
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
             List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortToUpdate.getId());
             BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(loanBreakdowns,cohortToUpdate.getTuitionAmount());
             cohortToUpdate.setTotalCohortFee(totalCohortFee);
+            cohort.setLoanBreakdowns(loanBreakdowns);
             cohort = updateCohort(cohort, cohortToUpdate);
         } else {
             BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort.getLoanBreakdowns(),cohort.getTuitionAmount());
@@ -83,13 +90,16 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohort;
     }
 
-    private Cohort updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
+    private Cohort updateCohort(Cohort cohort, Cohort cohortToUpdate) throws MeedlException {
         CohortEntity cohortEntity;
         List<LoanBreakdown> savedLoanBreakdowns;
         if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
             if (cohortEntity.getLoanDetail() != null) {
                 throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+            }if (cohort.getLoanDetail() != null){
+               LoanDetail loanDetail =  loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
+               cohort.setLoanDetail(loanDetail);
             }
             cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
             cohortToUpdate.setUpdatedAt(LocalDateTime.now());
@@ -97,7 +107,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
             activateStatus(cohortToUpdate);
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
             cohortEntity = cohortRepository.save(cohortEntity);
-            savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
+            savedLoanBreakdowns = saveLoanBreakdown(cohortToUpdate.getLoanBreakdowns(), cohortEntity);
             } else {
                 throw new CohortException(COHORT_EXIST.getMessage());
             }
@@ -106,14 +116,18 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohort;
     }
 
-    private Cohort newCohort(Cohort cohort, Program program) {
+    private Cohort newCohort(Cohort cohort, Program program) throws MeedlException {
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
         activateStatus(cohort);
         ProgramCohort newProgramCohort = new ProgramCohort();
+        if (cohort.getLoanDetail() != null) {
+            LoanDetail loanDetail = loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
+            cohort.setLoanDetail(loanDetail);
+        }
         CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
         cohortEntity = cohortRepository.save(cohortEntity);
-        List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
+        List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort.getLoanBreakdowns(), cohortEntity);
         cohort = cohortMapper.toCohort(cohortEntity);
         program.setNumberOfCohort(program.getNumberOfCohort() + 1);
         newProgramCohort.setCohort(cohort);
@@ -168,8 +182,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .findFirst()
                 .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
-    private List<LoanBreakdown> saveLoanBreakdown(Cohort cohort, CohortEntity savedCohort) {
-        List<LoanBreakdown> loanBreakdowns = cohort.getLoanBreakdowns().stream()
+    private List<LoanBreakdown> saveLoanBreakdown(List<LoanBreakdown> breakdowns, CohortEntity savedCohort) {
+        List<LoanBreakdown> loanBreakdowns = breakdowns.stream()
                 .peek(loanBreakdownObject -> loanBreakdownObject.setCohort(cohortMapper.toCohort(savedCohort)))
                         .toList();
         List<LoanBreakdownEntity> loanBreakdownEntities = loanBreakdowns.stream()

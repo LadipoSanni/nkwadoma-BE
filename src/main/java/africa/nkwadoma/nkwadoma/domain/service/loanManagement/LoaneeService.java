@@ -52,9 +52,13 @@ public class LoaneeService implements LoaneeUsecase {
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
+        log.info("{} organization",loanee.getOrganizationId());
         MeedlValidator.validateObjectInstance(loanee);
+        log.info("{} organization",loanee.getOrganizationId());
         loanee.validate();
+        log.info("{} organization",loanee.getOrganizationId());
         loanee = checkIfLoaneeWithEmailExist(loanee);
+        log.info("{} organization 4",loanee.getOrganizationId());
         OrganizationIdentity organizationIdentity = getOrganizationIdentity(loanee);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
         checkIfUserExistInOrganization(organizationIdentity, organizationEmployeeIdentity);
@@ -70,14 +74,14 @@ public class LoaneeService implements LoaneeUsecase {
         log.info("= {} = = got here  ",loanee);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
-//        cohortOutputPort.saveCohort(cohort);
+        cohortOutputPort.saveCohort(cohort);
         CohortLoanee cohortLoanee = cohortLoaneeOutputPort.save(loanee);
         return cohortLoanee.getLoanee();
     }
 
     private Loanee checkIfLoaneeWithEmailExist(Loanee loanee) throws LoaneeException {
-        loanee = loaneeOutputPort.findByLoaneeEmail(loanee.getLoanee().getEmail());
-        if (loanee != null){
+        Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getLoanee().getEmail());
+        if (existingLoanee != null) {
             throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST.getMessage());
         }
         return loanee;
@@ -142,7 +146,10 @@ public class LoaneeService implements LoaneeUsecase {
     }
 
     private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
-        return organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
+        log.info("Fetching employee identity for createdBy: {}", loanee.getCreatedBy());
+        OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
+        log.info("Found employee identity: {}", employeeIdentity);
+        return employeeIdentity;
     }
 
     private OrganizationIdentity getOrganizationIdentity(Loanee loanee) throws MeedlException {

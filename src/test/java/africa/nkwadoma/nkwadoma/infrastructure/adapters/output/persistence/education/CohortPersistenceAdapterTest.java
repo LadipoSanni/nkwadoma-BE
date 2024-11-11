@@ -195,7 +195,6 @@ public class CohortPersistenceAdapterTest {
     @Order(2)
     @Test
     void saveCohortWithExistingCohortName() {
-        elites.setId(meedleUserId);
         assertThrows(MeedlException.class,() ->cohortOutputPort.saveCohort(elites));
     }
 
@@ -289,19 +288,7 @@ public class CohortPersistenceAdapterTest {
        assertEquals(searchedCohort.getName(),elites.getName());
        assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
     }
-    @Order(7)
-    @Test
-    void deleteCohort(){
-        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-        assertTrue(foundCohort.isPresent());
-        try {
-            cohortOutputPort.deleteCohort(cohortOneId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        foundCohort = cohortRepository.findById(cohortOneId);
-        assertFalse(foundCohort.isPresent());
-    }
+
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){
@@ -327,7 +314,7 @@ public class CohortPersistenceAdapterTest {
         }
     }
 
-    @Order(8)
+    @Order(7)
     @Test
     void cohortWithoutLoanDetailsCanBeEdited(){
         Cohort editedCohort = new Cohort();
@@ -342,12 +329,11 @@ public class CohortPersistenceAdapterTest {
     }
 
 
-    @Order(9)
+    @Order(8)
     @Test
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
         try{
-            //TODO FIND ALL BREAKDOWN RELATED TO COHORT
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
             assertNull(cohort.getLoanDetail());
             LoanDetail loanDetail = getLoanDetail();
@@ -361,6 +347,19 @@ public class CohortPersistenceAdapterTest {
         assertNotNull(editedCohort.getLoanDetail());
     }
 
+    @Order(9)
+    @Test
+    void deleteCohort(){
+        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+        assertTrue(foundCohort.isPresent());
+        try {
+            cohortOutputPort.deleteCohort(cohortOneId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        foundCohort = cohortRepository.findById(cohortOneId);
+        assertFalse(foundCohort.isPresent());
+    }
 
     @AfterAll
     void cleanUp() throws MeedlException {

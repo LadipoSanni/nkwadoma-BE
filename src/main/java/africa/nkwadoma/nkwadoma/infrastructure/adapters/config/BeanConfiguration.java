@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -126,10 +127,12 @@ public class BeanConfiguration {
     public CohortPersistenceAdapter cohortPersistenceAdapter(
             ProgramOutputPort programOutputPort, CohortRepository cohortRepository, CohortMapper cohortMapper,
             UserIdentityOutputPort userIdentityOutputPort, ProgramCohortOutputPort programCohortOutputPort,
-            LoanBreakdownRepository loanBreakdownRepository, LoanBreakdownOutputPort loanBreakdownOutputPort){
+            LoanBreakdownRepository loanBreakdownRepository, LoanBreakdownOutputPort loanBreakdownOutputPort,
+            LoanDetailsOutputPort loanDetailsOutputPort
+            ){
         return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
                 cohortMapper,userIdentityOutputPort,programCohortOutputPort,
-                 loanBreakdownRepository,loanBreakdownOutputPort);
+                 loanBreakdownRepository,loanBreakdownOutputPort,loanDetailsOutputPort);
     }
 
     @Bean
