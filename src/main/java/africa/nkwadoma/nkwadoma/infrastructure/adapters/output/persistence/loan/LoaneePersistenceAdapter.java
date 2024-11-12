@@ -25,7 +25,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public Loanee save(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         loanee.validate();
-        Loanee foundLoanee = findByLoaneeEmail(loanee.getLoanee().getEmail());
+        Loanee foundLoanee = findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (foundLoanee != null){
             throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST.getMessage());
         }

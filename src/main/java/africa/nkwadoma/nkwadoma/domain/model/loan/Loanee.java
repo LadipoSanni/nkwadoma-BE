@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @Builder
-public class
-Loanee {
+public class Loanee {
     private String id;
     private String organizationId;
     private String cohortId;
@@ -21,14 +20,14 @@ Loanee {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentity loanee;
+    private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateEmail(loanee.getEmail());
-        MeedlValidator.validateDataElement(loanee.getFirstName());
-        MeedlValidator.validateDataElement(loanee.getLastName());
+        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getFirstName());
+        MeedlValidator.validateDataElement(userIdentity.getLastName());
         MeedlValidator.validateUUID(cohortId);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);

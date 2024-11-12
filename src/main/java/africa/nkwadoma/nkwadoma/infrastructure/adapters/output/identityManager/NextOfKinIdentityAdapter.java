@@ -28,7 +28,7 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
         if (ObjectUtils.isEmpty(nextOfKin)) {
             throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         }
-        userIdentityOutputPort.save(nextOfKin.getLoanee().getLoanee());
+        userIdentityOutputPort.save(nextOfKin.getLoanee().getUserIdentity());
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
         return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
