@@ -55,7 +55,7 @@ public class CohortLoaneePersistenceAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private Loanee loanee;
+//    private Loanee loanee;
     private CohortLoanee savedCohortLoanee;
 
 
@@ -74,9 +74,10 @@ public class CohortLoaneePersistenceAdapterTest {
             List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
             loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+
             firstLoanee = Loanee.builder().cohortId(id).createdBy(id).
                     loanee(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
-            loanee = loaneeOutputPort.save(firstLoanee);
+            firstLoanee = loaneeOutputPort.save(firstLoanee);
         }catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -87,8 +88,8 @@ public class CohortLoaneePersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         cohortLoanee = new CohortLoanee();
-        cohortLoanee.setCohort(loanee.getCohortId());
-        cohortLoanee.setLoanee(loanee);
+        cohortLoanee.setCohort(firstLoanee.getCohortId());
+        cohortLoanee.setLoanee(firstLoanee);
     }
 
 
@@ -96,7 +97,7 @@ public class CohortLoaneePersistenceAdapterTest {
     @Order(1)
     void saveCohortLoanee(){
         try{
-            savedCohortLoanee = cohortLoaneeOutputPort.save(loanee);
+            savedCohortLoanee = cohortLoaneeOutputPort.save(firstLoanee);
             log.info("cohort loanee id  {}", savedCohortLoanee.getId());
             cohortLoaneeId = savedCohortLoanee.getId();
         }catch (MeedlException e){
@@ -114,7 +115,7 @@ public class CohortLoaneePersistenceAdapterTest {
         log.info("cohort loanee id 3 {}", savedCohortLoanee.getId());
         log.info("cohortLoaneeId {}",cohortLoaneeId);
         cohortLoaneeRepository.deleteById(savedCohortLoanee.getId());
-        loaneeOutputPort.deleteLoanee(loanee.getId());
+        loaneeOutputPort.deleteLoanee(firstLoanee.getId());
         identityOutputPort.deleteUserById(userIdentity.getId());
         identityManagerOutputPort.deleteUser(userIdentity);
     }
