@@ -93,6 +93,7 @@ public class CohortLoaneePersistenceAdapterTest {
 
 
     @Test
+    @Order(1)
     void saveCohortLoanee(){
         try{
             savedCohortLoanee = cohortLoaneeOutputPort.save(loanee);
@@ -107,8 +108,8 @@ public class CohortLoaneePersistenceAdapterTest {
         log.info("cohort loanee id 2 {}", cohortLoaneeId);
     }
 
-
-    @AfterAll
+    @Test
+    @Order(2)
     void tearDown() throws MeedlException {
         log.info("cohort loanee id 3 {}", savedCohortLoanee.getId());
         log.info("cohortLoaneeId {}",cohortLoaneeId);
