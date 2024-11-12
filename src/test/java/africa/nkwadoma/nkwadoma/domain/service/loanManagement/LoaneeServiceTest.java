@@ -128,7 +128,6 @@ public class LoaneeServiceTest {
     void addLoaneeToCohort() throws MeedlException {
         OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
         mockEmployeeIdentity.setId(mockId);
-        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(identityManagerOutputPort.createUser(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
         when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
@@ -151,9 +150,6 @@ public class LoaneeServiceTest {
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(7000));
         elites.setTotalCohortFee(BigDecimal.valueOf(200));
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
-        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
-        mockEmployeeIdentity.setId(mockId);
-        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
     }
@@ -163,9 +159,6 @@ public class LoaneeServiceTest {
         loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(7000));
         elites.setTotalCohortFee(BigDecimal.valueOf(200));
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetails);
-        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
-        mockEmployeeIdentity.setId(mockId);
-        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
     }
@@ -174,9 +167,6 @@ public class LoaneeServiceTest {
     @Test
     void cohortTutionHaveToBeUpdatedBeforeAddingALoaneeToACohort() throws MeedlException {
         elites.setTuitionAmount(null);
-        OrganizationEmployeeIdentity mockEmployeeIdentity = new OrganizationEmployeeIdentity();
-        mockEmployeeIdentity.setId(mockId);
-        when(organizationEmployeeIdentityOutputPort.findByEmployeeId(firstLoanee.getCreatedBy())).thenReturn(mockEmployeeIdentity);
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
     }
