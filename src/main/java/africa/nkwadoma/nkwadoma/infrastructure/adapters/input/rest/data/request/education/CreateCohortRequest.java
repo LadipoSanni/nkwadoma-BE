@@ -23,5 +23,5 @@ public class CreateCohortRequest {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
-    private CohortLoanDetailRequest cohortLoanDetail;
+    private LoanDetailRequest LoanDetail;
 }

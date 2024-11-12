@@ -2,10 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -36,5 +33,8 @@ public class CohortEntity {
     private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
+    @OneToOne
+    private LoanDetailEntity loanDetail;
+    private Integer numberOfLoanees = 0;
 
 }

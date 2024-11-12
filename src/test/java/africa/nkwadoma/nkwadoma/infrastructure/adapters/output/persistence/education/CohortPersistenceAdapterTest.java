@@ -3,12 +3,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.educ
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -30,7 +28,6 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doThrow;
 
 
 @SpringBootTest
@@ -151,10 +147,11 @@ class CohortPersistenceAdapterTest {
         elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(List.of(loanBreakdown));
+        elites.setTuitionAmount(BigDecimal.valueOf(20000));
 
-        CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
+        LoanDetail loanDetail = getLoanDetail();
 
-        elites.setCohortLoanDetail(cohortLoanDetail);
+        elites.setLoanDetail(loanDetail);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -165,8 +162,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setLoanBreakdowns(List.of(loanBreakdown));
     }
 
-    private static CohortLoanDetail getCohortLoanDetail() {
-        CohortLoanDetail cohortLoanDetail = new CohortLoanDetail();
+    private static LoanDetail getLoanDetail() {
         LoanDetail loanDetail = new LoanDetail();
         loanDetail.setDebtPercentage(0.34);
         loanDetail.setRepaymentPercentage(0.67);
@@ -176,8 +172,7 @@ class CohortPersistenceAdapterTest {
         loanDetail.setLastMonthActual(BigDecimal.valueOf(200));
         loanDetail.setTotalAmountDisbursed(BigDecimal.valueOf(50000));
         loanDetail.setTotalOutstanding(BigDecimal.valueOf(450));
-        cohortLoanDetail.setLoanDetail(loanDetail);
-        return cohortLoanDetail;
+        return loanDetail;
     }
 
 
@@ -205,7 +200,6 @@ class CohortPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com","3gdgttebdindndd673ydieyendjdljdh"})
     void saveCohortWithInvalidCreator(String createdBy){
-        //TODO validate for UUID
         elites.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.saveCohort(elites));
     }
@@ -219,8 +213,8 @@ class CohortPersistenceAdapterTest {
             assertNotNull(cohort.getId());
             cohortOneId = cohort.getId();
             assertEquals(cohort.getName(), elites.getName());
-            assertNotNull(elites.getLoanBreakdowns());
-            assertNotNull(elites.getLoanBreakdowns().get(0));
+            assertNotNull(cohort.getLoanBreakdowns());
+            assertNotNull(cohort.getLoanBreakdowns().get(0));
             assertEquals(elites.getLoanBreakdowns().get(0).getItemName(), cohort.getLoanBreakdowns().get(0).getItemName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -230,7 +224,6 @@ class CohortPersistenceAdapterTest {
     @Order(2)
     @Test
     void saveCohortWithExistingCohortName() {
-        elites.setId(meedleUserId);
         assertThrows(MeedlException.class,() ->cohortOutputPort.saveCohort(elites));
     }
 
@@ -312,6 +305,7 @@ class CohortPersistenceAdapterTest {
                         cohortId));
     }
 
+    @Order(6)
     @Test
     void viewAllCohortInAProgram(){
         List<Cohort> cohorts = new ArrayList<>();
@@ -323,8 +317,8 @@ class CohortPersistenceAdapterTest {
         assertEquals(2,cohorts.size());
 
     }
-    
-    @Order(6)
+
+    @Order(7)
     @Test
     void searchForCohort(){
         Cohort searchedCohort = new Cohort();
@@ -337,19 +331,7 @@ class CohortPersistenceAdapterTest {
        assertEquals(searchedCohort.getName(),elites.getName());
        assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
     }
-    @Order(7)
-    @Test
-    void deleteCohort(){
-        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-        assertTrue(foundCohort.isPresent());
-        try {
-            cohortOutputPort.deleteCohort(cohortOneId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        foundCohort = cohortRepository.findById(cohortOneId);
-        assertFalse(foundCohort.isPresent());
-    }
+
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE, "ndjnhfd,"})
     void deleteCohortWithInvalidId(String cohortId){
@@ -380,11 +362,9 @@ class CohortPersistenceAdapterTest {
     void cohortWithoutLoanDetailsCanBeEdited(){
         Cohort editedCohort = new Cohort();
         try{
-            Cohort foundCohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
-            foundCohort.setLoanBreakdowns(List.of(loanBreakdown));
-            log.info("Found cohort============>: {}", foundCohort);
-            foundCohort.setName("edited cohort");
-            editedCohort = cohortOutputPort.saveCohort(foundCohort);
+            Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
+            cohort.setName("edited cohort");
+            editedCohort = cohortOutputPort.saveCohort(cohort);
         } catch (MeedlException exception) {
             log.info("{}", exception.getClass().getName(), exception);
         }
@@ -398,26 +378,37 @@ class CohortPersistenceAdapterTest {
         Cohort editedCohort = new Cohort();
         try{
             Cohort cohort = cohortOutputPort.viewCohortDetails(meedleUserId,program.getId(),cohortTwoId);
-            assertNull(cohort.getCohortLoanDetail());
-            CohortLoanDetail cohortLoanDetail = getCohortLoanDetail();
-            cohort.setCohortLoanDetail(cohortLoanDetail);
-            cohort.setLoanBreakdowns(List.of(loanBreakdown));
+            assertNull(cohort.getLoanDetail());
+            LoanDetail loanDetail = getLoanDetail();
+            cohort.setLoanDetail(loanDetail);
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.saveCohort(cohort);
             log.info("{} = =",editedCohort);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(editedCohort.getCohortLoanDetail());
+        assertNotNull(editedCohort.getLoanDetail());
     }
 
+    @Order(10)
+    @Test
+    void deleteCohort(){
+        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+        assertTrue(foundCohort.isPresent());
+        try {
+            cohortOutputPort.deleteCohort(cohortOneId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        foundCohort = cohortRepository.findById(cohortOneId);
+        assertFalse(foundCohort.isPresent());
+    }
 
     @AfterAll
     void cleanUp() throws MeedlException {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteClient(organizationId);
         identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
-//        programOutputPort.deleteProgram(programId);
         cohortOutputPort.deleteCohort(cohortTwoId);
         programCohortOutputPort.delete(programId);
         organizationIdentityOutputPort.delete(organizationId);

@@ -5,12 +5,15 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
+import africa.nkwadoma.nkwadoma.domain.service.loanManagement.LoaneeService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
@@ -20,10 +23,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.Black
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.CohortLoanDetailsPersistenceAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.CohortPersistenceAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.LoanDetailsPersistenceAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.ProgramCohortPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoanBreakdownPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneeLoanDetailPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneePersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
@@ -36,6 +39,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import org.keycloak.admin.client.Keycloak;
@@ -114,19 +119,22 @@ public class BeanConfiguration {
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort, ProgramOutputPort programOutputPort){
-        return new CohortService(cohortOutputPort, programOutputPort);
+    public CohortService cohortService(CohortOutputPort cohortOutputPort,
+                                       ProgramOutputPort programOutputPort,
+                                       LoaneeOutputPort loaneeOutputPort){
+        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort);
     }
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
             ProgramOutputPort programOutputPort, CohortRepository cohortRepository, CohortMapper cohortMapper,
             UserIdentityOutputPort userIdentityOutputPort, ProgramCohortOutputPort programCohortOutputPort,
-            LoanBreakdownRepository loanBreakdownRepository, CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort
-    ){
+            LoanBreakdownRepository loanBreakdownRepository, LoanBreakdownOutputPort loanBreakdownOutputPort,
+            LoanDetailsOutputPort loanDetailsOutputPort
+            ){
         return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
                 cohortMapper,userIdentityOutputPort,programCohortOutputPort,
-                cohortLoanDetailsOutputPort, loanBreakdownRepository);
+                 loanBreakdownRepository,loanBreakdownOutputPort,loanDetailsOutputPort);
     }
 
     @Bean
@@ -160,15 +168,40 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CohortLoanDetailsPersistenceAdapter cohortLoanDetailsPersistenceAdapter(CohortLoanDetailsRepository cohortLoanDetailsRepository,
-                                                                                   CohortLoanDetailsMapper cohortLoanDetailsMapper,
-                                                                                   LoanDetailsOutputPort loanDetailsOutputPort){
-        return new CohortLoanDetailsPersistenceAdapter(cohortLoanDetailsRepository,cohortLoanDetailsMapper,loanDetailsOutputPort);
-    }
-
-    @Bean
     public LoanDetailsPersistenceAdapter loanDetailsPersistenceAdapter(LoanDetailRepository loanDetailRepository,
                  LoanDetailMapper loanDetailMapper){
         return new LoanDetailsPersistenceAdapter(loanDetailRepository,loanDetailMapper);
+    }
+
+    @Bean
+    public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository,
+                                                             IdentityManagerOutputPort identityManagerOutputPort){
+        return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository,identityManagerOutputPort);
+    }
+
+    @Bean
+    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
+                                       LoaneeOutputPort loaneeOutputPort,
+                                       UserIdentityOutputPort userIdentityOutputPort,
+                                       IdentityManagerOutputPort identityManagerOutputPort,
+                                       CohortOutputPort cohortOutputPort,
+                                       LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
+                                       LoanBreakdownOutputPort loanBreakdownOutputPort){
+        return new LoaneeService(organizationEmployeeIdentityOutputPort,
+                loaneeOutputPort,userIdentityOutputPort,
+                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
+    }
+
+    @Bean
+    public LoanBreakdownPersistenceAdapter loanBreakdownPersistenceAdapter(LoanBreakdownRepository loanBreakdownRepository,
+    LoanBreakdownMapper loanBreakdownMapper){
+        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper);
+
+    }
+
+    @Bean
+    public LoaneeLoanDetailPersistenceAdapter loaneeLoanDetailPersistenceAdapter(LoaneeLoanDetailRepository loaneeLoanDetailRepository,
+                                                                                 LoaneeLoanDetailMapper loaneeLoanDetailMapper){
+        return new LoaneeLoanDetailPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
     }
 }

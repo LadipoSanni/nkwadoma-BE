@@ -20,11 +20,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@Slf4j
-@Builder
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Cohort {
     private String id;
     private String programId;
@@ -33,7 +32,7 @@ public class Cohort {
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
-    private BigDecimal tuitionAmount = BigDecimal.ZERO;
+    private BigDecimal tuitionAmount ;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -42,10 +41,10 @@ public class Cohort {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
-    private List<UserIdentity> trainees;
-    private int pageSize;
-    private int pageNumber;
-    private CohortLoanDetail cohortLoanDetail;
+    private LoanDetail loanDetail;
+    private Integer numberOfLoanees = 0;
+//    private int pageSize;
+//    private int pageNumber;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);

@@ -1,10 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
@@ -12,11 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
@@ -49,8 +46,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ProgramCohortOutputPort programCohortOutputPort;
-    private final CohortLoanDetailsOutputPort cohortLoanDetailsOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
+    private final LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private final LoanDetailsOutputPort loanDetailsOutputPort;
+
+
 
 
     @Override
@@ -66,44 +66,55 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohort.getName()))
                 .findFirst();
-        Cohort retrievedCohort  = updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
-        if (cohort.getCohortLoanDetail() != null){
-           CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.saveCohortLoanDetails(cohort,retrievedCohort.getId());
-            retrievedCohort.setCohortLoanDetail(cohortLoanDetail);
+        if (existingProgramCohort.isEmpty() && cohort.getId() != null) {
+            existingProgramCohort = programCohortList.stream()
+                    .filter(eachProgramCohort -> eachProgramCohort.getCohort().getId().equals(cohort.getId()))
+                    .findFirst();
         }
+        Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
         programOutputPort.saveProgram(program);
         return retrievedCohort;
     }
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
-        CohortEntity cohortEntity;
-//        BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort);
-//        List<LoanBreakdown> savedLoanBreakdowns = new ArrayList<>();
+
         if (existingProgramCohort.isPresent() && existingProgramCohort.get().getCohort() != null) {
             Cohort cohortToUpdate = existingProgramCohort.get().getCohort();
+            List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortToUpdate.getId());
+            if (cohortToUpdate.getTuitionAmount() != null) {
+                BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(loanBreakdowns, cohortToUpdate.getTuitionAmount());
+                cohortToUpdate.setTotalCohortFee(totalCohortFee);
+            }
+            cohort.setLoanBreakdowns(loanBreakdowns);
             cohort = updateCohort(cohort, cohortToUpdate);
         } else {
+            if (cohort.getTuitionAmount() != null) {
+                BigDecimal totalCohortFee = calculateTotalLoanBreakdownAmount(cohort.getLoanBreakdowns(), cohort.getTuitionAmount());
+                cohort.setTotalCohortFee(totalCohortFee);
+            }
             cohort = newCohort(cohort, program);
         }
         return cohort;
     }
 
-    private Cohort updateCohort(Cohort cohort, Cohort cohortToUpdate) throws CohortException {
+    private Cohort updateCohort(Cohort cohort, Cohort cohortToUpdate) throws MeedlException {
         CohortEntity cohortEntity;
         List<LoanBreakdown> savedLoanBreakdowns;
         if (cohort.getId() != null && cohort.getId().equals(cohortToUpdate.getId())) {
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-            CohortLoanDetail cohortLoanDetail = cohortLoanDetailsOutputPort.findByCohort(cohortEntity.getId());
-            if (cohortLoanDetail != null){
+            if (cohortEntity.getLoanDetail() != null) {
                 throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
+            }if (cohort.getLoanDetail() != null){
+               LoanDetail loanDetail =  loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
+               cohort.setLoanDetail(loanDetail);
             }
             cohortToUpdate = cohortMapper.cohortToUpdateCohort(cohort);
             cohortToUpdate.setUpdatedAt(LocalDateTime.now());
             cohortToUpdate.setUpdatedBy(cohortToUpdate.getCreatedBy());
             activateStatus(cohortToUpdate);
             cohortEntity = cohortMapper.toCohortEntity(cohortToUpdate);
-            cohortRepository.save(cohortEntity);
-            savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
+            cohortEntity = cohortRepository.save(cohortEntity);
+            savedLoanBreakdowns = saveLoanBreakdown(cohortToUpdate.getLoanBreakdowns(), cohortEntity);
             } else {
                 throw new CohortException(COHORT_EXIST.getMessage());
             }
@@ -114,11 +125,16 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     private Cohort newCohort(Cohort cohort, Program program) throws MeedlException {
         cohort.setCreatedAt(LocalDateTime.now());
+        cohort.setNumberOfLoanees(0);
         activateStatus(cohort);
         ProgramCohort newProgramCohort = new ProgramCohort();
+        if (cohort.getLoanDetail() != null) {
+            LoanDetail loanDetail = loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
+            cohort.setLoanDetail(loanDetail);
+        }
         CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
         cohortEntity = cohortRepository.save(cohortEntity);
-        List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort, cohortEntity);
+        List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort.getLoanBreakdowns(), cohortEntity);
         cohort = cohortMapper.toCohort(cohortEntity);
         program.setNumberOfCohort(program.getNumberOfCohort() + 1);
         newProgramCohort.setCohort(cohort);
@@ -167,14 +183,27 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         cohortRepository.deleteById(id);
     }
 
+    @Override
+    public Cohort findCohort(String cohortId) throws CohortException {
+        CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+        return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public Cohort save(Cohort cohort) {
+        CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
+        cohortEntity = cohortRepository.save(cohortEntity);
+        return cohortMapper.toCohort(cohortEntity);
+    }
+
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {
         return programCohorts.stream()
                 .filter(eachCohort -> eachCohort.getCohort().getId().equals(cohortId))
                 .findFirst()
                 .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
-    private List<LoanBreakdown> saveLoanBreakdown(Cohort cohort, CohortEntity savedCohort) {
-        List<LoanBreakdown> loanBreakdowns = cohort.getLoanBreakdowns().stream()
+    private List<LoanBreakdown> saveLoanBreakdown(List<LoanBreakdown> breakdowns, CohortEntity savedCohort) {
+        List<LoanBreakdown> loanBreakdowns = breakdowns.stream()
                 .peek(loanBreakdownObject -> loanBreakdownObject.setCohort(cohortMapper.toCohort(savedCohort)))
                         .toList();
         List<LoanBreakdownEntity> loanBreakdownEntities = loanBreakdowns.stream()
@@ -183,10 +212,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
          loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
          return loanBreakdownEntities.stream().map(cohortMapper::mapToLoanBreakdown).toList();
     }
-    private BigDecimal calculateTotalLoanBreakdownAmount(Cohort cohort) {
-        return cohort.getLoanBreakdowns().stream()
+    private BigDecimal calculateTotalLoanBreakdownAmount(List<LoanBreakdown> loanBreakdowns,BigDecimal tutionFee) {
+        return loanBreakdowns.stream()
                 .map(LoanBreakdown::getItemAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add).add(cohort.getTuitionAmount());
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(tutionFee);
     }
 
     @Override
