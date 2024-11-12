@@ -10,4 +10,6 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     LoaneeEntity findByLoaneeEmail(String email);
 
     List<LoaneeEntity> findAllByLoaneeEmail(String email);
+
+    List<LoaneeEntity> findAllByCohortId(String id);
 }

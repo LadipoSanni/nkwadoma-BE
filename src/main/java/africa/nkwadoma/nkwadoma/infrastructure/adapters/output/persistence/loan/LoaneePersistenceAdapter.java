@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -46,5 +47,10 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         return loaneeMapper.toLoanee(loaneeEntity);
     }
 
+    @Override
+    public List<Loanee> findAllLoaneesByCohortId(Cohort foundCohort) {
+        List<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(foundCohort.getId());
+       return loaneeMapper.toListOfLoanee(loaneeEntities);
+    }
 
 }

@@ -120,9 +120,10 @@ public class BeanConfiguration {
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort,CohortLoaneeOutputPort cohortLoaneeOutputPort,
-                                       ProgramOutputPort programOutputPort){
-        return new CohortService(cohortOutputPort,cohortLoaneeOutputPort,programOutputPort);
+    public CohortService cohortService(CohortOutputPort cohortOutputPort,
+                                       ProgramOutputPort programOutputPort,
+                                       LoaneeOutputPort loaneeOutputPort){
+        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort);
     }
 
     @Bean
@@ -179,16 +180,8 @@ public class BeanConfiguration {
         return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository,identityManagerOutputPort);
     }
 
-
-    @Bean
-    public CohortLoaneePersistenceAdapter cohortLoaneePesistenceAdapter(CohortLoaneeRepository cohortLoaneeRepository,
-                                                                        CohortLoaneeMapper cohortLoaneeMapper){
-        return new CohortLoaneePersistenceAdapter(cohortLoaneeRepository,cohortLoaneeMapper);
-    }
-
     @Bean
     public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                       CohortLoaneeOutputPort cohortLoaneeOutputPort,
                                        LoaneeOutputPort loaneeOutputPort,
                                        UserIdentityOutputPort userIdentityOutputPort,
                                        IdentityManagerOutputPort identityManagerOutputPort,
@@ -196,7 +189,7 @@ public class BeanConfiguration {
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort){
         return new LoaneeService(organizationEmployeeIdentityOutputPort,
-                cohortLoaneeOutputPort,loaneeOutputPort,userIdentityOutputPort,
+                loaneeOutputPort,userIdentityOutputPort,
                 identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
     }
 

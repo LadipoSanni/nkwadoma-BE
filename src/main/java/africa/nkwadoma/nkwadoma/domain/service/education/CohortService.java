@@ -1,15 +1,14 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortLoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanee;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
@@ -24,8 +23,9 @@ import java.util.List;
 public class CohortService implements CohortUseCase {
 
     private final CohortOutputPort cohortOutputPort;
-    private final CohortLoaneeOutputPort cohortLoaneeOutputPort;
+
     private final ProgramOutputPort programOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public Cohort createOrEditCohort(Cohort cohort) throws MeedlException {
@@ -73,10 +73,10 @@ public class CohortService implements CohortUseCase {
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
-        List<CohortLoanee> cohortLoanees = cohortLoaneeOutputPort.findAllLoaneesByCohortId(foundCohort);
+        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort);
         cohortLoanees
                 .forEach(this::inviteTrainee);
 
     }
-    private void inviteTrainee(CohortLoanee cohortLoanee){}
+    private void inviteTrainee(Loanee loanee){}
 }

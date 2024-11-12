@@ -53,8 +53,6 @@ public class LoaneeServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
-    private CohortLoaneeOutputPort cohortLoaneeOutputPort;
-    @Mock
     private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
     private  LoanBreakdownOutputPort loanBreakdownOutputPort;
@@ -65,7 +63,6 @@ public class LoaneeServiceTest {
     private Loanee firstLoanee;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private UserIdentity loaneeUserIdentity;
-    private CohortLoanee cohortLoanee;
     private LoaneeLoanDetail loaneeLoanDetails;
     private LoanBreakdown loanBreakdown;
 
@@ -122,10 +119,6 @@ public class LoaneeServiceTest {
         programCohort.setProgramId(mockId);
         programCohort.setId(mockId);
 
-        cohortLoanee = new CohortLoanee();
-        cohortLoanee.setId(mockId);
-        cohortLoanee.setCohort(mockId);
-        cohortLoanee.setLoanee(firstLoanee);
 
     }
 
@@ -143,7 +136,6 @@ public class LoaneeServiceTest {
         when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(loaneeLoanDetails);
         when(cohortOutputPort.save(any())).thenReturn(elites);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
-        when(cohortLoaneeOutputPort.save(firstLoanee)).thenReturn(cohortLoanee);
         try {
             Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
             assertEquals(firstLoanee.getLoanee().getFirstName(), loanee.getLoanee().getFirstName());

@@ -41,7 +41,6 @@ public class Cohort {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
-    private CohortLoanee Loanees;
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
     private int pageSize;

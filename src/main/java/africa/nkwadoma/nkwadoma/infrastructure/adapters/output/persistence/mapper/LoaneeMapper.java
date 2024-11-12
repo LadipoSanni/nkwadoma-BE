@@ -6,9 +6,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoaneeMapper {
     LoaneeEntity toLoaneeEntity(Loanee loanee);
 
     Loanee toLoanee(LoaneeEntity loaneeEntity);
+
+    List<Loanee> toListOfLoanee(List<LoaneeEntity> loaneeEntities);
 }
