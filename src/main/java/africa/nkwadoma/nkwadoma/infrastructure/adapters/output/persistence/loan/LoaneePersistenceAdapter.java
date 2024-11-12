@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -12,6 +12,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.springframework.stereotype.*;
+
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,8 +39,13 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public void deleteLoanee(String loaneeId) {
-        loaneeRepository.deleteById(loaneeId);
+    public void deleteLoanee(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId);
+        Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findById(loaneeId);
+        if (loaneeEntity.isPresent()) {
+            log.info("Found loanee: {}", loaneeEntity.get());
+            loaneeRepository.deleteById(loaneeEntity.get().getId());
+        }
     }
 
     @Override

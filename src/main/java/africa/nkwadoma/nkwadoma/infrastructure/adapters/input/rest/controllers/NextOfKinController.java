@@ -9,12 +9,16 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.*;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 
+@Slf4j
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 @RestController
@@ -23,8 +27,11 @@ public class NextOfKinController {
     private final NextOfKinRestMapper nextOfKinRestMapper;
 
     @PostMapping("next-of-kin-details")
-    public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request) throws MeedlException {
+    public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
+                                                                          @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
+        log.info("User ID =====> " + meedlUserId.getClaim("sub"));
         NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request);
+        nextOfKin.getLoanee().getUserIdentity().setId(meedlUserId.getClaim("sub"));
         NextOfKin createdNextOfKin = createNextOfKinUseCase.createNextOfKin(nextOfKin);
         return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
                .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))

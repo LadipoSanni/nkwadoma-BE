@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -24,7 +23,6 @@ import java.util.*;
 public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
     private final NextOfKinRepository nextOfKinRepository;
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final UserEntityRepository userEntityRepository;
     private final NextOfKinMapper nextOfKinMapper;
     private final UserIdentityMapper userIdentityMapper;
 
@@ -34,6 +32,13 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
             throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         }
         MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity());
+        updateUserEntity(nextOfKin);
+        NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
+        NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
+        return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
+    }
+
+    private void updateUserEntity(NextOfKin nextOfKin) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(nextOfKin.getLoanee().getUserIdentity().getId());
         if (ObjectUtils.isNotEmpty(userIdentity)) {
             UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
@@ -41,9 +46,6 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
             userIdentity = userIdentityMapper.toUserIdentity(updateUserEntity);
             userIdentityOutputPort.save(userIdentity);
         }
-        NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
-        NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
-        return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
     }
 
     @Override

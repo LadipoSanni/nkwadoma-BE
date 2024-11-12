@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 public interface LoaneeOutputPort {
     Loanee save(Loanee loanee) throws MeedlException;
 
-    void deleteLoanee(String loaneeId);
+    void deleteLoanee(String loaneeId) throws MeedlException;
 
     Loanee findByLoaneeEmail(String email);
 }

@@ -5,6 +5,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class NextOfKin {
@@ -16,5 +17,4 @@ public class NextOfKin {
     private String nextOfKinRelationship;
     private String contactAddress;
     private Loanee loanee;
-
 }

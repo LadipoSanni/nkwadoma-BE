@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
@@ -36,9 +37,6 @@ class NextOfKinIdentityAdapterTest {
                 lastName("Qudus").email("test@example.com").role(IdentityRole.TRAINEE).
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
 
-//        Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
-//        assertNull(foundLoanee);
-
         loanee = Loanee.builder().userIdentity(userIdentity).
                 cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
                 loaneeLoanDetail(LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
@@ -64,7 +62,7 @@ class NextOfKinIdentityAdapterTest {
             loanee.setUserIdentity(foundUserIdentity);
             nextOfKin.setLoanee(loanee);
         } catch (MeedlException e) {
-            log.error("Error saving Loanee details========>", e);
+            log.error("Error saving Loanee details========> {}", e.getMessage());
         }
     }
 

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity;
 
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @AllArgsConstructor
@@ -9,14 +10,25 @@ import lombok.*;
 @ToString
 @Builder
 public class NextOfKinRequest {
+    @NotBlank(message = "First name is required")
     private String firstName;
+    @NotBlank(message = "Last name is required")
     private String lastName;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
     private String email;
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
+    @NotNull(message = "Relationship with next of kin is required")
     private String nextOfKinRelationship;
+    @NotNull(message = "Contact address is required")
     private String contactAddress;
+    @Email(message = "Please provide a valid alternate email address")
+    @NotBlank(message = "Alternate email address is required")
     private String alternateEmail;
+    @NotBlank(message = "Alternate phone number is required")
     private String alternatePhoneNumber;
+    @NotBlank(message = "Alternate contact address is required")
     private String alternateContactAddress;
 
     public void setFirstName(String firstName) {
