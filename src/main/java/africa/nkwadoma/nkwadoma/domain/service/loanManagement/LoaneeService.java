@@ -122,7 +122,7 @@ public class LoaneeService implements LoaneeUsecase {
     }
 
     private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws CohortException {
-        if (cohort.getTuitionAmount() == null){
+        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())){
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }

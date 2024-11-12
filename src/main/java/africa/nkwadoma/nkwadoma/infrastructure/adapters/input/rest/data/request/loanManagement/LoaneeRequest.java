@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class AddLoaneeToCohortRequest {
+public class LoaneeRequest {
     private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;

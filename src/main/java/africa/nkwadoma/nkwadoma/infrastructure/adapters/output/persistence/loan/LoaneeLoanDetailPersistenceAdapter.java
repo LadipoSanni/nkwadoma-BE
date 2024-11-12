@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class LoaneeLoanDetailsPersistenceAdapter implements LoaneeLoanDetailsOutputPort {
+public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutputPort {
 
     private final LoaneeLoanDetailRepository loaneeLoanDetailRepository;
     private final LoaneeLoanDetailMapper loaneeLoanDetailMapper;

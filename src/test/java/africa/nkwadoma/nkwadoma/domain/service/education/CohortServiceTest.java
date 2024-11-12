@@ -38,6 +38,8 @@ class CohortServiceTest {
     private int pageSize = 2;
     private int pageNumber = 0;
     private Program program;
+    @Mock
+    private ProgramOutputPort programOutputPort;
 
     @BeforeEach
     void setUp() {

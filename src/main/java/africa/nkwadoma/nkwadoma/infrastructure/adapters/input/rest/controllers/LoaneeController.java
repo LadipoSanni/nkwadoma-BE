@@ -4,7 +4,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.AddLoaneeToCohortRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoaneeRestMapper;
@@ -35,8 +35,9 @@ public class LoaneeController {
 
     @PostMapping("addLoaneeToCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,@RequestBody AddLoaneeToCohortRequest addLoaneeToCohortRequest) throws MeedlException {
-        Loanee loanee = loaneeRestMapper.toLoanee(addLoaneeToCohortRequest);
+    public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
+                                                            @RequestBody LoaneeRequest loaneeRequest) throws MeedlException {
+        Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
         loanee.setCreatedBy(meedlUser.getClaimAsString("sub"));
         loanee = loaneeUsecase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =

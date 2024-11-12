@@ -28,7 +28,6 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doThrow;
 
 
 @SpringBootTest
@@ -215,8 +213,8 @@ class CohortPersistenceAdapterTest {
             assertNotNull(cohort.getId());
             cohortOneId = cohort.getId();
             assertEquals(cohort.getName(), elites.getName());
-            assertNotNull(elites.getLoanBreakdowns());
-            assertNotNull(elites.getLoanBreakdowns().get(0));
+            assertNotNull(cohort.getLoanBreakdowns());
+            assertNotNull(cohort.getLoanBreakdowns().get(0));
             assertEquals(elites.getLoanBreakdowns().get(0).getItemName(), cohort.getLoanBreakdowns().get(0).getItemName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
