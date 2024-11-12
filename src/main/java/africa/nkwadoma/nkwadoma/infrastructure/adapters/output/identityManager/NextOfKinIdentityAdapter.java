@@ -42,4 +42,15 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
             nextOfKinRepository.delete(foundNextOfKin.get());
         }
     }
+
+    @Override
+    public NextOfKin findByEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        Optional<NextOfKinEntity> foundNextOfKin = nextOfKinRepository.findByEmail(email);
+        NextOfKin nextOfKin = null;
+        if (foundNextOfKin.isPresent()) {
+            nextOfKin = nextOfKinMapper.toNextOfKin(foundNextOfKin.get());
+        }
+        return nextOfKin;
+    }
 }
