@@ -13,12 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.*;
 import org.springframework.security.config.http.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.*;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.*;
-
-import java.util.*;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
