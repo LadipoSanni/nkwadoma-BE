@@ -6,6 +6,7 @@ import lombok.extern.slf4j.*;
 import org.springframework.context.annotation.*;
 import org.springframework.core.convert.converter.*;
 import org.springframework.security.authentication.*;
+import org.springframework.security.config.*;
 import org.springframework.security.config.annotation.method.configuration.*;
 import org.springframework.security.config.annotation.web.builders.*;
 import org.springframework.security.config.annotation.web.configuration.*;
@@ -32,6 +33,7 @@ public class SecurityConfiguration {
         http.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
                 csrf(AbstractHttpConfigurer::disable);
 
+        http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests(requests -> {
             requests.requestMatchers(WhiteList.patterns).permitAll();
             requests.anyRequest().authenticated();
