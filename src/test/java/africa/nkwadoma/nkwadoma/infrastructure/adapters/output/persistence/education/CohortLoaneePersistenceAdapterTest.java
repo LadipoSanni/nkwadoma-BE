@@ -111,7 +111,6 @@ public class CohortLoaneePersistenceAdapterTest {
     }
 
 
-
     @AfterAll
     void tearDown() throws MeedlException {
         cohortLoaneeRepository.deleteById(cohortLoaneeId);
