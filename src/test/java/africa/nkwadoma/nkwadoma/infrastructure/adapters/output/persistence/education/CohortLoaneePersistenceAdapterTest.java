@@ -87,7 +87,6 @@ public class CohortLoaneePersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         cohortLoanee = new CohortLoanee();
-        log.info("loanee chort id{}",loanee.getCohortId());
         cohortLoanee.setCohort(loanee.getCohortId());
         cohortLoanee.setLoanee(loanee);
     }
@@ -109,8 +108,8 @@ public class CohortLoaneePersistenceAdapterTest {
         log.info("cohort loanee id 2 {}", cohortLoaneeId);
     }
 
-    @Test
-    @Order(2)
+
+    @AfterAll
     void tearDown() throws MeedlException {
         log.info("cohort loanee id 3 {}", savedCohortLoanee.getId());
         log.info("cohortLoaneeId {}",cohortLoaneeId);
