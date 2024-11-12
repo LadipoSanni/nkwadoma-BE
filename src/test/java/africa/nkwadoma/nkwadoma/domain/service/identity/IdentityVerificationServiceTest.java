@@ -41,7 +41,7 @@ class IdentityVerificationServiceTest {
     private final String generatedToken = "generatedToken";
     private UserIdentity favour;
     private String testBvn = "12345678956";
-    private String testNin = "testNin";
+    private String testNin = "21345678908";
     private IdentityVerification identityVerification;
     private IdentityVerificationEntity identityVerificationEntity;
 
@@ -105,12 +105,19 @@ class IdentityVerificationServiceTest {
         assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(identityVerification));
     }
     @Test
+    void verifyIdentityWithAtLeastOneIdentifier(){
+        identityVerification.setBvn(null);
+        identityVerification.setNin(testNin);
+        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(identityVerification));
+    }
+    @Test
     void verifyUserBvn(){
         when(identityVerificationRepository.findByBvn(testBvn)).thenReturn(identityVerificationEntity);
         when(identityVerificationMapper.mapToIdentityVerification(any())).thenReturn(identityVerification);
 
         try {
             IdentityVerification verifiedIdentity = identityVerificationService.verifyIdentity(identityVerification);
+            assertEquals(identityVerification, verifiedIdentity);
         } catch (MeedlException e) {
             log.error("Verification failed : {}", e.getMessage());
         }

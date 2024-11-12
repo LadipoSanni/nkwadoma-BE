@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerifica
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.NinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +68,7 @@ private IdentityVerificationOutputPort identityVerificationOutPutPort;
     @Test
     void verifyIdentity(){
         try {
-            PremblyNinResponse response = identityVerificationOutPutPort.verifyIdentity(identityVerification);
+            NinResponse response = identityVerificationOutPutPort.verifyIdentity(identityVerification);
             log.info("Response ----> {}",response);
             assertNotNull(response);
         }catch (InfrastructureException e){

@@ -2,8 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerifica
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.NinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.IdentityVerificationParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
@@ -33,20 +32,20 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     private String apiKey;
 
     @Override
-    public PremblyNinResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
+    public NinResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
         return getNinDetails(identityVerification);
     }
 
-    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
+    public NinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
         validateIdentityVerificationRequest(verificationRequest);
-        ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
+        ResponseEntity<NinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
         String verificationResult = getNinVerificationResponse(responseEntity.getBody());
         log.info("Verification Result : {}", verificationResult);
         log.info("Verification response entity: {}", responseEntity.getBody());
         return responseEntity.getBody();
     }
 
-    private ResponseEntity<PremblyNinResponse> getIdentityDetailsByNin(IdentityVerification verificationRequest) {
+    private ResponseEntity<NinResponse> getIdentityDetailsByNin(IdentityVerification verificationRequest) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -54,16 +53,16 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
         String url = premblyUrl.concat(IdentityVerificationParameter.NIN_URL.getValue());
         log.info(url);
-        ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
+        ResponseEntity<NinResponse> responseEntity = ResponseEntity.ofNullable(new NinResponse());
         try {
-            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
+            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, NinResponse.class);
         } catch (HttpServerErrorException ex) {
             log.info("Prembly server error {}", ex.getMessage());
         }
         return responseEntity;
     }
 
-    private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityVerificationException {
+    private String getNinVerificationResponse(NinResponse response) throws IdentityVerificationException {
         String responseMessage = StringUtils.EMPTY;
         if (response == null || response.getNinData() == null) {
             throw new IdentityVerificationException(IdentityVerificationMessage.PREMBLY_UNAVAILABLE.getValue());
