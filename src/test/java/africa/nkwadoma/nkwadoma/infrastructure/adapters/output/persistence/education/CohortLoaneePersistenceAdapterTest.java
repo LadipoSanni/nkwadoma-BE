@@ -87,6 +87,7 @@ public class CohortLoaneePersistenceAdapterTest {
     @BeforeEach
     public void setUp(){
         cohortLoanee = new CohortLoanee();
+        log.info("loanee chort id{}",loanee.getCohortId());
         cohortLoanee.setCohort(loanee.getCohortId());
         cohortLoanee.setLoanee(loanee);
     }
