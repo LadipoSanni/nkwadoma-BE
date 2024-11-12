@@ -55,6 +55,8 @@ public class CohortLoaneePersistenceAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private Loanee loanee;
+    private CohortLoanee savedCohortLoanee;
 
 
 
@@ -66,13 +68,15 @@ public class CohortLoaneePersistenceAdapterTest {
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
                 .currency("usd").build();
-
         try{
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
             loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            firstLoanee = Loanee.builder().cohortId(id).createdBy(id).
+                    loanee(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = loaneeOutputPort.save(firstLoanee);
         }catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -82,39 +86,34 @@ public class CohortLoaneePersistenceAdapterTest {
 
     @BeforeEach
     public void setUp(){
-        firstLoanee = new Loanee();
-        firstLoanee.setCohortId(id);
-        firstLoanee.setCreatedBy(id);
-        firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        firstLoanee.setLoanee(userIdentity);
         cohortLoanee = new CohortLoanee();
-        cohortLoanee.setCohort(firstLoanee.getCohortId());
-        cohortLoanee.setLoanee(firstLoanee);
-
+        cohortLoanee.setCohort(loanee.getCohortId());
+        cohortLoanee.setLoanee(loanee);
     }
 
 
     @Test
     void saveCohortLoanee(){
-        CohortLoanee savedCohortLoanee = new CohortLoanee();
         try{
-            Loanee loanee = loaneeOutputPort.save(firstLoanee);
-            loaneeId = loanee.getId();
             savedCohortLoanee = cohortLoaneeOutputPort.save(loanee);
+            log.info("cohort loanee id  {}", savedCohortLoanee.getId());
             cohortLoaneeId = savedCohortLoanee.getId();
         }catch (MeedlException e){
-            log.error(e.getMessage());
+            log.error("", e);
         }
         assertEquals(cohortLoanee.getCohort(), savedCohortLoanee.getCohort());
         assertEquals(cohortLoanee.getLoanee().getLoanee().getFirstName(),
                 savedCohortLoanee.getLoanee().getLoanee().getFirstName());
+        log.info("cohort loanee id 2 {}", cohortLoaneeId);
     }
 
 
     @AfterAll
     void tearDown() throws MeedlException {
-        cohortLoaneeRepository.deleteById(cohortLoaneeId);
-        loaneeOutputPort.deleteLoanee(loaneeId);
+        log.info("cohort loanee id 3 {}", savedCohortLoanee.getId());
+        log.info("cohortLoaneeId {}",cohortLoaneeId);
+        cohortLoaneeRepository.deleteById(savedCohortLoanee.getId());
+        loaneeOutputPort.deleteLoanee(loanee.getId());
         identityOutputPort.deleteUserById(userIdentity.getId());
         identityManagerOutputPort.deleteUser(userIdentity);
     }
