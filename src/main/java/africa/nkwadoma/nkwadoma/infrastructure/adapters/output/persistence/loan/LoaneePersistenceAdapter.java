@@ -42,6 +42,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Loanee findByLoaneeEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
         Optional<UserIdentity> userIdentity = identityManagerOutputPort.getUserByEmail(email);
         LoaneeEntity loaneeEntity = loaneeRepository.findByLoaneeEmail(email);
         return loaneeMapper.toLoanee(loaneeEntity);

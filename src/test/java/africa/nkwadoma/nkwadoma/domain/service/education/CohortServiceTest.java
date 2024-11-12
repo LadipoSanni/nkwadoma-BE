@@ -215,7 +215,7 @@ class CohortServiceTest {
     @Test
     void viewAllCohortInAProgram() {
         try {
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(xplorers);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
@@ -228,35 +228,32 @@ class CohortServiceTest {
 
     @Test
     void viewCohortsInAProgramWithNullProgramId(){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null,pageNumber,pageSize));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid uuid"})
     void viewCohortsInAProgramWithNonUUIDProgramId(String programId) {
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
     void viewCohortsInAProgramWithInvalidProgramId(String programId){
-        xplorers.setProgramId(programId);
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void viewCohortsInAProgramWithInvalidPageSize(int pageSize) {
-        xplorers.setPageSize(pageSize);
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize));
     }
 
 
     @ParameterizedTest
     @ValueSource(ints = {-1})
     void viewCohortsInAProgramWithInvalidPageNumber(int pageNumber){
-        xplorers.setPageNumber(pageNumber);
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(xplorers));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize));
     }
 
     @ParameterizedTest
@@ -266,9 +263,8 @@ class CohortServiceTest {
             "    1de71eaa-de6d-4cdf-8f93-aa7be533f4aa     "
     })
     void viewCohortsInAProgramWithProgramIdWithSpaces(String programId){
-        xplorers.setProgramId(programId);
         try {
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(xplorers);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());

@@ -24,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -78,8 +79,8 @@ public class LoaneeService implements LoaneeUsecase {
 
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getLoanee().getEmail());
-        if (existingLoanee != null) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST.getMessage());
+        if (ObjectUtils.isNotEmpty(existingLoanee)) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
         }
     }
 
@@ -102,11 +103,8 @@ public class LoaneeService implements LoaneeUsecase {
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getLoanee());
         userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
-        log.info("{} got here 2",userIdentity);
         userIdentity = identityOutputPort.save(userIdentity);
-        log.info("{} saved into db",userIdentity);
         loanee.setLoanee(userIdentity);
-
         loanee = loaneeOutputPort.save(loanee);
         return loanee;
     }
