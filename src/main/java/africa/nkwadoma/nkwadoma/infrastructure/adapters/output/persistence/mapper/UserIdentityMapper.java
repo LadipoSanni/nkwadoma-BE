@@ -2,8 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserIdentityMapper {
@@ -13,6 +12,6 @@ public interface UserIdentityMapper {
     @Mapping(source = "firstName", target = "firstName")
     UserIdentity toUserIdentity(UserEntity userEntity);
 
-
+    UserEntity updateUserEntity(@MappingTarget UserEntity userEntity, UserIdentity userIdentity);
 
 }

@@ -30,39 +30,49 @@ class NextOfKinIdentityAdapterTest {
     private UserIdentity userIdentity;
     private Loanee loanee;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").
-                role(IdentityRole.TRAINEE).alternateEmail("alt276@example.com").alternatePhoneNumber("0986564534").
-                alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
+                lastName("Qudus").email("test@example.com").role(IdentityRole.TRAINEE).
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+
+        Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
+        assertNull(foundLoanee);
 
         loanee = Loanee.builder().userIdentity(userIdentity).
                 cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
                 loaneeLoanDetail(LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                         initialDeposit(BigDecimal.valueOf(3000000.00)).build()).build();
+
         try {
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
+            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(loanee.getUserIdentity().getEmail());
+            assertNotNull(foundUserIdentity);
+
+            nextOfKin = new NextOfKin();
+            nextOfKin.setFirstName("Ahmad");
+            nextOfKin.setLastName("Doe");
+            nextOfKin.setEmail("ahmad12@gmail.com");
+            nextOfKin.setPhoneNumber("0785678901");
+            nextOfKin.setNextOfKinRelationship("Brother");
+            nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
+            foundUserIdentity = UserIdentity.builder().alternateEmail("alt276@example.com").role(IdentityRole.TRAINEE)
+                    .alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").build();
+            loanee.setUserIdentity(foundUserIdentity);
+            nextOfKin.setLoanee(loanee);
         } catch (MeedlException e) {
-            log.error("Exception occurred saving user and loanee", e);
+            log.error("Error saving Loanee details========>", e);
         }
-        nextOfKin = new NextOfKin();
-        nextOfKin.setFirstName("Ahmad");
-        nextOfKin.setLastName("Doe");
-        nextOfKin.setEmail("ahmad12@gmail.com");
-        nextOfKin.setPhoneNumber("0785678901");
-        nextOfKin.setNextOfKinRelationship("Brother");
-        nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-        nextOfKin.setLoanee(loanee);
     }
+
 
     @Test
     void saveNextOfKin() {
         NextOfKin savedNextOfKin = null;
         try {
             savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            log.info("Saved next of Kin: {}", savedNextOfKin);
         } catch (MeedlException e) {
             log.error("Exception saving next of kin details", e);
         }
@@ -81,7 +91,7 @@ class NextOfKinIdentityAdapterTest {
         assertThrows(MeedlException.class, () -> nextOfKinIdentityOutputPort.save(nextOfKin));
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown() {
         try {
             NextOfKin foundNextOfKin = nextOfKinIdentityOutputPort.findByEmail(nextOfKin.getEmail());

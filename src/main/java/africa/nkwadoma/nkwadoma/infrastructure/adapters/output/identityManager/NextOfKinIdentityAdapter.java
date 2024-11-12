@@ -3,10 +3,13 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -21,14 +24,22 @@ import java.util.*;
 public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
     private final NextOfKinRepository nextOfKinRepository;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final UserEntityRepository userEntityRepository;
     private final NextOfKinMapper nextOfKinMapper;
+    private final UserIdentityMapper userIdentityMapper;
 
     @Override
     public NextOfKin save(NextOfKin nextOfKin) throws MeedlException {
         if (ObjectUtils.isEmpty(nextOfKin)) {
             throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         }
-        userIdentityOutputPort.save(nextOfKin.getLoanee().getUserIdentity());
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(nextOfKin.getLoanee().getUserIdentity().getEmail());
+        UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
+        if (ObjectUtils.isNotEmpty(userIdentity)) {
+//            UserEntity updateUserEntity = userIdentityMapper.updateUserEntity(userEntity, userIdentity);
+//            userIdentity = userIdentityMapper.toUserIdentity(updateUserEntity);
+            userEntityRepository.save(userEntity);
+        }
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
         return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
