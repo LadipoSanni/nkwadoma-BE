@@ -11,6 +11,8 @@ import lombok.*;
 public class IdentityVerification {
 
     private String identityId;
+    private String bvn;
+    private String nin;
     private String identityImage;
     private IdentityVerificationEnum typeOfIdentity;
 

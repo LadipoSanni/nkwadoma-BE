@@ -6,6 +6,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +22,12 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Service
 public class IdentityVerificationService implements VerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final IdentityVerificationRepository identityVerificationRepository;
+    private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
 
     @Override
-    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
+    public String verifyIdentity(String token) throws MeedlException {
         String email = tokenUtils.decodeJWT(token);
         MeedlValidator.validateEmail(email);
         UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
@@ -34,20 +39,18 @@ public class IdentityVerificationService implements VerificationUseCase {
         log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
-    public void verifyUser(IdentityVerification identityVerification) {
-        UserIdentity userIdentity = userIdentityOutputPort.findByBvnOrNin(identityVerification);
-        if (userIdentity == null) {
-            throw new RuntimeException("User not found");
-        }
-        if (userIdentity.isVerified()) {
-            throw new RuntimeException("User already verified");
-        }
-        userIdentity.setVerified(true);
-        userIdentityOutputPort.save(userIdentity);
+    @Override
+    public IdentityVerification verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
+        IdentityVerification foundIdentityVerification = findByBvnOrNin(identityVerification);
+        return identityVerification;
     }
-    public void isUserBvnOrNinAlreadyVerified(IdentityVerification identityVerification {
-        userIdentityOutputPort.findByBvnOrNin(identityVerification);
+
+    private IdentityVerification findByBvnOrNin(IdentityVerification identityVerification) throws MeedlException {
+        MeedlValidator.validateDataElement(identityVerification.getBvn());
+        IdentityVerificationEntity identityVerificationEntity = identityVerificationRepository.findByBvn(identityVerification.getBvn());
+        return identityVerificationMapper.mapToIdentityVerification(identityVerificationEntity);
     }
+
     private boolean isIdentityVerified(UserIdentity foundUser){
         return true;
     }

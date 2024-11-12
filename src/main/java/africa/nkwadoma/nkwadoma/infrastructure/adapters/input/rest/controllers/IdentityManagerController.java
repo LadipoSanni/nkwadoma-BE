@@ -83,10 +83,17 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
-    @PostMapping("auth/identity/confirmVerification")
+    @PostMapping("auth/identity/confirm/token/verify")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.verifyByEmailUserIdentityVerified(token))
+                .data(verificationUseCase.verifyIdentity(token))
+                .statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/identity/verify")
+    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
+        IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
+        return ResponseEntity.ok(ApiResponse.<IdentityVerification>builder()
+                .data(verificationUseCase.verifyIdentity(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }
 
