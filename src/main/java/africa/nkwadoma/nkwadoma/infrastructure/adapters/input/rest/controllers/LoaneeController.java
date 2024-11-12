@@ -39,6 +39,7 @@ public class LoaneeController {
                                                             @RequestBody LoaneeRequest loaneeRequest) throws MeedlException {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
         loanee.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        loanee.getLoanee().setCreatedBy(loanee.getCreatedBy());
         loanee = loaneeUsecase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);

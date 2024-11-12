@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
@@ -51,7 +52,6 @@ public class LoaneeService implements LoaneeUsecase {
         MeedlValidator.validateObjectInstance(loanee);
         loanee.validate();
         checkIfLoaneeWithEmailExist(loanee);
-        getOrganizationEmployeeIdentity(loanee);
         String cohortId = loanee.getCohortId();
         Cohort cohort = cohortOutputPort.findCohort(cohortId);
         checkIfCohortTuitionDetailsHaveBeenUpdated(cohort);
@@ -62,6 +62,7 @@ public class LoaneeService implements LoaneeUsecase {
         loanee.setCreatedAt(LocalDateTime.now());
         List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown());
         saveLoaneeLoanDetails(loanee, loanBreakdowns);
+        loanee.getLoanee().setRole(IdentityRole.LOANEE);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
@@ -126,15 +127,6 @@ public class LoaneeService implements LoaneeUsecase {
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
-
-    private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
-        log.info("Fetching employee identity for createdBy: {}", loanee.getCreatedBy());
-        OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
-        log.info("Found employee identity: {}", employeeIdentity);
-        return employeeIdentity;
-    }
-
-
 
 
 }
