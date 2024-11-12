@@ -15,7 +15,9 @@ public class DevTestPatterns implements AllowedHost{
                 "http://localhost:3000/",
                 "http://localhost:3000/**",
                 "https://api-systest.learnspace.africa/",
-                "https://api-systest.learnspace.africa/swagger-ui/**",
+                "http://api-systest.learnspace.africa",
+                "http://api-systest.learnspace.africa/**",
+                "http://api-systest.learnspace.africa/swagger-ui/**"
         };
     }
 }
