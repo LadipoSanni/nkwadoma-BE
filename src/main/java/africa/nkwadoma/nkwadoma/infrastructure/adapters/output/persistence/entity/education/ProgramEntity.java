@@ -51,7 +51,6 @@ public class ProgramEntity {
     @Column(nullable = false)
     private String createdBy;
     private String updatedBy;
-    private String organizationId;
     @ManyToOne(cascade = CascadeType.MERGE)
     private OrganizationEntity organizationEntity;
 }

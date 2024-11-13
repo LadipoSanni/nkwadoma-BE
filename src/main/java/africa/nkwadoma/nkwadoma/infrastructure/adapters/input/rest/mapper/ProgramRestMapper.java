@@ -7,7 +7,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
-    @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(source = "programCreateRequest.programDuration", target = "duration")

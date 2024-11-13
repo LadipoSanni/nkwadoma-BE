@@ -36,7 +36,6 @@ public class Program {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
-    private String organizationId;
     private BigDecimal totalAmountRepaid = BigDecimal.ZERO;
     private BigDecimal totalAmountDisbursed = BigDecimal.ZERO;
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
@@ -50,8 +49,7 @@ public class Program {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.name);
-        MeedlValidator.validateDataElement(this.createdBy);
-        MeedlValidator.validateDataElement(this.organizationId);
+        MeedlValidator.validateUUID(this.createdBy);
     }
 
     public void setName(String name) {

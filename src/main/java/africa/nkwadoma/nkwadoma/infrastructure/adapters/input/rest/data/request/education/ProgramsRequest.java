@@ -9,12 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class ProgramsRequest {
-    @NotBlank(message = "Organization ID is required")
-    private String organizationId;
     private int pageSize;
     private int pageNumber;
-
-    public void setOrganizationId(@NotBlank(message = "Organization ID is required") String organizationId) {
-        this.organizationId = organizationId.trim();
-    }
 }

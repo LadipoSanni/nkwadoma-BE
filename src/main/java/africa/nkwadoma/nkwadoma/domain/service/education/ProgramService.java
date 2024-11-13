@@ -32,10 +32,8 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public Page<Program> viewAllPrograms(Program program) throws MeedlException {
-        MeedlValidator.validateDataElement(program.getOrganizationId());
-        String organizationId = program.getOrganizationId().trim();
-        return programOutputPort.findAllPrograms(organizationId, program.getPageSize(), program.getPageNumber());
+    public Page<Program> viewAllPrograms(String meedlUserId) throws MeedlException {
+        return programOutputPort.findAllPrograms(meedlUserId, 11, 11);
     }
 
     @Override

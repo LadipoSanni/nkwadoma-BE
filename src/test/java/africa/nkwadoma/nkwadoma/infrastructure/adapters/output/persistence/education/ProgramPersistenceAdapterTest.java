@@ -105,7 +105,7 @@ class ProgramPersistenceAdapterTest {
             organizationIdentity.setPhoneNumber("0907658483");
             organizationIdentity.setTin("Tin5678");
             organizationIdentity.setNumberOfPrograms(0);
-            organizationIdentity.setCreatedBy("3a6d1124-1349-4f5b-831a-ac269369a90f");
+            organizationIdentity.setCreatedBy(userIdentity.getCreatedBy());
             ServiceOffering serviceOffering = new ServiceOffering();
             serviceOffering.setName(ServiceOfferingType.TRAINING.name());
             serviceOffering.setIndustry(Industry.EDUCATION);
@@ -113,17 +113,17 @@ class ProgramPersistenceAdapterTest {
             organizationIdentity.setWebsiteAddress("webaddress.org");
 //            organizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
 
-            userIdentity = new UserIdentity();
-            userIdentity.setFirstName("Joel");
-            userIdentity.setLastName("Jacobs");
-            userIdentity.setEmail("joel@johnson.com");
-            userIdentity.setId(organizationIdentity.getCreatedBy());
-            userIdentity.setPhoneNumber("098647748393");
-            userIdentity.setEmailVerified(true);
-            userIdentity.setEnabled(true);
-            userIdentity.setCreatedAt(LocalDateTime.now().toString());
-            userIdentity.setRole(PORTFOLIO_MANAGER);
-            userIdentity.setCreatedBy(organizationIdentity.getCreatedBy());
+//            userIdentity = new UserIdentity();
+//            userIdentity.setFirstName("Joel");
+//            userIdentity.setLastName("Jacobs");
+//            userIdentity.setEmail("joel@johnson.com");
+//            userIdentity.setId(organizationIdentity.getCreatedBy());
+//            userIdentity.setPhoneNumber("098647748393");
+//            userIdentity.setEmailVerified(true);
+//            userIdentity.setEnabled(true);
+//            userIdentity.setCreatedAt(LocalDateTime.now().toString());
+//            userIdentity.setRole(PORTFOLIO_MANAGER);
+//            userIdentity.setCreatedBy(organizationIdentity.getCreatedBy());
 
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
                     meedlUser(userIdentity).build()));
@@ -145,7 +145,7 @@ class ProgramPersistenceAdapterTest {
         try {
             OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
 
-            program.setOrganizationId(foundOrganization.getId());
+//            program.setOrganizationId(foundOrganization.getId());
             program.setCreatedBy(foundOrganization.getCreatedBy());
             Program savedProgram = programOutputPort.saveProgram(program);
 

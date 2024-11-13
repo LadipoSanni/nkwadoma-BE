@@ -39,7 +39,7 @@ public class ProgramController {
     @Operation(summary = "Add a program to an Institute")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
+        log.info("Creating program is Meedl User with ID: {}", meedlUser.getClaimAsString("sub"));
         Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
 
         program = addProgramUseCase.createProgram(program);
@@ -53,11 +53,14 @@ public class ProgramController {
 
     @GetMapping("/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given institute.")
-    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@Valid @RequestBody ProgramsRequest programsRequest)
-            throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
+                                                            @Valid @RequestBody ProgramsRequest programsRequest)
+                                                            throws MeedlException {
+        log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
         Program program = programRestMapper.toProgram(programsRequest);
+        program.setCreatedBy(meedlUser.getClaimAsString("sub"));
 
-        Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
+        Page<Program> programs = addProgramUseCase.viewAllPrograms(meedlUser.getClaimAsString("sub"));
         List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();
         PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
                 programResponses, programs.hasNext(),
