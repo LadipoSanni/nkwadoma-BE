@@ -6,8 +6,11 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
@@ -73,6 +76,132 @@ class NextOfKinServiceTest {
     @Test
     void saveNullNextOfKin() {
         assertThrows(MeedlException.class, ()-> nextOfKinService.createNextOfKin(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    Ahmad", "Ahmad   "})
+    void saveNextOfKinFirstNameWithTrailingOrLeadingSpaces(String firstName) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setFirstName(firstName);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    Doe", "Doe   "})
+    void saveNextOfKinLastNameWithTrailingOrLeadingSpaces(String lastName) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setFirstName(lastName);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    0785678901", "0785678901   "})
+    void saveNextOfKinPhoneNumberWithTrailingOrLeadingSpaces(String phoneNumber) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setPhoneNumber(phoneNumber);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    test@example.com", "test@example.com   "})
+    void saveNextOfKinEmailWithTrailingOrLeadingSpaces(String email) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setEmail(email);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   Brother", "Brother   "})
+    void saveNextOfKinContactAddressWithTrailingOrLeadingSpaces(String contactAddress) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setContactAddress(contactAddress);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   2, Spencer Street, Yaba, Lagos", "2, Spencer Street, Yaba, Lagos   "})
+    void saveNextOfKinRelationshipWithTrailingOrLeadingSpaces(String nextOfKinRelationship) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.setNextOfKinRelationship(nextOfKinRelationship);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   alt276@example.com", "alt276@example.com   "})
+    void saveAlternateEmailWithTrailingOrLeadingSpaces(String alternateEmail) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.getLoanee().getUserIdentity().setAlternateEmail(alternateEmail);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   0986564534", "0986564534   "})
+    void saveAlternatePhoneNumberWithTrailingOrLeadingSpaces(String alternatePhoneNumber) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.getLoanee().getUserIdentity().setAlternatePhoneNumber(alternatePhoneNumber);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"   10, Onigbagbo Street, Mushin, Lagos State", "10, Onigbagbo Street, Mushin, Lagos State   "})
+    void saveAlternateContactAddressWithTrailingOrLeadingSpaces(String alternateContactAddress) {
+        NextOfKin savedNextOfKin = null;
+        try {
+            nextOfKin.getLoanee().getUserIdentity().setAlternateContactAddress(alternateContactAddress);
+            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            savedNextOfKin = nextOfKinService.createNextOfKin(nextOfKin);
+        } catch (MeedlException e) {
+            log.error("Failed to save next of kin", e);
+        }
+        assertNotNull(savedNextOfKin);
     }
 
     @Test

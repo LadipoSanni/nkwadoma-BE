@@ -32,4 +32,6 @@ public class UserIdentity {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+
+
 }

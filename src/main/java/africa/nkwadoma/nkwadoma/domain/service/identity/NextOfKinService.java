@@ -16,6 +16,8 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
     @Override
     public NextOfKin createNextOfKin(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin);
+        nextOfKin.validate();
+        nextOfKin.trimSpaceForUserIdentity(nextOfKin.getLoanee());
         return nextOfKinIdentityOutputPort.save(nextOfKin);
     }
 }
