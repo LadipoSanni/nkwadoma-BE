@@ -58,7 +58,6 @@ class LoanReferralAdapterTest {
     void saveLoanReferral() {
         loanReferral = LoanReferral.builder().loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-//        loanReferral = new LoanReferral("LoanReferral1", "John Doe", "1234567890", "Email@example.com", "Loan Application");
         LoanReferral savedLoanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
         assertNotNull(savedLoanReferral);
         assertNotNull(savedLoanReferral.getId());
