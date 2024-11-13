@@ -16,5 +16,5 @@ public class EditCohortLoanDetailRequest {
     private String name;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
-    private CohortLoanDetailRequest cohortLoanDetail;
+    private LoanDetailRequest LoanDetail;
 }

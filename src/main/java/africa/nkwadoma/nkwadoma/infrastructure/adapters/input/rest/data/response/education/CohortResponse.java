@@ -2,9 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
-import africa.nkwadoma.nkwadoma.domain.model.education.CohortLoanDetail;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +34,6 @@ public class CohortResponse {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
-    private CohortLoanDetailResponse cohortLoanDetail;
+    private LoanDetailResponse cohortLoanDetail;
 
 }
