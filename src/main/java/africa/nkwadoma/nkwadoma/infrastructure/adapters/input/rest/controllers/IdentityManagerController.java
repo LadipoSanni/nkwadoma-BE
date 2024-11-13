@@ -92,7 +92,7 @@ public class IdentityManagerController {
     @PostMapping("auth/identity/verify")
     public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
         IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
-        return ResponseEntity.ok(ApiResponse.<IdentityVerification>builder()
+        return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(verificationUseCase.verifyIdentity(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }

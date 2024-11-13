@@ -6,5 +6,5 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 public interface VerificationUseCase {
     String verifyIdentity(String token) throws MeedlException;
 
-    IdentityVerification verifyIdentity(IdentityVerification identityVerification) throws MeedlException;
+    String verifyIdentity(IdentityVerification identityVerification) throws MeedlException;
 }

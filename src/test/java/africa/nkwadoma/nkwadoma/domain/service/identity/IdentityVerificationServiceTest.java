@@ -20,6 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_PREVIOUSLY_VERIFIED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFIED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,6 +60,11 @@ class IdentityVerificationServiceTest {
         favour.setReactivationReason("Reason for reactivation is to test");
         favour.setDeactivationReason("Reason for deactivation is to test");
 
+        identityVerificationEntity = new IdentityVerificationEntity();
+        identityVerificationEntity.setId("9c558b64-c207-4c34-99c7-8d2f04398496");
+        identityVerificationEntity.setBvn(testBvn);
+        identityVerificationEntity.setNin(testNin);
+
         identityVerification = new IdentityVerification();
         identityVerification.setBvn(testBvn);
         identityVerification.setNin(testNin);
@@ -72,7 +80,7 @@ class IdentityVerificationServiceTest {
         try {
             when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
             when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            assertEquals(IDENTITY_VERIFIED.getMessage(), identityVerificationService.verifyIdentity(generatedToken));
+            assertEquals(IDENTITY_PREVIOUSLY_VERIFIED.getMessage(), identityVerificationService.verifyIdentity(generatedToken));
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
@@ -112,12 +120,12 @@ class IdentityVerificationServiceTest {
     }
     @Test
     void verifyUserBvn(){
-        when(identityVerificationRepository.findByBvn(testBvn)).thenReturn(identityVerificationEntity);
-        when(identityVerificationMapper.mapToIdentityVerification(any())).thenReturn(identityVerification);
+        when(identityVerificationRepository.findByBvn(testBvn)).thenReturn(Optional.of(identityVerificationEntity));
 
         try {
-            IdentityVerification verifiedIdentity = identityVerificationService.verifyIdentity(identityVerification);
-            assertEquals(identityVerification, verifiedIdentity);
+            String response = identityVerificationService.verifyIdentity(identityVerification);
+            assertNotNull(response);
+            assertEquals(IDENTITY_PREVIOUSLY_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Verification failed : {}", e.getMessage());
         }
