@@ -7,7 +7,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface ProgramRestMapper {
-    @Mapping(source = "programCreateRequest.instituteId", target = "organizationId")
     @Mapping(source = "programCreateRequest.programName", target = "name")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(source = "programCreateRequest.programDuration", target = "duration")
@@ -15,10 +14,6 @@ public interface ProgramRestMapper {
     @Mapping(source = "programCreateRequest.durationStatus", target = "durationType")
     @Mapping(source = "meedlUserId", target = "createdBy")
     Program toProgram(ProgramCreateRequest programCreateRequest, String meedlUserId);
-
-    @Mapping(target = "pageNumber", source = "pageNumber", defaultValue = "0")
-    @Mapping(target = "pageSize", source = "pageSize", defaultValue = "0")
-    Program toProgram(ProgramsRequest programsRequest);
 
     @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid", defaultValue = "0")
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")

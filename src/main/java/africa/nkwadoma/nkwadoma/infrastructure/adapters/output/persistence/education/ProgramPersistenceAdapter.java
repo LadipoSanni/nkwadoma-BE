@@ -28,7 +28,6 @@ import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateUUID;
 
 @RequiredArgsConstructor
 @Component
@@ -40,7 +39,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    private final CohortRepository cohortRepository;
 
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
@@ -56,10 +54,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
-        validateCreatedBy(program);
 
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());;
         log.info("The organization identity found when saving program is: {}", organizationIdentity);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
@@ -81,14 +78,15 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         }
     }
 
-    private void validateCreatedBy(Program program) throws MeedlException {
-        log.info("Validating the created by: {}",program.getCreatedBy());
-        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(program.getCreatedBy());
+    private OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
+        MeedlValidator.validateUUID(meedlUserId);
+        log.info("Validating the created by: {}",meedlUserId);
+        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
             throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
         }
+        return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
     }
-
 
     @Override
     public boolean programExists(String programName) throws MeedlException {
@@ -115,9 +113,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public Page<Program> findAllPrograms(String organizationId, int pageSize, int pageNumber) {
+    public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
+        OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(organizationId, pageRequest);
+        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(foundOrganizationIdentity.getId(), pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {

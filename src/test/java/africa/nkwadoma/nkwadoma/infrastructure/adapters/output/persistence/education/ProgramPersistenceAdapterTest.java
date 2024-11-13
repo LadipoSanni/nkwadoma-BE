@@ -51,7 +51,8 @@ class ProgramPersistenceAdapterTest {
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";;
+    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
+    private String userId ;
 
     @BeforeEach
     void setUp() {
@@ -79,6 +80,9 @@ class ProgramPersistenceAdapterTest {
         elites.setName("Elite");
         elites.setCreatedBy(userIdentity.getCreatedBy());
 
+    }
+    @BeforeAll
+    void init() {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
@@ -90,12 +94,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity.setRole(PORTFOLIO_MANAGER);
-    }
-    @BeforeAll
-    void init() {
         try {
-            OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
-                    meedlUser(userIdentity).build();
             organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setName("Amazing Grace Enterprises");
             organizationIdentity.setEmail("rachel@gmail.com");
@@ -105,30 +104,17 @@ class ProgramPersistenceAdapterTest {
             organizationIdentity.setPhoneNumber("0907658483");
             organizationIdentity.setTin("Tin5678");
             organizationIdentity.setNumberOfPrograms(0);
-            organizationIdentity.setCreatedBy("3a6d1124-1349-4f5b-831a-ac269369a90f");
+            organizationIdentity.setCreatedBy(testId);
             ServiceOffering serviceOffering = new ServiceOffering();
             serviceOffering.setName(ServiceOfferingType.TRAINING.name());
             serviceOffering.setIndustry(Industry.EDUCATION);
             organizationIdentity.setServiceOfferings(List.of(serviceOffering));
             organizationIdentity.setWebsiteAddress("webaddress.org");
-//            organizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
-
-            userIdentity = new UserIdentity();
-            userIdentity.setFirstName("Joel");
-            userIdentity.setLastName("Jacobs");
-            userIdentity.setEmail("joel@johnson.com");
-            userIdentity.setId(organizationIdentity.getCreatedBy());
-            userIdentity.setPhoneNumber("098647748393");
-            userIdentity.setEmailVerified(true);
-            userIdentity.setEnabled(true);
-            userIdentity.setCreatedAt(LocalDateTime.now().toString());
-            userIdentity.setRole(PORTFOLIO_MANAGER);
-            userIdentity.setCreatedBy(organizationIdentity.getCreatedBy());
 
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
                     meedlUser(userIdentity).build()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
-            userIdentityOutputPort.save(userIdentity);
+            userId = userIdentityOutputPort.save(userIdentity).getId();
             organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
 
             OrganizationIdentity foundOrganization = organizationOutputPort.findById(savedOrganization.getId());
@@ -143,10 +129,7 @@ class ProgramPersistenceAdapterTest {
     @Order(1)
     void saveProgram() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-
-            program.setOrganizationId(foundOrganization.getId());
-            program.setCreatedBy(foundOrganization.getCreatedBy());
+            program.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(program);
 
             assertNotNull(savedProgram);
@@ -189,19 +172,9 @@ class ProgramPersistenceAdapterTest {
             userIdentityOutputPort.save(foundUserIdentity);
             assertNotNull(savedOrganization);
 
-            designThinking.setOrganizationId(savedOrganization.getId());
             designThinking.setCreatedBy(foundUserIdentity.getCreatedBy());
 
             assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(designThinking));
-//            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
-//                    findOrganizationServiceOfferingsByOrganizationId(foundOrganizationIdentity.getId());
-//
-//            String serviceOfferingId = null;
-//            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-//                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-//                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-//            }
-//            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
 
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
@@ -244,7 +217,6 @@ class ProgramPersistenceAdapterTest {
             userIdentityOutputPort.save(foundUserIdentity);
             assertNotNull(savedOrganization);
 
-            program.setOrganizationId(foundOrganizationIdentity.getId());
             program.setName(programName);
             program.setCreatedBy(organizationIdentity.getCreatedBy());
             Program savedProgram = programOutputPort.saveProgram(program);
@@ -257,7 +229,6 @@ class ProgramPersistenceAdapterTest {
             log.error("Error saving program", e);
         }
     }
-
     @Test
     void createProgramWithNullName(){
         program.setName(null);
@@ -268,19 +239,6 @@ class ProgramPersistenceAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void createProgramWithInvalidName(String name){
         program.setName(name);
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
-    }
-
-    @Test
-    void createProgramWithNullOrganizationId(){
-        program.setOrganizationId(null);
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram((program)));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void createProgramWithInvalidOrganizationId(String organizationId){
-        program.setOrganizationId(organizationId);
         assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
     }
 
@@ -297,21 +255,11 @@ class ProgramPersistenceAdapterTest {
         assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"d5bf6a6c-7102-48b2-8ce9-7cd41919f074"})
-    void createProgramWithNonExistingCreatedBy(String createdBy){
-        try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-
-            program.setOrganizationId(foundOrganization.getId());
-            program.setCreatedBy(createdBy);
-            program.setOrganizationId(foundOrganization.getId());
-
+    @Test
+    void createProgramWithNonExistingCreatedBy(){
+            program.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
             MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(program));
             assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
-        } catch (MeedlException e) {
-            log.error("Error finding organization", e);
-        }
     }
 
     @Test
@@ -319,11 +267,8 @@ class ProgramPersistenceAdapterTest {
     void findProgramByName() {
         try {
             assertThrows(ResourceNotFoundException.class, ()->programOutputPort.findProgramByName(designThinking.getName()));
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
-                    organizationIdentity.getEmail());
 
-            designThinking.setCreatedBy(organizationIdentity.getCreatedBy());
-            designThinking.setOrganizationId(foundOrganization.getId());
+            designThinking.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(designThinking);
 
             Program foundProgram = programOutputPort.findProgramByName(savedProgram.getName());
@@ -345,11 +290,7 @@ class ProgramPersistenceAdapterTest {
     @ValueSource(strings = {"  First program", "Second program   ", "    Third program     "})
     void findProgramByNameWithSpaces(String name) {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
-                    organizationIdentity.getEmail());
-
-            program.setOrganizationId(foundOrganization.getId());
-            program.setCreatedBy(organizationIdentity.getCreatedBy());
+            program.setCreatedBy(userId);
             program.setName(name);
             Program savedProgram = programOutputPort.saveProgram(program);
 
@@ -367,12 +308,7 @@ class ProgramPersistenceAdapterTest {
     @Order(3)
     void findProgramById() {
         try {
-            assertThrows(ResourceNotFoundException.class,
-                    ()->programOutputPort.findProgramByName(program.getName()));
-
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            program.setOrganizationId(foundOrganization.getId());
-            program.setCreatedBy(organizationIdentity.getCreatedBy());
+            program.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(program);
 
             assertNotNull(savedProgram);
@@ -411,15 +347,11 @@ class ProgramPersistenceAdapterTest {
     @Order(4)
     void findAllPrograms() {
         try {
-            OrganizationIdentity organization = organizationOutputPort.findByEmail(
-                    organizationIdentity.getEmail());
-            assertNotNull(organization);
-            designThinking.setOrganizationId(organization.getId());
             designThinking.setCreatedBy(organizationIdentity.getCreatedBy());
             programOutputPort.saveProgram(designThinking);
 
             Page<Program> foundPrograms = programOutputPort.findAllPrograms(
-                    designThinking.getOrganizationId(), pageSize, pageNumber);
+                    userId, pageSize, pageNumber);
             List<Program> programsList = foundPrograms.toList();
 
             assertEquals(1, foundPrograms.getTotalElements());
@@ -456,10 +388,7 @@ class ProgramPersistenceAdapterTest {
     @Order(5)
     void deleteProgram() {
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(
-                    organizationIdentity.getEmail());
-            designThinking.setCreatedBy(organizationIdentity.getCreatedBy());
-            designThinking.setOrganizationId(foundOrganization.getId());
+            designThinking.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(designThinking);
             assertNotNull(savedProgram);
 
@@ -503,9 +432,7 @@ class ProgramPersistenceAdapterTest {
         Program savedProgram = new Program();
         CohortEntity savedCohort = new CohortEntity();
         try {
-            OrganizationIdentity foundOrganization = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
-            program.setOrganizationId(foundOrganization.getId());
-            program.setCreatedBy(userIdentity.getCreatedBy());
+            program.setCreatedBy(userId);
             savedProgram = programOutputPort.saveProgram(program);
             assertNotNull(savedProgram);
 
@@ -532,7 +459,7 @@ class ProgramPersistenceAdapterTest {
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
-                    findByCreatedBy(organizationIdentity.getCreatedBy());
+                    findByCreatedBy(userId);
             employeeIdentityOutputPort.delete(employeeIdentity.getId());
             userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
 

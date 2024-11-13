@@ -7,14 +7,12 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.LOANEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -38,7 +36,7 @@ class UserIdentityAdapterTest {
         john.setEmailVerified(false);
         john.setEnabled(false);
         john.setCreatedAt(LocalDateTime.now().toString());
-        john.setRole(TRAINEE);
+        john.setRole(LOANEE);
         john.setCreatedBy("2c521790-563a-4449-a4bd-459bd5a2d4d7");
 
     }

@@ -10,9 +10,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main", "dev", "prod-support" ]
+    branches: ["main", "dev", "prod-support"]
   pull_request:
-    branches: [ "main", "dev", "prod-support" ]
+    branches: ["main", "dev", "prod-support"]
 
 env:
   KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
@@ -26,7 +26,7 @@ env:
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
   FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
+  JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
   PROFILE: dev
   SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
   SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
@@ -37,16 +37,16 @@ env:
   MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
   MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
   MAIL_PORT: ${{ secrets.MAIL_PORT }}
-  
-  
-  
+  AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
+
+
   
 jobs:
 
   test:
     name: Unit Test
     runs-on: ubuntu-latest
-      
+
     services:
       postgres:
         image: postgres:13
@@ -61,11 +61,11 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Disable shallow clones for better relevancy of analysis
+          fetch-depth: 0
 
       - name: Wait for Postgres to be ready
         run: |
@@ -77,80 +77,53 @@ jobs:
             echo "Waiting for Postgres..."
             sleep 1
           done
+
           
 
- 
       - uses: actions/checkout@v1
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
+          
 
-      - name: Run Maven Tests with Debug
-
+      - name: Run Maven Tests with Surefire Report
         env:
-          KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
-          KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
-          KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
-          KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
-          KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
-          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
-          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
-          PROFILE: dev
-          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
-          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
-          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
-          CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST: ${{ secrets.MAIL_HOST }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          
-        run: mvn -B clean package  
+        run: mvn -B clean test
+        
 
-
-
+      - name: Archive Surefire Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: surefire-reports
+          path: target/surefire-reports
+      
+      - name: Upload Surefire Report to S3
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          S3_REPORT_PATH: ${{ secrets.S3_REPORT_PATH }}
+          AWS_REGION: eu-west-1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+          aws configure set region "$AWS_REGION"
+          aws s3 cp target/surefire-reports s3://${S3_BUCKET_NAME}/${S3_REPORT_PATH} --recursive
 
 
   build:
-    name: Build and analyze
+    name: Build and Analyze
     needs: ["test"]
     runs-on: ubuntu-latest
-    
-    # Define environment variables once for the entire job
-    env:
-          KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
-          KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
-          KEYCLOAK_SERVER: ${{ secrets.KEYCLOAK_SERVER }}
-          KEYCLOAK_USERNAME: ${{ secrets.KEYCLOAK_USERNAME }}
-          KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
-          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
-          DATABASE_URL: jdbc:postgresql://localhost:5432/nkwadoma_db
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION}}
-          PROFILE: dev
-          SUPER_ADMIN_FIRST_NAME: ${{ secrets.SUPER_ADMIN_FIRST_NAME }}
-          SUPER_ADMIN_LAST_NAME: ${{ secrets.SUPER_ADMIN_LAST_NAME }}
-          SUPER_ADMIN_EMAIL: ${{ secrets.SUPER_ADMIN_EMAIL }}
-          CREATED_BY: ${{ secrets.CREATED_BY }}
-          MAIL_HOST: ${{ secrets.MAIL_HOST }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-
-
+   
     services:
       postgres:
         image: postgres:13
@@ -165,11 +138,11 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Disable shallow clones for better relevancy of analysis
+          fetch-depth: 0
 
       - name: Wait for Postgres to be ready
         run: |
@@ -181,7 +154,6 @@ jobs:
             echo "Waiting for Postgres..."
             sleep 1
           done
-          
 
       - uses: actions/checkout@v4
         with:
@@ -194,8 +166,8 @@ jobs:
           distribution: 'temurin'
 
       - name: Maven Package for Dev
-        if: github.ref == 'refs/heads/dev'  # Use dev branch for dev environment
-        run: mvn -B clean package -Dspring.profiles.active=dev   
+        if: github.ref == 'refs/heads/dev'
+        run: mvn -B clean package -Dspring.profiles.active=dev
 
       - name: Cache SonarQube packages
         uses: actions/cache@v3
@@ -203,16 +175,17 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-          
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-          
+
+      # Uncomment and configure the following step if SonarQube analysis is required
       # - name: Build and analyze with SonarQube
       #   run: |
       #     mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
       #       -Dsonar.projectKey=Nkwadoma-Backend \
-      #       -Dsonar.projectName='Nkwadoma Backend' 
+      #       -Dsonar.projectName='Nkwadoma Backend'
