@@ -56,8 +56,9 @@ public class LoaneeController {
 
     @GetMapping("loanee/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoaneesInCohort(AllLoaneeInCohortRequest allLoaneeInCohortRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewAllLoaneesInCohort(@RequestBody AllLoaneeInCohortRequest allLoaneeInCohortRequest) throws MeedlException {
 
+        log.info("cohort id  1{}",allLoaneeInCohortRequest.getCohortId());
         Page<Loanee> loanees = loaneeUsecase.viewAllLoaneeInCohort(allLoaneeInCohortRequest.getCohortId(),
                 allLoaneeInCohortRequest.getPageSize(),
                 allLoaneeInCohortRequest.getPageNumber());

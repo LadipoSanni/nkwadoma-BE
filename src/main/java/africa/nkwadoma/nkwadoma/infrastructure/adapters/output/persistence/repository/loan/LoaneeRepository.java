@@ -13,7 +13,7 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     List<LoaneeEntity> findAllByLoaneeEmail(String email);
 
-    Page<LoaneeEntity> findAllByCohortId(String id, Pageable pageable);
+    Page<LoaneeEntity> findAllByCohortId(String cohortId, Pageable pageable);
 
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 }

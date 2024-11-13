@@ -24,8 +24,8 @@ public class LoaneeEntity {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToOne()
+    @OneToOne
     private UserEntity loanee;
-    @OneToOne()
+    @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

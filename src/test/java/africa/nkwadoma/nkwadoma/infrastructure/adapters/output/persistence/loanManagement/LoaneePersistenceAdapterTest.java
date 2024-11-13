@@ -46,10 +46,11 @@ class LoaneePersistenceAdapterTest {
     private String loaneeId;
     private String secondLoaneeId;
     private String cohortId;
-    private int pageSize = 1;
-    private int pageNumber = 2;
+    private int pageSize = 2;
+    private int pageNumber = 0;
 
     private LoaneeLoanDetail loaneeLoanDetail;
+    private LoaneeLoanDetail secondLoaneeLoanDetail;
     private LoanBreakdown loanBreakdown;
 
     @Autowired
@@ -75,6 +76,8 @@ class LoaneePersistenceAdapterTest {
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
+        secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+                .initialDeposit(BigDecimal.valueOf(200)).build();
         loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
                 .currency("usd").build();
         try {
@@ -84,7 +87,10 @@ class LoaneePersistenceAdapterTest {
             anotherUser = identityOutputPort.save(anotherUser);
             List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
             loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
+            List<LoanBreakdown> loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -101,10 +107,10 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
 
         anotherLoanee = new Loanee();
-        anotherLoanee.setId(secondId);
-        anotherLoanee.setCreatedBy(secondId);
+        anotherLoanee.setCohortId(id);
+        anotherLoanee.setCreatedBy(id);
         anotherLoanee.setLoanee(anotherUser);
-        anotherLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
 
     }
 
@@ -249,5 +255,7 @@ class LoaneePersistenceAdapterTest {
         loaneeRepository.deleteById(secondLoaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
         identityOutputPort.deleteUserById(anotherUser.getId());
+        identityManagerOutputPort.deleteUser(anotherUser);
+        identityManagerOutputPort.deleteUser(userIdentity);
     }
 }
