@@ -48,7 +48,7 @@ public class TokenUtils {
                     .getBody();
         } catch (ExpiredJwtException exception) {
             throw new MeedlException("Time allocated for this action has expired. Please refresh.");
-        } catch (SignatureException exception) {
+        } catch (SignatureException | MalformedJwtException exception ) {
             throw new MeedlException("You are not authorized to perform this action. Invalid signature");
         }
         if (expiration == null || claims.getExpiration().before(new Date())) {
