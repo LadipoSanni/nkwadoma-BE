@@ -1,30 +1,28 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.ProgramRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.*;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import jakarta.validation.constraints.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
 @Slf4j
 @RestController
@@ -51,6 +49,16 @@ public class ProgramController {
         );
     }
 
+    @GetMapping("/{organizationId}/programs")
+    @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
+    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@PathVariable String organizationId,
+                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        Program program = new Program();
+        program.setOrganizationId(organizationId);
+        program.setPageSize(pageSize);
+        program.setPageNumber(pageNumber);
     @GetMapping("/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given institute.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
@@ -64,8 +72,8 @@ public class ProgramController {
         List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();
         PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
                 programResponses, programs.hasNext(),
-                programs.getTotalPages(), programsRequest.getPageSize(),
-                programsRequest.getPageNumber()
+                programs.getTotalPages(), program.getPageSize(),
+                program.getPageNumber()
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).

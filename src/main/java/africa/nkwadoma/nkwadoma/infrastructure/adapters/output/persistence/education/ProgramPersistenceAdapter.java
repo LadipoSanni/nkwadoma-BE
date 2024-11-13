@@ -39,7 +39,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    private final CohortRepository cohortRepository;
 
     @Override
     public Program findProgramByName(String programName) throws MeedlException {
