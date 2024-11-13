@@ -24,7 +24,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.B
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.UserIdentityAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoanBreakdownPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneeLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneePersistenceAdapter;
