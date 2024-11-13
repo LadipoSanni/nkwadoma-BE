@@ -193,15 +193,6 @@ class ProgramPersistenceAdapterTest {
             designThinking.setCreatedBy(foundUserIdentity.getCreatedBy());
 
             assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(designThinking));
-//            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
-//                    findOrganizationServiceOfferingsByOrganizationId(foundOrganizationIdentity.getId());
-//
-//            String serviceOfferingId = null;
-//            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-//                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-//                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-//            }
-//            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
 
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
