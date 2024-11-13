@@ -19,13 +19,19 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -56,6 +62,8 @@ public class LoaneeServiceTest {
     private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
     private  LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private int pageSize = 2;
+    private int pageNumber = 1;
 
     private ProgramCohort programCohort;
     private Cohort elites;
@@ -176,6 +184,35 @@ public class LoaneeServiceTest {
     void cannotAddLoaneeToACohortWithExistingLoaneeEmail() throws MeedlException {
         when(loaneeOutputPort.findByLoaneeEmail(loaneeUserIdentity.getEmail())).thenReturn(firstLoanee);
         assertThrows(MeedlException.class,()->loaneeService.addLoaneeToCohort(firstLoanee));
+    }
+
+    @Test
+    void viewAllLoaneeInCohort() throws MeedlException {
+        when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber)).
+                thenReturn(new PageImpl<>(List.of(firstLoanee)));
+        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(mockId,pageSize,pageNumber);
+        assertEquals(1,loanees.toList().size());
+    }
+
+    @Test
+    void viewAllLoaneeInCohortWithNullId() throws MeedlException {
+        when(loaneeOutputPort.findAllLoaneeByCohortId(null,pageSize,pageNumber)).
+                thenThrow(MeedlException.class);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    void viewAllLoaneeInCohortWithEmptyId(String cohortId) throws MeedlException {
+        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber)).thenThrow(MeedlException.class);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ui7e8yujhd676yte","invalid-id"})
+    void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
+        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber)).thenThrow(MeedlException.class);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
 

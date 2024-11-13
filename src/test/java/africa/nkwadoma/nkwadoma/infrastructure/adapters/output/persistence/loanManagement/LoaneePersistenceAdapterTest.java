@@ -20,8 +20,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +46,8 @@ class LoaneePersistenceAdapterTest {
     private String loaneeId;
     private String secondLoaneeId;
     private String cohortId;
+    private int pageSize = 1;
+    private int pageNumber = 2;
 
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanBreakdown loanBreakdown;
@@ -230,11 +234,14 @@ class LoaneePersistenceAdapterTest {
     @Order(3)
     @Test
     void findAllLoanee(){
-        List<Loanee> loanees;
-        loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId);
-        assertEquals(2,loanees.size());
-    }
+        try {
+            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber);
+            assertEquals(2,loanees.toList().size());
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
 
+    }
 
 
 

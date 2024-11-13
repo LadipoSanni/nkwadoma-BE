@@ -13,7 +13,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,14 +53,19 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public List<Loanee> findAllLoaneeByCohortId(String cohortId) {
-        List<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId);
-        return loaneeMapper.toListOfLoanee(loaneeEntities);
+    public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize,int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId,pageRequest);
+        return loaneeEntities.map(loaneeMapper::toLoanee);
     }
 
-
-
-
+    @Override
+    public List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortId(id);
+        return loaneeMapper.toListOfLoanee(loanees);
+    }
 
 
 }
