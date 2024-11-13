@@ -12,7 +12,10 @@ import java.util.List;
 @Getter
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class LoaneeLoanDetail {
+    private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
     private List<LoanBreakdown> loanBreakdown = new ArrayList<>();

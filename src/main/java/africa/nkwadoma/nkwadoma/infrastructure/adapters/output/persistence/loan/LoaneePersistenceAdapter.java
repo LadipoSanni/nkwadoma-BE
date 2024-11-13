@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
@@ -21,16 +22,12 @@ import java.util.*;
 public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     private final LoaneeMapper loaneeMapper;
     private final LoaneeRepository loaneeRepository;
-
+    private final IdentityManagerOutputPort identityManagerOutputPort;
 
     @Override
     public Loanee save(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         loanee.validate();
-        Loanee foundLoanee = findByLoaneeEmail(loanee.getUserIdentity().getEmail());
-        if (foundLoanee != null){
-            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST.getMessage());
-        }
         LoaneeEntity loaneeEntity =
                 loaneeMapper.toLoaneeEntity(loanee);
         log.info("Loanee Entity: " + loaneeEntity);
@@ -49,8 +46,17 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public Loanee findByLoaneeEmail(String email) {
+    public Loanee findByLoaneeEmail(String email) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        Optional<UserIdentity> userIdentity = identityManagerOutputPort.getUserByEmail(email);
         LoaneeEntity loaneeEntity = loaneeRepository.findByLoaneeEmail(email);
         return loaneeMapper.toLoanee(loaneeEntity);
     }
+
+    @Override
+    public List<Loanee> findAllLoaneesByCohortId(Cohort foundCohort) {
+        List<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(foundCohort.getId());
+       return loaneeMapper.toListOfLoanee(loaneeEntities);
+    }
+
 }

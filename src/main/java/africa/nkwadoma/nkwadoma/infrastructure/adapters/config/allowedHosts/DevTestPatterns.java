@@ -13,8 +13,8 @@ public class DevTestPatterns implements AllowedHost{
         return new String[]{
                 "http://localhost:3000",
                 "http://localhost:3000/",
-                "http://localhost:3000/**",
-                "/swagger-ui/**"
+                "https://api-systest.learnspace.africa",
+                "http://api-systest.learnspace.africa"
         };
     }
 }

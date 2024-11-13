@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Loanee {
     private String id;
-    private String organizationId;
     private String cohortId;
-    private String programId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
