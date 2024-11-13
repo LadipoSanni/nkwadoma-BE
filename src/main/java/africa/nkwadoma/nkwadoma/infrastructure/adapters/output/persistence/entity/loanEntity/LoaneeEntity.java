@@ -24,8 +24,8 @@ public class LoaneeEntity {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne()
     private UserEntity loanee;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne()
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

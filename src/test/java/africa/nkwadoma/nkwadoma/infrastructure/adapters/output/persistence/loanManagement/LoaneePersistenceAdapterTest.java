@@ -42,7 +42,7 @@ class LoaneePersistenceAdapterTest {
     private Loanee firstLoanee ;
     private Loanee anotherLoanee ;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private String secondId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String secondId = "7bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private String loaneeId;
     private String secondLoaneeId;
     private String cohortId;
@@ -71,7 +71,7 @@ class LoaneePersistenceAdapterTest {
     void setUpUserIdentity(){
         userIdentity = UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
-        anotherUser = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("lekan").lastName("ayo")
+        anotherUser = UserIdentity.builder().id(secondId).email("lekan@gmail.com").firstName("lekan").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -242,10 +242,6 @@ class LoaneePersistenceAdapterTest {
         }
 
     }
-
-
-
-
 
     @AfterAll
     void cleanUp() throws MeedlException {

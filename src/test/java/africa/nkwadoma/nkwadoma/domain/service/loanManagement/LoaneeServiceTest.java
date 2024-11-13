@@ -196,22 +196,18 @@ public class LoaneeServiceTest {
 
     @Test
     void viewAllLoaneeInCohortWithNullId() throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(null,pageSize,pageNumber)).
-                thenThrow(MeedlException.class);
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void viewAllLoaneeInCohortWithEmptyId(String cohortId) throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber)).thenThrow(MeedlException.class);
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"ui7e8yujhd676yte","invalid-id"})
     void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber)).thenThrow(MeedlException.class);
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
