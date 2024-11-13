@@ -49,9 +49,14 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public List<Loanee> findAllLoaneesByCohortId(Cohort foundCohort) {
-        List<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(foundCohort.getId());
-       return loaneeMapper.toListOfLoanee(loaneeEntities);
+    public List<Loanee> findAllLoaneeByCohortId(String cohortId) {
+        List<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId);
+        return loaneeMapper.toListOfLoanee(loaneeEntities);
     }
+
+
+
+
+
 
 }

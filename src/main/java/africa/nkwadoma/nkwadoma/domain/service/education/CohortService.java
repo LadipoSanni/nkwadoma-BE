@@ -70,7 +70,7 @@ public class CohortService implements CohortUseCase {
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
-        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort);
+        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneeByCohortId(foundCohort.getId());
         cohortLoanees
                 .forEach(this::inviteTrainee);
 

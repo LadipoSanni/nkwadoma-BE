@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 
 import java.util.List;
@@ -15,5 +14,6 @@ public interface LoaneeOutputPort {
 
     Loanee findByLoaneeEmail(String email) throws MeedlException;
 
-    List<Loanee> findAllLoaneesByCohortId(Cohort foundCohort);
+
+    List<Loanee> findAllLoaneeByCohortId(String cohortId);
 }
