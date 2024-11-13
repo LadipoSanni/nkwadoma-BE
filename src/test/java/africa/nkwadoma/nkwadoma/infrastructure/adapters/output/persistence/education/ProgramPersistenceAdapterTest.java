@@ -155,7 +155,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
             assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
-//            programOutputPort.deleteProgram(savedProgram.getId());
+            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -519,7 +519,7 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
