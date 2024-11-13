@@ -49,26 +49,19 @@ public class ProgramController {
         );
     }
 
-    @GetMapping("/{organizationId}/programs")
+    @GetMapping("/programs/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
-    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@PathVariable String organizationId,
+    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
-    ) throws MeedlException {
+                                                          ) throws MeedlException {
         Program program = new Program();
-        program.setOrganizationId(organizationId);
         program.setPageSize(pageSize);
         program.setPageNumber(pageNumber);
-    @GetMapping("/all")
-    @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given institute.")
-    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
-                                                            @Valid @RequestBody ProgramsRequest programsRequest)
-                                                            throws MeedlException {
         log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
-        Program program = programRestMapper.toProgram(programsRequest);
         program.setCreatedBy(meedlUser.getClaimAsString("sub"));
 
-        Page<Program> programs = addProgramUseCase.viewAllPrograms(meedlUser.getClaimAsString("sub"));
+        Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
         List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();
         PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
                 programResponses, programs.hasNext(),

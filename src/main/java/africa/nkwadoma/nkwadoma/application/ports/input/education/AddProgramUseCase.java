@@ -6,7 +6,7 @@ import org.springframework.data.domain.*;
 
 public interface AddProgramUseCase {
     Program createProgram(Program program) throws MeedlException;
-    Page<Program> viewAllPrograms(String meedlUserId) throws MeedlException;
+    Page<Program> viewAllPrograms(Program program) throws MeedlException;
     Program updateProgram(Program program) throws MeedlException;
     Program viewProgramByName(Program program) throws MeedlException;
 

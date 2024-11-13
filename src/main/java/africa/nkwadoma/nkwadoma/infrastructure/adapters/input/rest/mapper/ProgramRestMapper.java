@@ -15,10 +15,6 @@ public interface ProgramRestMapper {
     @Mapping(source = "meedlUserId", target = "createdBy")
     Program toProgram(ProgramCreateRequest programCreateRequest, String meedlUserId);
 
-    @Mapping(target = "pageNumber", source = "pageNumber", defaultValue = "0")
-    @Mapping(target = "pageSize", source = "pageSize", defaultValue = "0")
-    Program toProgram(ProgramsRequest programsRequest);
-
     @Mapping(target = "totalAmountRepaid", source = "totalAmountRepaid", defaultValue = "0")
     @Mapping(target = "totalAmountDisbursed", source = "totalAmountDisbursed", defaultValue = "0")
     @Mapping(target = "totalAmountOutstanding", source = "totalAmountOutstanding", defaultValue = "0")

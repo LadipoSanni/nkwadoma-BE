@@ -155,7 +155,10 @@ class ProgramServiceTest {
         try {
             when(programOutputPort.findAllPrograms(testId, pageSize, pageNumber)).
                     thenReturn(new PageImpl<>(List.of(program)));
-            Page<Program> programs = programService.viewAllPrograms(testId);
+            program.setPageSize(pageSize);
+            program.setPageNumber(pageNumber);
+            program.setCreatedBy(testId);
+            Page<Program> programs = programService.viewAllPrograms(program);
             List<Program> programsList = programs.toList();
 
             verify(programOutputPort, times(1)).
