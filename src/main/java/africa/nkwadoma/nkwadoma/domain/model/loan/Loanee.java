@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Loanee {
-
     private String id;
     private String cohortId;
     private String createdBy;

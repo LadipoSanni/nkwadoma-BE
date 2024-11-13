@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
