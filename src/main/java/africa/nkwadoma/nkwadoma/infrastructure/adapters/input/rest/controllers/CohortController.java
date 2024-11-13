@@ -128,9 +128,8 @@ public class CohortController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             AllCohortsRequest allCohortsRequest) throws MeedlException {
-        Cohort cohort = Cohort.builder().programId(allCohortsRequest.getProgramId()).
-                pageNumber(allCohortsRequest.getPageNumber()).pageSize(allCohortsRequest.getPageSize()).build();
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(cohort);
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(allCohortsRequest.getProgramId(),allCohortsRequest.getPageNumber()
+                ,allCohortsRequest.getPageSize());
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), allCohortsRequest.getPageNumber(), allCohortsRequest.getPageSize());

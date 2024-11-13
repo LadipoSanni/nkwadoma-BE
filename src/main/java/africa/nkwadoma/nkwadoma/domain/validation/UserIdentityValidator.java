@@ -36,7 +36,6 @@ public class UserIdentityValidator extends MeedlValidator {
          MeedlValidator.validateObjectInstance(userIdentity);
          if (ObjectUtils.isEmpty(userIdentity.getRole())|| StringUtils.isEmpty(userIdentity.getRole().name()))
              throw new IdentityException(INVALID_VALID_ROLE.getMessage());
-
          MeedlValidator.validateEmail(userIdentity.getEmail());
          MeedlValidator.validateDataElement(userIdentity.getFirstName());
          MeedlValidator.validateDataElement(userIdentity.getLastName());

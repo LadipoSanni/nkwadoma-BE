@@ -28,7 +28,6 @@ public class LoanDetail {
     private BigDecimal lastMonthActual;
 
     public void validate() throws MeedlException {
-
         MeedlValidator.validateBigDecimalDataElement(totalAmountDisbursed);
         MeedlValidator.validateBigDecimalDataElement(totalAmountRepaid);
         MeedlValidator.validateBigDecimalDataElement(totalOutstanding);
@@ -37,7 +36,6 @@ public class LoanDetail {
         MeedlValidator.validateBigDecimalDataElement(lastMonthActual);
         MeedlValidator.validateDoubleDataElement(repaymentPercentage);
         MeedlValidator.validateDoubleDataElement(debtPercentage);
-
     }
 
 
