@@ -60,7 +60,7 @@ class LoaneePersistenceAdapterTest {
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -203,6 +203,5 @@ class LoaneePersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
-        identityManagerOutputPort.deleteUser(userIdentity);
     }
 }
