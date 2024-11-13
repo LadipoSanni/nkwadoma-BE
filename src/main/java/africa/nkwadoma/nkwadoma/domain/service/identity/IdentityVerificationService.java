@@ -45,6 +45,7 @@ public class IdentityVerificationService implements VerificationUseCase {
     }
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
+        MeedlValidator.validateObjectInstance(identityVerification);
         boolean isPreviouslyVerified = findByBvnOrNin(identityVerification);
         if (isPreviouslyVerified) {
             log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(" bvn/nin ",isPreviouslyVerified));
@@ -54,6 +55,7 @@ public class IdentityVerificationService implements VerificationUseCase {
     }
 
     private boolean findByBvnOrNin(IdentityVerification identityVerification) throws MeedlException {
+        MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         Optional<IdentityVerificationEntity> optionalIdentityVerificationEntity = identityVerificationRepository.findByBvn(identityVerification.getBvn());
         if (optionalIdentityVerificationEntity.isEmpty()) {

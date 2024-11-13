@@ -121,7 +121,6 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyUserBvn(){
         when(identityVerificationRepository.findByBvn(testBvn)).thenReturn(Optional.of(identityVerificationEntity));
-
         try {
             String response = identityVerificationService.verifyIdentity(identityVerification);
             assertNotNull(response);
