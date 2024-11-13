@@ -86,7 +86,7 @@ public class IdentityManagerController {
     @PostMapping("auth/identity/confirm/token/verify")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.verifyIdentity(token))
+                .data(verificationUseCase.isIdentityVerified(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/identity/verify")

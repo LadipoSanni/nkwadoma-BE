@@ -31,7 +31,7 @@ public class IdentityVerificationService implements VerificationUseCase {
     private final PremblyAdapter premblyAdapter;
 
     @Override
-    public String verifyIdentity(String token) throws MeedlException {
+    public String isIdentityVerified(String token) throws MeedlException {
         String email = tokenUtils.decodeJWT(token);
         MeedlValidator.validateEmail(email);
         UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
@@ -46,7 +46,7 @@ public class IdentityVerificationService implements VerificationUseCase {
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        boolean isPreviouslyVerified = findByBvnOrNin(identityVerification);
+        boolean isPreviouslyVerified = isIdentityVerified(identityVerification);
         if (isPreviouslyVerified) {
             log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(" bvn/nin ",isPreviouslyVerified));
             return IDENTITY_VERIFIED.getMessage();
@@ -54,7 +54,7 @@ public class IdentityVerificationService implements VerificationUseCase {
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
 
-    private boolean findByBvnOrNin(IdentityVerification identityVerification) throws MeedlException {
+    private boolean isIdentityVerified(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         Optional<IdentityVerificationEntity> optionalIdentityVerificationEntity = identityVerificationRepository.findByBvn(identityVerification.getBvn());

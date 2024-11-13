@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_PREVIOUSLY_VERIFIED;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFIED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -72,7 +71,7 @@ class IdentityVerificationServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void verifyUserIdentityVerifiedByInvalidEmail(String token) {
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(token));
+        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(token));
     }
 
     @Test
@@ -80,7 +79,7 @@ class IdentityVerificationServiceTest {
         try {
             when(userIdentityOutputPort.findByEmail(any())).thenReturn(favour);
             when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            assertEquals(IDENTITY_PREVIOUSLY_VERIFIED.getMessage(), identityVerificationService.verifyIdentity(generatedToken));
+            assertEquals(IDENTITY_PREVIOUSLY_VERIFIED.getMessage(), identityVerificationService.isIdentityVerified(generatedToken));
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
@@ -90,7 +89,7 @@ class IdentityVerificationServiceTest {
         try {
             when(userIdentityOutputPort.findByEmail(any())).thenThrow(MeedlException.class);
             when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
-            assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(generatedToken));
+            assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(generatedToken));
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
