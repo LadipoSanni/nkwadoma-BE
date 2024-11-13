@@ -197,6 +197,25 @@ class LoaneePersistenceAdapterTest {
         assertEquals(loanee.getCohortId(),firstLoanee.getCohortId());
     }
 
+    @Order(2)
+    @Test
+    void findLoanee(){
+        Loanee loanee = new Loanee();
+        log.info("loaneeId = {}",loaneeId);
+        try {
+            loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        } catch (MeedlException exception) {
+            log.error(exception.getMessage());
+        }
+        log.info("loanee firstname {}",loanee.getLoanee().getFirstName());
+        assertEquals(firstLoanee.getLoanee().getFirstName(),loanee.getLoanee().getFirstName());
+        assertEquals(firstLoanee.getCohortId(),loanee.getCohortId());
+    }
+
+    @Test
+    void findLoaneeWithNullId(){
+        assertThrows(MeedlException.class,()-> loaneeOutputPort.findLoaneeById(null));
+    }
 
 
     @AfterAll

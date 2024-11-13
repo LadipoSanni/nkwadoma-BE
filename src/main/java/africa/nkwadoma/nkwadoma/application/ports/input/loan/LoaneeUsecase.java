@@ -6,4 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 public interface LoaneeUsecase {
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
+
+    Loanee viewLoaneeDetails(String id) throws MeedlException;
 }

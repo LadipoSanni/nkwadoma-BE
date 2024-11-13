@@ -54,4 +54,12 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
        return loaneeMapper.toListOfLoanee(loaneeEntities);
     }
 
+    @Override
+    public Loanee findLoaneeById(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId);
+        LoaneeEntity loaneeEntity = loaneeRepository.findById(loaneeId)
+                 .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
+        return loaneeMapper.toLoanee(loaneeEntity);
+    }
+
 }

@@ -16,4 +16,6 @@ public interface LoaneeOutputPort {
     Loanee findByLoaneeEmail(String email) throws MeedlException;
 
     List<Loanee> findAllLoaneesByCohortId(Cohort foundCohort);
+
+    Loanee findLoaneeById(String loaneeId) throws MeedlException;
 }

@@ -69,6 +69,12 @@ public class LoaneeService implements LoaneeUsecase {
         return loanee;
     }
 
+    @Override
+    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        return loaneeOutputPort.findLoaneeById(id);
+    }
+
     private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
         LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
         loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
