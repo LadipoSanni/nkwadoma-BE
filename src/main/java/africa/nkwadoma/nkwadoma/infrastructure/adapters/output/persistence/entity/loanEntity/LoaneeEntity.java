@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,8 +23,8 @@ public class LoaneeEntity {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     private UserEntity loanee;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }
