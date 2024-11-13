@@ -33,6 +33,7 @@ class NextOfKinIdentityAdapterTest {
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
     private Loanee loanee;
+    private String loaneeLoanDetailId;
 
     @BeforeAll
     void init() {
@@ -100,8 +101,9 @@ class NextOfKinIdentityAdapterTest {
             NextOfKin foundNextOfKin = nextOfKinIdentityOutputPort.findByEmail(nextOfKin.getEmail());
             nextOfKinIdentityOutputPort.deleteNextOfKin(foundNextOfKin.getId());
             Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
+            loaneeLoanDetailId = foundLoanee.getLoaneeLoanDetail().getId();
             loaneeOutputPort.deleteLoanee(foundLoanee.getId());
-            // TODO Delete loanee loan details
+            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
             userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             log.error("Error deleting details", e);
