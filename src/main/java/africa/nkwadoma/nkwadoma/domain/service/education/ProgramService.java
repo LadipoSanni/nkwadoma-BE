@@ -33,7 +33,7 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public Page<Program> viewAllPrograms(String meedlUserId) throws MeedlException {
-        return programOutputPort.findAllPrograms(meedlUserId, 11, 11);
+        return programOutputPort.findAllPrograms(meedlUserId, 10, 0);
     }
 
     @Override

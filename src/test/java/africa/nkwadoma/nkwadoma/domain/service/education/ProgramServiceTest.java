@@ -42,7 +42,7 @@ class ProgramServiceTest {
     void setUp() {
         program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
+                objectives("Program Objectives").createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
     }
 
@@ -50,6 +50,7 @@ class ProgramServiceTest {
     void addProgram() {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programOutputPort.programExists(program.getName())).thenReturn(Boolean.FALSE);
             Program addedProgram = programService.createProgram(program);
             verify(programOutputPort, times(1)).saveProgram(program);
 
