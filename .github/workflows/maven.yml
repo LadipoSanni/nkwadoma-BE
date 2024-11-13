@@ -115,7 +115,7 @@ jobs:
           aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
           aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
           aws configure set region "$AWS_REGION"
-          aws s3 cp target/surefire-reports/surefire-report.html s3://${S3_BUCKET_NAME}/${S3_REPORT_PATH} --recursive
+          aws s3 cp target/surefire-reports/surefire-reports s3://${S3_BUCKET_NAME}/${S3_REPORT_PATH} --recursive
 
 
   build:
