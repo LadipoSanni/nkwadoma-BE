@@ -10,7 +10,7 @@ import org.springframework.context.annotation.*;
 import java.util.*;
 
 @Configuration
-@Profile(value = {"dev"})
+@Profile(value = {"local", "dev"})
 public class SwaggerConfig {
     @Value("${springdoc.swagger-ui.env.url}")
     private String swaggerEnvPath;
