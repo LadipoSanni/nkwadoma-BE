@@ -107,7 +107,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          S3_BUCKET: semicolon-build-reports
+          S3_BUCKET_NAME: semicolon-build-reports
+          S3_REPORT_PATH: https://semicolon-build-reports.s3.eu-west-1.amazonaws.com/learnspace/learnspace-backend/maven-reports/new-reports/surefire-reports
           AWS_REGION: eu-west-1
         run: |
           sudo apt-get update
