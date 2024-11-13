@@ -21,11 +21,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, LoaneeUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
@@ -67,8 +68,4 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanProductOutputPort.findById(loanProductId);
     }
 
-    @Override
-    public Loanee saveAdditionalDetails(Loanee loanee) {
-        return null;
-    }
 }

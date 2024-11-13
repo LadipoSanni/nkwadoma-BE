@@ -1,20 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.ProgramCohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -24,11 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,8 +42,6 @@ public class LoaneeServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private IdentityManagerOutputPort identityManagerOutputPort;
-    @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
@@ -78,7 +68,7 @@ public class LoaneeServiceTest {
                     .build();
 
             firstLoanee = new Loanee();
-            firstLoanee.setLoanee(loaneeUserIdentity);
+            firstLoanee.setUserIdentity(loaneeUserIdentity);
             firstLoanee.setCreatedBy(mockId);
             firstLoanee.setCohortId(mockId);
 
@@ -137,7 +127,7 @@ public class LoaneeServiceTest {
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
         try {
             Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
-            assertEquals(firstLoanee.getLoanee().getFirstName(), loanee.getLoanee().getFirstName());
+            assertEquals(firstLoanee.getUserIdentity().getFirstName(), loanee.getUserIdentity().getFirstName());
             verify(loaneeOutputPort, times(1)).save(firstLoanee);
             verify(cohortOutputPort, times(1)).save(any(Cohort.class));
         } catch (MeedlException exception) {

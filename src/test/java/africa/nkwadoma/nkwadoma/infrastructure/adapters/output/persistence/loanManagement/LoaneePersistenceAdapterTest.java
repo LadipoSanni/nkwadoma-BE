@@ -60,7 +60,7 @@ class LoaneePersistenceAdapterTest {
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -85,7 +85,7 @@ class LoaneePersistenceAdapterTest {
         firstLoanee = new Loanee();
         firstLoanee.setCohortId(id);
         firstLoanee.setCreatedBy(id);
-        firstLoanee.setLoanee(userIdentity);
+        firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
 
@@ -99,14 +99,14 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyFistName(String firstName){
-        firstLoanee.getLoanee().setFirstName(firstName);
+        firstLoanee.getUserIdentity().setFirstName(firstName);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyLastName(String lastName){
-        firstLoanee.getLoanee().setLastName(lastName);
+        firstLoanee.getUserIdentity().setLastName(lastName);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
 
     }
@@ -114,24 +114,24 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveNullEmail(){
-        firstLoanee.getLoanee().setEmail(null);
+        firstLoanee.getUserIdentity().setEmail(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
     @Test
     void saveNullFirstName(){
-        firstLoanee.getLoanee().setFirstName(null);
+        firstLoanee.getUserIdentity().setFirstName(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveNullLastName(){
-        firstLoanee.getLoanee().setLastName(null);
+        firstLoanee.getUserIdentity().setLastName(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
@@ -165,20 +165,20 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void saveLoaneeWithEmptyEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"qudussgsg", "25355366363"})
     void saveLoaneeWithInvalidEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveLoaneeWithNullEmail(){
-        firstLoanee.getLoanee().setEmail(null);
+        firstLoanee.getUserIdentity().setEmail(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
@@ -193,7 +193,7 @@ class LoaneePersistenceAdapterTest {
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertEquals(loanee.getLoanee().getFirstName(),firstLoanee.getLoanee().getFirstName());
+        assertEquals(loanee.getUserIdentity().getFirstName(),firstLoanee.getUserIdentity().getFirstName());
         assertEquals(loanee.getCohortId(),firstLoanee.getCohortId());
     }
 

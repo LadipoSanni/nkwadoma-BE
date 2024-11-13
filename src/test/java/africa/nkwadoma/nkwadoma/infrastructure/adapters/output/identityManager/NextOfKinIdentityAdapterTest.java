@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -27,11 +28,13 @@ class NextOfKinIdentityAdapterTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
     private Loanee loanee;
 
-    @BeforeEach
+    @BeforeAll
     void init() {
         userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.TRAINEE).
@@ -98,6 +101,7 @@ class NextOfKinIdentityAdapterTest {
             nextOfKinIdentityOutputPort.deleteNextOfKin(foundNextOfKin.getId());
             Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
             loaneeOutputPort.deleteLoanee(foundLoanee.getId());
+            // TODO Delete loanee loan details
             userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             log.error("Error deleting details", e);
