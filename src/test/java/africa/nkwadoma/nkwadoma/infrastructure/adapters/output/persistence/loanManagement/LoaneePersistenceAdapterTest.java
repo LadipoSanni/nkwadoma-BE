@@ -52,6 +52,7 @@ class LoaneePersistenceAdapterTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeLoanDetail secondLoaneeLoanDetail;
     private LoanBreakdown loanBreakdown;
+    private LoanBreakdown secondBreakdown;
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -70,15 +71,17 @@ class LoaneePersistenceAdapterTest {
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
-        anotherUser = UserIdentity.builder().id(secondId).email("lekan@gmail.com").firstName("lekan").lastName("ayo")
+        anotherUser = UserIdentity.builder().email("lekan@gmail.com").firstName("lekan").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
+                .currency("usd").build();
+        secondBreakdown = LoanBreakdown.builder().itemName("juno").itemAmount(BigDecimal.valueOf(34))
                 .currency("usd").build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
@@ -87,9 +90,9 @@ class LoaneePersistenceAdapterTest {
             anotherUser = identityOutputPort.save(anotherUser);
             List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
             loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
-            List<LoanBreakdown> loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
-            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            List<LoanBreakdown> loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(secondBreakdown));
+            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
             secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
