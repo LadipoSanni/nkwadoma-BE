@@ -33,17 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class LoaneePersistenceAdapterTest {
-
-
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
-    private Loanee firstLoanee ;
-    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private String loaneeId;
-
-    private LoaneeLoanDetail loaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
-
     @Autowired
     private LoaneeRepository loaneeRepository;
     private UserIdentity userIdentity;
@@ -55,6 +46,13 @@ class LoaneePersistenceAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private Loanee firstLoanee ;
+    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String loaneeId;
+    private String userId;
+    private String loaneeLoanDetailId;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private LoanBreakdown loanBreakdown;
 
 
 
@@ -85,11 +83,9 @@ class LoaneePersistenceAdapterTest {
         firstLoanee = new Loanee();
         firstLoanee.setCohortId(id);
         firstLoanee.setCreatedBy(id);
-        firstLoanee.setLoanee(userIdentity);
+        firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
-
-
 
     @Test
     void saveNullLoanee(){
@@ -99,14 +95,14 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyFistName(String firstName){
-        firstLoanee.getLoanee().setFirstName(firstName);
+        firstLoanee.getUserIdentity().setFirstName(firstName);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyLastName(String lastName){
-        firstLoanee.getLoanee().setLastName(lastName);
+        firstLoanee.getUserIdentity().setLastName(lastName);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
 
     }
@@ -114,24 +110,24 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void saveEmptyEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveNullEmail(){
-        firstLoanee.getLoanee().setEmail(null);
+        firstLoanee.getUserIdentity().setEmail(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
     @Test
     void saveNullFirstName(){
-        firstLoanee.getLoanee().setFirstName(null);
+        firstLoanee.getUserIdentity().setFirstName(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveNullLastName(){
-        firstLoanee.getLoanee().setLastName(null);
+        firstLoanee.getUserIdentity().setLastName(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
@@ -165,20 +161,20 @@ class LoaneePersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void saveLoaneeWithEmptyEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"qudussgsg", "25355366363"})
     void saveLoaneeWithInvalidEmail(String email){
-        firstLoanee.getLoanee().setEmail(email);
+        firstLoanee.getUserIdentity().setEmail(email);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
     @Test
     void saveLoaneeWithNullEmail(){
-        firstLoanee.getLoanee().setEmail(null);
+        firstLoanee.getUserIdentity().setEmail(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
@@ -188,12 +184,18 @@ class LoaneePersistenceAdapterTest {
     void saveLoanee(){
         Loanee loanee = new Loanee();
         try {
-             loanee = loaneeOutputPort.save(firstLoanee);
-             loaneeId = loanee.getId();
+            UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
+            firstLoanee.setUserIdentity(savedUserIdentity);
+            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(firstLoanee.getLoaneeLoanDetail());
+            firstLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+            loanee = loaneeOutputPort.save(firstLoanee);
+            loaneeId = loanee.getId();
+            userId = savedUserIdentity.getId();
+            loaneeLoanDetailId = savedLoaneeLoanDetail.getId();
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertEquals(loanee.getLoanee().getFirstName(),firstLoanee.getLoanee().getFirstName());
+        assertEquals(loanee.getUserIdentity().getFirstName(),firstLoanee.getUserIdentity().getFirstName());
         assertEquals(loanee.getCohortId(),firstLoanee.getCohortId());
     }
 
@@ -202,5 +204,6 @@ class LoaneePersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
+        loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
 }
