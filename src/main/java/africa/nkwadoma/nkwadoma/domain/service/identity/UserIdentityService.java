@@ -48,7 +48,6 @@ public class UserIdentityService implements CreateUserUseCase  {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
-    private final IdentityVerificationOutputPort identityVerificationOutputPort;
 
 
     @Override

@@ -198,7 +198,6 @@ class LoaneePersistenceAdapterTest {
     }
 
 
-
     @AfterAll
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);

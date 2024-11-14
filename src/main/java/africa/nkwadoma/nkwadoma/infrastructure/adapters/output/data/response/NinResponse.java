@@ -10,7 +10,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class PremblyNinResponse {
+public class NinResponse {
 
     private boolean status;
 

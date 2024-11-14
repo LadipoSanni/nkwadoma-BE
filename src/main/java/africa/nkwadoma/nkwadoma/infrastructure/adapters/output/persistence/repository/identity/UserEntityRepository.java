@@ -1,6 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.UserEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

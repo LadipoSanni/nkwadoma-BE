@@ -13,6 +13,8 @@ public class WhiteList {
             "/api/v1/auth/login",
             "/api/v1/auth/password/create",
             "/api/v1/auth/password/forgotPassword",
-            "/api/v1/auth/password/reset"
+            "/api/v1/auth/password/reset",
+            "auth/identity/confirm/token/verify",
+            "auth/identity/verify"
     };
 }
