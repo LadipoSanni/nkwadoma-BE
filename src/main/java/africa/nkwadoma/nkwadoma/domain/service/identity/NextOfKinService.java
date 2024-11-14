@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
+import org.apache.commons.lang3.*;
 import org.springframework.stereotype.*;
 
 @Service
@@ -17,7 +18,15 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
     public NextOfKin createNextOfKin(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin);
         nextOfKin.validate();
-        nextOfKin.trimSpaceForUserIdentity(nextOfKin.getLoanee());
+        trimSpaceForUserIdentity(nextOfKin.getLoanee());
         return nextOfKinIdentityOutputPort.save(nextOfKin);
+    }
+
+    private void trimSpaceForUserIdentity(Loanee loanee) {
+        if (ObjectUtils.isNotEmpty(loanee)) {
+            loanee.getUserIdentity().setAlternateContactAddress(loanee.getUserIdentity().getAlternateContactAddress().trim());
+            loanee.getUserIdentity().setAlternatePhoneNumber(loanee.getUserIdentity().getAlternatePhoneNumber().trim());
+            loanee.getUserIdentity().setAlternateEmail(loanee.getUserIdentity().getAlternateEmail().trim());
+        }
     }
 }

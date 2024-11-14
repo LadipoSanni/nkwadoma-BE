@@ -24,7 +24,6 @@ public class NextOfKin {
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(firstName);
         MeedlValidator.validateDataElement(lastName);
-        MeedlValidator.validateDataElement(email);
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber);
         MeedlValidator.validateDataElement(nextOfKinRelationship);
@@ -52,12 +51,6 @@ public class NextOfKin {
         }
     }
 
-    public void setEmail(String email) {
-        if (StringUtils.isNotEmpty(email)) {
-            this.email = email.trim();
-        }
-    }
-
     public void setPhoneNumber(String phoneNumber) {
         if (StringUtils.isNotEmpty(phoneNumber)) {
             this.phoneNumber = phoneNumber.trim();
@@ -76,9 +69,4 @@ public class NextOfKin {
         }
     }
 
-    public void trimSpaceForUserIdentity(Loanee loanee) {
-        loanee.getUserIdentity().setAlternateContactAddress(loanee.getUserIdentity().getAlternateContactAddress().trim());
-        loanee.getUserIdentity().setAlternatePhoneNumber(loanee.getUserIdentity().getAlternatePhoneNumber().trim());
-        loanee.getUserIdentity().setAlternateEmail(loanee.getUserIdentity().getAlternateEmail().trim());
-    }
 }
