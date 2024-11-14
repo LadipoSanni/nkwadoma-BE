@@ -128,4 +128,9 @@ class IdentityVerificationServiceTest {
             log.error("Verification failed : {}", e.getMessage());
         }
     }
+    @Test
+    void failedVerificationBlackListed(){
+
+    }
+
 }

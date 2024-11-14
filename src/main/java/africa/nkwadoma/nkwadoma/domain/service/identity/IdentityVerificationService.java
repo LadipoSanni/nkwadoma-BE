@@ -2,9 +2,11 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.VerificationFailureRecordOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
@@ -25,6 +27,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Service
 public class IdentityVerificationService implements VerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final VerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
@@ -67,6 +70,12 @@ public class IdentityVerificationService implements VerificationUseCase {
         return Boolean.FALSE;
     }
 
+    @Override
+    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord){
+        identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
+        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.
+        return "User has been black listed";
+    }
     private boolean isIdentityVerified(UserIdentity foundUser){
         return true;
     }

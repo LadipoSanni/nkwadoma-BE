@@ -18,4 +18,6 @@ public interface IdentityMapper {
     UserIdentity toLoginUserIdentity(LoginRequest loginRequest);
 
     IdentityVerification toIdentityVerification(IdentityVerificationRequest identityVerificationRequest);
+
+    IdentityVerificationFailureRecord toIdentityVerificationFailureRecord(IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest);
 }

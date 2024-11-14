@@ -96,6 +96,13 @@ public class IdentityManagerController {
                 .data(verificationUseCase.verifyIdentity(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }
+    @PostMapping("auth/identity/verify/failure")
+    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws MeedlException {
+        IdentityVerificationFailureRecord identityVerificationFailureRecord = identityMapper.toIdentityVerificationFailureRecord(identityVerificationFailureRecordRequest);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(verificationUseCase.createIdentityVerificationFailureRecord(identityVerificationFailureRecord))
+                .statusCode(HttpStatus.OK.name()).build());
+    }
 
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
