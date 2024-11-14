@@ -194,16 +194,14 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort,
+    public LoaneeService loaneeService(LoaneeOutputPort loaneeOutputPort,
                                        UserIdentityOutputPort userIdentityOutputPort,
                                        IdentityManagerOutputPort identityManagerOutputPort,
                                        CohortOutputPort cohortOutputPort,
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort){
-        return new LoaneeService(organizationEmployeeIdentityOutputPort,
-                loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
+        return new LoaneeService(loaneeOutputPort,userIdentityOutputPort, identityManagerOutputPort,cohortOutputPort,
+                loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
     }
 
     @Bean

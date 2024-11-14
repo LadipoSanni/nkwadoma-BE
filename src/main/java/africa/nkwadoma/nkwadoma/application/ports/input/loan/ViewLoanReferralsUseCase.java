@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loan;
 
-import org.springframework.stereotype.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import org.springframework.data.domain.*;
 
-@Component
-public class ViewLoanReferralsUseCase {
-
+public interface ViewLoanReferralsUseCase {
+    Page<LoanReferral> viewLoanReferrals(LoanReferral loanReferral) throws MeedlException;
 }

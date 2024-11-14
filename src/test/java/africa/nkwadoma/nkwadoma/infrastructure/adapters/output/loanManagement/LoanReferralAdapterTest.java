@@ -95,7 +95,7 @@ class LoanReferralAdapterTest {
     void viewLoanReferralWithTrailingAndLeadingSpaces() {
         Page<LoanReferral> loanReferrals = null;
         try {
-            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId + " ",0, 10);
+            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId.concat(StringUtils.SPACE),0, 10);
             log.info("Loan referrals: =====>{}", loanReferrals.getContent());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);

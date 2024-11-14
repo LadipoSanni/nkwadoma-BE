@@ -1,9 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanP
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +23,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoanReferralOutputPort loanReferralOutputPort;
+
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -68,4 +72,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanProductOutputPort.findById(loanProductId);
     }
 
+    @Override
+    public Page<LoanReferral> viewLoanReferrals(LoanReferral loanReferral) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanReferral);
+        MeedlValidator.validateDataElement(loanReferral.getLoanee().getUserIdentity().getId());
+        String loaneeUserId = loanReferral.getLoanee().getUserIdentity().getId().trim();
+        MeedlValidator.validateUUID(loaneeUserId);
+        MeedlValidator.validatePageNumber(loanReferral.getPageNumber());
+        MeedlValidator.validatePageSize(loanReferral.getPageSize());
+        return loanReferralOutputPort.findLoanReferrals(loaneeUserId, loanReferral.getPageNumber(),
+                loanReferral.getPageSize());
+    }
 }
