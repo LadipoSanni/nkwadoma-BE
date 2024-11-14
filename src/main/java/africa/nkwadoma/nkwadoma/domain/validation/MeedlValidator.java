@@ -29,7 +29,6 @@ public class MeedlValidator {
     }
 
     public static void validateUUID(String dataElement) throws MeedlException {
-        log.info("cohort id  3{}",dataElement);
         validateDataElement(dataElement);
         try {
             UUID.fromString(dataElement);

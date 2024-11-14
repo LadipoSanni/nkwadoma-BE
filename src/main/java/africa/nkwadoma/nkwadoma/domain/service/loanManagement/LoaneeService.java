@@ -72,9 +72,7 @@ public class LoaneeService implements LoaneeUsecase {
 
     @Override
     public Page<Loanee> viewAllLoaneeInCohort(String cohortId, int pageSize, int pageNumber) throws MeedlException {
-        log.info("cohort id  2{}",cohortId);
         MeedlValidator.validateUUID(cohortId);
-        log.info("cohort id  4{}",cohortId);
         return loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber);
     }
 
