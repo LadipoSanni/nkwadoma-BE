@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.enums;
 
-    public enum PremblyParameter {
+    public enum IdentityVerificationParameter {
         NIN_URL("/vnin"),
         APP_ID("app-id"),
         API_KEY("x-api-key"),
@@ -10,7 +10,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.enums;
         APPLICATION_JSON("application/json");
 
        private final String value;
-       PremblyParameter(String value) {
+       IdentityVerificationParameter(String value) {
             this.value = value;
        }
 
