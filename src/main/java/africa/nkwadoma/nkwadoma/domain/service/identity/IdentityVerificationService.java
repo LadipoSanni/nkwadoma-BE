@@ -39,8 +39,7 @@ public class IdentityVerificationService implements VerificationUseCase {
         if (optionalVerifiedIdentity.isPresent()) {
             return IDENTITY_VERIFIED.getMessage();
         }
-        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
-        checkIfAboveThreshold(numberOfAttempts, id);
+        checkIfAboveThreshold(id);
         log.info(USER_NOT_PREVIOUSLY_VERIFICATION.format(email, id));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
@@ -48,18 +47,19 @@ public class IdentityVerificationService implements VerificationUseCase {
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
+        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+
         Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
         if (optionalVerifiedIdentity.isPresent()) {
             return IDENTITY_VERIFIED.getMessage();
         }
-        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
-        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
-        checkIfAboveThreshold(numberOfAttempts, id);
+        checkIfAboveThreshold(id);
 
         log.info(USER_NOT_PREVIOUSLY_VERIFICATION.format(" bvn/nin ",id));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
-    private static void checkIfAboveThreshold(Long numberOfAttempts, String id) throws IdentityVerificationException {
+    private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
+        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
         if (numberOfAttempts >= 5L){
             log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
             throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
