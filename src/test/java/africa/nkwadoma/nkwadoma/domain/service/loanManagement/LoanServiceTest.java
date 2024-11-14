@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
@@ -53,31 +52,24 @@ class LoanServiceTest {
 
 
     @Test
-    void viewLoanReferrals() {
-        Page<LoanReferral> loanReferrals = null;
+    void viewLoanReferral() {
+        LoanReferral loanReferral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferrals(loanReferral.getLoanee().getUserIdentity().getId(),
-                            loanReferral.getPageNumber(), loanReferral.getPageSize())
-            ).thenReturn(new PageImpl<>(List.of(loanReferral)));
-            loanReferrals = loanService.viewLoanReferrals(loanReferral);
+            loanReferral = loanService.viewLoanReferral(loanReferral);
 
             verify(loanReferralOutputPort, times(1)).
-                    findLoanReferrals(loanReferral.getLoanee().getUserIdentity().getId(),
-                    loanReferral.getPageNumber(), loanReferral.getPageSize());
+                    findLoanReferralByLoaneeId(loanReferral.getLoanee().getUserIdentity().getId()
+                    );
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
 
-        assertNotNull(loanReferrals);
-        assertEquals(1, loanReferrals.getTotalElements());
-        assertTrue(loanReferrals.isFirst());
-        assertTrue(loanReferrals.isLast());
-        assertEquals(loanReferral, loanReferrals.getContent().get(0));
+        assertNotNull(loanReferral);
     }
 
     @Test
     void viewLoanReferralWithNullInput() {
-        assertThrows(MeedlException.class, () -> loanService.viewLoanReferrals(null));
+        assertThrows(MeedlException.class, () -> loanService.viewLoanReferral(null));
     }
 
     @ParameterizedTest
@@ -86,52 +78,33 @@ class LoanServiceTest {
             "    96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f   "}
     )
     void viewLoanReferralWithTrailingAndLeadingSpaces(String userId) {
-        Page<LoanReferral> loanReferrals = null;
+        LoanReferral loanReferral = null;
         try {
             loanReferral.getLoanee().getUserIdentity().setId(userId);
-            when(loanReferralOutputPort.findLoanReferrals(userId.trim(),
-                    loanReferral.getPageNumber(), loanReferral.getPageSize())
-            ).thenReturn(new PageImpl<>(List.of(loanReferral)));
-            loanReferrals = loanService.viewLoanReferrals(loanReferral);
+            loanReferral = loanService.viewLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(loanReferrals);
-        assertNotNull(loanReferrals.getContent());
-        assertEquals(1, loanReferrals.getTotalElements());
+        assertNotNull(loanReferral);
     }
 
     @Test
     void viewLoanReferralWithNullId() {
         loanReferral.getLoanee().getUserIdentity().setId(null);
-        assertThrows(MeedlException.class, ()->loanService.viewLoanReferrals(loanReferral));
+        assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewLoanReferralByIdWithSpaces(String loaneeId) {
         loanReferral.getLoanee().getUserIdentity().setId(loaneeId);
-        assertThrows(MeedlException.class, ()->loanService.viewLoanReferrals(loanReferral));
+        assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid id", "NON-UUID"})
     void viewLoanReferralByNonUUID(String loaneeId) {
         loanReferral.getLoanee().getUserIdentity().setId(loaneeId);
-        assertThrows(MeedlException.class, ()->loanService.viewLoanReferrals(loanReferral));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void viewLoanReferralByInvalidPageSize(int pageSize) {
-        loanReferral.setPageSize(pageSize);
-        assertThrows(MeedlException.class, ()->loanService.viewLoanReferrals(loanReferral));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1})
-    void viewLoanReferralByInvalidPageNumber(int pageNumber) {
-        loanReferral.setPageNumber(pageNumber);
-        assertThrows(MeedlException.class, ()->loanService.viewLoanReferrals(loanReferral));
+        assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 }

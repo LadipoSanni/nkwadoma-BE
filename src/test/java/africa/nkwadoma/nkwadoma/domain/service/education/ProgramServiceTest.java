@@ -42,7 +42,7 @@ class ProgramServiceTest {
     void setUp() {
         program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy(testId).deliveryType(DeliveryType.ONSITE).
+                createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
     }
 
@@ -57,7 +57,6 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
             assertEquals(addedProgram.getDurationType(), program.getDurationType());
             assertEquals(addedProgram.getName(), program.getName());
-            assertEquals(addedProgram.getObjectives(), program.getObjectives());
             assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
             assertEquals(addedProgram.getDuration(), program.getDuration());
             assertEquals(addedProgram.getMode(), program.getMode());

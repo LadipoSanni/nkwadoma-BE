@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -13,7 +12,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanP
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -73,14 +71,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<LoanReferral> viewLoanReferrals(LoanReferral loanReferral) throws MeedlException {
+    public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
         MeedlValidator.validateDataElement(loanReferral.getLoanee().getUserIdentity().getId());
         String loaneeUserId = loanReferral.getLoanee().getUserIdentity().getId().trim();
         MeedlValidator.validateUUID(loaneeUserId);
-        MeedlValidator.validatePageNumber(loanReferral.getPageNumber());
-        MeedlValidator.validatePageSize(loanReferral.getPageSize());
-        return loanReferralOutputPort.findLoanReferrals(loaneeUserId, loanReferral.getPageNumber(),
-                loanReferral.getPageSize());
+        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeUserId
+        );
     }
 }

@@ -3,12 +3,11 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import lombok.*;
 
-import java.math.*;
-
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class LoanReferral {
     private String id;

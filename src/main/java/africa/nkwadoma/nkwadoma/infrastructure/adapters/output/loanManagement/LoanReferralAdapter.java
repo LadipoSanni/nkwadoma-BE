@@ -30,15 +30,12 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public Page<LoanReferral> findLoanReferrals(String loaneeId, int pageNumber, int pageSize) throws MeedlException {
+    public LoanReferral findLoanReferralByLoaneeId(String loaneeId) throws MeedlException {
         MeedlValidator.validateDataElement(loaneeId);
         loaneeId = loaneeId.trim();
         MeedlValidator.validateUUID(loaneeId);
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        Page<LoanReferralEntity> referralEntities = loanReferralRepository.findByLoaneeEntityId(loaneeId,
-                PageRequest.of(pageNumber, pageSize));
-        return referralEntities.map(loanReferralMapper::toLoanReferral);
+        LoanReferralEntity loanReferralEntity = loanReferralRepository.findByLoaneeUserId(loaneeId);
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 
     @Override

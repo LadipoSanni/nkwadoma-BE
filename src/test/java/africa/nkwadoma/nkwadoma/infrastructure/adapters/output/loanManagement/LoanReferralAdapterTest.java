@@ -67,8 +67,9 @@ class LoanReferralAdapterTest {
             assertNotNull(loanee);
             loaneeId = loanee.getId();
 
-            loanReferral = LoanReferral.builder().loanee(loanee).
-                    loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+            loanReferral = new LoanReferral();
+            loanReferral.setLoanee(loanee);
+            loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
             LoanReferral savedLoanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
             assertNotNull(savedLoanReferral);
             loanReferralId = savedLoanReferral.getId();
@@ -80,58 +81,41 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferral() {
-        Page<LoanReferral> loanReferrals = null;
+        LoanReferral referral = null;
         try {
-            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10);
+            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(userId);
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(loanReferrals);
-        assertNotNull(loanReferrals.getContent());
-        assertEquals(1, loanReferrals.getTotalElements());
+        assertNotNull(referral);
     }
 
     @Test
     void viewLoanReferralWithTrailingAndLeadingSpaces() {
-        Page<LoanReferral> loanReferrals = null;
+        LoanReferral referral = null;
         try {
-            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId.concat(StringUtils.SPACE),0, 10);
-            log.info("Loan referrals: =====>{}", loanReferrals.getContent());
+            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(userId.concat(StringUtils.SPACE));
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(loanReferrals);
-        assertNotNull(loanReferrals.getContent());
-        assertEquals(1, loanReferrals.getTotalElements());
+        assertNotNull(referral);
     }
 
     @Test
     void viewLoanReferralWithNullId() {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(null,0, 10));
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void viewLoanReferralByIdWithSpaces(String loaneeId) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10));
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid id", "NON-UUID"})
     void viewLoanReferralByNonUUID(String loaneeId) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void viewLoanReferralByInvalidPageSize(int pageSize) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, pageSize));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1})
-    void viewLoanReferralByInvalidPageNumber(int pageNumber) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId, pageNumber, 10));
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId));
     }
 
     @AfterAll
@@ -142,7 +126,8 @@ class LoanReferralAdapterTest {
             userIdentityOutputPort.deleteUserById(userId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
         } catch (MeedlException e) {
-            throw new RuntimeException(e);
+            log.error("Exception occurred: ", e);
         }
     }
 }
+ 
