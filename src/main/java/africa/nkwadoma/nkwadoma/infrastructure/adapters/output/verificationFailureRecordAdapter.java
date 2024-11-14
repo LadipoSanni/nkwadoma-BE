@@ -6,9 +6,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.IdentityVe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationFailureRecordEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationFailureRecordRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class verificationFailureRecordAdapter implements VerificationFailureRecordOutputPort {
     private final IdentityVerificationFailureRecordRepository verificationFailureRecordRepository;
@@ -19,5 +19,10 @@ public class verificationFailureRecordAdapter implements VerificationFailureReco
         IdentityVerificationFailureRecordEntity identityVerificationFailureRecordEntity = identityVerificationFailureRecordMapper.mapToVerificationFailureRecordEntity(record);
         identityVerificationFailureRecordEntity = verificationFailureRecordRepository.save(identityVerificationFailureRecordEntity);
         return identityVerificationFailureRecordMapper.mapToIdentityVerificationFailureRecord(identityVerificationFailureRecordEntity);
+    }
+
+    @Override
+    public Long countByReferralId(String referralId) {
+        return verificationFailureRecordRepository.countByReferralId(referralId);
     }
 }

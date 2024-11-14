@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
@@ -97,7 +98,7 @@ public class IdentityManagerController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/identity/verify/failure")
-    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityVerificationException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = identityMapper.toIdentityVerificationFailureRecord(identityVerificationFailureRecordRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(verificationUseCase.createIdentityVerificationFailureRecord(identityVerificationFailureRecord))

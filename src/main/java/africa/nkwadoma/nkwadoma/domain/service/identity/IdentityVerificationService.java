@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificat
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,10 +72,13 @@ public class IdentityVerificationService implements VerificationUseCase {
     }
 
     @Override
-    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord){
+    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityVerificationException {
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
-        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.
-        return "User has been black listed";
+        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
+        if (numberOfFailedVerifications >= 5){
+            throw new IdentityVerificationException("Referral Blacklisted");
+        }
+        return "Saved verification failure";
     }
     private boolean isIdentityVerified(UserIdentity foundUser){
         return true;
