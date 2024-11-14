@@ -21,7 +21,9 @@ public enum MeedlMessages {
     NON_EXISTING_CREATED_BY("Creator not found"),
     USER_NOT_ENABLED("User not enabled"),
     PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO("Page number must not be less than zero"),
-    PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE("Page size must not be less than one");
+    PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE("Page size must not be less than one"),
+    LOAN_REFERRAL_SUBJECT("Loan referral"),
+    LOAN_REFERRAL_INVITATION("Loan referral Invitation");
 
 
     private final String message;

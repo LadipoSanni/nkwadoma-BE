@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
@@ -186,10 +187,13 @@ public class BeanConfiguration {
                                        IdentityManagerOutputPort identityManagerOutputPort,
                                        CohortOutputPort cohortOutputPort,
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
-                                       LoanBreakdownOutputPort loanBreakdownOutputPort){
+                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
+                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase){
         return new LoaneeService(organizationEmployeeIdentityOutputPort,
                 loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
+                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort,
+                organizationIdentityOutputPort,sendLoaneeEmailUsecase);
     }
 
     @Bean

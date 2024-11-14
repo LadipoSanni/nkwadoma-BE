@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -17,7 +18,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase {
+public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase , SendLoaneeEmailUsecase {
     private final EmailOutputPort emailOutputPort;
     private final TokenUtils tokenUtils;
     @Value("${FRONTEND_URL}")
@@ -63,4 +64,16 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         }
     }
 
+    @Override
+    public void sendReferLoaneeEmail(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LOAN_REFERRAL_SUBJECT.getMessage())
+                .to(userIdentity.getEmail())
+                .template(LOAN_REFERRAL_INVITATION.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+    }
 }
