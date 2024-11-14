@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -14,6 +15,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
 import java.math.*;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +27,8 @@ class NextOfKinServiceTest {
     private NextOfKinService nextOfKinService;
     @Mock
     NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
     private Loanee loanee;
@@ -56,6 +60,7 @@ class NextOfKinServiceTest {
     @Test
     void saveAdditionalDetails() {
         try {
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             NextOfKin savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
 
@@ -73,18 +78,6 @@ class NextOfKinServiceTest {
     }
 
     @Test
-    @Disabled
-    void saveAdditionalDetailsWithByNonReferredLoanee() {
-        // todo make test pass
-        try {
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
-        } catch (MeedlException e) {
-            log.error("Exception occurred", e);
-        }
-        assertThrows(MeedlException.class, ()->nextOfKinService.saveAdditionalDetails(nextOfKin));
-    }
-
-    @Test
     void saveNullNextOfKin() {
         assertThrows(MeedlException.class, ()-> nextOfKinService.saveAdditionalDetails(null));
     }
@@ -95,6 +88,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setFirstName(firstName);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -109,6 +103,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setFirstName(lastName);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -123,6 +118,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setPhoneNumber(phoneNumber);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -137,6 +133,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setEmail(email);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -151,6 +148,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setContactAddress(contactAddress);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -165,6 +163,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.setNextOfKinRelationship(nextOfKinRelationship);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -179,6 +178,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternateEmail(alternateEmail);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -193,6 +193,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternatePhoneNumber(alternatePhoneNumber);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
@@ -207,6 +208,7 @@ class NextOfKinServiceTest {
         NextOfKin savedNextOfKin = null;
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternateContactAddress(alternateContactAddress);
+            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
