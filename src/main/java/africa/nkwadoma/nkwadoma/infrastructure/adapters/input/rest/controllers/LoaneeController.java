@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
@@ -30,7 +30,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoaneeController {
 
     private final LoaneeRestMapper loaneeRestMapper;
-    private final LoaneeUsecase loaneeUsecase;
+    private final LoaneeUseCase loaneeUseCase;
 
 
     @PostMapping("addLoaneeToCohort")
@@ -40,7 +40,7 @@ public class LoaneeController {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
         loanee.setCreatedBy(meedlUser.getClaimAsString("sub"));
         loanee.getUserIdentity().setCreatedBy(loanee.getCreatedBy());
-        loanee = loaneeUsecase.addLoaneeToCohort(loanee);
+        loanee = loaneeUseCase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
         ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()

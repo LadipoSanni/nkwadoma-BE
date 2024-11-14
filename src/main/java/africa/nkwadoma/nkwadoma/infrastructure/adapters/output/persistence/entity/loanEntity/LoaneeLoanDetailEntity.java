@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
@@ -16,12 +13,11 @@ import java.util.List;
 @Getter
 @Entity
 public class LoaneeLoanDetailEntity {
-
     @Id
     @UuidGenerator
     private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<LoanBreakdownEntity> loanBreakdown;
 }

@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -33,7 +33,7 @@ import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
-public class LoaneeService implements LoaneeUsecase {
+public class LoaneeService implements LoaneeUseCase {
 
 
 

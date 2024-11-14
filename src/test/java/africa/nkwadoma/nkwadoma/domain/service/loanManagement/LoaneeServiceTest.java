@@ -43,8 +43,6 @@ public class LoaneeServiceTest {
     @Mock
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Mock
     private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
     private  LoanBreakdownOutputPort loanBreakdownOutputPort;

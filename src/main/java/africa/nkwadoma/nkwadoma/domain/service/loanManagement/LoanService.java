@@ -1,14 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
@@ -28,6 +26,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
@@ -65,7 +64,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
-        MeedlValidator.validateDataElement(loanProductId);
+        MeedlValidator.validateUUID(loanProductId);
         return loanProductOutputPort.findById(loanProductId);
     }
+
 }
