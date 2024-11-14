@@ -15,16 +15,15 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 public class LoaneeEntity {
-
     @Id
     @UuidGenerator
     private String id;
     private String cohortId;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    private String createdBy;
+    @OneToOne
     private UserEntity loanee;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }
