@@ -76,7 +76,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateDataElement(loanReferral.getLoanee().getUserIdentity().getId());
         String loaneeUserId = loanReferral.getLoanee().getUserIdentity().getId().trim();
         MeedlValidator.validateUUID(loaneeUserId);
-        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeUserId
-        );
+        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeUserId);
     }
 }
