@@ -37,7 +37,8 @@ public enum IdentityMessages{
     USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION("User email verification: %s has not been verified previously %s "),
     IDENTITY_VERIFIED("Identity verified"),
     IDENTITY_NOT_VERIFIED("Identity not verified"),
-    NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin details cannot be null");
+    NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin details cannot be null"),
+    LOANEE_NOT_FOUND("Loanee not found");
     private final String message;
 
     public String format(Object... args) {

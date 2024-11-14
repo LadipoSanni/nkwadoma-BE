@@ -4,5 +4,5 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 public interface CreateNextOfKinUseCase {
-    NextOfKin createNextOfKin(NextOfKin nextOfKin) throws MeedlException;
+    NextOfKin saveAdditionalDetails(NextOfKin nextOfKin) throws MeedlException;
 }

@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -9,16 +11,23 @@ import lombok.*;
 import org.apache.commons.lang3.*;
 import org.springframework.stereotype.*;
 
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class NextOfKinService implements CreateNextOfKinUseCase {
     private final NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
-    public NextOfKin createNextOfKin(NextOfKin nextOfKin) throws MeedlException {
+    public NextOfKin saveAdditionalDetails(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin);
         nextOfKin.validate();
         trimSpaceForUserIdentity(nextOfKin.getLoanee());
+        Optional<Loanee> foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId());
+        if (foundLoanee.isEmpty()) {
+            throw new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage());
+        }
         return nextOfKinIdentityOutputPort.save(nextOfKin);
     }
 

@@ -32,7 +32,7 @@ public class NextOfKinController {
         log.info("User ID =====> " + meedlUserId.getClaim("sub"));
         NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request);
         nextOfKin.getLoanee().getUserIdentity().setId(meedlUserId.getClaim("sub"));
-        NextOfKin createdNextOfKin = createNextOfKinUseCase.createNextOfKin(nextOfKin);
+        NextOfKin createdNextOfKin = createNextOfKinUseCase.saveAdditionalDetails(nextOfKin);
         return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
                .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))
                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())

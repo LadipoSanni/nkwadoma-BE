@@ -59,4 +59,14 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
        return loaneeMapper.toListOfLoanee(loaneeEntities);
     }
 
+    @Override
+    public Optional<Loanee> findByUserId(String userId) {
+        Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findByLoaneeId(userId);
+        if (loaneeEntity.isEmpty()) {
+            return Optional.empty();
+        }
+        Loanee loanee = loaneeMapper.toLoanee(loaneeEntity.get());
+        return Optional.of(loanee);
+    }
+
 }
