@@ -34,6 +34,8 @@ class NextOfKinIdentityAdapterTest {
     private UserIdentity userIdentity;
     private Loanee loanee;
     private String loaneeLoanDetailId;
+    private String userId;
+    private String loaneeId;
 
     @BeforeAll
     void init() {
@@ -47,7 +49,15 @@ class NextOfKinIdentityAdapterTest {
                         initialDeposit(BigDecimal.valueOf(3000000.00)).build()).build();
 
         try {
+            UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
+            userId = savedUserIdentity.getId();
+            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+            loaneeLoanDetailId = savedLoaneeLoanDetail.getId();
+
+            loanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+            loanee.setUserIdentity(savedUserIdentity);
             loanee = loaneeOutputPort.save(loanee);
+
             assertNotNull(loanee);
             UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(loanee.getUserIdentity().getEmail());
             assertNotNull(foundUserIdentity);

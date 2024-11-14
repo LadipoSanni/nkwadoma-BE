@@ -33,17 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class LoaneePersistenceAdapterTest {
-
-
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
-    private Loanee firstLoanee ;
-    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private String loaneeId;
-
-    private LoaneeLoanDetail loaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
-
     @Autowired
     private LoaneeRepository loaneeRepository;
     private UserIdentity userIdentity;
@@ -55,6 +46,13 @@ class LoaneePersistenceAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    private Loanee firstLoanee ;
+    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String loaneeId;
+    private String userId;
+    private String loaneeLoanDetailId;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private LoanBreakdown loanBreakdown;
 
 
 
@@ -88,8 +86,6 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
-
-
 
     @Test
     void saveNullLoanee(){
@@ -188,8 +184,14 @@ class LoaneePersistenceAdapterTest {
     void saveLoanee(){
         Loanee loanee = new Loanee();
         try {
-             loanee = loaneeOutputPort.save(firstLoanee);
-             loaneeId = loanee.getId();
+            UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
+            firstLoanee.setUserIdentity(savedUserIdentity);
+            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(firstLoanee.getLoaneeLoanDetail());
+            firstLoanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+            loanee = loaneeOutputPort.save(firstLoanee);
+            loaneeId = loanee.getId();
+            userId = savedUserIdentity.getId();
+            loaneeLoanDetailId = savedLoaneeLoanDetail.getId();
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
@@ -202,5 +204,6 @@ class LoaneePersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
+        loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
 }
