@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -28,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.TRAINEE;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +61,7 @@ class KeycloakAdapterTest {
         peter.setFirstName("Peter");
         peter.setLastName("Mark");
         peter.setEmail("peter@lendspace.com");
-        peter.setRole(TRAINEE);
+        peter.setRole(IdentityRole.LOANEE);
 
         List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder()
                 .industry(Industry.EDUCATION)

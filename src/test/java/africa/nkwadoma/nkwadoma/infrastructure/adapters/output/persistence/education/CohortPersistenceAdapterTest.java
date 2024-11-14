@@ -100,7 +100,7 @@ class CohortPersistenceAdapterTest {
             log.info("Organization identity saved before program {}",organizationIdentity);
             organizationId = organizationIdentity.getId();
             meedleUserId = organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getId();
-            program.setOrganizationId(organizationIdentity.getId());
+//            program.setOrganizationId(organizationIdentity.getId());
             program.setCreatedBy(meedleUserId);
             program = programOutputPort.saveProgram(program);
             log.info("Program saved {}",program);

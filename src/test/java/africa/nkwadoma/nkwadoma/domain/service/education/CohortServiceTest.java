@@ -44,7 +44,7 @@ class CohortServiceTest {
     @BeforeEach
     void setUp() {
         program = Program.builder().id("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa").name("My program").durationType(DurationType.YEARS).
-                programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
+                programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
 

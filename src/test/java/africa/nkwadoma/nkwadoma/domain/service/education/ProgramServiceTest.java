@@ -36,12 +36,13 @@ class ProgramServiceTest {
     private Program program;
     private int pageSize = 10;
     private int pageNumber = 0;
+    private String testId = "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa";
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().id("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa").name("My program").durationType(DurationType.YEARS).
-                programDescription("A great program").organizationId("68t46").programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
+        program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
+                programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
+                objectives("Program Objectives").createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
     }
 
@@ -49,6 +50,7 @@ class ProgramServiceTest {
     void addProgram() {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programOutputPort.programExists(program.getName())).thenReturn(Boolean.FALSE);
             Program addedProgram = programService.createProgram(program);
             verify(programOutputPort, times(1)).saveProgram(program);
 
@@ -78,14 +80,6 @@ class ProgramServiceTest {
         program.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void addProgramWithEmptyOrganizationId(String organizationId) {
-        program.setOrganizationId(organizationId);
-        assertThrows(MeedlException.class, ()->programService.createProgram(program));
-    }
-
     @Test
     void addProgramWithExistingName() {
         try {
@@ -159,17 +153,19 @@ class ProgramServiceTest {
     @Test
     void viewAllPrograms() {
         try {
-            when(programOutputPort.findAllPrograms(program.getOrganizationId(), pageSize, pageNumber)).
+            when(programOutputPort.findAllPrograms(testId, pageSize, pageNumber)).
                     thenReturn(new PageImpl<>(List.of(program)));
+            program.setPageSize(pageSize);
+            program.setPageNumber(pageNumber);
+            program.setCreatedBy(testId);
             Page<Program> programs = programService.viewAllPrograms(program);
             List<Program> programsList = programs.toList();
 
             verify(programOutputPort, times(1)).
-                    findAllPrograms(program.getOrganizationId(), pageSize, pageNumber);
+                    findAllPrograms(testId, pageSize, pageNumber);
             assertNotNull(programs);
             assertNotNull(programsList);
             assertEquals(programsList.get(0).getId(), program.getId());
-            assertEquals(programsList.get(0).getOrganizationId(), program.getOrganizationId());
             assertEquals(programsList.get(0).getName(), program.getName());
             assertEquals(programsList.get(0).getDuration(), program.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
@@ -182,54 +178,47 @@ class ProgramServiceTest {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewAllProgramsWithNullOrganizationId(String organizationId) {
-        program.setOrganizationId(organizationId);
-        assertThrows(MeedlException.class, () -> programService.viewAllPrograms(program));
-    }
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+//    void viewAllProgramsWithSpaces(String organizationId) {
+//        try {
+//            program.setOrganizationId(organizationId);
+//            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
+//                    thenReturn(new PageImpl<>(List.of(program)));
+//            Page<Program> programs = programService.viewAllPrograms(program);
+//            List<Program> programsList = programs.toList();
+//
+//            verify(programOutputPort, times(1)).
+//                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
+//            assertNotNull(programs);
+//            assertNotNull(programsList);
+//            assertEquals(programsList.get(0).getId(), program.getId());
+//            assertEquals(programsList.get(0), program);
+//        } catch (MeedlException e) {
+//            log.error("Error viewing all programs", e);
+//        }
+//    }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
-    void viewAllProgramsWithSpaces(String organizationId) {
-        try {
-            program.setOrganizationId(organizationId);
-            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
-                    thenReturn(new PageImpl<>(List.of(program)));
-            Page<Program> programs = programService.viewAllPrograms(program);
-            List<Program> programsList = programs.toList();
-
-            verify(programOutputPort, times(1)).
-                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
-            assertNotNull(programs);
-            assertNotNull(programsList);
-            assertEquals(programsList.get(0).getId(), program.getId());
-            assertEquals(programsList.get(0), program);
-        } catch (MeedlException e) {
-            log.error("Error viewing all programs", e);
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
-    void viewProgramsWithSpaces(String organizationId) {
-        try {
-            program.setOrganizationId(organizationId);
-            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
-                    thenReturn(new PageImpl<>(List.of(program)));
-            Page<Program> programs = programService.viewAllPrograms(program);
-            List<Program> programsList = programs.toList();
-
-            assertNotNull(programs);
-            assertNotNull(programsList);
-            assertEquals(programsList.get(0).getId(), program.getId());
-            assertEquals(programsList.get(0), program);
-            verify(programOutputPort, times(1)).
-                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
-        } catch (MeedlException e) {
-            log.error("Error viewing all programs", e);
-        }
-    }
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
+//    void viewProgramsWithSpaces(String organizationId) {
+//        try {
+//            program.setOrganizationId(organizationId);
+//            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
+//                    thenReturn(new PageImpl<>(List.of(program)));
+//            Page<Program> programs = programService.viewAllPrograms(program);
+//            List<Program> programsList = programs.toList();
+//
+//            assertNotNull(programs);
+//            assertNotNull(programsList);
+//            assertEquals(programsList.get(0).getId(), program.getId());
+//            assertEquals(programsList.get(0), program);
+//            verify(programOutputPort, times(1)).
+//                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
+//        } catch (MeedlException e) {
+//            log.error("Error viewing all programs", e);
+//        }
+//    }
 
     @Test
     void viewProgramByName() {

@@ -10,7 +10,7 @@ public interface ProgramOutputPort {
     boolean programExists(String programName) throws MeedlException;
     void deleteProgram(String programId) throws MeedlException;
     Program findProgramById(String programId) throws MeedlException;
-    Page<Program> findAllPrograms(String organizationId, int pageSize, int pageNumber) throws MeedlException;
+    Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException;
 
 
 }
