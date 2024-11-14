@@ -9,9 +9,13 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
+import org.springframework.data.domain.*;
 
 import java.math.*;
 
@@ -28,10 +32,15 @@ class LoanReferralAdapterTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private LoanReferral loanReferral;
     private Loanee loanee;
-    private LoaneeLoanDetail loaneeLoanDetail;
+    private String loaneeId;
     private UserIdentity userIdentity;
+    private String loaneeLoanDetailId;
+    private String loanReferralId;
+    private String userId;
 
     @BeforeAll
     void setUp() {
@@ -45,24 +54,95 @@ class LoanReferralAdapterTest {
                         initialDeposit(BigDecimal.valueOf(3000000.00)).build()).build();
 
         try {
+            UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
+            userId = savedUserIdentity.getId();
+
+            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+            loaneeLoanDetailId = savedLoaneeLoanDetail.getId();
+
+            loanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+            loanee.setUserIdentity(savedUserIdentity);
+
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
-            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(loanee.getUserIdentity().getEmail());
-            assertNotNull(foundUserIdentity);
+            loaneeId = loanee.getId();
+
+            loanReferral = LoanReferral.builder().loanee(loanee).
+                    loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+            LoanReferral savedLoanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            assertNotNull(savedLoanReferral);
+            loanReferralId = savedLoanReferral.getId();
         } catch (MeedlException e) {
             log.error("", e);
         }
     }
 
+
     @Test
-    void saveLoanReferral() {
-        loanReferral = LoanReferral.builder().loanee(loanee).
-                loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-        LoanReferral savedLoanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
-        assertNotNull(savedLoanReferral);
-        assertNotNull(savedLoanReferral.getId());
+    void viewLoanReferral() {
+        Page<LoanReferral> loanReferrals = null;
+        try {
+            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10);
+        } catch (MeedlException e) {
+            log.error("Error getting loan referral", e);
+        }
+        assertNotNull(loanReferrals);
+        assertNotNull(loanReferrals.getContent());
+        assertEquals(1, loanReferrals.getTotalElements());
+    }
+
+    @Test
+    void viewLoanReferralWithTrailingAndLeadingSpaces() {
+        Page<LoanReferral> loanReferrals = null;
+        try {
+            loanReferrals = loanReferralOutputPort.findLoanReferrals(loaneeId + " ",0, 10);
+            log.info("Loan referrals: =====>{}", loanReferrals.getContent());
+        } catch (MeedlException e) {
+            log.error("Error getting loan referral", e);
+        }
+        assertNotNull(loanReferrals);
+        assertNotNull(loanReferrals.getContent());
+        assertEquals(1, loanReferrals.getTotalElements());
+    }
+
+    @Test
+    void viewLoanReferralWithNullId() {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(null,0, 10));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewLoanReferralByIdWithSpaces(String loaneeId) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"invalid id", "NON-UUID"})
+    void viewLoanReferralByNonUUID(String loaneeId) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, 10));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void viewLoanReferralByInvalidPageSize(int pageSize) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId,0, pageSize));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1})
+    void viewLoanReferralByInvalidPageNumber(int pageNumber) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferrals(loaneeId, pageNumber, 10));
     }
 
     @AfterAll
-    void tearDown() {}
+    void tearDown() {
+        try {
+            loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+            loaneeOutputPort.deleteLoanee(loaneeId);
+            userIdentityOutputPort.deleteUserById(userId);
+            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

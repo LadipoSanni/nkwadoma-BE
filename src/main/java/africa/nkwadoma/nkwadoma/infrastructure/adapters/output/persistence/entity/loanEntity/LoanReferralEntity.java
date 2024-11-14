@@ -14,7 +14,7 @@ import lombok.*;
 public class LoanReferralEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String loanReferralId;
+    private String id;
     @ManyToOne
     private LoaneeEntity loaneeEntity;
     @Enumerated(EnumType.STRING)
