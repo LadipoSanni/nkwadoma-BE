@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 
-public interface VerificationUseCase {
+public interface IdentityVerificationUseCase {
     String isIdentityVerified(String token) throws MeedlException;
 
     String verifyIdentity(IdentityVerification identityVerification) throws MeedlException;

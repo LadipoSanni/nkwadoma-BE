@@ -1,12 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Builder
 public class IdentityVerificationFailureRecord {
     private String id;

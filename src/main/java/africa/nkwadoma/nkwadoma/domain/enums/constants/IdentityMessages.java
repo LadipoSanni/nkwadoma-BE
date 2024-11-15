@@ -36,6 +36,8 @@ public enum IdentityMessages{
     USER_EMAIL_PREVIOUSLY_VERIFICATION("User verification: %s has been verified previously %s"),
     USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION("User email verification: %s has not been verified previously %s "),
     IDENTITY_VERIFIED("Identity verified"),
+    BLACKLISTED_REFERRAL("Referral Blacklisted"),
+    IDENTITY_VERIFICATION_FAILURE_SAVED("Verification failure saved successfully"),
     IDENTITY_VERIFICATION_PROCESSING("Identity verification is being processed"),
     IDENTITY_PREVIOUSLY_VERIFIED("Identity verified"),
     IDENTITY_NOT_VERIFIED("Identity not verified"),

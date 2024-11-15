@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.VerificationFailureRecordOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -26,9 +26,9 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class IdentityVerificationService implements VerificationUseCase {
+public class IdentityVerificationService implements IdentityVerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final VerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
+    private final IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
@@ -76,9 +76,9 @@ public class IdentityVerificationService implements VerificationUseCase {
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
         Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
         if (numberOfFailedVerifications >= 5){
-            throw new IdentityVerificationException("Referral Blacklisted");
+            throw new IdentityVerificationException(BLACKLISTED_REFERRAL.getMessage());
         }
-        return "Saved verification failure";
+        return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
     private boolean isIdentityVerified(UserIdentity foundUser){
         return true;
