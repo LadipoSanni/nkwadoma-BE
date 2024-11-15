@@ -27,13 +27,13 @@ public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
     @PostMapping("/token/verify")
-    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(identityVerificationUseCase.isIdentityVerified(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/identity/verify")
-    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .data(identityVerificationUseCase.verifyIdentity(identityVerification))

@@ -42,8 +42,7 @@ public enum IdentityMessages{
     IDENTITY_PREVIOUSLY_VERIFIED("User email verification: %s has not been verified previously %s "),
     IDENTITY_NOT_VERIFIED("Identity not verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
-    LOANEE_NOT_FOUND("Loanee not found"),
-    IDENTITY_VERIFIED("Identity verified");
+    LOANEE_NOT_FOUND("Loanee not found");
 
     public String format(Object... args) {
         return String.format(message, args);

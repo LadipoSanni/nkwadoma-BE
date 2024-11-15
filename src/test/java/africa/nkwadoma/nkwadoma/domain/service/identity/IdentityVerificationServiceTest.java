@@ -55,9 +55,6 @@ class IdentityVerificationServiceTest {
     private String testBvn = "12345678956";
     private String testNin = "21345678908";
     private final String generatedToken = "generatedToken";
-    private final String testBvn = "12345678956";
-    private final String testId = "c508e3bb-1193-4fc7-aa75-e1335c78ef1e";
-    private final String testNin = "21345678908";
     private IdentityVerification identityVerification;
     private IdentityVerificationEntity identityVerificationEntity;
     private IdentityVerificationFailureRecord identityVerificationFailureRecord;
