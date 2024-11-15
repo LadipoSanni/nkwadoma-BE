@@ -87,7 +87,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanRequest createLoanRequest(LoanRequest loanRequest) {
-        return null;
+    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+        return loanRequestOutputPort.save(loanRequest);
     }
 }

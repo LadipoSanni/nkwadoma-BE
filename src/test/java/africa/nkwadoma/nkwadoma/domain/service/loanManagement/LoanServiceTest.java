@@ -16,6 +16,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
 import java.math.*;
+import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -27,9 +28,13 @@ class LoanServiceTest {
     private LoanService loanService;
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
+    @Mock
+    private LoanRequestOutputPort loanRequestOutputPort;
     private LoanReferral loanReferral;
     private Loanee loanee;
     private UserIdentity userIdentity;
+    private LoanRequest loanRequest;
+    private LoaneeLoanDetail loaneeLoanDetail;
 
     @BeforeEach
     void setUp() {
@@ -37,13 +42,23 @@ class LoanServiceTest {
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
 
+        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
+                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
         loanee = Loanee.builder().id("b1b832a2-5f73-46d8-a073-e5d812304a4b").userIdentity(userIdentity).
                 cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
-                loaneeLoanDetail(LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                        initialDeposit(BigDecimal.valueOf(3000000.00)).build()).build();
+                loaneeLoanDetail(loaneeLoanDetail).build();
 
         loanReferral = LoanReferral.builder().loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+
+        loanRequest = new LoanRequest();
+        loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanRequest.setReferredBy("Brown Hills Institute");
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        loanRequest.setLoanee(loanee);
+        loanRequest.setDateTimeApproved(LocalDateTime.now());
     }
 
 
@@ -110,6 +125,20 @@ class LoanServiceTest {
 
     @Test
     void createLoanRequest() {
+        try {
+            when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
+            verify(loanRequestOutputPort, times(1)).save(loanRequest);
+            assertNotNull(createdLoanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+    }
+
+    @Test
+    void createLoanRequestWithNullLoanReferralStatus() {
+        loanRequest.setLoanReferralStatus(null);
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 }
