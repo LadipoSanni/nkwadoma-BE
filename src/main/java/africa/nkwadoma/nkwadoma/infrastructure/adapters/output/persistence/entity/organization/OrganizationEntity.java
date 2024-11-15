@@ -33,15 +33,8 @@ public class OrganizationEntity {
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;
-
-
     private String logoImage;
     private String bannerImage;
     private String address;
     private String officeAddress;
-//    private List<String> serviceOfferings = new ArrayList<>();
-
-
-//    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-//    private ServiceOfferingEntity serviceOfferingEntity;
 }

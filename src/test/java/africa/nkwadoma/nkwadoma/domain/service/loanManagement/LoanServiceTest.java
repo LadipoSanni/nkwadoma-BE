@@ -107,4 +107,8 @@ class LoanServiceTest {
         loanReferral.getLoanee().setId(loaneeId);
         assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
+
+    @Test
+    void createLoanRequest() {
+    }
 }

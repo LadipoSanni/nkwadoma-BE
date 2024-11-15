@@ -21,7 +21,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase, RespondToLoanReferralUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
+        RespondToLoanReferralUseCase, LoanRequestUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
@@ -82,6 +83,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) {
+        return null;
+    }
+
+    @Override
+    public LoanRequest createLoanRequest(LoanRequest loanRequest) {
         return null;
     }
 }
