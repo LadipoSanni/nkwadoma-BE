@@ -15,7 +15,6 @@ import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
-import org.springframework.data.domain.*;
 
 import java.math.*;
 
@@ -83,7 +82,7 @@ class LoanReferralAdapterTest {
     void viewLoanReferral() {
         LoanReferral referral = null;
         try {
-            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(userId);
+            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId);
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
@@ -94,7 +93,7 @@ class LoanReferralAdapterTest {
     void viewLoanReferralWithTrailingAndLeadingSpaces() {
         LoanReferral referral = null;
         try {
-            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(userId.concat(StringUtils.SPACE));
+            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId.concat(StringUtils.SPACE));
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
@@ -113,7 +112,7 @@ class LoanReferralAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"invalid id", "NON-UUID"})
+    @ValueSource(strings = {"invalid id", "74567"})
     void viewLoanReferralByNonUUID(String loaneeId) {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId));
     }

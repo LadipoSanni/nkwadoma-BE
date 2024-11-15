@@ -1,6 +1,7 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.*;
 
 @Getter
@@ -9,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class LoanReferral {
+public class LoanReferralResponse {
     private String id;
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;

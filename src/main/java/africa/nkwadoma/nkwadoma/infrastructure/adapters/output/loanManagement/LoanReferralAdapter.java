@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
 import java.util.*;
@@ -34,7 +33,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         MeedlValidator.validateDataElement(loaneeId);
         loaneeId = loaneeId.trim();
         MeedlValidator.validateUUID(loaneeId);
-        LoanReferralEntity loanReferralEntity = loanReferralRepository.findByLoaneeUserId(loaneeId);
+        LoanReferralEntity loanReferralEntity = loanReferralRepository.findByLoaneeEntityId(loaneeId);
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 

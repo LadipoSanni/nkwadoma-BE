@@ -1,15 +1,15 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.CreateLoanProductUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductViewAllRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanProductRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,7 +42,9 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
+    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
+    private final LoanReferralRestMapper loanReferralRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -96,6 +98,8 @@ public class LoanController {
                 build(), HttpStatus.OK
         );
     }
+
+
     @GetMapping("/loan-product/view-details-by-id")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
@@ -110,5 +114,20 @@ public class LoanController {
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+    }
+
+    @GetMapping("loan-referral/{loaneeId}")
+    public ResponseEntity<ApiResponse<?>> viewLoanReferral (@PathVariable @NotBlank(message = "Loanee ID is required")
+                                                                          String loaneeId) throws MeedlException {
+        LoanReferral loanReferral = new LoanReferral();
+        loanReferral.getLoanee().setId(loaneeId.trim());
+        LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
+        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
+                .data(loanReferralResponse)
+                .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.FOUND.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
     }
 }

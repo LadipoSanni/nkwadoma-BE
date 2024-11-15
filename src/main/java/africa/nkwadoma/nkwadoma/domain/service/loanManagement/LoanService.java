@@ -74,10 +74,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
-        MeedlValidator.validateDataElement(loanReferral.getLoanee().getUserIdentity().getId());
-        String loaneeUserId = loanReferral.getLoanee().getUserIdentity().getId().trim();
-        MeedlValidator.validateUUID(loaneeUserId);
-        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeUserId);
+        MeedlValidator.validateDataElement(loanReferral.getLoanee().getId());
+        String loaneeId = loanReferral.getLoanee().getId().trim();
+        MeedlValidator.validateUUID(loaneeId);
+        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId);
     }
 
     @Override
