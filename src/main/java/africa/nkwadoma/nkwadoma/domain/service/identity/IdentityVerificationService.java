@@ -40,7 +40,7 @@ public class IdentityVerificationService implements VerificationUseCase {
             return IDENTITY_VERIFIED.getMessage();
         }
         checkIfAboveThreshold(id);
-        log.info(USER_NOT_PREVIOUSLY_VERIFICATION.format(email, id));
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
     @Override
@@ -55,7 +55,7 @@ public class IdentityVerificationService implements VerificationUseCase {
         }
         checkIfAboveThreshold(id);
 
-        log.info(USER_NOT_PREVIOUSLY_VERIFICATION.format(" bvn/nin ",id));
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
     private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
