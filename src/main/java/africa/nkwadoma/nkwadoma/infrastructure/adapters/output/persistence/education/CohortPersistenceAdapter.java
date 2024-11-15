@@ -70,10 +70,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         if (program == null) {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
-        OrganizationIdentity organizationIdentity = findCreatorOrganization(cohort.getCreatedBy());
-        if (!Objects.equals(organizationIdentity.getId(), program.getOrganizationId())){
-            throw new CohortException(CohortMessages.CREATEDBY_NOT_EXIST_IN_ORGANIZATION.getMessage());
-        }
+//        OrganizationIdentity organizationIdentity = findCreatorOrganization(cohort.getCreatedBy());
+//        if (!Objects.equals(organizationIdentity.getId(), program.getOrganizationId())){
+//            throw new CohortException(CohortMessages.CREATEDBY_NOT_EXIST_IN_ORGANIZATION.getMessage());
+//        }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         log.info("Found program cohort: {}", programCohortList);
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
@@ -89,15 +89,15 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return retrievedCohort;
     }
 
-    private OrganizationIdentity findCreatorOrganization(String createdBy) throws MeedlException {
-        MeedlValidator.validateUUID(createdBy);
-        log.info("Validating the created by: {}",createdBy);
-        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(createdBy);
-        if (ObjectUtils.isEmpty(employeeIdentity)) {
-            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
-        }
-        return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
-    }
+//    private OrganizationIdentity findCreatorOrganization(String createdBy) throws MeedlException {
+//        MeedlValidator.validateUUID(createdBy);
+//        log.info("Validating the created by: {}",createdBy);
+//        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(createdBy);
+//        if (ObjectUtils.isEmpty(employeeIdentity)) {
+//            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+//        }
+//        return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
+//    }
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
 
