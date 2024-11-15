@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
@@ -28,6 +29,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.Organ
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.UserIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoanBreakdownPersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoanReferralPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneeLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan.LoaneePersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
@@ -42,6 +44,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanReferralRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
@@ -203,11 +206,12 @@ public class BeanConfiguration {
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
                                        OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase){
+                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase,
+                                       LoanReferralOutputPort loanReferralOutputPort){
         return new LoaneeService(organizationEmployeeIdentityOutputPort,
                 loaneeOutputPort,userIdentityOutputPort,
                 identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort,
-                organizationIdentityOutputPort,sendLoaneeEmailUsecase);
+                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort);
     }
 
     @Bean
@@ -221,5 +225,11 @@ public class BeanConfiguration {
     public LoaneeLoanDetailPersistenceAdapter loaneeLoanDetailPersistenceAdapter(LoaneeLoanDetailRepository loaneeLoanDetailRepository,
                                                                                  LoaneeLoanDetailMapper loaneeLoanDetailMapper){
         return new LoaneeLoanDetailPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
+    }
+
+    @Bean
+    public LoanReferralPersistenceAdapter loanReferralPersistenceAdapter(LoanReferralRepository loanReferralRepository,
+                                                                         LoanReferralMapper loanReferralMapper){
+        return new LoanReferralPersistenceAdapter(loanReferralRepository,loanReferralMapper);
     }
 }

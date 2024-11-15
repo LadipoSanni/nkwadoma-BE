@@ -36,6 +36,7 @@ public class Cohort {
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
+    private Integer numberOfReferredLoanee = 0;
 //    private int pageSize;
 //    private int pageNumber;
 

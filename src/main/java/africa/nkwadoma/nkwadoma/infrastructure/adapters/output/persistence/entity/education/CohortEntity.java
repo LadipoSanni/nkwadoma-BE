@@ -36,5 +36,5 @@ public class CohortEntity {
     @OneToOne
     private LoanDetailEntity loanDetail;
     private Integer numberOfLoanees = 0;
-
+    private Integer numberOfReferredLoanee = 0;
 }

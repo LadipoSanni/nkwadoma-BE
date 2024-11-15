@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -9,12 +9,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -40,7 +40,7 @@ import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
-public class LoaneeService implements LoaneeUsecase {
+public class LoaneeService implements LoaneeUseCase {
 
 
 
@@ -53,6 +53,7 @@ public class LoaneeService implements LoaneeUsecase {
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    private final LoanReferralOutputPort loanReferralOutputPort;
 
 
     @Override
@@ -78,34 +79,52 @@ public class LoaneeService implements LoaneeUsecase {
     }
 
     @Override
-    public Loanee referLoanee(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        loanee.validate();
-        loanee = loaneeOutputPort.findLoaneeById(loanee.getId());
-        if (loanee.getLoaneeStatus() == LoaneeStatus.REFERRED){
-            throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
+    public LoanReferral referLoanee(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        if (cohort == null){
+            throw new CohortException(CohortMessages.COHORT_DOES_NOT_EXIST.getMessage());
         }
-        refer(loanee.getLoanee());
+        loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
+        refer(loanee.getLoanee());
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
+        notifyPortfolioManager(organizationEmployeeIdentity.getMeedlUser());
+        loaneeOutputPort.save(loanee);
+        cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
+        cohortOutputPort.save(cohort);
+        LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
+        return  loanReferral;
+    }
+
+    private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws LoaneeException {
+        Loanee loanee;
+        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort);
+        loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
+                .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
+        if (loanee.getLoaneeStatus() == LoaneeStatus.REFERRED){
+            throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
+        }else if (loanee.getLoaneeStatus() != LoaneeStatus.ADDED){
+            throw new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
+        }
+        return loanee;
+    }
+
+    private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         loanee.setReferredBy(organizationIdentity.getName());
-        loaneeOutputPort.save(loanee);
-        LoanReferral loanReferral = createLoanReferral(loanee);
-        return  loanee;
+        return organizationEmployeeIdentity;
     }
 
-    private LoanReferral createLoanReferral(Loanee loanee) {
-        int referralCount = 0;
-        LoanReferral loanReferral = new LoanReferral();
-        loanReferral.setLoanee(loanee);
-        loanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
-        loanReferral.setNumberOfReferrals(++referralCount);
-        return loanReferral;
+    private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
+        sendLoaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
     }
+
 
     private void refer(UserIdentity userIdentity) throws MeedlException {
         sendLoaneeEmailUsecase.sendReferLoaneeEmail(userIdentity);
@@ -148,6 +167,7 @@ public class LoaneeService implements LoaneeUsecase {
         userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
         userIdentity = identityOutputPort.save(userIdentity);
         loanee.setLoanee(userIdentity);
+        loanee.setLoaneeStatus(LoaneeStatus.ADDED);
         loanee = loaneeOutputPort.save(loanee);
         return loanee;
     }

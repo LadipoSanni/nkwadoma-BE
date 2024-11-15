@@ -69,11 +69,24 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
-                .subject(LOAN_REFERRAL_SUBJECT.getMessage())
+                .subject(LOANEE_REFERRAL_SUBJECT.getMessage())
                 .to(userIdentity.getEmail())
-                .template(LOAN_REFERRAL_INVITATION.getMessage())
+                .template(LOANEE_REFERRAL.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
+    }
+
+    @Override
+    public void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LOANEE_HAS_REFERRED.getMessage())
+                .to(userIdentity.getEmail())
+                .template(LOANEE_REFERRAL_INVITATION_SENT.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity,email);
     }
 }

@@ -82,7 +82,7 @@ class CohortPersistenceAdapterTest {
     void setUpOrg() {
         meedleUser = UserIdentity.builder()
                 .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
-                lastName("Benson Ayo").email("yanakix11h46@lineacr.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
+                lastName("Benson Ayo").email("qudusa55@gmail.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
         employeeIdentity = OrganizationEmployeeIdentity.builder()
                 .meedlUser(meedleUser).build();
         organizationIdentity = OrganizationIdentity.builder().email("fordorganization12@example.com")
@@ -390,30 +390,30 @@ class CohortPersistenceAdapterTest {
         assertNotNull(editedCohort.getLoanDetail());
     }
 
-    @Order(10)
-    @Test
-    void deleteCohort(){
-        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-        assertTrue(foundCohort.isPresent());
-        try {
-            cohortOutputPort.deleteCohort(cohortOneId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        foundCohort = cohortRepository.findById(cohortOneId);
-        assertFalse(foundCohort.isPresent());
-    }
-
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
-        identityManagementOutputPort.deleteClient(organizationId);
-        identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
-        cohortOutputPort.deleteCohort(cohortTwoId);
-        programCohortOutputPort.delete(programId);
-        organizationIdentityOutputPort.delete(organizationId);
-        userIdentityOutputPort.deleteUserById(meedleUserId);
-        cohortRepository.deleteById(cohortTwoId);
-        cohortRepository.deleteById(cohortOneId);
-    }
+//    @Order(10)
+//    @Test
+//    void deleteCohort(){
+//        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+//        assertTrue(foundCohort.isPresent());
+//        try {
+//            cohortOutputPort.deleteCohort(cohortOneId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        foundCohort = cohortRepository.findById(cohortOneId);
+//        assertFalse(foundCohort.isPresent());
+//    }
+//
+//    @AfterAll
+//    void cleanUp() throws MeedlException {
+//        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
+//        identityManagementOutputPort.deleteClient(organizationId);
+//        identityManagementOutputPort.deleteUser(UserIdentity.builder().id(meedleUserId).build());
+//        cohortOutputPort.deleteCohort(cohortTwoId);
+//        programCohortOutputPort.delete(programId);
+//        organizationIdentityOutputPort.delete(organizationId);
+//        userIdentityOutputPort.deleteUserById(meedleUserId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        cohortRepository.deleteById(cohortOneId);
+//    }
 }

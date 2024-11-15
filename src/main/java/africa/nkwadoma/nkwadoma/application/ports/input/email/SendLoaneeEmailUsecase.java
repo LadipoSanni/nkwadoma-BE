@@ -6,4 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 public interface SendLoaneeEmailUsecase {
 
     void sendReferLoaneeEmail(UserIdentity userIdentity) throws MeedlException;
+
+    void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException;
 }
