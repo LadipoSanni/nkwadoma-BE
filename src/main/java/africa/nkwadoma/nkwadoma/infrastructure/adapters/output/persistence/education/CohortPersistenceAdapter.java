@@ -56,8 +56,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final LoanBreakdownRepository loanBreakdownRepository;
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final LoanDetailsOutputPort loanDetailsOutputPort;
-    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+
 
 
 
@@ -70,10 +69,6 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         if (program == null) {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
-//        OrganizationIdentity organizationIdentity = findCreatorOrganization(cohort.getCreatedBy());
-//        if (!Objects.equals(organizationIdentity.getId(), program.getOrganizationId())){
-//            throw new CohortException(CohortMessages.CREATEDBY_NOT_EXIST_IN_ORGANIZATION.getMessage());
-//        }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         log.info("Found program cohort: {}", programCohortList);
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
@@ -85,19 +80,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                     .findFirst();
         }
         Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
+        log.info("created_by {}",retrievedCohort.getCreatedBy());
         programOutputPort.saveProgram(program);
         return retrievedCohort;
     }
-
-//    private OrganizationIdentity findCreatorOrganization(String createdBy) throws MeedlException {
-//        MeedlValidator.validateUUID(createdBy);
-//        log.info("Validating the created by: {}",createdBy);
-//        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(createdBy);
-//        if (ObjectUtils.isEmpty(employeeIdentity)) {
-//            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
-//        }
-//        return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
-//    }
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
 
