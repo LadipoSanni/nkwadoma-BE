@@ -156,7 +156,7 @@ class UserIdentityServiceTest {
         try {
             favour.setPassword("Passkey90@");
             assertNotNull(generatedToken);
-            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(identityManagerOutPutPort.createPassword(favour.getEmail(), favour.getPassword())).thenReturn(favour);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
             userIdentityService.createPassword(generatedToken,favour.getPassword());
@@ -345,7 +345,7 @@ class UserIdentityServiceTest {
     void resetPassword(){
         try {
             assertNotNull(generatedToken);
-            when(tokenUtils.decodeJWT(generatedToken)).thenReturn(favour.getEmail());
+            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             doNothing().when(identityManagerOutPutPort).resetPassword(any());
             favour.setEnabled(Boolean.TRUE);
             favour.setEmailVerified(Boolean.TRUE);
