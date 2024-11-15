@@ -110,5 +110,6 @@ class LoanServiceTest {
 
     @Test
     void createLoanRequest() {
+
     }
 }
