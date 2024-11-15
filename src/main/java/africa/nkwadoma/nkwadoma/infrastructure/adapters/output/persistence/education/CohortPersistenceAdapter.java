@@ -4,16 +4,22 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
@@ -23,6 +29,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -49,6 +56,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     private final LoanBreakdownRepository loanBreakdownRepository;
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final LoanDetailsOutputPort loanDetailsOutputPort;
+    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
 
@@ -60,6 +69,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         if (program == null) {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
+        }
+        OrganizationIdentity organizationIdentity = findCreatorOrganization(cohort.getCreatedBy());
+        if (!Objects.equals(organizationIdentity.getId(), program.getOrganizationId())){
+            throw new CohortException(CohortMessages.CREATEDBY_NOT_EXIST_IN_ORGANIZATION.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         log.info("Found program cohort: {}", programCohortList);
@@ -74,6 +87,16 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         Cohort retrievedCohort  =  updateOrAddCohortToProgram(cohort, existingProgramCohort, program);
         programOutputPort.saveProgram(program);
         return retrievedCohort;
+    }
+
+    private OrganizationIdentity findCreatorOrganization(String createdBy) throws MeedlException {
+        MeedlValidator.validateUUID(createdBy);
+        log.info("Validating the created by: {}",createdBy);
+        OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(createdBy);
+        if (ObjectUtils.isEmpty(employeeIdentity)) {
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+        }
+        return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
     }
 
     private Cohort updateOrAddCohortToProgram(Cohort cohort, Optional<ProgramCohort> existingProgramCohort, Program program) throws MeedlException {
