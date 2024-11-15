@@ -30,8 +30,6 @@ class LoanServiceTest {
     private LoanReferral loanReferral;
     private Loanee loanee;
     private UserIdentity userIdentity;
-    private int pageNumber = 0;
-    private int pageSize = 10;
 
     @BeforeEach
     void setUp() {
