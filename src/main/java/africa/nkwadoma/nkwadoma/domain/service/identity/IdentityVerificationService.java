@@ -8,9 +8,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -32,43 +32,42 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
-    private final PremblyAdapter premblyAdapter;
 
     @Override
-    public String isIdentityVerified(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWT(token);
+    public String isIdentityVerified(String token) throws MeedlException, IdentityVerificationException {
+        String email = tokenUtils.decodeJWTGetEmail(token);
+        String id = tokenUtils.decodeJWTGetId(token);
         MeedlValidator.validateEmail(email);
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        boolean identityVerified = isIdentityVerified(foundUser);
-        if (identityVerified) {
-            log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
-            return IDENTITY_PREVIOUSLY_VERIFIED.getMessage();
+
+        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByEmailAndStatus(email, IdentityVerificationStatus.VERIFIED);
+        if (optionalVerifiedIdentity.isPresent()) {
+            return IDENTITY_VERIFIED.getMessage();
         }
-        log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
+        checkIfAboveThreshold(id);
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
     @Override
-    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
-        boolean isPreviouslyVerified = isIdentityVerified(identityVerification);
-        if (isPreviouslyVerified) {
-            log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(" bvn/nin ",isPreviouslyVerified));
-            return IDENTITY_VERIFIED.getMessage();
-        }
-        return IDENTITY_VERIFICATION_PROCESSING.getMessage();
-    }
-
-    private boolean isIdentityVerified(IdentityVerification identityVerification) throws MeedlException {
+    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
-        Optional<IdentityVerificationEntity> optionalIdentityVerificationEntity = identityVerificationRepository.findByBvn(identityVerification.getBvn());
-        if (optionalIdentityVerificationEntity.isEmpty()) {
-            optionalIdentityVerificationEntity = identityVerificationRepository.findByNin(identityVerification.getNin());
+        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+
+        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
+        if (optionalVerifiedIdentity.isPresent()) {
+            return IDENTITY_VERIFIED.getMessage();
         }
-        if (optionalIdentityVerificationEntity.isPresent()) {
-            return Boolean.TRUE;
+        checkIfAboveThreshold(id);
+
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
+        return IDENTITY_VERIFICATION_PROCESSING.getMessage();
+    }
+    private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
+        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
+        if (numberOfAttempts >= 5L){
+            log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
+            throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
         }
-        return Boolean.FALSE;
     }
 
     @Override

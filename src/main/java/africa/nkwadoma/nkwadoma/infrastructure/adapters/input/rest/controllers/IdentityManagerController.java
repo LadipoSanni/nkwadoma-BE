@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
@@ -80,6 +81,19 @@ public class IdentityManagerController {
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/identity/confirm/token/verify")
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(verificationUseCase.isIdentityVerified(token))
+                .statusCode(HttpStatus.OK.name()).build());
+    }
+    @PostMapping("auth/identity/verify")
+    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
+        IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(verificationUseCase.verifyIdentity(identityVerification))
+                .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,

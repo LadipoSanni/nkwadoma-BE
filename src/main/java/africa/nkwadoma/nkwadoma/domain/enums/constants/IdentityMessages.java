@@ -39,10 +39,11 @@ public enum IdentityMessages{
     BLACKLISTED_REFERRAL("Referral Blacklisted"),
     IDENTITY_VERIFICATION_FAILURE_SAVED("Verification failure saved successfully"),
     IDENTITY_VERIFICATION_PROCESSING("Identity verification is being processed"),
-    IDENTITY_PREVIOUSLY_VERIFIED("Identity verified"),
+    IDENTITY_PREVIOUSLY_VERIFIED("User email verification: %s has not been verified previously %s "),
     IDENTITY_NOT_VERIFIED("Identity not verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
-    LOANEE_NOT_FOUND("Loanee not found");
+    LOANEE_NOT_FOUND("Loanee not found"),
+    IDENTITY_VERIFIED("Identity verified");
 
     public String format(Object... args) {
         return String.format(message, args);

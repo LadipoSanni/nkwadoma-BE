@@ -122,7 +122,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
         validateDataElement(token);
-        String email = tokenUtils.decodeJWT(token);
+        String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);
     }
