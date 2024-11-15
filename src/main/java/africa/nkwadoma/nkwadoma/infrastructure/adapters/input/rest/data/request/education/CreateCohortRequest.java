@@ -18,7 +18,6 @@ public class CreateCohortRequest {
     private String programId;
     private String cohortDescription;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
-    private String createdBy;
     private String name;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;

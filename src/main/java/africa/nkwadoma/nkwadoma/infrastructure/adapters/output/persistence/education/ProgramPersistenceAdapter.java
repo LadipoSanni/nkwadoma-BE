@@ -56,7 +56,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         program.validate();
 
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());;
+        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());
         log.info("The organization identity found when saving program is: {}", organizationIdentity);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
@@ -109,7 +109,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-        return programMapper.toProgram(programEntity);
+        Program program = programMapper.toProgram(programEntity);
+        program.setOrganizationId(programEntity.getOrganizationEntity().getId());
+        return program;
     }
 
     @Override
