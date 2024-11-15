@@ -21,12 +21,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase {
+public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase, RespondToLoanReferralUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
+    private final LoanRequestOutputPort loanRequestOutputPort;
 
 
     @Override
@@ -77,5 +78,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         String loaneeUserId = loanReferral.getLoanee().getUserIdentity().getId().trim();
         MeedlValidator.validateUUID(loaneeUserId);
         return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeUserId);
+    }
+
+    @Override
+    public LoanReferral respondToLoanReferral(LoanReferral loanReferral) {
+        return null;
     }
 }
