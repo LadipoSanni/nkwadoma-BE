@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 public class LoaneeEntity {
-
     @Id
     @UuidGenerator
     private String id;

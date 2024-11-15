@@ -1,19 +1,20 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeLoanDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.*;
+
 @RequiredArgsConstructor
 public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutputPort {
-
     private final LoaneeLoanDetailRepository loaneeLoanDetailRepository;
     private final LoaneeLoanDetailMapper loaneeLoanDetailMapper;
-
-
 
     @Override
     public LoaneeLoanDetail save(LoaneeLoanDetail loaneeLoanDetail) {
@@ -21,5 +22,12 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
                 loaneeLoanDetailMapper.toLoaneeLoanDetailsEnitity(loaneeLoanDetail);
         loanDetailEntity = loaneeLoanDetailRepository.save(loanDetailEntity);
         return loaneeLoanDetailMapper.toLoaneeLoanDetails(loanDetailEntity);
+    }
+
+    @Override
+    public void delete(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        Optional<LoaneeLoanDetailEntity> loaneeLoanDetailEntity = loaneeLoanDetailRepository.findById(id);
+        loaneeLoanDetailEntity.ifPresent(loaneeLoanDetailRepository::delete);
     }
 }

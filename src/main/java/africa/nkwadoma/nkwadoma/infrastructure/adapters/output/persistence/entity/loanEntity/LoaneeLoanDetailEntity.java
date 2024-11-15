@@ -13,7 +13,6 @@ import java.util.List;
 @Getter
 @Entity
 public class LoaneeLoanDetailEntity {
-
     @Id
     @UuidGenerator
     private String id;

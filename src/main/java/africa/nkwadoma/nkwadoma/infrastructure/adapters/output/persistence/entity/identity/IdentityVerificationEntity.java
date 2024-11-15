@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -15,4 +16,7 @@ public class IdentityVerificationEntity {
     private String id;
     private String bvn;
     private String nin;
+    private String referralId;
+    private String email;
+    private IdentityVerificationStatus status;
 }
