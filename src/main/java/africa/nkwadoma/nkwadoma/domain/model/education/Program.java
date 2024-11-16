@@ -41,6 +41,7 @@ public class Program {
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
     private int pageNumber;
     private int pageSize;
+    private String organizationId;
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();
