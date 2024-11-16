@@ -36,5 +36,12 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
 
+    @Override
+    public void deleteAll(List<LoanBreakdown> loanBreakdownList) {
+        List<LoanBreakdownEntity> loanBreakdownEntities =
+                loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdownList);
+        loanBreakdownRepository.deleteAll(loanBreakdownEntities);
+    }
+
 
 }

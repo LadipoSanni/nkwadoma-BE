@@ -36,8 +36,9 @@ public class CohortController {
 
     @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
+        cohort.setCreatedBy(meedlUser.getClaimAsString("sub"));
         cohort = cohortUseCase.createOrEditCohort(cohort);
         CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
         cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()

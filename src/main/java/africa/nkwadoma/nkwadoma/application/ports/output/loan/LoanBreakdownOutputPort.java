@@ -10,4 +10,6 @@ public interface LoanBreakdownOutputPort {
 
 
     List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail);
+
+    void deleteAll(List<LoanBreakdown> loanBreakdownList);
 }

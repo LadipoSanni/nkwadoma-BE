@@ -53,6 +53,7 @@ class LoaneePersistenceAdapterTest {
     private String loaneeLoanDetailId;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdownList;
 
 
 
@@ -67,10 +68,8 @@ class LoaneePersistenceAdapterTest {
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
-            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), firstLoanee.getLoaneeLoanDetail());
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-
+            loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), loaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -223,6 +222,8 @@ class LoaneePersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
+        identityManagerOutputPort.deleteUser(userIdentity);
+        loanBreakdownOutputPort.deleteAll(loanBreakdownList);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
 }

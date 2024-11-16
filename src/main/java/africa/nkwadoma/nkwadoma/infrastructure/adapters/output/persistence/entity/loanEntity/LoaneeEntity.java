@@ -19,9 +19,9 @@ public class LoaneeEntity {
     @UuidGenerator
     private String id;
     private String cohortId;
+    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String createdBy;
     @OneToOne
     private UserEntity userIdentity;
     @OneToOne
