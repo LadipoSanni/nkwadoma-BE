@@ -3,12 +3,19 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
@@ -18,22 +25,44 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Service
 public class IdentityVerificationService implements VerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final IdentityVerificationRepository identityVerificationRepository;
+    private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
 
     @Override
-    public String verifyByEmailUserIdentityVerified(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWT(token);
+    public String isIdentityVerified(String token) throws MeedlException, IdentityVerificationException {
+        String email = tokenUtils.decodeJWTGetEmail(token);
+        String id = tokenUtils.decodeJWTGetId(token);
         MeedlValidator.validateEmail(email);
-        UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
-        boolean identityVerified = isIdentityVerified(foundUser);
-        if (identityVerified) {
-            log.info(USER_EMAIL_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
+
+        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByEmailAndStatus(email, IdentityVerificationStatus.VERIFIED);
+        if (optionalVerifiedIdentity.isPresent()) {
             return IDENTITY_VERIFIED.getMessage();
         }
-        log.info(USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION.format(email, identityVerified));
+        checkIfAboveThreshold(id);
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
-    private boolean isIdentityVerified(UserIdentity foundUser){
-        return true;
+    @Override
+    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
+        MeedlValidator.validateObjectInstance(identityVerification);
+        identityVerification.validate();
+        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+
+        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
+        if (optionalVerifiedIdentity.isPresent()) {
+            return IDENTITY_VERIFIED.getMessage();
+        }
+        checkIfAboveThreshold(id);
+
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
+        return IDENTITY_VERIFICATION_PROCESSING.getMessage();
+    }
+    private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
+        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
+        if (numberOfAttempts >= 5L){
+            log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
+            throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
+        }
     }
 }

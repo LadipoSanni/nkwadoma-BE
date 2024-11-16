@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -18,7 +18,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -34,7 +33,7 @@ import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
-public class LoaneeService implements LoaneeUsecase {
+public class LoaneeService implements LoaneeUseCase {
 
 
 
@@ -60,9 +59,10 @@ public class LoaneeService implements LoaneeUsecase {
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         loanee.setCreatedAt(LocalDateTime.now());
-        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown());
-        saveLoaneeLoanDetails(loanee, loanBreakdowns);
-        loanee.getLoanee().setRole(IdentityRole.LOANEE);
+        saveLoaneeLoanDetails(loanee);
+        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown(),
+                loanee.getLoaneeLoanDetail());
+        loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
@@ -75,17 +75,16 @@ public class LoaneeService implements LoaneeUsecase {
         return loaneeOutputPort.findLoaneeById(id);
     }
 
-    private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
+    private void saveLoaneeLoanDetails(Loanee loanee) {
         LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
         loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
         loaneeLoanDetail.setAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
-        loaneeLoanDetail.setLoanBreakdown(loanBreakdowns);
         loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }
 
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
-        Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getLoanee().getEmail());
+        Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
             throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
         }
@@ -104,14 +103,14 @@ public class LoaneeService implements LoaneeUsecase {
     }
 
     private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
-        Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getLoanee().getEmail());
+        Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
         if (foundUserIdentity.isPresent()){
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
-        UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getLoanee());
+        UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
         userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
         userIdentity = identityOutputPort.save(userIdentity);
-        loanee.setLoanee(userIdentity);
+        loanee.setUserIdentity(userIdentity);
         loanee = loaneeOutputPort.save(loanee);
         return loanee;
     }

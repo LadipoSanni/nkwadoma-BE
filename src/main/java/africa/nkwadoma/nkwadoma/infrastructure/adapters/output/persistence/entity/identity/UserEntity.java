@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import jakarta.persistence.*;
@@ -24,6 +24,9 @@ public class UserEntity {
     private String createdAt;
     @Enumerated(EnumType.STRING)
     private IdentityRole role;
+    private String alternateEmail;
+    private String alternatePhoneNumber;
+    private String alternateContactAddress;
     private String createdBy;
     private String reactivationReason;
     private String deactivationReason;

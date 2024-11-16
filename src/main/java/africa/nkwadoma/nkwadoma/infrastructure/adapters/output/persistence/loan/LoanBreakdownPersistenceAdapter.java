@@ -2,11 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanBreakdownMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
 
     private final LoanBreakdownRepository loanBreakdownRepository;
     private final LoanBreakdownMapper loanBreakdownMapper;
+    private final LoaneeLoanDetailMapper loaneeLoanDetailMapper;
 
 
     @Override
@@ -25,9 +27,11 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
     }
 
     @Override
-    public List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown) {
+    public List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail) {
         List<LoanBreakdownEntity> loanBreakdownEntities =
                 loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdown);
+        loanBreakdownEntities.forEach(loanBreakdownEntity ->
+                loanBreakdownEntity.setLoaneeLoanDetail(loaneeLoanDetailMapper.toLoaneeLoanDetailsEnitity(loaneeLoanDetail)));
         loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }

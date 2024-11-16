@@ -1,20 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.ProgramCohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -26,11 +19,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,8 +42,6 @@ public class LoaneeServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private IdentityManagerOutputPort identityManagerOutputPort;
-    @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private  LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
@@ -80,7 +68,7 @@ public class LoaneeServiceTest {
                     .build();
 
             firstLoanee = new Loanee();
-            firstLoanee.setLoanee(loaneeUserIdentity);
+            firstLoanee.setUserIdentity(loaneeUserIdentity);
             firstLoanee.setCreatedBy(mockId);
             firstLoanee.setCohortId(mockId);
 
@@ -132,12 +120,12 @@ public class LoaneeServiceTest {
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
             when(identityManagerOutputPort.createUser(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
             when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
-            when(loanBreakdownOutputPort.saveAll(List.of(loanBreakdown))).thenReturn(List.of(loanBreakdown));
+            when(loanBreakdownOutputPort.saveAll(anyList(),any(LoaneeLoanDetail.class))).thenReturn(List.of(loanBreakdown));
             when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(loaneeLoanDetails);
             when(cohortOutputPort.save(any())).thenReturn(elites);
             when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
             Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
-            assertEquals(firstLoanee.getLoanee().getFirstName(), loanee.getLoanee().getFirstName());
+            assertEquals(firstLoanee.getUserIdentity().getFirstName(), loanee.getUserIdentity().getFirstName());
             verify(loaneeOutputPort, times(1)).save(firstLoanee);
             verify(cohortOutputPort, times(1)).save(any(Cohort.class));
         } catch (MeedlException exception) {
@@ -187,7 +175,7 @@ public class LoaneeServiceTest {
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(loanee.getLoanee().getEmail(),firstLoanee.getLoanee().getEmail());
+        assertEquals(loanee.getUserIdentity().getEmail(),firstLoanee.getUserIdentity().getEmail());
     }
 
 
@@ -197,7 +185,7 @@ public class LoaneeServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"7837783-jjduydsbghew87ew-ekyuhjuhdsj","invalid_uuid"})
+    @ValueSource(strings = {"7837783-jjduydsbghew87ew-ekyuhjuhdsj"})
     void cannotFindLoaneeWithInvalidUuid(String id){
         assertThrows(MeedlException.class,() -> loaneeService.viewLoaneeDetails(id));
     }

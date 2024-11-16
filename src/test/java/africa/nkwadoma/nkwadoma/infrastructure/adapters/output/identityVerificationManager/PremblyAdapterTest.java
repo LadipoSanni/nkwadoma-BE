@@ -1,15 +1,18 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class PremblyAdapterTest {
 
-
 @Autowired
+@Qualifier("premblyAdapter")
 private IdentityVerificationOutputPort identityVerificationOutPutPort;
 
     private IdentityVerification identityVerification;
@@ -32,10 +35,7 @@ private IdentityVerificationOutputPort identityVerificationOutPutPort;
     void setUp(){
         identityVerification =   IdentityVerification.builder().
                 identityId("12345678901").identityImage("WWW.imageUrl.com").build();
-
     }
-
-
 
     @Test
     void verifyIdentityWithNullIdentityVerification(){
@@ -65,8 +65,6 @@ private IdentityVerificationOutputPort identityVerificationOutPutPort;
        identityVerification.setIdentityImage(StringUtils.EMPTY);
        assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
-
-
 
     @Test
     void verifyIdentity(){
