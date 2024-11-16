@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
 import java.math.*;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,9 +81,9 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferral() {
-        LoanReferral referral = null;
+        Optional<LoanReferral> referral = Optional.empty();
         try {
-            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId);
+            referral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
@@ -91,9 +92,9 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferralWithTrailingAndLeadingSpaces() {
-        LoanReferral referral = null;
+        Optional<LoanReferral> referral = Optional.empty();
         try {
-            referral = loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId.concat(StringUtils.SPACE));
+            referral = loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE));
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
@@ -102,19 +103,19 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferralWithNullId() {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(null));
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewLoanReferralByIdWithSpaces(String loaneeId) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId));
+    void viewLoanReferralByIdWithSpaces(String loanReferralId) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid id", "74567"})
-    void viewLoanReferralByNonUUID(String loaneeId) {
-        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId));
+    void viewLoanReferralByNonUUID(String loanReferralId) {
+        assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
     @AfterAll

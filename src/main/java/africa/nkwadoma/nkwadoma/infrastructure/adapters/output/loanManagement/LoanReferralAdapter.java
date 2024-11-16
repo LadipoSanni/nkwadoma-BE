@@ -29,12 +29,16 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public LoanReferral findLoanReferralByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateDataElement(loaneeId);
-        loaneeId = loaneeId.trim();
-        MeedlValidator.validateUUID(loaneeId);
-        LoanReferralEntity loanReferralEntity = loanReferralRepository.findByLoaneeEntityId(loaneeId);
-        return loanReferralMapper.toLoanReferral(loanReferralEntity);
+    public Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateDataElement(loanReferralId);
+        loanReferralId = loanReferralId.trim();
+        MeedlValidator.validateUUID(loanReferralId);
+        Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
+        if (loanReferralEntity.isEmpty()) {
+            return Optional.empty();
+        }
+        log.info("Found loan referral: {}", loanReferralEntity.get());
+        return Optional.of(loanReferralMapper.toLoanReferral(loanReferralEntity.get()));
     }
 
     @Override
@@ -45,5 +49,6 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
             log.info("Found loan referral: {}", loanReferralEntity.get());
             loanReferralRepository.delete(loanReferralEntity.get());
         }
+        else log.info("Loan referral not found");
     }
 }

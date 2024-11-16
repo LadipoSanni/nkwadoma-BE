@@ -13,4 +13,7 @@ public interface LoanRequestMapper {
 
     @InheritInverseConfiguration
     LoanRequest toLoanRequest(LoanRequestEntity loanRequestEntity);
+
+    @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
+    LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

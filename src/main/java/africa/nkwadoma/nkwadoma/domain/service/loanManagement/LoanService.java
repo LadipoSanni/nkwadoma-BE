@@ -4,11 +4,13 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +28,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanRequestUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
+    private final LoanRequestMapper loanRequestMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
@@ -75,20 +79,44 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
-        MeedlValidator.validateDataElement(loanReferral.getLoanee().getId());
-        String loaneeId = loanReferral.getLoanee().getId().trim();
-        MeedlValidator.validateUUID(loaneeId);
-        return loanReferralOutputPort.findLoanReferralByLoaneeId(loaneeId);
+        MeedlValidator.validateDataElement(loanReferral.getId());
+        String loanReferralId = loanReferral.getId().trim();
+        MeedlValidator.validateUUID(loanReferralId);
+        Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
+        if (foundLoanReferral.isEmpty()) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        } else {
+            return foundLoanReferral.get();
+        }
     }
 
     @Override
-    public LoanReferral respondToLoanReferral(LoanReferral loanReferral) {
-        return null;
+    public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanReferral);
+        MeedlValidator.validateUUID(loanReferral.getId());
+        loanReferral.validate();
+        Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId());
+        if (foundLoanReferral.isEmpty()) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
+        LoanReferral updatedLoanReferral = foundLoanReferral.get();
+        if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(updatedLoanReferral);
+            createLoanRequest(loanRequest);
+            updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
+            updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
+        }
+        return updatedLoanReferral;
     }
 
     @Override
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
+        }
         return loanRequestOutputPort.save(loanRequest);
     }
 }
