@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.extern.slf4j.*;
-import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
@@ -35,7 +34,6 @@ class NextOfKinIdentityAdapterTest {
     private Loanee loanee;
     private String loaneeLoanDetailId;
     private String userId;
-    private String loaneeId;
 
     @BeforeAll
     void init() {

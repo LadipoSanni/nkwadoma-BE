@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.BlackListedTokenRepository;
