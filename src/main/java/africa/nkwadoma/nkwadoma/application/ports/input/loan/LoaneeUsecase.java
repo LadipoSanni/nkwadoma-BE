@@ -3,8 +3,6 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loan;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 
-import java.awt.*;
-
 public interface LoaneeUseCase {
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
