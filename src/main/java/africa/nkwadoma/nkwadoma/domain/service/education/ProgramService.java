@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutput
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;

@@ -1,15 +1,15 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface NextOfKinMapper {
+public interface LoanReferralMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
     @Mapping(target = "loaneeEntity.loanee", source = "loanee.userIdentity")
-    NextOfKinEntity toNextOfKinEntity(NextOfKin nextOfKin);
+    LoanReferralEntity toLoanReferralEntity(LoanReferral loanReferral);
 
     @InheritInverseConfiguration
-    NextOfKin toNextOfKin(NextOfKinEntity savedNextOfKinEntity);
+    LoanReferral toLoanReferral(LoanReferralEntity savedLoanReferralEntity);
 }
