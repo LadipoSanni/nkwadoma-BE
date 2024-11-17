@@ -69,7 +69,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
         }
     }
-
     @Override
     public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityVerificationException {
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
