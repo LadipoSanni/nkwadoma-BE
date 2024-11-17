@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
@@ -23,7 +23,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class IdentityVerificationService implements VerificationUseCase {
+public class IdentityVerificationService implements IdentityVerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;

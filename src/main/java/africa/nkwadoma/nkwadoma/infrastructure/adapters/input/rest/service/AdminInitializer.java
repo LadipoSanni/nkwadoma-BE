@@ -51,11 +51,13 @@ public class AdminInitializer {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = saveUserToKeycloak(userIdentity);
         UserIdentity foundUserIdentity = null;
+        log.info("First user, after saving on keycloak: {}", userIdentity);
         try {
             foundUserIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             log.warn("First user not found, creating first user: {}", e.getMessage());
         } finally {
+            log.info("First user after finding, before saving to db: {}", foundUserIdentity);
             if (ObjectUtils.isEmpty(foundUserIdentity)) {
                 saveUserToDB(userIdentity);
             }else {
@@ -65,12 +67,13 @@ public class AdminInitializer {
         return userIdentity;
     }
 
-    private void saveUserToDB(UserIdentity userIdentity) {
+    private void saveUserToDB(UserIdentity userIdentity) throws MeedlException {
             try {
                 userIdentityOutputPort.save(userIdentity);
                 log.info("First user created successfully");
             } catch (MeedlException e) {
                 log.error("Unable to save user to identity manager, error : {}", e.getMessage());
+                throw new MeedlException("Unable to save user to data base, error : " + e.getMessage());
             }
     }
 
@@ -82,6 +85,7 @@ public class AdminInitializer {
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
             UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);
+            log.info("user representation email {} , id : {}", userRepresentation.getEmail(), userRepresentation.getId() );
             userIdentity.setId(userRepresentation.getId());
         }
         return userIdentity;
