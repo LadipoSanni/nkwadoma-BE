@@ -14,6 +14,7 @@ import lombok.*;
 public class LoanReferral {
     private String id;
     private Loanee loanee;
+    private String reasonForDeclining;
     private LoanReferralStatus loanReferralStatus;
 
     public void validate() throws MeedlException {

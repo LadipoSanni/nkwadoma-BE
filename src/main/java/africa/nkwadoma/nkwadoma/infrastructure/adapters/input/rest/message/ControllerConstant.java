@@ -19,5 +19,6 @@ public class ControllerConstant {
    public static final String  LOAN_CONTROLLER = "Loan Controller";
    public static final String  LOAN_CONTROLLER_DESCRIPTION = "Manage loans and loan product on the platform";
 
-
+   public static final String LOAN_REFERRAL_STATUS_TYPE = "ACCEPTED | DECLINED";
+   public static final String LOAN_REFERRAL_ID_IS_REQUIRED = "Loan referral ID is required";
 }

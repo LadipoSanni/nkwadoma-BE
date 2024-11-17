@@ -109,6 +109,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
         }
+        else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+            MeedlValidator.validateDataElement(updatedLoanReferral.getReasonForDeclining());
+            updatedLoanReferral.setReasonForDeclining(updatedLoanReferral.getReasonForDeclining());
+            updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
+            updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
+        }
         return updatedLoanReferral;
     }
 

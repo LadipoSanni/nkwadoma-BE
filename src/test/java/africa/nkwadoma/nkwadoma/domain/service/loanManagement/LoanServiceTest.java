@@ -217,4 +217,34 @@ class LoanServiceTest {
         loanReferral.setId(null);
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
+
+    @Test
+    void declineLoanReferral() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.DECLINED);
+        loanReferral.setReasonForDeclining("I just don't want the loan");
+        LoanReferral referral = null;
+        try {
+            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
+            referral = loanService.respondToLoanReferral(loanReferral);
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+        assertNotNull(referral);
+        assertEquals(LoanReferralStatus.REJECTED, referral.getLoanReferralStatus());
+        assertEquals("I just don't want the loan", referral.getReasonForDeclining());
+    }
+
+    @Test
+    void declineLoanReferralWithNullReasonForDeclining() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.DECLINED);
+        loanReferral.setReasonForDeclining(null);
+        try {
+            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).
+                    thenReturn(Optional.of(loanReferral));
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
+    }
 }

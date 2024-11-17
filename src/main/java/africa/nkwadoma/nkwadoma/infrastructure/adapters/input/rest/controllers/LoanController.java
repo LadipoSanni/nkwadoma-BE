@@ -3,8 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductViewAllRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
@@ -43,6 +42,7 @@ public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
+    private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
 
@@ -129,5 +129,18 @@ public class LoanController {
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+    }
+
+    @PostMapping("/respond-to-loan-referral")
+    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(LoanReferralRequest request) throws MeedlException {
+        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(request);
+        LoanReferral updatedLoanReferral = respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
+        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(updatedLoanReferral);
+        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
+                .data(loanReferralResponse)
+                .message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
