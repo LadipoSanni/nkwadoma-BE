@@ -9,4 +9,5 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface IdentityVerificationMapper {
     public IdentityVerification mapToIdentityVerification(IdentityVerificationEntity identityVerificationEntity);
 
+    IdentityVerificationEntity mapToIdentityVerificationEntity(IdentityVerification identityVerificationEntity);
 }
