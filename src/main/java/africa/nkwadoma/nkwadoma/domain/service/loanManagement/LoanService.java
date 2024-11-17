@@ -98,9 +98,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (foundLoanReferral.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         }
-        LoanReferral updatedLoanReferral = foundLoanReferral.get();
-        updatedLoanReferral = updateLoanReferral(updatedLoanReferral);
-        return updatedLoanReferral;
+        return updateLoanReferral(foundLoanReferral.get());
     }
 
     private LoanReferral updateLoanReferral(LoanReferral updatedLoanReferral) throws MeedlException {
