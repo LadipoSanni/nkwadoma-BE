@@ -67,8 +67,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
         updateOrganization(program, organizationEntity);
-
-        return programMapper.toProgram(programEntity);
+        Program retrivedProgram  = programMapper.toProgram(programEntity);
+        retrivedProgram.setOrganizationId(organizationEntity.getId());
+        return retrivedProgram;
     }
 
     private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
