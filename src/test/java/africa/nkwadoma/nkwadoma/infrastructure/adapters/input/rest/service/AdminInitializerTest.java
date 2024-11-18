@@ -38,6 +38,7 @@ class AdminInitializerTest {
                .build();
 
     }
+
     @Test
     @Order(1)
     void initializeFirstUser() {
