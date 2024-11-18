@@ -21,6 +21,7 @@ public class SwaggerConfig {
                 .scheme("bearer");
     }
 
+    
     @Bean
     public OpenAPI openAPI() {
         Server server = new Server();
