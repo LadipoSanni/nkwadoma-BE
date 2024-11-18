@@ -34,6 +34,8 @@ class LoanServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanRequestMapper loanRequestMapper;
+    @Mock
+    private LoanReferralMapper loanReferralMapper;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
 
@@ -54,7 +56,7 @@ class LoanServiceTest {
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
 
         loanRequest = new LoanRequest();
-        loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
+        loanRequest.setLoanAmountRequested(loaneeLoanDetail.getAmountRequested());
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
         loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
         loanRequest.setReferredBy("Brown Hills Institute");
@@ -181,17 +183,17 @@ class LoanServiceTest {
 
     @Test
     void acceptLoanReferral() {
-        LoanReferral referral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralById(anyString())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralMapper.updateLoanReferral(any(LoanReferral.class), any(LoanReferral.class))).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
-            referral = loanService.respondToLoanReferral(loanReferral);
+            loanReferral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }
-        assertNotNull(referral);
-        assertEquals(LoanReferralStatus.AUTHORIZED, referral.getLoanReferralStatus());
+        assertNotNull(loanReferral);
+        assertEquals(LoanReferralStatus.AUTHORIZED, loanReferral.getLoanReferralStatus());
     }
 
     @Test
@@ -220,6 +222,7 @@ class LoanServiceTest {
         LoanReferral referral = null;
         try {
             when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralMapper.updateLoanReferral(any(LoanReferral.class), any(LoanReferral.class))).thenReturn(loanReferral);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
@@ -234,12 +237,6 @@ class LoanServiceTest {
     void declineLoanReferralWithNullReasonForDeclining() {
         loanReferral.setLoanReferralStatus(LoanReferralStatus.DECLINED);
         loanReferral.setReasonForDeclining(null);
-        try {
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).
-                    thenReturn(Optional.of(loanReferral));
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
         assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
     }
 }

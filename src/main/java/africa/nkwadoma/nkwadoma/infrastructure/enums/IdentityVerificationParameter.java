@@ -1,5 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.enums;
 
+import lombok.*;
+
+@Getter
 public enum IdentityVerificationParameter {
     NIN_URL("/vnin"),
     APP_ID("app-id"),
@@ -15,9 +18,6 @@ public enum IdentityVerificationParameter {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }
 
 

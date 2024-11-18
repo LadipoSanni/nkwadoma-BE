@@ -29,5 +29,6 @@ public class LoanRequest {
         MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
         MeedlValidator.validateObjectInstance(dateTimeApproved);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+        MeedlValidator.validateObjectInstance(status);
     }
 }
