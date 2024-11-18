@@ -25,6 +25,7 @@ public class TestData {
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName(name);
+        organizationIdentity.setId(testId);
         organizationIdentity.setEmail("testorganizationdata@gmail.com");
         organizationIdentity.setTin("7682-5627");
         organizationIdentity.setRcNumber(rcNumber);
