@@ -23,7 +23,6 @@ public class Program {
     private String id;
     private String programDescription;
     private String name;
-    private String objectives;
     private DurationType durationType;
     private LocalDate programStartDate;
     private int duration;

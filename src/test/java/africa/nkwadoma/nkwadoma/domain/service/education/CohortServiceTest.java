@@ -54,7 +54,7 @@ class CohortServiceTest {
     void setUp() {
         program = Program.builder().id(mockId).name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy("875565").deliveryType(DeliveryType.ONSITE).
+                createdBy("875565").deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
 
         elites = new Cohort();
