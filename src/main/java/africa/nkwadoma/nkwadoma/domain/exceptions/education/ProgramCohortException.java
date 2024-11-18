@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.exceptions.education;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 
 public class ProgramCohortException extends MeedlException {
     public ProgramCohortException(String message) {

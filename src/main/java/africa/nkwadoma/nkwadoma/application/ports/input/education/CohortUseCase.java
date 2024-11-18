@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.education;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import org.springframework.data.domain.Page;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import org.springframework.data.domain.*;
 
 public interface CohortUseCase {
 
@@ -13,6 +13,8 @@ public interface CohortUseCase {
     void deleteCohort(String id) throws MeedlException;
 
     void inviteCohort(String userId, String programId, String cohortId) throws MeedlException;
-    Page<Cohort> viewAllCohortInAProgram(String programId,int pageNumber, int pageSize) throws MeedlException;
+
+    Page<Cohort> viewAllCohortInAProgram(String programId, int pageNumber, int pageSize) throws MeedlException;
+
     Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
 }

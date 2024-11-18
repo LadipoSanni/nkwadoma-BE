@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.email;
 
 import lombok.*;
-import org.thymeleaf.context.Context;
+import org.thymeleaf.context.*;
 
 @Setter
 @Getter

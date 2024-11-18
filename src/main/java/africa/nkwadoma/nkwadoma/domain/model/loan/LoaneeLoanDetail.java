@@ -1,12 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.math.*;
+import java.util.*;
 
 @Setter
 @Getter

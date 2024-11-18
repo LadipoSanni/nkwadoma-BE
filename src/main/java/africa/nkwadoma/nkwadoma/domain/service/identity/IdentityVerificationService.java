@@ -1,24 +1,22 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.VerificationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.stereotype.*;
 
-import java.util.Optional;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,6 +41,7 @@ public class IdentityVerificationService implements VerificationUseCase {
         log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
+
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
@@ -55,12 +54,13 @@ public class IdentityVerificationService implements VerificationUseCase {
         }
         checkIfAboveThreshold(id);
 
-        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ", id));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
+
     private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
         Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
-        if (numberOfAttempts >= 5L){
+        if (numberOfAttempts >= 5L) {
             log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
             throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
         }

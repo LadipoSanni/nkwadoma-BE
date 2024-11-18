@@ -19,6 +19,6 @@ public class OrganizationEmployeeIdentity {
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();
-        return  this.pageSize == BigInteger.ZERO.intValue() ? defaultPageSize : this.pageSize;
+        return this.pageSize == BigInteger.ZERO.intValue() ? defaultPageSize : this.pageSize;
     }
 }

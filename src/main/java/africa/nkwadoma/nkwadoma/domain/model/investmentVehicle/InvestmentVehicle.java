@@ -1,12 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+import java.math.*;
 
 @Setter
 @Getter

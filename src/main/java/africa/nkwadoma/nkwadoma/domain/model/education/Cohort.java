@@ -1,15 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.math.*;
+import java.time.*;
+import java.util.*;
 
 @Getter
 @Setter
@@ -25,7 +23,7 @@ public class Cohort {
     private ActivationStatus activationStatus;
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
-    private BigDecimal tuitionAmount ;
+    private BigDecimal tuitionAmount;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
     private LocalDateTime updatedAt;
     private String createdBy;

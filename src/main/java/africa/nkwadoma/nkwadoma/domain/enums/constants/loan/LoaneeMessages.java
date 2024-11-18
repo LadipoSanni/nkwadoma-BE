@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants.loan;
 
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 public enum LoaneeMessages {

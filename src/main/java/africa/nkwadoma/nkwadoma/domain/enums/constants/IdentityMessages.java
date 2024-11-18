@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants;
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
-public enum IdentityMessages{
+public enum IdentityMessages {
 
     USER_NOT_FOUND("User not found!"),
     CLIENT_NOT_FOUND("Client not found!"),
@@ -43,10 +43,11 @@ public enum IdentityMessages{
     public String format(Object... args) {
         return String.format(message, args);
     }
+
     private final String message;
 
 
-    IdentityMessages(String message){
+    IdentityMessages(String message) {
         this.message = message;
     }
 

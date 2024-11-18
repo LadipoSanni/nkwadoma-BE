@@ -1,24 +1,23 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.*;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.math.*;
+import java.time.*;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -45,12 +44,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product {} created successfully", loanProduct.getName());
         return loanProductOutputPort.save(loanProduct);
     }
+
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateDataElement(loanProduct.getId());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
+
     @Override
     public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
         return loanProductOutputPort.findAllLoanProduct(loanProduct);
@@ -61,12 +62,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
-        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
+        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()) {
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-        log.info("Loan product updated {}",  foundLoanProduct);
+        log.info("Loan product updated {}", foundLoanProduct);
 
         return loanProductOutputPort.save(foundLoanProduct);
     }
@@ -107,8 +108,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             createLoanRequest(loanRequest);
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
-        }
-        else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+        } else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
             MeedlValidator.validateDataElement(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setReasonForDeclining(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);

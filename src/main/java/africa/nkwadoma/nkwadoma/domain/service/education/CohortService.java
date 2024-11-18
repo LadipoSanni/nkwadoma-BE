@@ -1,23 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.RequiredArgsConstructor;
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import lombok.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
-
-import java.util.List;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.*;
 
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
@@ -34,11 +29,11 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
-        return cohortOutputPort.viewCohortDetails(userId,programId,cohortId);
+        return cohortOutputPort.viewCohortDetails(userId, programId, cohortId);
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInAProgram(String programId,int pageNumber, int pageSize) throws MeedlException {
+    public Page<Cohort> viewAllCohortInAProgram(String programId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
@@ -64,16 +59,18 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
+        return cohortOutputPort.searchForCohortInAProgram(cohortName, programId);
     }
 
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
-        Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
+        Cohort foundCohort = viewCohortDetails(userId, programId, cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort);
         cohortLoanees
                 .forEach(this::inviteTrainee);
 
     }
-    private void inviteTrainee(Loanee loanee){}
+
+    private void inviteTrainee(Loanee loanee) {
+    }
 }

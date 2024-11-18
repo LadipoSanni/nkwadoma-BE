@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

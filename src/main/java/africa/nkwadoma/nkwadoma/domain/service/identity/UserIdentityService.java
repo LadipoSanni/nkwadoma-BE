@@ -1,43 +1,33 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.nimbusds.jwt.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
 import org.keycloak.representations.*;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.keycloak.representations.idm.*;
+import org.springframework.scheduling.annotation.*;
+import org.springframework.security.crypto.password.*;
 
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.text.*;
+import java.time.*;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
 @Slf4j
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase  {
+public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -67,8 +57,9 @@ public class UserIdentityService implements CreateUserUseCase  {
 
         return userIdentity;
     }
+
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
+    public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
         UserIdentityValidator.validateDataElement(userIdentity.getEmail());
         UserIdentityValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
@@ -79,14 +70,16 @@ public class UserIdentityService implements CreateUserUseCase  {
         identityManagerOutPutPort.logout(userIdentity);
         blackListedTokenAdapter.blackListToken(createBlackList(userIdentity.getAccessToken()));
     }
-    private BlackListedToken createBlackList(String accessToken){
+
+    private BlackListedToken createBlackList(String accessToken) {
         BlackListedToken blackListedToken = new BlackListedToken();
         blackListedToken.setAccess_token(accessToken);
         return blackListedToken;
     }
+
     @Scheduled(cron = "0 0 8,20 * * *") // Runs at 8 AM and 8 PM every day
     public void clearBlackListedToken() throws MeedlException {
-        if(!blackListedTokenAdapter.findAll().isEmpty()) {
+        if (!blackListedTokenAdapter.findAll().isEmpty()) {
             for (BlackListedToken blackListedToken : blackListedTokenAdapter.findAll()) {
                 if (isExpired(blackListedToken.getAccess_token())) {
                     blackListedTokenAdapter.deleteToken(blackListedToken);
@@ -102,9 +95,10 @@ public class UserIdentityService implements CreateUserUseCase  {
             Date expirationDate = jwt.getJWTClaimsSet().getExpirationTime();
             return Objects.requireNonNull(expirationDate).toInstant().isBefore(Instant.now());
         } catch (ParseException e) {
-            throw new MeedlException("Parse error...  : "+ e.getMessage());
+            throw new MeedlException("Parse error...  : " + e.getMessage());
         }
     }
+
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
@@ -132,7 +126,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
-        if(checkNewPasswordMatchLastFive(userIdentity)){
+        if (checkNewPasswordMatchLastFive(userIdentity)) {
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
         userIdentity.setPassword(userIdentity.getNewPassword());
@@ -153,6 +147,7 @@ public class UserIdentityService implements CreateUserUseCase  {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
     }
+
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
@@ -177,7 +172,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     }
 
     @Override
-    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
+    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) {
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
     }

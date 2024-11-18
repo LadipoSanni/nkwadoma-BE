@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
-
-import java.util.List;
 
 @Setter
 @Getter

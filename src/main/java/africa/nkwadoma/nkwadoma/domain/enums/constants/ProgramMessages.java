@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants;
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 public enum ProgramMessages {
@@ -11,6 +11,7 @@ public enum ProgramMessages {
     COHORT_EXISTS("Program with cohort cannot be deleted"),
     INVALID_SERVICE_OFFERING("Service Offering must be TRAINING");
     private final String message;
+
     ProgramMessages(String message) {
         this.message = message;
     }

@@ -1,17 +1,12 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import org.keycloak.admin.client.resource.ClientResource;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import org.keycloak.admin.client.resource.*;
+import org.keycloak.representations.*;
+import org.keycloak.representations.idm.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
@@ -21,7 +16,9 @@ public interface IdentityManagerOutputPort {
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
+
     UserIdentity createPassword(String email, String password) throws MeedlException;
+
     void logout(UserIdentity userIdentity) throws MeedlException;
 
     void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
@@ -32,11 +29,12 @@ public interface IdentityManagerOutputPort {
 
     void resetPassword(UserIdentity userIdentity) throws MeedlException;
 
-    void setPassword(UserIdentity userIdentity)throws MeedlException;
+    void setPassword(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException;
 
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
+
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
 
@@ -47,6 +45,7 @@ public interface IdentityManagerOutputPort {
     List<UserRepresentation> getUserRepresentations(UserIdentity userIdentity);
 
     UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
+
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
     ClientResource getClientResource(String clientId);

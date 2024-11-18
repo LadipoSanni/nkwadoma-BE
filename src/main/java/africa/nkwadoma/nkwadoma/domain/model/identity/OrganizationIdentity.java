@@ -3,8 +3,8 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.*;
+import java.util.*;
 
 @Setter
 @Getter

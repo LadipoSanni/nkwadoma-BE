@@ -1,11 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserConstants.INVALID_EMAIL;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserConstants.INVALID_FIRST_NAME;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.UserConstants.*;
 
 public class UserValidator {
     public static void validateUserInput(UserIdentity user) throws MeedlException {
@@ -15,6 +14,7 @@ public class UserValidator {
 //        if (user.getRole() == null) throwException(INVALID_ROLE);
 
     }
+
     private static void throwException(String message) throws MeedlException {
 //        log.error(message);
         throw new MeedlException(message);

@@ -1,22 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.glassfish.jaxb.core.v2.*;
-import org.hibernate.validator.internal.constraintvalidators.hv.*;
+import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
+import org.apache.commons.validator.routines.*;
 
 import java.math.*;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_PATTERN;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.WEAK_PASSWORD;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @Slf4j
@@ -36,6 +30,7 @@ public class MeedlValidator {
             throw new MeedlException(UUID_NOT_VALID.getMessage());
         }
     }
+
     public static void validateDataElement(String dataElement) throws MeedlException {
         if (isEmptyString(dataElement)) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
@@ -47,24 +42,25 @@ public class MeedlValidator {
     }
 
     public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 
     public static void validateFloatDataElement(Float dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
+
     public static void validateIntegerDataElement(int dataElement) throws MeedlException {
-        if (dataElement == 0){
+        if (dataElement == 0) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 
     public static void validateObjectInstance(Object instance) throws MeedlException {
-        if (ObjectUtils.isEmpty(instance)){
+        if (ObjectUtils.isEmpty(instance)) {
             throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
         }
     }
@@ -82,10 +78,11 @@ public class MeedlValidator {
     }
 
     public static void validateDoubleDataElement(Double dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
+
     public static void validatePassword(String password) throws MeedlException {
         validateDataElement(password);
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());

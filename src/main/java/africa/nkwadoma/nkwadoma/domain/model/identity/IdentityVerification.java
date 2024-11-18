@@ -1,13 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.*;
 
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 @Slf4j
 @Setter
@@ -43,7 +42,7 @@ public class IdentityVerification {
 
     }
 
-    private enum IdentityVerificationEnum{
+    private enum IdentityVerificationEnum {
         BVN, NIN
     }
 }

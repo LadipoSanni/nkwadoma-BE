@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import lombok.*;
 
 @Getter

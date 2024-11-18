@@ -1,35 +1,26 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.math.*;
+import java.time.*;
+import java.util.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -94,7 +85,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
-        if (foundUserIdentity.isPresent()){
+        if (foundUserIdentity.isPresent()) {
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
@@ -106,19 +97,19 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
-        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0){
+        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0) {
             throw new CohortException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
-        if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0 ){
+        if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0) {
             throw new CohortException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws CohortException {
-        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())){
+        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }

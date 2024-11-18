@@ -2,16 +2,12 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
-import jakarta.persistence.*;
 import lombok.*;
 import org.apache.commons.lang3.*;
 
 import java.math.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.*;
 
 @Getter
 @Setter
@@ -44,7 +40,7 @@ public class Program {
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();
-        return  this.pageSize == 0 ? defaultPageSize : this.pageSize;
+        return this.pageSize == 0 ? defaultPageSize : this.pageSize;
     }
 
     public void validate() throws MeedlException {
@@ -53,9 +49,9 @@ public class Program {
     }
 
     public void setName(String name) {
-       if (StringUtils.isNotEmpty(name)) {
-           this.name = name.trim();
-       }
+        if (StringUtils.isNotEmpty(name)) {
+            this.name = name.trim();
+        }
     }
 
     public BigDecimal getTotalAmountRepaid() {

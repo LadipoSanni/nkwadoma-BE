@@ -1,12 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.*;
 
 @Setter
 @Getter

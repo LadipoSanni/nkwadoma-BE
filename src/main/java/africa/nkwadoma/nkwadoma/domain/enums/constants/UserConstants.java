@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 public enum UserConstants {
