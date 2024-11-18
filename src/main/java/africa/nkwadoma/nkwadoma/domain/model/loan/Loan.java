@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,11 +18,11 @@ public class Loan {
     private LocalDateTime lastUpdatedDate;
 
 //    private LoanOffer loanOffer;
-
-    public void setStartDate(LocalDateTime startDate) throws MeedlException {
-        if (startDate.isAfter(LocalDateTime.now())) {
-            throw new MeedlException("Start date cannot be in the future.");
-        }
-        this.startDate = startDate;
+    public void validate() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
+        MeedlValidator.validateDataElement(loanAccountId);
+        MeedlValidator.validateObjectInstance(startDate);
     }
+
 }

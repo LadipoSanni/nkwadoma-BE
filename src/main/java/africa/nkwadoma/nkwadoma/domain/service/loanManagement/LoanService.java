@@ -83,7 +83,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loan.setLoanee(foundLoanee);
         loan.setLoanAccountId(generateLoanAccountId(foundLoanee));
         loan.setStartDate(LocalDateTime.now());
-
+        if (loan.getStartDate().isAfter(LocalDateTime.now())) {
+            throw new MeedlException("Start date cannot be in the future.");
+        }
         loanOutputPort.save(loan);
         return null;
     }
