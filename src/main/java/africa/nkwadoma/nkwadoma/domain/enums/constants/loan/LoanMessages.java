@@ -26,7 +26,8 @@ public enum LoanMessages {
     LOAN_ID_REQUIRED("Loan id is required"),
     TENOR_STATUS_MONTH_BOND("Tenor should be between 1 TO 120 months"),
     LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED("Loan referral must be accepted"),
-    LOAN_REFERRAL_NOT_FOUND("Loan referral not found");
+    LOAN_REFERRAL_NOT_FOUND("Loan referral not found"),
+    LOANEE_NOT_FOUND("Loanee not found"),;
     private final String message;
 
     LoanMessages(String message) {

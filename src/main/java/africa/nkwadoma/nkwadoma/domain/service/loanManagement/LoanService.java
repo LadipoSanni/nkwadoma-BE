@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -10,6 +11,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.StartLoanRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.StartLoanResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +30,14 @@ import java.util.*;
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
         RespondToLoanReferralUseCase, LoanRequestUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanRequestOutputPort loanRequestOutputPort;
+    private final LoanOutputPort loanOutputPort;
 
 
     @Override
@@ -68,6 +73,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product updated {}",  foundLoanProduct);
 
         return loanProductOutputPort.save(foundLoanProduct);
+    }
+
+    @Override
+    public StartLoanResponse startLoan(StartLoanRequest request) throws MeedlException {
+        Loanee foundLoanee = loaneeOutputPort.findByUserId(request.getLoaneeId())
+                .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
+        Loan loan = new Loan();
+        loan.setLoanee(foundLoanee);
+        loan.setLoanAccountId(generateLoanAccountId(foundLoanee));
+        loan.setStartDate(LocalDateTime.now());
+
+        loanOutputPort.save(loan);
+        return null;
+    }
+
+    private String generateLoanAccountId(Loanee foundLoanee) {
+        return null;
     }
 
     @Override

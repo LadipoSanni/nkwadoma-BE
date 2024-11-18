@@ -5,12 +5,14 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductViewAllRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.StartLoanRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -63,6 +65,7 @@ public class LoanController {
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @PostMapping("/loan-product/update")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
         log.info("Update loan product called with id .... {}", request.getId());
@@ -101,6 +104,7 @@ public class LoanController {
 
 
     @GetMapping("/loan-product/view-details-by-id")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
                                                                           @NotBlank(message = "Provide a valid loan product identifier")
@@ -129,5 +133,16 @@ public class LoanController {
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+    }
+    @PostMapping("start")
+    public ResponseEntity<ApiResponse<?>> startLoan(@RequestBody StartLoanRequest request) throws MeedlException {
+        log.info("Start loan called.... ");
+        StartLoanResponse startLoanResponse = createLoanProductUseCase.startLoan(request);
+        ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
+               .data(startLoanResponse)
+//               .message(LOAN_START_SUCCESS)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
