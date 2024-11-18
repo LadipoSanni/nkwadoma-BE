@@ -5,7 +5,11 @@ import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CohortMapper {
@@ -15,9 +19,12 @@ public interface CohortMapper {
 
     Cohort toCohort(CohortEntity cohortEntity);
 
-    Cohort cohortToUpdateCohort(Cohort cohort);
-
     LoanBreakdownEntity mapToLoanBreakdownEntity(LoanBreakdown loanBreakdown);
 
     LoanBreakdown mapToLoanBreakdown(LoanBreakdownEntity loanBreakdownEntity);
+
+    List<Cohort> toCohortList(List<CohortEntity> cohortEntities);
+    Cohort mapFromCohortToCohort(Cohort cohort);
+
+    void updateCohort(@MappingTarget Cohort foundCohort, Cohort cohort);
 }
