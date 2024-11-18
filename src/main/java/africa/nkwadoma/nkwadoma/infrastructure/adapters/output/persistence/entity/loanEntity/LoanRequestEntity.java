@@ -24,6 +24,6 @@ public class LoanRequestEntity {
     private String reasonForDecliningLoanRequest;
     @Enumerated(EnumType.STRING)
     private LoanRequestStatus status;
-    @OneToOne
+    @ManyToOne
     private LoaneeEntity loaneeEntity;
 }

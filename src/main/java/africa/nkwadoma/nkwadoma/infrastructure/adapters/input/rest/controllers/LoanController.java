@@ -132,8 +132,9 @@ public class LoanController {
     }
 
     @PostMapping("/respond-to-loan-referral")
-    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(LoanReferralRequest request) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(@Valid @RequestBody LoanReferralRequest request) throws MeedlException {
         LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(request);
+        log.info("Mapped Loan referral from loan referral request: {}", loanReferral);
         LoanReferral updatedLoanReferral = respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(updatedLoanReferral);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()

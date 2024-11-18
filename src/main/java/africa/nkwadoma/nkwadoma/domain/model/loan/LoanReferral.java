@@ -13,8 +13,8 @@ import lombok.*;
 @ToString
 public class LoanReferral {
     private String id;
-    private Loanee loanee;
     private String reasonForDeclining;
+    private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
 
     public void validate() throws MeedlException {

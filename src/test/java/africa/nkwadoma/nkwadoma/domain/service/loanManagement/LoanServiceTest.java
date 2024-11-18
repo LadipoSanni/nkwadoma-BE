@@ -132,6 +132,7 @@ class LoanServiceTest {
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
             assertNotNull(createdLoanRequest);
+            assertEquals(LoanRequestStatus.NEW, createdLoanRequest.getStatus());
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -169,12 +170,6 @@ class LoanServiceTest {
     @Test
     void createLoanRequestWithNullDateTimeApproved() {
         loanRequest.setDateTimeApproved(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanRequestStatus() {
-        loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 

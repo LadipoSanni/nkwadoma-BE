@@ -27,7 +27,6 @@ public class LoanRequest {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
-        MeedlValidator.validateObjectInstance(status);
         MeedlValidator.validateObjectInstance(dateTimeApproved);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
     }

@@ -118,7 +118,7 @@ class LoanReferralAdapterTest {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);

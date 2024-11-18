@@ -15,5 +15,5 @@ public class LoanReferralRequest {
     private String id;
     private String reasonForDeclining;
     @Pattern(regexp = ControllerConstant.LOAN_REFERRAL_STATUS_TYPE, message = "Loan referral status must be accepted or declined")
-    private LoanReferralStatus loanReferralStatus;
+    private String loanReferralStatus;
 }

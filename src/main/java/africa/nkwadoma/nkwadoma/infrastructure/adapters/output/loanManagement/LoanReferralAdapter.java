@@ -22,9 +22,11 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public LoanReferral saveLoanReferral(LoanReferral loanReferral) throws MeedlException {
+        log.info("Saving loan referral: {}", loanReferral);
         MeedlValidator.validateObjectInstance(loanReferral);
         LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
         LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);
+        log.info("Loan Referral saved successfully: {}", savedLoanReferralEntity);
         return loanReferralMapper.toLoanReferral(savedLoanReferralEntity);
     }
 
@@ -37,7 +39,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         if (loanReferralEntity.isEmpty()) {
             return Optional.empty();
         }
-        log.info("Found loan referral: {}", loanReferralEntity.get());
+        log.info("Found loan referral entity: {}", loanReferralEntity.get());
         return Optional.of(loanReferralMapper.toLoanReferral(loanReferralEntity.get()));
     }
 

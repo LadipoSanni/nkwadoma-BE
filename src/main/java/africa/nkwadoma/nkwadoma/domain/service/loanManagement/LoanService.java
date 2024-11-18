@@ -110,22 +110,28 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
         }
         else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+            log.info("Declining Loan referral");
             MeedlValidator.validateDataElement(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setReasonForDeclining(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
+            log.debug("LoanReferral: {}", updatedLoanReferral);
         }
+        log.debug("Updated loan referral: {}", updatedLoanReferral);
         return updatedLoanReferral;
     }
 
     @Override
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        log.info("Creating loan request");
         MeedlValidator.validateObjectInstance(loanRequest);
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
         if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
+        loanRequest.setStatus(LoanRequestStatus.NEW);
+        loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequestOutputPort.save(loanRequest);
     }
 }
