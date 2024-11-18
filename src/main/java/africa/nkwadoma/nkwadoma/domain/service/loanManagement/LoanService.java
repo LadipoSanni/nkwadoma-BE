@@ -29,6 +29,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
+    private final LoanReferralMapper loanReferralMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
@@ -94,11 +95,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
         MeedlValidator.validateUUID(loanReferral.getId());
-        Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId());
-        if (foundLoanReferral.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        return updateLoanReferral(foundLoanReferral.get());
+        LoanReferral foundLoanReferral = viewLoanReferral(loanReferral);
+        LoanReferral mappedLoanReferral = loanReferralMapper.updateLoanReferral(loanReferral, foundLoanReferral);
+        return updateLoanReferral(mappedLoanReferral);
     }
 
     private LoanReferral updateLoanReferral(LoanReferral updatedLoanReferral) throws MeedlException {
@@ -110,20 +109,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
         }
         else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
-            log.info("Declining Loan referral");
             MeedlValidator.validateDataElement(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setReasonForDeclining(updatedLoanReferral.getReasonForDeclining());
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
-            log.debug("LoanReferral: {}", updatedLoanReferral);
         }
-        log.debug("Updated loan referral: {}", updatedLoanReferral);
+        log.info("Updated loan referral: {}", updatedLoanReferral);
         return updatedLoanReferral;
     }
 
     @Override
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        log.info("Creating loan request");
         MeedlValidator.validateObjectInstance(loanRequest);
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());

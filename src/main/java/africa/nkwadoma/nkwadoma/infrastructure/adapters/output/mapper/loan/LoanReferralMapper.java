@@ -12,4 +12,6 @@ public interface LoanReferralMapper {
 
     @InheritInverseConfiguration
     LoanReferral toLoanReferral(LoanReferralEntity savedLoanReferralEntity);
+
+    LoanReferral updateLoanReferral(LoanReferral loanReferralDto, @MappingTarget LoanReferral foundLoanReferral);
 }

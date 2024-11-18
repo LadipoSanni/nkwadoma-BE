@@ -12,6 +12,5 @@ import lombok.*;
 @ToString
 public class LoanReferralResponse {
     private String id;
-    private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
 }
