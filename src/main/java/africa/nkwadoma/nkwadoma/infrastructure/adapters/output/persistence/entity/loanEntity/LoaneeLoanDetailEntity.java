@@ -18,6 +18,4 @@ public class LoaneeLoanDetailEntity {
     private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<LoanBreakdownEntity> loanBreakdown;
 }

@@ -23,7 +23,7 @@ public class LoaneeEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @OneToOne
-    private UserEntity loanee;
+    private UserEntity userIdentity;
     @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }
