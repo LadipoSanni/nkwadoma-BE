@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +20,7 @@ public class CreateCohortRequest {
     private String cohortDescription;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
     private String name;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private LocalDate startDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private LoanDetailRequest LoanDetail;
 }

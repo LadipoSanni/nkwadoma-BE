@@ -20,6 +20,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -47,12 +48,13 @@ public class CohortService implements CohortUseCase {
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
-        activateStatus(cohort);
         ProgramCohort programCohort = new ProgramCohort();
         if (cohort.getLoanDetail() != null) {
             LoanDetail loanDetail = loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
             cohort.setLoanDetail(loanDetail);
         }
+        cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
+        activateStatus(cohort);
         Cohort savedCohort = cohortOutputPort.save(cohort);
         List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort.getLoanBreakdowns(), savedCohort);
         linkCohortToProgram(program, programCohort, savedCohort);
@@ -90,12 +92,16 @@ public class CohortService implements CohortUseCase {
     public Cohort editCohort(Cohort cohort) throws MeedlException {
         cohort.updateValidation();
         Cohort foundCohort = cohortOutputPort.findCohort(cohort.getId());
+        Program program = programOutputPort.findProgramById(foundCohort.getProgramId());
         checkIfCohortNameExist(cohort, foundCohort);
         if (foundCohort.getLoanDetail() != null) {
             throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
         }
         cohortMapper.updateCohort(foundCohort,cohort);
         foundCohort.setUpdatedAt(LocalDateTime.now());
+        if (cohort.getStartDate() != null){
+            foundCohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
+        }
         activateStatus(foundCohort);
         List<LoanBreakdown> foundLoanBreakDown = loanBreakdownOutputPort.findAllByCohortId(cohort.getId());
         cohortOutputPort.save(foundCohort);
@@ -123,7 +129,7 @@ public class CohortService implements CohortUseCase {
     }
 
     private static void activateStatus(Cohort cohort) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         if (cohort.getStartDate().isAfter(now)) {
             cohort.setActivationStatus(ActivationStatus.INACTIVE);
             cohort.setCohortStatus(CohortStatus.INCOMING);

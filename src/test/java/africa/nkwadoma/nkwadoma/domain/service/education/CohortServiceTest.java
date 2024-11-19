@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 
 import java.math.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -55,15 +56,15 @@ class CohortServiceTest {
         program = Program.builder().id(mockId).name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 createdBy("875565").deliveryType(DeliveryType.ONSITE).
-                mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
+                mode(ProgramMode.FULL_TIME).duration(7).build();
 
         elites = new Cohort();
         elites.setId(mockId);
         elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(mockId);
-        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setStartDate(LocalDate.of(2024,11,29));
+        elites.setExpectedEndDate(LocalDate.of( 2025,6,29));
         elites.setTuitionAmount(BigDecimal.valueOf(2000));
         programCohort = new ProgramCohort();
         programCohort.setCohort(elites);
@@ -73,8 +74,8 @@ class CohortServiceTest {
         xplorers.setName("xplorers");
         xplorers.setProgramId(program.getId());
         xplorers.setCreatedBy(mockId);
-        xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        xplorers.setStartDate(LocalDate.of(2024,1,2));
+        xplorers.setExpectedEndDate(LocalDate.of(2024,8,2));
         xplorers.setTuitionAmount(BigDecimal.valueOf(2000));
 
         loanBreakdown = new LoanBreakdown();
@@ -93,6 +94,7 @@ class CohortServiceTest {
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
+            assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -331,6 +333,7 @@ class CohortServiceTest {
             elites.setId(mockId);
             elites.setName("edited cohort");
             elites.setUpdatedBy(mockId);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.findCohort(elites.getId())).thenReturn(elites);
             when(cohortOutputPort.findCohortByName(elites.getName())).thenReturn(elites);
             when(loanBreakdownOutputPort.findAllByCohortId(elites.getId())).thenReturn(List.of(loanBreakdown));

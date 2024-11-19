@@ -75,8 +75,7 @@ class ProgramPersistenceAdapterTest {
         designThinking.setDurationType(DurationType.YEARS);
 
         elites = new Cohort();
-        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setName("Elite");
         elites.setCreatedBy(userIdentity.getCreatedBy());
 
