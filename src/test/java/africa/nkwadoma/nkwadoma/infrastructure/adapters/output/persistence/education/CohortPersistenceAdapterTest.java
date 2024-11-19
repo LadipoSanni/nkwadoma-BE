@@ -83,7 +83,7 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        meedleUser =  UserIdentity.builder().id(id).email("qudusa55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
         employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).build();
