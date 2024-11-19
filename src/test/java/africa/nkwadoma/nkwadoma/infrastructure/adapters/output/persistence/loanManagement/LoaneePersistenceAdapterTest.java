@@ -223,7 +223,9 @@ class LoaneePersistenceAdapterTest {
 //        identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
-        loanBreakdownOutputPort.deleteAll(loanBreakdownList);
+        if (loanBreakdownList != null){
+            loanBreakdownOutputPort.deleteAll(loanBreakdownList);
+        }
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
 }

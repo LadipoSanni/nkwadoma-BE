@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.loan;
 
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 import java.util.*;
 
