@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -30,6 +31,7 @@ import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
+import static africa.nkwadoma.nkwadoma.test.data.TestData.createTestUserIdentity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -51,28 +53,8 @@ class KeycloakAdapterTest {
 
     @BeforeEach
     void setUp() {
-        john = new UserIdentity();
-        john.setFirstName("John");
-        john.setLastName("Max");
-        john.setEmail("johnmax@lendspace.com");
-        john.setRole(PORTFOLIO_MANAGER);
-
-        peter = new UserIdentity();
-        peter.setFirstName("Peter");
-        peter.setLastName("Mark");
-        peter.setEmail("peter@lendspace.com");
-        peter.setRole(IdentityRole.LOANEE);
-
-        List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder()
-                .industry(Industry.EDUCATION)
-                .name("TRAINING")
-                .build());
-
-        organizationIdentity = new OrganizationIdentity();
-        organizationIdentity.setEmail("organ@test.com");
-        organizationIdentity.setServiceOfferings(serviceOfferings);
-        organizationIdentity.setName("Till the end");
-
+        john = TestData.createTestUserIdentity("johnmax@lendspace.com");
+        peter = TestData.createTestUserIdentity("peter@lendspace.com");
 
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setMeedlUser(peter);
@@ -80,18 +62,7 @@ class KeycloakAdapterTest {
         List<OrganizationEmployeeIdentity> employeePeter = new ArrayList<>();
         employeePeter.add(employeeIdentity);
 
-        rizzGallery = new OrganizationIdentity();
-//        rizzGallery.setId("5bc2ef97-1035-4e42-bc8b-22a90b809f7c");
-        rizzGallery.setName("Rizz Gallery");
-        rizzGallery.setEmail("rizzyJane@gmail.com");
-        rizzGallery.setTin("7682-5627");
-        rizzGallery.setRcNumber("RC87899");
-        rizzGallery.setServiceOfferings(List.of(new ServiceOffering()));
-        rizzGallery.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
-        rizzGallery.setPhoneNumber("09876365713");
-        rizzGallery.setInvitedDate(LocalDateTime.now().toString());
-        rizzGallery.setWebsiteAddress("rizzgallery.org");
-        rizzGallery.setOrganizationEmployees(employeePeter);
+        rizzGallery = TestData.createOrganizationTestData("Rizz Gallery", "RC87899",employeePeter);
     }
 
     @Test
