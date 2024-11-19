@@ -6,7 +6,9 @@ import org.springframework.data.domain.*;
 
 public interface CohortUseCase {
 
-    Cohort createOrEditCohort(Cohort cohort) throws MeedlException;
+
+    Cohort createCohort(Cohort cohort)  throws MeedlException;
+    Cohort editCohort(Cohort cohort) throws MeedlException;
 
     Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
 

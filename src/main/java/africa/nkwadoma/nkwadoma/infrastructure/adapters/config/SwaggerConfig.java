@@ -14,23 +14,26 @@ import java.util.*;
 public class SwaggerConfig {
     @Value("${springdoc.swagger-ui.env.url}")
     private String swaggerEnvPath;
+
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme().type(SecurityScheme.Type.HTTP)
                 .bearerFormat("JWT")
                 .scheme("bearer");
     }
 
+    
     @Bean
     public OpenAPI openAPI() {
         Server server = new Server();
         server.setUrl(swaggerEnvPath);
+        Server localServer = new Server();
+        localServer.setUrl("http://localhost:8081");
 
-        return new OpenAPI().servers(List.of(server)).addSecurityItem(new SecurityRequirement().
+        return new OpenAPI().servers(List.of(server, localServer)).addSecurityItem(new SecurityRequirement().
                         addList("Bearer Authentication"))
                 .components(new Components().addSecuritySchemes
                         ("Bearer Authentication", createAPIKeyScheme()))
                 .info(new Info().title("Meedl API Documentation")
-//                        .description("Some custom description of API.")
                         .version("1.0")
                 );
     }
