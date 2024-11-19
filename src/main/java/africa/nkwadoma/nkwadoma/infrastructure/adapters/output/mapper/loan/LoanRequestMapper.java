@@ -7,7 +7,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanRequestMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
-    @Mapping(target = "loaneeEntity.loanee", source = "loanee.userIdentity")
+    @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
     @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
     LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 

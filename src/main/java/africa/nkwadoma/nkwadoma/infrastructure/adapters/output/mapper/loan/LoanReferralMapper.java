@@ -7,7 +7,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanReferralMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
-    @Mapping(target = "loaneeEntity.loanee", source = "loanee.userIdentity")
+    @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
     LoanReferralEntity toLoanReferralEntity(LoanReferral loanReferral);
 
     @InheritInverseConfiguration

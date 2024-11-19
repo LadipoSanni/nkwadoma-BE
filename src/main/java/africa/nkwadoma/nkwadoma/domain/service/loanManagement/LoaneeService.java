@@ -46,8 +46,9 @@ public class LoaneeService implements LoaneeUseCase {
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         loanee.setCreatedAt(LocalDateTime.now());
-        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown());
-        saveLoaneeLoanDetails(loanee, loanBreakdowns);
+        saveLoaneeLoanDetails(loanee);
+        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown(),
+                loanee.getLoaneeLoanDetail());
         loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
         loanee = createLoaneeAccount(loanee);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
@@ -55,11 +56,16 @@ public class LoaneeService implements LoaneeUseCase {
         return loanee;
     }
 
-    private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
+    @Override
+    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        return loaneeOutputPort.findLoaneeById(id);
+    }
+
+    private void saveLoaneeLoanDetails(Loanee loanee) {
         LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
         loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
         loaneeLoanDetail.setAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
-        loaneeLoanDetail.setLoanBreakdown(loanBreakdowns);
         loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
     }

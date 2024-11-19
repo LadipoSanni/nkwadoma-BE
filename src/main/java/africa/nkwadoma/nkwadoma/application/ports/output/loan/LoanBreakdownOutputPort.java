@@ -8,5 +8,9 @@ public interface LoanBreakdownOutputPort {
     List<LoanBreakdown> findAllByCohortId(String id);
 
 
-    List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown);
+    List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail);
+
+    void deleteAll(List<LoanBreakdown> loanBreakdownList);
+
+    List<LoanBreakdown> saveAllLoanBreakDown(List<LoanBreakdown> loanBreakdown);
 }

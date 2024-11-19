@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import lombok.*;
 
 import java.math.*;

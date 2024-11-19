@@ -6,7 +6,8 @@ import lombok.*;
 @Getter
 public enum LoaneeMessages {
 
-    LOANEE_WITH_EMAIL_EXIST_IN_COHORT("Loanee With Email Exist In Cohort");
+    LOANEE_WITH_EMAIL_EXIST_IN_COHORT("Loanee With Email Exist In Cohort"),
+    LOANEE_NOT_FOUND("Loanee Not Found");
 
     private final String message;
 
