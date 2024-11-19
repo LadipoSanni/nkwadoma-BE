@@ -18,6 +18,8 @@ public class TestData {
         userIdentity.setFirstName("Peter");
         userIdentity.setLastName("Mark");
         userIdentity.setEmail(email);
+        userIdentity.setPhoneNumber("090876536217");
+        userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
         userIdentity.setRole(IdentityRole.LOANEE);
         return userIdentity;

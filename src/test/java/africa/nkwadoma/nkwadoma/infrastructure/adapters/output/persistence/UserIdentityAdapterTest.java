@@ -30,16 +30,6 @@ class UserIdentityAdapterTest {
     void setUp(){
         john = new UserIdentity();
         john = TestData.createTestUserIdentity("john@johnson.com");
-//        john.setFirstName("John");
-//        john.setLastName("Johnson");
-//        john.setEmail("john@johnson.com");
-//        john.setId("2c521790-563a-4449-a4bd-459bd5a2d4d7");
-//        john.setPhoneNumber("09087655454");
-//        john.setEmailVerified(false);
-//        john.setEnabled(false);
-//        john.setCreatedAt(LocalDateTime.now().toString());
-//        john.setRole(LOANEE);
-//        john.setCreatedBy("2c521790-563a-4449-a4bd-459bd5a2d4d7");
 
     }
 
