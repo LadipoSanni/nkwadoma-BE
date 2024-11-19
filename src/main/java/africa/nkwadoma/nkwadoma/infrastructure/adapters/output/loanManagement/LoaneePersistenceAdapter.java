@@ -2,7 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -49,7 +51,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public Loanee findByLoaneeEmail(String email) throws MeedlException {
         MeedlValidator.validateEmail(email);
         Optional<UserIdentity> userIdentity = identityManagerOutputPort.getUserByEmail(email);
-        LoaneeEntity loaneeEntity = loaneeRepository.findByLoaneeEmail(email);
+        LoaneeEntity loaneeEntity = loaneeRepository.findLoaneeByUserIdentityEmail(email);
         return loaneeMapper.toLoanee(loaneeEntity);
     }
 
@@ -61,12 +63,20 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Optional<Loanee> findByUserId(String userId) {
-        Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findByLoaneeId(userId);
+        Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findLoaneeByUserIdentityId(userId);
         if (loaneeEntity.isEmpty()) {
             return Optional.empty();
         }
         Loanee loanee = loaneeMapper.toLoanee(loaneeEntity.get());
         return Optional.of(loanee);
+    }
+
+    @Override
+    public Loanee findLoaneeById(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId);
+        LoaneeEntity loaneeEntity = loaneeRepository.findById(loaneeId)
+                 .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
+        return loaneeMapper.toLoanee(loaneeEntity);
     }
 
 }

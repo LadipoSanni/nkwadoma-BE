@@ -83,7 +83,7 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        meedleUser =  UserIdentity.builder().id(id).email("qudusa55@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
         employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).build();
@@ -120,7 +120,7 @@ class CohortPersistenceAdapterTest {
             programId = program.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
-            loanBreakdowns = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
@@ -177,6 +177,17 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com","3gdgttebdindndd673ydieyendjdljdh"})
     void saveCohortWithInvalidCreator(String createdBy){
         elites.setCreatedBy(createdBy);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+
+    @Test
+    void saveCohortWithNullStartDate(){
+        elites.setStartDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+    @Test
+    void saveCohortWithNullEndDate(){
+        elites.setExpectedEndDate(null);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 
