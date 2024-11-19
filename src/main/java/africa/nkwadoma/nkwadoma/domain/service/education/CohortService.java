@@ -119,7 +119,7 @@ public class CohortService implements CohortUseCase {
         List<LoanBreakdown> loanBreakdowns = breakdowns.stream()
                 .peek(loanBreakdownObject -> loanBreakdownObject.setCohort(savedCohort))
                 .toList();
-        return loanBreakdownOutputPort.saveAll(loanBreakdowns);
+        return loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
     }
 
     private static void activateStatus(Cohort cohort) {
