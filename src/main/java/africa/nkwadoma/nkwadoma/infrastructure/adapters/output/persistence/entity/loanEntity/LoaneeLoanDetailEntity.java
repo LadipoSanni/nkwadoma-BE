@@ -13,12 +13,11 @@ import java.util.List;
 @Getter
 @Entity
 public class LoaneeLoanDetailEntity {
-
     @Id
     @UuidGenerator
     private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<LoanBreakdownEntity> loanBreakdown;
 }

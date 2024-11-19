@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoaneeLoanDetail {
-
     private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;

@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @ToString
@@ -15,13 +16,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Loanee {
-
     private String id;
     private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentity loanee;
+    private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeStatus loaneeStatus;
     private LocalDateTime referralDateTime;
@@ -29,10 +29,10 @@ public class Loanee {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateEmail(loanee.getEmail());
-        MeedlValidator.validateDataElement(loanee.getFirstName());
-        MeedlValidator.validateDataElement(loanee.getLastName());
+        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getFirstName());
+        MeedlValidator.validateDataElement(userIdentity.getLastName());
         MeedlValidator.validateUUID(cohortId);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);

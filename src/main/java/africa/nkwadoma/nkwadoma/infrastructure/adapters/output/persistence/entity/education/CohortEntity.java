@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +23,9 @@ public class CohortEntity {
     private String name;
     private String programId;
     private String cohortDescription;
+    @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
+    @Enumerated(EnumType.STRING)
     private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

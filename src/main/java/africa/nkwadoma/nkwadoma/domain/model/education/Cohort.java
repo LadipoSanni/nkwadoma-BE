@@ -45,4 +45,9 @@ public class Cohort {
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateUUID(createdBy);
     }
+
+    public void updateValidation() throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(updatedBy);
+    }
 }

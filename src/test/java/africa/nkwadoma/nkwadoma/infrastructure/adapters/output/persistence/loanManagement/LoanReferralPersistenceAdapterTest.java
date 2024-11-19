@@ -57,19 +57,20 @@ public class LoanReferralPersistenceAdapterTest {
     @BeforeAll
     void setUp() {
         userIdentity = UserIdentity.builder().email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
-                .createdBy(id).role(IdentityRole.LOANEE).build();
+                .createdBy(id).role(IdentityRole.LOANEE).alternateContactAddress("312 semicolon africa")
+                .alternatePhoneNumber("09079447913").alternateEmail("adeshina22@gmail,com").build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
                 .currency("usd").build();
-        loanee = Loanee.builder().cohortId(id).build();
+//        loanee = Loanee.builder().cohortId(id).build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
             loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loanee = Loanee.builder().cohortId(id).createdBy(userIdentity.getId()).loanee(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = Loanee.builder().cohortId(id).createdBy(userIdentity.getId()).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeOutputPort.save(loanee);
         } catch (MeedlException e) {
             log.error(e.getMessage());

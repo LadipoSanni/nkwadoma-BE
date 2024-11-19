@@ -1,16 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import lombok.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
-@Setter
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class LoanReferral {
 
@@ -21,6 +23,9 @@ public class LoanReferral {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanReferralStatus);
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateEmail());
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber());
     }
 
 }

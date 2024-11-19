@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -9,12 +9,11 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.ProgramMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.ProgramMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +55,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         program.validate();
 
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());;
+        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());
         log.info("The organization identity found when saving program is: {}", organizationIdentity);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
         ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
@@ -67,8 +66,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         programEntity.setOrganizationEntity(organizationEntity);
         programEntity = programRepository.save(programEntity);
         updateOrganization(program, organizationEntity);
-
-        return programMapper.toProgram(programEntity);
+        Program retrivedProgram  = programMapper.toProgram(programEntity);
+        retrivedProgram.setOrganizationId(organizationEntity.getId());
+        return retrivedProgram;
     }
 
     private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
@@ -109,7 +109,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-        return programMapper.toProgram(programEntity);
+        Program program = programMapper.toProgram(programEntity);
+        program.setOrganizationId(programEntity.getOrganizationEntity().getId());
+        return program;
     }
 
     @Override

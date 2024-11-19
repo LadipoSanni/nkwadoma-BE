@@ -34,11 +34,12 @@ public class CohortController {
     private final CohortUseCase cohortUseCase;
     private final CohortRestMapper cohortMapper;
 
-    @PostMapping("cohort")
+    @PostMapping("cohort/create")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> createCohort(@RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
-        cohort = cohortUseCase.createOrEditCohort(cohort);
+        cohort.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        cohort = cohortUseCase.createCohort(cohort);
         CohortResponse cohortResponse = cohortMapper.toCohortResponse(cohort);
         cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
                 .map(cohortMapper::toLoanBreakdownResponse)
@@ -54,10 +55,11 @@ public class CohortController {
     @GetMapping("cohort-details")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewCohortDetails(
-            @RequestParam @NotBlank(message = "User ID is required") String userId,
+            @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
-        Cohort cohort = cohortUseCase.viewCohortDetails(userId, programId, cohortId);
+
+        Cohort cohort = cohortUseCase.viewCohortDetails(meedlUser.getClaimAsString("sub"), programId, cohortId);
         CohortResponse cohortResponse =
                 cohortMapper.toCohortResponse(cohort);
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
@@ -70,9 +72,10 @@ public class CohortController {
 
 
     @PostMapping("cohort/edit")
-    public ResponseEntity<ApiResponse<?>> editCohort(@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser,@RequestBody EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
         Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
-        cohortUseCase.createOrEditCohort(cohort);
+        cohort.setUpdatedBy(meedlUser.getClaimAsString("sub"));
+        cohort = cohortUseCase.editCohort(cohort);
         CohortResponse cohortResponse =
                 cohortMapper.toCohortResponse(cohort);
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
