@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 
@@ -49,10 +52,14 @@ public class ProgramService implements AddProgramUseCase {
     }
 
     @Override
-    public Program viewProgramByName(Program program) throws MeedlException {
+    public List<Program> viewProgramByName(Program program) throws MeedlException {
+        MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getName());
-        String programName = program.getName().trim();
-        return programOutputPort.findProgramByName(programName);
+        List<Program> programByName = programOutputPort.findProgramByName(program.getName().trim());
+        if (programByName.isEmpty()) {
+            throw new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
+        }
+        return programByName;
     }
 
     @Override
