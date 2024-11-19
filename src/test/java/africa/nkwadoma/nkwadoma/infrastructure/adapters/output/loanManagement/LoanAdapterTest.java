@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
@@ -32,6 +33,7 @@ class LoanAdapterTest {
     public void setUp(){
         LoaneeEntity loaneeEntity = new LoaneeEntity();
         loaneeEntity = loaneeRepository.save(loaneeEntity);
+        UserIdentity userIdentity = new UserIdentity();
 
         loan = new Loan();
         loan.setLoanAccountId("account id");
@@ -40,16 +42,16 @@ class LoanAdapterTest {
 
     }
     @Test
-    void saveLoan() {
+    void saveLoan() throws MeedlException {
         Loan savedLoan = null;
-        try {
+//        try {
             savedLoan = loanOutputPort.save(loan);
             savedLoanId = savedLoan.getId();
             log.info("Saved loan: {} ", savedLoan.getId());
-        } catch (MeedlException e) {
-            log.error("Error saving loan {}", e.getMessage());
-            throw new IllegalStateException(e.getMessage());
-        }
+//        } catch (MeedlException e) {
+//            log.error("Error saving loan {}", e.getMessage());
+//            throw new RuntimeException(e.getMessage());
+//        }
 
         assertNotNull(savedLoan);
         assertNotNull(savedLoan.getId());
