@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class ProgramServiceTest {
     void setUp() {
         program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
-                objectives("Program Objectives").createdBy(testId).deliveryType(DeliveryType.ONSITE).
+                createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
     }
 
@@ -57,7 +57,6 @@ class ProgramServiceTest {
             assertEquals(addedProgram.getProgramDescription(), program.getProgramDescription());
             assertEquals(addedProgram.getDurationType(), program.getDurationType());
             assertEquals(addedProgram.getName(), program.getName());
-            assertEquals(addedProgram.getObjectives(), program.getObjectives());
             assertEquals(addedProgram.getProgramStatus(), program.getProgramStatus());
             assertEquals(addedProgram.getDuration(), program.getDuration());
             assertEquals(addedProgram.getMode(), program.getMode());
@@ -177,48 +176,6 @@ class ProgramServiceTest {
             log.error("Error viewing all programs", e);
         }
     }
-
-//    @ParameterizedTest
-//    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
-//    void viewAllProgramsWithSpaces(String organizationId) {
-//        try {
-//            program.setOrganizationId(organizationId);
-//            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
-//                    thenReturn(new PageImpl<>(List.of(program)));
-//            Page<Program> programs = programService.viewAllPrograms(program);
-//            List<Program> programsList = programs.toList();
-//
-//            verify(programOutputPort, times(1)).
-//                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
-//            assertNotNull(programs);
-//            assertNotNull(programsList);
-//            assertEquals(programsList.get(0).getId(), program.getId());
-//            assertEquals(programsList.get(0), program);
-//        } catch (MeedlException e) {
-//            log.error("Error viewing all programs", e);
-//        }
-//    }
-
-//    @ParameterizedTest
-//    @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
-//    void viewProgramsWithSpaces(String organizationId) {
-//        try {
-//            program.setOrganizationId(organizationId);
-//            when(programOutputPort.findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber)).
-//                    thenReturn(new PageImpl<>(List.of(program)));
-//            Page<Program> programs = programService.viewAllPrograms(program);
-//            List<Program> programsList = programs.toList();
-//
-//            assertNotNull(programs);
-//            assertNotNull(programsList);
-//            assertEquals(programsList.get(0).getId(), program.getId());
-//            assertEquals(programsList.get(0), program);
-//            verify(programOutputPort, times(1)).
-//                    findAllPrograms(program.getOrganizationId().trim(), pageSize, pageNumber);
-//        } catch (MeedlException e) {
-//            log.error("Error viewing all programs", e);
-//        }
-//    }
 
     @Test
     void viewProgramByName() {

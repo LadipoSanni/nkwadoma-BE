@@ -34,10 +34,6 @@ import java.util.Optional;
 @Slf4j
 @AllArgsConstructor
 public class LoaneeService implements LoaneeUseCase {
-
-
-
-    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort identityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;

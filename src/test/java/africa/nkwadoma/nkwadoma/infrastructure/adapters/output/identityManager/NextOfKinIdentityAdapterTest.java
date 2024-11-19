@@ -34,7 +34,6 @@ class NextOfKinIdentityAdapterTest {
     private Loanee loanee;
     private String loaneeLoanDetailId;
     private String userId;
-    private String loaneeId;
 
     @BeforeAll
     void init() {
