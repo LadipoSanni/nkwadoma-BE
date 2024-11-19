@@ -211,8 +211,8 @@ public class BeanConfiguration {
 
     @Bean
     public LoanBreakdownPersistenceAdapter loanBreakdownPersistenceAdapter(LoanBreakdownRepository loanBreakdownRepository,
-    LoanBreakdownMapper loanBreakdownMapper){
-        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper);
+    LoanBreakdownMapper loanBreakdownMapper,LoaneeLoanDetailMapper loaneeLoanDetailMapper){
+        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper,loaneeLoanDetailMapper);
 
     }
 

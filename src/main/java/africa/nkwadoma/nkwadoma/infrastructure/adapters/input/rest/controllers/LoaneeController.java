@@ -15,13 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_ADDED_TO_COHORT;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_VIEWED;
 
 @Slf4j
 @RestController
@@ -51,5 +49,18 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
+    @GetMapping("view/loaneeDetails/{loaneeId}")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
+        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
+        LoaneeResponse loaneeResponse =
+                loaneeRestMapper.toLoaneeResponse(loanee);
+        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
+                .data(loaneeResponse)
+                .message(LOANEE_VIEWED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 
 }

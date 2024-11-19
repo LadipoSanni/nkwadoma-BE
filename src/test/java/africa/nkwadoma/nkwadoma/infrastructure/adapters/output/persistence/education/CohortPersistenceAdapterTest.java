@@ -120,7 +120,7 @@ class CohortPersistenceAdapterTest {
             programId = program.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
-            loanBreakdowns = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
