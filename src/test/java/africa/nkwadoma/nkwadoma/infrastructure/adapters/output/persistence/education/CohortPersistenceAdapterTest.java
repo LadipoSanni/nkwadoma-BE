@@ -180,6 +180,17 @@ class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 
+    @Test
+    void saveCohortWithNullStartDate(){
+        elites.setStartDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+    @Test
+    void saveCohortWithNullEndDate(){
+        elites.setExpectedEndDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+
     @Order(1)
     @Test
     void saveCohort() {
