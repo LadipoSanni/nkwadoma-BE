@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 public class Loan {
     private String id;
     private Loanee loanee;
+    private String loaneeId;
+    private String loanOfferId;
     private String loanAccountId;
     private LocalDateTime startDate;
     private LocalDateTime lastUpdatedDate;
@@ -20,6 +22,7 @@ public class Loan {
 //    private LoanOffer loanOffer;
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
         UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
         MeedlValidator.validateDataElement(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);

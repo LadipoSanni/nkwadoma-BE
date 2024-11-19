@@ -76,21 +76,22 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public StartLoanResponse startLoan(StartLoanRequest request) throws MeedlException {
-        Loanee foundLoanee = loaneeOutputPort.findByUserId(request.getLoaneeId())
+    public Loan startLoan(Loan loan) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loan);
+        MeedlValidator.validateUUID(loan.getLoaneeId());
+        Loanee foundLoanee = loaneeOutputPort.findByUserId(loan.getLoaneeId())
                 .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
-        Loan loan = new Loan();
         loan.setLoanee(foundLoanee);
-        loan.setLoanAccountId(generateLoanAccountId(foundLoanee));
+        loan.setLoanAccountId(getLoanAccountId(foundLoanee));
         loan.setStartDate(LocalDateTime.now());
         if (loan.getStartDate().isAfter(LocalDateTime.now())) {
             throw new MeedlException("Start date cannot be in the future.");
         }
-        loanOutputPort.save(loan);
-        return null;
+        loan = loanOutputPort.save(loan);
+        return loan;
     }
 
-    private String generateLoanAccountId(Loanee foundLoanee) {
+    private String getLoanAccountId(Loanee foundLoanee) {
         return null;
     }
 

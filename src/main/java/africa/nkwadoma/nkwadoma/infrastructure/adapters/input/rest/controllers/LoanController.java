@@ -136,8 +136,10 @@ public class LoanController {
     }
     @PostMapping("start")
     public ResponseEntity<ApiResponse<?>> startLoan(@RequestBody StartLoanRequest request) throws MeedlException {
-        log.info("Start loan called.... ");
-        StartLoanResponse startLoanResponse = createLoanProductUseCase.startLoan(request);
+        log.info("Start loan called.... loan offer id : {}", request.getLoanOfferId());
+        Loan loan = loanProductMapper.mapToLoan(request);
+        loan = createLoanProductUseCase.startLoan(loan);
+        StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
                .data(startLoanResponse)
 //               .message(LOAN_START_SUCCESS)

@@ -48,6 +48,7 @@ class LoanAdapterTest {
             log.info("Saved loan: {} ", savedLoan.getId());
         } catch (MeedlException e) {
             log.error("Error saving loan {}", e.getMessage());
+            throw new IllegalStateException(e.getMessage());
         }
 
         assertNotNull(savedLoan);
