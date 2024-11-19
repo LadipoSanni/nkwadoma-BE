@@ -50,12 +50,13 @@ class KeycloakAdapterTest {
     private final String newPassword = "neWpasswordJ@345";
     private OrganizationIdentity rizzGallery;
     private String rizzGalleryId ;
+    private String johnEmail;
 
     @BeforeEach
     void setUp() {
         john = TestData.createTestUserIdentity("johnmax@lendspace.com");
         peter = TestData.createTestUserIdentity("peter@lendspace.com");
-
+        johnEmail = "johnmax@lendspace.com";
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setMeedlUser(peter);
 
@@ -121,7 +122,7 @@ class KeycloakAdapterTest {
     @Order(2)
     void createPassword(){
         try {
-            Optional<UserIdentity> existingUser = identityManagementOutputPort.getUserByEmail(john.getEmail());
+            Optional<UserIdentity> existingUser = identityManagementOutputPort.getUserByEmail(johnEmail);
             assertTrue(existingUser.isPresent());
             assertFalse(existingUser.get().isEnabled());
             assertFalse(existingUser.get().isEmailVerified());
