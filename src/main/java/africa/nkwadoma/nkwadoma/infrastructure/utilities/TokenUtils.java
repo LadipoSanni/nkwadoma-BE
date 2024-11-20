@@ -6,12 +6,14 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.*;
 import io.jsonwebtoken.security.*;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
 import java.security.*;
 import java.util.*;
 
+@Slf4j
 @Component
 public class TokenUtils {
     @Value("${jwt_secret}")
@@ -23,6 +25,10 @@ public class TokenUtils {
     public String generateToken(String email) throws MeedlException {
         MeedlValidator.validateEmail(email);
         Map<String, Object> claims = new HashMap<>();
+        return buildJwt(email, claims);
+    }
+
+    private String buildJwt(String email, Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
@@ -32,13 +38,31 @@ public class TokenUtils {
                 .compact();
     }
 
+    public String generateToken(String email, String id) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", id);
+        return buildJwt(email + id, claims);
+    }
+
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String decodeJWT(String token) throws MeedlException {
+    public String decodeJWTGetEmail(String token) throws MeedlException {
         MeedlValidator.validateDataElement(token);
+        Claims claims;
+        claims = getClaims(token);
+        return claims.getSubject();
+    }
+    public String decodeJWTGetId(String token) throws MeedlException {
+        MeedlValidator.validateDataElement(token);
+        Claims claims;
+        claims = getClaims(token);
+        return claims.get("id").toString();
+    }
+    private Claims getClaims(String token) throws MeedlException {
         Claims claims;
         try {
             claims = Jwts.parserBuilder()
@@ -54,6 +78,6 @@ public class TokenUtils {
         if (expiration == null || claims.getExpiration().before(new Date())) {
             throw new MeedlException("Token has expired");
         }
-        return claims.getSubject();
+        return claims;
     }
 }

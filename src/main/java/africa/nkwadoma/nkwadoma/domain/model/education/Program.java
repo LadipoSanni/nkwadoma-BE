@@ -23,7 +23,6 @@ public class Program {
     private String id;
     private String programDescription;
     private String name;
-    private String objectives;
     private DurationType durationType;
     private LocalDate programStartDate;
     private int duration;
@@ -41,6 +40,7 @@ public class Program {
     private BigDecimal totalAmountOutstanding = BigDecimal.ZERO;
     private int pageNumber;
     private int pageSize;
+    private String organizationId;
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();

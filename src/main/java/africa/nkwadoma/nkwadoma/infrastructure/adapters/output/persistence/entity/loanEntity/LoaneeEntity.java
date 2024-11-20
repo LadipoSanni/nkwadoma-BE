@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 public class LoaneeEntity {
-
     @Id
     @UuidGenerator
     private String id;
@@ -24,7 +23,7 @@ public class LoaneeEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @OneToOne
-    private UserEntity loanee;
+    private UserEntity userIdentity;
     @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

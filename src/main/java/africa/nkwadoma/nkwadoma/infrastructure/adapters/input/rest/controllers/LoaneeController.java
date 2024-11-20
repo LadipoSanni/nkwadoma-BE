@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
@@ -21,9 +21,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_ADDED_TO_COHORT;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_VIEWED;
 
 @Slf4j
 @RestController
@@ -32,7 +34,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoaneeController {
 
     private final LoaneeRestMapper loaneeRestMapper;
-    private final LoaneeUsecase loaneeUsecase;
+    private final LoaneeUseCase loaneeUseCase;
 
 
     @PostMapping("addLoaneeToCohort")
@@ -41,8 +43,8 @@ public class LoaneeController {
                                                             @RequestBody LoaneeRequest loaneeRequest) throws MeedlException {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
         loanee.setCreatedBy(meedlUser.getClaimAsString("sub"));
-        loanee.getLoanee().setCreatedBy(loanee.getCreatedBy());
-        loanee = loaneeUsecase.addLoaneeToCohort(loanee);
+        loanee.getUserIdentity().setCreatedBy(loanee.getCreatedBy());
+        loanee = loaneeUseCase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
         ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
@@ -53,6 +55,19 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
+    @GetMapping("view/loaneeDetails/{loaneeId}")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
+        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
+        LoaneeResponse loaneeResponse =
+                loaneeRestMapper.toLoaneeResponse(loanee);
+        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
+                .data(loaneeResponse)
+                .message(LOANEE_VIEWED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
     @GetMapping("cohort/all/loanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
@@ -60,7 +75,7 @@ public class LoaneeController {
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
     ) throws MeedlException {
-        Page<Loanee> loanees = loaneeUsecase.viewAllLoaneeInCohort(cohortId,
+        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId,
                 pageSize,
                 pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
