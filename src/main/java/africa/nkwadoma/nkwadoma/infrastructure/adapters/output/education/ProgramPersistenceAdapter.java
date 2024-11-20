@@ -40,13 +40,15 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
 
     @Override
-    public Program findProgramByName(String programName) throws MeedlException {
+    public List<Program> findProgramByName(String programName) throws MeedlException {
         validateDataElement(programName);
-        programName = programName.trim();
         log.info("Program being searched for by name is {}", programName);
-        ProgramEntity programEntity = programRepository.findByName(programName).
-                orElseThrow(()-> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
-        return programMapper.toProgram(programEntity);
+        List<ProgramEntity> programEntity = programRepository.findAllByNameLikeIgnoreCase(programName.trim());
+        log.info("Program entity: {}", programEntity);
+        if (programEntity.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return programEntity.stream().map(programMapper::toProgram).toList();
     }
 
     @Override
