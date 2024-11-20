@@ -23,7 +23,7 @@ public class Loan {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
-        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
+//        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
         MeedlValidator.validateDataElement(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);
     }
