@@ -4,7 +4,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUsecase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.AllLoaneeInCohortRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
@@ -54,17 +53,21 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
-    @GetMapping("loanee/all")
+    @GetMapping("cohort/all/loanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoaneesInCohort(@RequestBody AllLoaneeInCohortRequest allLoaneeInCohortRequest) throws MeedlException {
-        Page<Loanee> loanees = loaneeUsecase.viewAllLoaneeInCohort(allLoaneeInCohortRequest.getCohortId(),
-                allLoaneeInCohortRequest.getPageSize(),
-                allLoaneeInCohortRequest.getPageNumber());
+    public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
+            @RequestParam String cohortId,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        Page<Loanee> loanees = loaneeUsecase.viewAllLoaneeInCohort(cohortId,
+                pageSize,
+                pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();
         PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
                 loaneeResponses,loanees.hasNext(),
-                loanees.getTotalPages(),allLoaneeInCohortRequest.getPageNumber(),allLoaneeInCohortRequest.getPageSize()
+                loanees.getTotalPages(),pageNumber,pageSize
         );
         ApiResponse<PaginatedResponse<LoaneeResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeResponse>>builder()
                 .data(paginatedResponse)

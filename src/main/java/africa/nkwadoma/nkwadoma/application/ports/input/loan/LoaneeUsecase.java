@@ -8,5 +8,5 @@ public interface LoaneeUsecase {
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeInCohort(String programId,int pageSize ,int pageNumber) throws MeedlException;
+    Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber) throws MeedlException;
 }
