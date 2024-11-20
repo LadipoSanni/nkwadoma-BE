@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
 @Component
@@ -23,5 +24,10 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         LoanRequestEntity loanRequestEntity = loanRequestMapper.toLoanRequestEntity(loanRequest);
         LoanRequestEntity savedLoanRequestEntity = loanRequestRepository.save(loanRequestEntity);
         return loanRequestMapper.toLoanRequest(savedLoanRequestEntity);
+    }
+
+    @Override
+    public Page<LoanRequest> viewAll(int pageNumber, int pageSize) {
+        return null;
     }
 }
