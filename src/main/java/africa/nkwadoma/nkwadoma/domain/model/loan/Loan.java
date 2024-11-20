@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,12 +18,12 @@ public class Loan {
     private String loanAccountId;
     private LocalDateTime startDate;
     private LocalDateTime lastUpdatedDate;
+    private LoanOffer loanOffer;
 
-    //    private LoanOffer loanOffer;
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
-        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
+        loanee.getUserIdentity().validate();
         MeedlValidator.validateDataElement(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);
     }
