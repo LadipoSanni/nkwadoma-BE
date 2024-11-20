@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
 public class Loan {
     private String id;
     private Loanee loanee;
@@ -21,11 +20,11 @@ public class Loan {
     private LocalDateTime startDate;
     private LocalDateTime lastUpdatedDate;
 
-//    private LoanOffer loanOffer;
+    //    private LoanOffer loanOffer;
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
-//        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
+        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
         MeedlValidator.validateDataElement(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);
     }

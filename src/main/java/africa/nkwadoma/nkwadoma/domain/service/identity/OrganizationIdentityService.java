@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -13,8 +12,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.RequiredArgsConstructor;
@@ -81,8 +78,9 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
-        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        organizationIdentity.validate();
+        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
     }
 

@@ -91,10 +91,10 @@ public class IdentityManagerController {
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/identity/verify")
-    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.verifyIdentity(identityVerification))
+                .data(verificationUseCase.isIdentityVerified(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/reactivate")
