@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -37,41 +38,13 @@ class OrganizationIdentityAdapterTest {
     private  UserIdentity joel;
     @BeforeEach
         void setUp(){
-        String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
-        joel = new UserIdentity();
-        joel.setFirstName("Joel");
-        joel.setLastName("Jacobs");
-        joel.setEmail("joel@johnson.com");
-        joel.setId(joel.getEmail());
-        joel.setPhoneNumber("098647748393");
-        joel.setEmailVerified(true);
-        joel.setEnabled(true);
-        joel.setCreatedAt(LocalDateTime.now().toString());
-        joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        joel.setCreatedBy(testId);
+        joel = TestData.createTestUserIdentity("joel@johnson.com");
 
         OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
         organizationEmployeeIdentity.setMeedlUser(joel);
-
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
-        OrganizationEmployeeIdentity employeeJoel = new OrganizationEmployeeIdentity();
-        employeeJoel.setMeedlUser(joel);
 
-        amazingGrace = new OrganizationIdentity();
-        amazingGrace.setName("Amazing Grace Enterprises");
-        amazingGrace.setEmail("rachel@gmail.com");
-        amazingGrace.setInvitedDate(LocalDateTime.now().toString());
-        amazingGrace.setRcNumber("RC345677");
-        amazingGrace.setId(testId);
-        amazingGrace.setPhoneNumber("0907658483");
-        amazingGrace.setTin("Tin5678");
-        amazingGrace.setServiceOfferings(List.of(new ServiceOffering()));
-        amazingGrace.getServiceOfferings().get(0).setIndustry(Industry.BANKING);
-        amazingGrace.setWebsiteAddress("webaddress.org");
-        amazingGrace.setOrganizationEmployees(userIdentities);
-        amazingGrace.setOrganizationEmployees(List.of(employeeJoel));
-        amazingGrace.setPageSize(10);
-        amazingGrace.setPageNumber(0);
+        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises", "RC87877", userIdentities);
         }
 
     @Test

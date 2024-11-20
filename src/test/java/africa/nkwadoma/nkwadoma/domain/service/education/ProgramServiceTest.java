@@ -180,14 +180,20 @@ class ProgramServiceTest {
     @Test
     void viewProgramByName() {
         try {
-            when(programOutputPort.findProgramByName(program.getName())).thenReturn(program);
-            Program foundProgram = programService.viewProgramByName(program);
+            when(programOutputPort.findProgramByName(program.getName())).thenReturn(List.of(program));
+            List<Program> foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
-            assertEquals(foundProgram, program);
+            assertEquals(foundProgram, List.of(program));
             verify(programOutputPort, times(1)).findProgramByName(program.getName());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
+    }
+
+    @Test
+    void viewProgramByNonExistingName() {
+        program.setName("non existing name");
+        assertThrows(MeedlException.class, ()->programService.viewProgramByName(program));
     }
 
     @ParameterizedTest
@@ -195,9 +201,8 @@ class ProgramServiceTest {
     void viewProgramByNameWithSpaces(String programWithSpace) {
         try {
             program.setName(programWithSpace);
-            when(programOutputPort.findProgramByName(programWithSpace.trim())).thenReturn(program);
-
-            Program foundProgram = programService.viewProgramByName(program);
+            when(programOutputPort.findProgramByName(program.getName())).thenReturn(List.of(program));
+            List<Program> foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
             verify(programOutputPort, times(1)).findProgramByName(program.getName().trim());
         } catch (MeedlException e) {

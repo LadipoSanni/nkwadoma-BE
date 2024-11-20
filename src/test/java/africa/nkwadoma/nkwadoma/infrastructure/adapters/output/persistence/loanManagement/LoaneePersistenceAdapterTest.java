@@ -53,12 +53,13 @@ class LoaneePersistenceAdapterTest {
     private String loaneeLoanDetailId;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdownList;
 
 
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().id(id).email("qudus55@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().id(id).email("qudusa595@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -67,10 +68,8 @@ class LoaneePersistenceAdapterTest {
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
-            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-
+            loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), loaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -199,11 +198,33 @@ class LoaneePersistenceAdapterTest {
         assertEquals(loanee.getCohortId(),firstLoanee.getCohortId());
     }
 
+    @Order(2)
+    @Test
+    void findLoanee(){
+        Loanee loanee = new Loanee();
+        log.info("loaneeId = {}",loaneeId);
+        try {
+            loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        } catch (MeedlException exception) {
+            log.error(exception.getMessage());
+        }
+        log.info("loanee firstname {}",loanee.getUserIdentity().getFirstName());
+        assertEquals(firstLoanee.getUserIdentity().getFirstName(),loanee.getUserIdentity().getFirstName());
+        assertEquals(firstLoanee.getCohortId(),loanee.getCohortId());
+    }
+
+    @Test
+    void findLoaneeWithNullId(){
+        assertThrows(MeedlException.class,()-> loaneeOutputPort.findLoaneeById(null));
+    }
 
     @AfterAll
     void cleanUp() throws MeedlException {
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
+        if (loanBreakdownList != null) {
+          loanBreakdownOutputPort.deleteAll(loanBreakdownList);
+        }
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
 }

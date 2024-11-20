@@ -8,4 +8,8 @@ import java.util.*;
 
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     Optional<CohortEntity> findByProgramId(String programId);
+
+    CohortEntity findCohortByName(String name);
+
+    List<CohortEntity> findAllByProgramId(String programId);
 }

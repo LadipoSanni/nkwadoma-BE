@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
@@ -135,20 +136,24 @@ public class BeanConfiguration {
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
                                        ProgramOutputPort programOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort){
-        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort);
+                                       LoaneeOutputPort loaneeOutputPort,
+                                       ProgramCohortOutputPort programCohortOutputPort,
+                                       LoanDetailsOutputPort loanDetailsOutputPort,
+                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
+                                       CohortMapper cohortMapper){
+        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper);
     }
 
     @Bean
     public CohortPersistenceAdapter cohortPersistenceAdapter(
-            ProgramOutputPort programOutputPort, CohortRepository cohortRepository, CohortMapper cohortMapper,
+             CohortRepository cohortRepository, CohortMapper cohortMapper,
             UserIdentityOutputPort userIdentityOutputPort, ProgramCohortOutputPort programCohortOutputPort,
-            LoanBreakdownRepository loanBreakdownRepository, LoanBreakdownOutputPort loanBreakdownOutputPort,
-            LoanDetailsOutputPort loanDetailsOutputPort
+            LoanBreakdownRepository loanBreakdownRepository
             ){
-        return new CohortPersistenceAdapter(programOutputPort,cohortRepository,
+        return new CohortPersistenceAdapter(cohortRepository,
                 cohortMapper,userIdentityOutputPort,programCohortOutputPort,
-                 loanBreakdownRepository,loanBreakdownOutputPort,loanDetailsOutputPort);
+                 loanBreakdownRepository);
     }
 
     @Bean
@@ -206,8 +211,8 @@ public class BeanConfiguration {
 
     @Bean
     public LoanBreakdownPersistenceAdapter loanBreakdownPersistenceAdapter(LoanBreakdownRepository loanBreakdownRepository,
-    LoanBreakdownMapper loanBreakdownMapper){
-        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper);
+    LoanBreakdownMapper loanBreakdownMapper,LoaneeLoanDetailMapper loaneeLoanDetailMapper){
+        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper,loaneeLoanDetailMapper);
 
     }
 

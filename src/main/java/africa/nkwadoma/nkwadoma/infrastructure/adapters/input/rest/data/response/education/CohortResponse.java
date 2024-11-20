@@ -34,6 +34,6 @@ public class CohortResponse {
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
-    private LoanDetailResponse cohortLoanDetail;
+    private LoanDetailResponse loanDetail;
 
 }

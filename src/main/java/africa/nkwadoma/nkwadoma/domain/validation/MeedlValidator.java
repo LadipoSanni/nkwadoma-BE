@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -15,8 +17,8 @@ import java.math.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.PASSWORD_PATTERN;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.WEAK_PASSWORD;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 
 @Slf4j
@@ -94,5 +96,32 @@ public class MeedlValidator {
         if (!pattern.matcher(password).matches()) {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
+    }
+    public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {
+        MeedlValidator.validateEmail(inviteeEmail);
+        MeedlValidator.validateEmail(inviterEmail);
+        if (!compareEmailDomain(inviteeEmail,inviterEmail)){
+            log.error("{} - {} : {}",DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage(), inviteeEmail, inviterEmail);
+            throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
+        }
+    }
+    private static boolean compareEmailDomain(String inviteeEmail, String inviterEmail) {
+        String inviteeEmailDomain =
+                inviteeEmail.substring(inviteeEmail.indexOf(EMAIL_INDEX.getMessage()));
+        String inviterEmailDomain = inviterEmail.substring(inviterEmail.indexOf(EMAIL_INDEX.getMessage()));
+        return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
+    }
+    public static void validateOrganizationUserIdentities(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
+        log.info("Started validdating for user identities (List) : {}", userIdentities);
+        log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
+        if (CollectionUtils.isEmpty(userIdentities)){
+            log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);
+            throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+        }
+        for(OrganizationEmployeeIdentity userIdentity : userIdentities){
+            MeedlValidator.validateObjectInstance(userIdentity);
+            userIdentity.getMeedlUser().validate();
+        }
+        log.info("Users identity validation completed... for user {} ", userIdentities);
     }
 }

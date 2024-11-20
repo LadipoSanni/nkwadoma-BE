@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import java.util.*;
 
 public interface CohortOutputPort {
-    Cohort  saveCohort(Cohort cohort) throws MeedlException;
 
     Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException;
 
@@ -18,5 +17,7 @@ public interface CohortOutputPort {
 
     Cohort findCohort(String cohortId) throws CohortException;
 
-    Cohort save(Cohort cohort);
+    Cohort save(Cohort cohort) throws MeedlException;
+
+    Cohort findCohortByName(String name) throws MeedlException;
 }
