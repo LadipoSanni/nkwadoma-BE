@@ -33,6 +33,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -67,13 +68,33 @@ public class LoaneeService implements LoaneeUseCase {
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         loanee.setCreatedAt(LocalDateTime.now());
-        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown());
-        saveLoaneeLoanDetails(loanee, loanBreakdowns);
+        LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee , loanee.getLoaneeLoanDetail());
+        List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown(),
+                loaneeLoanDetail);
+        loaneeLoanDetail.setLoanBreakdown(loanBreakdowns);
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
-        loanee = createLoaneeAccount(loanee);
+        loanee = createLoaneeAccount(loanee,loanBreakdowns);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
         return loanee;
+    }
+
+    @Override
+    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        return loaneeOutputPort.findLoaneeById(id);
+    }
+
+    @Override
+    public Page<Loanee> viewAllLoaneeInCohort(String cohortId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
+        return loaneeOutputPort.findAllLoaneeByCohortId(cohortId, pageSize, pageNumber);
+    }
+
+    private LoaneeLoanDetail saveLoaneeLoanDetails(Loanee loanee, LoaneeLoanDetail loaneeLoanDetail) {
+        LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        return savedLoaneeLoanDetail;
     }
 
     @Override
@@ -97,9 +118,9 @@ public class LoaneeService implements LoaneeUseCase {
         return  loanReferral;
     }
 
-    private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws LoaneeException {
+    private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws MeedlException {
         Loanee loanee;
-        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort);
+        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
         loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
                 .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
         if (loanee.getLoaneeStatus() == LoaneeStatus.REFERRED){
@@ -156,9 +177,9 @@ public class LoaneeService implements LoaneeUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
+    private Loanee createLoaneeAccount(Loanee loanee, List<LoanBreakdown> loanBreakdowns) throws MeedlException {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
-        if (foundUserIdentity.isPresent()){
+        if (foundUserIdentity.isPresent()) {
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
@@ -167,26 +188,28 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setUserIdentity(userIdentity);
         loanee.setLoaneeStatus(LoaneeStatus.ADDED);
         loanee = loaneeOutputPort.save(loanee);
+        loanee.getLoaneeLoanDetail().setLoanBreakdown(loanBreakdowns);
         return loanee;
     }
 
     private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
-        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0){
+        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0) {
             throw new CohortException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
-        if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0 ){
+        if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0) {
             throw new CohortException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws CohortException {
-        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())){
+        if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
 
 
 }
+

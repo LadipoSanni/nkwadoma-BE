@@ -25,4 +25,6 @@ public class LoanBreakdownEntity {
     private CohortEntity cohort;
     @ManyToOne
     private LoaneeEntity loanee;
+    @ManyToOne
+    private LoaneeLoanDetailEntity loaneeLoanDetail;
 }

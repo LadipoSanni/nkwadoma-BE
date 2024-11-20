@@ -67,9 +67,9 @@ public class LoanReferralPersistenceAdapterTest {
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
-            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown),loaneeLoanDetail);
+            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loanee = Loanee.builder().cohortId(id).createdBy(userIdentity.getId()).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeOutputPort.save(loanee);
         } catch (MeedlException e) {

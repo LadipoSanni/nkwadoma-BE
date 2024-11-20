@@ -194,9 +194,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository,
-                                                             IdentityManagerOutputPort identityManagerOutputPort){
-        return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository,identityManagerOutputPort);
+    public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository){
+        return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository);
     }
 
     @Bean
@@ -218,8 +217,8 @@ public class BeanConfiguration {
 
     @Bean
     public LoanBreakdownPersistenceAdapter loanBreakdownPersistenceAdapter(LoanBreakdownRepository loanBreakdownRepository,
-    LoanBreakdownMapper loanBreakdownMapper){
-        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper);
+    LoanBreakdownMapper loanBreakdownMapper,LoaneeLoanDetailMapper loaneeLoanDetailMapper){
+        return new LoanBreakdownPersistenceAdapter(loanBreakdownRepository,loanBreakdownMapper,loaneeLoanDetailMapper);
 
     }
 

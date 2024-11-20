@@ -36,8 +36,9 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
-        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        organizationIdentity.validate();
+        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
 
         validate(organizationIdentity);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
@@ -55,10 +56,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
-
     public void validate(OrganizationIdentity organizationIdentity) throws MeedlException {
-        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        organizationIdentity.validate();
+        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
     }
     @Override
     public Optional<OrganizationEntity> findByRcNumber(String rcNumber) {

@@ -7,11 +7,14 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoaneeRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +22,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;
+
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_ADDED_TO_COHORT;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_VIEWED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
 
 @Slf4j
@@ -49,6 +57,44 @@ public class LoaneeController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
+
+    @GetMapping("view/loaneeDetails/{loaneeId}")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
+        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
+        LoaneeResponse loaneeResponse =
+                loaneeRestMapper.toLoaneeResponse(loanee);
+        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
+                .data(loaneeResponse)
+                .message(LOANEE_VIEWED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+    @GetMapping("cohort/all/loanee")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
+            @RequestParam String cohortId,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
+        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId,
+                pageSize,
+                pageNumber);
+        List<LoaneeResponse> loaneeResponses = loanees.stream()
+                .map(loaneeRestMapper::toLoaneeResponse).toList();
+        PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
+                loaneeResponses,loanees.hasNext(),
+                loanees.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoaneeResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+
     }
 
     @PostMapping("referLoanee/{loaneeId}")

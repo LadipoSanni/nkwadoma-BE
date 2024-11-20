@@ -119,7 +119,7 @@ public class CohortService implements CohortUseCase {
         List<LoanBreakdown> loanBreakdowns = breakdowns.stream()
                 .peek(loanBreakdownObject -> loanBreakdownObject.setCohort(savedCohort))
                 .toList();
-        return loanBreakdownOutputPort.saveAll(loanBreakdowns);
+        return loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
     }
 
     private static void activateStatus(Cohort cohort) {
@@ -179,7 +179,7 @@ public class CohortService implements CohortUseCase {
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
-        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort);
+        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort.getId());
         cohortLoanees
                 .forEach(this::inviteTrainee);
 

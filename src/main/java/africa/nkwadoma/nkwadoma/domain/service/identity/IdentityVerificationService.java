@@ -44,7 +44,7 @@ public class IdentityVerificationService implements VerificationUseCase {
         return IDENTITY_NOT_VERIFIED.getMessage();
     }
     @Override
-    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
+    public String isIdentityVerified(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
@@ -57,6 +57,14 @@ public class IdentityVerificationService implements VerificationUseCase {
 
         log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
+    }
+    @Override
+    public IdentityVerification verifyIdentity(IdentityVerification smileIdVerification) throws MeedlException {
+        MeedlValidator.validateObjectInstance(smileIdVerification);
+        IdentityVerificationEntity identityVerificationEntity = identityVerificationMapper.mapToIdentityVerificationEntity(smileIdVerification);
+        identityVerificationEntity.setStatus(IdentityVerificationStatus.VERIFIED);
+        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
+        return identityVerificationMapper.mapToIdentityVerification(identityVerificationEntity);
     }
     private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
         Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);

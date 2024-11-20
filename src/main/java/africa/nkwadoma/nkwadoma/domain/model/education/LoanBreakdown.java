@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -17,4 +18,5 @@ public class LoanBreakdown {
     private BigDecimal itemAmount ;
     private String currency;
     private Cohort cohort;
+    private LoaneeLoanDetail loaneeLoanDetail;
 }

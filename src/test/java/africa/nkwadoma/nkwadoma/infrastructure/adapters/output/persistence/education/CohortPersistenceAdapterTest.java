@@ -19,7 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,7 +46,6 @@ class CohortPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
-    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
@@ -83,10 +82,9 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser = UserIdentity.builder()
-                .firstName("Ford").role(IdentityRole.PORTFOLIO_MANAGER).
-                lastName("Benson Ayo").email("qudusa55@gmail.com").createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c").build();
-        employeeIdentity = OrganizationEmployeeIdentity.builder()
+        meedleUser =  UserIdentity.builder().id(id).email("qudusa559@gmail.com").firstName("qudus").lastName("lekan")
+                .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
+        employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).organization(id).build();
         organizationIdentity = OrganizationIdentity.builder().id(id).email("fordorganization12@example.com")
                 .name("Organization test").rcNumber("56767").serviceOfferings(
@@ -108,6 +106,10 @@ class CohortPersistenceAdapterTest {
         loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Loan Break").build();
         try {
+            Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
+            if (userByEmail.isPresent()) {
+                identityManagementOutputPort.deleteUser(userByEmail.get());
+            }
             meedleUser = identityManagementOutputPort.createUser(meedleUser);
             userIdentityOutputPort.save(meedleUser);
             organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
@@ -121,7 +123,7 @@ class CohortPersistenceAdapterTest {
             programId = program.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
-            loanBreakdowns = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown));
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
@@ -178,6 +180,17 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings= {StringUtils.EMPTY, " ", "email@gmail.com","3gdgttebdindndd673ydieyendjdljdh"})
     void saveCohortWithInvalidCreator(String createdBy){
         elites.setCreatedBy(createdBy);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+
+    @Test
+    void saveCohortWithNullStartDate(){
+        elites.setStartDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+    @Test
+    void saveCohortWithNullEndDate(){
+        elites.setExpectedEndDate(null);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 

@@ -6,8 +6,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OrganizationEmployeeIdentityMapper {
-
-    @Mapping(target = "meedlUser", source = "meedlUser")
     OrganizationEmployeeEntity toOrganizationEmployeeEntity(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
     @InheritInverseConfiguration

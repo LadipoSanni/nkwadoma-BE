@@ -4,8 +4,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import org.springframework.data.domain.*;
 
+import java.util.*;
+
 public interface ProgramOutputPort {
-    Program findProgramByName(String programName) throws MeedlException;
+    List<Program> findProgramByName(String programName) throws MeedlException;
     Program saveProgram(Program program) throws MeedlException;
     boolean programExists(String programName) throws MeedlException;
     void deleteProgram(String programId) throws MeedlException;

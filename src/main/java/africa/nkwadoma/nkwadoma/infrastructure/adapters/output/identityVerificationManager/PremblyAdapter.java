@@ -55,7 +55,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         log.info(url);
         ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
         try {
-            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
+//            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
         } catch (HttpServerErrorException ex) {
             log.info("Prembly server error {}", ex.getMessage());
         }
