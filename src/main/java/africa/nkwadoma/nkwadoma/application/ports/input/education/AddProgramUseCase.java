@@ -4,14 +4,15 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import org.springframework.data.domain.*;
 
+import java.util.*;
+
 public interface AddProgramUseCase {
     Program createProgram(Program program) throws MeedlException;
 
     Page<Program> viewAllPrograms(Program program) throws MeedlException;
 
     Program updateProgram(Program program) throws MeedlException;
-
-    Program viewProgramByName(Program program) throws MeedlException;
+    List<Program> viewProgramByName(Program program) throws MeedlException;
 
     Program viewProgramById(Program program) throws MeedlException;
 

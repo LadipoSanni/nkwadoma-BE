@@ -220,11 +220,10 @@ class LoaneePersistenceAdapterTest {
 
     @AfterAll
     void cleanUp() throws MeedlException {
-//        identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
-        if (loanBreakdownList != null){
-            loanBreakdownOutputPort.deleteAll(loanBreakdownList);
+        if (loanBreakdownList != null) {
+          loanBreakdownOutputPort.deleteAll(loanBreakdownList);
         }
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
     }
