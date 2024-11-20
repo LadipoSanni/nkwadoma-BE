@@ -1,13 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.domain.validation.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import com.nimbusds.jwt.*;
@@ -23,7 +28,6 @@ import java.time.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
-import static africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,9 +45,10 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
-        UserIdentityValidator.validateUserIdentity(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity);
+        userIdentity.validate();
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
-//        validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMeedlUser().getEmail().trim());
+//        MeedlValidator.validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMeedlUser().getEmail().trim());
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         userIdentityOutputPort.save(userIdentity);
@@ -59,9 +64,9 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
-        UserIdentityValidator.validateDataElement(userIdentity.getEmail());
-        UserIdentityValidator.validateDataElement(userIdentity.getPassword());
+    public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
+        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
 
@@ -115,7 +120,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
-        validateDataElement(token);
+        MeedlValidator.validateDataElement(token);
         String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);
@@ -152,7 +157,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
-        validateDataElement(userIdentity.getReactivationReason());
+        MeedlValidator.validateDataElement(userIdentity.getReactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
@@ -163,7 +168,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
-        validateDataElement(userIdentity.getDeactivationReason());
+        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);

@@ -1,17 +1,23 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.domain.validation.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
-import org.apache.commons.lang3.*;
-import org.springframework.data.domain.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
 
 import java.time.*;
 import java.util.*;
@@ -71,9 +77,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
-        OrganizationIdentityValidator.validateOrganizationIdentity(organizationIdentity);
-        UserIdentityValidator.validateUserIdentity(organizationIdentity.getOrganizationEmployees());
-        log.info("Organization service validated is : {}", organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        organizationIdentity.validate();
+        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
+        log.info("Organization service validated is : {}",organizationIdentity);
     }
 
     private OrganizationIdentity createOrganizationIdentityOnKeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {

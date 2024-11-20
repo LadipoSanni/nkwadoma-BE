@@ -25,9 +25,7 @@ public class Loanee {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateEmail(userIdentity.getEmail());
-        MeedlValidator.validateDataElement(userIdentity.getFirstName());
-        MeedlValidator.validateDataElement(userIdentity.getLastName());
+        userIdentity.validate();
         MeedlValidator.validateUUID(cohortId);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);

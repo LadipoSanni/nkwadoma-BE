@@ -25,6 +25,18 @@ public class IdentityVerification {
     private String token;
     private IdentityVerificationEnum typeOfIdentity;
 
+    private String country;
+    private String IDType;
+    private String IDNumber;
+    private String  fullName;
+    private String DOB;
+    private String photo;
+    private String phoneNumber;
+    private String gender;
+    private String address;
+
+
+
     public void validate() throws MeedlException {
         log.info("Validation starting bvn and nin");
 
