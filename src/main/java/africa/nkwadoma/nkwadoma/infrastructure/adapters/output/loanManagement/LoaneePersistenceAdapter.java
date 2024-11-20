@@ -32,7 +32,7 @@ import java.util.*;
 public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     private final LoaneeMapper loaneeMapper;
     private final LoaneeRepository loaneeRepository;
-    private final IdentityManagerOutputPort identityManagerOutputPort;
+
 
     @Override
     public Loanee save(Loanee loanee) throws MeedlException {
@@ -58,7 +58,6 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     @Override
     public Loanee findByLoaneeEmail(String email) throws MeedlException {
         MeedlValidator.validateEmail(email);
-        Optional<UserIdentity> userIdentity = identityManagerOutputPort.getUserByEmail(email);
         LoaneeEntity loaneeEntity = loaneeRepository.findLoaneeByUserIdentityEmail(email);
         return loaneeMapper.toLoanee(loaneeEntity);
     }

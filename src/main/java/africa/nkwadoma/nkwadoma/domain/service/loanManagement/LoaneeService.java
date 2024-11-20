@@ -55,11 +55,13 @@ public class LoaneeService implements LoaneeUseCase {
         BigDecimal totalLoanBreakDown = getTotalLoanBreakdown(loanee);
         calculateAmountRequested(loanee, totalLoanBreakDown, cohort);
         loanee.setCreatedAt(LocalDateTime.now());
+        LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee , loanee.getLoaneeLoanDetail());
         List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAll(loanee.getLoaneeLoanDetail().getLoanBreakdown(),
-                loanee.getLoaneeLoanDetail());
-        saveLoaneeLoanDetails(loanee, loanBreakdowns);
+                loaneeLoanDetail);
+        loaneeLoanDetail.setLoanBreakdown(loanBreakdowns);
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
-        loanee = createLoaneeAccount(loanee);
+        loanee = createLoaneeAccount(loanee,loanBreakdowns);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
         return loanee;
@@ -77,12 +79,9 @@ public class LoaneeService implements LoaneeUseCase {
         return loaneeOutputPort.findAllLoaneeByCohortId(cohortId, pageSize, pageNumber);
     }
 
-    private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
-        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
-        loaneeLoanDetail.setInitialDeposit(loanee.getLoaneeLoanDetail().getInitialDeposit());
-        loaneeLoanDetail.setAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
-        loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
+    private LoaneeLoanDetail saveLoaneeLoanDetails(Loanee loanee, LoaneeLoanDetail loaneeLoanDetail) {
+        LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
+        return savedLoaneeLoanDetail;
     }
 
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
@@ -104,7 +103,7 @@ public class LoaneeService implements LoaneeUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
+    private Loanee createLoaneeAccount(Loanee loanee, List<LoanBreakdown> loanBreakdowns) throws MeedlException {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
         if (foundUserIdentity.isPresent()) {
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
@@ -114,6 +113,7 @@ public class LoaneeService implements LoaneeUseCase {
         userIdentity = identityOutputPort.save(userIdentity);
         loanee.setUserIdentity(userIdentity);
         loanee = loaneeOutputPort.save(loanee);
+        loanee.getLoaneeLoanDetail().setLoanBreakdown(loanBreakdowns);
         return loanee;
     }
 
