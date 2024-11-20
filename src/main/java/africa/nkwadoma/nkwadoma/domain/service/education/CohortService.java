@@ -99,9 +99,7 @@ public class CohortService implements CohortUseCase {
         }
         cohortMapper.updateCohort(foundCohort,cohort);
         foundCohort.setUpdatedAt(LocalDateTime.now());
-        if (cohort.getStartDate() != null){
-            foundCohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
-        }
+        foundCohort.setExpectedEndDate(foundCohort.getStartDate().plusMonths(program.getDuration()));
         activateStatus(foundCohort);
         List<LoanBreakdown> foundLoanBreakDown = loanBreakdownOutputPort.findAllByCohortId(cohort.getId());
         cohortOutputPort.save(foundCohort);
