@@ -23,12 +23,18 @@ public class LoanRequest {
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private int pageNumber;
+    private int pageSize;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
         MeedlValidator.validateObjectInstance(status);
-        MeedlValidator.validateObjectInstance(dateTimeApproved);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+    }
+
+    public int getPageSize() {
+        int defaultPageSize = BigInteger.TEN.intValue();
+        return this.pageSize == BigInteger.ZERO.intValue() ? defaultPageSize : this.pageSize;
     }
 }

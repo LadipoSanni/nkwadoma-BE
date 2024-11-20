@@ -6,5 +6,5 @@ import org.springframework.data.domain.*;
 
 public interface LoanRequestOutputPort {
     LoanRequest save(LoanRequest loanRequest) throws MeedlException;
-    Page<LoanRequest> viewAll(int pageNumber, int pageSize);
+    Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException;
 }

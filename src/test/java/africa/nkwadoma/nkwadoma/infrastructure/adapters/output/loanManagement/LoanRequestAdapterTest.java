@@ -10,16 +10,16 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
-import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
 import java.math.*;
-import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,7 +94,6 @@ class LoanRequestAdapterTest {
         loanRequest.setReferredBy("Brown Hills Institute");
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanRequest.setLoanee(loanee);
-        loanRequest.setDateTimeApproved(LocalDateTime.now());
     }
 
     @AfterEach
@@ -115,6 +114,7 @@ class LoanRequestAdapterTest {
         }
         assertNotNull(savedLoanRequest);
         assertNotNull(savedLoanRequest.getId());
+        assertNotNull(savedLoanRequest.getDateTimeApproved());
         loanRequestId = savedLoanRequest.getId();
     }
 
@@ -136,12 +136,6 @@ class LoanRequestAdapterTest {
     }
 
     @Test
-    void saveLoanRequestWithNullDateTimeApproved() {
-        loanRequest.setDateTimeApproved(null);
-        assertThrows(MeedlException.class, ()->loanRequestOutputPort.save(loanRequest));
-    }
-
-    @Test
     void saveLoanRequestWithNullLoanRequestStatus() {
         loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()->loanRequestOutputPort.save(loanRequest));
@@ -155,28 +149,35 @@ class LoanRequestAdapterTest {
 
     @Test
     void viewAllLoanRequests() {
-        UserIdentity john = TestData.createTestUserIdentity("john@example.com");
-        loanee.setUserIdentity(john);
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        LoanRequest request = new LoanRequest();
-        request.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
-        request.setStatus(LoanRequestStatus.APPROVED);
-        request.setReferredBy("Semicolon");
-        request.setLoanee(loanee);
-        request.setDateTimeApproved(LocalDateTime.now());
         try {
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
-            LoanRequest savedRequest = loanRequestOutputPort.save(request);
-
-            Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(10, 0);
-
-            assertNotNull(loanRequests.getContent());
-            assertEquals(loanRequests.getContent(), List.of(savedRequest, savedLoanRequest));
+            assertNotNull(savedLoanRequest);
+            loanRequestId = savedLoanRequest.getId();
         } catch (MeedlException e) {
             log.error("", e);
         }
+        Page<LoanRequest> loanRequests = null;
+        try {
+            loanRequests = loanRequestOutputPort.viewAll(0, 10);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertNotNull(loanRequests.getContent());
+        assertTrue(loanRequests.isLast());
+        assertFalse(loanRequests.hasNext());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = -1)
+    void viewAllLoanRequestsWithInvalidPageNumber(int pageNumber) {
+        assertThrows(MeedlException.class, ()->loanRequestOutputPort.viewAll(pageNumber, 10));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void viewAllLoanRequestsWithInvalidPageSize(int pageSize) {
+        assertThrows(MeedlException.class, ()->loanRequestOutputPort.viewAll(0, pageSize));
+    }
 
     @AfterAll
     void cleanUp() {

@@ -119,4 +119,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         return loanRequestOutputPort.save(loanRequest);
     }
+
+    @Override
+    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
+        MeedlValidator.validatePageSize(loanRequest.getPageSize());
+        return loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+    }
 }

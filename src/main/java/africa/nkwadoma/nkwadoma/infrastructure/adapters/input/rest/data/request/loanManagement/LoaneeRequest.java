@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class LoaneeRequest {
+    private String id;
     private String cohortId;
     private String createdBy;
     private LocalDateTime createdAt;
