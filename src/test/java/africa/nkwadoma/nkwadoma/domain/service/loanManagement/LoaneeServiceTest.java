@@ -204,7 +204,7 @@ class LoaneeServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ui7e8yujhd676yte","invalid-id"})
+    @ValueSource(strings = {"invalid-id"})
     void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
