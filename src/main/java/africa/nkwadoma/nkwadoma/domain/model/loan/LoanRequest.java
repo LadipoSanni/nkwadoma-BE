@@ -20,6 +20,7 @@ public class LoanRequest {
     private BigDecimal loanAmountRequested;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
+    private LocalDateTime createdDate;
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;

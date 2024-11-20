@@ -114,7 +114,7 @@ class LoanRequestAdapterTest {
         }
         assertNotNull(savedLoanRequest);
         assertNotNull(savedLoanRequest.getId());
-        assertNotNull(savedLoanRequest.getDateTimeApproved());
+        assertNotNull(savedLoanRequest.getCreatedDate());
         loanRequestId = savedLoanRequest.getId();
     }
 

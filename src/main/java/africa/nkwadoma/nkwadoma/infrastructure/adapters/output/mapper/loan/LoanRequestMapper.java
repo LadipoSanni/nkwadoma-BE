@@ -8,12 +8,12 @@ import org.mapstruct.*;
 public interface LoanRequestMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
     @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
-    @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
     LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 
     @InheritInverseConfiguration
     LoanRequest toLoanRequest(LoanRequestEntity loanRequestEntity);
 
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
+    @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

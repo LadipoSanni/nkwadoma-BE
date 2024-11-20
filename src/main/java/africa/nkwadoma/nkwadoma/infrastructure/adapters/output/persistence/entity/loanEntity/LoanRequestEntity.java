@@ -21,6 +21,7 @@ public class LoanRequestEntity {
     private String referredBy;
     private BigDecimal loanAmountRequested;
     private LocalDateTime dateTimeApproved;
+    private LocalDateTime createdDate;
     private String reasonForDecliningLoanRequest;
     @Enumerated(EnumType.STRING)
     private LoanRequestStatus status;

@@ -168,12 +168,6 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNullDateTimeApproved() {
-        loanRequest.setDateTimeApproved(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createLoanRequestWithNullLoanRequestStatus() {
         loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
