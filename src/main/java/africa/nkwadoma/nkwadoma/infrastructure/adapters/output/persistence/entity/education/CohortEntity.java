@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ public class CohortEntity {
     private String id;
     private String name;
     private String programId;
+    @Size(max = 250, message = "cohort description must no go beyond 250")
     private String cohortDescription;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;

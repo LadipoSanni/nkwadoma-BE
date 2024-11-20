@@ -14,7 +14,7 @@ public class LoaneeResponse {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UserIdentityResponse loanee;
+    private UserIdentityResponse userIdentity;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
 
 }

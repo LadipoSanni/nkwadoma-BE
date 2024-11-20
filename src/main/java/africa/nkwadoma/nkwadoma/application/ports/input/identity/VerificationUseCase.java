@@ -7,5 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationEx
 public interface VerificationUseCase {
     String isIdentityVerified(String token) throws MeedlException, IdentityVerificationException;
 
-    String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException;
+    String isIdentityVerified(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException;
+
+    IdentityVerification verifyIdentity(IdentityVerification smileIdVerification) throws MeedlException;
 }

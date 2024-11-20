@@ -34,7 +34,7 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
+//import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
 
 
 @RequiredArgsConstructor
@@ -94,7 +94,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
     @Override
     public Optional<UserIdentity> getUserByEmail(String email) throws MeedlException {
-        UserIdentityValidator.validateEmail(email);
+        MeedlValidator.validateEmail(email);
         List<UserRepresentation> foundUsers = getUserRepresentations(email);
         if (foundUsers.isEmpty()) {
             return Optional.empty();
@@ -106,7 +106,8 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
 
     @Override
     public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
-        validateOrganizationIdentity(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        organizationIdentity.validate();
         log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
         Response response = getClients(keycloak).create(clientRepresentation);
@@ -147,7 +148,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getEmail());
         MeedlValidator.validateDataElement(userIdentity.getPassword());
-        log.info("User login credentials: {}, {}", userIdentity.getEmail(), userIdentity.getPassword());
+        log.info("User login credentials: {}", userIdentity.getEmail());
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();

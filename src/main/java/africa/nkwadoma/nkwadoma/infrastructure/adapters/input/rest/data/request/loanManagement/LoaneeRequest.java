@@ -10,9 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 public class LoaneeRequest {
     private String cohortId;
-    private String createdBy;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private UserIdentityRequest loanee;
+    private UserIdentityRequest userIdentity;
     private LoaneeLoanDetailRequest loaneeLoanDetail;
 }

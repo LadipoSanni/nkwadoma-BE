@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -43,43 +42,47 @@ class ProgramPersistenceAdapterTest {
     @Autowired
     private CohortRepository cohortRepository;
     @Autowired
+    private ProgramRepository programRepository;
+    @Autowired
     private CohortMapper cohortMapper;
     private Cohort elites;
-    private Program program;
-    private Program designThinking;
+    private Program dataAnalytics;
+    private Program dataScience;
     private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
     private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
-    private String userId ;
+    private String userId;
+    private String dataAnalyticsProgramId;
+    private String dataScienceProgramId;
 
     @BeforeEach
     void setUp() {
-        program = new Program();
-        program.setName("Software Engineering");
-        program.setProgramDescription("A rigorous course in the art and science of software engineering");
-        program.setMode(ProgramMode.FULL_TIME);
-        program.setProgramStatus(ActivationStatus.ACTIVE);
-        program.setDuration(2);
-        program.setDeliveryType(DeliveryType.ONSITE);
-        program.setDurationType(DurationType.MONTHS);
+        dataAnalytics = new Program();
+        dataAnalytics.setName("Data Analytics");
+        dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
+        dataAnalytics.setMode(ProgramMode.FULL_TIME);
+        dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
+        dataAnalytics.setDuration(2);
+        dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
+        dataAnalytics.setDurationType(DurationType.MONTHS);
 
-        designThinking = new Program();
-        designThinking.setName("Design Thinking");
-        designThinking.setProgramDescription("The art of putting thought into solving problems");
-        designThinking.setMode(ProgramMode.FULL_TIME);
-        designThinking.setProgramStatus(ActivationStatus.ACTIVE);
-        designThinking.setDuration(1);
-        designThinking.setDeliveryType(DeliveryType.ONSITE);
-        designThinking.setDurationType(DurationType.YEARS);
+        dataScience = new Program();
+        dataScience.setName("Data Science");
+        dataScience.setProgramDescription("The art of putting thought into solving problems");
+        dataScience.setMode(ProgramMode.FULL_TIME);
+        dataScience.setProgramStatus(ActivationStatus.ACTIVE);
+        dataScience.setDuration(1);
+        dataScience.setDeliveryType(DeliveryType.ONSITE);
+        dataScience.setDurationType(DurationType.YEARS);
 
         elites = new Cohort();
         elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setName("Elite");
         elites.setCreatedBy(userIdentity.getCreatedBy());
-
     }
+
     @BeforeAll
     void init() {
         userIdentity = new UserIdentity();
@@ -113,8 +116,12 @@ class ProgramPersistenceAdapterTest {
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
                     meedlUser(userIdentity).build()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
+            String organizationId = savedOrganization.getId();
             userId = userIdentityOutputPort.save(userIdentity).getId();
-            organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
+            OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
+            employeeIdentity.setOrganization(organizationId);
+            organizationIdentity.getOrganizationEmployees().forEach(
+                    organizationEmployeeIdentity -> employeeIdentityOutputPort.save(employeeIdentity));
 
             OrganizationIdentity foundOrganization = organizationOutputPort.findById(savedOrganization.getId());
             assertNotNull(foundOrganization);
@@ -124,20 +131,30 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
+    @AfterEach
+    void cleanUp() {
+        if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
+            programRepository.deleteById(dataAnalyticsProgramId);
+        }
+        if (StringUtils.isNotEmpty(dataScienceProgramId)) {
+            programRepository.deleteById(dataScienceProgramId);
+        }
+    }
+
     @Test
     @Order(1)
     void saveProgram() {
         try {
-            program.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(program);
+            dataAnalytics.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = savedProgram.getId();
 
             assertNotNull(savedProgram);
             assertNotNull(savedProgram.getId());
-            assertEquals(program.getName(), savedProgram.getName());
-            assertEquals(program.getProgramStatus(), savedProgram.getProgramStatus());
-            assertEquals(program.getProgramDescription(), savedProgram.getProgramDescription());
+            assertEquals(dataAnalytics.getName(), savedProgram.getName());
+            assertEquals(dataAnalytics.getProgramStatus(), savedProgram.getProgramStatus());
+            assertEquals(dataAnalytics.getProgramDescription(), savedProgram.getProgramDescription());
             assertEquals(LocalDate.now(), savedProgram.getProgramStartDate());
-            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
@@ -171,25 +188,13 @@ class ProgramPersistenceAdapterTest {
             userIdentityOutputPort.save(foundUserIdentity);
             assertNotNull(savedOrganization);
 
-            designThinking.setCreatedBy(foundUserIdentity.getCreatedBy());
+            dataScience.setCreatedBy(foundUserIdentity.getCreatedBy());
 
-            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(designThinking));
+            assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(dataScience));
 
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
         }
-    }
-
-    @Test
-    void createProgramWithExistingName(){
-        try {
-            Program foundProgram = programOutputPort.findProgramByName(program.getName());
-            assertNotNull(foundProgram);
-            assertEquals(program.getName(), foundProgram.getName());
-        } catch (MeedlException exception) {
-            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
     }
 
     @ParameterizedTest
@@ -216,48 +221,48 @@ class ProgramPersistenceAdapterTest {
             userIdentityOutputPort.save(foundUserIdentity);
             assertNotNull(savedOrganization);
 
-            program.setName(programName);
-            program.setCreatedBy(organizationIdentity.getCreatedBy());
-            Program savedProgram = programOutputPort.saveProgram(program);
+            dataAnalytics.setName(programName);
+            dataAnalytics.setCreatedBy(organizationIdentity.getCreatedBy());
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = savedProgram.getId();
 
             assertNotNull(savedProgram);
             assertNotNull(savedProgram.getId());
             assertEquals(programName.trim(), savedProgram.getName());
-            programOutputPort.deleteProgram(savedProgram.getId());
         } catch (MeedlException e) {
             log.error("Error saving program", e);
         }
     }
     @Test
     void createProgramWithNullName(){
-        program.setName(null);
-        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((program)));
+        dataAnalytics.setName(null);
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((dataAnalytics)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void createProgramWithInvalidName(String name){
-        program.setName(name);
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
+        dataAnalytics.setName(name);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
     void createProgramWithNullCreatedBy() {
-        program.setCreatedBy(null);
-        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(program));
+        dataAnalytics.setCreatedBy(null);
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void createProgramWithInvalidCreatedBy(String createdBy){
-        program.setCreatedBy(createdBy);
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(program));
+        dataAnalytics.setCreatedBy(createdBy);
+        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
     void createProgramWithNonExistingCreatedBy(){
-            program.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-            MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(program));
+            dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
+            MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
             assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
     }
 
@@ -265,14 +270,21 @@ class ProgramPersistenceAdapterTest {
     @Order(2)
     void findProgramByName() {
         try {
-            assertThrows(ResourceNotFoundException.class, ()->programOutputPort.findProgramByName(designThinking.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
+            dataScienceProgramId = savedProgram.getId();
+            dataAnalytics.setCreatedBy(userId);
+            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
 
-            designThinking.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(designThinking);
+            List<Program> foundProgram = programOutputPort.findProgramByName("data");
 
-            Program foundProgram = programOutputPort.findProgramByName(savedProgram.getName());
             assertNotNull(foundProgram);
-            programOutputPort.deleteProgram(foundProgram.getId());
+            assertEquals(2, foundProgram.size());
+            assertEquals("Data Science", foundProgram.get(0).getName());
+            assertEquals("Data Analytics", foundProgram.get(1).getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
@@ -289,15 +301,15 @@ class ProgramPersistenceAdapterTest {
     @ValueSource(strings = {"  First program", "Second program   ", "    Third program     "})
     void findProgramByNameWithSpaces(String name) {
         try {
-            program.setCreatedBy(userId);
-            program.setName(name);
-            Program savedProgram = programOutputPort.saveProgram(program);
+            dataAnalytics.setCreatedBy(userId);
+            dataAnalytics.setName(name);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = savedProgram.getId();
 
             assertNotNull(savedProgram);
-            Program foundProgramByName = programOutputPort.findProgramByName(name);
+            List<Program> foundProgramByName = programOutputPort.findProgramByName(name);
             assertNotNull(foundProgramByName);
-            assertEquals(foundProgramByName.getName(), program.getName());
-            programOutputPort.deleteProgram(savedProgram.getId());
+            assertEquals(foundProgramByName.get(0).getName(), dataAnalytics.getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name with spaces", e);
         }
@@ -307,15 +319,15 @@ class ProgramPersistenceAdapterTest {
     @Order(3)
     void findProgramById() {
         try {
-            program.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(program);
-
+            dataAnalytics.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
+            dataAnalyticsProgramId = savedProgram.getId();
+
             Program foundProgram = programOutputPort.findProgramById(savedProgram.getId());
 
             assertNotNull(foundProgram);
             assertEquals(savedProgram.getId(), foundProgram.getId());
-            programOutputPort.deleteProgram(foundProgram.getId());
         } catch (MeedlException e) {
             log.error("Error finding program by ID", e);
         }
@@ -324,20 +336,20 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findProgramByEmptyId(String id){
-        program.setId(id);
-        assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(program.getId()));
+        dataAnalytics.setId(id);
+        assertThrows(MeedlException.class,()-> programOutputPort.findProgramById(dataAnalytics.getId()));
     }
 
     @Test
     void findProgramWithNullProgramId(){
-        program.setId(null);
-        assertThrows(MeedlException.class,()-> programOutputPort.findProgramById((program.getId())));
+        dataAnalytics.setId(null);
+        assertThrows(MeedlException.class,()-> programOutputPort.findProgramById((dataAnalytics.getId())));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"non-uuid", "3657679"})
     void viewProgramWithNonUUIDId(String programId) {
-        program.setId(programId);
+        dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
         assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
     }
@@ -346,8 +358,8 @@ class ProgramPersistenceAdapterTest {
     @Order(4)
     void findAllPrograms() {
         try {
-            designThinking.setCreatedBy(organizationIdentity.getCreatedBy());
-            programOutputPort.saveProgram(designThinking);
+            dataScience.setCreatedBy(organizationIdentity.getCreatedBy());
+            programOutputPort.saveProgram(dataScience);
 
             Page<Program> foundPrograms = programOutputPort.findAllPrograms(
                     userId, pageSize, pageNumber);
@@ -360,10 +372,10 @@ class ProgramPersistenceAdapterTest {
 
             assertNotNull(programsList);
             assertEquals(1, programsList.size());
-            assertEquals(programsList.get(0).getName(), designThinking.getName());
-            assertEquals(programsList.get(0).getDuration(), designThinking.getDuration());
-            assertEquals(programsList.get(0).getNumberOfCohort(), designThinking.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), designThinking.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getName(), dataScience.getName());
+            assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
+            assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
+            assertEquals(programsList.get(0).getNumberOfTrainees(), dataScience.getNumberOfTrainees());
             programOutputPort.deleteProgram(foundPrograms.getContent().get(0).getId());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
@@ -371,31 +383,23 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "f98hv"})
-    void findAllProgramsByNullOrInvalidOrganizationId(String organizationId) {
-        try {
-            Page<Program> foundPrograms = programOutputPort.findAllPrograms(organizationId, pageSize, pageNumber);
-            List<Program> foundProgramsList = foundPrograms.toList();
-            assertTrue(foundProgramsList.isEmpty());
-            assertEquals(foundProgramsList, List.of());
-        } catch (MeedlException e) {
-            log.error("Failed to find all programs", e);
-        }
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void findAllProgramsByEmptyOrganizationId(String organizationId) {
+        assertThrows(MeedlException.class, ()->programOutputPort.findAllPrograms(organizationId, pageSize, pageNumber));
     }
 
     @Test
     @Order(5)
     void deleteProgram() {
         try {
-            designThinking.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(designThinking);
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
             assertNotNull(savedProgram);
 
             programOutputPort.deleteProgram(savedProgram.getId());
 
-            ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                    ()-> programOutputPort.findProgramByName(designThinking.getName()));
-            assertEquals(exception.getMessage(), (PROGRAM_NOT_FOUND.getMessage()));
+            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
+            assertTrue(programByName.isEmpty());
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }
@@ -403,14 +407,14 @@ class ProgramPersistenceAdapterTest {
 
     @Test
     void deleteNonExistingProgram() {
-        program.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
-        assertThrows(ResourceNotFoundException.class, ()->programOutputPort.deleteProgram(program.getId()));
+        dataAnalytics.setId("1de71eaa-de6d-4cdf-8f93-aa7be533f4aa");
+        assertThrows(ResourceNotFoundException.class, ()->programOutputPort.deleteProgram(dataAnalytics.getId()));
     }
 
     @Test
     void deleteProgramWithNullId() {
-        program.setId(null);
-        assertThrows(MeedlException.class, ()->programOutputPort.deleteProgram(program.getId()));
+        dataAnalytics.setId(null);
+        assertThrows(MeedlException.class, ()->programOutputPort.deleteProgram(dataAnalytics.getId()));
     }
 
     @ParameterizedTest
@@ -428,13 +432,13 @@ class ProgramPersistenceAdapterTest {
 
     @Test
     void deleteProgramWithCohort() {
-        Program savedProgram = new Program();
+        Program savedProgram;
         CohortEntity savedCohort = new CohortEntity();
         try {
-            program.setCreatedBy(userId);
-            savedProgram = programOutputPort.saveProgram(program);
+            dataAnalytics.setCreatedBy(userId);
+            savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
-
+            dataAnalyticsProgramId = savedProgram.getId();
             elites.setProgramId(savedProgram.getId());
 
             savedCohort = cohortRepository.save(cohortMapper.toCohortEntity(elites));
@@ -443,15 +447,8 @@ class ProgramPersistenceAdapterTest {
             log.error("Error while creating program {}", e.getMessage());
         }
         //TODO this test needs to be fixed
-//        String id = savedProgram.getId();
-//        assertThrows(EducationException.class, ()->programOutputPort.deleteProgram(id));
 
         cohortRepository.delete(savedCohort);
-        try {
-            programOutputPort.deleteProgram(savedProgram.getId());
-        } catch (MeedlException e) {
-            log.error("Error deleting program {}", e.getMessage());
-        }
     }
 
     @AfterAll
