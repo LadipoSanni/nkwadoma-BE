@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.domain.validation.UserIdentityValidator;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +22,7 @@ public class Loan {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
-        UserIdentityValidator.validateUserIdentity(loanee.getUserIdentity());
+        loanee.getUserIdentity().validate();
         MeedlValidator.validateDataElement(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);
     }
