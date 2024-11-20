@@ -19,7 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,7 +46,6 @@ class CohortPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
-    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
@@ -107,6 +106,10 @@ class CohortPersistenceAdapterTest {
         loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Loan Break").build();
         try {
+            Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
+            if (userByEmail.isPresent()) {
+                identityManagementOutputPort.deleteUser(userByEmail.get());
+            }
             meedleUser = identityManagementOutputPort.createUser(meedleUser);
             userIdentityOutputPort.save(meedleUser);
             organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
