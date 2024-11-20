@@ -118,19 +118,19 @@ class IdentityVerificationServiceTest {
     void verifyIdentityWithoutBvnOrNin(){
         identityVerification.setBvn(null);
         identityVerification.setNin(null);
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
     }
     @Test
     void verifyIdentityWithAtLeastOneIdentifier(){
         identityVerification.setBvn(null);
         identityVerification.setNin(testNin);
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(identityVerification));
+        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
     }
     @Test
     void verifyUserBvn(){
         when(identityVerificationRepository.findByBvnAndStatus(testBvn, IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
         try {
-            String response = identityVerificationService.verifyIdentity(identityVerification);
+            String response = identityVerificationService.isIdentityVerified(identityVerification);
             assertNotNull(response);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
         } catch (MeedlException|IdentityVerificationException e) {
