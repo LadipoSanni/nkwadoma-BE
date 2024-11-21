@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,8 +38,8 @@ public class CohortEntity {
     private String createdBy;
     private String updatedBy;
     private String imageUrl;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     @OneToOne
     private LoanDetailEntity loanDetail;
     private Integer numberOfLoanees = 0;
