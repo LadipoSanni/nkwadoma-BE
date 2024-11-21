@@ -6,5 +6,5 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 public interface LoanOfferUseCase {
 
 
-    LoanOffer createLoanOffer(LoanOffer loanOffer) throws MeedlException;
+    LoanOffer createLoanOffer(String loanRequestId) throws MeedlException;
 }

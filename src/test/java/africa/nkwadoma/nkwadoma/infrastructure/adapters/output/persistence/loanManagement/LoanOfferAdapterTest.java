@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -59,14 +60,10 @@ public class LoanOfferAdapterTest {
 
     @BeforeAll
     void setUp() {
-         userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
-
-         loanee = Loanee.builder().userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
-                loaneeLoanDetail(LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                        initialDeposit(BigDecimal.valueOf(3000000.00)).build()).build();
+//         String email = "test@gmail";
+//         userIdentity = TestData.createTestUserIdentity(email);
+//         loaneeLoanDetail = TestData.createLoaneeLoanDetail();
+//         loanee = TestData.createLoaneeTestData(userIdentity,loaneeLoanDetail);
          try{
              userIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
              loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
@@ -87,14 +84,9 @@ public class LoanOfferAdapterTest {
     @BeforeEach
     void setUpLoanOffer() {
         loanOffer = new LoanOffer();
-        loanOffer.setLoanRequestId(loanRequest.getId());
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        loanOffer.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
         loanOffer.setLoanee(loanee);
-        loanOffer.setReferredBy(loanRequest.getReferredBy());
-        loanOffer.setDateTimeApproved(loanRequest.getDateTimeApproved());
-        loanOffer.setLoanRequestStatus(loanRequest.getStatus());
-        loanOffer.setLoanReferralStatus(loanRequest.getLoanReferralStatus());
+        loanOffer.setLoanRequest(loanRequest);
     }
 
     @Test
@@ -103,16 +95,10 @@ public class LoanOfferAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource( strings = {"jduhjdkbkkvkgkd"})
+    @ValueSource( strings = {"jduhjdkbkkvkgkd",StringUtils.EMPTY,StringUtils.SPACE})
     void saveLoanOfferWithInvalidLoanRequestId(String loanRequestId){
-        loanOffer.setLoanRequestId(loanRequestId);
-        assertThrows(MeedlException.class, () -> loanOfferOutputPort.save(loanOffer));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void saveLoanOfferWithEmptyLoanRequestId(String loanRequestId){
-        loanOffer.setLoanRequestId(loanRequestId);
+        loanRequest.setId(loanRequestId);
+        loanOffer.setLoanRequest(loanRequest);
         assertThrows(MeedlException.class, () -> loanOfferOutputPort.save(loanOffer));
     }
 
@@ -126,9 +112,9 @@ public class LoanOfferAdapterTest {
         } catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertEquals(savedLoanOffer.getLoanRequestId(), loanOffer.getLoanRequestId());
-        assertEquals(savedLoanOffer.getLoanAmountRequested(), loanOffer.getLoanAmountRequested());
-        assertEquals(savedLoanOffer.getLoanReferralStatus(), loanOffer.getLoanReferralStatus());
+        assertEquals(savedLoanOffer.getLoanRequest().getId(), loanRequest.getId());
+        assertEquals(savedLoanOffer.getLoanRequest().getLoanAmountRequested(), loanRequest.getLoanAmountRequested());
+        assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
 
 
@@ -136,7 +122,7 @@ public class LoanOfferAdapterTest {
     void cleanUp(){
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferral.getId());
-            loanOfferEntityRepository.deleteById(loanOfferId);
+            loanOfferOutputPort.deleteLoanOfferById(loanOfferId);
             loanRequestOutputPort.deleteLoanRequestById(loanRequest.getId());
             loaneeOutputPort.deleteLoanee(loanee.getId());
             userIdentityOutputPort.deleteUserById(userIdentity.getId());

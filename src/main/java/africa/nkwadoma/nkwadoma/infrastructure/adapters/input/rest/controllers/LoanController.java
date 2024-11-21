@@ -47,8 +47,6 @@ public class LoanController {
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
-    private final LoanOfferUseCase loanOfferUseCase;
-    private final LoanOfferRestMapper loanOfferRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -135,19 +133,6 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
     }
 
-    @PostMapping("/create-loan-offer/{loanRequestId}")
-    public ResponseEntity<ApiResponse<?>> createLoanOffer(@PathVariable  @NotBlank(message = "LoanRequest Id is Required")
-                                                          String loanRequestId) throws MeedlException {
-        LoanOffer loanOffer = new LoanOffer();
-        loanOffer.setLoanRequestId(loanRequestId);
-        loanOffer = loanOfferUseCase.createLoanOffer(loanOffer);
-        LoanOfferResponse loanOfferResponse = loanOfferRestMapper.toLoanOfferResponse(loanOffer);
-        ApiResponse<LoanOfferResponse> apiResponse =ApiResponse.<LoanOfferResponse>builder()
-                .data(loanOfferResponse)
-                .message(LOANOFFER_CREATED)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
+
 
 }

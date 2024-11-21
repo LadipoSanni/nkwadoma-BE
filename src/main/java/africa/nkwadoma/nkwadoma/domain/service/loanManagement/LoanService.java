@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -124,20 +125,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanOffer createLoanOffer(LoanOffer loanOffer) throws MeedlException {
-        loanOffer.validate();
-        LoanRequest loanRequest = loanRequestOutputPort.findById(loanOffer.getLoanRequestId());
-        if (loanRequest == null){
+    public LoanOffer createLoanOffer(String loanRequestId) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        LoanRequest loanRequest = loanRequestOutputPort.findById(loanRequestId);
+        if (ObjectUtils.isEmpty(loanRequest)){
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
-        LoanOffer offer =
-                loanOfferMapper.mapLoanRequestToLoanOffer(loanRequest);
-        offer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        offer.setDateTimeOffered(LocalDateTime.now());
-        offer = loanOfferOutputPort.save(offer);
-        return offer;
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer = loanOfferOutputPort.save(loanOffer);
+        return loanOffer;
     }
 }

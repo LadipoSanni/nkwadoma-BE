@@ -21,14 +21,10 @@ public class LoanOfferEntitiy {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private String loanRequestId;
-    private String referredBy;
-    private BigDecimal loanAmountRequested;
-    private LocalDateTime dateTimeApproved;
-    @Enumerated(EnumType.STRING)
-    private LoanRequestStatus loanRequestStatus;
     @Enumerated(EnumType.STRING)
     private LoanOfferStatus loanOfferStatus;
+    @OneToOne
+    private LoanRequestEntity loanRequest;
     @ManyToOne
     private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;

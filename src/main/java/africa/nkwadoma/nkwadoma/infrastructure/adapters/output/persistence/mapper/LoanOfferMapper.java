@@ -12,10 +12,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface LoanOfferMapper {
 
 
-    @Mapping(source = "status", target = "loanRequestStatus")
-    @Mapping(source = "id", target = "loanRequestId")
-    LoanOffer mapLoanRequestToLoanOffer(LoanRequest loanRequest);
-
     LoanOfferEntitiy toLoanOfferEntity(LoanOffer loanOffer);
 
     LoanOffer toLoanOffer(LoanOfferEntitiy loanOfferEntitiy);

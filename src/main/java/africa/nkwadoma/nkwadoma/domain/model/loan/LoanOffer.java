@@ -15,19 +15,9 @@ import java.time.LocalDateTime;
 @Setter
 public class LoanOffer {
     private String id;
-    private String loanRequestId;
-    private String referredBy;
-    private BigDecimal loanAmountRequested;
-    private LoanReferralStatus loanReferralStatus;
-    private LocalDateTime dateTimeApproved;
-    private LoanRequestStatus loanRequestStatus;
+    private LoanRequest loanRequest;
     private LoanOfferStatus loanOfferStatus;
     private Loanee loanee;
     private LocalDateTime dateTimeOffered;
 
-
-
-    public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequestId);
-    }
 }

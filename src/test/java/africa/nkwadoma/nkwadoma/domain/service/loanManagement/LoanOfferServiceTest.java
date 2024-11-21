@@ -56,10 +56,8 @@ public class LoanOfferServiceTest {
                 .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
                 .dateTimeApproved(LocalDateTime.now()).build();
         loanOffer = new LoanOffer();
-        loanOffer.setLoanRequestId(mockId);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
-        loanOffer.setReferredBy(loanRequest.getReferredBy());
-        loanOffer.setLoanRequestStatus(LoanRequestStatus.APPROVED);
+        loanOffer.setLoanRequest(loanRequest);
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setLoanee(loanee);
     }
@@ -67,37 +65,38 @@ public class LoanOfferServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
     void createLoanOfferWithInvalidLoanRequestId(String invalidId) {
-        loanOffer.setLoanRequestId(invalidId);
-        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(loanOffer));
+        loanRequest.setId(invalidId);
+        loanOffer.setLoanRequest(loanRequest);
+        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(mockId));
     }
 
     @Test
     void createLoanOfferWithNullLoanRequestId() {
-        loanOffer.setLoanRequestId(null);
-        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(loanOffer));
+        loanRequest.setId(null);
+        loanOffer.setLoanRequest(loanRequest);
+        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(mockId));
     }
 
     @Test
     void createLoanOfferWithValidLoanRequestId() {
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
-            when(loanRequestOutputPort.findById(loanOffer.getLoanRequestId())).thenReturn(loanRequest);
-            when(loanOfferMapper.mapLoanRequestToLoanOffer(loanRequest)).thenReturn(loanOffer);
+            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
-            cretedLoanOffer = loanService.createLoanOffer(loanOffer);
+            cretedLoanOffer = loanService.createLoanOffer(mockId);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
-        assertEquals(LoanRequestStatus.APPROVED, cretedLoanOffer.getLoanRequestStatus());
+        assertEquals(LoanRequestStatus.APPROVED, cretedLoanOffer.getLoanRequest().getStatus());
         assertEquals(LoanOfferStatus.OFFERED, cretedLoanOffer.getLoanOfferStatus());
     }
 
     @Test
     void createLoanOfferWithUnApprovedLoanRequest() {
         try {
-            when(loanRequestOutputPort.findById(loanOffer.getLoanRequestId())).thenReturn(loanRequest);
+            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
             loanRequest.setStatus(LoanRequestStatus.DECLINED);
-            assertThrows(MeedlException.class, ()->loanService.createLoanOffer(loanOffer));
+            assertThrows(MeedlException.class, ()->loanService.createLoanOffer(mockId));
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }

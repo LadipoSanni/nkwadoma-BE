@@ -18,12 +18,12 @@ public class LoanOfferResponse {
 
     private String id;
     private String loanRequestId;
-    private String referredBy;
-    private BigDecimal loanAmountRequested;
-    private LoanReferralStatus loanReferralStatus;
-    private LocalDateTime dateTimeApproved;
-    private LoanRequestStatus loanRequestStatus;
-    private LoanOfferStatus loanOfferStatus;
-    private Loanee loanee;
+//    private String referredBy;
+//    private BigDecimal loanAmountRequested;
+//    private LoanReferralStatus loanReferralStatus;
+//    private LocalDateTime dateTimeApproved;
+//    private LoanRequestStatus loanRequestStatus;
+//    private LoanOfferStatus loanOfferStatus;
+    private LoaneeResponse loanee;
     private LocalDateTime dateTimeOffered;
 }

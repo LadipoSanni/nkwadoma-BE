@@ -6,7 +6,10 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,6 +44,17 @@ public class TestData {
         organizationIdentity.setPageNumber(0);
 
         return organizationIdentity;
+    }
+
+    public static Loanee createLoaneeTestData(UserIdentity userIdentity, LoaneeLoanDetail loaneeLoanDetail) {
+        return Loanee.builder().userIdentity(userIdentity).
+                 cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy())
+                .loaneeLoanDetail(loaneeLoanDetail).build();
+    }
+
+    public static LoaneeLoanDetail createLoaneeLoanDetail() {
+        return LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
+                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
     }
 
 }
