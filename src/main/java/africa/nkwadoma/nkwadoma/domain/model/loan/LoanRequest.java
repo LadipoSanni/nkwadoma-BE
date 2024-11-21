@@ -27,14 +27,14 @@ public class LoanRequest {
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
-    private LocalDateTime cohortStartDate;
+    private LocalDate cohortStartDate;
     private String programName;
     private int pageNumber;
     private int pageSize;
 
 
     public LoanRequest(String id, String firstName, String lastName, String organizationName, BigDecimal loanAmountRequested,
-                       LocalDateTime createdDate, BigDecimal initialDeposit, LocalDateTime cohortStartDate, String programName) {
+                       LocalDateTime createdDate, BigDecimal initialDeposit, LocalDate cohortStartDate, String programName) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

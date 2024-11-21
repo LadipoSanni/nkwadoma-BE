@@ -36,6 +36,8 @@ class OrganizationEmployeeIdentityAdapterTest {
     private int pageNumber = 0;
     private int pageSize = 10;
     private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
+    private String organizationId;
+    private String userId;
 
     @BeforeAll
     void init() {
@@ -64,13 +66,20 @@ class OrganizationEmployeeIdentityAdapterTest {
             joel.setCreatedAt(LocalDateTime.now().toString());
             joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
             joel.setCreatedBy(amazingGrace.getCreatedBy());
+            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
+
+            if (StringUtils.isNotEmpty(foundUserIdentity.getId())) {
+                userIdentityOutputPort.deleteUserById(foundUserIdentity.getId());
+            }
 
             amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().meedlUser(joel).build()));
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
+            organizationId = savedOrganization.getId();
 
             UserIdentity userIdentity = userIdentityOutputPort.save(joel);
             assertNotNull(userIdentity);
+            userId = userIdentity.getId();
         } catch (MeedlException e) {
             log.error("Error saving organization", e);
         }
@@ -79,8 +88,8 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Test
     void findAllOrganizationEmployees() {
         try {
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
-            UserIdentity userIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+            UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
 
             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());

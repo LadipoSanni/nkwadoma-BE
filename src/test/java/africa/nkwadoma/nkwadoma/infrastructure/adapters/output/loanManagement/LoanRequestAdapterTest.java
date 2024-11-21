@@ -152,8 +152,8 @@ class LoanRequestAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             elites = new Cohort();
-            elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-            elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+            elites.setStartDate(LocalDate.of(2024,10,18));
+            elites.setExpectedEndDate(LocalDate.of(2024,11,18));
             elites.setProgramId(savedProgram.getId());
             elites.setName("Elite");
             elites.setCreatedBy(userIdentity.getCreatedBy());
