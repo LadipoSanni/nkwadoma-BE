@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -14,9 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import lombok.extern.slf4j.Slf4j;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,9 +21,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.*;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.*;
 import java.time.*;
@@ -50,9 +46,14 @@ class LoaneeServiceTest {
     @Mock
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Mock
-    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private  LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private int pageSize = 2;
+    private int pageNumber = 1;
+
     private ProgramCohort programCohort;
     private Cohort elites;
     private Loanee firstLoanee;
@@ -101,8 +102,7 @@ class LoaneeServiceTest {
 
         elites = new Cohort();
         elites.setId(mockId);
-        elites.setStartDate(LocalDateTime.of(2024, 10, 18, 9, 43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024, 11, 18, 9, 43));
+        elites.setStartDate(LocalDate.of(2024, 10, 18));
         elites.setProgramId(mockId);
         elites.setName("Elite");
         elites.setCreatedBy(mockId);
@@ -181,6 +181,31 @@ class LoaneeServiceTest {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertEquals(loanee.getUserIdentity().getEmail(),firstLoanee.getUserIdentity().getEmail());
+    }
+
+    @Test
+    void viewAllLoaneeInCohort() throws MeedlException {
+        when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber)).
+                thenReturn(new PageImpl<>(List.of(firstLoanee)));
+        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(mockId,pageSize,pageNumber);
+        assertEquals(1,loanees.toList().size());
+    }
+
+    @Test
+    void viewAllLoaneeInCohortWithNullId() throws MeedlException {
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    void viewAllLoaneeInCohortWithEmptyId(String cohortId) throws MeedlException {
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"invalid-id"})
+    void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
 

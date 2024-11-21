@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -82,7 +83,7 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("qudusa559@gmail.com").firstName("qudus").lastName("lekan")
+        meedleUser =  UserIdentity.builder().id(id).email("ade5@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
         employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).build();
@@ -134,8 +135,7 @@ class CohortPersistenceAdapterTest {
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
         elites = new Cohort();
-        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
@@ -145,8 +145,7 @@ class CohortPersistenceAdapterTest {
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
-        xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        xplorers.setStartDate(LocalDate.of(2024,10,18));
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
@@ -186,11 +185,6 @@ class CohortPersistenceAdapterTest {
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
-        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
-    }
-    @Test
-    void saveCohortWithNullEndDate(){
-        elites.setExpectedEndDate(null);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 
