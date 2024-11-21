@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
