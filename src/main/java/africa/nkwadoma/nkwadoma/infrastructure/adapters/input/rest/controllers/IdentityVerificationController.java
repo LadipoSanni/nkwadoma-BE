@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailur
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationFailureRecordRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.IdentityVerificationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.IdentityVerificationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.validation.Valid;
@@ -35,8 +36,10 @@ public class IdentityVerificationController {
     @PostMapping("/identity/verify")
     public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
-        return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(identityVerificationUseCase.verifyIdentity(identityVerification))
+        identityVerification = identityVerificationUseCase.verifyIdentity(identityVerification);
+        IdentityVerificationResponse identityVerificationResponse = identityVerificationMapper.toIdentityVerificationResponse(identityVerification);
+        return ResponseEntity.ok(ApiResponse.<IdentityVerificationResponse>builder()
+                .data(identityVerificationResponse)
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/failure-record/create")
