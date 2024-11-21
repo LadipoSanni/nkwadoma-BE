@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,8 @@ public class Cohort {
     private String createdBy;
     private String updatedBy;
     private String imageUrl;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
@@ -44,7 +45,6 @@ public class Cohort {
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(startDate);
-        MeedlValidator.validateObjectInstance(expectedEndDate);
     }
 
     public void updateValidation() throws MeedlException {
