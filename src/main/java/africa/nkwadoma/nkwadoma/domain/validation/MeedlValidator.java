@@ -31,10 +31,12 @@ public class MeedlValidator {
     }
 
     public static void validateUUID(String dataElement) throws MeedlException {
+        log.info("validateUUID {}", dataElement);
         validateDataElement(dataElement);
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
+            log.info("{}. The invalid UUID {}", e.getMessage(), dataElement);
             throw new MeedlException(UUID_NOT_VALID.getMessage());
         }
     }
