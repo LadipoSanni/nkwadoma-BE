@@ -83,9 +83,11 @@ public class ProgramController {
         Program program = new Program();
         program.setName(name.trim());
         List<Program> programs = addProgramUseCase.viewProgramByName(program);
-
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                data(programs.stream().map(foundProgram -> programRestMapper.toProgramResponse(program))).
+        List<ProgramResponse> programResponses = programs.stream().
+                map(programRestMapper::toProgramResponse).toList();
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(programResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );
