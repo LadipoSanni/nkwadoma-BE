@@ -102,8 +102,7 @@ class LoaneeServiceTest {
 
         elites = new Cohort();
         elites.setId(mockId);
-        elites.setStartDate(LocalDateTime.of(2024, 10, 18, 9, 43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024, 11, 18, 9, 43));
+        elites.setStartDate(LocalDate.of(2024, 10, 18));
         elites.setProgramId(mockId);
         elites.setName("Elite");
         elites.setCreatedBy(mockId);

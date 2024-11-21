@@ -73,7 +73,7 @@ class LoaneePersistenceAdapterTest {
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().email("qudusa3595@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("lekan").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
