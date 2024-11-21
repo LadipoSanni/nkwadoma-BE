@@ -21,6 +21,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     @Override
     public LoanOffer save(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanOffer);
+        loanOffer.validate();
         LoanOfferEntitiy loanOfferEntitiy = loanOfferMapper.toLoanOfferEntity(loanOffer);
         loanOfferEntitiy = loanOfferEntityRepository.save(loanOfferEntitiy);
         return loanOfferMapper.toLoanOffer(loanOfferEntitiy);

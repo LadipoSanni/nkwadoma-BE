@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -37,8 +38,7 @@ public class LoanOfferServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
-    @Mock
-    private LoanOfferMapper loanOfferMapper;
+
 
     private LoanOffer loanOffer;
     private LoanRequest loanRequest;
@@ -82,8 +82,8 @@ public class LoanOfferServiceTest {
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
             when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
-            when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
-            cretedLoanOffer = loanService.createLoanOffer(mockId);
+            when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
+            cretedLoanOffer = loanService.createLoanOffer(loanRequest.getId());
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }

@@ -56,29 +56,35 @@ public class LoanOfferAdapterTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private String loanOfferId;
+    private String loanRequestId;
 
 
     @BeforeAll
     void setUp() {
-//         String email = "test@gmail";
-//         userIdentity = TestData.createTestUserIdentity(email);
-//         loaneeLoanDetail = TestData.createLoaneeLoanDetail();
-//         loanee = TestData.createLoaneeTestData(userIdentity,loaneeLoanDetail);
-         try{
-             userIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
-             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
-             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-             loanee.setUserIdentity(userIdentity);
-             loanee = loaneeOutputPort.save(loanee);
-             loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-             loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
-             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
-                     .status(LoanRequestStatus.DECLINED).referredBy("Brown Hills Institute").loanee(loanee)
-                     .dateTimeApproved(LocalDateTime.now()).build();
-             loanRequest = loanRequestOutputPort.save(loanRequest);
-         }catch (MeedlException exception){
-             log.error(exception.getMessage());
-         }
+        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
+                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
+                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
+        loanee = Loanee.builder().userIdentity(userIdentity).
+                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy())
+                .loaneeLoanDetail(loaneeLoanDetail).build();
+        try {
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+            loanee.setLoaneeLoanDetail(loaneeLoanDetail);
+            loanee.setUserIdentity(userIdentity);
+            loanee = loaneeOutputPort.save(loanee);
+            loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
+                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
+                    .dateTimeApproved(LocalDateTime.now()).build();
+            loanRequest = loanRequestOutputPort.save(loanRequest);
+            loanRequestId = loanRequest.getId();
+        } catch (MeedlException exception) {
+            log.error(exception.getMessage());
+        }
     }
 
     @BeforeEach
@@ -90,26 +96,25 @@ public class LoanOfferAdapterTest {
     }
 
     @Test
-    void saveNullLoanOffer(){
-       assertThrows(MeedlException.class, () -> loanOfferOutputPort.save(null));
+    void saveNullLoanOffer() {
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.save(null));
     }
 
     @ParameterizedTest
-    @ValueSource( strings = {"jduhjdkbkkvkgkd",StringUtils.EMPTY,StringUtils.SPACE})
-    void saveLoanOfferWithInvalidLoanRequestId(String loanRequestId){
-        loanRequest.setId(loanRequestId);
-        loanOffer.setLoanRequest(loanRequest);
+    @ValueSource(strings = {"jduhjdkbkkvkgkd", StringUtils.EMPTY, StringUtils.SPACE})
+    void saveLoanOfferWithInvalidLoanRequestId(String loanRequestId) {
+        loanOffer.getLoanRequest().setId(loanRequestId);
         assertThrows(MeedlException.class, () -> loanOfferOutputPort.save(loanOffer));
     }
 
     @Order(1)
     @Test
-    void saveLoanOffer(){
+    void saveLoanOffer() {
         LoanOffer savedLoanOffer = new LoanOffer();
-        try{
+        try {
             savedLoanOffer = loanOfferOutputPort.save(loanOffer);
             loanOfferId = savedLoanOffer.getId();
-        } catch (MeedlException exception){
+        } catch (MeedlException exception) {
             log.error(exception.getMessage());
         }
         assertEquals(savedLoanOffer.getLoanRequest().getId(), loanRequest.getId());
@@ -119,11 +124,11 @@ public class LoanOfferAdapterTest {
 
 
     @AfterAll
-    void cleanUp(){
+    void cleanUp() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferral.getId());
             loanOfferOutputPort.deleteLoanOfferById(loanOfferId);
-            loanRequestOutputPort.deleteLoanRequestById(loanRequest.getId());
+            loanRequestOutputPort.deleteLoanRequestById(loanRequestId);
             loaneeOutputPort.deleteLoanee(loanee.getId());
             userIdentityOutputPort.deleteUserById(userIdentity.getId());
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetail.getId());
@@ -131,5 +136,4 @@ public class LoanOfferAdapterTest {
             log.error(exception.getMessage());
         }
     }
-
 }

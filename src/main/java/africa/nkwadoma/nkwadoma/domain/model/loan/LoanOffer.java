@@ -20,4 +20,8 @@ public class LoanOffer {
     private Loanee loanee;
     private LocalDateTime dateTimeOffered;
 
+    public void validate() throws MeedlException {
+        MeedlValidator.validateUUID(loanRequest.getId());
+    }
+
 }
