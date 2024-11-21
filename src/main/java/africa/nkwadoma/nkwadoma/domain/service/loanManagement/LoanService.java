@@ -125,6 +125,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanRequest);
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
-        return loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+        log.info("Loan requests from repository: {}", loanRequests.getContent());
+        return loanRequests;
     }
 }

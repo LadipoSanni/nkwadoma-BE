@@ -8,11 +8,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class LoanRequestAdapter implements LoanRequestOutputPort {
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRequestMapper loanRequestMapper;
@@ -30,9 +32,9 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     public Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        Page<LoanRequestEntity> loanRequestEntities = loanRequestRepository.findAll(
-                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("dateTimeApproved")))
-        );
-        return loanRequestEntities.map(loanRequestMapper::toLoanRequest);
+        Page<LoanRequest> loanRequests = loanRequestRepository.findAllLoanRequests(
+                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+        log.info("Loan requests from repository: {}", loanRequests.getContent());
+        return loanRequests;
     }
 }
