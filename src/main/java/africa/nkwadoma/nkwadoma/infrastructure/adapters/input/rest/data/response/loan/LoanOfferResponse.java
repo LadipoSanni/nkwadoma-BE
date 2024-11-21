@@ -1,19 +1,21 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
-public class LoanOffer {
+@Getter
+@ToString
+public class LoanOfferResponse {
+
     private String id;
     private String loanRequestId;
     private String referredBy;
@@ -24,10 +26,4 @@ public class LoanOffer {
     private LoanOfferStatus loanOfferStatus;
     private Loanee loanee;
     private LocalDateTime dateTimeOffered;
-
-
-
-    public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequestId);
-    }
 }

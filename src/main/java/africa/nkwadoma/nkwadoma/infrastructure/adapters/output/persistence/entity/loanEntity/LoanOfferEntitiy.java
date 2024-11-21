@@ -1,33 +1,35 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
 @Getter
 @Setter
-public class LoanOffer {
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoanOfferEntitiy {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String loanRequestId;
     private String referredBy;
     private BigDecimal loanAmountRequested;
-    private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
+    @Enumerated(EnumType.STRING)
     private LoanRequestStatus loanRequestStatus;
+    @Enumerated(EnumType.STRING)
     private LoanOfferStatus loanOfferStatus;
-    private Loanee loanee;
+    @ManyToOne
+    private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;
-
-
-
-    public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequestId);
-    }
 }

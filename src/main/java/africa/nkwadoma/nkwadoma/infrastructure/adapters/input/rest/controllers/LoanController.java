@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
@@ -32,6 +33,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANOFFER_CREATED;
 
 
 @RequestMapping(BASE_URL + LOAN)
@@ -45,6 +47,8 @@ public class LoanController {
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanOfferUseCase loanOfferUseCase;
+    private final LoanOfferRestMapper loanOfferRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -130,4 +134,20 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
     }
+
+    @PostMapping("/create-loan-offer/{loanRequestId}")
+    public ResponseEntity<ApiResponse<?>> createLoanOffer(@PathVariable  @NotBlank(message = "LoanRequest Id is Required")
+                                                          String loanRequestId) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setLoanRequestId(loanRequestId);
+        loanOffer = loanOfferUseCase.createLoanOffer(loanOffer);
+        LoanOfferResponse loanOfferResponse = loanOfferRestMapper.toLoanOfferResponse(loanOffer);
+        ApiResponse<LoanOfferResponse> apiResponse =ApiResponse.<LoanOfferResponse>builder()
+                .data(loanOfferResponse)
+                .message(LOANOFFER_CREATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 }

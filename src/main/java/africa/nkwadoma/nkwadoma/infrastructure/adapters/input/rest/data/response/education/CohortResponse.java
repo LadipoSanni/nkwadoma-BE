@@ -31,6 +31,7 @@ public class CohortResponse {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
+    private String imageUrl;
     private LocalDateTime startDate;
     private LocalDateTime expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
