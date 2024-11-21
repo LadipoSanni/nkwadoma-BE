@@ -25,7 +25,7 @@ public class CohortEntity {
     private String id;
     private String name;
     private String programId;
-    @Size(max = 250, message = "cohort description must no go beyond 250")
+    @Size( max = 2500, message = "cohort description must no go beyond 2500" )
     private String cohortDescription;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
