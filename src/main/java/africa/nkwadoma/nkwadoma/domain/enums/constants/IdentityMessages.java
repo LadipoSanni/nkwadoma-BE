@@ -33,8 +33,6 @@ public enum IdentityMessages{
     ACCOUNT_ALREADY_DISABLED("Account is not currently enabled"),
     INVALID_EMAIL_OR_PASSWORD("Invalid email or password"),
     ORGANIZATION_EMPLOYEE_NOT_FOUND("Organization employee not found!"),
-    USER_EMAIL_PREVIOUSLY_VERIFICATION("User verification: %s has been verified previously %s"),
-    USER_EMAIL_NOT_PREVIOUSLY_VERIFICATION("User email verification: %s has not been verified previously %s "),
     IDENTITY_VERIFIED("Identity verified"),
     BLACKLISTED_REFERRAL("Referral Blacklisted"),
     IDENTITY_VERIFICATION_FAILURE_SAVED("Verification failure saved successfully"),

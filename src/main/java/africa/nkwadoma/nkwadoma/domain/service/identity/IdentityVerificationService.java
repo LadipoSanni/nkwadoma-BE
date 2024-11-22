@@ -87,8 +87,4 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         }
         return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
-    private boolean isIdentityVerified(UserIdentity foundUser){
-        return true;
-    }
-
 }
