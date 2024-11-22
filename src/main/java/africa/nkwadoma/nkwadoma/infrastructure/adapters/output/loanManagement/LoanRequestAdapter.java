@@ -24,4 +24,9 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         LoanRequestEntity savedLoanRequestEntity = loanRequestRepository.save(loanRequestEntity);
         return loanRequestMapper.toLoanRequest(savedLoanRequestEntity);
     }
+
+    @Override
+    public LoanRequest viewLoanRequest(String id) {
+        return null;
+    }
 }
