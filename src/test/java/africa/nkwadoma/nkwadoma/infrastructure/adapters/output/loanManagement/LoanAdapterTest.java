@@ -66,7 +66,7 @@ class LoanAdapterTest {
 
     }
     @Test
-    void saveLoan() throws MeedlException {
+    void saveLoan(){
         Loan savedLoan = null;
         try {
             savedLoan = loanOutputPort.save(loan);
