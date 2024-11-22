@@ -49,10 +49,6 @@ public class CohortService implements CohortUseCase {
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
         ProgramCohort programCohort = new ProgramCohort();
-        if (cohort.getLoanDetail() != null) {
-            LoanDetail loanDetail = loanDetailsOutputPort.saveLoanDetails(cohort.getLoanDetail());
-            cohort.setLoanDetail(loanDetail);
-        }
         cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
         activateStatus(cohort);
         Cohort savedCohort = cohortOutputPort.save(cohort);
@@ -94,7 +90,7 @@ public class CohortService implements CohortUseCase {
         Cohort foundCohort = cohortOutputPort.findCohort(cohort.getId());
         Program program = programOutputPort.findProgramById(foundCohort.getProgramId());
         checkIfCohortNameExist(cohort, foundCohort);
-        if (foundCohort.getLoanDetail() != null) {
+        if (! ObjectUtils.isEmpty(foundCohort.getLoanDetail())) {
             throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
         }
         cohortMapper.updateCohort(foundCohort,cohort);
