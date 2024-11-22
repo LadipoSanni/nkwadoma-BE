@@ -32,9 +32,8 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     public Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        Page<LoanRequest> loanRequests = loanRequestRepository.findAllLoanRequests(
+        Page<LoanRequestEntity> loanRequests = loanRequestRepository.findAll(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
-        log.info("Loan requests from repository: {}", loanRequests.getContent());
-        return loanRequests;
+        return loanRequests.map(loanRequestMapper::toLoanRequest);
     }
 }

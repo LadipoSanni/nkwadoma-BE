@@ -19,6 +19,8 @@ public class LoanRequest {
     private String organizationName;
     private String firstName;
     private String lastName;
+    private String referredBy;
+    private String cohortId;
     private BigDecimal loanAmountRequested;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
