@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -19,7 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,7 +47,6 @@ class CohortPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
-    private Cohort cohort;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
@@ -83,7 +83,7 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("qudusa559@gmail.com").firstName("qudus").lastName("lekan")
+        meedleUser =  UserIdentity.builder().id(id).email("ade5@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
         employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).build();
@@ -107,6 +107,10 @@ class CohortPersistenceAdapterTest {
         loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Loan Break").build();
         try {
+            Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
+            if (userByEmail.isPresent()) {
+                identityManagementOutputPort.deleteUser(userByEmail.get());
+            }
             meedleUser = identityManagementOutputPort.createUser(meedleUser);
             userIdentityOutputPort.save(meedleUser);
             organizationIdentity.getOrganizationEmployees().forEach(employeeIdentityOutputPort::save);
@@ -131,8 +135,7 @@ class CohortPersistenceAdapterTest {
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
         elites = new Cohort();
-        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
@@ -142,8 +145,7 @@ class CohortPersistenceAdapterTest {
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
-        xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        xplorers.setStartDate(LocalDate.of(2024,10,18));
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
@@ -183,11 +185,6 @@ class CohortPersistenceAdapterTest {
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
-        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
-    }
-    @Test
-    void saveCohortWithNullEndDate(){
-        elites.setExpectedEndDate(null);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 

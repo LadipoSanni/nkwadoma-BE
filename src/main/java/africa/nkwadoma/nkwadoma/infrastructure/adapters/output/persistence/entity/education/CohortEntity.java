@@ -4,9 +4,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +25,7 @@ public class CohortEntity {
     private String id;
     private String name;
     private String programId;
+    @Size(max = 250, message = "cohort description must no go beyond 250")
     private String cohortDescription;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
@@ -34,8 +38,8 @@ public class CohortEntity {
     private String createdBy;
     private String updatedBy;
     private String imageUrl;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     @OneToOne
     private LoanDetailEntity loanDetail;
     private Integer numberOfLoanees = 0;

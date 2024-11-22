@@ -82,10 +82,12 @@ public class ProgramController {
             throws MeedlException {
         Program program = new Program();
         program.setName(name.trim());
-        program = addProgramUseCase.viewProgramByName(program);
-
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
-                data(programRestMapper.toProgramResponse(program)).
+        List<Program> programs = addProgramUseCase.viewProgramByName(program);
+        List<ProgramResponse> programResponses = programs.stream().
+                map(programRestMapper::toProgramResponse).toList();
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(programResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );

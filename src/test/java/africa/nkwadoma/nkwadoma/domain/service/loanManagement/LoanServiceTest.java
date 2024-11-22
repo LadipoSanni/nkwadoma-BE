@@ -209,8 +209,7 @@ class LoanServiceTest {
         loanReferral.getLoanee().getUserIdentity().setAlternateContactAddress(null);
         loanReferral.getLoanee().getUserIdentity().setAlternateEmail(null);
         loanReferral.getLoanee().getUserIdentity().setAlternatePhoneNumber(null);
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
-        log.info("", meedlException);
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
     }
 
     @Test

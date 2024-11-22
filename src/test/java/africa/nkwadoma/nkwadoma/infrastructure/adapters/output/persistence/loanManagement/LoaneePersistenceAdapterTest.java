@@ -20,8 +20,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,9 +37,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class LoaneePersistenceAdapterTest {
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
+    private Loanee firstLoanee ;
+    private Loanee anotherLoanee ;
+    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String secondId = "7bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String loaneeId;
+    private String secondLoaneeId;
+    private String cohortId;
+    private int pageSize = 2;
+    private int pageNumber = 0;
+
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private LoaneeLoanDetail secondLoaneeLoanDetail;
+    private LoanBreakdown loanBreakdown;
+    private LoanBreakdown secondBreakdown;
+
     @Autowired
     private LoaneeRepository loaneeRepository;
     private UserIdentity userIdentity;
+    private UserIdentity anotherUser;
     @Autowired
     private UserIdentityOutputPort identityOutputPort;
     @Autowired
@@ -46,30 +64,38 @@ class LoaneePersistenceAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private Loanee firstLoanee ;
-    private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private String loaneeId;
     private String userId;
     private String loaneeLoanDetailId;
-    private LoaneeLoanDetail loaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
     private List<LoanBreakdown> loanBreakdownList;
+    private List<LoanBreakdown> loanBreakdownList2;
 
 
 
     @BeforeAll
     void setUpUserIdentity(){
-        userIdentity = UserIdentity.builder().id(id).email("qudusa595@gmail.com").firstName("qudus").lastName("lekan")
+        userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
+        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("lekan").lastName("ayo")
+                .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
+        secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+                .initialDeposit(BigDecimal.valueOf(200)).build();
         loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
+                .currency("usd").build();
+        secondBreakdown = LoanBreakdown.builder().itemName("juno").itemAmount(BigDecimal.valueOf(34))
                 .currency("usd").build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
+            anotherUser = identityManagerOutputPort.createUser(anotherUser);
+            anotherUser = identityOutputPort.save(anotherUser);
+            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
             loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), loaneeLoanDetail);
+            loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(secondBreakdown),loaneeLoanDetail);
+            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
+            secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
@@ -84,6 +110,13 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setCreatedBy(id);
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
+
+        anotherLoanee = new Loanee();
+        anotherLoanee.setCohortId(id);
+        anotherLoanee.setCreatedBy(id);
+        anotherLoanee.setUserIdentity(anotherUser);
+        anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
+
     }
 
     @Test
@@ -200,6 +233,32 @@ class LoaneePersistenceAdapterTest {
 
     @Order(2)
     @Test
+    void saveAnotherLoanee(){
+        Loanee loanee = new Loanee();
+        try{
+            loanee = loaneeOutputPort.save(anotherLoanee);
+            secondLoaneeId = loanee.getId();
+            cohortId = loanee.getCohortId();
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(loanee.getUserIdentity().getFirstName(),anotherLoanee.getUserIdentity().getFirstName());
+        assertEquals(loanee.getCohortId(),anotherLoanee.getCohortId());
+    }
+
+    @Order(3)
+    @Test
+    void findAllLoanee(){
+        try {
+            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber);
+            assertEquals(2,loanees.toList().size());
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+
+    }
+    @Order(4)
+    @Test
     void findLoanee(){
         Loanee loanee = new Loanee();
         log.info("loaneeId = {}",loaneeId);
@@ -222,8 +281,12 @@ class LoaneePersistenceAdapterTest {
     void cleanUp() throws MeedlException {
         identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);
+        loaneeRepository.deleteById(secondLoaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
         loanBreakdownOutputPort.deleteAll(loanBreakdownList);
+        loanBreakdownOutputPort.deleteAll(loanBreakdownList2);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+        identityOutputPort.deleteUserById(anotherUser.getId());
+        identityManagerOutputPort.deleteUser(anotherUser);
     }
 }
