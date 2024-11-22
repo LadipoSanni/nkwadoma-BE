@@ -28,6 +28,10 @@ public class GlobalExceptionHandler {
         log.info("Validation errors: {}", errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(IdentityVerificationException.class)
+    public ResponseEntity<ExceptionResponse> handleValidationExceptions(IdentityVerificationException ex) {
+        return new ResponseEntity<>(errorResponseBuilder(ex.getMessage()), HttpStatus.EXPECTATION_FAILED);
+    }
 
     @ExceptionHandler(MeedlException.class)
     public  ResponseEntity<ExceptionResponse> handleMeedlException(MeedlException exception){
