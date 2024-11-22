@@ -77,7 +77,6 @@ class CohortPersistenceAdapterTest {
     private LoanBreakdown loanBreakdown;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
-    private LoanDetail loanDetail2;
     private List<LoanBreakdown> loanBreakdowns;
 
 
@@ -100,10 +99,6 @@ class CohortPersistenceAdapterTest {
                 .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
                 .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
                 .totalOutstanding(BigDecimal.valueOf(450)).build();
-        loanDetail2 = LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
-                .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
-                .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
-                .totalOutstanding(BigDecimal.valueOf(450)).build();
         loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Loan Break").build();
         try {
@@ -123,7 +118,6 @@ class CohortPersistenceAdapterTest {
             log.info("Program saved {}",program);
             programId = program.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
-            loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
@@ -141,7 +135,6 @@ class CohortPersistenceAdapterTest {
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
-        elites.setLoanDetail(loanDetail);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -324,7 +317,7 @@ class CohortPersistenceAdapterTest {
         try{
             Cohort cohort = cohortOutputPort.findCohort(cohortTwoId);
             assertNull(cohort.getLoanDetail());
-            cohort.setLoanDetail(loanDetail2);
+            cohort.setLoanDetail(loanDetail);
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.save(cohort);
             log.info("{} = =",editedCohort);
