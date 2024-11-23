@@ -11,9 +11,11 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ import java.util.*;
 @Slf4j
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
-        RespondToLoanReferralUseCase, LoanRequestUseCase {
+        RespondToLoanReferralUseCase, LoanRequestUseCase , LoanOfferUseCase{
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
@@ -33,6 +35,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanRequestOutputPort loanRequestOutputPort;
+    private final LoanOfferMapper loanOfferMapper;
+    private final LoanOfferOutputPort loanOfferOutputPort;
 
 
     @Override
@@ -118,5 +122,22 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
         return loanRequestOutputPort.save(loanRequest);
+    }
+
+    @Override
+    public LoanOffer createLoanOffer(String loanRequestId) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        LoanRequest loanRequest = loanRequestOutputPort.findById(loanRequestId);
+        if (ObjectUtils.isEmpty(loanRequest)){
+            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+        }
+        if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
+            throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
+        }
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer = loanOfferOutputPort.save(loanOffer);
+        return loanOffer;
     }
 }

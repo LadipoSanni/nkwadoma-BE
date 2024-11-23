@@ -5,4 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 public interface LoanRequestOutputPort {
     LoanRequest save(LoanRequest loanRequest) throws MeedlException;
+
+    LoanRequest findById(String loanRequestId) throws MeedlException;
+
+    void deleteLoanRequestById(String id);
 }
