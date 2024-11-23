@@ -17,4 +17,7 @@ public interface CohortUseCase {
     void inviteCohort(String userId, String programId, String cohortId) throws MeedlException;
     Page<Cohort> viewAllCohortInAProgram(String programId,int pageNumber, int pageSize) throws MeedlException;
     Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
+
+    Page<Cohort> viewAllCohortInOrganization(String actorId,String organizationId,
+    int pageNumber,int pageSize) throws MeedlException ;
 }

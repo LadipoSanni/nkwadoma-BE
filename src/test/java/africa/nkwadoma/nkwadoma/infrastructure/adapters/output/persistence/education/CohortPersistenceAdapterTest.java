@@ -48,6 +48,7 @@ class CohortPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
     private Cohort xplorers;
+    private Cohort mavin;
     @Autowired
     private CohortRepository cohortRepository;
     private String meedleUserId;
@@ -71,17 +72,20 @@ class CohortPersistenceAdapterTest {
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     private Program program;
+    private Program program2;
     private String programId;
+    private String programId2;
     private String cohortOneId;
     private String cohortTwoId;
+    private String cohortThreeId;
     private String organizationId;
     private LoanBreakdown loanBreakdown;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
     private LoanDetail loanDetail2;
     private List<LoanBreakdown> loanBreakdowns;
-    private int pageSize = 0;
-    private int pageNumber = 2;
+    private int pageSize = 3;
+    private int pageNumber = 1;
 
 
     @BeforeAll
@@ -95,6 +99,11 @@ class CohortPersistenceAdapterTest {
                         List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
                 phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).createdBy(id).build();
         program = Program.builder().name("My program Ford").
+                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
+                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
+                deliveryType(DeliveryType.ONSITE).
+                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
+        program2 = Program.builder().name("My program Ford 2").
                 programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
                 mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
                 deliveryType(DeliveryType.ONSITE).
@@ -122,9 +131,12 @@ class CohortPersistenceAdapterTest {
             organizationId = organizationIdentity.getId();
             meedleUserId = meedleUser.getId();
             program.setCreatedBy(meedleUserId);
+            program2.setCreatedBy(meedleUserId);
             program = programOutputPort.saveProgram(program);
+            program2 = programOutputPort.saveProgram(program2);
             log.info("Program saved {}",program);
             programId = program.getId();
+            programId2 = program2.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
@@ -146,6 +158,7 @@ class CohortPersistenceAdapterTest {
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
         elites.setLoanDetail(loanDetail);
         elites.setOrganizationId(organizationId);
+        elites.setCohortStatus(CohortStatus.GRADUATED);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -154,6 +167,16 @@ class CohortPersistenceAdapterTest {
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
         xplorers.setOrganizationId(organizationId);
+
+        mavin = new Cohort();
+        mavin.setStartDate(LocalDate.of(2024,10,18));
+        mavin.setProgramId(programId2);
+        mavin.setName("Mavin");
+        mavin.setCreatedBy(meedleUserId);
+        mavin.setLoanBreakdowns(loanBreakdowns);
+        mavin.setTuitionAmount(BigDecimal.valueOf(20000));
+        mavin.setOrganizationId(organizationId);
+        mavin.setCohortStatus(CohortStatus.INCOMING);
     }
 
 
@@ -222,6 +245,19 @@ class CohortPersistenceAdapterTest {
 
     @Order(3)
     @Test
+    void saveCohortInAnotherProgram() {
+        try {
+            Cohort cohort = cohortOutputPort.save(mavin);
+            assertEquals(cohort.getName(), mavin.getName());
+            cohortThreeId = cohort.getId();
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+
+    @Order(4)
+    @Test
     void viewCohortDetails(){
         Cohort viewedCohort = new Cohort() ;
         try{
@@ -233,7 +269,7 @@ class CohortPersistenceAdapterTest {
         assertEquals(xplorers.getCreatedBy(), viewedCohort.getCreatedBy());
     }
 
-    @Order(4)
+    @Order(5)
     @Test
     void viewCohortWithNullUserId(){
         assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(null,
@@ -282,7 +318,7 @@ class CohortPersistenceAdapterTest {
                         cohortId));
     }
 
-    @Order(5)
+    @Order(6)
     @Test
     void viewAllCohortInAProgram(){
         List<Cohort> cohorts = new ArrayList<>();
@@ -295,7 +331,7 @@ class CohortPersistenceAdapterTest {
 
     }
 
-    @Order(6)
+    @Order(7)
     @Test
     void searchForCohort(){
         Cohort searchedCohort = new Cohort();
@@ -322,7 +358,7 @@ class CohortPersistenceAdapterTest {
                      cohortOutputPort.searchForCohortInAProgram(cohortName,elites.getProgramId()));
     }
 
-    @Order(7)
+    @Order(8)
     @Test
     void addLoanDetailsToCohort(){
         Cohort editedCohort = new Cohort();
@@ -352,14 +388,14 @@ class CohortPersistenceAdapterTest {
                 cohortOutputPort.findAllCohortByOrganizationId(null,pageSize,pageNumber));
     }
 
-    @Order(8)
+    @Order(9)
     @Test
     void findAllCohortWitOrganizationId() throws MeedlException {
     Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
-    assertEquals(2,cohorts.getSize());
+    assertEquals(3,cohorts.getSize());
     }
 
-    @Order(9)
+    @Order(10)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
@@ -378,10 +414,10 @@ class CohortPersistenceAdapterTest {
         log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
         identityManagementOutputPort.deleteUser(meedleUser);
         cohortOutputPort.deleteCohort(cohortTwoId);
+        cohortOutputPort.deleteCohort(cohortThreeId);
         programCohortOutputPort.delete(programId);
+        programCohortOutputPort.delete(programId2);
         organizationIdentityOutputPort.delete(organizationId);
         userIdentityOutputPort.deleteUserById(meedleUserId);
-        cohortRepository.deleteById(cohortTwoId);
-        cohortRepository.deleteById(cohortOneId);
     }
 }

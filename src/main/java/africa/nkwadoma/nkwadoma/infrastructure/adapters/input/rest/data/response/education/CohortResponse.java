@@ -22,6 +22,7 @@ public class CohortResponse {
 
     private String id;
     private String programId;
+    private String organizationId;
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;

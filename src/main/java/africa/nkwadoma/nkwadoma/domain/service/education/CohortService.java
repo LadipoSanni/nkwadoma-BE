@@ -177,6 +177,17 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
+    public Page<Cohort> viewAllCohortInOrganization(String actorId,String organizationId,
+                                                    int pageNumber,int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
+        if (!organizationId.equals(organizationIdentity.getId())){
+            throw new CohortException(CohortMessages.ACTOR_DOESNT_EXIST_IN_ORGANIZATION.getMessage());
+        }
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
+    }
+
+    @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort.getId());

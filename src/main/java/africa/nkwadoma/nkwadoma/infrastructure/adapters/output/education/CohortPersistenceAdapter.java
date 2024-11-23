@@ -33,6 +33,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -108,7 +109,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
         Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationId(organizationId,pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
     }
