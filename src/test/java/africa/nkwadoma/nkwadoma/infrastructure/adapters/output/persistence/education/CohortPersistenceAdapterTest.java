@@ -150,7 +150,6 @@ class CohortPersistenceAdapterTest {
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
-        elites.setLoanDetail(loanDetail);
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
 
