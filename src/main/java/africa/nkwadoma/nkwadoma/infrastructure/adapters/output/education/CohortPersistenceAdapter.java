@@ -30,6 +30,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -100,6 +103,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         MeedlValidator.validateDataElement(name);
         CohortEntity cohortEntity = cohortRepository.findCohortByName(name);
         return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationId(organizationId,pageRequest);
+        return cohortEntities.map(cohortMapper::toCohort);
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {

@@ -21,6 +21,7 @@ import java.util.List;
 public class Cohort {
     private String id;
     private String programId;
+    private String organizationId;
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;

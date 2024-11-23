@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -79,6 +80,8 @@ class CohortPersistenceAdapterTest {
     private LoanDetail loanDetail;
     private LoanDetail loanDetail2;
     private List<LoanBreakdown> loanBreakdowns;
+    private int pageSize = 0;
+    private int pageNumber = 2;
 
 
     @BeforeAll
@@ -142,6 +145,7 @@ class CohortPersistenceAdapterTest {
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
         elites.setLoanDetail(loanDetail);
+        elites.setOrganizationId(organizationId);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
@@ -149,6 +153,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
+        xplorers.setOrganizationId(organizationId);
     }
 
 
@@ -334,7 +339,27 @@ class CohortPersistenceAdapterTest {
         assertNotNull(editedCohort.getLoanDetail());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE,StringUtils.EMPTY,"hhjhjjsdhhhdshhjdhsh"})
+    void findAllCohortWithInvalidOrganizationId(String organizationId){
+        assertThrows(MeedlException.class,()->
+                cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber));
+    }
+
+    @Test
+    void findAllCohortWithNullOrganizationId(){
+        assertThrows(MeedlException.class,()->
+                cohortOutputPort.findAllCohortByOrganizationId(null,pageSize,pageNumber));
+    }
+
     @Order(8)
+    @Test
+    void findAllCohortWitOrganizationId() throws MeedlException {
+    Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
+    assertEquals(2,cohorts.getSize());
+    }
+
+    @Order(9)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
