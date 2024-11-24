@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -78,6 +79,8 @@ class CohortPersistenceAdapterTest {
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
     private List<LoanBreakdown> loanBreakdowns;
+    private int pageSize = 2;
+    private int pageNumber= 0;
 
 
     @BeforeAll
@@ -273,13 +276,14 @@ class CohortPersistenceAdapterTest {
     @Order(5)
     @Test
     void viewAllCohortInAProgram(){
-        List<Cohort> cohorts = new ArrayList<>();
+
         try{
-            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
+          Page<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
+            assertEquals(2,cohorts.toList().size());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,cohorts.size());
+
 
     }
 
