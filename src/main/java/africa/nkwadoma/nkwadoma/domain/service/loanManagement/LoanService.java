@@ -127,14 +127,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanOffer createLoanOffer(String loanRequestId) throws MeedlException {
         LoanOffer loanOffer = new LoanOffer();
-        LoanRequest loanRequest = loanRequestOutputPort.findById(loanRequestId);
-        if (ObjectUtils.isEmpty(loanRequest)){
+        Optional<LoanRequest> loanRequest = loanRequestOutputPort.findById(loanRequestId);
+        if (loanRequest.isEmpty()){
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
-        if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
+        if (loanRequest.get().getStatus() != LoanRequestStatus.APPROVED){
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
-        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanRequest(loanRequest.get());
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer = loanOfferOutputPort.save(loanOffer);

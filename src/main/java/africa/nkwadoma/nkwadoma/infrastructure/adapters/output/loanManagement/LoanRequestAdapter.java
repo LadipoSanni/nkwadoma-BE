@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -12,14 +13,16 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
+
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class LoanRequestAdapter implements LoanRequestOutputPort {
     private final LoanRequestRepository loanRequestRepository;
+    private final NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     private final LoanRequestMapper loanRequestMapper;
 
     @Override
@@ -32,11 +35,21 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
-    public LoanRequest findById(String loanRequestId) throws MeedlException {
+    public Optional<LoanRequest> findById(String loanRequestId) throws MeedlException {
         MeedlValidator.validateUUID(loanRequestId);
-        LoanRequestEntity loanRequestEntity = loanRequestRepository.findById(loanRequestId)
-                .orElseThrow(() -> new LoanRequestException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
-        return loanRequestMapper.toLoanRequest(loanRequestEntity);
+        Optional<LoanRequestEntity> loanRequestEntity = loanRequestRepository.findById(loanRequestId);
+        if (loanRequestEntity.isEmpty()) {
+            return Optional.empty();
+        }
+        LoanRequest loanRequest;
+        Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(
+                loanRequestEntity.get().getLoaneeEntity().getId());
+        if (foundNextOfKin.isEmpty()) {
+            return Optional.empty();
+        }
+        loanRequest = loanRequestMapper.toLoanRequest(loanRequestEntity.get());
+        loanRequest.setNextOfKin(foundNextOfKin.get());
+        return Optional.of(loanRequest);
     }
 
     @Override
@@ -51,10 +64,5 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
         return loanRequests.map(loanRequestMapper::loanRequestProjectionToLoanRequest);
-    }
-
-    @Override
-    public LoanRequest viewLoanRequest(String id) {
-        return null;
     }
 }

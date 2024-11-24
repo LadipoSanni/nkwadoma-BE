@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,8 +39,6 @@ public class LoanOfferServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
-
-
     private LoanOffer loanOffer;
     private LoanRequest loanRequest;
     private Loanee loanee;
@@ -81,7 +80,7 @@ public class LoanOfferServiceTest {
     void createLoanOfferWithValidLoanRequestId() {
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
-            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
+            when(loanRequestOutputPort.findById(mockId)).thenReturn(Optional.ofNullable(loanRequest));
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
             cretedLoanOffer = loanService.createLoanOffer(loanRequest.getId());
         } catch (MeedlException exception) {
@@ -94,7 +93,7 @@ public class LoanOfferServiceTest {
     @Test
     void createLoanOfferWithUnApprovedLoanRequest() {
         try {
-            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
+            when(loanRequestOutputPort.findById(mockId)).thenReturn(Optional.ofNullable(loanRequest));
             loanRequest.setStatus(LoanRequestStatus.DECLINED);
             assertThrows(MeedlException.class, ()->loanService.createLoanOffer(mockId));
         } catch (MeedlException exception) {

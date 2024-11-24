@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @Setter
 @ToString
 public class LoanBreakdown {
-
     private String loanBreakdownId;
     private String itemName;
     private BigDecimal itemAmount ;

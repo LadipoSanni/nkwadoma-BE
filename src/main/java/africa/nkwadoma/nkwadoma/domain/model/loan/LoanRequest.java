@@ -27,6 +27,7 @@ public class LoanRequest {
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private NextOfKin nextOfKin;
     private LocalDate cohortStartDate;
     private String programName;
     private int pageNumber;
@@ -39,6 +40,7 @@ public class LoanRequest {
         MeedlValidator.validateObjectInstance(status);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
     }
+
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();
