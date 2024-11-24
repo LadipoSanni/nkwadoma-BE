@@ -210,7 +210,7 @@ class LoanRequestAdapterTest {
         if (foundLoanee != null) {
             loanRequest = new LoanRequest();
             loanRequest.setStatus(LoanRequestStatus.APPROVED);
-            loanRequest.setOrganizationName("Brown Hills Institute");
+            loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(foundLoanee.getLoaneeLoanDetail());
             loanRequest.setLoanee(foundLoanee);
             loanRequest.setCreatedDate(LocalDateTime.now());
@@ -321,9 +321,7 @@ class LoanRequestAdapterTest {
                 organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
             }
             organizationOutputPort.deleteServiceOffering(serviceOfferingId);
-
             organizationOutputPort.delete(organizationId);
-
 
             loanDetailRepository.deleteById(loanDetailId);
             loanBreakdownOutputPort.deleteAll(loanBreakdowns);

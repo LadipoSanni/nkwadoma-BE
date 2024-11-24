@@ -20,16 +20,14 @@ public class LoanRequestEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String referredBy;
-    @ManyToOne
-    private CohortEntity cohortEntity;
+    private String cohortId;
     private BigDecimal loanAmountRequested;
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;
     private String reasonForDecliningLoanRequest;
     @Enumerated(EnumType.STRING)
     private LoanRequestStatus status;
-    @OneToOne
-    private LoanReferralEntity loanReferralEntity;
+    private String loanReferralId;
     @OneToOne
     private LoaneeEntity loaneeEntity;
 }

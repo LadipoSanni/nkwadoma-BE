@@ -58,7 +58,7 @@ class LoanServiceTest {
         loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
         loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-        loanRequest.setOrganizationName("Brown Hills Institute");
+        loanRequest.setReferredBy("Brown Hills Institute");
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanRequest.setLoanee(loanee);
         loanRequest.setDateTimeApproved(LocalDateTime.now());

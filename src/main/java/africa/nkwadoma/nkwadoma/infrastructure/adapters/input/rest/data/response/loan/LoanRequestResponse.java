@@ -19,6 +19,6 @@ public class LoanRequestResponse {
     private BigDecimal loanAmountRequested;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
-    private LocalDateTime cohortStartDate;
+    private LocalDate cohortStartDate;
     private String programName;
 }

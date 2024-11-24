@@ -6,8 +6,5 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanRequestRestMapper {
-    @Mapping(target = "cohortStartDate", source = "cohort.startDate")
-    @Mapping(target = "firstName", source = "loanee.userIdentity.firstName")
-    @Mapping(target = "lastName", source = "loanee.userIdentity.lastName")
     LoanRequestResponse toLoanRequestResponse(LoanRequest loanRequest);
 }

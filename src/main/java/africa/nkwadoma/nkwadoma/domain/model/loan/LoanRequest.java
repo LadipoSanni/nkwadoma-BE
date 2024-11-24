@@ -18,6 +18,8 @@ import java.time.*;
 public class LoanRequest {
     private String id;
     private String referredBy;
+    private String firstName;
+    private String lastName;
     private BigDecimal loanAmountRequested;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
@@ -26,7 +28,7 @@ public class LoanRequest {
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
-    private Cohort cohort;
+    private LocalDate cohortStartDate;
     private String programName;
     private int pageNumber;
     private int pageSize;
