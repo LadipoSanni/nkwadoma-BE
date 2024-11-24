@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;

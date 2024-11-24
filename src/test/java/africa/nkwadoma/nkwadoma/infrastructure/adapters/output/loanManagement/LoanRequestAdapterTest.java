@@ -72,6 +72,7 @@ class LoanRequestAdapterTest {
     private String loaneeId;
     private String loaneeLoanDetailId;
     private String loanReferralId;
+    private String joelUserId;
     private String userId;
     private String loanRequestId;
     private LoanDetail loanDetail;
@@ -102,7 +103,7 @@ class LoanRequestAdapterTest {
                 organizationIdentity.setEmail("rachel@gmail.com");
                 organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
                 organizationIdentity.setRcNumber("RC345677");
-                organizationIdentity.setId(testId);
+                organizationIdentity.setId("e66eb97f-cf79-47b0-96fa-6a460ffa7f63");
                 organizationIdentity.setPhoneNumber("0907658483");
                 organizationIdentity.setTin("Tin5678");
                 organizationIdentity.setNumberOfPrograms(0);
@@ -117,7 +118,7 @@ class LoanRequestAdapterTest {
                         meedlUser(userIdentity).build()));
                 OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
                 organizationId = savedOrganization.getId();
-                userId = userIdentityOutputPort.save(userIdentity).getId();
+                joelUserId = userIdentityOutputPort.save(userIdentity).getId();
                 OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
                 employeeIdentity.setOrganization(organizationId);
                 organizationIdentity.getOrganizationEmployees().forEach(
@@ -195,18 +196,25 @@ class LoanRequestAdapterTest {
         } catch (MeedlException e) {
             log.error("Error saving organization", e);
         }
-
     }
 
     @BeforeEach
     void init() {
-        loanRequest = new LoanRequest();
-        loanRequest.setLoanAmountRequested(loaneeLoanDetail.getAmountRequested());
-        loanRequest.setStatus(LoanRequestStatus.APPROVED);
-        loanRequest.setOrganizationName("Brown Hills Institute");
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        loanRequest.setLoanee(loanee);
-        loanRequest.setCreatedDate(LocalDateTime.now());
+        Loanee foundLoanee = null;
+        try {
+            foundLoanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        if (foundLoanee != null) {
+            loanRequest = new LoanRequest();
+            loanRequest.setStatus(LoanRequestStatus.APPROVED);
+            loanRequest.setReferredBy("Brown Hills Institute");
+            loanee.setLoaneeLoanDetail(foundLoanee.getLoaneeLoanDetail());
+            loanRequest.setLoanee(foundLoanee);
+            loanRequest.setCreatedDate(LocalDateTime.now());
+            loanRequest.setLoanAmountRequested(foundLoanee.getLoaneeLoanDetail().getAmountRequested());
+        }
     }
 
     @AfterEach
@@ -297,10 +305,21 @@ class LoanRequestAdapterTest {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(userId);
+            userIdentityOutputPort.deleteUserById(joelUserId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
 
             cohortOutputPort.deleteCohort(eliteCohortId);
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
+
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
+
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationOutputPort.deleteServiceOffering(serviceOfferingId);
             organizationOutputPort.delete(organizationId);
 
             loanDetailRepository.deleteById(loanDetailId);

@@ -8,9 +8,12 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
@@ -56,6 +59,10 @@ class ProgramPersistenceAdapterTest {
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
+    @Autowired
+    private OrganizationServiceOfferingRepository organizationServiceOfferingRepository;
+    @Autowired
+    private ServiceOfferEntityRepository serviceOfferEntityRepository;
 
     @BeforeEach
     void setUp() {
@@ -88,7 +95,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel@johnson.com");
+        userIdentity.setEmail("me@example.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
@@ -99,12 +106,12 @@ class ProgramPersistenceAdapterTest {
         try {
             organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setName("Amazing Grace Enterprises");
-            organizationIdentity.setEmail("rachel@gmail.com");
+            organizationIdentity.setEmail("org@example.com");
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC345677");
-            organizationIdentity.setId(testId);
+            organizationIdentity.setRcNumber("RC354097");
+            organizationIdentity.setId("2378afa0-b60b-4d32-97ae-7af5822a490b");
             organizationIdentity.setPhoneNumber("0907658483");
-            organizationIdentity.setTin("Tin5678");
+            organizationIdentity.setTin("Tin56782");
             organizationIdentity.setNumberOfPrograms(0);
             organizationIdentity.setCreatedBy(testId);
             ServiceOffering serviceOffering = new ServiceOffering();
@@ -112,6 +119,17 @@ class ProgramPersistenceAdapterTest {
             serviceOffering.setIndustry(Industry.EDUCATION);
             organizationIdentity.setServiceOfferings(List.of(serviceOffering));
             organizationIdentity.setWebsiteAddress("webaddress.org");
+
+            List<String> serviceOfferings = new ArrayList<>();
+            List<OrganizationServiceOfferingEntity> organizationServiceOfferingEntities = organizationServiceOfferingRepository.findByOrganizationId(organizationIdentity.getId());
+            if (CollectionUtils.isNotEmpty(organizationServiceOfferingEntities)) {
+                organizationServiceOfferingEntities.forEach(organizationServiceOffering -> {
+                    serviceOfferings.add(organizationServiceOffering.getServiceOfferingEntity().getId());
+                    organizationServiceOfferingRepository.delete(organizationServiceOffering);
+
+                });
+            }
+            serviceOfferEntityRepository.deleteAllById(serviceOfferings);
 
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
                     meedlUser(userIdentity).build()));
@@ -198,7 +216,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    Electrical Engineering", "Data Science      "})
+    @ValueSource(strings = {"    Electrical Engineering", "Cloud Computing      "})
     void createProgramWithSpacesInProgramName(String programName){
         try{
             OrganizationIdentity foundOrganizationIdentity = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
