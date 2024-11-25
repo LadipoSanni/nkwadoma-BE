@@ -52,7 +52,7 @@ class ProgramPersistenceAdapterTest {
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
+    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ja7";
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
@@ -60,7 +60,7 @@ class ProgramPersistenceAdapterTest {
     @BeforeEach
     void setUp() {
         dataAnalytics = new Program();
-        dataAnalytics.setName("Data Analytics");
+        dataAnalytics.setName("Data analytics");
         dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
         dataAnalytics.setMode(ProgramMode.FULL_TIME);
         dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
@@ -69,7 +69,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setDurationType(DurationType.MONTHS);
 
         dataScience = new Program();
-        dataScience.setName("Data Science");
+        dataScience.setName("Data science");
         dataScience.setProgramDescription("The art of putting thought into solving problems");
         dataScience.setMode(ProgramMode.FULL_TIME);
         dataScience.setProgramStatus(ActivationStatus.ACTIVE);
@@ -88,7 +88,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel@johnson.com");
+        userIdentity.setEmail("joel34@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
@@ -98,10 +98,10 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setRole(PORTFOLIO_MANAGER);
         try {
             organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setName("Amazing Grace Enterprises");
-            organizationIdentity.setEmail("rachel@gmail.com");
+            organizationIdentity.setName("Brown Hills Institute");
+            organizationIdentity.setEmail("rachel23@gmail.com");
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC345677");
+            organizationIdentity.setRcNumber("RC345687");
             organizationIdentity.setId(testId);
             organizationIdentity.setPhoneNumber("0907658483");
             organizationIdentity.setTin("Tin5678");
@@ -131,7 +131,7 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-//    @AfterEach
+    @AfterEach
     void cleanUp() {
         if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
             programRepository.deleteById(dataAnalyticsProgramId);
@@ -473,7 +473,7 @@ class ProgramPersistenceAdapterTest {
         cohortRepository.delete(savedCohort);
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
