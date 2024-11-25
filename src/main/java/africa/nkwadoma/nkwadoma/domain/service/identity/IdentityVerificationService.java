@@ -2,8 +2,11 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
@@ -25,6 +28,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Service
 public class IdentityVerificationService implements IdentityVerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
@@ -72,5 +76,15 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
             throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
         }
+    }
+
+    @Override
+    public String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord identityVerificationFailureRecord) throws IdentityVerificationException {
+        identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
+        Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
+        if (numberOfFailedVerifications >= 5){
+            throw new IdentityVerificationException(BLACKLISTED_REFERRAL.getMessage());
+        }
+        return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
 }

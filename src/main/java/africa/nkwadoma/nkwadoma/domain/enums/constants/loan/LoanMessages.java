@@ -27,6 +27,8 @@ public enum LoanMessages {
     TENOR_STATUS_MONTH_BOND("Tenor should be between 1 TO 120 months"),
     LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED("Loan referral must be accepted"),
     LOAN_REFERRAL_NOT_FOUND("Loan referral not found"),
+    LOAN_REQUEST_NOT_FOUND("Loan request not found"),
+    LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED("Loan Request Must Have Been Approved"),
     LOANEE_NOT_FOUND("Loanee not found"),;
     private final String message;
 
