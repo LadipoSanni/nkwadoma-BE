@@ -243,7 +243,7 @@ class CohortServiceTest {
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
-            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(program.getId());
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(program.getId(),pageNumber,pageSize);
         }
         catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -292,7 +292,7 @@ class CohortServiceTest {
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
-            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(programId.trim());
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(programId.trim(),pageNumber,pageSize);
         }
         catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
