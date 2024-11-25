@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -141,9 +142,10 @@ public class BeanConfiguration {
                                        ProgramCohortOutputPort programCohortOutputPort,
                                        LoanDetailsOutputPort loanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
-                                       CohortMapper cohortMapper){
+                                       CohortMapper cohortMapper,
+                                       LoaneeUseCase loaneeUseCase){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,loaneeUseCase);
     }
 
     @Bean

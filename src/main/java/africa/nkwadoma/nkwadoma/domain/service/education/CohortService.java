@@ -33,7 +33,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 import java.util.List;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
 
