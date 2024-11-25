@@ -41,7 +41,7 @@ class CreditRegistryAdapterTest {
     }
     @Test
     void geCreditScoreWithBvnThatDoesNotExist() {
-        String searchQuery = "22200006741";
+        String searchQuery = "92500096741";
         int creditScore = 0;
         try {
             creditScore = creditRegistryOutputPort.getCreditScore(searchQuery);
