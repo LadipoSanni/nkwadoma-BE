@@ -53,7 +53,7 @@ class CreditRegistryAdapterTest {
     void geCreditScoreWithBvn() {
         int creditScore = 0;
         try {
-            creditScore = creditRegistryOutputPort.getCreditScore(bvnNumber);
+            creditScore = creditRegistryOutputPort.getCreditScoreWithBvn(bvnNumber);
         } catch (MeedlException e) {
             log.error("Error getting credit score {}", e.getMessage());
         }
@@ -63,26 +63,37 @@ class CreditRegistryAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "invalid values"})
     void getCreditScoreWithInvalidBvn(String bvn){
-        assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScore(bvn));
+        assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScoreWithBvn(bvn));
     }
     @Test
     void getCreditScoreWithBvnThatDoesNotExist() {
         String searchQuery = "92500096741";
         int creditScore = 0;
         try {
-            creditScore = creditRegistryOutputPort.getCreditScore(searchQuery);
+            creditScore = creditRegistryOutputPort.getCreditScoreWithBvn(searchQuery);
         } catch (MeedlException e) {
             log.error("Error getting credit score {}", e.getMessage());
         }
         log.info("Credit score {}", creditScore);
         assertTrue(creditScore == 0);
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "invalid values"})
+    void getCreditScoreWithInvalidRegistryId(String registryId){
+        String sessionCode = creditRegistryOutputPort.getSessionCode();
+        assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScoreWithRegistryId(registryId, sessionCode));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "invalid values"})
+    void getCreditScoreWithInvalidSessionCode(String invalidSessionCode){
+        assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScoreWithRegistryId(registryId, invalidSessionCode));
+    }
     @Test
     void geCreditScoreWithRegistryId() {
         String sessionCode = creditRegistryOutputPort.getSessionCode();
         int creditScore = 0;
         try {
-            creditScore = creditRegistryOutputPort.getCreditScore(registryId, sessionCode);
+            creditScore = creditRegistryOutputPort.getCreditScoreWithRegistryId(registryId, sessionCode);
         } catch (MeedlException e) {
             log.error("Error getting credit score {}", e.getMessage());
         }
@@ -90,7 +101,7 @@ class CreditRegistryAdapterTest {
         assertTrue(creditScore >= 0);
     }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, })
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE })
     void getCustomerDetailsWithInvalidSearchQuery(String searchQuery){
     assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCustomerDetails(searchQuery, "sessionCode"));
     }

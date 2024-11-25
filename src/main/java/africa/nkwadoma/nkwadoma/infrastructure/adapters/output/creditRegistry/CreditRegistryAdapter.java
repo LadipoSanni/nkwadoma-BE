@@ -60,7 +60,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         return Objects.requireNonNull(responseEntity.getBody()).getSessionCode();
     }
     @Override
-    public int getCreditScore(String bvn) throws MeedlException {
+    public int getCreditScoreWithBvn(String bvn) throws MeedlException {
         MeedlValidator.validateBvn(bvn);
         String sessionCode = getSessionCode();
         CreditRegistryFindDetailResponse creditRegistryFindDetailResponse;
@@ -82,10 +82,10 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         if (registryId.equals("0")){
             return 0;
         }
-        return getCreditScore(registryId, sessionCode);
+        return getCreditScoreWithRegistryId(registryId, sessionCode);
     }
     @Override
-    public int getCreditScore(String registryId, String sessionCode) throws MeedlException {
+    public int getCreditScoreWithRegistryId(String registryId, String sessionCode) throws MeedlException {
         validateSessionCode(sessionCode);
         validateRegistryId(registryId);
 

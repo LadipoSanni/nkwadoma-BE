@@ -4,9 +4,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.CreditRegistryFindDetailResponse;
 
 public interface CreditRegistryOutputPort {
-    int getCreditScore(String bvn) throws MeedlException;
+    int getCreditScoreWithBvn(String bvn) throws MeedlException;
 
-    int getCreditScore(String identifier, String sessionCode) throws MeedlException;
+    int getCreditScoreWithRegistryId(String registryId, String sessionCode) throws MeedlException;
 
     String getSessionCode();
 
