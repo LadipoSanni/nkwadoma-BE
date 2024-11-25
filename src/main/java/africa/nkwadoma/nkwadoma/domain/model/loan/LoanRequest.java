@@ -36,6 +36,7 @@ public class LoanRequest {
     private NextOfKin nextOfKin;
     private LocalDate cohortStartDate;
     private String programName;
+    private String cohortName;
     private int pageNumber;
     private int pageSize;
 

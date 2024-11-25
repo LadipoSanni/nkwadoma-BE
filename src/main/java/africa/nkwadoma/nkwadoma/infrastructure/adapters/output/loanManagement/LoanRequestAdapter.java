@@ -35,17 +35,15 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     @Override
     public Optional<LoanRequest> findById(String loanRequestId) throws MeedlException {
         MeedlValidator.validateUUID(loanRequestId);
-        Optional<LoanRequestEntity> loanRequestEntity = loanRequestRepository.findById(loanRequestId);
-        if (loanRequestEntity.isEmpty()) {
+        Optional<LoanRequestProjection> foundLoanRequest = loanRequestRepository.findLoanRequestById(loanRequestId);
+        if (foundLoanRequest.isEmpty()) {
             return Optional.empty();
         }
-        LoanRequest loanRequest;
-        Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(
-                loanRequestEntity.get().getLoaneeEntity().getId());
+        LoanRequest loanRequest = loanRequestMapper.loanRequestProjectionToLoanRequest(foundLoanRequest.get());
+        Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(foundLoanRequest.get().getLoaneeId());
         if (foundNextOfKin.isEmpty()) {
             return Optional.empty();
         }
-        loanRequest = loanRequestMapper.toLoanRequest(loanRequestEntity.get());
         loanRequest.setNextOfKin(foundNextOfKin.get());
         return Optional.of(loanRequest);
     }

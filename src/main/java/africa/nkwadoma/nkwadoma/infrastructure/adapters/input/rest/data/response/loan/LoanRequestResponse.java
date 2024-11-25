@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import lombok.*;
 
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Getter
 @Setter
@@ -17,8 +20,12 @@ public class LoanRequestResponse {
     private String firstName;
     private String lastName;
     private BigDecimal loanAmountRequested;
+    private String alternateEmail;
+    private String alternateContactAddress;
+    private String alternatePhoneNumber;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
     private LocalDate cohortStartDate;
     private String programName;
+    private NextOfKin nextOfKin;
 }
