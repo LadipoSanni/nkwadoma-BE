@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
@@ -27,6 +28,11 @@ public class LoanRequest {
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private String alternateEmail;
+    private String alternateContactAddress;
+    private String alternatePhoneNumber;
+    private UserIdentity userIdentity;
     private NextOfKin nextOfKin;
     private LocalDate cohortStartDate;
     private String programName;
@@ -39,6 +45,23 @@ public class LoanRequest {
         MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
         MeedlValidator.validateObjectInstance(status);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+    }
+
+
+    public LoanRequest(String id, String firstName, String lastName, String alternateContactAddress, String alternateEmail,
+                       String alternatePhoneNumber, String organizationName, BigDecimal loanAmountRequested,
+                       BigDecimal initialDeposit, LocalDate startDate, String programName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.alternateContactAddress = alternateContactAddress;
+        this.alternateEmail = alternateEmail;
+        this.alternatePhoneNumber = alternatePhoneNumber;
+        this.referredBy = organizationName;
+        this.loanAmountRequested = loanAmountRequested;
+        this.initialDeposit = initialDeposit;
+        this.cohortStartDate = startDate;
+        this.programName = programName;
     }
 
 
