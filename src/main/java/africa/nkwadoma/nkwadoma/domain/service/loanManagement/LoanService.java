@@ -26,16 +26,17 @@ import java.util.*;
 @Slf4j
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
-        RespondToLoanReferralUseCase, LoanRequestUseCase , LoanOfferUseCase{
+        RespondToLoanReferralUseCase, LoanOfferUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
+    private final LoanRequestService loanRequestService;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanRequestOutputPort loanRequestOutputPort;
-    private final LoanOfferMapper loanOfferMapper;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOfferMapper loanOfferMapper;
 
 
     @Override
@@ -105,22 +106,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanReferral updatedLoanReferral = foundLoanReferral.get();
         if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(updatedLoanReferral);
-            createLoanRequest(loanRequest);
+            loanRequestService.createLoanRequest(loanRequest);
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
         }
         return updatedLoanReferral;
-    }
-
-    @Override
-    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        loanRequest.validate();
-        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
-        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
-        }
-        return loanRequestOutputPort.save(loanRequest);
     }
 
     @Override
@@ -140,13 +130,4 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanOffer;
     }
 
-    @Override
-    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
-        MeedlValidator.validatePageSize(loanRequest.getPageSize());
-        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
-        log.info("Loan requests from repository: {}", loanRequests.getContent());
-        return loanRequests;
-    }
 }
