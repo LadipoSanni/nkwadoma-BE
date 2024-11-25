@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,9 @@ public class CohortResponse {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private String imageUrl;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
     private LoanDetailResponse loanDetail;
 

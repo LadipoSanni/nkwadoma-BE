@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,9 +23,10 @@ public class CohortEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Column(unique = true)
     private String name;
     private String programId;
-    @Size(max = 250, message = "cohort description must no go beyond 250")
+    @Size(max = 2500, message = "cohort description must no go beyond 2500")
     private String cohortDescription;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
@@ -34,11 +36,12 @@ public class CohortEntity {
     private LocalDateTime updatedAt;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
+    @Column(nullable = false)
     private String createdBy;
     private String updatedBy;
     private String imageUrl;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     @OneToOne
     private LoanDetailEntity loanDetail;
     private Integer numberOfLoanees = 0;

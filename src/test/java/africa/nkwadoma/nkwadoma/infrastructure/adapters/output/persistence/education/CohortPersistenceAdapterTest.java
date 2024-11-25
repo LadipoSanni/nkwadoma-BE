@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -25,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -76,13 +78,14 @@ class CohortPersistenceAdapterTest {
     private LoanBreakdown loanBreakdown;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
-    private LoanDetail loanDetail2;
     private List<LoanBreakdown> loanBreakdowns;
+    private int pageSize = 2;
+    private int pageNumber= 0;
 
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("qudusa559@gmail.com").firstName("qudus").lastName("lekan")
+        meedleUser =  UserIdentity.builder().id(id).email("ade5@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
         employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
                 .meedlUser(meedleUser).organization(id).build();
@@ -96,10 +99,6 @@ class CohortPersistenceAdapterTest {
                 deliveryType(DeliveryType.ONSITE).
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
         loanDetail = LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
-                .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
-                .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
-                .totalOutstanding(BigDecimal.valueOf(450)).build();
-        loanDetail2 = LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
                 .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
                 .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
                 .totalOutstanding(BigDecimal.valueOf(450)).build();
@@ -122,7 +121,6 @@ class CohortPersistenceAdapterTest {
             log.info("Program saved {}",program);
             programId = program.getId();
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
-            loanDetail2 = loanDetailsOutputPort.saveLoanDetails(loanDetail2);
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
@@ -134,19 +132,16 @@ class CohortPersistenceAdapterTest {
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
         elites = new Cohort();
-        elites.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        elites.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setProgramId(program.getId());
         elites.setName("Elite");
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
-        elites.setLoanDetail(loanDetail);
 
         xplorers = new Cohort();
         xplorers.setName("xplorers");
-        xplorers.setStartDate(LocalDateTime.of(2024,10,18,9,43));
-        xplorers.setExpectedEndDate(LocalDateTime.of(2024,11,18,9,43));
+        xplorers.setStartDate(LocalDate.of(2024,10,18));
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
@@ -186,11 +181,6 @@ class CohortPersistenceAdapterTest {
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
-        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
-    }
-    @Test
-    void saveCohortWithNullEndDate(){
-        elites.setExpectedEndDate(null);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 
@@ -286,13 +276,14 @@ class CohortPersistenceAdapterTest {
     @Order(5)
     @Test
     void viewAllCohortInAProgram(){
-        List<Cohort> cohorts = new ArrayList<>();
+
         try{
-            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
+          Page<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
+            assertEquals(2,cohorts.toList().size());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,cohorts.size());
+
 
     }
 
@@ -330,7 +321,7 @@ class CohortPersistenceAdapterTest {
         try{
             Cohort cohort = cohortOutputPort.findCohort(cohortTwoId);
             assertNull(cohort.getLoanDetail());
-            cohort.setLoanDetail(loanDetail2);
+            cohort.setLoanDetail(loanDetail);
             log.info("{} = =",cohort);
             editedCohort = cohortOutputPort.save(cohort);
             log.info("{} = =",editedCohort);
