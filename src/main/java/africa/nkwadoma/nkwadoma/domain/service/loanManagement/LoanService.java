@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -138,6 +141,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer = loanOfferOutputPort.save(loanOffer);
+        return loanOffer;
+    }
+
+    @Override
+    public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
+                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                throw new LoanOfferException(
+                        LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
+            }
         return loanOffer;
     }
 }

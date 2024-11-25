@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntitiy;
@@ -28,8 +30,12 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public LoanOffer findLoanOfferById(String loanOfferId){
-        return null;
+    public LoanOffer findLoanOfferById(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        LoanOfferEntitiy loanOfferEntitiy = loanOfferEntityRepository.findById(loanOfferId)
+                .orElseThrow(
+                        ()->new LoanOfferException(LoanOfferMessages.LOAN_OFFER_NOT_FOUND.getMessage()));
+        return loanOfferMapper.toLoanOffer(loanOfferEntitiy);
     }
 
     @Override

@@ -123,6 +123,31 @@ public class LoanOfferAdapterTest {
     }
 
 
+    @Test
+    void findLoanOfferWithNullId() {
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.findLoanOfferById(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"jduhjdkbkkvkgkd", StringUtils.EMPTY, StringUtils.SPACE})
+    void findLoanOfferWithInvalidId(String loanOfferId) {
+        loanOffer.getLoanRequest().setId(loanOfferId);
+        assertThrows(MeedlException.class, () -> loanOfferOutputPort.findLoanOfferById(loanOfferId));
+    }
+
+    @Order(2)
+    @Test
+    void findLoanOfferWithValidId(){
+        LoanOffer foundLoanOffer = new LoanOffer();
+        try{
+            foundLoanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(loanOfferId, foundLoanOffer.getId());
+        assertEquals(loanOffer.getLoanRequest().getId(), foundLoanOffer.getLoanRequest().getId());
+    }
+
     @AfterAll
     void cleanUp() {
         try {

@@ -1,16 +1,21 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +43,8 @@ public class LoanOfferServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
 
 
     private LoanOffer loanOffer;
@@ -45,6 +52,7 @@ public class LoanOfferServiceTest {
     private Loanee loanee;
     private UserIdentity userIdentity;
     private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
+    private String loaneeId = "1f732a03-00ad-4187-825d-94969153c3d1";
 
 
 
@@ -102,6 +110,49 @@ public class LoanOfferServiceTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hjdhjdbdjbff"})
+    void viewLoanOfferWithInvalidLoanOfferId(String invalidId){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanOfferDetails(mockId,invalidId));
+    }
 
+    @Test
+    void viewLoanOfferWithNullLoanOFferId(){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanOfferDetails(mockId,null));
+    }
+
+    @Test
+    void loaneeCannotViewLoanOfferThatNotAssignedToLoanee() {
+        userIdentity.setRole(IdentityRole.LOANEE);
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            LoanOffer mockLoanOffer = new LoanOffer();
+            Loanee mockLoanee = new Loanee();
+            UserIdentity mockLoaneeIdentity = new UserIdentity();
+            mockLoaneeIdentity.setId(loaneeId);
+            mockLoanee.setUserIdentity(mockLoaneeIdentity);
+            mockLoanOffer.setLoanee(mockLoanee);
+            when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
+            assertThrows(
+                    LoanOfferException.class,
+                    () -> loanService.viewLoanOfferDetails(mockId, mockId)
+            );
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+    }
+
+    @Test
+    void viewLoanOfferDetails(){
+        try {
+            userIdentity.setRole(IdentityRole.LOANEE);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
+            loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(loanOffer.getLoanRequest(),loanRequest);
+    }
 }
 

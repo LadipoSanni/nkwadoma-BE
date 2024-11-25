@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
-
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOAN_OFFER_FOUND;
 
 
 @RequestMapping(BASE_URL + LOAN)
@@ -47,6 +48,8 @@ public class LoanController {
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanOfferUseCase loanOfferUseCase;
+    private final LoanOfferRestMapper loanOfferRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -131,6 +134,20 @@ public class LoanController {
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+    }
+
+    @GetMapping("view-loan-offer/{loanOfferId}")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoanOffer(@AuthenticationPrincipal Jwt meedlUser, @PathVariable @NotBlank(message = "LoanOffer ID is required")
+                                                            String loanOfferId ) throws MeedlException {
+        LoanOffer loanOffer = loanOfferUseCase.viewLoanOfferDetails((meedlUser.getClaimAsString("sub")),loanOfferId);
+        LoanOfferResponse loanOfferResponse = loanOfferRestMapper.toLoanOfferResponse(loanOffer);
+        ApiResponse<LoanOfferResponse> apiResponse = ApiResponse.<LoanOfferResponse>builder()
+                .data(loanOfferResponse)
+                .message(LOAN_OFFER_FOUND)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
 

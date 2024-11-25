@@ -7,4 +7,5 @@ public interface LoanOfferUseCase {
 
 
     LoanOffer createLoanOffer(String loanRequestId) throws MeedlException;
+    LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException;
 }
