@@ -97,6 +97,7 @@ public class IdentityManagerController {
                 .data(verificationUseCase.isIdentityVerified(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }
+
     @PostMapping("auth/user/reactivate")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
