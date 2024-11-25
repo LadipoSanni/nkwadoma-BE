@@ -61,6 +61,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     }
     @Override
     public int getCreditScore(String bvn) throws MeedlException {
+        MeedlValidator.validateBvn(bvn);
         String sessionCode = getSessionCode();
         CreditRegistryFindDetailResponse creditRegistryFindDetailResponse;
         try {
@@ -88,14 +89,6 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         validateSessionCode(sessionCode);
         validateRegistryId(registryId);
 
-//        Map<String, String> formData = new HashMap<>();
-//        formData.put(SESSION_CODE.getValue(), sessionCode);
-//        formData.put(CUSTOMER_QUERY.getValue(), registryId);
-//        formData.put(GET_NO_MATCH_REPORT.getValue(), "IfNoMatch");
-//        formData.put(MIN_RELEVANCE.getValue(), "0");
-//        formData.put(MAX_RECORDS.getValue(), "0");
-//        formData.put(ENQUIRY_REASON.getValue(), "KYCCheck");
-
         CreditScoreRequest requestBody = new CreditScoreRequest();
         requestBody.setSessionCode(sessionCode);
         requestBody.setCustomerRegistryIDList(Collections.singletonList(registryId));
@@ -120,7 +113,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     @Override
     public CreditRegistryFindDetailResponse getCustomerDetails(String bvn, String sessionCode) throws MeedlException {
         validateSessionCode(sessionCode);
-        MeedlValidator.validateDataElement(bvn);
+        MeedlValidator.validateBvn(bvn);
 
         Map<String, String> formData = new HashMap<>();
         formData.put(SESSION_CODE.getValue(), sessionCode);

@@ -5,21 +5,43 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.CreditRegistryFindDetailResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CreditRegistryAdapterTest {
+    @Value("${TEST_BVN}")
+    String bvnNumber;
+    private String registryId ;
     @Autowired
     private CreditRegistryOutputPort creditRegistryOutputPort;
+
+    @Test
+    @Order(1)
+    void getCustomerDetailsWithBvn() {
+        CreditRegistryFindDetailResponse findDetailsResponse = null;
+        try {
+            String sessionCode = creditRegistryOutputPort.getSessionCode();
+            findDetailsResponse = creditRegistryOutputPort.getCustomerDetails(bvnNumber, sessionCode);
+        } catch (MeedlException e) {
+            log.info("Could not find customer details {}", e.getMessage());
+        }
+        assertNotNull(findDetailsResponse);
+        assertNotNull(findDetailsResponse.getSearchResult());
+        assertFalse(findDetailsResponse.getSearchResult().isEmpty());
+        assertTrue(findDetailsResponse.getSearchResult().stream().allMatch(customerDetail -> customerDetail.getRegistryID() != null));
+        registryId = findDetailsResponse.getSearchResult().get(0).getRegistryID();
+        log.info("{}",findDetailsResponse.getSearchResult());
+    }
     @Test
     void getSessionCode(){
         String sessionCode = creditRegistryOutputPort.getSessionCode();
@@ -29,18 +51,22 @@ class CreditRegistryAdapterTest {
     }
     @Test
     void geCreditScoreWithBvn() {
-        String searchQuery = "22200006749";
         int creditScore = 0;
         try {
-            creditScore = creditRegistryOutputPort.getCreditScore(searchQuery);
+            creditScore = creditRegistryOutputPort.getCreditScore(bvnNumber);
         } catch (MeedlException e) {
             log.error("Error getting credit score {}", e.getMessage());
         }
         log.info("Credit score {}", creditScore);
         assertTrue(creditScore > 0);
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "invalid values"})
+    void getCreditScoreWithInvalidBvn(String bvn){
+        assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCreditScore(bvn));
+    }
     @Test
-    void geCreditScoreWithBvnThatDoesNotExist() {
+    void getCreditScoreWithBvnThatDoesNotExist() {
         String searchQuery = "92500096741";
         int creditScore = 0;
         try {
@@ -54,10 +80,9 @@ class CreditRegistryAdapterTest {
     @Test
     void geCreditScoreWithRegistryId() {
         String sessionCode = creditRegistryOutputPort.getSessionCode();
-        String searchQuery = "735756718704397361";
         int creditScore = 0;
         try {
-            creditScore = creditRegistryOutputPort.getCreditScore(searchQuery, sessionCode);
+            creditScore = creditRegistryOutputPort.getCreditScore(registryId, sessionCode);
         } catch (MeedlException e) {
             log.error("Error getting credit score {}", e.getMessage());
         }
@@ -68,36 +93,5 @@ class CreditRegistryAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, })
     void getCustomerDetailsWithInvalidSearchQuery(String searchQuery){
     assertThrows(MeedlException.class, ()-> creditRegistryOutputPort.getCustomerDetails(searchQuery, "sessionCode"));
-
-    }
-    @Test
-    void getCustomerDetailsWithBvn() {
-        String searchQuery = "22200085865";
-        CreditRegistryFindDetailResponse findDetailsResponse = null;
-        try {
-            String sessionCode = creditRegistryOutputPort.getSessionCode();
-            findDetailsResponse = creditRegistryOutputPort.getCustomerDetails(searchQuery, sessionCode);
-        } catch (MeedlException e) {
-            log.info("Could not find customer details {}", e.getMessage());
-        }
-        assertNotNull(findDetailsResponse);
-        assertNotNull(findDetailsResponse.getSearchResult());
-        assertFalse(findDetailsResponse.getSearchResult().isEmpty());
-        assertTrue(findDetailsResponse.getSearchResult().stream().allMatch(customerDetail -> customerDetail.getRegistryID() != null));
-        log.info("{}",findDetailsResponse.getSearchResult());
-    }
-    @Test
-    void getCustomerDetailsWithNoneExistingDetails() {
-        String searchQuery = "aofijhivjfsdnik";
-        CreditRegistryFindDetailResponse findDetailsResponse = null;
-        try {
-            String sessionCode = creditRegistryOutputPort.getSessionCode();
-            findDetailsResponse = creditRegistryOutputPort.getCustomerDetails(searchQuery, sessionCode);
-        } catch (MeedlException e) {
-            log.info("Could not find customer details {}", e.getMessage());
-        }
-        assertNotNull(findDetailsResponse);
-        assertNotNull(findDetailsResponse.getSearchResult());
-        assertTrue(findDetailsResponse.getSearchResult().isEmpty());
     }
 }

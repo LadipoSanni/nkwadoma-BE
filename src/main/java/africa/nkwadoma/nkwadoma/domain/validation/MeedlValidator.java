@@ -84,6 +84,16 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());
         }
     }
+    public static void validateBvn(String bvn) throws MeedlException {
+        MeedlValidator.validateDataElement(bvn);
+        String regex = "^\\d{11}$";
+
+        boolean isValid = Pattern.matches(regex, bvn);
+        if (!isValid) {
+            log.error("Invalid bvn {}", bvn);
+            throw new MeedlException("Invalid bvn provided");
+        }
+    }
 
     public static void validateDoubleDataElement(Double dataElement) throws MeedlException {
         if (dataElement == null){
