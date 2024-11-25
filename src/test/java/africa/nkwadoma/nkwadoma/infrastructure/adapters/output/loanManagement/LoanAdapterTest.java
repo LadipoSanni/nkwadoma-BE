@@ -12,19 +12,18 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LoanAdapterTest {
     @Autowired
     private LoanOutputPort loanOutputPort;
@@ -34,18 +33,15 @@ class LoanAdapterTest {
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
-    private final String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private Loan loan;
     private String savedLoanId;
-    private String userId;
     private String loaneeId;
+    private String loanId;
     @BeforeEach
     public void setUp(){
-
         UserIdentity userIdentity = TestData.createTestUserIdentity("testuser@email.com");
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
-            userId = userIdentity.getId();
         } catch (MeedlException e) {
             log.error("Error saving user {}", e.getMessage());
             throw new RuntimeException(e);
@@ -61,20 +57,20 @@ class LoanAdapterTest {
         }
         loaneeId = loanee.getId();
         loan = TestData.createTestLoan(loanee);
-
     }
     @Test
+    @Order(1)
     void saveLoan(){
         Loan savedLoan = null;
         try {
             savedLoan = loanOutputPort.save(loan);
             savedLoanId = savedLoan.getId();
             log.info("Saved loan: {} ", savedLoan.getId());
+            loanId = savedLoan.getId();
         } catch (MeedlException e) {
             log.error("Error saving loan {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
-
         assertNotNull(savedLoan);
         assertNotNull(savedLoan.getId());
     }
@@ -94,10 +90,26 @@ class LoanAdapterTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid.id"})
-    void findLoanById(String id){
+    void findLoanByInvalidId(String id){
         assertThrows(MeedlException.class,()->loanOutputPort.findLoanById(id));
     }
-    @AfterEach
+    @Test
+    @Order(2)
+    void findLoanById() {
+        Loan loan = null;
+        try {
+            log.info("loan id before finding : {}", loanId);
+            loan = loanOutputPort.findLoanById(loanId);
+        } catch (MeedlException e) {
+            log.error("Error getting loan {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+        assertNotNull(loan);
+        assertNotNull(loan.getId());
+        assertEquals(loan.getLoaneeId(), loaneeId);
+
+    }
+    @AfterAll
     void tearDown() {
         if (StringUtils.isNotEmpty(savedLoanId)) {
             loanOutputPort.deleteById(savedLoanId);
@@ -107,7 +119,7 @@ class LoanAdapterTest {
                 loaneeOutputPort.deleteLoanee(loaneeId);
             } catch (MeedlException e) {
                 log.error("Error deleting loanee {}", e.getMessage());
-//                throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
     }
