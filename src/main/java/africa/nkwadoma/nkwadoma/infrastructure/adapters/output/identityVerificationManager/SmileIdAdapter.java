@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.IdentityVerificationParameter;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.PremblyVerificationParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +39,9 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(IdentityVerificationParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
+        formData.add(PremblyVerificationParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
-        String url = smileIdUrl.concat(IdentityVerificationParameter.NIN_URL.getValue());
+        String url = smileIdUrl.concat(PremblyVerificationParameter.NIN_URL.getValue());
         log.info(url);
         ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
         try {
@@ -76,10 +76,10 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(IdentityVerificationParameter.ACCEPT.getValue(), IdentityVerificationParameter.APPLICATION_JSON.getValue());
+        headers.set(PremblyVerificationParameter.ACCEPT.getValue(), PremblyVerificationParameter.APPLICATION_JSON.getValue());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add(IdentityVerificationParameter.APP_ID.getValue(), appId);
-        headers.add(IdentityVerificationParameter.API_KEY.getValue(), apiKey);
+        headers.add(PremblyVerificationParameter.APP_ID.getValue(), appId);
+        headers.add(PremblyVerificationParameter.API_KEY.getValue(), apiKey);
         return headers;
     }
 
