@@ -131,7 +131,7 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-    @AfterEach
+//    @AfterEach
     void cleanUp() {
         if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
             programRepository.deleteById(dataAnalyticsProgramId);
@@ -285,6 +285,28 @@ class ProgramPersistenceAdapterTest {
             assertEquals(2, foundProgram.size());
             assertEquals("Data Science", foundProgram.get(0).getName());
             assertEquals("Data Analytics", foundProgram.get(1).getName());
+        } catch (MeedlException e) {
+            log.error("Error finding program by name", e);
+        }
+    }
+
+    @Test
+    void findProgramByNameThatMatchesOneResult() {
+        try {
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
+            dataScienceProgramId = savedProgram.getId();
+            dataAnalytics.setCreatedBy(userId);
+            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
+
+            List<Program> foundProgram = programOutputPort.findProgramByName("ytic");
+
+            assertNotNull(foundProgram);
+            assertEquals(1, foundProgram.size());
+            assertEquals("Data Analytics", foundProgram.get(0).getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
@@ -451,7 +473,7 @@ class ProgramPersistenceAdapterTest {
         cohortRepository.delete(savedCohort);
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
