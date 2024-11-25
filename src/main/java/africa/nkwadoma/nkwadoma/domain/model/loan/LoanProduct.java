@@ -10,14 +10,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
 
 @Slf4j
 @Getter
@@ -59,7 +56,7 @@ public class LoanProduct {
     private int pageNumber;
 
     public void validateLoanProductDetails() throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateName(name);
         MeedlValidator.validateDataElement(termsAndCondition);
         MeedlValidator.validateDataElement(mandate);
         validateLoanProductSize();

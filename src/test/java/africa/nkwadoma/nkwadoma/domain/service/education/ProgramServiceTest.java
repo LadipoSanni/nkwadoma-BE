@@ -40,7 +40,7 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
+        program = Program.builder().id(testId).name("Ben's-Mat").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
@@ -67,8 +67,8 @@ class ProgramServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE})
-    void addProgramWithEmptyProgramName(String programName) {
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
+    void createProgramWithInvalidName(String programName){
         program.setName(programName);
         assertThrows(MeedlException.class, ()->programService.createProgram(program));
     }

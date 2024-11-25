@@ -3,15 +3,12 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.glassfish.jaxb.core.v2.*;
-import org.hibernate.validator.internal.constraintvalidators.hv.*;
 
 import java.math.*;
 import java.util.*;
@@ -95,6 +92,15 @@ public class MeedlValidator {
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()) {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
+        }
+    }
+    public static void validateName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        String regex = "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9'-]+$";
+        Pattern pattern = Pattern.compile(regex);
+        boolean isValid = pattern.matcher(name).matches();
+        if (!isValid){
+            throw new MeedlException("Invalid name: {}. Name should not contain only numbers or special characters. Letters, numbers, ' - are allowed " + name);
         }
     }
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {

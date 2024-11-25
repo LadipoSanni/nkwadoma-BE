@@ -41,7 +41,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public List<Program> findProgramByName(String programName) throws MeedlException {
-        validateDataElement(programName);
+        MeedlValidator.validateDataElement(programName);
         log.info("Program being searched for by name is {}", programName);
         List<ProgramEntity> programEntity = programRepository.findAllByNameLikeIgnoreCase(programName.trim());
         log.info("Program entity: {}", programEntity);
