@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +42,14 @@ public class TestData {
         organizationIdentity.setPageNumber(0);
 
         return organizationIdentity;
+    }
+
+    public static Loanee createTestLoanee(UserIdentity userIdentity){
+        Loanee loanee = new Loanee();
+        loanee.setUserIdentity(userIdentity);
+        loanee.setCreatedBy(testId);
+        loanee.setCohortId(testId);
+        return loanee;
     }
 
 }

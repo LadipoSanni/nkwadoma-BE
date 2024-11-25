@@ -7,13 +7,11 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,9 +31,9 @@ class LoanAdapterTest {
     @Autowired
     private LoanOutputPort loanOutputPort;
     @Autowired
-    private LoaneeRepository loaneeRepository;
+    private LoaneeOutputPort loaneeOutputPort;
     @Autowired
-    private UserEntityRepository userEntityRepository;
+    private UserIdentityOutputPort userIdentityOutputPort;
     private final String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private Loan loan;
     private String savedLoanId;
@@ -44,23 +42,27 @@ class LoanAdapterTest {
     @BeforeEach
     public void setUp(){
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(testId);
-        userEntity = userEntityRepository.save(userEntity);
-        userId = userEntity.getId();
-
-        LoaneeEntity loaneeEntity = new LoaneeEntity();
-        loaneeEntity.setUserIdentity(userEntity);
-        loaneeEntity = loaneeRepository.save(loaneeEntity);
-        loaneeId = loaneeEntity.getId();
-
-        Loanee loanee = new Loanee();
-        loanee.setId(loaneeEntity.getId());
-        loanee.setUserIdentity(UserIdentity.builder().id(userEntity.getId()).build());
+        UserIdentity userIdentity = TestData.createTestUserIdentity("testuser@email.com");
+        try {
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+            userId = userIdentity.getId();
+        } catch (MeedlException e) {
+            log.error("Error saving user {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+        LoaneeLoanDetail loaneeLoanDetail = new LoaneeLoanDetail();
+        Loanee loanee = TestData.createTestLoanee(userIdentity);
+        try {
+            loanee = loaneeOutputPort.save(loanee);
+        } catch (MeedlException e) {
+            log.error("Error saving loanee {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+        loaneeId = loanee.getId();
 
         loan = new Loan();
         loan.setLoanAccountId("account id");
-        loan.setLoanee(Loanee.builder().id(loaneeEntity.getId()).build());
+        loan.setLoanee(loanee);
         loan.setStartDate(LocalDateTime.now());
         loan.setLoanee(loanee);
 
@@ -105,7 +107,12 @@ class LoanAdapterTest {
             loanOutputPort.deleteById(savedLoanId);
         }
         if (StringUtils.isNotEmpty(loaneeId)) {
-            loaneeRepository.deleteById(loaneeId);
+            try {
+                loaneeOutputPort.deleteLoanee(loaneeId);
+            } catch (MeedlException e) {
+                log.error("Error deleting loanee {}", e.getMessage());
+//                throw new RuntimeException(e);
+            }
         }
     }
 }
