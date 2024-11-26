@@ -8,9 +8,12 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
@@ -56,6 +59,10 @@ class ProgramPersistenceAdapterTest {
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
+    @Autowired
+    private OrganizationServiceOfferingRepository organizationServiceOfferingRepository;
+    @Autowired
+    private ServiceOfferEntityRepository serviceOfferEntityRepository;
 
     @BeforeEach
     void setUp() {
@@ -112,6 +119,17 @@ class ProgramPersistenceAdapterTest {
             serviceOffering.setIndustry(Industry.EDUCATION);
             organizationIdentity.setServiceOfferings(List.of(serviceOffering));
             organizationIdentity.setWebsiteAddress("webaddress.org");
+
+            List<String> serviceOfferings = new ArrayList<>();
+            List<OrganizationServiceOfferingEntity> organizationServiceOfferingEntities = organizationServiceOfferingRepository.findByOrganizationId(organizationIdentity.getId());
+            if (CollectionUtils.isNotEmpty(organizationServiceOfferingEntities)) {
+                organizationServiceOfferingEntities.forEach(organizationServiceOffering -> {
+                    serviceOfferings.add(organizationServiceOffering.getServiceOfferingEntity().getId());
+                    organizationServiceOfferingRepository.delete(organizationServiceOffering);
+
+                });
+            }
+            serviceOfferEntityRepository.deleteAllById(serviceOfferings);
 
             organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
                     meedlUser(userIdentity).build()));
@@ -198,7 +216,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    Electrical Engineering", "Data Science      "})
+    @ValueSource(strings = {"    Electrical Engineering", "Cloud Computing      "})
     void createProgramWithSpacesInProgramName(String programName){
         try{
             OrganizationIdentity foundOrganizationIdentity = organizationOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -238,6 +256,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setName(null);
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((dataAnalytics)));
     }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
     void createProgramWithInvalidName(String programName){
