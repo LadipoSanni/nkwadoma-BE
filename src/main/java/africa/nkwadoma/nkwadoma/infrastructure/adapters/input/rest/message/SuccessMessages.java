@@ -10,4 +10,5 @@ public class SuccessMessages {
     public static final String CREATE_LOAN_PRODUCT_FAILED = "Loan product creation failed";
     public static final String LOAN_REFERRAL_FOUND_SUCCESSFULLY = "Loan referral found successfully";
     public static final String LOAN_START_SUCCESS = "Loan has started successfully";
+    public static final String LOAN_REQUESTS_FOUND_SUCCESSFULLY = "Loan requests found successfully";
 }

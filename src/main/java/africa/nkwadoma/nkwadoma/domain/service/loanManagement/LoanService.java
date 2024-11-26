@@ -164,4 +164,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer = loanOfferOutputPort.save(loanOffer);
         return loanOffer;
     }
+
+    @Override
+    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
+        MeedlValidator.validatePageSize(loanRequest.getPageSize());
+        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+        log.info("Loan requests from repository: {}", loanRequests.getContent());
+        return loanRequests;
+    }
 }
