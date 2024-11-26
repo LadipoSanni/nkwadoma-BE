@@ -44,7 +44,7 @@ class OrganizationIdentityAdapterTest {
         organizationEmployeeIdentity.setMeedlUser(joel);
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
 
-        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises", "RC87877", userIdentities);
+        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC87877", userIdentities);
         }
 
     @Test

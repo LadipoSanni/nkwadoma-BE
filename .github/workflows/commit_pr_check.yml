@@ -28,12 +28,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Load Previous Build Count and Details
+      - name: Retrieve Build Tracker Artifact
         uses: actions/download-artifact@v3
         with:
           name: build-tracker
           path: ./build_tracker.json
-        continue-on-error: true  # Allow missing artifact gracefully
+        continue-on-error: true # Handle missing artifacts without failing the workflow
 
       - name: Initialize or Increment Build Count
         id: build_count
