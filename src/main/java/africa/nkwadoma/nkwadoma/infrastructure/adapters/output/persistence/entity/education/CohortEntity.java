@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -24,10 +25,10 @@ public class CohortEntity {
     private String programId;
     @Size(max = 2500, message = "cohort description must no go beyond 2500")
     private String cohortDescription;
-//    @Enumerated(EnumType.STRING)
-//    private ActivationStatus activationStatus;
-//    @Enumerated(EnumType.STRING)
-//    private CohortStatus cohortStatus;
+    @Enumerated(EnumType.STRING)
+    private ActivationStatus activationStatus;
+    @Enumerated(EnumType.STRING)
+    private CohortStatus cohortStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
