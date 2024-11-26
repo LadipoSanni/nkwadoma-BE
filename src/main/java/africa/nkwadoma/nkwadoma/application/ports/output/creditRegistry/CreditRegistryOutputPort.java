@@ -5,10 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.Cre
 
 public interface CreditRegistryOutputPort {
     int getCreditScoreWithBvn(String bvn) throws MeedlException;
-
     int getCreditScoreWithRegistryId(String registryId, String sessionCode) throws MeedlException;
-
     String getSessionCode();
-
     CreditRegistryFindDetailResponse getCustomerDetails(String customerQuery, String sessionCode) throws MeedlException;
 }
