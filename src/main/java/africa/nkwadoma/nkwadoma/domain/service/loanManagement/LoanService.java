@@ -89,6 +89,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loan.getStartDate().isAfter(LocalDateTime.now())) {
             throw new MeedlException("Start date cannot be in the future.");
         }
+        loan.setLoanStatus(LoanStatus.PERFORMING);
         loan = loanOutputPort.save(loan);
         return loan;
     }
