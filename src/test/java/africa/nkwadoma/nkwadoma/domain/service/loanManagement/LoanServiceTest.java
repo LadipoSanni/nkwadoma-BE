@@ -33,6 +33,8 @@ class LoanServiceTest {
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
     private LoanRequestMapper loanRequestMapper;
+    @Mock
+    private LoanRequestService loanRequestService;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
 
@@ -129,6 +131,7 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
+            when(loanRequestService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
