@@ -24,7 +24,6 @@ class CreditRegistryAdapterTest {
     private String registryId ;
     @Autowired
     private CreditRegistryOutputPort creditRegistryOutputPort;
-
     @Test
     @Order(1)
     void getCustomerDetailsWithBvn() {
