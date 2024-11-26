@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 public interface LoanOutputPort {
     Loan save(Loan loan) throws MeedlException;
 
-    void deleteById(String savedLoanId);
+    void deleteById(String savedLoanId) throws MeedlException;
 
     Loan findLoanById(String id) throws MeedlException;
 }

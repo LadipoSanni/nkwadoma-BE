@@ -29,7 +29,8 @@ public class LoanAdapter implements LoanOutputPort {
     }
 
     @Override
-    public void deleteById(String loanId) {
+    public void deleteById(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId);
         loanRepository.deleteById(loanId);
         log.info("Loan with id {} deleted successfully",loanId);
     }

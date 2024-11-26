@@ -143,7 +143,7 @@ public class LoanController {
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
                .data(startLoanResponse)
-//               .message(LOAN_START_SUCCESS)
+               .message(SuccessMessages.LOAN_START_SUCCESS)
                .statusCode(HttpStatus.OK.toString())
                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

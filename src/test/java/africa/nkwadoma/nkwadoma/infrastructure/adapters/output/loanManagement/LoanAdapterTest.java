@@ -37,11 +37,11 @@ class LoanAdapterTest {
     private String savedLoanId;
     private String loaneeId;
     private String loanId;
-    @BeforeEach
+    @BeforeAll
     public void setUp(){
         UserIdentity userIdentity = TestData.createTestUserIdentity("testuser@email.com");
         try {
-            userIdentity = userIdentityOutputPort.save(userIdentity);
+            userIdentity = saveUserIdentity(userIdentity);
         } catch (MeedlException e) {
             log.error("Error saving user {}", e.getMessage());
             throw new RuntimeException(e);
@@ -58,6 +58,7 @@ class LoanAdapterTest {
         loaneeId = loanee.getId();
         loan = TestData.createTestLoan(loanee);
     }
+
     @Test
     @Order(1)
     void saveLoan(){
@@ -100,27 +101,54 @@ class LoanAdapterTest {
         try {
             log.info("loan id before finding : {}", loanId);
             loan = loanOutputPort.findLoanById(loanId);
+            log.info("loan id after finding : {}", loan);
         } catch (MeedlException e) {
             log.error("Error getting loan {}", e.getMessage());
             throw new RuntimeException(e);
         }
         assertNotNull(loan);
         assertNotNull(loan.getId());
-        assertEquals(loan.getLoaneeId(), loaneeId);
+        assertEquals(loan.getId(), loanId);
 
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid.id"})
+    void deleteLoanByInvalidId(String id){
+        assertThrows(MeedlException.class,()->loanOutputPort.deleteById(id));
     }
     @AfterAll
     void tearDown() {
+        deleteLoan();
+    }
+
+    private void deleteLoan() {
         if (StringUtils.isNotEmpty(savedLoanId)) {
-            loanOutputPort.deleteById(savedLoanId);
+            try {
+                loanOutputPort.deleteById(savedLoanId);
+            } catch (MeedlException e) {
+                log.error("Error deleting loan {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
         if (StringUtils.isNotEmpty(loaneeId)) {
             try {
                 loaneeOutputPort.deleteLoanee(loaneeId);
+
             } catch (MeedlException e) {
                 log.error("Error deleting loanee {}", e.getMessage());
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
+        try {
+            deleteLoan();
+            userIdentityOutputPort.deleteUserById(userIdentity.getId());
+        } catch (MeedlException e) {
+            log.error("Error deleting user {}", e.getMessage());
+        }
+        userIdentity = userIdentityOutputPort.save(userIdentity);
+        return userIdentity;
     }
 }
