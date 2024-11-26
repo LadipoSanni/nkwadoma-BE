@@ -13,10 +13,12 @@ public interface LoanRequestMapper {
 
     @InheritInverseConfiguration
     LoanRequest toLoanRequest(LoanRequestEntity loanRequestEntity);
-
+    
     LoanRequest loanRequestProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
+    @Mapping(target = "cohortId", source = "loanee.cohortId")
+    @Mapping(target = "loanReferralId", source = "id")
     @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

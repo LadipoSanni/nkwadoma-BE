@@ -147,12 +147,9 @@ class LoanRequestAdapterTest {
                     .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
                     .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
                     .totalOutstanding(BigDecimal.valueOf(450)).build();
-            loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
-                    .itemName("Loan Break").build();
 
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetailId = loanDetail.getId();
-            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             elites = new Cohort();
             elites.setStartDate(LocalDate.of(2024, 10, 18));
@@ -166,6 +163,9 @@ class LoanRequestAdapterTest {
             Cohort cohort = cohortOutputPort.save(elites);
             eliteCohortId = cohort.getId();
 
+            loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
+                    .itemName("Loan Break").cohort(cohort).build();
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                     lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
@@ -228,6 +228,8 @@ class LoanRequestAdapterTest {
             loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(foundLoanee);
+            loanRequest.setLoanReferralId(loanReferralId);
+            loanRequest.setCohortId(foundLoanee.getCohortId());
             loanRequest.setCreatedDate(LocalDateTime.now());
             loanRequest.setLoanAmountRequested(foundLoanee.getLoaneeLoanDetail().getAmountRequested());
         }
@@ -328,11 +330,18 @@ class LoanRequestAdapterTest {
         loanRequestId = savedLoanRequest.getId();
         try {
             Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
+
             assertFalse(foundLoanRequest.isEmpty());
             assertNotNull(foundLoanRequest.get().getId());
-            assertNotNull(foundLoanRequest.get().getLoanee().getLoaneeLoanDetail());
-            assertNotNull(foundLoanRequest.get().getLoanee().getUserIdentity());
             assertNotNull(foundLoanRequest.get().getNextOfKin());
+            assertEquals(foundLoanRequest.get().getReferredBy(), organizationIdentity.getName());
+            assertEquals(foundLoanRequest.get().getProgramName(), dataAnalytics.getName());
+            assertEquals(foundLoanRequest.get().getCohortName(), elites.getName());
+            assertEquals(foundLoanRequest.get().getCohortStartDate(), elites.getStartDate());
+            assertNotNull(foundLoanRequest.get().getLoanAmountRequested());
+            assertNotNull(foundLoanRequest.get().getInitialDeposit());
+            assertEquals("Adeshina", foundLoanRequest.get().getFirstName());
+            assertEquals("Qudus", foundLoanRequest.get().getLastName());
         } catch (MeedlException e) {
             log.error("", e);
         }

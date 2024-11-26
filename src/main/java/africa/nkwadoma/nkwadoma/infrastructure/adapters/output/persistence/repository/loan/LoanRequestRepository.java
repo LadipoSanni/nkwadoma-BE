@@ -25,10 +25,10 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
 
     @Query("""
           select
-                 lr.id, l.userIdentity.firstName, l.userIdentity.lastName, l.userIdentity.alternateContactAddress,
-                 l.userIdentity.alternateEmail, l.userIdentity.alternatePhoneNumber, o.name, l.id as loaneeId,
-                 lr.loanAmountRequested, l.loaneeLoanDetail.initialDeposit, c.startDate, c.name, p.name
-    
+                 lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, l.userIdentity.alternateContactAddress as alternateContactAddress,
+                 l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber, o.name as referredBy, l.id as loaneeId,
+                 lr.loanAmountRequested as loanAmountRequested, l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.name as cohortName, p.name as programName
+
           from LoanRequestEntity lr
           join LoaneeEntity l on lr.loaneeEntity.id = l.id
           join CohortEntity c on l.cohortId = c.id

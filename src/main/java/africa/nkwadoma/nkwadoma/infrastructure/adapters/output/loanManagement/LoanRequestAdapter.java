@@ -39,7 +39,9 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         if (foundLoanRequest.isEmpty()) {
             return Optional.empty();
         }
+        log.info("Found loan request: {} {}", foundLoanRequest.get().getLoaneeId(), foundLoanRequest.get().getId());
         LoanRequest loanRequest = loanRequestMapper.loanRequestProjectionToLoanRequest(foundLoanRequest.get());
+        log.info("Loan request: {}", loanRequest);
         Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(foundLoanRequest.get().getLoaneeId());
         if (foundNextOfKin.isEmpty()) {
             return Optional.empty();
