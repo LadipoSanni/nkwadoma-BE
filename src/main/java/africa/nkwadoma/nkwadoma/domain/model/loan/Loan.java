@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Slf4j
 @Getter
 @Setter
-@ToString
 public class Loan {
     private String id;
     private Loanee loanee;

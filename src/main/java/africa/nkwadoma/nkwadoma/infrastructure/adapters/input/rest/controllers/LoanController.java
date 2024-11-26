@@ -136,6 +136,8 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
     }
     @PostMapping("start")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> startLoan(@RequestBody StartLoanRequest request) throws MeedlException {
         log.info("Start loan called.... loan offer id : {}", request.getLoanOfferId());
         Loan loan = loanProductMapper.mapToLoan(request);

@@ -18,6 +18,8 @@ public class ControllerConstant {
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
    public static final String  LOAN_CONTROLLER = "Loan Controller";
    public static final String  LOAN_CONTROLLER_DESCRIPTION = "Manage loans and loan product on the platform";
+   public static final String  START_LOAN_DESCRIPTION = "AT this point the loan starts.";
+   public static final String  START_LOAN = "Start loan";
 
 
 }
