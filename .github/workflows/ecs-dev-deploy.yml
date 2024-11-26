@@ -9,7 +9,7 @@ env:
   ECR_REPOSITORY: learnspace-backend-systest
   CLUSTER: learnspace-africa
   ECS: learnspace-backend-systest
-  AWS_REGION: eu-west-1
+  AWS_REGION: us-east-1
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   
 
@@ -46,7 +46,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: us-east-1
 
       - name: Set environment variables
         id: vars
