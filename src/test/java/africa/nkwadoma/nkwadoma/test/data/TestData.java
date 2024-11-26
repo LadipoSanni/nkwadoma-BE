@@ -68,8 +68,6 @@ public class TestData {
         loan.setLoanee(loanee);
         loan.setLoaneeId(testId);
         loan.setLoanOfferId(testId);
-
-        Loan
         return loan;
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){

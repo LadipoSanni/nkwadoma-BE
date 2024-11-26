@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Loan {
     private String id;
     private Loanee loanee;
