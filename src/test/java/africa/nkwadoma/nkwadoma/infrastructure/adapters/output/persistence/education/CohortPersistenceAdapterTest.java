@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -83,36 +84,20 @@ class CohortPersistenceAdapterTest {
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
     private List<LoanBreakdown> loanBreakdowns;
-    private int pageSize = 3;
-    private int pageNumber = 1;
+    private int pageSize ;
+    private int pageNumber ;
 
 
     @BeforeAll
     void setUpOrg() {
-        meedleUser =  UserIdentity.builder().id(id).email("ade5@gmail.com").firstName("qudus").lastName("lekan")
-                .createdBy(id).role(IdentityRole.PORTFOLIO_MANAGER).build();
-        employeeIdentity = OrganizationEmployeeIdentity.builder().organization(id)
-                .meedlUser(meedleUser).build();
-        organizationIdentity = OrganizationIdentity.builder().id(id).email("fordorganization12@example.com")
-                .name("Organization test").rcNumber("56767").serviceOfferings(
-                        List.of(ServiceOffering.builder().industry(Industry.EDUCATION).name(ServiceOfferingType.TRAINING.name()).build())).
-                phoneNumber("09084567832").organizationEmployees(List.of(employeeIdentity)).createdBy(id).build();
-        program = Program.builder().name("My program Ford").
-                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-        program2 = Program.builder().name("My program Ford 2").
-                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
-                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
-                deliveryType(DeliveryType.ONSITE).
-                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
-        loanDetail = LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
-                .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
-                .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
-                .totalOutstanding(BigDecimal.valueOf(450)).build();
-        loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
-                .itemName("Loan Break").build();
+        meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
+        meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
+        organizationIdentity = TestData.createOrganizationTestData("Organization test","RC345687",List.of(employeeIdentity));
+        program = TestData.createProgramTestData("My program Ford");
+        program2 = TestData.createProgramTestData("My Program Ford 2");
+        loanDetail = TestData.createLoanDetail();
+        loanBreakdown = TestData.createLoanBreakDown();
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
             if (userByEmail.isPresent()) {
@@ -160,6 +145,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
         xplorers.setOrganizationId(organizationId);
+        xplorers.setCohortStatus(CohortStatus.CURRENT);
 
         mavin = new Cohort();
         mavin.setStartDate(LocalDate.of(2024,10,18));
@@ -314,13 +300,16 @@ class CohortPersistenceAdapterTest {
     @Order(6)
     @Test
     void viewAllCohortInAProgram(){
-        List<Cohort> cohorts = new ArrayList<>();
+
+        pageSize = 2;
+        pageNumber = 0;
         try{
-            cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId());
+          Page<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(program.getId(),pageSize,pageNumber);
+            assertEquals(2,cohorts.toList().size());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(2,cohorts.size());
+
 
     }
 
@@ -384,6 +373,8 @@ class CohortPersistenceAdapterTest {
     @Order(9)
     @Test
     void findAllCohortWitOrganizationId() throws MeedlException {
+        pageSize = 3;
+        pageNumber = 0;
     Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
     assertEquals(3,cohorts.getSize());
     }

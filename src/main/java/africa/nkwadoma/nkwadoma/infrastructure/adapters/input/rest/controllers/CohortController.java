@@ -132,12 +132,13 @@ public class CohortController {
     @GetMapping("cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
-            AllCohortsRequest allCohortsRequest) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(allCohortsRequest.getProgramId(),allCohortsRequest.getPageNumber()
-                ,allCohortsRequest.getPageSize());
+            @RequestParam @NotBlank(message = "Program ID is required") String programId,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId, pageSize, pageNumber);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
-                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), allCohortsRequest.getPageNumber(), allCohortsRequest.getPageSize());
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
         ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
@@ -147,14 +148,13 @@ public class CohortController {
     }
 
 
-    @GetMapping("organization-cohort-all")
+    @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
-            @RequestParam @NotBlank(message = "Organization ID is required") String organizationId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),organizationId,
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),
                                                                          pageNumber,pageSize);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(

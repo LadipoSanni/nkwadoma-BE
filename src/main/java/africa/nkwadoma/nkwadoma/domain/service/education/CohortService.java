@@ -56,6 +56,7 @@ public class CohortService implements CohortUseCase {
         linkCohortToProgram(program, programCohort, savedCohort);
         BigDecimal totalFee = calculateTotalLoanBreakdownAmount(savedLoanBreakdowns,cohort.getTuitionAmount());
         savedCohort.setTotalCohortFee(totalFee);
+        savedCohort.setOrganizationId(program.getOrganizationId());
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         return savedCohort;
@@ -147,7 +148,7 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInAProgram(String programId,int pageNumber, int pageSize) throws MeedlException {
+    public Page<Cohort> viewAllCohortInAProgram(String programId,int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
@@ -155,14 +156,7 @@ public class CohortService implements CohortUseCase {
         if (ObjectUtils.isEmpty(foundProgram)) {
             throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
         }
-        List<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(programId);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), cohorts.size());
-        if (start >= cohorts.size()) {
-            return new PageImpl<>(Collections.emptyList(), pageRequest, cohorts.size());
-        }
-        return new PageImpl<>(cohorts.subList(start, end), pageRequest, cohorts.size());
+        return cohortOutputPort.findAllCohortInAProgram(programId,pageSize,pageNumber);
     }
 
     @Override
@@ -177,14 +171,10 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInOrganization(String actorId,String organizationId,
+    public Page<Cohort> viewAllCohortInOrganization(String actorId,
                                                     int pageNumber,int pageSize) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
-        if (!organizationId.equals(organizationIdentity.getId())){
-            throw new CohortException(CohortMessages.ACTOR_DOESNT_EXIST_IN_ORGANIZATION.getMessage());
-        }
-        return cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
     }
 
     @Override

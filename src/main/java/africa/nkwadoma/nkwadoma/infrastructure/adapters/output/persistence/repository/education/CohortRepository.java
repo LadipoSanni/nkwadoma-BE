@@ -13,7 +13,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
 
     CohortEntity findCohortByName(String name);
 
-    List<CohortEntity> findAllByProgramId(String programId);
+    Page<CohortEntity> findAllByProgramId(String programId, Pageable pageRequest);
 
     Page<CohortEntity> findAllByOrganizationId(String organizationId, Pageable pageRequest);
 }

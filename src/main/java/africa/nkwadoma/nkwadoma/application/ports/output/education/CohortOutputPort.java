@@ -14,7 +14,7 @@ public interface CohortOutputPort {
     Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
 
     void deleteCohort(String id) throws MeedlException;
-    List<Cohort> findAllCohortInAProgram(String id) throws MeedlException;
+    Page<Cohort> findAllCohortInAProgram(String id, int pageSize,int pageNumber) throws MeedlException;
 
     Cohort findCohort(String cohortId) throws CohortException;
 

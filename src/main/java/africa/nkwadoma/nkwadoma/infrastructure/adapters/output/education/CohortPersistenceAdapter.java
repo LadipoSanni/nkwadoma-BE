@@ -130,10 +130,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public List<Cohort> findAllCohortInAProgram(String programId) throws MeedlException {
+    public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
         validateUUID(programId);
-        List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId);
-        return cohortMapper.toCohortList(cohortEntities);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId,pageRequest);
+        return cohortEntities.map(cohortMapper::toCohort);
     }
 
 }
