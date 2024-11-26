@@ -28,7 +28,9 @@ public enum LoanMessages {
     LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED("Loan referral must be accepted"),
     LOAN_REFERRAL_NOT_FOUND("Loan referral not found"),
     LOAN_REQUEST_NOT_FOUND("Loan request not found"),
-    LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED("Loan Request Must Have Been Approved");
+    LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED("Loan Request Must Have Been Approved"),
+    LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT("Loan amount approved must be less than or equal to the loan amount requested"),
+    LOAN_PRODUCT_NOT_FOUND("Loan product not found");
     private final String message;
 
     LoanMessages(String message) {

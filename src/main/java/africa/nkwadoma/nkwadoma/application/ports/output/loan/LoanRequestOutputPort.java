@@ -9,4 +9,5 @@ public interface LoanRequestOutputPort {
     LoanRequest findById(String loanRequestId) throws MeedlException;
 
     void deleteLoanRequestById(String id);
+
 }

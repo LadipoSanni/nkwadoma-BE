@@ -16,11 +16,15 @@ import java.time.*;
 @AllArgsConstructor
 public class LoanRequest {
     private String id;
+    private String loanProductId;
     private String referredBy;
+    private String loanRequestDecision;
     private BigDecimal loanAmountRequested;
+    private BigDecimal loanAmountApproved;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
     private String reasonForDecliningLoanRequest;
+    private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;
 
