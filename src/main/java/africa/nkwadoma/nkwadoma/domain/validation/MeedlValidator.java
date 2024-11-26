@@ -94,12 +94,13 @@ public class MeedlValidator {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
-    public static void validateName(String name) throws MeedlException {
+    public static void validateObjectName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name);
-        String regex = "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9'-]+$";
+        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' -]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
         if (!isValid){
+            log.error("Invalid name pattern: {}", name);
             throw new MeedlException("Invalid name: {}. Name should not contain only numbers or special characters. Letters, numbers, ' - are allowed " + name);
         }
     }

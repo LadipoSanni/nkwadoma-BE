@@ -51,7 +51,7 @@ class LoanProductServiceTest {
         Vendor vendor = new Vendor();
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
-        loanProduct.setName("Test Loan Product: unit testing within application");
+        loanProduct.setName("Test Loan Product - unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
         loanProduct.setObligorLoanLimit(new BigDecimal("100"));
@@ -77,6 +77,7 @@ class LoanProductServiceTest {
             verify(loanProductOutputPort, times(1)).save(loanProduct);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
+            throw new RuntimeException(exception);
         }
     }
     @Test

@@ -69,8 +69,9 @@ class ProgramServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
     void createProgramWithInvalidName(String programName){
+        program = new Program();
         program.setName(programName);
-        assertThrows(MeedlException.class, ()->programService.createProgram(program));
+        assertThrows(MeedlException.class, ()-> programService.createProgram(program));
     }
 
     @ParameterizedTest

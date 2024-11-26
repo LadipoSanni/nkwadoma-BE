@@ -47,7 +47,7 @@ public class OrganizationIdentity {
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);
         log.info("{}",this.serviceOfferings);
-        MeedlValidator.validateName(this.name);
+        MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.rcNumber);
         MeedlValidator.validateDataElement(this.phoneNumber);

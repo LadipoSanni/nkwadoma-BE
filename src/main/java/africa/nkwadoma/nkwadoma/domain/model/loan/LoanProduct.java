@@ -56,11 +56,13 @@ public class LoanProduct {
     private int pageNumber;
 
     public void validateLoanProductDetails() throws MeedlException {
-        MeedlValidator.validateName(name);
+        log.info("Started loan product validation");
+        MeedlValidator.validateObjectName(name);
         MeedlValidator.validateDataElement(termsAndCondition);
         MeedlValidator.validateDataElement(mandate);
         validateLoanProductSize();
         validateObligorLimit();
+        log.info("ended loan product validation successfully... ");
     }
 
     private void validateObligorLimit() throws MeedlException {

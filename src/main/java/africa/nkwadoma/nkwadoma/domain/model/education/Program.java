@@ -45,7 +45,7 @@ public class Program {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateName(this.name);
+        MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateUUID(this.createdBy);
     }
 
