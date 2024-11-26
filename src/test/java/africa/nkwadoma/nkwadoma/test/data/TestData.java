@@ -20,15 +20,18 @@ public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
 
     public static UserIdentity createTestUserIdentity(String email){
-        UserIdentity userIdentity = new UserIdentity();
-        userIdentity.setFirstName("Peter");
-        userIdentity.setLastName("Mark");
-        userIdentity.setEmail(email);
-        userIdentity.setPhoneNumber("090876536217");
-        userIdentity.setId(testId);
-        userIdentity.setCreatedBy(testId);
-        userIdentity.setRole(IdentityRole.LOANEE);
-        return userIdentity;
+        return UserIdentity.builder()
+                .id(testId)
+                .firstName("John")
+                .lastName("Doe")
+                .email(email)
+                .phoneNumber("090876536217")
+                .createdBy(testId)
+                .role(IdentityRole.LOANEE)
+                .alternateEmail("alt276@example.com")
+                .alternatePhoneNumber("0986564534")
+                .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
+                .build();
     }
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
@@ -50,19 +53,30 @@ public class TestData {
     }
 
     public static Loanee createTestLoanee(UserIdentity userIdentity, LoaneeLoanDetail loaneeLoanDetail){
-        Loanee loanee = new Loanee();
-        loanee.setUserIdentity(userIdentity);
-        loanee.setCreatedBy(testId);
-        loanee.setCohortId(testId);
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        return loanee;
+        return Loanee.builder()
+                .id(testId)
+                .userIdentity(userIdentity)
+                .cohortId(testId)
+                .createdBy(userIdentity.getCreatedBy())
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .build();
     }
     public static Loan createTestLoan(Loanee loanee){
         Loan loan = new Loan();
         loan.setLoanAccountId("account id");
         loan.setStartDate(LocalDateTime.now());
         loan.setLoanee(loanee);
+        loan.setLoaneeId(testId);
+        loan.setLoanOfferId(testId);
+
+        Loan
         return loan;
+    }
+    public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
+        return LoaneeLoanDetail.builder()
+                .amountRequested(BigDecimal.valueOf(9000000.00))
+                .initialDeposit(BigDecimal.valueOf(3000000.00))
+                .build();
     }
 
 }

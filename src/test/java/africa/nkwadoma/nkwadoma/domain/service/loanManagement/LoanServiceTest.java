@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -40,16 +41,9 @@ class LoanServiceTest {
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = UserIdentity.builder().id(testId).firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
-                alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
-                createdBy(testId).build();
-
-        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
-        Loanee loanee = Loanee.builder().id(testId).userIdentity(userIdentity).
-                cohortId(testId).createdBy(userIdentity.getCreatedBy()).
-                loaneeLoanDetail(loaneeLoanDetail).build();
+        UserIdentity userIdentity = TestData.createTestUserIdentity("test@example.com");
+        LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
 
         loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
