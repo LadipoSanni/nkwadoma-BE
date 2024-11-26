@@ -22,6 +22,7 @@ public class IdentityVerification {
     private String identityId;
     private String bvn;
     private String nin;
+    private String imageUrl;
     private String email;
     private String identityImage;
     private String token;
