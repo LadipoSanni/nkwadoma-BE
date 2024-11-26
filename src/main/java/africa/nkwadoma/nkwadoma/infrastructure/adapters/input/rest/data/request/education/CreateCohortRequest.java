@@ -27,5 +27,6 @@ public class CreateCohortRequest {
     private String name;
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
+    private String imageUrl;
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
 }

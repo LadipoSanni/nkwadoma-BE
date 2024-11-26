@@ -22,8 +22,8 @@ import java.util.List;
 public class Cohort {
     private String id;
     private String programId;
-    @Size( max = 2500, message = "cohort description must no go beyond 2500" )
     private String organizationId;
+    @Size( max = 2500, message = "cohort description must no go beyond 2500" )
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;
