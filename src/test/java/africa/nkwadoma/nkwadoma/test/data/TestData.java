@@ -62,13 +62,13 @@ public class TestData {
                 .build();
     }
     public static Loan createTestLoan(Loanee loanee){
-        Loan loan = new Loan();
-        loan.setLoanAccountId("account id");
-        loan.setStartDate(LocalDateTime.now());
-        loan.setLoanee(loanee);
-        loan.setLoaneeId(testId);
-        loan.setLoanOfferId(testId);
-        return loan;
+        return Loan.builder()
+                .loaneeId(testId)
+                .loanOfferId(testId)
+                .loanee(loanee)
+                .startDate(LocalDateTime.now())
+                .loanAccountId("account id")
+                .build();
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
         return LoaneeLoanDetail.builder()
