@@ -81,8 +81,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build Docker image
-        run: docker build -t ${{ env.REPO_URL }}:latest .
+      # - name: Build Docker image
+      #   run: docker build -t ${{ env.REPO_URL }}:latest .
 
       # - name: Push Docker image to ECR
       #   run: |
@@ -96,19 +96,22 @@ jobs:
           SOURCE_TAG: alpha
           TARGET_TAG: beta
         run: |
-          # Pull the existing alpha tag
+          # Pull the existing alpha-tagged image
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG
-    
+      
           # Retag the image as beta
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
-          
-          # Push the beta tag
+      
+          # Push the beta tag to ECR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
-
+      
+          echo "Image successfully retagged from $SOURCE_TAG to $TARGET_TAG and pushed to ECR."
+      
+      
 
       - name: Update ECS service
         run: |
-          aws ecs update-service --cluster ${{ env.CLUSTER }} --service ${{ env.ECS }} --force-new-deployment
+          aws ecs update-service --cluster ${{ env.CLUSTER }} --service ${{ env.ECS }} --region eu-west-1 --force-new-deployment
 
   send_notification:
     name: Send Email Notification
