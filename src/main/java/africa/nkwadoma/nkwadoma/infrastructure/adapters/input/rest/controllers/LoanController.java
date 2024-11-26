@@ -1,19 +1,16 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductViewAllRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.StartLoanRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -138,9 +135,14 @@ public class LoanController {
     @PostMapping("start")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> startLoan(@RequestBody StartLoanRequest request) throws MeedlException {
-        log.info("Start loan called.... loan offer id : {}", request.getLoanOfferId());
-        Loan loan = loanProductMapper.mapToLoan(request);
+    public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
+                                                                String loaneeId,
+                                                    @RequestParam @NotBlank(message = "LoanOffer ID is required")
+                                                                String loanOfferId) throws MeedlException {
+        log.info("Start loan called.... loan offer id : {}", loanOfferId);
+        Loan loan = new Loan();
+        loan.setLoaneeId(loaneeId);
+        loan.setLoanOfferId(loanOfferId);
         loan = createLoanProductUseCase.startLoan(loan);
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
