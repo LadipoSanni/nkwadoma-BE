@@ -238,12 +238,11 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setName(null);
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((dataAnalytics)));
     }
-
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void createProgramWithInvalidName(String name){
-        dataAnalytics.setName(name);
-        assertThrows(MeedlException.class,()-> programOutputPort.saveProgram(dataAnalytics));
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
+    void createProgramWithInvalidName(String programName){
+        dataAnalytics.setName(programName);
+        assertThrows(MeedlException.class, ()-> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test

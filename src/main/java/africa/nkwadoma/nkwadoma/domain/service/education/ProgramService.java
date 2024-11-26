@@ -26,6 +26,7 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
+        log.info("Creating program {}", program);
         program.validate();
         boolean programExists = programOutputPort.programExists(program.getName());
         if (programExists) {
