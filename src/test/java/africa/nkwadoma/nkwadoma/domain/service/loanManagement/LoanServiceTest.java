@@ -76,8 +76,10 @@ class LoanServiceTest {
         loanRequest = new LoanRequest();
         loanRequest.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanRequest.setLoanProductId(loanProduct.getId());
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
+        loanRequest.setLoanRequestDecision("Approved by PM");
         loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
-        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
         loanRequest.setReferredBy("Brown Hills Institute");
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -249,21 +251,19 @@ class LoanServiceTest {
     @Test
     void approveLoanRequest() {
         LoanRequest approvedLoanRequest = new LoanRequest();
-        approvedLoanRequest.setId(loanRequest.getId());
-        approvedLoanRequest.setLoanProductId(loanRequest.getLoanProductId());
-        approvedLoanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
-        approvedLoanRequest.setLoanRequestDecision("Approved by PM");
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
-            approvedLoanRequest = loanService.approveLoanRequest(approvedLoanRequest);
+            approvedLoanRequest = loanService.approveLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
         }
         assertNotNull(approvedLoanRequest);
         assertEquals(LoanRequestStatus.APPROVED, approvedLoanRequest.getStatus());
+        assertEquals(approvedLoanRequest.getLoanAmountApproved(), BigDecimal.valueOf(500000));
+        assertEquals("Approved by PM", approvedLoanRequest.getLoanRequestDecision());
     }
 
     @Test
