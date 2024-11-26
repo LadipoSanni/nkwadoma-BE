@@ -141,6 +141,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loanProduct)) {
             throw new LoanException(LoanMessages.LOAN_PRODUCT_NOT_FOUND.getMessage());
         }
+        // TODO Check that loan request's Status is "NEW"
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
