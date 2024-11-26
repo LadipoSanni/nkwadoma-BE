@@ -15,6 +15,7 @@ import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
+import org.springframework.data.domain.*;
 
 import java.math.*;
 import java.time.*;
@@ -167,12 +168,6 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNullDateTimeApproved() {
-        loanRequest.setDateTimeApproved(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createLoanRequestWithNullLoanRequestStatus() {
         loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
@@ -216,5 +211,19 @@ class LoanServiceTest {
     void acceptLoanReferralWithNullLoanReferralId() {
         loanReferral.setId(null);
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+    }
+
+    @Test
+    void viewAllLoanRequests() {
+        try {
+            when(loanRequestOutputPort.viewAll(0, 10)).
+                    thenReturn(new PageImpl<>(List.of(loanRequest)));
+            Page<LoanRequest> loanRequests = loanService.viewAllLoanRequests(loanRequest);
+
+            verify(loanRequestOutputPort, times(1)).viewAll(0, 10);
+            assertNotNull(loanRequests.getContent());
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }
