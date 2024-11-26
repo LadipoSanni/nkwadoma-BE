@@ -3,14 +3,14 @@ name: Deploy Learnspace Systest to AWS ECS
 on:
   push:
     branches:
-      - dev
+      - image-tag
 
 env:
   ECR_REPOSITORY: learnspace-backend-systest
   CLUSTER: learnspace-africa
   ECS: learnspace-backend-systest
   AWS_REGION: eu-west-1
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/learnspace-backend-systest
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   
 
 jobs:
@@ -84,9 +84,27 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ env.REPO_URL }}:latest .
 
-      - name: Push Docker image to ECR
+      # - name: Push Docker image to ECR
+      #   run: |
+      #     docker push ${{ env.REPO_URL }}:latest
+
+      - name: Retag and push as beta
+        if: success() # Ensure this step runs only if the previous steps succeeded
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: nkwadoma # Replace with your actual repository name
+          SOURCE_TAG: alpha
+          TARGET_TAG: beta
         run: |
-          docker push ${{ env.REPO_URL }}:latest
+          # Pull the existing alpha tag
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG
+    
+          # Retag the image as beta
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+          
+          # Push the beta tag
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+
 
       - name: Update ECS service
         run: |
