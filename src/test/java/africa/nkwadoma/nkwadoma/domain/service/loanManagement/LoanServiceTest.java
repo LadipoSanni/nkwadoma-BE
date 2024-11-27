@@ -268,14 +268,25 @@ class LoanServiceTest {
 
     @Test
     void approveLoanRequest() {
-        LoanRequest approvedLoanRequest = new LoanRequest();
+        LoanRequest savedLoanRequest = null;
         try {
-            loanRequest.setStatus(LoanRequestStatus.APPROVED);
-            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
-            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
-            when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
-            when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
-            approvedLoanRequest = loanService.respondToLoanRequest(loanRequest);
+            savedLoanRequest = loanService.createLoanRequest(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        LoanRequest approvedLoanRequest = new LoanRequest();
+        approvedLoanRequest.setStatus(LoanRequestStatus.APPROVED);
+        approvedLoanRequest.setLoanProductId(loanRequest.getLoanProductId());
+        approvedLoanRequest.setId(loanRequest.getId());
+        approvedLoanRequest.setLoanAmountApproved(new BigDecimal("500000"));
+        approvedLoanRequest.setLoanRequestDecision("Approved by PM");
+        try {
+
+            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(savedLoanRequest);
+//            when(loanRequestOutputPort.save(any())).thenReturn(savedLoanRequest);
+//            when(loanProductOutputPort.findById(anyString())).thenReturn(loanProduct);
+//            when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
+            approvedLoanRequest = loanService.respondToLoanRequest(approvedLoanRequest);
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -303,6 +314,11 @@ class LoanServiceTest {
         loanRequest.setLoanAmountApproved(null);
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
+        try {
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
         MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
         log.info("Exception occurred: {}", meedlException.getMessage());
     }
@@ -333,6 +349,11 @@ class LoanServiceTest {
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000000));
+        try {
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
     }
 

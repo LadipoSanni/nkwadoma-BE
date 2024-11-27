@@ -152,11 +152,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
-            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
-        }
         if (ObjectUtils.isEmpty(foundLoanRequest)){
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+        }
+        if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
+            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
         if (ObjectUtils.isEmpty(loanProduct)) {
