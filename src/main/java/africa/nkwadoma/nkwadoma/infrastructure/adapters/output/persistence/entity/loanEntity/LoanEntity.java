@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -12,20 +10,16 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @Entity
-@ToString
-public class LoaneeEntity {
+public class LoanEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String cohortId;
-    private String createdBy;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     @OneToOne
-    private UserEntity userIdentity;
-    @OneToOne
-    private LoaneeLoanDetailEntity loaneeLoanDetail;
+    private LoaneeEntity loaneeEntity;
+    private String loanAccountId;
+    private LocalDateTime startDate;
+    private LocalDateTime lastUpdatedDate;
 }

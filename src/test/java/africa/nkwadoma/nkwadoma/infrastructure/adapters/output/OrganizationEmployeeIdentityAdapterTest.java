@@ -128,7 +128,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     void viewAllOrganizationEmployeesWithInvalidPageNumber(int pageNumber) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         try {
-            organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         } catch (MeedlException e) {
             log.error("Error occurred ===>", e);
         }
@@ -142,7 +142,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     void viewAllOrganizationEmployeesWithInvalidPageSize(int pageSize) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         try {
-            organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         } catch (MeedlException e) {
             log.error("Error finding organization", e);
         }

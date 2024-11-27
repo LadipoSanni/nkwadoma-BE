@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -37,21 +38,15 @@ class LoanServiceTest {
     private LoanRequestMapper loanRequestMapper;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
-
+    private Loan loan;
+    private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
-                alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+        UserIdentity userIdentity = TestData.createTestUserIdentity("test@example.com");
+        LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
 
-        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
-        Loanee loanee = Loanee.builder().id("b1b832a2-5f73-46d8-a073-e5d812304a4b").userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
-                loaneeLoanDetail(loaneeLoanDetail).build();
-
-        loanReferral = LoanReferral.builder().id("3a6d1124-1349-4f5b-831a-ac269369a90f").loanee(loanee).
+        loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
 
         loanRequest = new LoanRequest();
@@ -62,6 +57,10 @@ class LoanServiceTest {
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanRequest.setLoanee(loanee);
         loanRequest.setDateTimeApproved(LocalDateTime.now());
+
+        loan = new Loan();
+        loan.setLoaneeId(testId);
+        loan.setLoanOfferId(testId);
     }
 
 
@@ -207,6 +206,16 @@ class LoanServiceTest {
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(null));
     }
 
+    @Test
+    void startLoanWithNull() {
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "invalid uuid"})
+    void startLoanWithInvalidId(String loaneeId) {
+        loan.setLoaneeId(loaneeId);
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
     @Test
     void acceptLoanReferralWithNullLoanReferralId() {
         loanReferral.setId(null);
