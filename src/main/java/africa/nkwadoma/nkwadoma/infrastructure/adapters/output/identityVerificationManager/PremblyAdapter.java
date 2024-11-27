@@ -1,29 +1,32 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.IdentityVerificationParameter;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-
+@Service
 @Slf4j
+@RequiredArgsConstructor
 public class PremblyAdapter implements IdentityVerificationOutputPort {
-
-
     @Value("${PREMBLY_URL}")
     private String premblyUrl;
-
 
     @Value("${PREMBLY_APP_ID}")
     private String appId;
@@ -31,72 +34,100 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Value("${PREMBLY_APP_KEY}")
     private String apiKey;
 
+    private final RestTemplate restTemplate;
+
+
     @Override
-    public PremblyNinResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
+    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
+        MeedlValidator.validateObjectInstance(identityVerification);
+        identityVerification.validate();
+        identityVerification.validateImageUrl();
         return getNinDetails(identityVerification);
     }
 
-    public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
-        validateIdentityVerificationRequest(verificationRequest);
-        ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
-        String verificationResult = getNinVerificationResponse(responseEntity.getBody());
-        log.info("Verification Result : {}", verificationResult);
-        log.info("Verification response entity: {}", responseEntity.getBody());
+    public PremblyResponse getNinDetails(IdentityVerification identityVerification) {
+        PremblyResponse premblyResponse = getIdentityDetailsByNin(identityVerification);
+        premblyResponse.getVerification().updateValidNin();
+        log.info("Response: {}", premblyResponse);
+        return premblyResponse;
+    }
+
+    private PremblyNinResponse getIdentityDetailsByNin(IdentityVerification identityVerification) {
+        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(identityVerification);
+        String url = premblyUrl.concat(PremblyParameter.NIN_FACE_URL.getValue());
+        log.info(url);
+        ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(PremblyNinResponse.builder().build());
+        log.info("Response {}",responseEntity.getBody());
+        try {
+            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
+        } catch (HttpServerErrorException ex) {
+            log.info("Prembly server error {}", ex.getMessage());
+            log.error("Prembly Server error {}", ex.getMessage());
+        }
         return responseEntity.getBody();
     }
 
-    private ResponseEntity<PremblyNinResponse> getIdentityDetailsByNin(IdentityVerification verificationRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = getHttpHeaders();
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(IdentityVerificationParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
-        String url = premblyUrl.concat(IdentityVerificationParameter.NIN_URL.getValue());
-        log.info(url);
-        ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
-        try {
-//            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
-        } catch (HttpServerErrorException ex) {
-            log.info("Prembly server error {}", ex.getMessage());
-        }
-        return responseEntity;
+    @Override
+    public PremblyResponse verifyLiveliness(IdentityVerification identityVerification) {
+        String URL = premblyUrl.concat(PremblyParameter.NIN_LIVENESS_URL.getValue());
+        HttpHeaders httpHeaders = getHttpHeaders();
+        HttpEntity<IdentityVerification> requestHttpEntity = new HttpEntity<>(identityVerification, httpHeaders);
+        ResponseEntity<PremblyLivelinessResponse> responseEntity = restTemplate.exchange(
+                URL,
+                HttpMethod.POST,
+                requestHttpEntity,
+                PremblyLivelinessResponse.class
+        );
+        return responseEntity.getBody();
+    }
+    @Override
+    public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws IdentityVerificationException, MeedlException {
+        MeedlValidator.validateObjectInstance(identityVerification);
+        identityVerification.validate();
+        identityVerification.validateImageUrl();
+        return getBvnDetails(identityVerification);
+    }
+    public PremblyResponse getBvnDetails(IdentityVerification identityVerification) {
+        PremblyResponse premblyBvnResponse = getIdentityDetailsByBvn(identityVerification);
+        premblyBvnResponse.getVerification().updateValidNin();
+        log.info("Verification Result : {}", premblyBvnResponse);
+        return premblyBvnResponse;
     }
 
-    private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityVerificationException {
-        String responseMessage = StringUtils.EMPTY;
-        if (response == null || response.getNinData() == null) {
-            throw new IdentityVerificationException(IdentityVerificationMessage.PREMBLY_UNAVAILABLE.getValue());
+    private PremblyResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
+        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(verificationRequest);
+        log.info("url {}", premblyUrl);
+        String url = premblyUrl.concat(PremblyParameter.BVN_FACE.getValue());
+        log.info(url);
+        ResponseEntity<PremblyBvnResponse> responseEntity = ResponseEntity.ofNullable(PremblyBvnResponse.builder().build());
+        log.info("Response...{}",responseEntity.getBody());
+        try {
+            responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyBvnResponse.class);
+        } catch (HttpServerErrorException | ResourceAccessException ex) {
+            log.info("server error {}", ex.getMessage());
+            log.error("Server error {}", ex.getMessage());
         }
-        switch (response.getResponseCode()) {
-            case "00" -> {
-                responseMessage = IdentityVerificationMessage.NIN_VERIFIED.getValue();
-            }
-            case "01" -> responseMessage = IdentityVerificationMessage.NIN_NOT_FOUND.getValue();
-            case "02" -> {
-                log.warn("{} : {}", PremblyAdapter.class.getName(), IdentityVerificationMessage.SERVICE_UNAVAILABLE.getValue());
-                responseMessage = IdentityVerificationMessage.SERVICE_UNAVAILABLE.getValue();
-            }
-            case "03" -> {
-                log.warn("{} : {}", PremblyAdapter.class.getName(), IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue());
-                responseMessage = IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue();
-            }
-        }
-        return responseMessage;
+        return responseEntity.getBody();
     }
+
+    private HttpEntity<MultiValueMap<String, String>> createRequestEntity(IdentityVerification verificationRequest) {
+        HttpHeaders headers = getHttpHeaders();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(PremblyParameter.BVN_NUMBER.getValue(), verificationRequest.getBvn());
+        formData.add(PremblyParameter.BVN_IMAGE.getValue(), verificationRequest.getImageUrl());
+        log.debug("Prepared form data: {}", formData);
+        return new HttpEntity<>(formData, headers);
+    }
+
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(IdentityVerificationParameter.ACCEPT.getValue(), IdentityVerificationParameter.APPLICATION_JSON.getValue());
+        headers.set(PremblyParameter.ACCEPT.getValue(), PremblyParameter.APPLICATION_JSON.getValue());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add(IdentityVerificationParameter.APP_ID.getValue(), appId);
-        headers.add(IdentityVerificationParameter.API_KEY.getValue(), apiKey);
+        headers.add(PremblyParameter.APP_ID.getValue(), appId);
+        headers.add(PremblyParameter.API_KEY.getValue(), apiKey);
         return headers;
     }
-
-    private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
-        if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getIdentityImage())) {
-            throw new InfrastructureException("credentials should not be empty");
-        }
-
-    }
 }
+
+

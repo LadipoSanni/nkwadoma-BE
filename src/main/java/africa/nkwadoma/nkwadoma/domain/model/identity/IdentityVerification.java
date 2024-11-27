@@ -24,7 +24,6 @@ public class IdentityVerification {
     private String nin;
     private String imageUrl;
     private String email;
-    private String identityImage;
     private String token;
     private IdentityVerificationEnum typeOfIdentity;
 
@@ -54,9 +53,9 @@ public class IdentityVerification {
         if (!pattern.matcher(this.nin).matches()) {
             throw new InvalidInputException("Please provide a valid nin");
         }
-
     }
-
-
+    public void validateImageUrl() throws MeedlException {
+        MeedlValidator.validateDataElement(this.imageUrl);
+    }
 }
 

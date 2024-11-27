@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.IdentityVerificationParameter;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +24,18 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     private String apiKey = "null value";
 
     @Override
-    public PremblyNinResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
+    public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws InfrastructureException {
         return getNinDetails(identityVerification);
+    }
+
+    @Override
+    public PremblyResponse verifyLiveliness(IdentityVerification identityVerification) {
+        return null;
+    }
+
+    @Override
+    public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
+        return null;
     }
 
     public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
@@ -39,9 +51,9 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(IdentityVerificationParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
+        formData.add(PremblyParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
-        String url = smileIdUrl.concat(IdentityVerificationParameter.NIN_URL.getValue());
+        String url = smileIdUrl.concat(PremblyParameter.NIN_URL.getValue());
         log.info(url);
         ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(new PremblyNinResponse());
         try {
@@ -76,15 +88,15 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(IdentityVerificationParameter.ACCEPT.getValue(), IdentityVerificationParameter.APPLICATION_JSON.getValue());
+        headers.set(PremblyParameter.ACCEPT.getValue(), PremblyParameter.APPLICATION_JSON.getValue());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add(IdentityVerificationParameter.APP_ID.getValue(), appId);
-        headers.add(IdentityVerificationParameter.API_KEY.getValue(), apiKey);
+        headers.add(PremblyParameter.APP_ID.getValue(), appId);
+        headers.add(PremblyParameter.API_KEY.getValue(), apiKey);
         return headers;
     }
 
     private void validateIdentityVerificationRequest(IdentityVerification identityVerification) throws InfrastructureException {
-        if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getIdentityImage())) {
+        if (identityVerification == null || StringUtils.isEmpty(identityVerification.getIdentityId()) || StringUtils.isEmpty(identityVerification.getImageUrl())) {
             throw new InfrastructureException("credentials should not be empty");
         }
 
