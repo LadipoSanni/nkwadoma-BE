@@ -22,6 +22,7 @@ public class LoanRequestEntity {
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
     private String loanRequestDecision;
+    private String declineReason;
     private LocalDateTime dateTimeApproved;
     private String reasonForDecliningLoanRequest;
     @Enumerated(EnumType.STRING)

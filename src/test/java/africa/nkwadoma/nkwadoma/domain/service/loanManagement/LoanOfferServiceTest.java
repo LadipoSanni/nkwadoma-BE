@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -58,26 +56,10 @@ public class LoanOfferServiceTest {
         loanOffer.setLoanee(loanee);
     }
 
-//    @ParameterizedTest
-//    @ValueSource(strings = {"invalid-id"})
-//    void createLoanOfferWithInvalidLoanRequestId(String invalidId) {
-//        loanRequest.setId(invalidId);
-//        loanOffer.setLoanRequest(loanRequest);
-//        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(loanRequest));
-//    }
-
-//    @Test
-//    void createLoanOfferWithNullLoanRequestId() {
-//        loanRequest.setId(null);
-//        loanOffer.setLoanRequest(loanRequest);
-//        assertThrows(MeedlException.class,()-> loanService.createLoanOffer(loanRequest));
-//    }
-
     @Test
     void createLoanOfferWithValidLoanRequestId() {
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
-            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
             cretedLoanOffer = loanService.createLoanOffer(loanRequest);
         } catch (MeedlException exception) {
@@ -89,14 +71,9 @@ public class LoanOfferServiceTest {
 
     @Test
     void createLoanOfferWithUnApprovedLoanRequest() {
-        try {
-            when(loanRequestOutputPort.findById(mockId)).thenReturn(loanRequest);
-            loanRequest.setId(mockId);
-            loanRequest.setStatus(LoanRequestStatus.DECLINED);
-            assertThrows(MeedlException.class, ()->loanService.createLoanOffer(loanRequest));
-        } catch (MeedlException exception) {
-            log.error(exception.getMessage());
-        }
+        loanRequest.setId(mockId);
+        loanRequest.setStatus(LoanRequestStatus.DECLINED);
+        assertThrows(MeedlException.class, () -> loanService.createLoanOffer(loanRequest));
     }
 
 

@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -252,11 +251,12 @@ class LoanServiceTest {
     void approveLoanRequest() {
         LoanRequest approvedLoanRequest = new LoanRequest();
         try {
+            loanRequest.setStatus(LoanRequestStatus.APPROVED);
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
-            approvedLoanRequest = loanService.approveLoanRequest(loanRequest);
+            approvedLoanRequest = loanService.respondToLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -268,7 +268,7 @@ class LoanServiceTest {
 
     @Test
     void approveNullLoanRequest() {
-        assertThrows(MeedlException.class, ()-> loanService.approveLoanRequest(null));
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(null));
     }
 
     @Test
@@ -276,7 +276,7 @@ class LoanServiceTest {
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(null);
         loanRequest.setLoanAmountApproved(new BigDecimal("9000"));
-        assertThrows(MeedlException.class, () -> loanService.approveLoanRequest(loanRequest));
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
     }
 
     @Test
@@ -284,7 +284,7 @@ class LoanServiceTest {
         loanRequest.setLoanAmountApproved(null);
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.approveLoanRequest(loanRequest));
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
         log.info("Exception occurred: {}", meedlException.getMessage());
     }
 
@@ -293,7 +293,7 @@ class LoanServiceTest {
         loanRequest.setLoanProductId(null);
         loanRequest.setId(loanRequest.getId());
         loanRequest.setLoanAmountApproved(new BigDecimal("9000"));
-        assertThrows(MeedlException.class, ()-> loanService.approveLoanRequest(loanRequest));
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
     }
 
     @Test
@@ -306,7 +306,7 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error("", e);
         }
-        assertThrows(MeedlException.class, () -> loanService.approveLoanRequest(loanRequest));
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
     }
 
     @Test
@@ -314,6 +314,42 @@ class LoanServiceTest {
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000000));
-        assertThrows(MeedlException.class, ()-> loanService.approveLoanRequest(loanRequest));
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
+    }
+
+    @Test
+    void approveLoanRequestWithStatusThatIsNotNew() {
+        loanRequest.setLoanProductId(loanRequest.getLoanProductId());
+        loanRequest.setId(loanRequest.getId());
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        try {
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
+    }
+
+    @Test
+    void declineLoanRequest() {
+        loanRequest.setStatus(LoanRequestStatus.DECLINED);
+        loanRequest.setDeclineReason("I just don't want the loan offer");
+        loanRequest.setLoanProductId(loanRequest.getLoanProductId());
+        loanRequest.setId(loanRequest.getId());
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(70000));
+
+        LoanRequest approvedLoanRequest = new LoanRequest();
+        try {
+            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
+            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
+            approvedLoanRequest = loanService.respondToLoanRequest(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertNotNull(approvedLoanRequest);
+        assertEquals(LoanRequestStatus.DECLINED, approvedLoanRequest.getStatus());
+        assertEquals("I just don't want the loan offer", approvedLoanRequest.getDeclineReason());
     }
 }

@@ -19,6 +19,7 @@ public class LoanRequest {
     private String loanProductId;
     private String referredBy;
     private String loanRequestDecision;
+    private String declineReason;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
     private LoanReferralStatus loanReferralStatus;
@@ -27,6 +28,12 @@ public class LoanRequest {
     private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;
+
+    public static void validate(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validateUUID(loanRequest.getId());
+        MeedlValidator.validateUUID(loanRequest.getLoanProductId());
+    }
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);

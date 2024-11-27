@@ -125,28 +125,37 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanRequest approveLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validateUUID(loanRequest.getId());
-        MeedlValidator.validateUUID(loanRequest.getLoanProductId());
-        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+    public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        LoanRequest.validate(loanRequest);
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
         if (ObjectUtils.isEmpty(foundLoanRequest)){
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-        }
-        if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
-            throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
         }
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
         if (ObjectUtils.isEmpty(loanProduct)) {
             throw new LoanException(LoanMessages.LOAN_PRODUCT_NOT_FOUND.getMessage());
         }
-        // TODO Check that loan request's Status is "NEW"
-        foundLoanRequest.setLoanProduct(loanProduct);
-        foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        createLoanOffer(foundLoanRequest);
+        return respondToLoanRequest(loanRequest, foundLoanRequest, loanProduct);
+    }
+
+    private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest, LoanProduct loanProduct) throws MeedlException {
+        if (loanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
+            MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+            if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
+                throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
+            }
+            foundLoanRequest.setLoanProduct(loanProduct);
+            foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
+            foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
+            foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+            createLoanOffer(foundLoanRequest);
+        }
+        else if (loanRequest.getStatus().equals(LoanRequestStatus.DECLINED)) {
+            MeedlValidator.validateDataElement(loanRequest.getDeclineReason());
+            foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
+            foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+            foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
+        }
         return loanRequestOutputPort.save(foundLoanRequest);
     }
 
