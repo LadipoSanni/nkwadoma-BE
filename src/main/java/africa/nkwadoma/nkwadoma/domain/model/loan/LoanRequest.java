@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
@@ -17,18 +18,31 @@ import java.time.*;
 public class LoanRequest {
     private String id;
     private String referredBy;
+    private String firstName;
+    private String lastName;
     private BigDecimal loanAmountRequested;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
+    private LocalDateTime createdDate;
+    private BigDecimal initialDeposit;
     private String reasonForDecliningLoanRequest;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private LocalDate cohortStartDate;
+    private String programName;
+    private int pageNumber;
+    private int pageSize;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
         MeedlValidator.validateObjectInstance(status);
-        MeedlValidator.validateObjectInstance(dateTimeApproved);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+    }
+
+    public int getPageSize() {
+        int defaultPageSize = BigInteger.TEN.intValue();
+        return this.pageSize == BigInteger.ZERO.intValue() ? defaultPageSize : this.pageSize;
     }
 }

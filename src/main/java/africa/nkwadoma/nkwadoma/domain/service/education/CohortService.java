@@ -56,6 +56,7 @@ public class CohortService implements CohortUseCase {
         linkCohortToProgram(program, programCohort, savedCohort);
         BigDecimal totalFee = calculateTotalLoanBreakdownAmount(savedLoanBreakdowns,cohort.getTuitionAmount());
         savedCohort.setTotalCohortFee(totalFee);
+        savedCohort.setOrganizationId(program.getOrganizationId());
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         return savedCohort;
@@ -167,6 +168,13 @@ public class CohortService implements CohortUseCase {
     @Override
     public Cohort searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
         return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
+    }
+
+    @Override
+    public Page<Cohort> viewAllCohortInOrganization(String actorId,
+                                                    int pageNumber,int pageSize) throws MeedlException {
+        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
     }
 
     @Override

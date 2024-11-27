@@ -147,4 +147,25 @@ public class CohortController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+
+    @GetMapping("organization-cohort/all")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+            @AuthenticationPrincipal Jwt meedl,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),
+                                                                         pageNumber,pageSize);
+        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
+        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
+        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+                .data(paginatedResponse)
+                .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+    }
+
 }
