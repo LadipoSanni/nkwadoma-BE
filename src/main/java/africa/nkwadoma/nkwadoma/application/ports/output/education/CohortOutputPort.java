@@ -21,4 +21,6 @@ public interface CohortOutputPort {
     Cohort save(Cohort cohort) throws MeedlException;
 
     Cohort findCohortByName(String name) throws MeedlException;
+
+    Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 }
