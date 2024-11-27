@@ -12,7 +12,7 @@ env:
   ECR_REPO: learnspace-backend-systest
   CLUSTER: nkwadoma
   ECS: learnspace-backend-systest
-  EMAILS: "joshua.o@semicolon.africa, ladipo@semicolon.africa, prince@semicolon.africa, t.lemon@semicolon.africa, divinemercy601@gmail.com, qudusa55@gmail.com, o.koleaje@semicolon.africa, ned@semicolon.africa, tade@semicolon.africa, moyinoluwa@semicolon.africa, mariam@semicolon.africa, i.james@semicolon.africa, david@semicolon.africa, abigail@semicolon.africa, precious@semicolon.africa, dapo@semicolon.africa, pauline@semicolon.africa, davidoso@semicolon.africa, henry@semicolon.africa"
+  EMAILS: "joshua.o@semicolon.africa, ladipo@semicolon.africa, prince@semicolon.africa, t.lemon@semicolon.africa, qudusa55@gmail.com, o.koleaje@semicolon.africa, ned@semicolon.africa, tade@semicolon.africa, moyinoluwa@semicolon.africa, mariam@semicolon.africa, i.james@semicolon.africa, david@semicolon.africa, abigail@semicolon.africa, precious@semicolon.africa, dapo@semicolon.africa, pauline@semicolon.africa, davidoso@semicolon.africa, henry@semicolon.africa"
   SONARQUBE_URL_SET: false
   MAVEN_REPORT_URL_SET: false
   AUTOMATION_TEST_URL_SET: false
@@ -90,6 +90,11 @@ jobs:
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          CREDIT_REGISTRY_EMAIL = ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
+          CREDIT_REGISTRY_SUBSCRIBER_ID =${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
+          CREDIT_REGISTRY_PASSWORD =${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
+          CREDIT_REGISTRY_BASE_URL = ${{ secrets.CREDIT_REGISTRY_URL }}
+          TEST_BVN = ${{ secrets.TEST_BVN_VALUE }}
   
 
       - name: Get Maven Report URL
