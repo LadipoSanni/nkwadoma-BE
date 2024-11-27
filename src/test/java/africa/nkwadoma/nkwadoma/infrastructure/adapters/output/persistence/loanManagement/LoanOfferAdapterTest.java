@@ -33,8 +33,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 public class LoanOfferAdapterTest {
-
-
     @Autowired
     private LoanOfferOutputPort loanOfferOutputPort;
     @Autowired
