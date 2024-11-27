@@ -90,6 +90,11 @@ jobs:
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          CREDIT_REGISTRY_EMAIL = ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
+          CREDIT_REGISTRY_SUBSCRIBER_ID =${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
+          CREDIT_REGISTRY_PASSWORD =${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
+          CREDIT_REGISTRY_BASE_URL = ${{ secrets.CREDIT_REGISTRY_URL }}
+          TEST_BVN = ${{ secrets.TEST_BVN_VALUE }}
   
 
       - name: Get Maven Report URL
