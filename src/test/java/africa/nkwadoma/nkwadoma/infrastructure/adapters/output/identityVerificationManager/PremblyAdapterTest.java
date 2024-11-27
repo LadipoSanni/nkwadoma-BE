@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyResponseCode;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +74,14 @@ class PremblyAdapterTest {
         assertEquals(PremblyVerificationMessage.VERIFIED.getMessage(), response.getVerification().getStatus());
         assertFalse(response.getFaceData().isFaceVerified());
         assertTrue(response.getVerification().isValidIdentity());
+    }
+    @Test
+    void verifyIdentityWithValidBvn() throws MeedlException {
+        bvnIdentityVerification.setBvn("22257882103");
+        PremblyBvnResponse response = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(bvnIdentityVerification);
+        assertNotNull(response);
+        assertTrue(response.isVerificationCallSuccessful());
+        assertEquals(PremblyVerificationMessage.VERIFIED.getMessage(), response.getVerification().getStatus());
     }
 
 
@@ -219,15 +226,12 @@ class PremblyAdapterTest {
                 .responseCode(PremblyResponseCode.INSUFFICIENT_WALLET_BALANCE.getCode())
                 .verificationCallSuccessful(false)
                 .build();
-
         when(premblyAdapter.verifyBvn(bvnIdentityVerification))
                 .thenReturn(insufficientBalanceResponse);
-
         PremblyResponse response =premblyAdapter.verifyBvn(bvnIdentityVerification);
         assertNotNull(response);
         assertEquals(PremblyResponseCode.INSUFFICIENT_WALLET_BALANCE.getCode(), response.getResponseCode());
         assertFalse(response.isVerificationCallSuccessful());
-
         verify(premblyAdapter, times(1)).verifyBvn(bvnIdentityVerification);
     }
 

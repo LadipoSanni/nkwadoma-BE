@@ -1,15 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 
-@Builder
+@SuperBuilder
 @Getter
 @Setter
+@NoArgsConstructor
 public class PremblyBvnResponse extends PremblyResponse{
 
     @JsonProperty("status")

@@ -163,7 +163,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
                 requestHttpEntity,
                 PremblyBvnResponse.class
         );
-
+        log.info("Response : {}", responseEntity.getBody());
         return responseEntity.getBody();
     }
 
