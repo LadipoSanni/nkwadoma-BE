@@ -128,7 +128,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
 
         try {
             responseEntity = restTemplate.exchange(
-                    url + "/FindSummary",
+                    url + "/FindDetail",
                     HttpMethod.POST,
                     entity,
                     CreditRegistryFindDetailResponse.class);
