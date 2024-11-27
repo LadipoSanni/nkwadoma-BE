@@ -21,6 +21,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 
 import java.util.List;
 
+@Service
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
 
@@ -110,10 +112,10 @@ public class CohortService implements CohortUseCase {
 
     private void checkIfCohortNameExist(Cohort cohort, Cohort foundCohort) throws MeedlException {
         Cohort foundCohortByName = null;
-        if (cohort.getName() != null) {
+        if (! StringUtils.isEmpty(cohort.getName())) {
             foundCohortByName = cohortOutputPort.checkIfCohortExistWithName(cohort.getName());
         }
-        if (foundCohortByName != null) {
+        if (ObjectUtils.isNotEmpty(foundCohortByName)) {
             if (!StringUtils.equals(foundCohort.getId(), foundCohortByName.getId())) {
                 throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
             }
