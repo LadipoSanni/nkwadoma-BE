@@ -267,15 +267,4 @@ class PremblyAdapterTest {
        assertThrows(MeedlException.class, ()-> identityVerificationOutputPort.verifyIdentity(identityVerification));
     }
 
-//    @Test
-    void verifyIdentity(){
-        try {
-            PremblyNinResponse response = (PremblyNinResponse) identityVerificationOutputPort.verifyIdentity(identityVerification);
-            log.info("Response ----> {}",response);
-            assertNotNull(response);
-        }catch (MeedlException e){
-            log.info(e.getMessage());
-        }
-    }
-
 }

@@ -38,6 +38,21 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         return null;
     }
 
+    @Override
+    public PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
+        return null;
+    }
+
+    @Override
+    public PremblyResponse verifyNin(IdentityVerification identityVerification) throws IdentityVerificationException {
+        return null;
+    }
+
+    @Override
+    public PremblyResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
+        return null;
+    }
+
     public PremblyNinResponse getNinDetails(IdentityVerification verificationRequest) throws InfrastructureException {
         validateIdentityVerificationRequest(verificationRequest);
         ResponseEntity<PremblyNinResponse> responseEntity = getIdentityDetailsByNin(verificationRequest);
@@ -51,7 +66,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(PremblyParameter.NIN_NUMBER.getValue(), verificationRequest.getIdentityId());
+        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getIdentityId());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
         String url = smileIdUrl.concat(PremblyParameter.NIN_URL.getValue());
         log.info(url);

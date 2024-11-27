@@ -14,4 +14,11 @@ public interface IdentityVerificationOutputPort {
     PremblyResponse verifyIdentity (IdentityVerification identityVerification) throws MeedlException;
     PremblyResponse verifyLiveliness(IdentityVerification identityVerification);
     PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException;
+
+
+
+    PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException;
+    PremblyResponse verifyNin(IdentityVerification identityVerification) throws MeedlException;
+    PremblyResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException;
+
 }

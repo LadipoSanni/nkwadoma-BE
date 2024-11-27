@@ -17,7 +17,7 @@ public  class Verification {
     @JsonProperty("reference")
     private String reference;
 
-    public void updateValidNin() {
+    public void updateValidIdentity() {
         if (StringUtils.equalsIgnoreCase("VERIFIED", this.status)) {
             validIdentity = Boolean.TRUE;
         }

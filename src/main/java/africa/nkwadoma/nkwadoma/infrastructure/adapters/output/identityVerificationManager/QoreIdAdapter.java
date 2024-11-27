@@ -21,4 +21,19 @@ public class QoreIdAdapter implements IdentityVerificationOutputPort {
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
         return null;
     }
+
+    @Override
+    public PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
+        return null;
+    }
+
+    @Override
+    public PremblyResponse verifyNin(IdentityVerification identityVerification) throws IdentityVerificationException {
+        return null;
+    }
+
+    @Override
+    public PremblyResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
+        return null;
+    }
 }
