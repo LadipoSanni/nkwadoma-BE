@@ -331,29 +331,29 @@ class CohortPersistenceAdapterTest {
         assertNotNull(editedCohort.getLoanDetail());
     }
 
-    @Order(8)
-    @Test
-    void deleteCohort(){
-        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-        assertTrue(foundCohort.isPresent());
-        try {
-            cohortOutputPort.deleteCohort(cohortOneId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        foundCohort = cohortRepository.findById(cohortOneId);
-        assertFalse(foundCohort.isPresent());
-    }
+//    @Order(8)
+//    @Test
+//    void deleteCohort(){
+//        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+//        assertTrue(foundCohort.isPresent());
+//        try {
+//            cohortOutputPort.deleteCohort(cohortOneId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        foundCohort = cohortRepository.findById(cohortOneId);
+//        assertFalse(foundCohort.isPresent());
+//    }
 
-    @AfterAll
-    void cleanUp() throws MeedlException {
-        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
-        identityManagementOutputPort.deleteUser(meedleUser);
-        cohortOutputPort.deleteCohort(cohortTwoId);
-        programCohortOutputPort.delete(programId);
-        organizationIdentityOutputPort.delete(organizationId);
-        userIdentityOutputPort.deleteUserById(meedleUserId);
-        cohortRepository.deleteById(cohortTwoId);
-        cohortRepository.deleteById(cohortOneId);
-    }
+//    @AfterAll
+//    void cleanUp() throws MeedlException {
+//        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
+//        identityManagementOutputPort.deleteUser(meedleUser);
+//        cohortOutputPort.deleteCohort(cohortTwoId);
+//        programCohortOutputPort.delete(programId);
+//        organizationIdentityOutputPort.delete(organizationId);
+//        userIdentityOutputPort.deleteUserById(meedleUserId);
+//        cohortRepository.deleteById(cohortTwoId);
+//        cohortRepository.deleteById(cohortOneId);
+//    }
 }

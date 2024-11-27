@@ -26,6 +26,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -102,15 +103,12 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(loaneeId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
-        if (cohort == null){
-            throw new CohortException(CohortMessages.COHORT_DOES_NOT_EXIST.getMessage());
-        }
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
-        refer(loanee.getUserIdentity());
         OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
-        notifyPortfolioManager(organizationEmployeeIdentity.getMeedlUser());
+        refer(loanee);
+//        notifyPortfolioManager(organizationEmployeeIdentity.getMeedlUser());
         loaneeOutputPort.save(loanee);
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
@@ -145,8 +143,8 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
 
-    private void refer(UserIdentity userIdentity) throws MeedlException {
-        sendLoaneeEmailUsecase.sendReferLoaneeEmail(userIdentity);
+    private void refer(Loanee loanee) throws MeedlException {
+        sendLoaneeEmailUsecase.sendReferLoaneeEmail(loanee);
     }
 
     private void saveLoaneeLoanDetails(Loanee loanee, List<LoanBreakdown> loanBreakdowns) {
