@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import org.springframework.data.domain.*;
 
 import java.util.*;
@@ -13,4 +14,7 @@ public interface ProgramOutputPort {
     void deleteProgram(String programId) throws MeedlException;
     Program findProgramById(String programId) throws MeedlException;
     Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException;
+    OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException;
+
+
 }

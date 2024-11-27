@@ -224,7 +224,7 @@ class LoanServiceTest {
 
     @Test
     void viewAllLoanRequests() {
-        try {
+         try {
             when(loanRequestOutputPort.viewAll(0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
             Page<LoanRequest> loanRequests = loanService.viewAllLoanRequests(loanRequest);
