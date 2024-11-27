@@ -24,17 +24,24 @@ public class SwaggerConfig {
     
     @Bean
     public OpenAPI openAPI() {
-        Server server = new Server();
-        server.setUrl(swaggerEnvPath);
-        Server localServer = new Server();
-        localServer.setUrl("http://localhost:8081");
-
-        return new OpenAPI().servers(List.of(server, localServer)).addSecurityItem(new SecurityRequirement().
+        return new OpenAPI().servers(getServerList()).addSecurityItem(new SecurityRequirement().
                         addList("Bearer Authentication"))
                 .components(new Components().addSecuritySchemes
                         ("Bearer Authentication", createAPIKeyScheme()))
                 .info(new Info().title("Meedl API Documentation")
                         .version("1.0")
                 );
+    }
+    private List<Server> getServerList() {
+        Server server = new Server();
+        server.setUrl(swaggerEnvPath);
+        Server localServer1 = new Server();
+        localServer1.setUrl("http://localhost:8081");
+        Server localServer2 = new Server();
+        localServer2.setUrl("http://localhost:8080");
+        Server devServer = new Server();
+        devServer.setUrl("http://api-dev-meedl.learnspace.africa");
+
+        return List.of(server, localServer1, localServer2, devServer);
     }
 }

@@ -92,52 +92,52 @@ jobs:
         run: |
           aws ecs update-service --cluster ${{ env.CLUSTER }} --service ${{ env.ECS }} --force-new-deployment
 
-  # send_notification:
-  #   name: Send Email Notification
-  #   needs: [build-and-deploy]
-  #   runs-on: ubuntu-latest
-  #   if: always()
+  send_notification:
+    name: Send Email Notification
+    needs: [build-and-deploy]
+    runs-on: ubuntu-latest
+    if: always()
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Send build success email notification
-  #       if: success()
-  #       env:
-  #         SMTP_SERVER: semicolon.africa
-  #         SMTP_PORT: 465
-  #         SMTP_USERNAME: builds@semicolon.africa
-  #         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-  #       run: |
-  #         chmod +x .github/workflows/scripts/send_success_email.sh
-  #         .github/workflows/scripts/send_success_email.sh \
-  #           "$SMTP_SERVER" \
-  #           "$SMTP_PORT" \
-  #           "$SMTP_USERNAME" \
-  #           "$SMTP_PASSWORD" \
-  #           "${{ env.EMAILS }}" \
-  #           "${{ env.TAG }}" \
-  #           "${{ env.BRANCH_NAME }}" \
-  #           "${{ env.COMMIT_AUTHOR }}" \
-  #           "${{ env.COMMIT_MESSAGE }}"
+      - name: Send build success email notification
+        if: success()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          chmod +x .github/workflows/scripts/send_success_email.sh
+          .github/workflows/scripts/send_success_email.sh \
+            "$SMTP_SERVER" \
+            "$SMTP_PORT" \
+            "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" \
+            "${{ env.EMAILS }}" \
+            "${{ env.TAG }}" \
+            "${{ env.BRANCH_NAME }}" \
+            "${{ env.COMMIT_AUTHOR }}" \
+            "${{ env.COMMIT_MESSAGE }}"
 
-  #     - name: Send build failure email notification
-  #       if: failure()
-  #       env:
-  #         SMTP_SERVER: semicolon.africa
-  #         SMTP_PORT: 465
-  #         SMTP_USERNAME: builds@semicolon.africa
-  #         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-  #       run: |
-  #         chmod +x .github/workflows/scripts/send_failure_email.sh
-  #         .github/workflows/scripts/send_failure_email.sh \
-  #           "$SMTP_SERVER" \
-  #           "$SMTP_PORT" \
-  #           "$SMTP_USERNAME" \
-  #           "$SMTP_PASSWORD" \
-  #           "${{ env.EMAILS }}" \
-  #           "${{ env.TAG }}" \
-  #           "${{ env.BRANCH_NAME }}" \
-  #           "${{ env.COMMIT_AUTHOR }}" \
-  #           "${{ env.COMMIT_MESSAGE }}"
+      - name: Send build failure email notification
+        if: failure()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          chmod +x .github/workflows/scripts/send_failure_email.sh
+          .github/workflows/scripts/send_failure_email.sh \
+            "$SMTP_SERVER" \
+            "$SMTP_PORT" \
+            "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" \
+            "${{ env.EMAILS }}" \
+            "${{ env.TAG }}" \
+            "${{ env.BRANCH_NAME }}" \
+            "${{ env.COMMIT_AUTHOR }}" \
+            "${{ env.COMMIT_MESSAGE }}"
