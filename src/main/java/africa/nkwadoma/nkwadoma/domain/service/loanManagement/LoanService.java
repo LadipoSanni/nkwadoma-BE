@@ -128,6 +128,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
+        if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
+            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
+        }
         if (ObjectUtils.isEmpty(foundLoanRequest)){
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
@@ -166,6 +169,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
         loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanee(loanRequest.getLoanee());
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());

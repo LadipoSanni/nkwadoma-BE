@@ -341,6 +341,21 @@ class LoanServiceTest {
     }
 
     @Test
+    void approveLoanRequestThatHasBeenApproved() {
+        loanRequest.setLoanProductId(loanRequest.getLoanProductId());
+        loanRequest.setId(loanRequest.getId());
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        try {
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
+        log.info("{}", meedlException.getMessage());
+    }
+
+    @Test
     void declineLoanRequest() {
         loanRequest.setStatus(LoanRequestStatus.DECLINED);
         loanRequest.setDeclineReason("I just don't want the loan offer");

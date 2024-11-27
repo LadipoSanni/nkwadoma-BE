@@ -10,8 +10,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferMapper {
-
-
     LoanOfferEntitiy toLoanOfferEntity(LoanOffer loanOffer);
 
     LoanOffer toLoanOffer(LoanOfferEntitiy loanOfferEntitiy);
