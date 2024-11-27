@@ -7,9 +7,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,9 @@ class OrganizationIdentityAdapterTest {
     private OrganizationIdentity amazingGrace;
     private String amazingGraceId;
     private  UserIdentity joel;
+    @Autowired
+    private OrganizationEntityRepository organizationEntityRepository;
+
     @BeforeEach
         void setUp(){
         joel = TestData.createTestUserIdentity("joel@johnson.com");
@@ -45,7 +47,28 @@ class OrganizationIdentityAdapterTest {
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
 
         amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC87877", userIdentities);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (StringUtils.isNotEmpty(amazingGraceId)) {
+            try {
+                List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
+                        findOrganizationServiceOfferingsByOrganizationId(amazingGraceId);
+                String serviceOfferingId = null;
+                for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                    serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                    organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+                }
+                if (StringUtils.isNotEmpty(serviceOfferingId)) {
+                    organizationOutputPort.deleteServiceOffering(serviceOfferingId);
+                }
+            } catch (MeedlException e) {
+                log.error("", e);
+            }
+            organizationEntityRepository.deleteById(amazingGraceId);
         }
+    }
 
     @Test
     @Order(1)
@@ -54,8 +77,8 @@ class OrganizationIdentityAdapterTest {
                 assertThrows(MeedlException.class,()-> organizationOutputPort.findById(amazingGrace.getId()));
                 OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
                 log.info("Organization saved id is : {}", savedOrganization.getId());
-                amazingGraceId = savedOrganization.getId();
                 assertNotNull(savedOrganization);
+                amazingGraceId = savedOrganization.getId();
                 log.info("Organization saved successfully {}", savedOrganization);
                 assertEquals(amazingGrace.getName(),savedOrganization.getName());
                 assertNotNull(savedOrganization.getServiceOfferings());
@@ -64,8 +87,7 @@ class OrganizationIdentityAdapterTest {
              }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
-
-       }
+    }
 
     @Test
     void saveOrganizationWithNullOrganizationIdentity(){
@@ -167,7 +189,11 @@ class OrganizationIdentityAdapterTest {
     void searchOrganizationByValidName(){
         List<OrganizationIdentity> organizationIdentities = null;
         try {
-            organizationIdentities = organizationOutputPort.findByName(amazingGrace.getName());
+            OrganizationIdentity savedOrganization =  organizationOutputPort.save(amazingGrace);
+            log.info("Saved Organization ID : {}", savedOrganization.getId());
+            assertNotNull(savedOrganization);
+            amazingGraceId = savedOrganization.getId();
+            organizationIdentities = organizationOutputPort.findByName(savedOrganization.getName());
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }
