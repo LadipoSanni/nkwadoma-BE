@@ -8,11 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -31,8 +29,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +86,16 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
+        Cohort cohortByName;
+        try {
+            cohortByName = cohortOutputPort.findCohortByName("Elite");
+            if (ObjectUtils.isNotEmpty(cohortByName) && StringUtils.isNotEmpty(cohortByName.getId())) {
+                cohortOutputPort.deleteCohort(cohortByName.getId());
+            }
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+
         meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
