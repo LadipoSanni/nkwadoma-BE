@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,11 +87,14 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        List<Cohort> cohortByName;
+        List<Cohort> cohortSearchResults;
         try {
-            cohortByName = cohortOutputPort.findCohortByName("Elite");
-            if (ObjectUtils.isNotEmpty(cohortByName) && StringUtils.isNotEmpty(cohortByName.getId())) {
-                cohortOutputPort.deleteCohort(cohortByName.getId());
+            cohortSearchResults = cohortOutputPort.findCohortByName("Elite");
+            if (cohortSearchResults != null && !cohortSearchResults.isEmpty()) {
+                if (ObjectUtils.isNotEmpty(cohortSearchResults.get(0)) && StringUtils.isNotEmpty(cohortSearchResults.get(0).getId())) {
+                    cohortOutputPort.deleteCohort(cohortSearchResults.get(0).getId());
+                }
+
             }
         } catch (MeedlException e) {
             log.error("", e);
