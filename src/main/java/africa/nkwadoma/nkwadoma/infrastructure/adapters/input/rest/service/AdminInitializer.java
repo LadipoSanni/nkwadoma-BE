@@ -46,7 +46,6 @@ public class AdminInitializer {
                 .createdBy(CREATED_BY)
                 .build();
     }
-
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = saveUserToKeycloak(userIdentity);

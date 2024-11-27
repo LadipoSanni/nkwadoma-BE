@@ -34,7 +34,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
 
 
-
 @RequestMapping(BASE_URL + LOAN)
 @RequiredArgsConstructor
 @RestController
@@ -66,6 +65,7 @@ public class LoanController {
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @PostMapping("/loan-product/update")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
         log.info("Update loan product called with id .... {}", request.getId());
@@ -104,6 +104,7 @@ public class LoanController {
 
 
     @GetMapping("/loan-product/view-details-by-id")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
                                                                           @NotBlank(message = "Provide a valid loan product identifier")
@@ -158,4 +159,24 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PostMapping("start")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
+                                                                String loaneeId,
+                                                    @RequestParam @NotBlank(message = "LoanOffer ID is required")
+                                                                String loanOfferId) throws MeedlException {
+        log.info("Start loan called.... loan offer id : {}", loanOfferId);
+        Loan loan = new Loan();
+        loan.setLoaneeId(loaneeId);
+        loan.setLoanOfferId(loanOfferId);
+        loan = createLoanProductUseCase.startLoan(loan);
+        StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
+        ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
+               .data(startLoanResponse)
+               .message(SuccessMessages.LOAN_START_SUCCESS)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -29,6 +30,7 @@ import java.util.*;
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
         RespondToLoanReferralUseCase, LoanRequestUseCase , LoanOfferUseCase{
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
@@ -37,6 +39,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanRequestOutputPort loanRequestOutputPort;
     private final LoanOfferMapper loanOfferMapper;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOutputPort loanOutputPort;
 
 
     @Override
@@ -72,6 +75,27 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product updated {}",  foundLoanProduct);
 
         return loanProductOutputPort.save(foundLoanProduct);
+    }
+
+    @Override
+    public Loan startLoan(Loan loan) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loan);
+        MeedlValidator.validateUUID(loan.getLoaneeId());
+        Loanee foundLoanee = loaneeOutputPort.findByUserId(loan.getLoaneeId())
+                            .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
+        loan.setLoanee(foundLoanee);
+        loan.setLoanAccountId(getLoanAccountId(foundLoanee));
+        loan.setStartDate(LocalDateTime.now());
+        if (loan.getStartDate().isAfter(LocalDateTime.now())) {
+            throw new MeedlException("Start date cannot be in the future.");
+        }
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+        loan = loanOutputPort.save(loan);
+        return loan;
+    }
+
+    private String getLoanAccountId(Loanee foundLoanee) {
+        return null;
     }
 
     @Override
