@@ -86,6 +86,16 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
+        Cohort cohortByName;
+        try {
+            cohortByName = cohortOutputPort.findCohortByName("Elite");
+            if (ObjectUtils.isNotEmpty(cohortByName) && StringUtils.isNotEmpty(cohortByName.getId())) {
+                cohortOutputPort.deleteCohort(cohortByName.getId());
+            }
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+
         meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
