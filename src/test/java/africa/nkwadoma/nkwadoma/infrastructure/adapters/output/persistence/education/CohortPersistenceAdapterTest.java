@@ -8,11 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -31,7 +29,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +128,7 @@ class CohortPersistenceAdapterTest {
         elites = new Cohort();
         elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setProgramId(program.getId());
-        elites.setName("Elite");
+        elites.setName("X-men");
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
@@ -150,7 +147,7 @@ class CohortPersistenceAdapterTest {
         mavin = new Cohort();
         mavin.setStartDate(LocalDate.of(2024,10,18));
         mavin.setProgramId(programId2);
-        mavin.setName("Mavin");
+        mavin.setName("X-wonders");
         mavin.setCreatedBy(meedleUserId);
         mavin.setLoanBreakdowns(loanBreakdowns);
         mavin.setTuitionAmount(BigDecimal.valueOf(20000));
@@ -315,16 +312,15 @@ class CohortPersistenceAdapterTest {
 
     @Order(7)
     @Test
-    void searchForCohort(){
-        Cohort searchedCohort = new Cohort();
+    void searchForCohortInProgram(){
+        List<Cohort> cohorts  = new ArrayList<>();
         try{
-            searchedCohort =
-                    cohortOutputPort.findCohortByName(elites.getName());
+            cohorts  =
+                    cohortOutputPort.searchForCohortInAProgram("X",programId);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-       assertEquals(searchedCohort.getName(),elites.getName());
-       assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
+       assertEquals(2,cohorts.size());
     }
 
     @ParameterizedTest
@@ -333,12 +329,6 @@ class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.deleteCohort(cohortId));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings= {"wrong cohort 1", "wrong cohort 2"})
-    void searchForCohortWithWrongCohortName(String cohortName){
-        assertThrows(MeedlException.class, ()->
-                     cohortOutputPort.searchForCohortInAProgram(cohortName,elites.getProgramId()));
-    }
 
     @Order(8)
     @Test
@@ -379,7 +369,25 @@ class CohortPersistenceAdapterTest {
     assertEquals(3,cohorts.getSize());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    void searchForCohortWithEmptyName(String emptyName){
+        assertThrows(MeedlException.class,()-> cohortOutputPort.findCohortByName(emptyName));
+    }
+
     @Order(10)
+    @Test
+    void searchForCohortInOrganization(){
+        List<Cohort> cohorts  = new ArrayList<>();
+        try{
+            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x");
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(3,cohorts.size());
+    }
+
+    @Order(11)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
