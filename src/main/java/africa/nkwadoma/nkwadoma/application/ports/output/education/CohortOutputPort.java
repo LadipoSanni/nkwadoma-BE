@@ -5,8 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import org.springframework.data.domain.Page;
 
-import java.util.*;
-
 public interface CohortOutputPort {
 
     Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException;
