@@ -6,8 +6,11 @@ on:
       - dev
       - main
       - prod-support
-
-
+  pull_request:
+    branches
+      - dev
+      - main
+      - prod-support
 env:
   ECR_REPO: learnspace-backend-systest
   CLUSTER: nkwadoma
