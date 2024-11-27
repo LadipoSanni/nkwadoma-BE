@@ -10,79 +10,120 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700&display=swap">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <meta name="x-apple-disable-message-reformatting">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #3163ad;
-            font-family: 'IBM Plex Sans', sans-serif;
-        }
-        #emailContainer {
-            width: 460px;
-            height: 642px;
-            margin: 55px auto 0 auto;
-            padding: 24px 0 0 0;
-            border-radius: 6px 0 0 0;
-            background-color:#FAFBFC;
-            position: relative;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .logo {
-            margin: 2px ;
-            left: 20px;
-            width: 115px;
-            height: 31px;
-        }
-        .content {
-            padding: 20px 40px;
-            color: #344054;
-        }
-        .button {
-            border-radius: 4px;
-            border: 1px solid #142854;
-            background: #142854;
-            color: #FFF;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            text-align: center;
-            display: inline-block;
-            text-decoration: none;
-        }
-        .footer {
-            padding: 20px 40px;
-            color: #475467;
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
-        }
-        .social-link {
-            text-decoration: underline;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 21px;
-            color: #142854;
-        }
-    </style>
 </head>
+<style>
+    body {
+        padding: 10px;
+        background-color: #3163ad;
+        font-family: 'IBM Plex Sans', sans-serif;
+        height: 594px;
+    }
+    #responsiveDiv {
+        margin-top: 40px;
+        height: 28px;
+        flex-shrink: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0;
+    }
+    @media (min-width: 769px) {
+        #responsiveDiv {
+            width: 100%;
+        }
+    }
+    .question-section {
+        border-top: 2px solid #6a6b6a;
+        padding-top: 16px;
+    }
+    .bold-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 21px;
+    }
+    .social-link {
+        text-decoration: underline;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 21px;
+        color: #142854;
+    }
+    .template {
+        background-color: #FFFFFF;
+        border: 20px solid #f7f7fc;
+    }
+
+</style>
 <body>
-<div id="emailContainer">
-    <img src="https://res.cloudinary.com/dfkxvsiiu/image/upload/v1732709444/Meedle_Logo_Primary_Main_f5tmbe.svg"
-         alt="Meedl Logo" class="logo" />
-    <div class="content">
-        <p>Hi <span th:text="${firstName}"></span>,</p>
-        <p>Welcome to Meedl! This is where you will access all things related to your loan with <span th:text="${organizationName}"></span>.</p>
-        <p>To complete your onboarding process, you need to first accept the invite by clicking on the button below:</p>
-        <a th:href="@{${token}}" target="_blank" class="button">Accept Invite</a>
-        <p>Meedl ensures your information stays safe while providing a seamless experience.</p>
-        <p>Thank you,</p>
-        <p>The Meedl Team</p>
-    </div>
-    <div class="footer">
-        <a href="https://x.com/trymeedl?s=21" target="_blank" class="social-link">X</a>
-        <a href="https://www.instagram.com/trymeedl/profilecard/?igsh=MWNxZ2hpcDM2ejJ2NA==" target="_blank" class="social-link">Instagram</a>
-    </div>
-</div>
+<div id="responsiveDiv"></div>
+<table  class="template" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse; margin: auto">
+    <tr>
+        <td style="padding: 20px;" >
+            <img alt="socialIcons"
+                 src=https://res.cloudinary.com/dfkxvsiiu/image/upload/v1732709444/Meedle_Logo_Primary_Main_f5tmbe.svg
+                 style="position:relative; margin-top:8.84px; width: 115px ; height: 31px ; left: 18px "/>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;background-color: #fff" width="100%">
+                <tr>
+                    <td style="padding: 20px 20px 20px 40px; max-width: 550px; color: #344054 ;gap: 28px">
+                        <p style="padding-bottom: 24px; margin: 0; font-size: 16px; line-height: 24px">
+                            Hi <span th:text="${firstName}"></span>,
+                        </p>
+                        <p>Welcome to Meedl! This is where you will access all</p>
+                        <p>things related to your loan with <span class="bold-text" th:text="${organizationName}"></span>.</p>
+
+                        <p>To complete your onboarding process, you need to first</p>
+                        <p>accept the invite by clicking on the button below </p>
+
+                        <div style="text-align: left; margin-top: 16px;">
+                            <a th:href="@{${token}}" style="text-decoration: none; color: white;" target="_blank">
+                                <p style="
+                  border-radius: 4px;
+                  border: 1px solid #142854;
+                  background: #142854;
+                  color: #FFF;
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  font-style: normal;
+                  cursor: pointer;
+                  font-weight: 500;
+                  text-align: center;
+                  display: inline-block;">
+                                    Accept Invite
+                                </p>
+                            </a>
+                        </div>
+
+                        <p>Meedl ensures your information stays safe while</p>
+                        <p>providing a seamless experience.</p>
+
+                        <p>Thank you,</p>
+                        <p>The Meedl Team</p>
+
+
+                        <div class="question-section">
+                            <p style=" color: #6a6b6a">If you have any questions, please don’t hesitate </p>
+                            <p style=" color: #6a6b6a"> contact us at <a href="mailto:help@meedl.africa" style="text-decoration: none; color: #6a6b6a ; font-size: 17px">help@meedl.africa</a>.</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="justify" style="padding: 0 20px 0 40px; color: #475467; display: flex; flex-direction: row; gap: 10px;">
+                        <a href="https://x.com/trymeedl?s=21" target="_blank" class="social-link">
+                            X
+                        </a>
+                        <a href="https://www.instagram.com/trymeedl/profilecard/?igsh=MWNxZ2hpcDM2ejJ2NA==" target="_blank" class="social-link">
+                            Instagram
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
