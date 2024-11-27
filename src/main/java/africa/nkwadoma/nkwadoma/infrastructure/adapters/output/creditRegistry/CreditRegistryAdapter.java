@@ -16,10 +16,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.enums.CreditRegistryConstant.*;
@@ -72,28 +69,28 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         }
         if (creditRegistryFindDetailResponse.getSearchResult() == null
                 || creditRegistryFindDetailResponse.getSearchResult().isEmpty()){
-            log.info("No customer found with BVN {} in credit registry", bvn);
+            log.info("No customer found with BVN {} in credit registry because the response list is null or empty", bvn);
             return 0;
         }
-        String registryId = creditRegistryFindDetailResponse.getSearchResult().stream()
-                                    .filter(customerDetail -> bvn.equals(customerDetail.getBvn()))
+        List<String> registryIds = creditRegistryFindDetailResponse.getSearchResult().stream()
+//                                    .filter(customerDetail -> bvn.equals(customerDetail.getBvn()))
                                     .map(CustomerDetail::getRegistryID)
-                                    .findFirst().orElse("0");
-        if (registryId.equals("0")){
+                                    .toList();
+//                                    .findFirst().orElse("0");
+        if (registryIds.isEmpty()){
             return 0;
         }
-        return getCreditScoreWithRegistryId(registryId, sessionCode);
+        return getCreditScoreWithRegistryId(registryIds, sessionCode);
     }
     @Override
-    public int getCreditScoreWithRegistryId(String registryId, String sessionCode) throws MeedlException {
+    public int getCreditScoreWithRegistryId(List<String> registryIds, String sessionCode) throws MeedlException {
         validateSessionCode(sessionCode);
-        validateRegistryId(registryId);
 
         CreditScoreRequest requestBody = new CreditScoreRequest();
         requestBody.setSessionCode(sessionCode);
-        requestBody.setCustomerRegistryIDList(Collections.singletonList(registryId));
+        requestBody.setCustomerRegistryIDList(registryIds);
         requestBody.setEnquiryReason("KYCCheck");
-        log.info("Request body: {}", requestBody);
+        log.info("Request body for get credit score: {}", requestBody);
 
         HttpEntity<CreditScoreRequest> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<CreditScoreResponse> responseEntity = ResponseEntity.ofNullable(new CreditScoreResponse());
@@ -103,11 +100,30 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
                     HttpMethod.POST,
                     entity,
                     CreditScoreResponse.class);
+            log.info("Response from credit registry API entity {}",responseEntity);
             log.info("Response from credit registry API {}", Objects.requireNonNull(responseEntity.getBody()));
         } catch (HttpServerErrorException | ResourceAccessException ex) {
             log.error("Credit registry server error {}", ex.getMessage());
         }
-        return Objects.requireNonNull(responseEntity.getBody()).getSmartScores().get(0).getGenericScore();
+//        return Objects.requireNonNull(responseEntity.getBody()).getSmartScores().get(0).getGenericScore();
+        return getCreditScore(Objects.requireNonNull(responseEntity.getBody()).getSmartScores());
+    }
+
+    private int getCreditScore(List<CreditScoreResponse.SMARTScore> smartScores) {
+        log.info("credit score retrieval {}", Objects.requireNonNull(smartScores));
+        long distinctScoreCount = smartScores.stream()
+                .map(CreditScoreResponse.SMARTScore::getGenericScore)
+                .peek(value -> log.info("{}", value))
+                .distinct()
+                .count();
+        if (distinctScoreCount == 1){
+            return smartScores.get(0).getGenericScore();
+        }else {
+            return (int) smartScores.stream()
+                    .mapToInt(CreditScoreResponse.SMARTScore::getGenericScore)
+                    .average()
+                    .orElse(0);
+        }
     }
 
     @Override
@@ -128,11 +144,11 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
 
         try {
             responseEntity = restTemplate.exchange(
-                    url + "/FindDetail",
+                    url + "/FindSummary",
                     HttpMethod.POST,
                     entity,
                     CreditRegistryFindDetailResponse.class);
-            log.info("Response from credit registry API {}", Objects.requireNonNull(responseEntity.getBody()));
+            log.info("Response from credit registry API find summary : {}", Objects.requireNonNull(responseEntity.getBody()));
         } catch (HttpServerErrorException | ResourceAccessException ex) {
             log.error("Credit registry server error {}", ex.getMessage());
         }
