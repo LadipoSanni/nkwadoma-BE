@@ -1,12 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
@@ -19,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
