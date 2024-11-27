@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 public class PremblyNinResponse extends PremblyResponse{

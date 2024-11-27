@@ -82,14 +82,15 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(identityVerification);
         String url = premblyUrl.concat(PremblyParameter.NIN_FACE_URL.getValue());
         log.info(url);
+        log.info("entity: {}", entity);
         ResponseEntity<PremblyNinResponse> responseEntity = ResponseEntity.ofNullable(PremblyNinResponse.builder().build());
-        log.info("Response {}",responseEntity.getBody());
         try {
             responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyNinResponse.class);
         } catch (HttpServerErrorException ex) {
             log.info("Prembly server error {}", ex.getMessage());
             log.error("Prembly Server error {}", ex.getMessage());
         }
+        log.info("Response {}",responseEntity.getBody());
         return responseEntity.getBody();
     }
 

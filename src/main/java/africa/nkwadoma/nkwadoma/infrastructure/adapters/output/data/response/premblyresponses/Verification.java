@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pr
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

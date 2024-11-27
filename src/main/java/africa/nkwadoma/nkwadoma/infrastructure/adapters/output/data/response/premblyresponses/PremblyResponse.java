@@ -2,8 +2,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pr
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@ToString
 public abstract class PremblyResponse {
     @JsonProperty("status")
     private boolean verificationCallSuccessful;
