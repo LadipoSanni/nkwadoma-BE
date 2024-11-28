@@ -1,10 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,4 +26,8 @@ public class LoaneeEntity {
     private UserEntity userIdentity;
     @OneToOne
     private LoaneeLoanDetailEntity loaneeLoanDetail;
+    @Enumerated(EnumType.STRING)
+    private LoaneeStatus loaneeStatus;
+    private LocalDateTime referralDateTime;
+    private String referredBy;
 }

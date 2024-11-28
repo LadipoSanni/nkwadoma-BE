@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -19,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
 
@@ -44,10 +47,11 @@ public class CohortService implements CohortUseCase {
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoaneeUseCase loaneeUseCase;
 
 
     @Override
-    public Cohort createCohort(Cohort cohort)  throws MeedlException {
+    public Cohort createCohort(Cohort cohort) throws MeedlException {
         String cohortName = cohort.getName();
         MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
@@ -60,7 +64,7 @@ public class CohortService implements CohortUseCase {
         Cohort savedCohort = cohortOutputPort.save(cohort);
         List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort.getLoanBreakdowns(), savedCohort);
         linkCohortToProgram(program, programCohort, savedCohort);
-        BigDecimal totalFee = calculateTotalLoanBreakdownAmount(savedLoanBreakdowns,cohort.getTuitionAmount());
+        BigDecimal totalFee = calculateTotalLoanBreakdownAmount(savedLoanBreakdowns, cohort.getTuitionAmount());
         savedCohort.setTotalCohortFee(totalFee);
         savedCohort.setOrganizationId(program.getOrganizationId());
         savedCohort = cohortOutputPort.save(savedCohort);
@@ -85,7 +89,7 @@ public class CohortService implements CohortUseCase {
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
                 .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohortName))
                 .findFirst();
-        if (existingProgramCohort.isPresent()){
+        if (existingProgramCohort.isPresent()) {
             throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
         }
         return program;
@@ -97,10 +101,10 @@ public class CohortService implements CohortUseCase {
         Cohort foundCohort = cohortOutputPort.findCohort(cohort.getId());
         Program program = programOutputPort.findProgramById(foundCohort.getProgramId());
         checkIfCohortNameExist(cohort, foundCohort);
-        if (! ObjectUtils.isEmpty(foundCohort.getLoanDetail())) {
+        if (!ObjectUtils.isEmpty(foundCohort.getLoanDetail())) {
             throw new CohortException(CohortMessages.COHORT_WITH_LOAN_DETAILS_CANNOT_BE_EDITED.getMessage());
         }
-        cohortMapper.updateCohort(foundCohort,cohort);
+        cohortMapper.updateCohort(foundCohort, cohort);
         foundCohort.setUpdatedAt(LocalDateTime.now());
         foundCohort.setExpectedEndDate(foundCohort.getStartDate().plusMonths(program.getDuration()));
         activateStatus(foundCohort);
@@ -142,6 +146,7 @@ public class CohortService implements CohortUseCase {
             cohort.setCohortStatus(CohortStatus.GRADUATED);
         }
     }
+
     private BigDecimal calculateTotalLoanBreakdownAmount(List<LoanBreakdown> loanBreakdowns, BigDecimal tutionFee) {
         return loanBreakdowns.stream()
                 .map(LoanBreakdown::getItemAmount)
@@ -150,11 +155,11 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
-        return cohortOutputPort.viewCohortDetails(userId,programId,cohortId);
+        return cohortOutputPort.viewCohortDetails(userId, programId, cohortId);
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInAProgram(String programId,int pageSize, int pageNumber) throws MeedlException {
+    public Page<Cohort> viewAllCohortInAProgram(String programId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
@@ -162,7 +167,7 @@ public class CohortService implements CohortUseCase {
         if (ObjectUtils.isEmpty(foundProgram)) {
             throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
         }
-        return cohortOutputPort.findAllCohortInAProgram(programId,pageSize,pageNumber);
+        return cohortOutputPort.findAllCohortInAProgram(programId, pageSize, pageNumber);
     }
 
     @Override
@@ -177,6 +182,7 @@ public class CohortService implements CohortUseCase {
         MeedlValidator.validateDataElement(cohortName);
         return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
     }
+
 
     @Override
     public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
@@ -199,11 +205,20 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
-        Cohort foundCohort = viewCohortDetails(userId,programId,cohortId);
+        Cohort foundCohort = viewCohortDetails(userId, programId, cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort.getId());
-        cohortLoanees
-                .forEach(this::inviteTrainee);
+        for (Loanee loanee : cohortLoanees) {
+            try {
+                inviteTrainee(loanee);
+            } catch (MeedlException e) {
+                log.error("Failed to invite trainee: {}", loanee.getId(), e);
+            }
 
+        }
     }
-    private void inviteTrainee(Loanee loanee){}
+
+        private void inviteTrainee (Loanee loanee) throws MeedlException {
+            loaneeUseCase.referLoanee(loanee.getId());
+        }
+
 }

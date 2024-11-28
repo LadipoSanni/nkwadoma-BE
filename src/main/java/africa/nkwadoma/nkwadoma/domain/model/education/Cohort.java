@@ -40,6 +40,8 @@ public class Cohort {
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
+    private Integer numberOfReferredLoanee = 0;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);

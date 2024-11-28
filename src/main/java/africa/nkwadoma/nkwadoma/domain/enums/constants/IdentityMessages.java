@@ -22,6 +22,7 @@ public enum IdentityMessages{
     ENCODING_VALUE("utf-8"),
     CONTEXT_TOKEN("token"),
     CONTEXT_FIRST_NAME("firstName"),
+    CONTEXT_ORGANIZATION_NAME("organizationName"),
     CONTEXT_CURRENT_YEAR("currentYear"),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),
     PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%-=()*?&]{8,16}$"),
