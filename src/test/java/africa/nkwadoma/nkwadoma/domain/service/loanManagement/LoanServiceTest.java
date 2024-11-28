@@ -120,7 +120,7 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
-            when(loanRequestService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
+            when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
