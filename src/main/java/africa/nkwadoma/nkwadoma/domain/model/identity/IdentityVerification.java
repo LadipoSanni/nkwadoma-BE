@@ -30,7 +30,7 @@ public class IdentityVerification {
     private String country;
     private String IDType;
     private String IDNumber;
-    private String  fullName;
+    private String fullName;
     private String DOB;
     private String photo;
     private String phoneNumber;
