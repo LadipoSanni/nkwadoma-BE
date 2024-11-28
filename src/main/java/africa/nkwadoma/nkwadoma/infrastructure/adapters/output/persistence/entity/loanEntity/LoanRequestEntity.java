@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +21,9 @@ public class LoanRequestEntity {
     private String referredBy;
     private String cohortId;
     private BigDecimal loanAmountRequested;
+    private BigDecimal loanAmountApproved;
+    private LoanDecision loanRequestDecision;
+    private String declineReason;
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;
     private String reasonForDecliningLoanRequest;
