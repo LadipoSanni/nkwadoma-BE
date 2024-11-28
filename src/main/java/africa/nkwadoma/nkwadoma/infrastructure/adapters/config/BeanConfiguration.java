@@ -21,8 +21,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.QoreIdAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.QoreIdAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.KeyCloakMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.SmileIdAdapter;
@@ -49,6 +49,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import org.keycloak.admin.client.Keycloak;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,10 +57,12 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.*;
+import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.TemplateEngine;
 
 @Configuration
 public class BeanConfiguration {
+    private RestTemplate restTemplate;
     @Bean
     public OrganizationIdentityService organizationIdentityService(
             OrganizationIdentityOutputPort organizationIdentityOutputPort,
@@ -94,11 +97,17 @@ public class BeanConfiguration {
     public KeycloakAdapter keycloakAdapter(Keycloak keycloak, KeyCloakMapper mapper){
         return new KeycloakAdapter(keycloak,mapper);
     }
-
+    @Bean
+    public RestTemplate restTemplate(){
+        if (restTemplate == null) {
+            restTemplate = new RestTemplate();
+        }
+        return restTemplate;
+    }
     @Bean
     @Qualifier("premblyAdapter")
     public PremblyAdapter premblyAdapter(){
-        return new PremblyAdapter();
+        return new PremblyAdapter(restTemplate());
     }
     @Bean
     @Qualifier("smileIdAdapter")

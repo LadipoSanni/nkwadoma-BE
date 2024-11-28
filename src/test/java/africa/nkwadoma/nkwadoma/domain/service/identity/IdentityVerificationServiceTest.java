@@ -27,12 +27,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_PREVIOUSLY_VERIFIED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFICATION_FAILURE_SAVED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFIED;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -99,7 +97,7 @@ class IdentityVerificationServiceTest {
             when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             assertEquals(IDENTITY_VERIFIED.getMessage(), identityVerificationService.isIdentityVerified(generatedToken));
-        } catch (MeedlException | IdentityVerificationException e) {
+        } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
     }
@@ -112,7 +110,7 @@ class IdentityVerificationServiceTest {
             when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
             String response = identityVerificationService.isIdentityVerified(generatedToken);
             assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
-        } catch (MeedlException | IdentityVerificationException e) {
+        } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
     }
@@ -147,7 +145,7 @@ class IdentityVerificationServiceTest {
             String response = identityVerificationService.isIdentityVerified(identityVerification);
             assertNotNull(response);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
-        } catch (MeedlException|IdentityVerificationException e) {
+        } catch (MeedlException e) {
             log.error("Verification failed : {}", e.getMessage());
         }
     }
