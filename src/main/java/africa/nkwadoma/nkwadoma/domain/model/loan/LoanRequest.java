@@ -17,17 +17,22 @@ import java.time.*;
 @AllArgsConstructor
 public class LoanRequest {
     private String id;
+    private String loanProductId;
     private String referredBy;
     private String firstName;
     private String lastName;
+    private LoanDecision loanRequestDecision;
+    private String declineReason;
     private String cohortId;
     private String loanReferralId;
     private BigDecimal loanAmountRequested;
+    private BigDecimal loanAmountApproved;
     private LoanReferralStatus loanReferralStatus;
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
     private String reasonForDecliningLoanRequest;
+    private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;
     private LoaneeLoanDetail loaneeLoanDetail;
@@ -42,6 +47,13 @@ public class LoanRequest {
     private int pageNumber;
     private int pageSize;
 
+
+    public static void validate(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validateUUID(loanRequest.getId());
+        MeedlValidator.validateUUID(loanRequest.getLoanProductId());
+        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+    }
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);

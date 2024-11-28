@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -22,6 +23,10 @@ public class Loanee {
     private LocalDateTime updatedAt;
     private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
+    private LoaneeStatus loaneeStatus;
+    private LocalDateTime referralDateTime;
+    private String referredBy;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);

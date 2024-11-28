@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -56,7 +57,7 @@ class ProgramPersistenceAdapterTest {
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ja7";
+    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6788";
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
@@ -68,7 +69,7 @@ class ProgramPersistenceAdapterTest {
     @BeforeEach
     void setUp() {
         dataAnalytics = new Program();
-        dataAnalytics.setName("Data analytics");
+        dataAnalytics.setName("Data analysis");
         dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
         dataAnalytics.setMode(ProgramMode.FULL_TIME);
         dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
@@ -77,7 +78,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setDurationType(DurationType.MONTHS);
 
         dataScience = new Program();
-        dataScience.setName("Data science");
+        dataScience.setName("Data sciences");
         dataScience.setProgramDescription("The art of putting thought into solving problems");
         dataScience.setMode(ProgramMode.FULL_TIME);
         dataScience.setProgramStatus(ActivationStatus.ACTIVE);
@@ -87,7 +88,7 @@ class ProgramPersistenceAdapterTest {
 
         elites = new Cohort();
         elites.setStartDate(LocalDate.of(2024,10,18));
-        elites.setName("Elite");
+        elites.setName("Elites");
         elites.setCreatedBy(userIdentity.getCreatedBy());
     }
 
@@ -96,7 +97,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel34@johnson.com");
+        userIdentity.setEmail("joel094@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
@@ -106,13 +107,13 @@ class ProgramPersistenceAdapterTest {
         userIdentity.setRole(PORTFOLIO_MANAGER);
         try {
             organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setName("Brown Hills Institute");
-            organizationIdentity.setEmail("rachel23@gmail.com");
+            organizationIdentity.setName("Brown Hill institute");
+            organizationIdentity.setEmail("rachel423@gmail.com");
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC345687");
+            organizationIdentity.setRcNumber("RC3499987");
             organizationIdentity.setId(testId);
             organizationIdentity.setPhoneNumber("0907658483");
-            organizationIdentity.setTin("Tin5678");
+            organizationIdentity.setTin("Tin8675678");
             organizationIdentity.setNumberOfPrograms(0);
             organizationIdentity.setCreatedBy(testId);
             ServiceOffering serviceOffering = new ServiceOffering();
@@ -149,7 +150,6 @@ class ProgramPersistenceAdapterTest {
             log.error("Error creating organization", e);
         }
     }
-
     @AfterEach
     void cleanUp() {
         if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
@@ -257,6 +257,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setName(null);
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((dataAnalytics)));
     }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
     void createProgramWithInvalidName(String programName){
@@ -301,8 +302,8 @@ class ProgramPersistenceAdapterTest {
 
             assertNotNull(foundProgram);
             assertEquals(2, foundProgram.size());
-            assertEquals("Data Science", foundProgram.get(0).getName());
-            assertEquals("Data Analytics", foundProgram.get(1).getName());
+            assertEquals("Data sciences", foundProgram.get(0).getName());
+            assertEquals("Data analysis", foundProgram.get(1).getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }
@@ -320,11 +321,11 @@ class ProgramPersistenceAdapterTest {
             Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
             dataAnalyticsProgramId = dataAnalyticsProgram.getId();
 
-            List<Program> foundProgram = programOutputPort.findProgramByName("ytic");
+            List<Program> foundProgram = programOutputPort.findProgramByName("ysis");
 
             assertNotNull(foundProgram);
             assertEquals(1, foundProgram.size());
-            assertEquals("Data Analytics", foundProgram.get(0).getName());
+            assertEquals("Data analysis", foundProgram.get(0).getName());
         } catch (MeedlException e) {
             log.error("Error finding program by name", e);
         }

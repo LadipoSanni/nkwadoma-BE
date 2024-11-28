@@ -52,9 +52,8 @@ public class ProgramController {
     @GetMapping("/programs/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
-                                                          ) throws MeedlException {
+                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         Program program = new Program();
         program.setPageSize(pageSize);
         program.setPageNumber(pageNumber);
@@ -62,11 +61,12 @@ public class ProgramController {
         program.setCreatedBy(meedlUser.getClaimAsString("sub"));
 
         Page<Program> programs = addProgramUseCase.viewAllPrograms(program);
+        log.info("Programs returned from db: {}", programs);
         List<ProgramResponse> programResponses = programs.stream().map(programRestMapper::toProgramResponse).toList();
+        log.info("Programs mapped: {}", programResponses);
         PaginatedResponse<ProgramResponse> response = new PaginatedResponse<>(
                 programResponses, programs.hasNext(),
-                programs.getTotalPages(), program.getPageSize(),
-                program.getPageNumber()
+                programs.getTotalPages(), pageNumber, pageSize
         );
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
@@ -78,7 +78,8 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
-    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name)
+    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name")
+                                                                  @NotBlank(message = "Program name is required") String name)
             throws MeedlException {
         Program program = new Program();
         program.setName(name.trim());

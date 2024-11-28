@@ -22,7 +22,8 @@ import java.util.List;
 public class Cohort {
     private String id;
     private String programId;
-    @Size( max = 2500, message = "cohort description must not go beyond 2500" )
+    private String organizationId;
+    @Size( max = 2500, message = "cohort description must no go beyond 2500" )
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;
@@ -39,6 +40,8 @@ public class Cohort {
     private List<LoanBreakdown> loanBreakdowns = new ArrayList<>();
     private LoanDetail loanDetail;
     private Integer numberOfLoanees = 0;
+    private Integer numberOfReferredLoanee = 0;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId);

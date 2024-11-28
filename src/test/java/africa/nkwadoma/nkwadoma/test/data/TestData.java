@@ -1,15 +1,18 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.Industry;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,15 +20,18 @@ public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
 
     public static UserIdentity createTestUserIdentity(String email){
-        UserIdentity userIdentity = new UserIdentity();
-        userIdentity.setFirstName("Peter");
-        userIdentity.setLastName("Mark");
-        userIdentity.setEmail(email);
-        userIdentity.setPhoneNumber("090876536217");
-        userIdentity.setId(testId);
-        userIdentity.setCreatedBy(testId);
-        userIdentity.setRole(IdentityRole.LOANEE);
-        return userIdentity;
+        return UserIdentity.builder()
+                .id(testId)
+                .firstName("John")
+                .lastName("Doe")
+                .email(email)
+                .phoneNumber("090876536217")
+                .createdBy(testId)
+                .role(IdentityRole.LOANEE)
+                .alternateEmail("alt276@example.com")
+                .alternatePhoneNumber("0986564534")
+                .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
+                .build();
     }
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
@@ -36,6 +42,7 @@ public class TestData {
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setWebsiteAddress("testdata.org");
@@ -46,5 +53,94 @@ public class TestData {
         return organizationIdentity;
     }
 
+    public static Loanee createTestLoanee(UserIdentity userIdentity, LoaneeLoanDetail loaneeLoanDetail){
+        return Loanee.builder()
+                .id(testId)
+                .userIdentity(userIdentity)
+                .cohortId(testId)
+                .createdBy(userIdentity.getCreatedBy())
+                .loaneeLoanDetail(loaneeLoanDetail)
+                .build();
+    }
+    public static Loan createTestLoan(Loanee loanee){
+        return Loan.builder()
+                .loaneeId(testId)
+                .loanOfferId(testId)
+                .loanee(loanee)
+                .startDate(LocalDateTime.now())
+                .loanAccountId("account id")
+                .build();
+    }
+    public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
+        return LoaneeLoanDetail.builder()
+                .amountRequested(BigDecimal.valueOf(9000000.00))
+                .initialDeposit(BigDecimal.valueOf(3000000.00))
+                .build();
+    }
+    public static OrganizationEmployeeIdentity createOrganizationEmployeeIdentityTestData(UserIdentity identity){
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+        organizationEmployeeIdentity.setOrganization(testId);
+        organizationEmployeeIdentity.setMeedlUser(identity);
+        return organizationEmployeeIdentity;
+    }
 
+    public static Program createProgramTestData(String programName){
+         return Program.builder().name(programName).
+                programStatus(ActivationStatus.ACTIVE).programDescription("Program description").
+                mode(ProgramMode.FULL_TIME).duration(2).durationType(DurationType.YEARS).
+                deliveryType(DeliveryType.ONSITE).
+                createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
+    }
+
+    public static LoanDetail createLoanDetail(){
+      return LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
+                .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
+                .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
+                .totalOutstanding(BigDecimal.valueOf(450)).build();
+    }
+
+    public static LoanBreakdown createLoanBreakDown(){
+        return LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
+                .itemName("Loan Break").build();
+    }
+
+    public static LoanProduct buildLoanProduct(String name) {
+        Vendor vendor = new Vendor();
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanProduct.setName(name);
+        loanProduct.setMandate("Test: A new mandate for test");
+        loanProduct.setSponsors(List.of("Mark", "Jack"));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
+        loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
+        loanProduct.setLoanProductSize(new BigDecimal("1000000"));
+        loanProduct.setPageSize(10);
+        loanProduct.setPageNumber(0);
+        loanProduct.setVendors(List.of(vendor));
+        return loanProduct;
+    }
+
+    public static LoanOffer buildLoanOffer(LoanRequest loanRequest, Loanee loanee) {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setLoanee(loanee);
+        return loanOffer;
+    }
+
+    public static LoanRequest buildLoanRequest(Loanee loanee, LoaneeLoanDetail loaneeLoanDetail) {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
+        loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
+        loanRequest.setLoanAmountRequested(BigDecimal.valueOf(900000));
+        loanRequest.setStatus(LoanRequestStatus.NEW);
+        loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanRequest.setReferredBy("Brown Hills Institute");
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        loanRequest.setLoanee(loanee);
+        loanRequest.setDateTimeApproved(LocalDateTime.now());
+        return loanRequest;
+    }
 }

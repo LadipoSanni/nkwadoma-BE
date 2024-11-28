@@ -14,6 +14,7 @@ class ImageConverterTest {
     void nullMultipartFileThrowsExceptionTest(){
        assertThrows (ImageConverterException.class, ()->ImageConverter.convertImageToBase64(null));
    }
+
    @Test
     void throwsExceptionIfNotImageTest(){
        byte[] noImage = "some random string".getBytes();

@@ -79,7 +79,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         }
     }
 
-    private OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
+    @Override
+    public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId);
         log.info("Validating the created by: {}",meedlUserId);
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);

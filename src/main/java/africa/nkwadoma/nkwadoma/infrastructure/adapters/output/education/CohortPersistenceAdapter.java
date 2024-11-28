@@ -1,47 +1,28 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.*;
 import java.util.List;
-import java.util.stream.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
@@ -100,10 +81,50 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Cohort findCohortByName(String name) throws MeedlException {
+    public List<Cohort> findCohortByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name);
-        CohortEntity cohortEntity = cohortRepository.findCohortByName(name);
+        List<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+    }
+
+    @Override
+    public Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationId(organizationId,pageRequest);
+        return cohortEntities.map(cohortMapper::toCohort);
+    }
+
+    @Override
+    public List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateUUID(programId);
+        List<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+    }
+
+    @Override
+    public Cohort checkIfCohortExistWithName(String name) {
+        CohortEntity cohortEntity = cohortRepository.findByName(name);
         return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public List<Cohort> searchCohortInOrganization(String organizationId, String name) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(name);
+        List<CohortEntity> cohortEntities =
+                cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {
@@ -113,19 +134,12 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
 
-    @Override
-    public Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException {
-        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
-        return programCohorts.stream()
-                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(name.trim()))
-                .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
-    }
 
     @Override
     public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
         validateUUID(programId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId,pageRequest);
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId, pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
     }
 

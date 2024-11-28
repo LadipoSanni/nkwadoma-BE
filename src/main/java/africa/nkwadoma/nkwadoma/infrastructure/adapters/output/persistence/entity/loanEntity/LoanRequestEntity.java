@@ -21,6 +21,9 @@ public class LoanRequestEntity {
     private String referredBy;
     private String cohortId;
     private BigDecimal loanAmountRequested;
+    private BigDecimal loanAmountApproved;
+    private LoanDecision loanRequestDecision;
+    private String declineReason;
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;
     private String reasonForDecliningLoanRequest;
