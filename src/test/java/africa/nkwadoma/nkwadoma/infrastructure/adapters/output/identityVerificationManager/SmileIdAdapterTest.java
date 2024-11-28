@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -27,9 +28,8 @@ public class SmileIdAdapterTest {
     private ImageConverter base64Converter;
 
     @BeforeEach
-    void setUp(){
-        identityVerification =   IdentityVerification.builder().
-                identityId("12345678901").identityImage("WWW.imageUrl.com").build();
+    void setUp() {
+        identityVerification = TestData.createTestIdentityVerification("12345678993","23456781234");
     }
 
     @Test
@@ -51,13 +51,13 @@ public class SmileIdAdapterTest {
 
     @Test
     void verifyIdentityWithNullIdentityImage(){
-        identityVerification.setIdentityImage(null);
+        identityVerification.setImageUrl(null);
         assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
     @Test
     void verifyIdentityWithEmptyIdentityImage(){
-        identityVerification.setIdentityImage(StringUtils.EMPTY);
+        identityVerification.setImageUrl(StringUtils.EMPTY);
         assertThrows(InfrastructureException.class, ()-> identityVerificationOutPutPort.verifyIdentity(identityVerification));
     }
 
