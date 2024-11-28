@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
+  
 
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
