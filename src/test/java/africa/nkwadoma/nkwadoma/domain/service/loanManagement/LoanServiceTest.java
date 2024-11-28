@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.*;
 import org.springframework.data.domain.*;
 
 import java.math.*;
-import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -321,25 +320,12 @@ class LoanServiceTest {
     }
 
     @Test
-    void approveLoanRequestWithStatusThatIsNotNew() {
-        loanRequest.setLoanProductId(loanRequest.getLoanProductId());
-        loanRequest.setId(loanRequest.getId());
-        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
-        loanRequest.setStatus(LoanRequestStatus.APPROVED);
-        try {
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
-        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
-    }
-
-    @Test
     void approveLoanRequestThatHasBeenApproved() {
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
-        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
+        loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
         try {
             when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
         } catch (MeedlException e) {
