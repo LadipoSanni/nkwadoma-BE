@@ -98,7 +98,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyNin(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-//        identityVerification.validate();
+        identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.NIN_URL.getValue());
         HttpHeaders httpHeaders = getHttpHeaders();
@@ -119,7 +119,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-//        identityVerification.validate();
+        identityVerification.validate();
         identityVerification.validateImageUrl();
         return getBvnDetails(identityVerification);
     }
