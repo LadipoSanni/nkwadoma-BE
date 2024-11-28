@@ -106,10 +106,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+        log.info("Searching for all organizations at adapter level.");
         MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
+        MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
+        log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
-        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+        log.info("Found organizations in db: {}", organizationEntities);
+         return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
     @Override
@@ -164,7 +169,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public List<OrganizationIdentity> findByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name);
         log.info("Searching for organizations with name {}", name);
-        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByName(name.trim());
+        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
         log.info("Found {} organizations", organizationEntities);
         return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
     }

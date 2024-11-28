@@ -10,9 +10,7 @@ import java.util.*;
 public interface CohortOutputPort {
 
     Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException;
-
-    Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException;
-
+    
     void deleteCohort(String id) throws MeedlException;
     Page<Cohort> findAllCohortInAProgram(String id, int pageSize,int pageNumber) throws MeedlException;
 
@@ -20,7 +18,13 @@ public interface CohortOutputPort {
 
     Cohort save(Cohort cohort) throws MeedlException;
 
-    Cohort findCohortByName(String name) throws MeedlException;
+    List<Cohort> findCohortByName(String name) throws MeedlException;
 
     Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
+    List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException;
+
+    Cohort checkIfCohortExistWithName(String name);
+
+    List<Cohort> searchCohortInOrganization(String organizationId, String x) throws MeedlException;
 }

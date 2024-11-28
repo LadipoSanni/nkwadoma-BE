@@ -8,17 +8,17 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -31,7 +31,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -86,18 +85,36 @@ class CohortPersistenceAdapterTest {
     private List<LoanBreakdown> loanBreakdowns;
     private int pageSize ;
     private int pageNumber ;
+    @Autowired
+    private ProgramRepository programRepository;
 
 
     @BeforeAll
     void setUpOrg() {
+        List<Cohort> cohortSearchResults;
+        try {
+            cohortSearchResults = cohortOutputPort.findCohortByName("Elite");
+            if (cohortSearchResults != null && !cohortSearchResults.isEmpty()) {
+                if (ObjectUtils.isNotEmpty(cohortSearchResults.get(0)) && StringUtils.isNotEmpty(cohortSearchResults.get(0).getId())) {
+                    cohortOutputPort.deleteCohort(cohortSearchResults.get(0).getId());
+                }
+
+            }
+        } catch (MeedlException e) {
+            log.error("error deleting cohorts ... {}", e.getMessage());
+        }
+
         meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
         organizationIdentity = TestData.createOrganizationTestData("Organization test","RC345687",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("My program Ford");
-        program2 = TestData.createProgramTestData("My Program Ford 2");
+        program = TestData.createProgramTestData("This name should not duplicate");
+        program2 = TestData.createProgramTestData("Write a test that checks first before creating");
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
+
+        deleteExistingTestPrograms();
+
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
             if (userByEmail.isPresent()) {
@@ -125,13 +142,29 @@ class CohortPersistenceAdapterTest {
         }
     }
 
+    private void deleteExistingTestPrograms() {
+        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
+        ProgramEntity foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+        log.info("Deleting already existing program 1... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
+        }
+        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
+        foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+
+        log.info("Deleting already existing program 2... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
+        }
+    }
+
     @BeforeEach
     public void setUp(){
         log.info("progam id is --- {}", program.getId());
         elites = new Cohort();
         elites.setStartDate(LocalDate.of(2024,10,18));
         elites.setProgramId(program.getId());
-        elites.setName("Elite");
+        elites.setName("X-men");
         elites.setCreatedBy(meedleUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
         elites.setTuitionAmount(BigDecimal.valueOf(20000));
@@ -150,7 +183,7 @@ class CohortPersistenceAdapterTest {
         mavin = new Cohort();
         mavin.setStartDate(LocalDate.of(2024,10,18));
         mavin.setProgramId(programId2);
-        mavin.setName("Mavin");
+        mavin.setName("X-wonders");
         mavin.setCreatedBy(meedleUserId);
         mavin.setLoanBreakdowns(loanBreakdowns);
         mavin.setTuitionAmount(BigDecimal.valueOf(20000));
@@ -188,7 +221,6 @@ class CohortPersistenceAdapterTest {
         elites.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
-
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
@@ -315,16 +347,15 @@ class CohortPersistenceAdapterTest {
 
     @Order(7)
     @Test
-    void searchForCohort(){
-        Cohort searchedCohort = new Cohort();
+    void searchForCohortInProgram(){
+        List<Cohort> cohorts  = new ArrayList<>();
         try{
-            searchedCohort =
-                    cohortOutputPort.findCohortByName(elites.getName());
+            cohorts  =
+                    cohortOutputPort.searchForCohortInAProgram("X",programId);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-       assertEquals(searchedCohort.getName(),elites.getName());
-       assertEquals(searchedCohort.getProgramId(),elites.getProgramId());
+       assertEquals(2,cohorts.size());
     }
 
     @ParameterizedTest
@@ -333,12 +364,6 @@ class CohortPersistenceAdapterTest {
         assertThrows(MeedlException.class, ()-> cohortOutputPort.deleteCohort(cohortId));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings= {"wrong cohort 1", "wrong cohort 2"})
-    void searchForCohortWithWrongCohortName(String cohortName){
-        assertThrows(MeedlException.class, ()->
-                     cohortOutputPort.searchForCohortInAProgram(cohortName,elites.getProgramId()));
-    }
 
     @Order(8)
     @Test
@@ -379,29 +404,47 @@ class CohortPersistenceAdapterTest {
     assertEquals(3,cohorts.getSize());
     }
 
-//    @Order(10)
-//    @Test
-//    void deleteCohort(){
-//        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
-//        assertTrue(foundCohort.isPresent());
-//        try {
-//            cohortOutputPort.deleteCohort(cohortOneId);
-//        } catch (MeedlException e) {
-//            throw new RuntimeException(e);
-//        }
-//        foundCohort = cohortRepository.findById(cohortOneId);
-//        assertFalse(foundCohort.isPresent());
-//    }
-//
-//    @AfterAll
-//    void cleanUp() throws MeedlException {
-//        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
-//        identityManagementOutputPort.deleteUser(meedleUser);
-//        cohortOutputPort.deleteCohort(cohortTwoId);
-//        cohortOutputPort.deleteCohort(cohortThreeId);
-//        programCohortOutputPort.delete(programId);
-//        programCohortOutputPort.delete(programId2);
-//        organizationIdentityOutputPort.delete(organizationId);
-//        userIdentityOutputPort.deleteUserById(meedleUserId);
-//    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    void searchForCohortWithEmptyName(String emptyName){
+        assertThrows(MeedlException.class,()-> cohortOutputPort.findCohortByName(emptyName));
+    }
+
+    @Order(10)
+    @Test
+    void searchForCohortInOrganization(){
+        List<Cohort> cohorts  = new ArrayList<>();
+        try{
+            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x");
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(3,cohorts.size());
+    }
+
+    @Order(11)
+    @Test
+    void deleteCohort(){
+        Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
+        assertTrue(foundCohort.isPresent());
+        try {
+            cohortOutputPort.deleteCohort(cohortOneId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        foundCohort = cohortRepository.findById(cohortOneId);
+        assertFalse(foundCohort.isPresent());
+    }
+
+    @AfterAll
+    void cleanUp() throws MeedlException {
+        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
+        identityManagementOutputPort.deleteUser(meedleUser);
+        cohortOutputPort.deleteCohort(cohortTwoId);
+        cohortOutputPort.deleteCohort(cohortThreeId);
+        programCohortOutputPort.delete(programId);
+        programCohortOutputPort.delete(programId2);
+        organizationIdentityOutputPort.delete(organizationId);
+        userIdentityOutputPort.deleteUserById(meedleUserId);
+    }
 }

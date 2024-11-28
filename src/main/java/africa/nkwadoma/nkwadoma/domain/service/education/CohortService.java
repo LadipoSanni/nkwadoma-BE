@@ -4,15 +4,18 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
@@ -31,6 +34,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 
 import java.util.List;
 
+@Service
 @Slf4j
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
@@ -42,6 +46,7 @@ public class CohortService implements CohortUseCase {
     private final LoanDetailsOutputPort loanDetailsOutputPort;
     private final LoanBreakdownOutputPort loanBreakdownOutputPort;
     private final CohortMapper cohortMapper;
+    private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
 
 
@@ -111,10 +116,10 @@ public class CohortService implements CohortUseCase {
 
     private void checkIfCohortNameExist(Cohort cohort, Cohort foundCohort) throws MeedlException {
         Cohort foundCohortByName = null;
-        if (cohort.getName() != null) {
-            foundCohortByName = cohortOutputPort.findCohortByName(cohort.getName());
+        if (! StringUtils.isEmpty(cohort.getName())) {
+            foundCohortByName = cohortOutputPort.checkIfCohortExistWithName(cohort.getName());
         }
-        if (foundCohortByName != null) {
+        if (ObjectUtils.isNotEmpty(foundCohortByName)) {
             if (!StringUtils.equals(foundCohort.getId(), foundCohortByName.getId())) {
                 throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
             }
@@ -172,10 +177,24 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Cohort searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        return cohortOutputPort.searchForCohortInAProgram(cohortName, programId);
+    public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
+        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateDataElement(cohortName);
+        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
     }
 
+
+    @Override
+    public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateUUID(userId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
+            OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
+            return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),name);
+        }
+        return cohortOutputPort.findCohortByName(name);
+    }
 
     @Override
     public Page<Cohort> viewAllCohortInOrganization(String actorId,

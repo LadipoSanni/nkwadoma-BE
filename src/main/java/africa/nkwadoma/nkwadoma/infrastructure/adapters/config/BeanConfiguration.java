@@ -142,10 +142,10 @@ public class BeanConfiguration {
                                        ProgramCohortOutputPort programCohortOutputPort,
                                        LoanDetailsOutputPort loanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
-                                       CohortMapper cohortMapper,
-                                       LoaneeUseCase loaneeUseCase){
+                                       LoaneeUseCase loaneeUseCase,
+                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,loaneeUseCase);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase);
     }
 
     @Bean

@@ -148,7 +148,6 @@ class ProgramPersistenceAdapterTest {
             log.error("Error creating organization", e);
         }
     }
-
     @AfterEach
     void cleanUp() {
         if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
