@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
@@ -35,7 +34,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
 
 
-
 @RequestMapping(BASE_URL + LOAN)
 @RequiredArgsConstructor
 @RestController
@@ -45,8 +43,10 @@ public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
+    private final LoanRequestUseCase loanRequestUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanRequestRestMapper loanRequestRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -65,6 +65,7 @@ public class LoanController {
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @PostMapping("/loan-product/update")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
         log.info("Update loan product called with id .... {}", request.getId());
@@ -103,6 +104,7 @@ public class LoanController {
 
 
     @GetMapping("/loan-product/view-details-by-id")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
                                                                           @NotBlank(message = "Provide a valid loan product identifier")
@@ -122,17 +124,59 @@ public class LoanController {
     public ResponseEntity<ApiResponse<?>> viewLoanReferral (@PathVariable @NotBlank(message = "Loanee ID is required")
                                                                           String loaneeId) throws MeedlException {
         LoanReferral loanReferral = new LoanReferral();
-        loanReferral.getLoanee().setId(loaneeId.trim());
+        loanReferral.getLoanee().setId(loaneeId);
         LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
                 .data(loanReferralResponse)
                 .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.FOUND.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/loan-requests")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
+        Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
+        log.info("Loan requests: {}", loanRequests.getContent());
+        List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
+        log.info("Loan request responses: {}", loanRequestResponses);
+        PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
+                loanRequestResponses, loanRequests.hasNext(),
+                loanRequests.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+                <PaginatedResponse<LoanRequestResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
-
+    @PostMapping("start")
+    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
+                                                                String loaneeId,
+                                                    @RequestParam @NotBlank(message = "LoanOffer ID is required")
+                                                                String loanOfferId) throws MeedlException {
+        log.info("Start loan called.... loan offer id : {}", loanOfferId);
+        Loan loan = new Loan();
+        loan.setLoaneeId(loaneeId);
+        loan.setLoanOfferId(loanOfferId);
+        loan = createLoanProductUseCase.startLoan(loan);
+        StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
+        ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
+               .data(startLoanResponse)
+               .message(SuccessMessages.LOAN_START_SUCCESS)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }
