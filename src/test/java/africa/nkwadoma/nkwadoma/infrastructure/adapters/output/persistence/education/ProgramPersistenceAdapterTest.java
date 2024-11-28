@@ -55,7 +55,7 @@ class ProgramPersistenceAdapterTest {
     private UserIdentity userIdentity;
     private final int pageSize = 10;
     private final int pageNumber = 0;
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ja7";
+    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6780";
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
@@ -148,7 +148,7 @@ class ProgramPersistenceAdapterTest {
             log.error("Error creating organization", e);
         }
     }
-    @AfterEach
+//    @AfterEach
     void cleanUp() {
         if (StringUtils.isNotEmpty(dataAnalyticsProgramId)) {
             programRepository.deleteById(dataAnalyticsProgramId);
@@ -490,7 +490,7 @@ class ProgramPersistenceAdapterTest {
         cohortRepository.delete(savedCohort);
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown()  {
         try {
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
