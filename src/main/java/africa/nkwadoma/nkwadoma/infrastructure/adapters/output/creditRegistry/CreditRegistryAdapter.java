@@ -41,6 +41,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         formData.put(EMAIL.getValue(), EmailAddress);
         formData.put(SUBSCRIBER_ID.getValue(), SubscriberID);
         formData.put(PASSWORD.getValue(), Password);
+        log.info("Credit registry url : {}", url);
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(formData, headers);
         ResponseEntity<CreditRegistryLoginResponse> responseEntity = ResponseEntity.ofNullable(new CreditRegistryLoginResponse());
