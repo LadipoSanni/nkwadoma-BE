@@ -74,10 +74,8 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
             return 0;
         }
         List<String> registryIds = creditRegistryFindDetailResponse.getSearchResult().stream()
-//                                    .filter(customerDetail -> bvn.equals(customerDetail.getBvn()))
                                     .map(CustomerDetail::getRegistryID)
                                     .toList();
-//                                    .findFirst().orElse("0");
         if (registryIds.isEmpty()){
             return 0;
         }
@@ -106,7 +104,6 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         } catch (HttpServerErrorException | ResourceAccessException ex) {
             log.error("Credit registry server error {}", ex.getMessage());
         }
-//        return Objects.requireNonNull(responseEntity.getBody()).getSmartScores().get(0).getGenericScore();
         return getCreditScore(Objects.requireNonNull(responseEntity.getBody()).getSmartScores());
     }
 
@@ -155,6 +152,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         }
         return responseEntity.getBody();
     }
+
     private void validateSessionCode(String sessionCode) throws MeedlException {
         MeedlValidator.validateDataElement(sessionCode);
         String regex = "^\\d{6}$";
