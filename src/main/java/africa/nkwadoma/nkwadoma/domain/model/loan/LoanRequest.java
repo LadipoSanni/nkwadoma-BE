@@ -20,7 +20,7 @@ public class LoanRequest {
     private String referredBy;
     private String firstName;
     private String lastName;
-    private String loanRequestDecision;
+    private LoanDecision loanRequestDecision;
     private String declineReason;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
@@ -42,6 +42,7 @@ public class LoanRequest {
         MeedlValidator.validateObjectInstance(loanRequest);
         MeedlValidator.validateUUID(loanRequest.getId());
         MeedlValidator.validateUUID(loanRequest.getLoanProductId());
+        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
     }
 
     public void validate() throws MeedlException {

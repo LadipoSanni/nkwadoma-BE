@@ -95,7 +95,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     @Override
     public LoanProduct findById(String id) throws MeedlException {
         MeedlValidator.validateDataElement(id);
-        LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
+        LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
 

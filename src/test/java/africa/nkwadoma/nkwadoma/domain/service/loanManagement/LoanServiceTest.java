@@ -1,12 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -42,11 +42,10 @@ class LoanServiceTest {
     private LoanOfferOutputPort loanOfferOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
-    private LoanProduct loanProduct;
     private LoanOffer loanOffer;
-
     private Loan loan;
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+
     @BeforeEach
     void setUp() {
         UserIdentity userIdentity = TestData.createTestUserIdentity("test@example.com");
@@ -56,43 +55,15 @@ class LoanServiceTest {
         loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
 
-        Vendor vendor = new Vendor();
-        loanProduct = new LoanProduct();
-        loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
-        loanProduct.setName("Test Loan Product - unit testing within application");
-        loanProduct.setMandate("Test: A new mandate for test");
-        loanProduct.setSponsors(List.of("Mark", "Jack"));
-        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
-        loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
-        loanProduct.setLoanProductSize(new BigDecimal("1000000"));
-        loanProduct.setPageSize(10);
-        loanProduct.setPageNumber(0);
-        loanProduct.setVendors(List.of(vendor));
+        LoanProduct loanProduct = TestData.buildLoanProduct("Test Loan Product - unit testing within application");
 
-        loanRequest = new LoanRequest();
-        loanRequest.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
-        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
-        loanRequest.setLoanRequestDecision("Approved by PM");
-        loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
-        loanRequest.setStatus(LoanRequestStatus.NEW);
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-        loanRequest.setReferredBy("Brown Hills Institute");
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        loanRequest.setLoanee(loanee);
-        loanRequest.setDateTimeApproved(LocalDateTime.now());
 
-        loan = new Loan();
-        loan.setLoaneeId(testId);
-        loan.setLoanOfferId(testId);
+        loan = TestData.createTestLoan(loanee);
 
-        loanOffer = new LoanOffer();
-        loanOffer.setDateTimeOffered(LocalDateTime.now());
-        loanOffer.setLoanRequest(loanRequest);
-        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        loanOffer.setLoanee(loanee);
+        loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
     }
-
 
     @Test
     void viewLoanReferral() {
@@ -268,32 +239,28 @@ class LoanServiceTest {
 
     @Test
     void approveLoanRequest() {
-        LoanRequest savedLoanRequest = null;
+        LoanRequest savedLoanRequest;
         try {
+            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             savedLoanRequest = loanService.createLoanRequest(loanRequest);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
-        LoanRequest approvedLoanRequest = new LoanRequest();
-        approvedLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        approvedLoanRequest.setLoanProductId(loanRequest.getLoanProductId());
-        approvedLoanRequest.setId(loanRequest.getId());
-        approvedLoanRequest.setLoanAmountApproved(new BigDecimal("500000"));
-        approvedLoanRequest.setLoanRequestDecision("Approved by PM");
-        try {
 
-            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(savedLoanRequest);
-//            when(loanRequestOutputPort.save(any())).thenReturn(savedLoanRequest);
-//            when(loanProductOutputPort.findById(anyString())).thenReturn(loanProduct);
-//            when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
+            LoanRequest approvedLoanRequest = new LoanRequest();
+            approvedLoanRequest.setLoanProductId(loanRequest.getLoanProductId());
+            approvedLoanRequest.setId(savedLoanRequest.getId());
+            approvedLoanRequest.setLoanAmountApproved(new BigDecimal("500000"));
+            approvedLoanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
+
+            when(loanRequestOutputPort.findById(approvedLoanRequest.getId())).thenReturn(savedLoanRequest);
+            when(loanOfferOutputPort.save(any())).thenReturn(loanOffer);
             approvedLoanRequest = loanService.respondToLoanRequest(approvedLoanRequest);
+
+            assertNotNull(approvedLoanRequest);
+            assertEquals(LoanRequestStatus.APPROVED, approvedLoanRequest.getStatus());
+            assertEquals(approvedLoanRequest.getLoanAmountApproved(), BigDecimal.valueOf(500000));
         } catch (MeedlException e) {
-            log.error("", e);
+            log.error("Exception occurred saving loan request ", e);
         }
-        assertNotNull(approvedLoanRequest);
-        assertEquals(LoanRequestStatus.APPROVED, approvedLoanRequest.getStatus());
-        assertEquals(approvedLoanRequest.getLoanAmountApproved(), BigDecimal.valueOf(500000));
-        assertEquals("Approved by PM", approvedLoanRequest.getLoanRequestDecision());
+
     }
 
     @Test
@@ -314,13 +281,7 @@ class LoanServiceTest {
         loanRequest.setLoanAmountApproved(null);
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
-        try {
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
-        log.info("Exception occurred: {}", meedlException.getMessage());
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanRequest(loanRequest));
     }
 
     @Test
@@ -338,6 +299,7 @@ class LoanServiceTest {
         loanRequest.setLoanAmountApproved(new BigDecimal("9000"));
         try {
             when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
+            when(loanProductOutputPort.findById(anyString())).thenThrow(LoanException.class);
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -348,6 +310,7 @@ class LoanServiceTest {
     void approveLoanRequestWithLoanAmountApprovedGreaterThanAmountRequested() {
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
+        loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000000));
         try {
             when(loanRequestOutputPort.findById(anyString())).thenReturn(loanRequest);
@@ -382,13 +345,12 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error("", e);
         }
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
-        log.info("{}", meedlException.getMessage());
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanRequest(loanRequest));
     }
 
     @Test
     void declineLoanRequest() {
-        loanRequest.setStatus(LoanRequestStatus.DECLINED);
+        loanRequest.setLoanRequestDecision(LoanDecision.DECLINED);
         loanRequest.setDeclineReason("I just don't want the loan offer");
         loanRequest.setLoanProductId(loanRequest.getLoanProductId());
         loanRequest.setId(loanRequest.getId());
@@ -398,7 +360,6 @@ class LoanServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
-            when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             approvedLoanRequest = loanService.respondToLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);

@@ -22,7 +22,7 @@ public class LoanRequestEntity {
     private String cohortId;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
-    private String loanRequestDecision;
+    private LoanDecision loanRequestDecision;
     private String declineReason;
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -8,9 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -103,5 +102,45 @@ public class TestData {
     public static LoanBreakdown createLoanBreakDown(){
         return LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
                 .itemName("Loan Break").build();
+    }
+
+    public static LoanProduct buildLoanProduct(String name) {
+        Vendor vendor = new Vendor();
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanProduct.setName(name);
+        loanProduct.setMandate("Test: A new mandate for test");
+        loanProduct.setSponsors(List.of("Mark", "Jack"));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
+        loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
+        loanProduct.setLoanProductSize(new BigDecimal("1000000"));
+        loanProduct.setPageSize(10);
+        loanProduct.setPageNumber(0);
+        loanProduct.setVendors(List.of(vendor));
+        return loanProduct;
+    }
+
+    public static LoanOffer buildLoanOffer(LoanRequest loanRequest, Loanee loanee) {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setLoanee(loanee);
+        return loanOffer;
+    }
+
+    public static LoanRequest buildLoanRequest(Loanee loanee, LoaneeLoanDetail loaneeLoanDetail) {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanRequest.setLoanAmountApproved(BigDecimal.valueOf(500000));
+        loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
+        loanRequest.setLoanAmountRequested(BigDecimal.valueOf(900000));
+        loanRequest.setStatus(LoanRequestStatus.NEW);
+        loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+        loanRequest.setReferredBy("Brown Hills Institute");
+        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        loanRequest.setLoanee(loanee);
+        loanRequest.setDateTimeApproved(LocalDateTime.now());
+        return loanRequest;
     }
 }
