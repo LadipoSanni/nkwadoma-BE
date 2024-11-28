@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +32,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
-    private final LoanRequestService loanRequestService;
+    private final LoanRequestOutputPort loanRequestOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
-    private final LoanRequestOutputPort loanRequestOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final LoanOutputPort loanOutputPort;
     private final LoanOfferMapper loanOfferMapper;
@@ -129,79 +129,33 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanReferral updatedLoanReferral = foundLoanReferral.get();
         if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(updatedLoanReferral);
-            loanRequestService.createLoanRequest(loanRequest);
+            createLoanRequest(loanRequest);
             updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
         }
         return updatedLoanReferral;
     }
 
-    @Override
-    public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        LoanRequest.validate(loanRequest);
-        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        MeedlValidator.validateLoanRequest(foundLoanRequest);
-        if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
-            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
+    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanRequest);
+        loanRequest.validate();
+        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
-        return respondToLoanRequest(loanRequest, foundLoanRequest);
+        return loanRequestOutputPort.save(loanRequest);
     }
-
-    private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            approveLoanRequest(loanRequest, foundLoanRequest);
-        }
-        else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
-            declineLoanRequest(loanRequest, foundLoanRequest);
-        }
-        return loanRequestOutputPort.save(foundLoanRequest);
-    }
-
-    private static void declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateDataElement(loanRequest.getDeclineReason());
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
-    }
-
-    private void approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
-        if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
-            throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
-        }
-        LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
-        foundLoanRequest.setLoanProduct(loanProduct);
-        foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        createLoanOffer(foundLoanRequest);
-    }
-
     @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
         LoanOffer loanOffer = new LoanOffer();
-        Optional<LoanRequest> loanRequest = loanRequestOutputPort.findById(loanRequestId);
-        if (loanRequest.isEmpty()){
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-        }
-        if (loanRequest.get().getStatus() != LoanRequestStatus.APPROVED){
+        if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
-        loanOffer.setLoanRequest(loanRequest.get());
+        loanOffer.setLoanRequest(loanRequest);
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
         return loanOffer;
-    }
-
-    @Override
-    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
-        MeedlValidator.validatePageSize(loanRequest.getPageSize());
-        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
-        log.info("Loan requests from repository: {}", loanRequests.getContent());
-        return loanRequests;
     }
 }

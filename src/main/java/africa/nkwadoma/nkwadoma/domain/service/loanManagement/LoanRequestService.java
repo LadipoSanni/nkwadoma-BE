@@ -20,17 +20,20 @@ import java.util.*;
 @Slf4j
 public class LoanRequestService implements LoanRequestUseCase {
     private final LoanRequestOutputPort loanRequestOutputPort;
+    private final LoanProductOutputPort loanProductOutputPort;
+    private final LoanOfferUseCase loanOfferUseCase;
 
-    @Override
-    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        loanRequest.validate();
-        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
-        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
-        }
-        return loanRequestOutputPort.save(loanRequest);
-    }
+
+//    @Override
+//    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
+//        MeedlValidator.validateObjectInstance(loanRequest);
+//        loanRequest.validate();
+//        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+//        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+//            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
+//        }
+//        return loanRequestOutputPort.save(loanRequest);
+//    }
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -51,5 +54,49 @@ public class LoanRequestService implements LoanRequestUseCase {
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
         return foundLoanRequest.get();
+    }
+
+    @Override
+    public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
+        LoanRequest.validate(loanRequest);
+        Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
+        if (foundLoanRequest.isEmpty()) {
+            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+        }
+        MeedlValidator.validateLoanRequest(foundLoanRequest.get());
+        if (foundLoanRequest.get().getStatus().equals(LoanRequestStatus.APPROVED)) {
+            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
+        }
+        return respondToLoanRequest(loanRequest, foundLoanRequest.get());
+    }
+
+    private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+        if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
+            approveLoanRequest(loanRequest, foundLoanRequest);
+        }
+        else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
+            declineLoanRequest(loanRequest, foundLoanRequest);
+        }
+        return loanRequestOutputPort.save(foundLoanRequest);
+    }
+
+    private static void declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+        MeedlValidator.validateDataElement(loanRequest.getDeclineReason());
+        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
+        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+        foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
+    }
+
+    private void approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+        if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
+            throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
+        }
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
+        foundLoanRequest.setLoanProduct(loanProduct);
+        foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
+        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
+        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+        loanOfferUseCase.createLoanOffer(foundLoanRequest);
     }
 }
