@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
@@ -80,10 +81,13 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Cohort findCohortByName(String name) throws MeedlException {
+    public List<Cohort> findCohortByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name);
-        CohortEntity cohortEntity = cohortRepository.findCohortByName(name);
-        return cohortMapper.toCohort(cohortEntity);
+        List<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
     }
 
     @Override
@@ -94,6 +98,35 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
         return cohortEntities.map(cohortMapper::toCohort);
     }
 
+    @Override
+    public List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateUUID(programId);
+        List<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+    }
+
+    @Override
+    public Cohort checkIfCohortExistWithName(String name) {
+        CohortEntity cohortEntity = cohortRepository.findByName(name);
+        return cohortMapper.toCohort(cohortEntity);
+    }
+
+    @Override
+    public List<Cohort> searchCohortInOrganization(String organizationId, String name) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(name);
+        List<CohortEntity> cohortEntities =
+                cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name);
+        if (cohortEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+    }
+
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {
         return programCohorts.stream()
                 .filter(eachCohort -> eachCohort.getCohort().getId().equals(cohortId))
@@ -101,13 +134,6 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
                 .orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
     }
 
-    @Override
-    public Cohort searchForCohortInAProgram(String name, String programId) throws MeedlException {
-        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
-        return programCohorts.stream()
-                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(name.trim()))
-                .findFirst().orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage())).getCohort();
-    }
 
     @Override
     public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
