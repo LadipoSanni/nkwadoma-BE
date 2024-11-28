@@ -167,7 +167,7 @@ class OrganizationIdentityAdapterTest {
             log.info("Saved Organization ID : {}", savedOrganization.getId());
             assertNotNull(savedOrganization);
             amazingGraceId = savedOrganization.getId();
-            organizationIdentities = organizationOutputPort.findByName(savedOrganization.getName());
+            organizationIdentities = organizationOutputPort.findByName("a");
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }
