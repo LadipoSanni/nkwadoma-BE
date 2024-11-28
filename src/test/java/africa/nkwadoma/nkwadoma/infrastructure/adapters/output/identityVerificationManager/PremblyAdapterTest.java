@@ -158,11 +158,10 @@ class PremblyAdapterTest {
         assertEquals(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage(),exception.getMessage());
 
     }
-//    @Test
+    @Test
     void verifyIdentityWithValidBvnAndValidImage() throws MeedlException {
         bvnIdentityVerification.setImageUrl("https://res.cloudinary.com/dhhhqruoy/image/upload/v1732776176/.jpg");
         bvnIdentityVerification.setBvn("3943979743");
-        bvnIdentityVerification.setNin(null);
 
         PremblyBvnResponse response = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvnLikeness(bvnIdentityVerification);
         log.info("Prembly {}",response);
