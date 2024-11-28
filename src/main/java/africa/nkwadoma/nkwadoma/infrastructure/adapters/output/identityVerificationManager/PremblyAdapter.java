@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -97,7 +98,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyNin(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        identityVerification.validate();
+//        identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.NIN_URL.getValue());
         HttpHeaders httpHeaders = getHttpHeaders();
@@ -118,25 +119,30 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        identityVerification.validate();
+//        identityVerification.validate();
         identityVerification.validateImageUrl();
         return getBvnDetails(identityVerification);
     }
 
     public PremblyResponse getBvnDetails(IdentityVerification identityVerification) {
         PremblyResponse premblyBvnResponse = getIdentityDetailsByBvn(identityVerification);
-        premblyBvnResponse.getVerification().updateValidIdentity();
+        if (!ObjectUtils.isEmpty(premblyBvnResponse)
+                && !ObjectUtils.isEmpty(premblyBvnResponse.getVerification())) {
+            premblyBvnResponse.getVerification().updateValidIdentity();
+        }else {
+            log.error("Verification failed. BVN not found.");
+        }
         log.info("Verification Result : {}", premblyBvnResponse);
         return premblyBvnResponse;
     }
 
     private PremblyResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
         HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(verificationRequest);
-        log.info("url {}", premblyUrl);
+        log.info("prembly url : {}", premblyUrl);
         String url = premblyUrl.concat(PremblyParameter.BVN_FACE.getValue());
-        log.info(url);
+        log.info("Complete prembly url : {}",url);
         ResponseEntity<PremblyBvnResponse> responseEntity = ResponseEntity.ofNullable(PremblyBvnResponse.builder().build());
-        log.info("Response...{}",responseEntity.getBody());
+        log.info("Response. from get Identity Details By Bvn..{}",responseEntity.getBody());
         try {
             responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyBvnResponse.class);
         } catch (HttpServerErrorException ex) {
@@ -184,7 +190,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     private HttpEntity<MultiValueMap<String, String>> createRequestEntity(IdentityVerification verificationRequest) {
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getNin());
+        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getBvn());
         formData.add(PremblyParameter.IMAGE.getValue(), verificationRequest.getImageUrl());
         log.debug("Prepared form data: {}", formData);
         return new HttpEntity<>(formData, headers);

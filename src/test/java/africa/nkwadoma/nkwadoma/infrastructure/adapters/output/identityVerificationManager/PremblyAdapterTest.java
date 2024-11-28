@@ -13,12 +13,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyVerification
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +42,7 @@ class PremblyAdapterTest {
     private ImageConverter base64Converter;
 
 
-//    @BeforeEach
+    @BeforeEach
     void setUp() {
         bvnIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");
         ninIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");
@@ -160,11 +156,13 @@ class PremblyAdapterTest {
     }
     @Test
     void verifyIdentityWithValidBvnAndValidImage() throws MeedlException {
-        bvnIdentityVerification.setImageUrl("https://res.cloudinary.com/dhhhqruoy/image/upload/v1732776176/.jpg");
-        bvnIdentityVerification.setBvn("3943979743");
+        log.info("{}", bvnIdentityVerification);
+        bvnIdentityVerification.setImageUrl("https://res.cloudinary.com/dhhhqruoy/image/upload/v1732776176/meedl/gii4woazrwingka7uirl.jpg");
+        bvnIdentityVerification.setBvn("22257882103");
+        bvnIdentityVerification.setNin(null);
 
         PremblyBvnResponse response = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvnLikeness(bvnIdentityVerification);
-        log.info("Prembly {}",response);
+        log.info("Prembly bvn test : {}",response);
         assertNotNull(response);
         assertEquals(PremblyResponseCode.SUCCESSFUL.getCode(), response.getResponseCode());
         assertTrue(response.isVerificationCallSuccessful());
