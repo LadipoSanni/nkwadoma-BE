@@ -24,8 +24,13 @@ public class LoanReferral {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanReferralStatus);
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateEmail());
+        MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber());
+    }
+
+    public void validateForCreate() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanReferralStatus);
     }
 
 }

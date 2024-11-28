@@ -66,7 +66,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     }
 
     @Override
-    public void sendReferLoaneeEmail(Loanee loanee) throws MeedlException {
+    public void referLoaneeEmail(Loanee loanee) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
                                                             loanee.getUserIdentity().getFirstName(),
                                                                 loanee.getReferredBy());

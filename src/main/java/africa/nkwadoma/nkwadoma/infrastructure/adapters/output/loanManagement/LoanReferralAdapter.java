@@ -59,7 +59,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         LoanReferral loanReferral = new LoanReferral();
         loanReferral.setLoanee(loanee);
         loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
-        loanReferral.validate();
+        loanReferral.validateForCreate();
         LoanReferralEntity loanReferralEntity =
                 loanReferralMapper.toLoanReferralEntity(loanReferral);
         loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
