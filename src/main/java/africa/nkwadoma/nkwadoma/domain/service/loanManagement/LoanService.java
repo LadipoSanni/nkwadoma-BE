@@ -15,7 +15,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -150,9 +149,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
         LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        if (ObjectUtils.isEmpty(foundLoanRequest)){
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-        }
+        MeedlValidator.validateLoanRequest(foundLoanRequest);
         if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
