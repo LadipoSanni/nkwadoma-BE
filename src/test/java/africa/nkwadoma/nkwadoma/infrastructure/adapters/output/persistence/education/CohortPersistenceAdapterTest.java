@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class CohortPersistenceAdapterTest {
-
     @Autowired
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
@@ -298,14 +297,6 @@ class CohortPersistenceAdapterTest {
     void viewCohortWithEmptyUserId(String userId){
         assertThrows(MeedlException.class, ()->
                 cohortOutputPort.viewCohortDetails(userId,
-                        cohortTwoId));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewCohortWithEmptyProgramId(String programId){
-        assertThrows(MeedlException.class, ()->
-                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
                         cohortTwoId));
     }
 
