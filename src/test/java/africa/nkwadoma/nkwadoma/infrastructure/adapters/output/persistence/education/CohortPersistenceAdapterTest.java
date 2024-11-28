@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class CohortPersistenceAdapterTest {
-
     @Autowired
     private CohortOutputPort cohortOutputPort;
     private Cohort elites;
@@ -284,21 +283,12 @@ class CohortPersistenceAdapterTest {
     @Test
     void viewCohortWithNullUserId(){
         assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(null,
-                program.getId(),
-                cohortTwoId));
-    }
-
-    @Test
-    void viewCohortWithNullProgramId(){
-        assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
-                null,
                 cohortTwoId));
     }
 
     @Test
     void viewCohortWithNullCohortId(){
         assertThrows(MeedlException.class, () -> cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
-                program.getId(),
                 null));
     }
 
@@ -307,16 +297,6 @@ class CohortPersistenceAdapterTest {
     void viewCohortWithEmptyUserId(String userId){
         assertThrows(MeedlException.class, ()->
                 cohortOutputPort.viewCohortDetails(userId,
-                        program.getId(),
-                        cohortTwoId));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewCohortWithEmptyProgramId(String programId){
-        assertThrows(MeedlException.class, ()->
-                cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
-                        programId,
                         cohortTwoId));
     }
 
@@ -325,7 +305,6 @@ class CohortPersistenceAdapterTest {
     void viewCohortWithEmptyCohortId(String cohortId){
         assertThrows(MeedlException.class, ()->
                 cohortOutputPort.viewCohortDetails(elites.getCreatedBy(),
-                        program.getId(),
                         cohortId));
     }
 
