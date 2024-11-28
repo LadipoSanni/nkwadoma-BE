@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import lombok.*;
 
 import java.math.*;
@@ -16,6 +17,7 @@ public class LoanRequestResponse {
     private String referredBy;
     private String firstName;
     private String lastName;
+    private LoanRequestStatus status;
     private BigDecimal loanAmountRequested;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;

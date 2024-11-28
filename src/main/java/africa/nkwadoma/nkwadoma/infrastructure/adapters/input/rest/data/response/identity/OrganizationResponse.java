@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Setter
+@Getter
 @ToString
 @Builder
 @AllArgsConstructor

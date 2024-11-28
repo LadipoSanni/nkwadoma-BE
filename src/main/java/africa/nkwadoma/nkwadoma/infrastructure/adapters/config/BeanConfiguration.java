@@ -1,11 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
@@ -148,9 +151,10 @@ public class BeanConfiguration {
                                        ProgramCohortOutputPort programCohortOutputPort,
                                        LoanDetailsOutputPort loanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
+                                       LoaneeUseCase loaneeUseCase,
                                        CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase);
     }
 
     @Bean
@@ -206,14 +210,20 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LoaneeService loaneeService(LoaneeOutputPort loaneeOutputPort,
+    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
+                                       LoaneeOutputPort loaneeOutputPort,
                                        UserIdentityOutputPort userIdentityOutputPort,
                                        IdentityManagerOutputPort identityManagerOutputPort,
                                        CohortOutputPort cohortOutputPort,
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
-                                       LoanBreakdownOutputPort loanBreakdownOutputPort){
-        return new LoaneeService(loaneeOutputPort,userIdentityOutputPort, identityManagerOutputPort,cohortOutputPort,
-                loaneeLoanDetailsOutputPort,loanBreakdownOutputPort);
+                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
+                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase,
+                                       LoanReferralOutputPort loanReferralOutputPort){
+        return new LoaneeService(organizationEmployeeIdentityOutputPort,
+                loaneeOutputPort,userIdentityOutputPort,
+                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort,
+                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort);
     }
 
     @Bean
@@ -228,4 +238,6 @@ public class BeanConfiguration {
                                                                                  LoaneeLoanDetailMapper loaneeLoanDetailMapper){
         return new LoaneeLoanDetailPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
     }
+
+
 }

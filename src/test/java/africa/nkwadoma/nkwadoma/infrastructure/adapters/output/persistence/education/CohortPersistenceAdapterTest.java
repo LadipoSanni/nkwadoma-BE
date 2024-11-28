@@ -16,7 +16,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -83,6 +85,8 @@ class CohortPersistenceAdapterTest {
     private List<LoanBreakdown> loanBreakdowns;
     private int pageSize ;
     private int pageNumber ;
+    @Autowired
+    private ProgramRepository programRepository;
 
 
     @BeforeAll
@@ -97,17 +101,20 @@ class CohortPersistenceAdapterTest {
 
             }
         } catch (MeedlException e) {
-            log.error("", e);
+            log.error("error deleting cohorts ... {}", e.getMessage());
         }
 
         meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
         organizationIdentity = TestData.createOrganizationTestData("Organization test","RC345687",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("My program Ford");
-        program2 = TestData.createProgramTestData("My Program Ford 2");
+        program = TestData.createProgramTestData("This name should not duplicate");
+        program2 = TestData.createProgramTestData("Write a test that checks first before creating");
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
+
+        deleteExistingTestPrograms();
+
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
             if (userByEmail.isPresent()) {
@@ -132,6 +139,22 @@ class CohortPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteExistingTestPrograms() {
+        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
+        ProgramEntity foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+        log.info("Deleting already existing program 1... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
+        }
+        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
+        foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+
+        log.info("Deleting already existing program 2... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
         }
     }
 
@@ -198,7 +221,6 @@ class CohortPersistenceAdapterTest {
         elites.setCreatedBy(createdBy);
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
-
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);

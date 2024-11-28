@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -51,4 +52,18 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         }
         else log.info("Loan referral not found");
     }
+
+    @Override
+    public LoanReferral createLoanReferral(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        LoanReferral loanReferral = new LoanReferral();
+        loanReferral.setLoanee(loanee);
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);
+        loanReferral.validateForCreate();
+        LoanReferralEntity loanReferralEntity =
+                loanReferralMapper.toLoanReferralEntity(loanReferral);
+        loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
+    }
 }
+

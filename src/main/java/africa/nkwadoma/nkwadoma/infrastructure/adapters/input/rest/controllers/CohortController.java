@@ -180,7 +180,6 @@ public class CohortController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-
     }
 
 }
