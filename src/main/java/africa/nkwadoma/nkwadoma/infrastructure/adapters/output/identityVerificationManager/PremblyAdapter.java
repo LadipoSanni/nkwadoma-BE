@@ -3,10 +3,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerifica
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyNinResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.prembly.PremblyParameter;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
@@ -19,6 +19,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -197,7 +198,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(PremblyVerificationParameter.ACCEPT.getValue(), PremblyVerificationParameter.APPLICATION_JSON.getValue());
         headers.set(PremblyParameter.ACCEPT.getValue(), PremblyParameter.APPLICATION_JSON.getValue());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.add(PremblyParameter.APP_ID.getValue(), appId);
