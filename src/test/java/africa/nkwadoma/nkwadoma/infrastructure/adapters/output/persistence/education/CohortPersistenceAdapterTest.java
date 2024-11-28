@@ -112,12 +112,9 @@ class CohortPersistenceAdapterTest {
         program2 = TestData.createProgramTestData("Write a test that checks first before creating");
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
-        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
-        log.info("Deleting already existing program... {}", programs);
-        programRepository.deleteAll(programs);
-        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
-        log.info("Deleting already existing program... {}", programs);
-        programRepository.deleteAll(programs);
+
+        deleteExistingTestPrograms();
+
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
             if (userByEmail.isPresent()) {
@@ -142,6 +139,22 @@ class CohortPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteExistingTestPrograms() {
+        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
+        ProgramEntity foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+        log.info("Deleting already existing program 1... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
+        }
+        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
+        foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
+
+        log.info("Deleting already existing program 2... {}", programs);
+        if (foundProgram != null) {
+            programRepository.delete(foundProgram);
         }
     }
 
