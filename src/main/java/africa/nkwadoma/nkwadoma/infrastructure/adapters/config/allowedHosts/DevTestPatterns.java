@@ -16,7 +16,8 @@ public class DevTestPatterns implements AllowedHost{
                 "https://api-systest.learnspace.africa",
                 "http://api-systest.learnspace.africa",
                 "https://systest-meedl.learnspace.africa",
-                "https://systest-meedl.learnspace.africa/"
+                "https://systest-meedl.learnspace.africa/",
+                "https://dev.dgm4f0hfsnbkz.amplifyapp.com/"
         };
     }
 }
