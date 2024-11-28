@@ -11,10 +11,13 @@ import org.springframework.stereotype.Component;
 public class DevTestPatterns implements AllowedHost{
     @Value("${dev}")
     private String allowedHost;
+    @Value("${dev2}")
+    private String allowedHost2;
     @Override
     public String[] getPatterns() {
         return new String[]{
-                allowedHost
+                allowedHost,
+                allowedHost2
         };
     }
 }
