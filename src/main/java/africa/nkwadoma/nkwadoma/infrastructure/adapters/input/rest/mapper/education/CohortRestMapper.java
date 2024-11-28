@@ -9,6 +9,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CohortRestMapper {
 
@@ -20,4 +22,6 @@ public interface CohortRestMapper {
     LoanBreakdownResponse toLoanBreakdownResponse(LoanBreakdown loanBreakdown);
 
     Cohort mapEditCohortRequestToCohort(EditCohortLoanDetailRequest editCohortLoanDetailRequest);
+
+    List<CohortResponse> toCohortResponses(List<Cohort> cohorts);
 }
