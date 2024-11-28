@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -140,5 +143,12 @@ public class MeedlValidator {
             userIdentity.getMeedlUser().validate();
         }
         log.info("Users identity validation completed... for user {} ", userIdentities);
+    }
+
+    public static void validateLoanRequest(LoanRequest foundLoanRequest) throws LoanException {
+        if (ObjectUtils.isEmpty(foundLoanRequest)){
+            log.info("Loan request: {}", foundLoanRequest);
+            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
+        }
     }
 }

@@ -61,7 +61,7 @@ class CohortServiceTest {
         elites = new Cohort();
         elites.setId(mockId);
         elites.setProgramId(program.getId());
-        elites.setName("Elite");
+        elites.setName("x-man");
         elites.setCreatedBy(mockId);
         elites.setStartDate(LocalDate.of(2024,11,29));
         elites.setExpectedEndDate(LocalDate.of( 2025,6,29));
@@ -217,23 +217,18 @@ class CohortServiceTest {
     @Order(6)
     @Test
     void searchForCohort() {
-        Cohort expectedCohort = new Cohort();
-        expectedCohort.setName(xplorers.getName());
-        expectedCohort.setProgramId(xplorers.getProgramId());
-        Cohort searchedCohort = new Cohort();
+        List<Cohort> searchedCohort = new ArrayList<>();
         try{
-            when(cohortOutputPort.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId()))
-                    .thenReturn(expectedCohort);
+            when(cohortOutputPort.searchForCohortInAProgram(anyString(), eq(xplorers.getProgramId())))
+                    .thenReturn(List.of(elites, xplorers));
 
-
-            searchedCohort = cohortService.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId());
+            searchedCohort = cohortService.searchForCohortInAProgram("x", xplorers.getProgramId());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
         assertNotNull(searchedCohort);
-        assertEquals(expectedCohort.getName(), searchedCohort.getName());
-        assertEquals(expectedCohort.getProgramId(), searchedCohort.getProgramId());
+        assertEquals(2, searchedCohort.size());
     }
 
     @Test
@@ -335,7 +330,7 @@ class CohortServiceTest {
             elites.setUpdatedBy(mockId);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.findCohort(elites.getId())).thenReturn(elites);
-            when(cohortOutputPort.findCohortByName(elites.getName())).thenReturn(elites);
+            when(cohortOutputPort.checkIfCohortExistWithName(elites.getName())).thenReturn(elites);
             when(loanBreakdownOutputPort.findAllByCohortId(elites.getId())).thenReturn(List.of(loanBreakdown));
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort editedCohort = cohortService.editCohort(elites);

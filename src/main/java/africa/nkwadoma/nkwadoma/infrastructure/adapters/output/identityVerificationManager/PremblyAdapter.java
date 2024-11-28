@@ -44,7 +44,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         log.info("Verification response entity: {}", responseEntity.getBody());
         return responseEntity.getBody();
     }
-
     private ResponseEntity<PremblyNinResponse> getIdentityDetailsByNin(IdentityVerification verificationRequest) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = getHttpHeaders();

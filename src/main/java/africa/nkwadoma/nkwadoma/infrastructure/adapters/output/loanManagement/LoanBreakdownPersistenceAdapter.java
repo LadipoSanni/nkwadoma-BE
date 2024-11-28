@@ -1,8 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanBreakdownMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanDetailMapper;
@@ -48,6 +50,13 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
         List<LoanBreakdownEntity> loanBreakdownEntities =
                 loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdown);
         loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
+        return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
+    }
+
+    @Override
+    public List<LoanBreakdown> finAllByLoaneeLoanDetailsId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        List<LoanBreakdownEntity> loanBreakdownEntities = loanBreakdownRepository.findAllByLoaneeLoanDetailId(id);
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
 

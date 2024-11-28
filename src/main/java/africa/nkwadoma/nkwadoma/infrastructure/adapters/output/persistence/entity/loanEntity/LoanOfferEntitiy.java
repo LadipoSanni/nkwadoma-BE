@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoanOfferEntitiy {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -25,6 +23,8 @@ public class LoanOfferEntitiy {
     private LoanOfferStatus loanOfferStatus;
     @OneToOne
     private LoanRequestEntity loanRequest;
+    @ManyToOne
+    private LoanProductEntity loanProduct;
     @ManyToOne
     private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;
