@@ -41,7 +41,7 @@ env:
   CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_BASE_URL }}
   TEST_BVN_VALUE: ${{ secrets.TEST_BVN_VALUE }}
   AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
-
+  DEV_FRONTEND_BASE_URL: http://localhost:3000
 
   
 jobs:
