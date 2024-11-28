@@ -158,7 +158,7 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/loan-requests/response")
+    @PostMapping("/loan-request/response")
     public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
             throws MeedlException {
         LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
