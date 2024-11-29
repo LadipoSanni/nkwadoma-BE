@@ -30,4 +30,5 @@ public class UserEntity {
     private String createdBy;
     private String reactivationReason;
     private String deactivationReason;
+    private String bvn;
 }

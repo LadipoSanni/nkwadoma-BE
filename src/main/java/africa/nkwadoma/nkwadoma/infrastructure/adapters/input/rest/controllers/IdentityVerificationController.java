@@ -30,16 +30,16 @@ public class IdentityVerificationController {
     @PostMapping("/token/verify")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(identityVerificationUseCase.isIdentityVerified(token))
+                .data(identityVerificationUseCase.verifyIdentity(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/identity/verify")
     public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
-        identityVerification = identityVerificationUseCase.verifyIdentity(identityVerification);
-        IdentityVerificationResponse identityVerificationResponse = identityVerificationMapper.toIdentityVerificationResponse(identityVerification);
-        return ResponseEntity.ok(ApiResponse.<IdentityVerificationResponse>builder()
-                .data(identityVerificationResponse)
+        String response = identityVerificationUseCase.verifyIdentity(identityVerification);
+//        IdentityVerificationResponse identityVerificationResponse = identityVerificationMapper.toIdentityVerificationResponse(identityVerification);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data(response)
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/failure-record/create")

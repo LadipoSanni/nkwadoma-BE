@@ -20,24 +20,13 @@ import java.util.regex.Pattern;
 public class IdentityVerification {
 
     private String identityId;
+    private String loanReferralId;
     private String bvn;
     private String nin;
     private String imageUrl;
     private String email;
     private String token;
     private IdentityVerificationEnum typeOfIdentity;
-
-    private String country;
-    private String IDType;
-    private String IDNumber;
-    private String fullName;
-    private String DOB;
-    private String photo;
-    private String phoneNumber;
-    private String gender;
-    private String address;
-
-
 
     public void validate() throws MeedlException {
         log.info("Validation starting bvn and nin");

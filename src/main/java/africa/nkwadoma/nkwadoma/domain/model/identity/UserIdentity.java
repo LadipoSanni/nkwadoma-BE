@@ -25,6 +25,7 @@ public class UserIdentity {
     private String lastName;
     private String phoneNumber;
     private boolean emailVerified;
+    private boolean isIdentityVerified;
     private boolean enabled;
     private String createdAt;
     private IdentityRole role;
@@ -39,6 +40,7 @@ public class UserIdentity {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+    private String bvn;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
