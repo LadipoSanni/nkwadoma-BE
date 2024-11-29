@@ -57,10 +57,9 @@ public class CohortController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewCohortDetails(
             @AuthenticationPrincipal Jwt meedlUser,
-            @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
 
-        Cohort cohort = cohortUseCase.viewCohortDetails(meedlUser.getClaimAsString("sub"), programId, cohortId);
+        Cohort cohort = cohortUseCase.viewCohortDetails(meedlUser.getClaimAsString("sub"), cohortId);
         CohortResponse cohortResponse =
                 cohortMapper.toCohortResponse(cohort);
         ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()

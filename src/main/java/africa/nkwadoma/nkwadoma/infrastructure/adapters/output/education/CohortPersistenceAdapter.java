@@ -43,16 +43,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
 
     @Override
-    public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
+    public Cohort viewCohortDetails(String userId, String cohortId) throws MeedlException {
         validateDataElement(userId);
-        validateDataElement(programId);
         validateDataElement(cohortId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity == null){
             throw new IdentityException(USER_NOT_FOUND.getMessage());
         }
-        List<ProgramCohort> programCohorts = programCohortOutputPort.findAllByProgramId(programId);
-        return getCohort(cohortId,programCohorts );
+        return findCohort(cohortId);
     }
 
     @Transactional

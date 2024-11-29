@@ -154,8 +154,8 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Cohort viewCohortDetails(String userId, String programId, String cohortId) throws MeedlException {
-        return cohortOutputPort.viewCohortDetails(userId, programId, cohortId);
+    public Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException {
+        return cohortOutputPort.viewCohortDetails(userId, cohortId);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
-        Cohort foundCohort = viewCohortDetails(userId, programId, cohortId);
+        Cohort foundCohort = viewCohortDetails(userId,cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort.getId());
         for (Loanee loanee : cohortLoanees) {
             try {

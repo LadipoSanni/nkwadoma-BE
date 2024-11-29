@@ -12,7 +12,7 @@ public interface CohortUseCase {
     Cohort createCohort(Cohort cohort)  throws MeedlException;
     Cohort editCohort(Cohort cohort) throws MeedlException;
 
-    Cohort viewCohortDetails(String createdBy, String id, String cohortId) throws MeedlException;
+    Cohort viewCohortDetails(String createdBy,  String cohortId) throws MeedlException;
 
     void deleteCohort(String id) throws MeedlException;
 
