@@ -109,6 +109,7 @@ public class OrganizationController {
     }
 
     @PostMapping("organization/deactivate")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());

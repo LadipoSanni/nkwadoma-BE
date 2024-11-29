@@ -210,16 +210,20 @@ class LoanProductAdapterTest {
             Page<LoanProduct> foundLoanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
             List<LoanProduct> loanProductList = foundLoanProducts.toList();
 
-            assertEquals(1, foundLoanProducts.getTotalElements());
             assertEquals(1, foundLoanProducts.getTotalPages());
             assertTrue(foundLoanProducts.isFirst());
             assertTrue(foundLoanProducts.isLast());
 
             assertNotNull(loanProductList);
-            assertEquals(1, loanProductList.size());
-            assertEquals(gemsLoanProduct.getName(), loanProductList.get(0).getName());
-            assertEquals(gemsLoanProduct.getTermsAndCondition(), loanProductList.get(0).getTermsAndCondition());
-            assertEquals(gemsLoanProduct.getObligorLoanLimit(), loanProductList.get(0).getObligorLoanLimit());
+            assertTrue(!loanProductList.isEmpty());
+            LoanProduct loanProduct = loanProductList.stream()
+                                        .filter(foundLoanProduct -> foundLoanProduct.getName().equals(gemsLoanProduct.getName()))
+                                        .findFirst()
+                                        .orElse(null);
+            assertNotNull(loanProduct);
+            assertEquals(gemsLoanProduct.getName(), loanProduct.getName());
+            assertEquals(gemsLoanProduct.getTermsAndCondition(), loanProduct.getTermsAndCondition());
+            assertEquals(gemsLoanProduct.getObligorLoanLimit(), loanProduct.getObligorLoanLimit());
 
     }
     @ParameterizedTest

@@ -22,15 +22,15 @@ public class IdentityVerification {
     private String identityId;
     private String bvn;
     private String nin;
+    private String imageUrl;
     private String email;
-    private String identityImage;
     private String token;
     private IdentityVerificationEnum typeOfIdentity;
 
     private String country;
     private String IDType;
     private String IDNumber;
-    private String  fullName;
+    private String fullName;
     private String DOB;
     private String photo;
     private String phoneNumber;
@@ -53,9 +53,9 @@ public class IdentityVerification {
         if (!pattern.matcher(this.nin).matches()) {
             throw new InvalidInputException("Please provide a valid nin");
         }
-
     }
-
-
+    public void validateImageUrl() throws MeedlException {
+        MeedlValidator.validateDataElement(this.imageUrl);
+    }
 }
 
