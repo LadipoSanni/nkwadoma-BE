@@ -111,7 +111,6 @@ public class CohortController {
                 .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
-
     @GetMapping("program/searchCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
