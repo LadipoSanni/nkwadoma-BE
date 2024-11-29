@@ -29,37 +29,45 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 public class IdentityVerificationService implements IdentityVerificationUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
-    private final IdentityVerificationRepository identityVerificationRepository;
+//    private final IdentityVerificationRepository identityVerificationRepository;
     private final IdentityVerificationMapper identityVerificationMapper;
     private final TokenUtils tokenUtils;
 
     @Override
-    public String isIdentityVerified(String token) throws MeedlException, IdentityVerificationException {
+    public String isIdentityVerified(String token) throws MeedlException {
         String email = tokenUtils.decodeJWTGetEmail(token);
-        String id = tokenUtils.decodeJWTGetId(token);
+        String loanReferralId = tokenUtils.decodeJWTGetId(token);
         MeedlValidator.validateEmail(email);
-
-        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByEmailAndStatus(email, IdentityVerificationStatus.VERIFIED);
-        if (optionalVerifiedIdentity.isPresent()) {
+        checkIfAboveThreshold(loanReferralId);
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        if (!userIdentity.isIdentityVerified()) {
+            addedToLoaneeLoan(loanReferralId);
+            log.info("Identity: Email {}. Loan referral id {}. Verified ", email, loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
+        } else {
+            log.info("Identity: Email {}. Loan referral id {}, not verified ", email, loanReferralId);
+            return IDENTITY_NOT_VERIFIED.getMessage();
         }
-        checkIfAboveThreshold(id);
-        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
-        return IDENTITY_NOT_VERIFIED.getMessage();
     }
+
+    private void addedToLoaneeLoan(String loanReferralId) {
+
+    }
+
     @Override
-    public String isIdentityVerified(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
+    public String isIdentityVerified(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        identityVerification.validate();
-        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+        String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+        checkIfAboveThreshold(identityVerification.getLoanReferralId());
+//        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
+//        if (optionalVerifiedIdentity.isPresent()) {
+//            return IDENTITY_VERIFIED.getMessage();
+//        }
 
-        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
-        if (optionalVerifiedIdentity.isPresent()) {
-            return IDENTITY_VERIFIED.getMessage();
-        }
-        checkIfAboveThreshold(id);
 
-        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
+
+
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",bvn));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
     @Override
@@ -67,14 +75,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(smileIdVerification);
         IdentityVerificationEntity identityVerificationEntity = identityVerificationMapper.mapToIdentityVerificationEntity(smileIdVerification);
         identityVerificationEntity.setStatus(IdentityVerificationStatus.VERIFIED);
-        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
+//        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
         return identityVerificationMapper.mapToIdentityVerification(identityVerificationEntity);
     }
-    private void checkIfAboveThreshold(String id) throws IdentityVerificationException {
-        Long numberOfAttempts = identityVerificationRepository.countByReferralId(id);
+    private void checkIfAboveThreshold(String loanReferralId) throws IdentityVerificationException {
+        Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByReferralId(loanReferralId);
         if (numberOfAttempts >= 5L){
-            log.error("You have reached the maximum number of verification attempts for this referral code: {}", id);
-            throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", id));
+            log.error("You have reached the maximum number of verification attempts for this referral code: {}", loanReferralId);
+            throw new IdentityVerificationException(String.format("You have reached the maximum number of verification attempts for this referral code: %s", loanReferralId));
         }
     }
 

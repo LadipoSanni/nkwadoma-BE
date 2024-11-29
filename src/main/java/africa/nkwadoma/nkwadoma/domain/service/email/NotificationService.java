@@ -54,13 +54,13 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
-        log.info("Generated token with only email ... {}", token);
+        log.info("Generated token {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
-    private String getLink(UserIdentity userIdentity, String loanReferralId) throws MeedlException {
-        String token = tokenUtils.generateToken(userIdentity.getEmail(), loanReferralId);
-        log.info("Generated token with id attached... {}", token);
-        return baseUrl + CREATE_PASSWORD_URL + token;
+
+    private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
+        String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
+        return baseUrl + CREATE_PASSWORD_URL + token ;
     }
 
     private void sendMail(UserIdentity userIdentity, Email email) {
@@ -72,21 +72,21 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     }
 
     @Override
-    public void referLoaneeEmail(LoanReferral loanReferral) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(
-                                                                getLink(loanReferral.getLoanee().getUserIdentity(),
-                                                                loanReferral.getId()),
-                                                                loanReferral.getLoanee().getUserIdentity().getFirstName(),
-                                                                loanReferral.getLoanee().getReferredBy());
+    public void referLoaneeEmail(Loanee loanee,String loaneeReferralId) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLinkForLoanReferral(loanee.getUserIdentity(),loaneeReferralId),
+                                                            loanee.getUserIdentity().getFirstName(),
+                                                                loanee.getReferredBy());
         Email email = Email.builder()
                 .context(context)
                 .subject(LOANEE_REFERRAL_SUBJECT.getMessage())
-                .to(loanReferral.getLoanee().getUserIdentity().getEmail())
+                .to(loanee.getUserIdentity().getEmail())
                 .template(LOANEE_REFERRAL.getMessage())
-                .firstName(loanReferral.getLoanee().getUserIdentity().getFirstName())
+                .firstName(loanee.getUserIdentity().getFirstName())
                 .build();
-        sendMail(loanReferral.getLoanee().getUserIdentity(), email);
+        sendMail(loanee.getUserIdentity(), email);
     }
+
+
 
     @Override
     public void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException {
