@@ -4,34 +4,36 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
+
 
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
-  EMAILS: >-
-    sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,
-    t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,
-    ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa
+  CLUSTER: learnspace-africa
+  SERVICE: learnspace-backend-systest
+  EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Build the application
+        env:
+          CREDIT_REGISTRY_EMAIL: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
+          CREDIT_REGISTRY_SUBSCRIBER_ID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
+          CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
+          CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
+          TEST_BVN: ${{ secrets.TEST_BVN_VALUE }}
         run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
@@ -53,15 +55,19 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CREDIT_REGISTRY_EMAIL: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
+      CREDIT_REGISTRY_SUBSCRIBER_ID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
+      CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
+      CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
     needs: build-and-push
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: SSH to EC2 and Deploy Docker Container
         env:
@@ -77,18 +83,14 @@ jobs:
           chmod 600 QA-KP.pem
           ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
           set -e
-          AWS_REGION="us-east-1"
-          AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
-          ECR_REPOSITORY="nkwadoma"
-          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-          IMAGE_TAG="alpha"
-
+          echo "SSH connection established!"
+              
           echo "Authenticating with ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-
+              
           echo "Fetching environment variables from S3..."
           aws s3 cp s3://$S3_BUCKET_NAME/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region $S3_REGION
-
+              
           echo "Pulling the latest image..."
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
@@ -96,14 +98,55 @@ jobs:
           sudo fuser -k 8768/tcp || true
 
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
-            docker stop nkwadoma-container || true
-            docker rm nkwadoma-container || true
+             docker stop nkwadoma-container || true
+             docker rm nkwadoma-container || true
           fi
-
-          echo "Starting the new container..."
+              
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
 
           docker system prune -af --filter "until=24h" || true
           EOF
+
+  send_notification:
+    name: Send Email Notification
+    needs: [build-and-push, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send success email notification
+        if: success()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          echo "Sending success email..."
+          chmod +x .github/workflows/scripts/send_success_email.sh
+          .github/workflows/scripts/send_success_email.sh \
+            "$SMTP_SERVER" \
+            "$SMTP_PORT" \
+            "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" \
+            "${{ env.EMAILS }}" \
+            "Success Notification"
+      - name: Send failure email notification
+        if: failure()
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          echo "Sending failure email..."
+          chmod +x .github/workflows/scripts/send_failure_email.sh
+          .github/workflows/scripts/send_failure_email.sh \
+            "$SMTP_SERVER" \
+            "$SMTP_PORT" \
+            "$SMTP_USERNAME" \
+            "$SMTP_PASSWORD" \
+            "${{ env.EMAILS }}" \
+            "Failure Notification"
