@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.*;
 import java.util.List;
 
 @Setter
@@ -25,6 +26,11 @@ public class OrganizationResponse {
     private String phoneNumber;
     private int numberOfPrograms;
     private String createdBy;
+    private int numberOfLoanees;
+    private BigDecimal totalDebtRepaid;
+    private BigDecimal totalCurrentDebt;
+    private BigDecimal totalHistoricalDebt;
+    private double repaymentRate;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
 //    private List<ServiceOffering> serviceOfferings;
