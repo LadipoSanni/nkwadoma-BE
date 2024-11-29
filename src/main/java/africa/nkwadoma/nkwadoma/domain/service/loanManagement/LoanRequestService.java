@@ -23,18 +23,6 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
 
-
-//    @Override
-//    public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
-//        MeedlValidator.validateObjectInstance(loanRequest);
-//        loanRequest.validate();
-//        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
-//        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-//            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
-//        }
-//        return loanRequestOutputPort.save(loanRequest);
-//    }
-
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
