@@ -28,6 +28,12 @@ public class TokenUtils {
         return buildJwt(email, claims);
     }
 
+    public String generateToken(String email, String id) throws MeedlException {
+        MeedlValidator.validateEmail(email);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", id);
+        return buildJwt(email + id, claims);
+    }
     private String buildJwt(String email, Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -36,13 +42,6 @@ public class TokenUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public String generateToken(String email, String id) throws MeedlException {
-        MeedlValidator.validateEmail(email);
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", id);
-        return buildJwt(email + id, claims);
     }
 
     private Key getSignKey() {
