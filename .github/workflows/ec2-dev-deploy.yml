@@ -81,34 +81,46 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
-          ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
           set -e
+      
           echo "SSH connection established!"
-              
+          
+          # Define variables
+          AWS_REGION="us-east-1"
+          AWS_ACCOUNT_ID="${AWS_ACCESS_KEY_ID}"
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          ECR_REPOSITORY="nkwadoma"
+          IMAGE_TAG="alpha"
+      
           echo "Authenticating with ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-              
+      
           echo "Fetching environment variables from S3..."
           aws s3 cp s3://$S3_BUCKET_NAME/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region $S3_REGION
-              
+      
           echo "Pulling the latest image..."
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
+      
           echo "Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
-
+      
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
-             docker stop nkwadoma-container || true
-             docker rm nkwadoma-container || true
+            echo "Stopping and removing existing container..."
+            docker stop nkwadoma-container || true
+            docker rm nkwadoma-container || true
           fi
-              
+      
+          echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
-
+      
+          echo "Cleaning up unused Docker resources..."
           docker system prune -af --filter "until=24h" || true
+      
           EOF
+
 
   send_notification:
     name: Send Email Notification
