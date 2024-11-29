@@ -99,24 +99,29 @@ jobs:
           echo "Fetching environment variables from S3..."
           aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
       
+          # Pull the latest Docker image
           echo "Pulling the latest image..."
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.IMAGE_TAG }}
-      
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          # Free port 8768 if it's in use
           echo "Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
-      
+              
+          # Check if the container exists
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
-            echo "Stopping and removing existing container..."
-            docker stop nkwadoma-container || true
-            docker rm nkwadoma-container || true
+             echo "Stopping and removing existing container..."
+             docker stop nkwadoma-container || true
+             docker rm nkwadoma-container || true
+             echo "Stopped and removed containers."
           fi
-      
+              
+          # Run the new container
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
-              $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
-              # $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG              
-          echo "Cleaning up unused Docker resources..."
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          echo "Container started successfully!"
+          # Clean up unused Docker resources without affecting running containers
+          echo "Performing safe Docker cleanup..."
           docker system prune -af --filter "until=24h" || true
       
           EOF
