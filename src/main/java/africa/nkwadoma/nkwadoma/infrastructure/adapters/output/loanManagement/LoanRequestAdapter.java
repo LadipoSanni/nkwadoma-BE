@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -38,7 +37,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         if (loanRequestProjection.isEmpty()) {
             return Optional.empty();
         }
-        LoanRequest loanRequest = loanRequestMapper.loanRequestProjectionToLoanRequest(loanRequestProjection.get());
+        LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection.get());
         log.info("Mapped Loan request: {}", loanRequest);
         return Optional.of(loanRequest);
     }
@@ -54,6 +53,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
-        return loanRequests.map(loanRequestMapper::loanRequestProjectionToLoanRequest);
+        return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
 }
