@@ -64,7 +64,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         }
 
 
-        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",id));
+        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",bvn));
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
     @Override
