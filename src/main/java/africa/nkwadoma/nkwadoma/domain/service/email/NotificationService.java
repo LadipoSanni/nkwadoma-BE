@@ -57,6 +57,11 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 
+    private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
+        String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
+        return baseUrl + CREATE_PASSWORD_URL + token ;
+    }
+
     private void sendMail(UserIdentity userIdentity, Email email) {
         try {
             emailOutputPort.sendEmail(email);
@@ -66,8 +71,8 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     }
 
     @Override
-    public void referLoaneeEmail(Loanee loanee) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(loanee.getUserIdentity()),
+    public void referLoaneeEmail(Loanee loanee,String loaneeReferralId) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLinkForLoanReferral(loanee.getUserIdentity(),loaneeReferralId),
                                                             loanee.getUserIdentity().getFirstName(),
                                                                 loanee.getReferredBy());
         Email email = Email.builder()
@@ -79,6 +84,8 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .build();
         sendMail(loanee.getUserIdentity(), email);
     }
+
+
 
     @Override
     public void sendLoaneeHasBeenReferEmail(UserIdentity userIdentity) throws MeedlException {

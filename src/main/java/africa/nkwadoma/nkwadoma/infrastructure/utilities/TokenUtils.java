@@ -25,13 +25,13 @@ public class TokenUtils {
     public String generateToken(String email) throws MeedlException {
         MeedlValidator.validateEmail(email);
         Map<String, Object> claims = new HashMap<>();
-        return buildJwt(email, claims);
+        claims.put("email", email);
+        return buildJwt(claims);
     }
 
-    private String buildJwt(String email, Map<String, Object> claims) {
+    private String buildJwt(Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
@@ -42,7 +42,8 @@ public class TokenUtils {
         MeedlValidator.validateEmail(email);
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", id);
-        return buildJwt(email + id, claims);
+        claims.put("email", email);
+        return buildJwt(claims);
     }
 
     private Key getSignKey() {
@@ -54,7 +55,7 @@ public class TokenUtils {
         MeedlValidator.validateDataElement(token);
         Claims claims;
         claims = getClaims(token);
-        return claims.getSubject();
+        return claims.get("email").toString();
     }
     public String decodeJWTGetId(String token) throws MeedlException {
         MeedlValidator.validateDataElement(token);

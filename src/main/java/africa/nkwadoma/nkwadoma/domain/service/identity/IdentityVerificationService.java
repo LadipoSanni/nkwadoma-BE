@@ -51,6 +51,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
 
     private void addedToLoaneeLoan(String loanReferralId) {
+
     }
 
     @Override
@@ -59,9 +60,9 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
 //        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
-        if (optionalVerifiedIdentity.isPresent()) {
-            return IDENTITY_VERIFIED.getMessage();
-        }
+//        if (optionalVerifiedIdentity.isPresent()) {
+//            return IDENTITY_VERIFIED.getMessage();
+//        }
 
 
         log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(" bvn/nin ",bvn));
@@ -72,7 +73,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(smileIdVerification);
         IdentityVerificationEntity identityVerificationEntity = identityVerificationMapper.mapToIdentityVerificationEntity(smileIdVerification);
         identityVerificationEntity.setStatus(IdentityVerificationStatus.VERIFIED);
-        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
+//        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
         return identityVerificationMapper.mapToIdentityVerification(identityVerificationEntity);
     }
     private void checkIfAboveThreshold(String loanReferralId) throws IdentityVerificationException {
