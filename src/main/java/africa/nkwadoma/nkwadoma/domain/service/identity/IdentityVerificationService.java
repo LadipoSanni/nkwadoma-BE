@@ -52,7 +52,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
-
+        String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+//        checkIfAboveThreshold(identityVerification);
         Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
         if (optionalVerifiedIdentity.isPresent()) {
             return IDENTITY_VERIFIED.getMessage();
