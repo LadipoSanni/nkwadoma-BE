@@ -34,24 +34,30 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private final TokenUtils tokenUtils;
 
     @Override
-    public String isIdentityVerified(String token) throws MeedlException, IdentityVerificationException {
+    public String isIdentityVerified(String token) throws MeedlException {
         String email = tokenUtils.decodeJWTGetEmail(token);
-        String id = tokenUtils.decodeJWTGetId(token);
+        String loanReferralId = tokenUtils.decodeJWTGetId(token);
         MeedlValidator.validateEmail(email);
-
-        Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByEmailAndStatus(email, IdentityVerificationStatus.VERIFIED);
-        if (optionalVerifiedIdentity.isPresent()) {
+        checkIfAboveThreshold(loanReferralId);
+        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        if (!userIdentity.isIdentityVerified()) {
+            addedToLoaneeLoan(loanReferralId);
+            log.info("Identity: Email {}. Loan referral id {}. Verified ", email, loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
+        } else {
+            log.info("Identity: Email {}. Loan referral id {}, not verified ", email, loanReferralId);
+            return IDENTITY_NOT_VERIFIED.getMessage();
         }
-        checkIfAboveThreshold(id);
-        log.info(IDENTITY_PREVIOUSLY_VERIFIED.format(email, id));
-        return IDENTITY_NOT_VERIFIED.getMessage();
     }
+
+    private void addedToLoaneeLoan(String loanReferralId) {
+    }
+
     @Override
     public String isIdentityVerified(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
-        String id = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+        String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
 
         Optional<IdentityVerificationEntity> optionalVerifiedIdentity = identityVerificationRepository.findByBvnAndStatus(identityVerification.getBvn(), IdentityVerificationStatus.VERIFIED);
         if (optionalVerifiedIdentity.isPresent()) {

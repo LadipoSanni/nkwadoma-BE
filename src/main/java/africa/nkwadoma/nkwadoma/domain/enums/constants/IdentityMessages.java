@@ -34,12 +34,12 @@ public enum IdentityMessages{
     ACCOUNT_ALREADY_DISABLED("Account is not currently enabled"),
     INVALID_EMAIL_OR_PASSWORD("Invalid email or password"),
     ORGANIZATION_EMPLOYEE_NOT_FOUND("Organization employee not found!"),
-    IDENTITY_VERIFIED("Identity verified"),
     BLACKLISTED_REFERRAL("Referral Blacklisted"),
     IDENTITY_VERIFICATION_FAILURE_SAVED("Verification failure saved successfully"),
     IDENTITY_VERIFICATION_PROCESSING("Identity verification is being processed"),
     IDENTITY_PREVIOUSLY_VERIFIED("User email verification: %s has not been verified previously %s "),
-    IDENTITY_NOT_VERIFIED("Identity not verified"),
+    IDENTITY_VERIFIED("Identity Verified"),
+    IDENTITY_NOT_VERIFIED("Identity Not Verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
     LOANEE_NOT_FOUND("Loanee not found");
 

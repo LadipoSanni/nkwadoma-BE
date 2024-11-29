@@ -25,6 +25,7 @@ public class UserIdentity {
     private String lastName;
     private String phoneNumber;
     private boolean emailVerified;
+    private boolean isIdentityVerified;
     private boolean enabled;
     private String createdAt;
     private IdentityRole role;
