@@ -187,6 +187,7 @@ class LoanRequestAdapterTest {
 
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanee.setUserIdentity(savedUserIdentity);
+            loanee.setCohortId(cohort.getId());
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();

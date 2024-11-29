@@ -38,7 +38,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         if (loanRequestProjection.isEmpty()) {
             return Optional.empty();
         }
-        log.info("Found loan request projection: {}", loanRequestProjection.get());
         LoanRequest loanRequest = loanRequestMapper.loanRequestProjectionToLoanRequest(loanRequestProjection.get());
         log.info("Mapped Loan request: {}", loanRequest);
         return Optional.of(loanRequest);

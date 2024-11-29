@@ -2,12 +2,14 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Getter
 @Setter
@@ -36,6 +38,7 @@ public class LoanRequest {
     private LoanRequestStatus status;
     private Loanee loanee;
     private LoaneeLoanDetail loaneeLoanDetail;
+    private List<LoanBreakdown> loanBreakdowns;
     private String alternateEmail;
     private String alternateContactAddress;
     private String alternatePhoneNumber;
