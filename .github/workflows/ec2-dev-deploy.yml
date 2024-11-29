@@ -7,7 +7,7 @@ on:
 
 
 env:
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  REPO_URL: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
   CLUSTER: learnspace-africa
@@ -88,8 +88,8 @@ jobs:
           
           # Define variables
           AWS_REGION="us-east-1"
-          AWS_ACCOUNT_ID="${AWS_ACCESS_KEY_ID}"
-          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          AWS_ACCOUNT_ID="$AWS_ACCESS_KEY_ID"
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com"
           ECR_REPOSITORY="nkwadoma"
           IMAGE_TAG="alpha"
       
@@ -114,7 +114,7 @@ jobs:
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+              $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
               # $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG              
           echo "Cleaning up unused Docker resources..."
           docker system prune -af --filter "until=24h" || true
