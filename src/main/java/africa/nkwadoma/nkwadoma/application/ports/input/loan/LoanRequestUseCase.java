@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import org.springframework.data.domain.*;
 
 public interface LoanRequestUseCase {
-//    LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException;
     Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException;
     LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException;
     LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException;

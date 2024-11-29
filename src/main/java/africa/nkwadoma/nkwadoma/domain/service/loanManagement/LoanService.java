@@ -145,6 +145,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         return loanRequestOutputPort.save(loanRequest);
     }
+
     @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
         LoanOffer loanOffer = new LoanOffer();

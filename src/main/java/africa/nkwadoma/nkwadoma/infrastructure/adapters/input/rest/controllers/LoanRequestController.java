@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
@@ -17,8 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
 @RequestMapping(BASE_URL + LOAN)
 @RequiredArgsConstructor
@@ -27,7 +27,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanRequestController {
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanRequestRestMapper loanRequestRestMapper;
-
 
     @GetMapping("/loan-requests")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
@@ -65,6 +64,21 @@ public class LoanRequestController {
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/loan-request/response")
+    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
+            throws MeedlException {
+        LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
+        loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
+        LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
+        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
+                <LoanRequestResponse>builder()
+                .data(loanRequestResponse)
+                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

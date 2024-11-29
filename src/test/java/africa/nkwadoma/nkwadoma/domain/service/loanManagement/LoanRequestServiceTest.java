@@ -32,12 +32,12 @@ class LoanRequestServiceTest {
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
-    private LoanOfferUseCase loanOfferUseCase;
-    @Mock
     private LoanProductOutputPort loanProductOutputPort;
-    private LoanService loanService;
+    @Mock
+    private LoanOfferUseCase loanOfferUseCase;
     private LoanRequest loanRequest;
     private LoanOffer loanOffer;
+    private LoanProduct loanProduct;
 
     @BeforeEach
     void setUp() {
@@ -48,67 +48,13 @@ class LoanRequestServiceTest {
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
-        LoanProduct loanProduct = TestData.buildLoanProduct("Test Loan Product - unit testing within application");
+        loanProduct = TestData.buildLoanProduct("Test Loan Product - unit testing within application");
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
 
         loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
     }
-
-//    @Test
-//    void createLoanRequest() {
-//        try {
-//            when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
-//            LoanRequest createdLoanRequest = loanRequestService.createLoanRequest(loanRequest);
-//
-//            verify(loanRequestOutputPort, times(1)).save(loanRequest);
-//            assertNotNull(createdLoanRequest);
-//        } catch (MeedlException e) {
-//            log.error("", e);
-//        }
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNullLoanReferralStatus() {
-//        loanRequest.setLoanReferralStatus(null);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNonAcceptedLoanReferralStatus() {
-//        loanRequest.setLoanReferralStatus(LoanReferralStatus.DECLINED);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
-//
-//    @Test
-//    void createNullLoanRequest() {
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(null));
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNullLoanee() {
-//        loanRequest.setLoanee(null);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNullLoanAmountRequested() {
-//        loanRequest.setLoanAmountRequested(null);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNullLoanRequestStatus() {
-//        loanRequest.setStatus(null);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
-//
-//    @Test
-//    void createLoanRequestWithNullLoaneeLoanDetail() {
-//        loanRequest.getLoanee().setLoaneeLoanDetail(null);
-//        assertThrows(MeedlException.class, ()-> loanRequestService.createLoanRequest(loanRequest));
-//    }
 
     @Test
     void viewLoanRequestById() {
@@ -163,24 +109,22 @@ class LoanRequestServiceTest {
 
     @Test
     void approveLoanRequest() {
-        LoanRequest savedLoanRequest;
         try {
-            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
-            savedLoanRequest = loanService.createLoanRequest(loanRequest);
+            LoanRequest loanRequestDto = new LoanRequest();
+            loanRequestDto.setLoanProductId(loanRequest.getLoanProductId());
+            loanRequestDto.setId(loanRequest.getId());
+            loanRequestDto.setLoanRequestDecision(LoanDecision.ACCEPTED);
+            loanRequestDto.setLoanAmountApproved(new BigDecimal("500000"));
 
-            LoanRequest approvedLoanRequest = new LoanRequest();
-            approvedLoanRequest.setLoanProductId(loanRequest.getLoanProductId());
-            approvedLoanRequest.setId(savedLoanRequest.getId());
-            approvedLoanRequest.setLoanAmountApproved(new BigDecimal("500000"));
-            approvedLoanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
-
-            when(loanRequestOutputPort.findById(approvedLoanRequest.getId())).thenReturn(Optional.of(savedLoanRequest));
+            when(loanRequestOutputPort.findById(anyString())).thenReturn(Optional.of(loanRequest));
+            when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
-            approvedLoanRequest = loanRequestService.respondToLoanRequest(approvedLoanRequest);
+            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            loanRequestDto = loanRequestService.respondToLoanRequest(loanRequestDto);
 
-            assertNotNull(approvedLoanRequest);
-            assertEquals(LoanRequestStatus.APPROVED, approvedLoanRequest.getStatus());
-            assertEquals(approvedLoanRequest.getLoanAmountApproved(), BigDecimal.valueOf(500000));
+            assertNotNull(loanRequestDto);
+            assertEquals(LoanRequestStatus.APPROVED, loanRequestDto.getStatus());
+            assertEquals(loanRequestDto.getLoanAmountApproved(), BigDecimal.valueOf(500000));
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);
         }
