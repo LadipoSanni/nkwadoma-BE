@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,7 +36,11 @@ public class OrganizationIdentity {
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
-
+    private int numberOfLoanees;
+    private BigDecimal totalDebtRepaid;
+    private BigDecimal totalCurrentDebt;
+    private BigDecimal totalHistoricalDebt;
+    private double repaymentRate;
     private int pageSize;
     private int pageNumber;
 
