@@ -20,7 +20,6 @@ import java.util.*;
 @Slf4j
 public class LoanRequestAdapter implements LoanRequestOutputPort {
     private final LoanRequestRepository loanRequestRepository;
-    private final NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     private final LoanRequestMapper loanRequestMapper;
 
     @Override

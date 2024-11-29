@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Setter
 @Getter
