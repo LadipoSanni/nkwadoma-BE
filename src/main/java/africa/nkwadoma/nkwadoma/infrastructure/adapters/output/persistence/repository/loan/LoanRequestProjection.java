@@ -13,9 +13,16 @@ public interface LoanRequestProjection {
     BigDecimal getLoanAmountRequested();
     LocalDateTime getCreatedDate();
     BigDecimal getInitialDeposit();
+    BigDecimal getTuitionAmount();
     LocalDate getCohortStartDate();
     String getProgramName();
     String getAlternatePhoneNumber();
     String getAlternateEmail();
     String getAlternateContactAddress();
+    String getNextOfKinFirstName();
+    String getNextOfKinLastName();
+    String getNextOfKinEmail();
+    String getNextOfKinContactAddress();
+    String getNextOfKinRelationship();
+    String getNextOfKinPhoneNumber();
 }

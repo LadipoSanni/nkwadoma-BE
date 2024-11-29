@@ -27,11 +27,16 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
           select
                  lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, l.userIdentity.alternateContactAddress as alternateContactAddress,
                  l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber, o.name as referredBy, l.id as loaneeId,
-                 lr.loanAmountRequested as loanAmountRequested, l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.name as cohortName, p.name as programName
+                 l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.name as cohortName,
+                 p.name as programName, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
+                 n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship, lb,
+                 l.loaneeLoanDetail.amountRequested as loanAmountRequested, l.loaneeLoanDetail.tuitionAmount as tuitionAmount, lr.createdDate as createdDate
 
           from LoanRequestEntity lr
           join LoaneeEntity l on lr.loaneeEntity.id = l.id
           join CohortEntity c on l.cohortId = c.id
+          join NextOfKinEntity n on l.id = n.loaneeEntity.id
+          join LoanBreakdownEntity lb on c.id = lb.cohort.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationEntity.id = o.id
           where lr.id = :id

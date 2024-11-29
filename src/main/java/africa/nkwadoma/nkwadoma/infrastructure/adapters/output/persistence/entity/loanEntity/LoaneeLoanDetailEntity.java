@@ -18,4 +18,5 @@ public class LoaneeLoanDetailEntity {
     private String id;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private BigDecimal tuitionAmount;
 }

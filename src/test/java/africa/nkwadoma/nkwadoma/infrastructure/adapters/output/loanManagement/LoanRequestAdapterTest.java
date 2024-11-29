@@ -342,6 +342,12 @@ class LoanRequestAdapterTest {
             assertNotNull(foundLoanRequest.get().getInitialDeposit());
             assertEquals("Adeshina", foundLoanRequest.get().getFirstName());
             assertEquals("Qudus", foundLoanRequest.get().getLastName());
+            assertEquals("Ahmad", foundLoanRequest.get().getNextOfKin().getFirstName());
+            assertEquals("Doe", foundLoanRequest.get().getNextOfKin().getLastName());
+            assertEquals("0785678901", foundLoanRequest.get().getNextOfKin().getPhoneNumber());
+            assertEquals("ahmad12@gmail.com", foundLoanRequest.get().getNextOfKin().getEmail());
+            assertEquals("Brother", foundLoanRequest.get().getNextOfKin().getNextOfKinRelationship());
+            assertEquals("2, Spencer Street, Yaba, Lagos", foundLoanRequest.get().getNextOfKin().getContactAddress());
         } catch (MeedlException e) {
             log.error("", e);
         }
