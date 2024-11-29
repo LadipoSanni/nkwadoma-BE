@@ -114,8 +114,8 @@ jobs:
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
-              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+              # $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG              
           echo "Cleaning up unused Docker resources..."
           docker system prune -af --filter "until=24h" || true
       
