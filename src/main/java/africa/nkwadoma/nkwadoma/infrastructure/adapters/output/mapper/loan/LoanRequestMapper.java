@@ -14,6 +14,7 @@ public interface LoanRequestMapper {
     @InheritInverseConfiguration
     LoanRequest toLoanRequest(LoanRequestEntity loanRequestEntity);
 
+    @Mapping(target = "nextOfKin.id", source = "nextOfKinId")
     @Mapping(target = "nextOfKin.firstName", source = "nextOfKinFirstName")
     @Mapping(target = "nextOfKin.lastName", source = "nextOfKinLastName")
     @Mapping(target = "nextOfKin.email", source = "nextOfKinEmail")

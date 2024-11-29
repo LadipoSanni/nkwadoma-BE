@@ -20,6 +20,7 @@ public interface LoanRequestProjection {
     String getAlternatePhoneNumber();
     String getAlternateEmail();
     String getAlternateContactAddress();
+    String getNextOfKinId();
     String getNextOfKinFirstName();
     String getNextOfKinLastName();
     String getNextOfKinEmail();

@@ -26,7 +26,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
                  lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, l.userIdentity.alternateContactAddress as alternateContactAddress,
                  l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber, o.name as referredBy, l.id as loaneeId,
                  l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, c.name as cohortName, l.userIdentity.image as loaneeImage,
-                 p.name as programName, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
+                 p.name as programName, n.id as nextOfKinId, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
                  n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship,
                  l.loaneeLoanDetail.amountRequested as loanAmountRequested, l.loaneeLoanDetail.tuitionAmount as tuitionAmount, lr.createdDate as createdDate
 
