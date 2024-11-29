@@ -74,25 +74,17 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-          IMAGE_TAG: alpha
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           S3_BUCKET_NAME: semicolon-delivery
           S3_REGION: eu-west-1
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
-          ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << EOF
+          ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
           set -e
           echo "SSH connection established!"
               
-          echo "Exporting environment variables..."
-          export AWS_REGION="${AWS_REGION}"
-          export ECR_REGISTRY="${ECR_REGISTRY}"
-          export ECR_REPOSITORY="${ECR_REPOSITORY}"
-          export IMAGE_TAG="${IMAGE_TAG}"
-
           echo "Authenticating with ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
               
@@ -113,10 +105,10 @@ jobs:
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
 
           docker system prune -af --filter "until=24h" || true
           EOF
-
 
   send_notification:
     name: Send Email Notification

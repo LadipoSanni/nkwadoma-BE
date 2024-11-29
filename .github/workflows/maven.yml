@@ -11,6 +11,8 @@ name: Java CI with Maven
 on:
   pull_request:
     branches: ["main", "dev", "prod-support"]
+  push:
+    branches: ["main", "dev", "prod-support"]  
 
 env:
   KEYCLOAK_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
