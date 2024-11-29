@@ -5,7 +5,6 @@ on:
     branches:
       - dev
 
-
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
@@ -17,23 +16,18 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Build the application
-        env:
-          CREDIT_REGISTRY_EMAIL: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
-          CREDIT_REGISTRY_SUBSCRIBER_ID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
-          CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
-          CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
-          TEST_BVN: ${{ secrets.TEST_BVN_VALUE }}
         run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
@@ -51,48 +45,36 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: alpha
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
-    env:
-      CREDIT_REGISTRY_EMAIL: ${{ secrets.CREDIT_REGISTRY_EMAIL_ADDRESS }}
-      CREDIT_REGISTRY_SUBSCRIBER_ID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
-      CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
-      CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
     needs: build-and-push
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: SSH to EC2 and Deploy Docker Container
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-          IMAGE_TAG: alpha
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           S3_BUCKET_NAME: semicolon-delivery
           S3_REGION: eu-west-1
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
-          ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << EOF
+          ssh -t -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
           set -e
           echo "SSH connection established!"
               
-          echo "Exporting environment variables..."
-          export AWS_REGION="${AWS_REGION}"
-          export ECR_REGISTRY="${ECR_REGISTRY}"
-          export ECR_REPOSITORY="${ECR_REPOSITORY}"
-          export IMAGE_TAG="${IMAGE_TAG}"
-
           echo "Authenticating with ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
               
@@ -113,18 +95,37 @@ jobs:
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
 
           docker system prune -af --filter "until=24h" || true
           EOF
 
-
+         
   send_notification:
     name: Send Email Notification
     needs: [build-and-push, deploy]
     runs-on: ubuntu-latest
     if: always()
+  
     steps:
-      - name: Send success email notification
+      - uses: actions/checkout@v3
+
+      - name: Set environment variables
+        run: |
+          PROJECT_NAME="NKWADOMA"
+          echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          if [ -n "${{ github.head_ref }}" ]; then
+            echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+          fi
+          echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GITHUB_ENV
+          sanitized_commit_message=$(git log -1 --pretty=%B | tr -d '\n' | tr -d '\r')
+          echo "COMMIT_MESSAGE=${sanitized_commit_message}" >> $GITHUB_ENV
+          commit_message_summary=$(git log -1 --pretty=%s | tr -d '\n' | tr -d '\r')
+          CUSTOM_TAG="${PROJECT_NAME}-${BRANCH_NAME}-${commit_message_summary// /_}"
+          echo "TAG=${CUSTOM_TAG}" >> $GITHUB_ENV
+      - name: Send build success email notification
         if: success()
         env:
           SMTP_SERVER: semicolon.africa
@@ -140,8 +141,13 @@ jobs:
             "$SMTP_USERNAME" \
             "$SMTP_PASSWORD" \
             "${{ env.EMAILS }}" \
-            "Success Notification"
-      - name: Send failure email notification
+            "${{ env.TAG }}" \
+            "${{ env.BRANCH_NAME }}" \
+            "${{ env.COMMIT_AUTHOR }}" \
+            "BUILD_REPORT_URL_SET" \
+            "AUTOMATION_TEST_URL_SET" \
+            "${{ env.COMMIT_MESSAGE }}"
+      - name: Send build failure email notification
         if: failure()
         env:
           SMTP_SERVER: semicolon.africa
@@ -157,4 +163,9 @@ jobs:
             "$SMTP_USERNAME" \
             "$SMTP_PASSWORD" \
             "${{ env.EMAILS }}" \
-            "Failure Notification"
+            "${{ env.TAG }}" \
+            "${{ env.BRANCH_NAME }}" \
+            "${{ env.COMMIT_AUTHOR }}" \
+            "BUILD_REPORT_URL_SET" \
+            "AUTOMATION_TEST_URL_SET" \
+            "${{ env.COMMIT_MESSAGE }}"
