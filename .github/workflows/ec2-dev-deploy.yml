@@ -97,10 +97,10 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
       
           echo "Fetching environment variables from S3..."
-          aws s3 cp s3://$S3_BUCKET_NAME/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
+          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
       
           echo "Pulling the latest image..."
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.IMAGE_TAG }}
       
           echo "Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
