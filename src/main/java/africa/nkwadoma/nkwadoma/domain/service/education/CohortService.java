@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -31,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
 
 import java.util.List;
 
@@ -204,17 +205,26 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public void inviteCohort(String userId, String programId, String cohortId) throws MeedlException {
+    public String inviteCohort(String userId, String cohortId, List<String> loaneeIds) throws MeedlException {
         Cohort foundCohort = viewCohortDetails(userId,cohortId);
-        List<Loanee> cohortLoanees = loaneeOutputPort.findAllLoaneesByCohortId(foundCohort.getId());
+        List<Loanee> cohortLoanees = loaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
+        if (cohortLoanees == null || cohortLoanees.isEmpty()){
+            log.info("No loanee in the cohort is assigned to be referred");
+            throw new MeedlException("No loanee in the cohort is assigned to be referred");
+        }
+        if (cohortLoanees.size() == 1){
+            inviteTrainee(cohortLoanees.get(0));
+            return LOANEE_HAS_BEEN_REFERED ;
+        }
+
         for (Loanee loanee : cohortLoanees) {
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
                 log.error("Failed to invite trainee: {}", loanee.getId(), e);
             }
-
         }
+        return COHORT_INVITED;
     }
 
         private void inviteTrainee (Loanee loanee) throws MeedlException {
