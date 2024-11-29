@@ -20,6 +20,7 @@ public interface LoanRequestMapper {
     @Mapping(target = "nextOfKin.phoneNumber", source = "nextOfKinPhoneNumber")
     @Mapping(target = "nextOfKin.contactAddress", source = "nextOfKinContactAddress")
     @Mapping(target = "nextOfKin.nextOfKinRelationship", source = "nextOfKinRelationship")
+    @Mapping(target = "userIdentity.image", source = "loaneeImage")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")

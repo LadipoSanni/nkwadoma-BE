@@ -168,7 +168,7 @@ class LoanRequestAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
+                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).image("loanee-img.jpg").
                     createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.org").
                     alternateContactAddress("1, Onigbongbo Street, Oshodi, Lagos").alternatePhoneNumber("08075533235").build();
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
