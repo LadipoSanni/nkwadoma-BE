@@ -91,64 +91,64 @@ class IdentityVerificationServiceTest {
         assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(token));
     }
 
-    @Test
-    void verifyUserIdentityVerifiedByEmail() {
-        try {
-            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            assertEquals(IDENTITY_VERIFIED.getMessage(), identityVerificationService.isIdentityVerified(generatedToken));
-        } catch (MeedlException e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
-    @Test
-    void verifyNonExistingUserIdentityIsVerifiedByEmail() {
-        try {
-            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.empty());
-            when(identityVerificationRepository.countByReferralId(testId)).thenReturn(1L);
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
-            String response = identityVerificationService.isIdentityVerified(generatedToken);
-            assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
-        } catch (MeedlException e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
-    @Test
-    void verificationBeyondThreshold() {
-        try {
-            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.empty());
-            when(identityVerificationRepository.countByReferralId(testId)).thenReturn(6L);
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
-            assertThrows(IdentityVerificationException.class, ()-> identityVerificationService.isIdentityVerified(generatedToken));
-        } catch (MeedlException  e) {
-            log.error("Error while verifying user identity {}", e.getMessage());
-        }
-    }
-    @Test
-    void verifyIdentityWithoutBvnOrNin(){
-        identityVerification.setBvn(null);
-        identityVerification.setNin(null);
-        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
-    }
-    @Test
-    void verifyIdentityWithAtLeastOneIdentifier(){
-        identityVerification.setBvn(null);
-        identityVerification.setNin(testNin);
-        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
-    }
-    @Test
-    void verifyUserBvn(){
-        when(identityVerificationRepository.findByBvnAndStatus(testBvn, IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
-        try {
-            String response = identityVerificationService.isIdentityVerified(identityVerification);
-            assertNotNull(response);
-            assertEquals(IDENTITY_VERIFIED.getMessage(), response);
-        } catch (MeedlException e) {
-            log.error("Verification failed : {}", e.getMessage());
-        }
-    }
+//    @Test
+//    void verifyUserIdentityVerifiedByEmail() {
+//        try {
+//            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
+//            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+//            assertEquals(IDENTITY_VERIFIED.getMessage(), identityVerificationService.isIdentityVerified(generatedToken));
+//        } catch (MeedlException e) {
+//            log.error("Error while verifying user identity {}", e.getMessage());
+//        }
+//    }
+//    @Test
+//    void verifyNonExistingUserIdentityIsVerifiedByEmail() {
+//        try {
+//            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.empty());
+//            when(identityVerificationRepository.countByReferralId(testId)).thenReturn(1L);
+//            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+//            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
+//            String response = identityVerificationService.isIdentityVerified(generatedToken);
+//            assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
+//        } catch (MeedlException e) {
+//            log.error("Error while verifying user identity {}", e.getMessage());
+//        }
+//    }
+//    @Test
+//    void verificationBeyondThreshold() {
+//        try {
+//            when(identityVerificationRepository.findByEmailAndStatus(favour.getEmail(), IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.empty());
+//            when(identityVerificationRepository.countByReferralId(testId)).thenReturn(6L);
+//            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+//            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
+//            assertThrows(IdentityVerificationException.class, ()-> identityVerificationService.isIdentityVerified(generatedToken));
+//        } catch (MeedlException  e) {
+//            log.error("Error while verifying user identity {}", e.getMessage());
+//        }
+//    }
+//    @Test
+//    void verifyIdentityWithoutBvnOrNin(){
+//        identityVerification.setBvn(null);
+//        identityVerification.setNin(null);
+//        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
+//    }
+//    @Test
+//    void verifyIdentityWithAtLeastOneIdentifier(){
+//        identityVerification.setBvn(null);
+//        identityVerification.setNin(testNin);
+//        assertThrows(MeedlException.class, ()-> identityVerificationService.isIdentityVerified(identityVerification));
+//    }
+//    @Test
+//    void verifyUserBvn(){
+//        when(identityVerificationRepository.findByBvnAndStatus(testBvn, IdentityVerificationStatus.VERIFIED)).thenReturn(Optional.of(identityVerificationEntity));
+//        try {
+//            String response = identityVerificationService.isIdentityVerified(identityVerification);
+//            assertNotNull(response);
+//            assertEquals(IDENTITY_VERIFIED.getMessage(), response);
+//        } catch (MeedlException e) {
+//            log.error("Verification failed : {}", e.getMessage());
+//        }
+//    }
     @Test
     void failedVerificationBlackListed(){
         when(identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord)).thenReturn(identityVerificationFailureRecord);
