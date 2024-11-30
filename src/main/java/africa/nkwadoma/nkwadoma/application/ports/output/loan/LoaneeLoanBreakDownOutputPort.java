@@ -10,7 +10,7 @@ public interface LoaneeLoanBreakDownOutputPort {
 
     List<LoaneeLoanBreakdown> saveAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns, Loanee loanee) throws MeedlException;
 
-    void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns);
+    void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns) throws MeedlException;
 
     List<LoaneeLoanBreakdown> findAllByLoaneeId(String loaneeId) throws MeedlException;
 }

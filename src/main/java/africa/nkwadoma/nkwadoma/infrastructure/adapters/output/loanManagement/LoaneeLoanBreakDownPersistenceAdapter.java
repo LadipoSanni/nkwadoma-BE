@@ -36,7 +36,10 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     }
 
     @Override
-    public void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns) {
+    public void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns) throws MeedlException {
+        for (LoaneeLoanBreakdown loanBreakdown : loaneeLoanBreakdowns){
+            MeedlValidator.validateObjectInstance(loanBreakdown);
+        }
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownMapper.toLoaneeLoanBreakdownEntities(loaneeLoanBreakdowns);
         loaneeLoanBreakDownRepository.deleteAll(loanBreakdownEntities);
