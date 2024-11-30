@@ -172,7 +172,7 @@ class LoanRequestAdapterTest {
                     createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.org").
                     alternateContactAddress("1, Onigbongbo Street, Oshodi, Lagos").alternatePhoneNumber("08075533235").build();
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                    loanBreakdown(loanBreakdowns).initialDeposit(BigDecimal.valueOf(3000000.00)).build();
+                    initialDeposit(BigDecimal.valueOf(3000000.00)).build();
 
             loanee = Loanee.builder().userIdentity(userIdentity).
                     cohortId(eliteCohortId).createdBy(userIdentity.getCreatedBy()).
@@ -181,7 +181,7 @@ class LoanRequestAdapterTest {
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
             userId = savedUserIdentity.getId();
 
-            loanBreakdownOutputPort.saveAllLoanBreakDown(loaneeLoanDetail.getLoanBreakdown());
+            loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
             loaneeLoanDetailId = loaneeLoanDetail.getId();
 

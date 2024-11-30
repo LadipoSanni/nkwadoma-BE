@@ -5,12 +5,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +48,9 @@ class LoaneePersistenceAdapterTest {
     private String cohortId;
     private int pageSize = 2;
     private int pageNumber = 0;
-
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeLoanDetail secondLoaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
-    private LoanBreakdown secondBreakdown;
+
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -61,13 +61,11 @@ class LoaneePersistenceAdapterTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
-    private LoanBreakdownOutputPort loanBreakdownOutputPort;
-    @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private String userId;
     private String loaneeLoanDetailId;
-    private List<LoanBreakdown> loanBreakdownList;
-    private List<LoanBreakdown> loanBreakdownList2;
+
+
 
 
 
@@ -81,20 +79,12 @@ class LoaneePersistenceAdapterTest {
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
-        loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
-                .currency("usd").build();
-        secondBreakdown = LoanBreakdown.builder().itemName("juno").itemAmount(BigDecimal.valueOf(34))
-                .currency("usd").build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             anotherUser = identityManagerOutputPort.createUser(anotherUser);
             anotherUser = identityOutputPort.save(anotherUser);
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), loaneeLoanDetail);
-            loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(secondBreakdown),loaneeLoanDetail);
-            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
             secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
@@ -297,8 +287,6 @@ class LoaneePersistenceAdapterTest {
         loaneeRepository.deleteById(loaneeId);
         loaneeRepository.deleteById(secondLoaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
-        loanBreakdownOutputPort.deleteAll(loanBreakdownList);
-        loanBreakdownOutputPort.deleteAll(loanBreakdownList2);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
         identityOutputPort.deleteUserById(anotherUser.getId());
         identityManagerOutputPort.deleteUser(anotherUser);

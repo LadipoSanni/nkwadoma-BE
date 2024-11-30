@@ -41,6 +41,8 @@ public class UserIdentity {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+    private String bvn;
+    private String nin;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
