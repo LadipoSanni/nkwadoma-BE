@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanReferralRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +41,7 @@ public class LoanReferralPersistenceAdapterTest {
     @Autowired
     private UserIdentityOutputPort identityOutputPort;
     @Autowired
-    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     @Autowired
@@ -49,9 +51,9 @@ public class LoanReferralPersistenceAdapterTest {
     private Loanee loanee;
     private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private String loanReferralId ;
+
 
 
     @BeforeAll
@@ -61,15 +63,10 @@ public class LoanReferralPersistenceAdapterTest {
                 .alternatePhoneNumber("09079447913").alternateEmail("adeshina22@gmail,com").build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
-        loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
-                .currency("usd").build();
-//        loanee = Loanee.builder().cohortId(id).build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            List<LoanBreakdown> loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown),loaneeLoanDetail);
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loanee = Loanee.builder().cohortId(id).createdBy(userIdentity.getId()).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeOutputPort.save(loanee);
         } catch (MeedlException e) {

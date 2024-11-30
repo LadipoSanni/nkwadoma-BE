@@ -27,17 +27,6 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
                 loanBreakdownRepository.findAllByCohortId(id);
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
-
-    @Override
-    public List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail) {
-        List<LoanBreakdownEntity> loanBreakdownEntities =
-                loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdown);
-        loanBreakdownEntities.forEach(loanBreakdownEntity ->
-                loanBreakdownEntity.setLoaneeLoanDetail(loaneeLoanDetailMapper.toLoaneeLoanDetailsEnitity(loaneeLoanDetail)));
-        loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
-        return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
-    }
-
     @Override
     public void deleteAll(List<LoanBreakdown> loanBreakdownList) {
         List<LoanBreakdownEntity> loanBreakdownEntities =
@@ -53,12 +42,7 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
 
-    @Override
-    public List<LoanBreakdown> finAllByLoaneeLoanDetailsId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
-        List<LoanBreakdownEntity> loanBreakdownEntities = loanBreakdownRepository.findAllByLoaneeLoanDetailId(id);
-        return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
-    }
+
 
 
 }

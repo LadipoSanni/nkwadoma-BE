@@ -12,5 +12,4 @@ public interface LoanBreakdownRepository extends JpaRepository<LoanBreakdownEnti
 
     List<LoanBreakdownEntity> findAllByCohortId(String id);
 
-    List<LoanBreakdownEntity> findAllByLoaneeLoanDetailId(String id);
 }

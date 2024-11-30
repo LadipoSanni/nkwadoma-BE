@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 
@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 @Setter
 @Entity
 @ToString
-public class LoanBreakdownEntity {
+public class LoaneeLoanBreakdownEntity {
+
     @Id
-    @UuidGenerator
-    private String loanBreakdownId;
+    private String loaneeLoanBreakdownId;
     private String itemName;
     private BigDecimal itemAmount = BigDecimal.ZERO;
     private String currency;
     @ManyToOne
-    private CohortEntity cohort;
+    private LoaneeEntity loanee;
 }

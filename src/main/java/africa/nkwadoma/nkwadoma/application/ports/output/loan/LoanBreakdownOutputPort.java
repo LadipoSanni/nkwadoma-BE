@@ -9,12 +9,9 @@ import java.util.List;
 public interface LoanBreakdownOutputPort {
     List<LoanBreakdown> findAllByCohortId(String id);
 
-
-    List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail);
-
     void deleteAll(List<LoanBreakdown> loanBreakdownList);
 
     List<LoanBreakdown> saveAllLoanBreakDown(List<LoanBreakdown> loanBreakdown);
 
-    List<LoanBreakdown> finAllByLoaneeLoanDetailsId(String id) throws MeedlException;
+
 }

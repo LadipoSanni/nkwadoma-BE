@@ -18,5 +18,5 @@ public class LoanBreakdown {
     private BigDecimal itemAmount ;
     private String currency;
     private Cohort cohort;
-    private LoaneeLoanDetail loaneeLoanDetail;
+
 }
