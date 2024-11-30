@@ -2,11 +2,14 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Getter
 @Setter
@@ -22,6 +25,8 @@ public class LoanRequest {
     private String lastName;
     private LoanDecision loanRequestDecision;
     private String declineReason;
+    private String cohortId;
+    private String loanReferralId;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
     private LoanReferralStatus loanReferralStatus;
@@ -32,8 +37,16 @@ public class LoanRequest {
     private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    private List<LoanBreakdown> loanBreakdowns;
+    private String alternateEmail;
+    private String alternateContactAddress;
+    private String alternatePhoneNumber;
+    private UserIdentity userIdentity;
+    private NextOfKin nextOfKin;
     private LocalDate cohortStartDate;
     private String programName;
+    private String cohortName;
     private int pageNumber;
     private int pageSize;
 
@@ -51,6 +64,24 @@ public class LoanRequest {
         MeedlValidator.validateObjectInstance(status);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
     }
+
+
+    public LoanRequest(String id, String firstName, String lastName, String alternateContactAddress, String alternateEmail,
+                       String alternatePhoneNumber, String organizationName, BigDecimal loanAmountRequested,
+                       BigDecimal initialDeposit, LocalDate startDate, String programName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.alternateContactAddress = alternateContactAddress;
+        this.alternateEmail = alternateEmail;
+        this.alternatePhoneNumber = alternatePhoneNumber;
+        this.referredBy = organizationName;
+        this.loanAmountRequested = loanAmountRequested;
+        this.initialDeposit = initialDeposit;
+        this.cohortStartDate = startDate;
+        this.programName = programName;
+    }
+
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();

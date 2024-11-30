@@ -58,6 +58,9 @@ class LoanRequestAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoanRequestRepository loanRequestRepository;
+    private NextOfKin nextOfKin;
+    @Autowired
+    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     @Autowired
     private LoanDetailRepository loanDetailRepository;
     private Program dataAnalytics;
@@ -81,6 +84,7 @@ class LoanRequestAdapterTest {
     private String loanDetailId;
     private UserIdentity userIdentity;
     private OrganizationIdentity organizationIdentity;
+    private String nextOfKinId;
 
     @BeforeAll
     void setUp() {
@@ -143,12 +147,9 @@ class LoanRequestAdapterTest {
                     .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
                     .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
                     .totalOutstanding(BigDecimal.valueOf(450)).build();
-            loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
-                    .itemName("Loan Break").build();
 
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetailId = loanDetail.getId();
-            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             elites = new Cohort();
             elites.setStartDate(LocalDate.of(2024, 10, 18));
@@ -162,10 +163,14 @@ class LoanRequestAdapterTest {
             Cohort cohort = cohortOutputPort.save(elites);
             eliteCohortId = cohort.getId();
 
+            loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
+                    .itemName("Loan Break").cohort(cohort).build();
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
-            UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
-                    createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).image("loanee-img.jpg").
+                    createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.org").
+                    alternateContactAddress("1, Onigbongbo Street, Oshodi, Lagos").alternatePhoneNumber("08075533235").build();
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                     initialDeposit(BigDecimal.valueOf(3000000.00)).build();
 
@@ -176,14 +181,28 @@ class LoanRequestAdapterTest {
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
             userId = savedUserIdentity.getId();
 
+            loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
             loaneeLoanDetailId = loaneeLoanDetail.getId();
 
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanee.setUserIdentity(savedUserIdentity);
+            loanee.setCohortId(cohort.getId());
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
+
+            nextOfKin = new NextOfKin();
+            nextOfKin.setFirstName("Ahmad");
+            nextOfKin.setLastName("Doe");
+            nextOfKin.setEmail("ahmad12@gmail.com");
+            nextOfKin.setPhoneNumber("0785678901");
+            nextOfKin.setNextOfKinRelationship("Brother");
+            nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
+            nextOfKin.setLoanee(loanee);
+            NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            assertNotNull(savedNextOfKin);
+            nextOfKinId = savedNextOfKin.getId();
 
             loanReferral = new LoanReferral();
             loanReferral.setLoanee(loanee);
@@ -204,12 +223,14 @@ class LoanRequestAdapterTest {
         } catch (MeedlException e) {
             log.error("", e);
         }
-        if (foundLoanee != null) {
+        if (ObjectUtils.isNotEmpty(foundLoanee)) {
             loanRequest = new LoanRequest();
             loanRequest.setStatus(LoanRequestStatus.APPROVED);
             loanRequest.setReferredBy("Brown Hills Institute");
-            loanee.setLoaneeLoanDetail(foundLoanee.getLoaneeLoanDetail());
+            loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(foundLoanee);
+            loanRequest.setLoanReferralId(loanReferralId);
+            loanRequest.setCohortId(foundLoanee.getCohortId());
             loanRequest.setCreatedDate(LocalDateTime.now());
             loanRequest.setLoanAmountRequested(foundLoanee.getLoaneeLoanDetail().getAmountRequested());
         }
@@ -297,9 +318,57 @@ class LoanRequestAdapterTest {
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.viewAll(0, pageSize));
     }
 
+    @Test
+    void viewLoanRequestById() {
+        LoanRequest savedLoanRequest = null;
+        try {
+            savedLoanRequest = loanRequestOutputPort.save(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertNotNull(savedLoanRequest);
+        assertNotNull(savedLoanRequest.getId());
+        loanRequestId = savedLoanRequest.getId();
+        try {
+            Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
+
+            assertFalse(foundLoanRequest.isEmpty());
+            assertNotNull(foundLoanRequest.get().getId());
+            assertNotNull(foundLoanRequest.get().getNextOfKin());
+            assertEquals(foundLoanRequest.get().getReferredBy(), organizationIdentity.getName());
+            assertEquals(foundLoanRequest.get().getProgramName(), dataAnalytics.getName());
+            assertEquals(foundLoanRequest.get().getCohortName(), elites.getName());
+            assertEquals(foundLoanRequest.get().getCohortStartDate(), elites.getStartDate());
+            assertNotNull(foundLoanRequest.get().getLoanAmountRequested());
+            assertNotNull(foundLoanRequest.get().getInitialDeposit());
+            assertEquals("Adeshina", foundLoanRequest.get().getFirstName());
+            assertEquals("Qudus", foundLoanRequest.get().getLastName());
+            assertEquals("Ahmad", foundLoanRequest.get().getNextOfKin().getFirstName());
+            assertEquals("Doe", foundLoanRequest.get().getNextOfKin().getLastName());
+            assertEquals("0785678901", foundLoanRequest.get().getNextOfKin().getPhoneNumber());
+            assertEquals("ahmad12@gmail.com", foundLoanRequest.get().getNextOfKin().getEmail());
+            assertEquals("Brother", foundLoanRequest.get().getNextOfKin().getNextOfKinRelationship());
+            assertEquals("2, Spencer Street, Yaba, Lagos", foundLoanRequest.get().getNextOfKin().getContactAddress());
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+    }
+
+    @Test
+    void viewLoanRequestByIdWithNullId() {
+        assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"36797387091", "foireui"})
+    void viewLoanRequestByNonUUID(String id) {
+        assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(id));
+    }
+
     @AfterAll
     void cleanUp() {
         try {
+            nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(userId);
