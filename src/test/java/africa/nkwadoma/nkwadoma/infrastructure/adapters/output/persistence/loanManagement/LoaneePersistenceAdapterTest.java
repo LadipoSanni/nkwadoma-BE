@@ -73,7 +73,7 @@ class LoaneePersistenceAdapterTest {
     void setUpUserIdentity(){
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
-        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("lekan").lastName("ayo")
+        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("leke").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -205,6 +205,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveLoanee(){
         Loanee loanee = new Loanee();
+        firstLoanee.setFullName(userIdentity.getFirstName().concat(userIdentity.getLastName()));
         try {
             UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
             firstLoanee.setUserIdentity(savedUserIdentity);
@@ -225,6 +226,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveAnotherLoanee(){
         Loanee loanee = new Loanee();
+        anotherLoanee.setFullName(anotherUser.getFirstName().concat(anotherUser.getLastName()));
         try{
             loanee = loaneeOutputPort.save(anotherLoanee);
             secondLoaneeId = loanee.getId();
@@ -265,6 +267,18 @@ class LoaneePersistenceAdapterTest {
     @Test
     void findLoaneeWithNullId(){
         assertThrows(MeedlException.class,()-> loaneeOutputPort.findLoaneeById(null));
+    }
+
+    @Order(5)
+    @Test
+    void searchLoanee(){
+        List<Loanee> loanees = new ArrayList<>();
+        try{
+            loanees = loaneeOutputPort.searchForLoaneeInCohort("le",cohortId);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+        assertEquals(2,loanees.size());
     }
 
     @AfterAll
