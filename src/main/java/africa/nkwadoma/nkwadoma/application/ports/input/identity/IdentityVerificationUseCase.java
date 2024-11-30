@@ -1,3 +1,4 @@
+
 package africa.nkwadoma.nkwadoma.application.ports.input.identity;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -9,5 +10,4 @@ public interface IdentityVerificationUseCase {
     String verifyIdentity(String token) throws MeedlException, IdentityVerificationException;
     String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException;
     String createIdentityVerificationFailureRecord(IdentityVerificationFailureRecord verificationFailureRecord) throws IdentityVerificationException;
-//    IdentityVerification verifyIdentity(IdentityVerification smileIdVerification) throws MeedlException;
 }
