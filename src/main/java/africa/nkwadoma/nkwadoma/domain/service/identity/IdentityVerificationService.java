@@ -10,34 +10,29 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.IdentityVerificationStatus;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class IdentityVerificationService implements IdentityVerificationUseCase {
-    private final UserIdentityOutputPort userIdentityOutputPort;
-    private final IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
-//    private final IdentityVerificationRepository identityVerificationRepository;
-    private final IdentityVerificationMapper identityVerificationMapper;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
+    @Autowired
     @Qualifier("premblyAdapter")
-    private final IdentityVerificationOutputPort identityVerificationOutputPort;
-    private final TokenUtils tokenUtils;
-    private final Emai
+    private IdentityVerificationOutputPort identityVerificationOutputPort;
+    @Autowired
+    private TokenUtils tokenUtils;
 
 
     @Override
@@ -82,15 +77,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
     }
 
-
-//    @Override
-//    public IdentityVerification verifyIdentity(IdentityVerification smileIdVerification) throws MeedlException {
-//        MeedlValidator.validateObjectInstance(smileIdVerification);
-//        IdentityVerificationEntity identityVerificationEntity = identityVerificationMapper.mapToIdentityVerificationEntity(smileIdVerification);
-//        identityVerificationEntity.setStatus(IdentityVerificationStatus.VERIFIED);
-////        identityVerificationEntity = identityVerificationRepository.save(identityVerificationEntity);
-//        return identityVerificationMapper.mapToIdentityVerification(identityVerificationEntity);
-//    }
 
     private void checkIfAboveThreshold(String loanReferralId) throws IdentityVerificationException {
         Long numberOfAttempts = identityVerificationFailureRecordOutputPort.countByReferralId(loanReferralId);
