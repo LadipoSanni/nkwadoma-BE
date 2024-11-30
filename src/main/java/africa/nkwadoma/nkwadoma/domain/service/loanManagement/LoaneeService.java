@@ -120,6 +120,13 @@ public class LoaneeService implements LoaneeUseCase {
         return  loanReferral;
     }
 
+    @Override
+    public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateUUID(cohortId);
+        return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
+    }
+
     private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws MeedlException {
         Loanee loanee;
         List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
@@ -204,6 +211,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
+
 
 
 }
