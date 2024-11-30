@@ -7,7 +7,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +16,7 @@ import org.thymeleaf.context.Context;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.CREATE_PASSWORD_URL;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOANEE_OVERVIEW;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -60,7 +60,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
-        return baseUrl + CREATE_PASSWORD_URL + token ;
+        return baseUrl + LOANEE_OVERVIEW + token ;
     }
 
     private void sendMail(UserIdentity userIdentity, Email email) {
