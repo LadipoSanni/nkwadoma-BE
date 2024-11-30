@@ -35,10 +35,6 @@ public class NextOfKin {
         MeedlValidator.validateUUID(loanee.getUserIdentity().getId());
     }
 
-    public void setId(String id) {
-        this.id = id.trim();
-    }
-
     public void setFirstName(String firstName) {
         if (StringUtils.isNotEmpty(firstName)) {
             this.firstName = firstName.trim();

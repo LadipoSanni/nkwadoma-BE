@@ -26,15 +26,15 @@ import java.util.*;
 @Slf4j
 @Service
 public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUseCase, ViewLoanReferralsUseCase,
-        RespondToLoanReferralUseCase, LoanRequestUseCase , LoanOfferUseCase{
+        RespondToLoanReferralUseCase, LoanOfferUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
+    private final LoanRequestOutputPort loanRequestOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
-    private final LoanRequestOutputPort loanRequestOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final LoanOutputPort loanOutputPort;
 
@@ -134,7 +134,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return updatedLoanReferral;
     }
 
-    @Override
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
         loanRequest.validate();
@@ -146,68 +145,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        LoanRequest.validate(loanRequest);
-        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        MeedlValidator.validateLoanRequest(foundLoanRequest);
-        if (foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
-            throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
-        }
-        return respondToLoanRequest(loanRequest, foundLoanRequest);
-    }
-
-    private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            approveLoanRequest(loanRequest, foundLoanRequest);
-        }
-        else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
-            declineLoanRequest(loanRequest, foundLoanRequest);
-        }
-        return loanRequestOutputPort.save(foundLoanRequest);
-    }
-
-    private static void declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateDataElement(loanRequest.getDeclineReason());
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
-    }
-
-    private void approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
-        if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
-            throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
-        }
-        LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
-        foundLoanRequest.setLoanProduct(loanProduct);
-        foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        createLoanOffer(foundLoanRequest);
-    }
-
-    @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
         LoanOffer loanOffer = new LoanOffer();
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
         loanOffer.setLoanRequest(loanRequest);
-        loanOffer.setLoanee(loanRequest.getLoanee());
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
         return loanOffer;
-    }
-
-    @Override
-    public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
-        MeedlValidator.validatePageSize(loanRequest.getPageSize());
-        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
-        log.info("Loan requests from repository: {}", loanRequests.getContent());
-        return loanRequests;
     }
 }

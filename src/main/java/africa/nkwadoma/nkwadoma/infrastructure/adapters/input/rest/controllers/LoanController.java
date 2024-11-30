@@ -42,10 +42,8 @@ public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
-    private final LoanRequestUseCase loanRequestUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
-    private final LoanRequestRestMapper loanRequestRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
@@ -129,45 +127,6 @@ public class LoanController {
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
                 .data(loanReferralResponse)
                 .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("/loan-requests")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
-            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
-        LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setPageNumber(pageNumber);
-        loanRequest.setPageSize(pageSize);
-        Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
-        log.info("Loan requests: {}", loanRequests.getContent());
-        List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
-        log.info("Loan request responses: {}", loanRequestResponses);
-        PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
-                loanRequestResponses, loanRequests.hasNext(),
-                loanRequests.getTotalPages(), pageNumber, pageSize
-        );
-        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
-                <PaginatedResponse<LoanRequestResponse>>builder()
-                .data(paginatedResponse)
-                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @PostMapping("/loan-request/response")
-    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
-            throws MeedlException {
-        LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
-        loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
-        LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
-        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
-                <LoanRequestResponse>builder()
-                .data(loanRequestResponse)
-                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

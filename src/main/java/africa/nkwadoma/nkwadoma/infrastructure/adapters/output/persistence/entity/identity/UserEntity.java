@@ -18,6 +18,7 @@ public class UserEntity {
     private String email;
     private String firstName;
     private String lastName;
+    private String image;
     private String phoneNumber;
     private boolean emailVerified;
     private boolean enabled;

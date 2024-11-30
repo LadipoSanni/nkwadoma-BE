@@ -23,8 +23,4 @@ public class LoanBreakdownEntity {
     private String currency;
     @ManyToOne
     private CohortEntity cohort;
-    @ManyToOne
-    private LoaneeEntity loanee;
-    @ManyToOne
-    private LoaneeLoanDetailEntity loaneeLoanDetail;
 }
