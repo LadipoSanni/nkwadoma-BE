@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
@@ -215,14 +216,14 @@ public class BeanConfiguration {
                                        IdentityManagerOutputPort identityManagerOutputPort,
                                        CohortOutputPort cohortOutputPort,
                                        LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
-                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
                                        OrganizationIdentityOutputPort organizationIdentityOutputPort,
                                        SendLoaneeEmailUsecase sendLoaneeEmailUsecase,
-                                       LoanReferralOutputPort loanReferralOutputPort){
+                                       LoanReferralOutputPort loanReferralOutputPort,
+                                       LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort){
         return new LoaneeService(organizationEmployeeIdentityOutputPort,
                 loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,loanBreakdownOutputPort,
-                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort);
+                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,
+                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort,loaneeLoanBreakDownOutputPort);
     }
 
     @Bean

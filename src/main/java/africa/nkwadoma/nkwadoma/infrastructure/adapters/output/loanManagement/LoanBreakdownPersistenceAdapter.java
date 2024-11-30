@@ -27,14 +27,6 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
     }
 
     @Override
-    public List<LoanBreakdown> saveAll(List<LoanBreakdown> loanBreakdown, LoaneeLoanDetail loaneeLoanDetail) {
-        List<LoanBreakdownEntity> loanBreakdownEntities =
-                loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdown);
-        loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
-        return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
-    }
-
-    @Override
     public void deleteAll(List<LoanBreakdown> loanBreakdownList) {
         List<LoanBreakdownEntity> loanBreakdownEntities =
                 loanBreakdownMapper.toLoanBreakdownEntityList(loanBreakdownList);
@@ -48,6 +40,7 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
         loanBreakdownEntities = loanBreakdownRepository.saveAll(loanBreakdownEntities);
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);
     }
+
 
 
 

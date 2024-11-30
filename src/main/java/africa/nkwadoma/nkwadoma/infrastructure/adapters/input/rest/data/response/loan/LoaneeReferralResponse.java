@@ -10,7 +10,7 @@ import lombok.Setter;
 public class LoaneeReferralResponse {
 
     private String id;
-    private Loanee loanee;
+    private LoaneeResponse loanee;
     private LoanReferralStatus loanReferralStatus;
 }
 
