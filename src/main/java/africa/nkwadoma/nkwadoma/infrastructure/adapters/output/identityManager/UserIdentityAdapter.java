@@ -64,6 +64,12 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userEntityRepository.delete(userEntity);
     }
 
+    @Override
+    public UserIdentity findByBvn(String bvn) throws MeedlException {
+        MeedlValidator.validateDataElement(bvn);
+        UserEntity userEntity = userEntityRepository.findByBvn(bvn);
+        return userIdentityMapper.toUserIdentity(userEntity);
+    }
 
 
     private UserEntity getUserEntityByEmail(String email) throws IdentityException {

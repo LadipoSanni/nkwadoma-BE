@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.IdentityVerificationFailureRecordMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationFailureRecordMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationFailureRecordEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.IdentityVerificationFailureRecordRepository;
 import lombok.RequiredArgsConstructor;
