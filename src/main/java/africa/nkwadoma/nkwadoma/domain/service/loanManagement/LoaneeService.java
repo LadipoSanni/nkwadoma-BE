@@ -101,8 +101,9 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(loaneeId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+
         List<LoanBreakdown> loanBreakdowns =
-                loanBreakdownOutputPort.finAllByLoaneeLoanDetailsId(loanee.getLoaneeLoanDetail().getId());
+                loanBreakdownOutputPort.findAllByCohortId(cohort.getId());
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());

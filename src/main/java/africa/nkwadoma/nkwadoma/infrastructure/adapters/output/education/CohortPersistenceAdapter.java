@@ -33,8 +33,6 @@ import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validate
 @Slf4j
 @RequiredArgsConstructor
 public class CohortPersistenceAdapter implements CohortOutputPort {
-
-
     private final CohortRepository cohortRepository;
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;

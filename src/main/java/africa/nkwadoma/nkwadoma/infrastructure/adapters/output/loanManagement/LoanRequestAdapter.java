@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanRequestException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -13,6 +11,8 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
+
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -31,11 +31,15 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
-    public LoanRequest findById(String loanRequestId) throws MeedlException {
+    public Optional<LoanRequest> findById(String loanRequestId) throws MeedlException {
         MeedlValidator.validateUUID(loanRequestId);
-        LoanRequestEntity loanRequestEntity = loanRequestRepository.findById(loanRequestId)
-                .orElseThrow(() -> new LoanRequestException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
-        return loanRequestMapper.toLoanRequest(loanRequestEntity);
+        Optional<LoanRequestProjection> loanRequestProjection = loanRequestRepository.findLoanRequestById(loanRequestId);
+        if (loanRequestProjection.isEmpty()) {
+            return Optional.empty();
+        }
+        LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection.get());
+        log.info("Mapped Loan request: {}", loanRequest);
+        return Optional.of(loanRequest);
     }
 
     @Override
@@ -49,6 +53,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
-        return loanRequests.map(loanRequestMapper::loanRequestProjectionToLoanRequest);
+        return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
 }

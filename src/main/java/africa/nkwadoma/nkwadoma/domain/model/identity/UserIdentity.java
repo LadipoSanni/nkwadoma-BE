@@ -28,6 +28,7 @@ public class UserIdentity {
     private boolean isIdentityVerified;
     private boolean enabled;
     private String createdAt;
+    private String image;
     private IdentityRole role;
     private String createdBy;
     private String alternateEmail;

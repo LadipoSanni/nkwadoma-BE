@@ -68,4 +68,14 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
         }
         return nextOfKin;
     }
+
+    @Override
+    public Optional<NextOfKin> findByLoaneeId(String loaneeId) throws MeedlException {
+        MeedlValidator.validateDataElement(loaneeId);
+        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByLoaneeEntityId(loaneeId);
+        if (nextOfKinEntity.isPresent()) {
+            return Optional.ofNullable(nextOfKinMapper.toNextOfKin(nextOfKinEntity.get()));
+        }
+        return Optional.empty();
+    }
 }

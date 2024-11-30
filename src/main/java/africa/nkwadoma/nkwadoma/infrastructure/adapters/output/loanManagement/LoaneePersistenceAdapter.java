@@ -1,12 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
@@ -17,14 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import lombok.extern.slf4j.*;
-import org.springframework.stereotype.*;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,6 +67,12 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     public List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
         List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortId(id);
+        return loaneeMapper.toListOfLoanee(loanees);
+    }
+    @Override
+    public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
+        MeedlValidator.validateUUID(id);
+        List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortIdAndLoaneeIds(id,loaneeIds);
         return loaneeMapper.toListOfLoanee(loanees);
     }
 
