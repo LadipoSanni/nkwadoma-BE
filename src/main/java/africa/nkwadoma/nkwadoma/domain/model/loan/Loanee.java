@@ -26,6 +26,7 @@ public class Loanee {
     private LoaneeStatus loaneeStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private String fullName;
 
 
     public void validate() throws MeedlException {

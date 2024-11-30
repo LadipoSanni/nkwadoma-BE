@@ -27,9 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_ADDED_TO_COHORT;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_VIEWED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.*;
 
 @Slf4j
 @RestController
@@ -109,6 +107,21 @@ public class LoaneeController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @GetMapping("cohort/searchForLoanee")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
+                                                                  @RequestParam("cohortId")String cohortId) throws MeedlException {
+       List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId);
+       List<LoaneeResponse> loaneeResponse = loaneeRestMapper.toLoaneeResponses(loanee);
+       ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
+               .data(loaneeResponse)
+               .message(LOANEE_RETRIVED)
+               .statusCode(HttpStatus.OK.toString())
+               .build();
+       return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+
     }
 
 }

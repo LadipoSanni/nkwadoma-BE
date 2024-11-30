@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import lombok.extern.slf4j.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +70,19 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortId(id);
         return loaneeMapper.toListOfLoanee(loanees);
     }
+
+    @Override
+    public List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateDataElement(name);
+        List<LoaneeEntity> loaneeEntities =
+                loaneeRepository.findByCohortIdAndFullNameContainingIgnoreCase(cohortId,name);
+        if (loaneeEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        return loaneeEntities.stream().map(loaneeMapper::toLoanee).toList();
+    }
+
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
         MeedlValidator.validateUUID(id);

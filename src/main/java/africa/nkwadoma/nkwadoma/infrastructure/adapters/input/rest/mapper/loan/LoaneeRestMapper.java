@@ -8,6 +8,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoaneeRestMapper {
 
@@ -16,4 +18,6 @@ public interface LoaneeRestMapper {
     LoaneeResponse toLoaneeResponse(Loanee loanee);
 
     LoaneeReferralResponse toLoaneeReferralResponse(LoanReferral loanReferral);
+
+    List<LoaneeResponse> toLoaneeResponses(List<Loanee> loanee);
 }
