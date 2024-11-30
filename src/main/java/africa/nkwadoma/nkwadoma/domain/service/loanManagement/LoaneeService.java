@@ -120,6 +120,19 @@ public class LoaneeService implements LoaneeUseCase {
         return  loanReferral;
     }
 
+    @Override
+    public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateUUID(cohortId);
+        List<Loanee>  loanees = loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
+        for (Loanee loanee : loanees) {
+            List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
+                    loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanee.getId());
+            loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
+        }
+        return loanees;
+    }
+
     private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws MeedlException {
         Loanee loanee;
         List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
@@ -182,6 +195,7 @@ public class LoaneeService implements LoaneeUseCase {
         userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
         userIdentity = identityOutputPort.save(userIdentity);
         loanee.setUserIdentity(userIdentity);
+        loanee.setFullName(loanee.getUserIdentity().getFirstName().concat(loanee.getUserIdentity().getLastName()));
         loanee.setLoaneeStatus(LoaneeStatus.ADDED);
         loanee = loaneeOutputPort.save(loanee);
         return loanee;
@@ -204,6 +218,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
+
 
 
 }
