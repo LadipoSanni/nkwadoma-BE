@@ -23,8 +23,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.*;
@@ -117,7 +115,7 @@ public class LoaneeController {
        List<LoaneeResponse> loaneeResponse = loaneeRestMapper.toLoaneeResponses(loanee);
        ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
                .data(loaneeResponse)
-               .message(LOANEE_RETRIVED)
+               .message(LOANEE_RETRIEVED)
                .statusCode(HttpStatus.OK.toString())
                .build();
        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
