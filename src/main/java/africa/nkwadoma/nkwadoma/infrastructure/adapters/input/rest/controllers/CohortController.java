@@ -99,19 +99,18 @@ public class CohortController {
         );
     }
 
-    @GetMapping("invite-cohort")
+    @PostMapping("cohort/loanee/refer")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteCohort(
             @AuthenticationPrincipal Jwt meedl,
-            @RequestParam @NotBlank(message = "Program ID is required") String programId,
-            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
-        cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), programId, cohortId);
+            @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId,
+            @RequestParam List<String> loaneeIds) throws MeedlException {
+        String message = cohortUseCase.inviteCohort(meedl.getClaimAsString("sub"), cohortId, loaneeIds);
         return new ResponseEntity<>(ApiResponse.<String>builder()
-                .message(COHORT_INVITED)
+                .message(message)
                 .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
-
     @GetMapping("program/searchCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
