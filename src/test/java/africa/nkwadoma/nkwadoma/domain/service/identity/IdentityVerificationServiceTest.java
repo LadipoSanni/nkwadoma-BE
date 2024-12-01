@@ -81,7 +81,7 @@ class IdentityVerificationServiceTest {
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
             when(userIdentityOutputPort.findByEmail(favour.getEmail()))
-                    .thenReturn(UserIdentity.builder().isIdentityVerified(false).build());
+                    .thenReturn(UserIdentity.builder().isIdentityVerified(Boolean.TRUE).build());
             String response = identityVerificationService.verifyIdentity(generatedToken);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
@@ -95,7 +95,7 @@ class IdentityVerificationServiceTest {
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
             when(userIdentityOutputPort.findByEmail(favour.getEmail()))
-                    .thenReturn(UserIdentity.builder().isIdentityVerified(true).build());
+                    .thenReturn(UserIdentity.builder().isIdentityVerified(Boolean.FALSE).build());
             String response = identityVerificationService.verifyIdentity(generatedToken);
             assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
