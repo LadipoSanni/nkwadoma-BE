@@ -5,12 +5,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +48,9 @@ class LoaneePersistenceAdapterTest {
     private String cohortId;
     private int pageSize = 2;
     private int pageNumber = 0;
-
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeLoanDetail secondLoaneeLoanDetail;
-    private LoanBreakdown loanBreakdown;
-    private LoanBreakdown secondBreakdown;
+
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -61,13 +61,11 @@ class LoaneePersistenceAdapterTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
-    private LoanBreakdownOutputPort loanBreakdownOutputPort;
-    @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private String userId;
     private String loaneeLoanDetailId;
-    private List<LoanBreakdown> loanBreakdownList;
-    private List<LoanBreakdown> loanBreakdownList2;
+
+
 
 
 
@@ -75,26 +73,18 @@ class LoaneePersistenceAdapterTest {
     void setUpUserIdentity(){
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
-        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("lekan").lastName("ayo")
+        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("leke").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
-        loanBreakdown = LoanBreakdown.builder().itemName("bread").itemAmount(BigDecimal.valueOf(34))
-                .currency("usd").build();
-        secondBreakdown = LoanBreakdown.builder().itemName("juno").itemAmount(BigDecimal.valueOf(34))
-                .currency("usd").build();
         try {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             anotherUser = identityManagerOutputPort.createUser(anotherUser);
             anotherUser = identityOutputPort.save(anotherUser);
-            loaneeLoanDetail.setLoanBreakdown(loanBreakdownList);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loanBreakdownList = loanBreakdownOutputPort.saveAll(List.of(loanBreakdown), loaneeLoanDetail);
-            loanBreakdownList2 = loanBreakdownOutputPort.saveAll(List.of(secondBreakdown),loaneeLoanDetail);
-            secondLoaneeLoanDetail.setLoanBreakdown(loanBreakdownList2);
             secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
@@ -215,6 +205,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveLoanee(){
         Loanee loanee = new Loanee();
+        firstLoanee.setFullName(userIdentity.getFirstName().concat(userIdentity.getLastName()));
         try {
             UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
             firstLoanee.setUserIdentity(savedUserIdentity);
@@ -235,6 +226,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveAnotherLoanee(){
         Loanee loanee = new Loanee();
+        anotherLoanee.setFullName(anotherUser.getFirstName().concat(anotherUser.getLastName()));
         try{
             loanee = loaneeOutputPort.save(anotherLoanee);
             secondLoaneeId = loanee.getId();
@@ -277,14 +269,24 @@ class LoaneePersistenceAdapterTest {
         assertThrows(MeedlException.class,()-> loaneeOutputPort.findLoaneeById(null));
     }
 
+    @Order(5)
+    @Test
+    void searchLoanee(){
+        List<Loanee> loanees = new ArrayList<>();
+        try{
+            loanees = loaneeOutputPort.searchForLoaneeInCohort("le",cohortId);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+        assertEquals(2,loanees.size());
+    }
+
     @AfterAll
     void cleanUp() throws MeedlException {
         identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);
         loaneeRepository.deleteById(secondLoaneeId);
         identityOutputPort.deleteUserById(userIdentity.getId());
-        loanBreakdownOutputPort.deleteAll(loanBreakdownList);
-        loanBreakdownOutputPort.deleteAll(loanBreakdownList2);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
         identityOutputPort.deleteUserById(anotherUser.getId());
         identityManagerOutputPort.deleteUser(anotherUser);

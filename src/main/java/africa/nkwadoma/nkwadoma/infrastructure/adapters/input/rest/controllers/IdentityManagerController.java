@@ -88,14 +88,14 @@ public class IdentityManagerController {
     @PostMapping("auth/identity/confirm/token/verify")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.isIdentityVerified(token))
+                .data(verificationUseCase.verifyIdentity(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/identity/verify")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.isIdentityVerified(identityVerification))
+                .data(verificationUseCase.verifyIdentity(identityVerification))
                 .statusCode(HttpStatus.OK.name()).build());
     }
 

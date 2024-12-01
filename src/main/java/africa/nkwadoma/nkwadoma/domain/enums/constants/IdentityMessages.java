@@ -37,7 +37,6 @@ public enum IdentityMessages{
     BLACKLISTED_REFERRAL("Referral Blacklisted"),
     IDENTITY_VERIFICATION_FAILURE_SAVED("Verification failure saved successfully"),
     IDENTITY_VERIFICATION_PROCESSING("Identity verification is being processed"),
-    IDENTITY_PREVIOUSLY_VERIFIED("User email verification: %s has not been verified previously %s "),
     IDENTITY_VERIFIED("Identity Verified"),
     IDENTITY_NOT_VERIFIED("Identity Not Verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),

@@ -23,4 +23,6 @@ public interface LoaneeOutputPort {
     Page<Loanee> findAllLoaneeByCohortId(String cohortId , int pageSize , int pageNumber) throws MeedlException;
 
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
+
+    List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException;
 }

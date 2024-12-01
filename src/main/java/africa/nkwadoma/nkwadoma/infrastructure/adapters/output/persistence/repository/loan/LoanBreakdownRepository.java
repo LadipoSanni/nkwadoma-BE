@@ -10,4 +10,5 @@ public interface LoanBreakdownRepository extends JpaRepository<LoanBreakdownEnti
     void deleteAllByCohort(CohortEntity cohortEntity);
 
     List<LoanBreakdownEntity> findAllByCohortId(String id);
+
 }
