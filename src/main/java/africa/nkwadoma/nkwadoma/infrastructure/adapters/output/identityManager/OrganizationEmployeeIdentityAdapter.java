@@ -10,6 +10,8 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -60,12 +62,17 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateUUID(organizationId);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        Page<OrganizationEmployeeEntity> organizationEmployees =
-                employeeAdminEntityRepository.findAllByOrganization(organizationId, PageRequest.of(pageNumber, pageSize));
+        Page<OrganizationEmployeeProjection> organizationEmployees =
+                employeeAdminEntityRepository.findAllByOrganization(
+                        organizationId, PageRequest.of(pageNumber, pageSize));
         if (organizationEmployees.isEmpty()) {
             throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
-        return organizationEmployees.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
+        log.info("Organization employees: {}", organizationEmployees);
+        Page<OrganizationEmployeeIdentity> employeeIdentities = organizationEmployees
+                .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
+        log.info("Mapped Organization employees: {}", employeeIdentities);
+        return employeeIdentities;
     }
 
     @Override

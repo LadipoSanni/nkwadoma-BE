@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
-import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,49 +37,42 @@ class OrganizationEmployeeIdentityAdapterTest {
     private int pageSize = 10;
     private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
     private String organizationId;
+    private OrganizationEmployeeIdentity savedEmployeeIdentity;
     private String userId;
+    private String organizationEmployeeIdentityId;
 
     @BeforeAll
     void init() {
         try {
-            amazingGrace = new OrganizationIdentity();
-            amazingGrace.setName("Amazing Grace Enterprises");
-            amazingGrace.setEmail("rachel@gmail.com");
-            amazingGrace.setInvitedDate(LocalDateTime.now().toString());
-            amazingGrace.setRcNumber("RC345677");
-            amazingGrace.setPhoneNumber("0907658483");
-            amazingGrace.setTin("Tin5678");
-            amazingGrace.setCreatedBy(testId);
-            amazingGrace.setId(testId);
-            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
+            joel = TestData.createTestUserIdentity("joel54@johnson.com");
+            List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
+                    .builder().meedlUser(joel).build());
+
+            amazingGrace = TestData.createOrganizationTestData(
+                    "Amazing Grace Enterprises",
+                    "RC79500034",
+                    employees
+            );
+            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
+                    name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
-            amazingGrace.setWebsiteAddress("webaddress.org");
 
-            joel = new UserIdentity();
-            joel.setFirstName("Joel");
-            joel.setLastName("Jacobs");
-            joel.setEmail("joel@johnson.com");
-            joel.setId(amazingGrace.getCreatedBy());
-            joel.setPhoneNumber("098647748393");
-            joel.setEmailVerified(Boolean.TRUE);
-            joel.setEnabled(Boolean.TRUE);
-            joel.setCreatedAt(LocalDateTime.now().toString());
-            joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            joel.setCreatedBy(amazingGrace.getCreatedBy());
-            UserIdentity foundUserIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
-
-            if (StringUtils.isNotEmpty(foundUserIdentity.getId())) {
-                userIdentityOutputPort.deleteUserById(foundUserIdentity.getId());
-            }
-
-            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().meedlUser(joel).build()));
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
             organizationId = savedOrganization.getId();
 
-            UserIdentity userIdentity = userIdentityOutputPort.save(joel);
-            assertNotNull(userIdentity);
-            userId = userIdentity.getId();
+            joel = userIdentityOutputPort.save(joel);
+            assertNotNull(joel);
+            userId = joel.getId();
+
+            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+            organizationEmployeeIdentity.setOrganization(organizationId);
+            organizationEmployeeIdentity.setMeedlUser(joel);
+            savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+                    save(organizationEmployeeIdentity);
+
+            assertNotNull(savedEmployeeIdentity);
+            organizationEmployeeIdentityId = savedEmployeeIdentity.getId();
         } catch (MeedlException e) {
             log.error("Error saving organization", e);
         }
@@ -88,21 +81,13 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Test
     void findAllOrganizationEmployees() {
         try {
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-            UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-
-            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-            organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
-            organizationEmployeeIdentity.setMeedlUser(userIdentity);
-            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
-                    save(organizationEmployeeIdentity);
-            assertNotNull(savedEmployeeIdentity);
-
             Page<OrganizationEmployeeIdentity> organizationEmployees =
-                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
-                            pageNumber, pageSize);
+                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(
+                            organizationId, pageNumber, pageSize);
 
             assertNotNull(organizationEmployees);
+            assertEquals(1, organizationEmployees.getContent().size());
+
         } catch (MeedlException e) {
             log.error("Error saving organization to the DB", e);
         }
@@ -162,14 +147,11 @@ class OrganizationEmployeeIdentityAdapterTest {
     @AfterAll
     void tearDown() {
         try {
-            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByCreatedBy(joel.getCreatedBy());
-            organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
-            userIdentityOutputPort.deleteUserByEmail(joel.getEmail());
-
-            OrganizationIdentity organization = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+            userIdentityOutputPort.deleteUserById(userId);
 
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(organization.getId());
+                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
@@ -177,7 +159,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             }
             organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
 
-            organizationIdentityOutputPort.delete(organization.getId());
+            organizationIdentityOutputPort.delete(organizationId);
         } catch (MeedlException e) {
             log.error("Error occurred cleaning up", e);
         }
