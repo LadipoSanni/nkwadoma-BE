@@ -28,7 +28,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
-    @PostMapping("/email/verify")
+    @PostMapping("/email/identity/is-verified")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam
                                                                  @Valid
                                                                  @NotBlank(message = "Email is required")
