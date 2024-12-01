@@ -415,15 +415,15 @@ class CohortPersistenceAdapterTest {
         assertFalse(foundCohort.isPresent());
     }
 
-//    @AfterAll
-//    void cleanUp() throws MeedlException {
-//        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
-//        identityManagementOutputPort.deleteUser(meedleUser);
-//        cohortOutputPort.deleteCohort(cohortTwoId);
-//        cohortOutputPort.deleteCohort(cohortThreeId);
-//        programCohortOutputPort.delete(programId);
-//        programCohortOutputPort.delete(programId2);
-//        organizationIdentityOutputPort.delete(organizationId);
-//        userIdentityOutputPort.deleteUserById(meedleUserId);
-//    }
+    @AfterAll
+    void cleanUp() throws MeedlException {
+        log.info("cleanUp : orgainization id {} , userId {} , programId {} , cohortId {}", organizationId, meedleUserId, programId, cohortTwoId);
+        identityManagementOutputPort.deleteUser(meedleUser);
+        cohortOutputPort.deleteCohort(cohortTwoId);
+        cohortOutputPort.deleteCohort(cohortThreeId);
+        programCohortOutputPort.delete(programId);
+        programCohortOutputPort.delete(programId2);
+        organizationIdentityOutputPort.delete(organizationId);
+        userIdentityOutputPort.deleteUserById(meedleUserId);
+    }
 }
