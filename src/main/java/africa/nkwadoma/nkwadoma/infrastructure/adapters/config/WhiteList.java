@@ -14,7 +14,7 @@ public class WhiteList {
             "/api/v1/auth/password/create",
             "/api/v1/auth/password/forgotPassword",
             "/api/v1/auth/password/reset",
-            "/api/v1/identity/verification/token/verify",
+            "/api/v1/identity/verification/identity/is-verified",
             "/api/v1/identity/verification/identity/verify",
             "/api/v1/identity/verification/failure-record/create",
     };
