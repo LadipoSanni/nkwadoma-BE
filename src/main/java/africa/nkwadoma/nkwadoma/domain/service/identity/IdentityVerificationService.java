@@ -35,10 +35,9 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
 
     @Override
-    public String verifyIdentity(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWTGetEmail(token);
-        String loanReferralId = tokenUtils.decodeJWTGetId(token);
+    public String verifyIdentity(String email, String loanReferralId) throws MeedlException {
         MeedlValidator.validateEmail(email);
+        MeedlValidator.validateUUID(loanReferralId);
         checkIfAboveThreshold(loanReferralId);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
         if (!userIdentity.isIdentityVerified()) {

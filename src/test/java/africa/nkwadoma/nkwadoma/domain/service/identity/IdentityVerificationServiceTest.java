@@ -71,18 +71,22 @@ class IdentityVerificationServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
-    void verifyUserIdentityVerifiedByInvalidEmail(String token) {
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(token));
+    void verifyUserIdentityVerifiedByInvalidEmail(String email) {
+        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(email, testId));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
+    void verifyUserIdentityVerifiedByInvalidLoanReferralId(String id) {
+        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(favour.getEmail(), id));
+    }
+
 
     @Test
     void verifyUserIdentityVerifiedByEmail() {
         try {
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
             when(userIdentityOutputPort.findByEmail(favour.getEmail()))
                     .thenReturn(UserIdentity.builder().isIdentityVerified(false).build());
-            String response = identityVerificationService.verifyIdentity(generatedToken);
+            String response = identityVerificationService.verifyIdentity(favour.getEmail(), testId);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
@@ -92,11 +96,9 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyNonExistingUserIdentityIsVerifiedByEmail() {
         try {
-            when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(tokenUtils.decodeJWTGetId(generatedToken)).thenReturn(testId);
             when(userIdentityOutputPort.findByEmail(favour.getEmail()))
                     .thenReturn(UserIdentity.builder().isIdentityVerified(true).build());
-            String response = identityVerificationService.verifyIdentity(generatedToken);
+            String response = identityVerificationService.verifyIdentity(favour.getEmail(), testId);
             assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());

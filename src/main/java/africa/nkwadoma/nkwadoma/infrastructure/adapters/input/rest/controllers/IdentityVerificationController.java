@@ -10,6 +10,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.IdentityVerificationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,9 +29,15 @@ public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
     @PostMapping("/token/verify")
-    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
+    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam
+                                                                 @Valid
+                                                                 @NotBlank(message = "Email is required")
+                                                                 @Email(message = "Provide a valid email address")
+                                                                 String email,
+                                                                 @NotBlank(message = "Loan referral id is required")
+                                                                  String loanReferralId) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(identityVerificationUseCase.verifyIdentity(token))
+                .data(identityVerificationUseCase.verifyIdentity(email, loanReferralId))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/identity/verify")
