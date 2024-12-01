@@ -28,17 +28,12 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
-    @PostMapping("/email/identity/is-verified")
+    @PostMapping("/identity/is-verified")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam
-                                                                 @Valid
-                                                                 @NotBlank(message = "Email is required")
-                                                                 @Email(message = "Provide a valid email address")
-                                                                 String email,
-                                                                 @RequestParam
                                                                  @NotBlank(message = "Loan referral id is required")
-                                                                  String loanReferralId) throws MeedlException {
+                                                                 String loanReferralId) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(identityVerificationUseCase.verifyIdentity(email, loanReferralId))
+                .data(identityVerificationUseCase.verifyIdentity(loanReferralId))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/identity/verify")

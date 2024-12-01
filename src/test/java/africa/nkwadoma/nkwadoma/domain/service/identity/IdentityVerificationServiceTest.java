@@ -2,11 +2,15 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -22,6 +26,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFICATION_FAILURE_SAVED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_VERIFIED;
@@ -34,16 +40,18 @@ class IdentityVerificationServiceTest {
     @InjectMocks
     private IdentityVerificationService identityVerificationService;
     @Mock
+    private LoanReferralOutputPort loanReferralOutputPort;
+    @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     @Mock
     private TokenUtils tokenUtils;
     private UserIdentity favour;
+    private LoanReferral loanReferral;
     private final String testId ="9c558b64-c207-4c34-99c7-8d2f04398496";
     private final String testBvn = "12345678956";
     private final String testNin = "21345678908";
-    private final String generatedToken = "generatedToken";
     private IdentityVerification identityVerification;
     private IdentityVerificationEntity identityVerificationEntity;
     private IdentityVerificationFailureRecord identityVerificationFailureRecord;
@@ -51,8 +59,9 @@ class IdentityVerificationServiceTest {
     @BeforeEach
     void setUp() {
         favour = TestData.createTestUserIdentity("favour@gmail.com");
-                new UserIdentity();
-//
+        Loanee loanee = TestData.createTestLoanee(favour, TestData.createTestLoaneeLoanDetail());
+        loanReferral = LoanReferral.builder().loanee(loanee).build();
+
         identityVerificationEntity = new IdentityVerificationEntity();
         identityVerificationEntity.setId(testId);
         identityVerificationEntity.setBvn(testBvn);
@@ -71,22 +80,16 @@ class IdentityVerificationServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
-    void verifyUserIdentityVerifiedByInvalidEmail(String email) {
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(email, testId));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void verifyUserIdentityVerifiedByInvalidLoanReferralId(String id) {
-        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(favour.getEmail(), id));
+        assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(id));
     }
 
 
     @Test
     void verifyUserIdentityVerifiedByEmail() {
         try {
-            when(userIdentityOutputPort.findByEmail(favour.getEmail()))
-                    .thenReturn(UserIdentity.builder().isIdentityVerified(false).build());
-            String response = identityVerificationService.verifyIdentity(favour.getEmail(), testId);
+            when(loanReferralOutputPort.findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
+            String response = identityVerificationService.verifyIdentity(testId);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
@@ -96,10 +99,10 @@ class IdentityVerificationServiceTest {
     @Test
     void verifyNonExistingUserIdentityIsVerifiedByEmail() {
         try {
-            when(userIdentityOutputPort.findByEmail(favour.getEmail()))
-                    .thenReturn(UserIdentity.builder().isIdentityVerified(true).build());
-            String response = identityVerificationService.verifyIdentity(favour.getEmail(), testId);
-            assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
+            loanReferral.getLoanee().getUserIdentity().setIdentityVerified(Boolean.TRUE);
+            when(loanReferralOutputPort.findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
+            String response = identityVerificationService.verifyIdentity(testId);
+             assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
