@@ -34,6 +34,7 @@ public class IdentityVerificationController {
                                                                  @NotBlank(message = "Email is required")
                                                                  @Email(message = "Provide a valid email address")
                                                                  String email,
+                                                                 @RequestParam
                                                                  @NotBlank(message = "Loan referral id is required")
                                                                   String loanReferralId) throws MeedlException {
         return ResponseEntity.ok(ApiResponse.<String>builder()
