@@ -40,7 +40,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateEmail(email);
         checkIfAboveThreshold(loanReferralId);
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
-        if (!userIdentity.isIdentityVerified()) {
+        if (userIdentity.isIdentityVerified()) {
             addedToLoaneeLoan(loanReferralId);
             log.info("Identity: Email {}. Loan referral id {}. Verified ", email, loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
