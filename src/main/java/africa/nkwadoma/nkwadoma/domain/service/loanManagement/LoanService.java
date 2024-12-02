@@ -106,7 +106,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanReferral);
         MeedlValidator.validateDataElement(loanReferral.getId());
         String loanReferralId = loanReferral.getId().trim();
-        MeedlValidator.validateUUID(loanReferralId);Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId);
+        Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
         if (foundLoanReferral.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         } else {

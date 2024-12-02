@@ -117,11 +117,11 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
     }
 
-    @GetMapping("loan-referral/{loaneeId}")
+    @GetMapping("loan-referral/{loanReferralId}")
     public ResponseEntity<ApiResponse<?>> viewLoanReferral (@PathVariable @NotBlank(message = "Loanee ID is required")
-                                                                          String loaneeId) throws MeedlException {
+                                                                          String loanReferralId) throws MeedlException {
         LoanReferral loanReferral = new LoanReferral();
-        loanReferral.getLoanee().setId(loaneeId);
+        loanReferral.setId(loanReferralId);
         LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()

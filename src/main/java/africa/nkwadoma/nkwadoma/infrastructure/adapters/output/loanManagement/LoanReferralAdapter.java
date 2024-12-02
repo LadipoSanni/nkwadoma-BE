@@ -31,15 +31,14 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateDataElement(loanReferralId);
-        loanReferralId = loanReferralId.trim();
         MeedlValidator.validateUUID(loanReferralId);
-        Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
-        if (loanReferralEntity.isEmpty()) {
+        Optional<LoanReferralProjection> loanReferralProjection = loanReferralRepository.findLoanReferralById(loanReferralId);
+        if (loanReferralProjection.isEmpty()) {
             return Optional.empty();
         }
-        log.info("Found loan referral: {}", loanReferralEntity.get());
-        return Optional.of(loanReferralMapper.toLoanReferral(loanReferralEntity.get()));
+        LoanReferral loanReferral = loanReferralMapper.mapProjectionToLoanReferralEntity(loanReferralProjection.get());
+        log.info("Loan referral: {}", loanReferral);
+        return Optional.of(loanReferral);
     }
 
     @Override

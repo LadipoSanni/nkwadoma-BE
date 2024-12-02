@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.*;
+import java.time.*;
+
 @Getter
 @Setter
 @Builder
@@ -15,10 +18,17 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class LoanReferral {
-
     private String id;
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
+    private String referredBy;
+    String cohortName;
+    String loaneeImage;
+    BigDecimal loanAmountRequested;
+    BigDecimal initialDeposit;
+    BigDecimal tuitionAmount;
+    LocalDate cohortStartDate;
+    String programName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);

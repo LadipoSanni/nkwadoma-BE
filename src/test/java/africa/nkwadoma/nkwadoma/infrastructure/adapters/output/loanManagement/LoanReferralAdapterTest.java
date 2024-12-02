@@ -81,13 +81,16 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferral() {
-        Optional<LoanReferral> referral = Optional.empty();
+        Optional<LoanReferral> referral;
         try {
             referral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
+            assertNotNull(referral);
+            assertFalse(referral.isEmpty());
+            assertEquals("Adeshina", referral.get().getLoanee().getUserIdentity().getFirstName());
+            assertEquals("Qudus", referral.get().getLoanee().getUserIdentity().getLastName());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(referral);
     }
 
     @Test
