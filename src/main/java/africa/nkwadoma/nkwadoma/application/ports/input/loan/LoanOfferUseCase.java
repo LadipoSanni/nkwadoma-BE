@@ -5,4 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 public interface LoanOfferUseCase {
     LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException;
+
+    LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException;
 }

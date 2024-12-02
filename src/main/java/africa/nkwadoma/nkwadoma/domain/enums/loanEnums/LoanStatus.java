@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.loanEnums;
 
 public enum LoanStatus {
-    PERFORMING
+    PERFORMING,
+    AWAITING_DISBURSAL
 }

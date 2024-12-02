@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final LoanOutputPort loanOutputPort;
+    private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
 
 
     @Override
@@ -155,5 +157,32 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
         return loanOffer;
+    }
+
+    @Override
+    public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        loanOffer.validateForAcceptOffer();
+        if (loanOffer.getAcceptanceTimeFrame().isBefore(LocalTime.now())){
+            throw new LoanException(LoanMessages.ACCEPTANCE_TIME_FRAME_PASSED.getMessage());
+        }
+        LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
+        if (! offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
+            throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
+        }
+        if (loanOffer.getLoaneeResponse().equals(LoanOfferResponse.ACCEPT)){
+            //Loanee Wallet would be Created
+            // Notify Pm
+            return createLoaneeLoanAccount();
+        }
+        //Notify Pm On Loanee Reposne
+        return null;
+    }
+
+    private LoaneeLoanAccount createLoaneeLoanAccount() throws MeedlException {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setStatus(AccountStatus.NEW);
+        loaneeLoanAccount.setLoanStatus(LoanStatus.AWAITING_DISBURSAL);
+        loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
+        return loaneeLoanAccount;
     }
 }

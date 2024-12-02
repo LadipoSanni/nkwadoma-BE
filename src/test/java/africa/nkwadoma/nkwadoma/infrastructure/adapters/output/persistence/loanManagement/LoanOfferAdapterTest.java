@@ -119,6 +119,29 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"kjkjdjksjk"})
+    void findLoanOfferWithInvalidId(String invalidId){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(invalidId));
+    }
+
+    @Test
+    void findLoanOfferWithNullId(){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(null));
+    }
+
+    @Order(2)
+    @Test
+    void findLoanOfferById(){
+        LoanOffer offer = new LoanOffer();
+        try{
+            offer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(offer.getId(), loanOfferId);
+    }
+
 
     @AfterAll
     void cleanUp() {
