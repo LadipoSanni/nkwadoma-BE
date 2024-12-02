@@ -119,6 +119,7 @@ public class OrganizationController {
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
     @GetMapping("organization/all")
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
     public ResponseEntity<ApiResponse<?>> viewAllOrganization(@RequestParam int pageNumber, @RequestParam int pageSize)
@@ -128,9 +129,9 @@ public class OrganizationController {
                                                                 .pageNumber(pageNumber)
                                                                 .pageSize(pageSize)
                                                                 .build());
-        List<OrganizationResponse> programResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
-                programResponses, organizationIdentities.hasNext(),
+                organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(), pageNumber,
                 pageSize
         );
