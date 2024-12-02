@@ -41,12 +41,14 @@ jobs:
       - name: Initialize or Increment Build Count
         id: build_count
         run: |
+          # Function to initialize the build tracker
           initialize_tracker() {
               echo "Initializing build tracker..."
               echo '{"count": 1, "builds": []}' > ./build_tracker.json
               echo "count=1" >> $GITHUB_ENV
           }
       
+          # Function to update the build tracker
           update_tracker() {
               local new_count=$1
               local builds=$2
@@ -70,34 +72,48 @@ jobs:
               echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
           }
       
+          # Check if the build tracker file exists
           if [ -f "./build_tracker.json" ]; then
+              echo "Build tracker found. Loading existing data..."
               count=$(jq '.count' ./build_tracker.json)
               builds=$(jq '.builds' ./build_tracker.json)
               last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json)
               new_count=$((count + 1))
           else
+              echo "Build tracker not found. Initializing new tracker..."
               initialize_tracker
               last_timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
               new_count=1
               builds="[]"
           fi
       
+          # Generate metadata for the new build
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           BRANCH="${{ github.head_ref || github.ref_name }}"
           COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
           new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
       
+          # Update the tracker with the new build
           update_tracker $new_count "$builds" "$new_build"
       
-          TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
+          # Calculate time difference between the last and current builds
+          if [ -n "$last_timestamp" ]; then
+              TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
+          else
+              TIME_DIFF=0
+          fi
       
+          # Export environment variables for use in subsequent steps
           echo "count=$new_count" >> $GITHUB_ENV
           echo "builds=$builds" >> $GITHUB_ENV
           echo "timestamp=$BUILD_TIMESTAMP" >> $GITHUB_ENV
           echo "author=$AUTHOR" >> $GITHUB_ENV
           echo "last_timestamp=$last_timestamp" >> $GITHUB_ENV
           echo "time_diff=$TIME_DIFF" >> $GITHUB_ENV
+
+          echo "Build tracker updated successfully."
+
 
       - name: Upload Updated Build Tracker
         uses: actions/upload-artifact@v3
