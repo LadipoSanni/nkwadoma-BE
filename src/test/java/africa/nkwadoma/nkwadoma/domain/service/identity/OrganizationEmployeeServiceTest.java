@@ -27,6 +27,8 @@ class OrganizationEmployeeServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeOutputPort;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    private int pageNumber = 0;
+    private int pageSize = 10;
 
     @BeforeEach
     void setUp() {
@@ -54,6 +56,15 @@ class OrganizationEmployeeServiceTest {
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
+    }
+
+    @Test
+    void viewAllOrganizationEmployeesWithNonExistingOrganizationId() {
+        organizationEmployeeIdentity.setOrganization("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        organizationEmployeeIdentity.setPageSize(pageSize);
+        organizationEmployeeIdentity.setPageNumber(pageNumber);
+        assertThrows(MeedlException.class, () -> organizationEmployeeService.
+                viewOrganizationEmployees(organizationEmployeeIdentity));
     }
 
     @ParameterizedTest

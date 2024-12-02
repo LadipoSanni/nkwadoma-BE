@@ -66,7 +66,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 employeeAdminEntityRepository.findAllByOrganization(
                         organizationId, PageRequest.of(pageNumber, pageSize));
         if (organizationEmployees.isEmpty()) {
-            throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
+            return Page.empty();
+//            throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
         Page<OrganizationEmployeeIdentity> employeeIdentities = organizationEmployees
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);

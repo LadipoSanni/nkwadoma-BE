@@ -112,15 +112,8 @@ class OrganizationEmployeeIdentityAdapterTest {
     @ParameterizedTest
     @ValueSource(ints = {-1})
     void viewAllOrganizationEmployeesWithInvalidPageNumber(int pageNumber) {
-        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-        try {
-            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        } catch (MeedlException e) {
-            log.error("Error occurred ===>", e);
-        }
-        String id = organizationIdentity.getId();
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
-                findAllOrganizationEmployees(id, pageNumber, pageSize));
+                findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
     }
 
     @ParameterizedTest
@@ -130,19 +123,11 @@ class OrganizationEmployeeIdentityAdapterTest {
         try {
             organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         } catch (MeedlException e) {
-            log.error("Error finding organization", e);
+            log.error("Error finding organization employees", e);
         }
         String id = organizationIdentity.getId();
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
                 findAllOrganizationEmployees(id, pageNumber, pageSize));
-    }
-
-
-    @ParameterizedTest
-    @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
-    void viewAllOrganizationEmployeesWithNonExistingOrganizationId(String organizationId) {
-        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.
-                findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
     }
 
     @AfterAll
