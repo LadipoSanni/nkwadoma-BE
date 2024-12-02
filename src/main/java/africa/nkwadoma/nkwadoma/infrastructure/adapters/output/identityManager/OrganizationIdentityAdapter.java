@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -43,13 +44,14 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         validate(organizationIdentity);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity.setInvitedDate(LocalDateTime.now());
+        organizationEntity.setStatus(ActivationStatus.INVITED);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
         saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
         log.info("Organization entity saved successfully {}", organizationEntity);
-//        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
+        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
+                toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
         log.info("Organization entity saved successfully");
 
         organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
@@ -114,7 +116,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
-         return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
     @Override

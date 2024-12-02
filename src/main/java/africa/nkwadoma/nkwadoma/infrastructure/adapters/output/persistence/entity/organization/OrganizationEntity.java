@@ -1,4 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,8 @@ public class OrganizationEntity {
     private String registrationNumber;
     private String taxIdentity;
     private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    private ActivationStatus status;
     private String rcNumber;
     private String createdBy;
     private String updatedBy;
