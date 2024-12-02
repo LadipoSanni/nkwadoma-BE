@@ -150,4 +150,11 @@ public class TestData {
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequest;
     }
+
+    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status) {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setLoanStatus(loanStatus);
+        loaneeLoanAccount.setStatus(status);
+        return loaneeLoanAccount;
+    }
 }

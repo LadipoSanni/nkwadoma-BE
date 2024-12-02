@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -10,4 +11,9 @@ public interface OrganizationEmployeeIdentityMapper {
 
     @InheritInverseConfiguration
     OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeEntity organizationEmployeeEntity);
+
+    @Mapping(target = "meedlUser.firstName", source = "firstName")
+    @Mapping(target = "meedlUser.lastName", source = "lastName")
+//    @Mapping(target = "status", source = "status")
+    OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeProjection organizationEmployeeProjection);
 }

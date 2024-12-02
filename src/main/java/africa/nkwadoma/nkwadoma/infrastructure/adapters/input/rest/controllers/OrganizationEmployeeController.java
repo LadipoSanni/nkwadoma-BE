@@ -1,0 +1,50 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
+
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
+
+@RestController
+@RequestMapping(BASE_URL + "organization/")
+@Slf4j
+@RequiredArgsConstructor
+public class OrganizationEmployeeController {
+    private final ViewOrganizationEmployeesUseCase viewOrganizationEmployeesUseCase;
+    private final OrganizationEmployeeRestMapper organizationEmployeeRestMapper;
+
+    @GetMapping("employees/{organizationId}")
+    public ResponseEntity<?> viewOrganizationEmployees(@Valid @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
+                                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                       @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
+            throws MeedlException {
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity(organizationId, pageNumber, pageSize);
+        Page<OrganizationEmployeeIdentity> employeeIdentities = viewOrganizationEmployeesUseCase.
+                viewOrganizationEmployees(employeeIdentity);
+        List<OrganizationEmployeeResponse> employeeResponses = employeeIdentities.map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).getContent();
+        PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =
+                PaginatedResponse.<OrganizationEmployeeResponse>builder()
+                        .body(employeeResponses)
+                        .hasNextPage(employeeIdentities.hasNext())
+                        .pageSize(pageSize)
+                        .totalPages(employeeIdentities.getTotalPages())
+                        .pageNumber(pageNumber).build();
+        return ResponseEntity.ok(new ApiResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
+                paginatedResponse, HttpStatus.OK.toString())
+        );
+    }
+}

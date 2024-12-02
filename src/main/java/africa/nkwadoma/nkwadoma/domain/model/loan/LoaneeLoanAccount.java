@@ -17,7 +17,7 @@ public class LoaneeLoanAccount {
     private LoanStatus loanStatus;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(String.valueOf(status));
-        MeedlValidator.validateDataElement(String.valueOf(loanStatus));
+        MeedlValidator.validateObjectInstance(status);
+        MeedlValidator.validateObjectInstance(loanStatus);
     }
 }

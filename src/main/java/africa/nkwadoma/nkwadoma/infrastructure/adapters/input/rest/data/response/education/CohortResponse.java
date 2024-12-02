@@ -38,5 +38,6 @@ public class CohortResponse {
     private LocalDate expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
     private LoanDetailResponse loanDetail;
-
+    private int numberOfLoanees = 0;
+    private int numberOfReferredLoanee = 0;
 }

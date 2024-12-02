@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAccount;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoaneeLoanAccountMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeLoanAccountEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanAccountRepository;
@@ -23,5 +24,11 @@ public class LoaneeLoanAccountPersistenceAdapter implements LoaneeLoanAccountOut
         LoaneeLoanAccountEntity loaneeLoanAccountEntity = loaneeLoanAccountMapper.toLoaneeLoanAccountEntity(loaneeLoanAccount);
         loaneeLoanAccountEntity = loaneeLoanAccountRepository.save(loaneeLoanAccountEntity);
         return loaneeLoanAccountMapper.toLoaneeLoanAccount(loaneeLoanAccountEntity);
+    }
+
+    @Override
+    public void deleteLoaneeLoanAccount(String loaneeLoanAccountId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeLoanAccountId);
+        loaneeLoanAccountRepository.deleteById(loaneeLoanAccountId);
     }
 }

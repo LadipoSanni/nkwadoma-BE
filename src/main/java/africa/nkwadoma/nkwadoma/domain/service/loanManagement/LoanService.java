@@ -162,7 +162,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
         loanOffer.validateForAcceptOffer();
-        if (loanOffer.getAcceptanceTimeFrame().isBefore(LocalTime.now())){
+        if (loanOffer.getDateTimeOffered().isBefore(LocalDateTime.now())){
             throw new LoanException(LoanMessages.ACCEPTANCE_TIME_FRAME_PASSED.getMessage());
         }
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
