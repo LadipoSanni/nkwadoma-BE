@@ -1,9 +1,6 @@
 name: Commit and PR Tracker
 
 on:
-  pull_request:
-    branches:
-      - dev
   schedule:
     - cron: "0 9 * * *"
     - cron: "0 11 * * *"
@@ -12,6 +9,7 @@ on:
   workflow_run:
     workflows:
       - Artifact Creation  # Name of the first workflow
+      - Java CI with Maven
     types:
       - completed
 
