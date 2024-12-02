@@ -4,28 +4,40 @@ on:
   pull_request:
     branches:
       - dev
-  workflow_run:
-    workflows:
-      - Java CI with Maven
-      # - Deploy Systest to Amazon EC2
-    types:
-      - completed
   schedule:
     - cron: "0 9 * * *"
     - cron: "0 11 * * *"
     - cron: "0 13 * * *"
     - cron: "0 17 * * *"
+  workflow_run:
+    workflows:
+      - Java CI with Maven
+      - Deploy Systest to Amazon EC2
+    types:
+      - completed
 
 jobs:
-  track-build:
+  check-all-workflows:
     runs-on: ubuntu-latest
-    if: always() # Ensure it runs regardless of upstream workflow success/failure
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Check All Workflows Script
+        run: |
+          chmod +x .github/workflows/scripts/check-all-workflows.sh
+          .github/workflows/scripts/check-all-workflows.sh
+
+  track-build:
+    needs: check-all-workflows  # Ensures 'track-build' runs after 'check-all-workflows'
+    runs-on: ubuntu-latest
+    if: always()  # Ensures that this job runs even if 'check-all-workflows' fails
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Try to download the artifact; if it doesn't exist, initialize a new tracker
+      # Attempt to retrieve build-tracker artifact (continue on error if not found)
       - name: Retrieve Build Tracker Artifact
         uses: actions/download-artifact@v3
         with:
@@ -33,7 +45,7 @@ jobs:
           path: ./build_tracker.json
         continue-on-error: true
 
-      # Initialize or increment the build tracker
+      # Initialize or Increment Build Count
       - name: Initialize or Increment Build Count
         id: build_count
         run: |
@@ -110,14 +122,14 @@ jobs:
 
           echo "Build tracker updated successfully."
 
-      # Upload the updated build tracker artifact
+      # Upload Updated Build Tracker
       - name: Upload Updated Build Tracker
         uses: actions/upload-artifact@v3
         with:
           name: build-tracker
           path: ./build_tracker.json
 
-      # Send inactivity or activity emails based on the count
+      # Send Inactivity Email
       - name: Send Inactivity Email
         if: ${{ env.count == 0 }}
         env:
@@ -125,7 +137,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'recipient1@example.com,recipient2@example.com'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
@@ -133,6 +145,7 @@ jobs:
             "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
+      # Send Activity Summary Email
       - name: Send Activity Summary Email
         if: ${{ env.count > 0 }}
         env:
@@ -140,7 +153,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'recipient1@example.com,recipient2@example.com'
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
           BUILDS: ${{ env.builds }}
           LAST_COMMIT_AUTHOR: ${{ env.author }}
           LAST_COMMIT_MESSAGE: ${{ steps.build_count.outputs.LAST_COMMIT_MESSAGE }}
