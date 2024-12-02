@@ -124,13 +124,7 @@ public class LoaneeService implements LoaneeUseCase {
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateUUID(cohortId);
-        List<Loanee>  loanees = loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
-        for (Loanee loanee : loanees) {
-            List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                    loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanee.getId());
-            loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
-        }
-        return loanees;
+        return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
 
     private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws MeedlException {
