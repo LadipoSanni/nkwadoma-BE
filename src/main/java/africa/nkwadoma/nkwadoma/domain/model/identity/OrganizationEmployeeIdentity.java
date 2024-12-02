@@ -19,6 +19,12 @@ public class OrganizationEmployeeIdentity {
     private int pageNumber;
     private int pageSize;
 
+    public OrganizationEmployeeIdentity(String organizationId, int pageNumber, int pageSize) {
+        organization = organizationId;
+        pageNumber = pageNumber;
+        pageSize = pageSize;
+    }
+
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();
         return  this.pageSize == BigInteger.ZERO.intValue() ? defaultPageSize : this.pageSize;
