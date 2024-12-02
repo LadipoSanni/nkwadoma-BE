@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import lombok.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -25,6 +26,7 @@ public class OrganizationResponse {
     private String tin;
     private String phoneNumber;
     private int numberOfPrograms;
+    private ActivationStatus status;
     private String createdBy;
     private int numberOfLoanees;
     private BigDecimal totalDebtRepaid;

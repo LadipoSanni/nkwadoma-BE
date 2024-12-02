@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -35,6 +36,7 @@ public class OrganizationIdentity {
     private String updatedBy;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
+    private ActivationStatus status;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
     private BigDecimal totalDebtRepaid;
@@ -43,7 +45,6 @@ public class OrganizationIdentity {
     private double repaymentRate;
     private int pageSize;
     private int pageNumber;
-
     private String logoImage;
     private String bannerImage;
     private String address;
