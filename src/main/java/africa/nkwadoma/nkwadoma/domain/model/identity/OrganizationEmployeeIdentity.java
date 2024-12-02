@@ -20,9 +20,9 @@ public class OrganizationEmployeeIdentity {
     private int pageSize;
 
     public OrganizationEmployeeIdentity(String organizationId, int pageNumber, int pageSize) {
-        organization = organizationId;
-        pageNumber = pageNumber;
-        pageSize = pageSize;
+        this.organization = organizationId;
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
     }
 
     public int getPageSize() {
