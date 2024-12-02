@@ -20,6 +20,7 @@ public class UserEntity {
     private String lastName;
     private String image;
     private String phoneNumber;
+    private boolean isIdentityVerified;
     private boolean emailVerified;
     private boolean enabled;
     private String createdAt;

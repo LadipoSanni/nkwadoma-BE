@@ -50,7 +50,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             throw new MeedlException("Loan referral has no loanee assigned to it.");
         }
         UserIdentity userIdentity = loanReferral.getLoanee().getUserIdentity();
-        if (!userIdentity.isIdentityVerified()) {
+        if (userIdentity.isIdentityVerified()) {
             addedToLoaneeLoan(loanReferralId);
             log.info("Identity: Loan referral id {}. Verified ", loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
