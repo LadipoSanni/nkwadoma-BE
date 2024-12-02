@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - dev
+  workflow_run:
+    workflows:
+      - Java CI with Maven
+      # - Deploy Systest to Amazon EC2
+    types:
+      - completed
   schedule:
     - cron: "0 9 * * *"
     - cron: "0 11 * * *"
@@ -11,26 +17,15 @@ on:
     - cron: "0 17 * * *"
 
 jobs:
-  check-all-workflows:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Run Check All Workflows Script
-        run: |
-          chmod +x .github/workflows/scripts/check-all-workflows.sh
-          .github/workflows/scripts/check-all-workflows.sh
-
   track-build:
-    needs: check-all-workflows
     runs-on: ubuntu-latest
-    if: always()
+    if: always() # Ensure it runs regardless of upstream workflow success/failure
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Try to download the artifact; if it doesn't exist, initialize a new tracker
       - name: Retrieve Build Tracker Artifact
         uses: actions/download-artifact@v3
         with:
@@ -38,6 +33,7 @@ jobs:
           path: ./build_tracker.json
         continue-on-error: true
 
+      # Initialize or increment the build tracker
       - name: Initialize or Increment Build Count
         id: build_count
         run: |
@@ -47,31 +43,31 @@ jobs:
               echo '{"count": 1, "builds": []}' > ./build_tracker.json
               echo "count=1" >> $GITHUB_ENV
           }
-      
+
           # Function to update the build tracker
           update_tracker() {
               local new_count=$1
               local builds=$2
               local new_build=$3
-      
+
               echo "Updating build tracker..."
-      
+
               # Ensure builds is a valid JSON array
               if [ -z "$builds" ] || [ "$builds" = "null" ]; then
                   builds="[]"
               fi
-      
+
               # Add the new build to the builds array
               updated_builds=$(echo "$builds" | jq ". += [$new_build]")
               if [ $? -ne 0 ]; then
                   echo "Error updating builds with jq."
                   exit 1
               fi
-      
+
               # Update the JSON file
               echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
           }
-      
+
           # Check if the build tracker file exists
           if [ -f "./build_tracker.json" ]; then
               echo "Build tracker found. Loading existing data..."
@@ -86,24 +82,24 @@ jobs:
               new_count=1
               builds="[]"
           fi
-      
+
           # Generate metadata for the new build
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           BRANCH="${{ github.head_ref || github.ref_name }}"
           COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
           new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
-      
+
           # Update the tracker with the new build
           update_tracker $new_count "$builds" "$new_build"
-      
+
           # Calculate time difference between the last and current builds
           if [ -n "$last_timestamp" ]; then
               TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
           else
               TIME_DIFF=0
           fi
-      
+
           # Export environment variables for use in subsequent steps
           echo "count=$new_count" >> $GITHUB_ENV
           echo "builds=$builds" >> $GITHUB_ENV
@@ -114,13 +110,14 @@ jobs:
 
           echo "Build tracker updated successfully."
 
-
+      # Upload the updated build tracker artifact
       - name: Upload Updated Build Tracker
         uses: actions/upload-artifact@v3
         with:
           name: build-tracker
           path: ./build_tracker.json
 
+      # Send inactivity or activity emails based on the count
       - name: Send Inactivity Email
         if: ${{ env.count == 0 }}
         env:
@@ -128,7 +125,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'recipient1@example.com,recipient2@example.com'
         run: |
           chmod +x .github/workflows/scripts/inactivity_email.sh
           .github/workflows/scripts/inactivity_email.sh \
@@ -143,7 +140,7 @@ jobs:
           SMTP_PORT: 465
           SMTP_USERNAME: builds@semicolon.africa
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+          EMAILS: 'recipient1@example.com,recipient2@example.com'
           BUILDS: ${{ env.builds }}
           LAST_COMMIT_AUTHOR: ${{ env.author }}
           LAST_COMMIT_MESSAGE: ${{ steps.build_count.outputs.LAST_COMMIT_MESSAGE }}
