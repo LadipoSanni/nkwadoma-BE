@@ -16,6 +16,7 @@ public interface OrganizationIdentityMapper {
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration
+    @Mapping(target = "status", source = "status")
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
 
     List<ServiceOfferingEntity> toServiceOfferingEntity(List<ServiceOffering> serviceOfferings);
