@@ -48,50 +48,47 @@ jobs:
               local new_count=$1
               local builds=$2
               local new_build=$3
-
+      
               echo "Updating build tracker..."
-
-              # Ensure builds is an array
-              if [ "$builds" = "null" ] || [ -z "$builds" ]; then
+      
+              # Ensure builds is a valid JSON array
+              if [ -z "$builds" ] || [ "$builds" = "null" ]; then
                   builds="[]"
               fi
-
-              updated_builds=$(jq ".builds += [$new_build]" <<<"$builds")
+      
+              # Add the new build to the builds array
+              updated_builds=$(echo "$builds" | jq ". += [$new_build]")
               if [ $? -ne 0 ]; then
                   echo "Error updating builds with jq."
                   exit 1
               fi
-
+      
+              # Update the JSON file
               echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
           }
-
-          # Check for tracker file and initialize or update
-          if [ ! -f "./build_tracker.json" ]; then
+      
+          if [ -f "./build_tracker.json" ]; then
+              count=$(jq '.count' ./build_tracker.json)
+              builds=$(jq '.builds' ./build_tracker.json)
+              last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json)
+              new_count=$((count + 1))
+          else
               initialize_tracker
               last_timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
               new_count=1
               builds="[]"
-          else
-              echo "build_tracker.json content:"
-              cat ./build_tracker.json
-
-              count=$(jq '.count' ./build_tracker.json)
-              builds=$(jq '.builds' ./build_tracker.json || echo "[]")
-              last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json || echo "$(date --utc +%Y-%m-%dT%H:%M:%SZ)")
-              new_count=$((count + 1))
           fi
-
-          # Gather new build details
+      
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           BRANCH="${{ github.head_ref || github.ref_name }}"
           COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
           new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
-
+      
           update_tracker $new_count "$builds" "$new_build"
-
+      
           TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
-
+      
           echo "count=$new_count" >> $GITHUB_ENV
           echo "builds=$builds" >> $GITHUB_ENV
           echo "timestamp=$BUILD_TIMESTAMP" >> $GITHUB_ENV
