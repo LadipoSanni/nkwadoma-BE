@@ -84,7 +84,6 @@ class IdentityVerificationServiceTest {
         assertThrows(MeedlException.class, ()-> identityVerificationService.verifyIdentity(id));
     }
 
-
     @Test
     void verifyUserIdentityVerifiedByEmail() {
         try {

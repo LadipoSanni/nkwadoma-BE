@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizatio
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -74,6 +75,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
         identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
+        foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
         return foundOrganization;
     }
 
