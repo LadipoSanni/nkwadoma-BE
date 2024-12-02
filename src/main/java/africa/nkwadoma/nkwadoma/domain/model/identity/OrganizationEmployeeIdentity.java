@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
 
 import java.math.*;
@@ -14,6 +15,7 @@ public class OrganizationEmployeeIdentity {
     private String id;
     private UserIdentity meedlUser;
     private String organization;
+    private ActivationStatus status;
     private int pageNumber;
     private int pageSize;
 

@@ -68,10 +68,9 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         if (organizationEmployees.isEmpty()) {
             throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
-        log.info("Organization employees: {}", organizationEmployees);
         Page<OrganizationEmployeeIdentity> employeeIdentities = organizationEmployees
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
-        log.info("Mapped Organization employees: {}", employeeIdentities);
+        log.info("Mapped Organization employees: {}", employeeIdentities.getContent());
         return employeeIdentities;
     }
 

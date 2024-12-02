@@ -35,7 +35,6 @@ class OrganizationEmployeeIdentityAdapterTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
-    private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
     private String organizationId;
     private OrganizationEmployeeIdentity savedEmployeeIdentity;
     private String userId;
@@ -86,12 +85,14 @@ class OrganizationEmployeeIdentityAdapterTest {
                             organizationId, pageNumber, pageSize);
 
             assertNotNull(organizationEmployees);
+            OrganizationEmployeeIdentity employee = organizationEmployees.getContent().get(0);
             assertEquals(1, organizationEmployees.getContent().size());
-
+            assertEquals("John", employee.getMeedlUser().getFirstName());
+            assertEquals("Doe", employee.getMeedlUser().getLastName());
+            assertEquals(ActivationStatus.INVITED, employee.getStatus());
         } catch (MeedlException e) {
-            log.error("Error saving organization to the DB", e);
+            log.error("Error retrieving organization employees", e);
         }
-
     }
 
     @ParameterizedTest
