@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanReferralsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
@@ -11,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanReferralRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,10 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Slf4j
 @Service
 public class IdentityVerificationService implements IdentityVerificationUseCase {
+    @Autowired
+    private LoanReferralRestMapper loanReferralRestMapper;
+    @Autowired
+    private ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
