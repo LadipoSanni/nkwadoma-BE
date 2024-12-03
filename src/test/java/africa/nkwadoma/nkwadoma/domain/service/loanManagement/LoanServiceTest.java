@@ -112,12 +112,13 @@ class LoanServiceTest {
     void viewLoanReferral() {
         LoanReferral foundLoanReferral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId()))
-                    .thenReturn(Optional.ofNullable(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralByUserId(loanReferral.getLoanee().getUserIdentity().getId()))
+                    .thenReturn(List.of(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-
+            log.info("found loan referral : {}",foundLoanReferral);
+            assertNotNull(foundLoanReferral);
             verify(loanReferralOutputPort, times(1)).
-                    findLoanReferralById(foundLoanReferral.getId());
+                    findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
@@ -139,9 +140,11 @@ class LoanServiceTest {
         LoanReferral foundLoanReferral = null;
         try {
             loanReferral.setId(loanReferralId);
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId().trim()))
-                    .thenReturn(Optional.ofNullable(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralByUserId(loanReferral.getLoanee().getUserIdentity().getId()))
+                    .thenReturn(List.of(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
+            verify(loanReferralOutputPort, times(1)).
+                    findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }

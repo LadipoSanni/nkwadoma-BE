@@ -60,6 +60,7 @@ class IdentityVerificationServiceTest {
     void setUp() {
         favour = TestData.createTestUserIdentity("favour@gmail.com");
         Loanee loanee = TestData.createTestLoanee(favour, TestData.createTestLoaneeLoanDetail());
+        loanee.setUserIdentity(favour);
         loanReferral = LoanReferral.builder().loanee(loanee).build();
 
         identityVerificationEntity = new IdentityVerificationEntity();
@@ -85,8 +86,9 @@ class IdentityVerificationServiceTest {
     }
 
     @Test
-    void verifyUserIdentityVerifiedByEmail() {
+    void verifyUserIdentityVerifiedByLoanReferralId() {
         try {
+            loanReferral.getLoanee().getUserIdentity().setIdentityVerified(Boolean.TRUE);
             when(loanReferralOutputPort.findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
             String response = identityVerificationService.verifyIdentity(testId);
             assertEquals(IDENTITY_VERIFIED.getMessage(), response);
@@ -94,14 +96,13 @@ class IdentityVerificationServiceTest {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
     }
-
     @Test
-    void verifyNonExistingUserIdentityIsVerifiedByEmail() {
+    void identityNotVerifiedForUnVerifiedUser() {
         try {
-            loanReferral.getLoanee().getUserIdentity().setIdentityVerified(Boolean.TRUE);
+            loanReferral.getLoanee().getUserIdentity().setIdentityVerified(Boolean.FALSE);
             when(loanReferralOutputPort.findLoanReferralById(testId)).thenReturn(Optional.ofNullable(loanReferral));
             String response = identityVerificationService.verifyIdentity(testId);
-             assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
+            assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
         } catch (MeedlException e) {
             log.error("Error while verifying user identity {}", e.getMessage());
         }
