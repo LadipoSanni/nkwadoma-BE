@@ -32,7 +32,7 @@ public class IdentityVerificationController {
                 .data(identityVerificationUseCase.verifyIdentity(token))
                 .statusCode(HttpStatus.OK.name()).build());
     }
-    @PostMapping("/identity/verify")
+    @PostMapping("/verify")
     public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
         String response = identityVerificationUseCase.verifyIdentity(identityVerification);
