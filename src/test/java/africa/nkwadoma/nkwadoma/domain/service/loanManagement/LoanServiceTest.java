@@ -35,11 +35,12 @@ class LoanServiceTest {
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
+    private UserIdentity userIdentity;
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
 
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = TestData.createTestUserIdentity("test@example.com");
+        userIdentity = TestData.createTestUserIdentity("test@example.com");
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
 
@@ -112,8 +113,10 @@ class LoanServiceTest {
     void viewLoanReferral() {
         LoanReferral foundLoanReferral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralByUserId(loanReferral.getLoanee().getUserIdentity().getId()))
-                    .thenReturn(List.of(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralByUserId(
+                    loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralById(
+                    loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
             log.info("found loan referral : {}",foundLoanReferral);
             assertNotNull(foundLoanReferral);
@@ -122,7 +125,6 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-
         assertNotNull(foundLoanReferral);
     }
 
@@ -137,18 +139,8 @@ class LoanServiceTest {
             "    96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f   "}
     )
     void viewLoanReferralWithTrailingAndLeadingSpaces(String loanReferralId) {
-        LoanReferral foundLoanReferral = null;
-        try {
-            loanReferral.setId(loanReferralId);
-            when(loanReferralOutputPort.findLoanReferralByUserId(loanReferral.getLoanee().getUserIdentity().getId()))
-                    .thenReturn(List.of(loanReferral));
-            foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-            verify(loanReferralOutputPort, times(1)).
-                    findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
-        } catch (MeedlException e) {
-            log.error("Error getting loan referral", e);
-        }
-        assertNotNull(foundLoanReferral);
+        loanReferral.setId(loanReferralId);
+        assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 
     @Test
@@ -166,8 +158,8 @@ class LoanServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid id", "89954"})
-    void viewLoanReferralByNonUUID(String loanReferralId) {
-        loanReferral.setId(loanReferralId);
+    void viewLoanReferralByNonUUID(String id) {
+        loanReferral.setId(id);
         assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 

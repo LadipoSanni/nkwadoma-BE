@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -112,10 +112,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (foundLoanReferrals.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         } else if (foundLoanReferrals.size() > 1){
-            throw new LoanException("The feature for multiple loan processing has not been handled yet.");
+            throw new LoanException("Multiple loan referrals is currently not allowed");
         } else {
-            return foundLoanReferrals.get(0);
+            return getLoanReferral(foundLoanReferrals);
         }
+    }
+
+    private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
+        Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
+                findLoanReferralById(foundLoanReferrals.get(0).getId());
+        if (loanReferralById.isEmpty()) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
+        return loanReferralById.get();
     }
 
     @Override

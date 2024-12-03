@@ -20,7 +20,6 @@ public class LoaneeLoanDetail {
     private String id;
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
-    private BigDecimal tuitionAmount;
     private BigDecimal amountRequested;
 
     public void validate() throws MeedlException {
