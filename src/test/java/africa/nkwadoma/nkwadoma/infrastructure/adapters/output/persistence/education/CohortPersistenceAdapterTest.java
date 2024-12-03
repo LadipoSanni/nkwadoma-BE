@@ -401,10 +401,6 @@ class CohortPersistenceAdapterTest {
         assertEquals(3,cohorts.size());
     }
 
-
-//    @Order(11)
-//    void get
-
     @Order(12)
     @Test
     void deleteCohort(){
