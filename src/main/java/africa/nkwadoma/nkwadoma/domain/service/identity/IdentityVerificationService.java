@@ -4,15 +4,19 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerific
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
+    private LoanReferralOutputPort loanReferralOutputPort;
+    @Autowired
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     @Autowired
     @Qualifier("premblyAdapter")
@@ -35,18 +41,21 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
 
     @Override
-    public String verifyIdentity(String token) throws MeedlException {
-        String email = tokenUtils.decodeJWTGetEmail(token);
-        String loanReferralId = tokenUtils.decodeJWTGetId(token);
-        MeedlValidator.validateEmail(email);
+    public String verifyIdentity(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId);
         checkIfAboveThreshold(loanReferralId);
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(email);
+        LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
+                                    .orElseThrow(()-> new ResourceNotFoundException("Could not find loan referral"));
+        if (ObjectUtils.isEmpty(loanReferral.getLoanee())){
+            throw new MeedlException("Loan referral has no loanee assigned to it.");
+        }
+        UserIdentity userIdentity = loanReferral.getLoanee().getUserIdentity();
         if (userIdentity.isIdentityVerified()) {
             addedToLoaneeLoan(loanReferralId);
-            log.info("Identity: Email {}. Loan referral id {}. Verified ", email, loanReferralId);
+            log.info("Identity: Loan referral id {}. Verified ", loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
         } else {
-            log.info("Identity: Email {}. Loan referral id {}, not verified ", email, loanReferralId);
+            log.info("Loan referral id {}, not verified ", loanReferralId);
             return IDENTITY_NOT_VERIFIED.getMessage();
         }
     }
