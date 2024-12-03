@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -119,8 +120,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
+        LoanReferral loanReferral = foundLoanReferrals.get(0);
+        if (ObjectUtils.isEmpty(loanReferral)) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
         Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
-                findLoanReferralById(foundLoanReferrals.get(0).getId());
+                findLoanReferralById(loanReferral.getId());
         if (loanReferralById.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         }
