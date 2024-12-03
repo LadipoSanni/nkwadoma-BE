@@ -10,7 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.InvalidKeyException;
 import java.util.*;
 
 @Slf4j
@@ -80,5 +86,23 @@ public class TokenUtils {
             throw new MeedlException("Token has expired");
         }
         return claims;
+    }
+    public String decryptBvn(String encryptedBvn) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String secretKey = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";  // Shared secret key
+        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBvn);
+
+        // Create a secret key from the string
+        SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(), "AES");
+
+        // Initialize the cipher
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+
+        // Decrypt the data
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+        log.info(new String(decryptedBytes));
+        // Convert decrypted bytes back to string
+        return new String(decryptedBytes);
+
     }
 }
