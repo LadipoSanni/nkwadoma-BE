@@ -18,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LoaneeLoanDetail {
     private String id;
+    private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal tuitionAmount;
     private BigDecimal amountRequested;

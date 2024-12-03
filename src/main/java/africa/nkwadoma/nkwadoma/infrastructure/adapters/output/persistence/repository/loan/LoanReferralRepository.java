@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.*;
 
 import java.util.*;
 
+import java.util.List;
+
 public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity, String> {
     LoanReferralEntity findByLoaneeEntityId(String loanReferralId);
 
@@ -23,4 +25,5 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         where lre.id = :id
     """)
     Optional<LoanReferralProjection> findLoanReferralById(@Param("id") String id);
+    List<LoanReferralEntity> findAllByLoaneeEntityUserIdentityId(String userId);
 }

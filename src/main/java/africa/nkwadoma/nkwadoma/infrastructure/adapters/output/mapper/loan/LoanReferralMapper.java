@@ -6,6 +6,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import org.mapstruct.*;
 
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanReferralMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
@@ -19,4 +21,6 @@ public interface LoanReferralMapper {
     @Mapping(target = "loanee.userIdentity.lastName", source = "lastName")
     @Mapping(target = "loanee.userIdentity.firstName", source = "firstName")
     LoanReferral mapProjectionToLoanReferralEntity(LoanReferralProjection loanReferralProjection);
+
+    List<LoanReferral> toLoanReferrals(List<LoanReferralEntity> loanReferralEntities);
 }

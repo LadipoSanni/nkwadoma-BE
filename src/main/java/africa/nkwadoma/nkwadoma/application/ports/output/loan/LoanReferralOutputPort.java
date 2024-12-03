@@ -12,4 +12,6 @@ public interface LoanReferralOutputPort {
 
     void deleteLoanReferral(String loanReferralId) throws MeedlException;
     LoanReferral createLoanReferral(Loanee loanee) throws MeedlException;
+
+    List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException;
 }

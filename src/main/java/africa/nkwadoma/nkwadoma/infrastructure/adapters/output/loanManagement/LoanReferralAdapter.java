@@ -66,5 +66,12 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
+
+    @Override
+    public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+        List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
+        return loanReferralMapper.toLoanReferrals(loanReferralEntities);
+    }
 }
 

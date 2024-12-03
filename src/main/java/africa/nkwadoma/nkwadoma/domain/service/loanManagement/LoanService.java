@@ -104,14 +104,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
-        MeedlValidator.validateDataElement(loanReferral.getId());
-        String loanReferralId = loanReferral.getId().trim();
-        MeedlValidator.validateUUID(loanReferralId);
-        Optional<LoanReferral> foundLoanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId);
-        if (foundLoanReferral.isEmpty()) {
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanee());
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanee().getUserIdentity());
+        String userId = loanReferral.getLoanee().getUserIdentity().getId();
+        MeedlValidator.validateUUID(userId);
+        List<LoanReferral> foundLoanReferrals = loanReferralOutputPort.findLoanReferralByUserId(userId);
+        if (foundLoanReferrals.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        } else if (foundLoanReferrals.size() > 1){
+            throw new LoanException("The feature for multiple loan processing has not been handled yet.");
         } else {
-            return foundLoanReferral.get();
+            return foundLoanReferrals.get(0);
         }
     }
 

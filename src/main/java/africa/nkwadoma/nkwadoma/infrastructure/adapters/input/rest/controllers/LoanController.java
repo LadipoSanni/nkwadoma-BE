@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -127,7 +128,7 @@ public class LoanController {
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
                 .data(loanReferralResponse)
                 .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
