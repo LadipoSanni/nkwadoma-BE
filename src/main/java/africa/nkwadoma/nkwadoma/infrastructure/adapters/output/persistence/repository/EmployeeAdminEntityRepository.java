@@ -9,7 +9,9 @@ import java.util.*;
 
 public interface EmployeeAdminEntityRepository extends JpaRepository<OrganizationEmployeeEntity,String> {
     @Query("""
-          select oe.id as id, oe.meedlUser.firstName as firstName, oe.meedlUser.lastName as lastName, o.status as status
+          select
+          oe.id as id, oe.meedlUser.firstName as firstName, oe.meedlUser.lastName as lastName,
+          oe.meedlUser.email as email, o.status as status
           from OrganizationEmployeeEntity oe
           join OrganizationEntity o on oe.organization = o.id
           where o.id = :organizationId

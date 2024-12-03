@@ -118,7 +118,7 @@ public class LoanController {
     }
 
     @GetMapping("loan-referral/{loanReferralId}")
-    public ResponseEntity<ApiResponse<?>> viewLoanReferral (@PathVariable @NotBlank(message = "Loanee ID is required")
+    public ResponseEntity<ApiResponse<?>> viewLoanReferral (@PathVariable @NotBlank(message = "Loan referral ID is required")
                                                                           String loanReferralId) throws MeedlException {
         LoanReferral loanReferral = new LoanReferral();
         loanReferral.setId(loanReferralId);

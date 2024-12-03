@@ -16,7 +16,8 @@ public interface LoanReferralMapper {
     @InheritInverseConfiguration
     LoanReferral toLoanReferral(LoanReferralEntity savedLoanReferralEntity);
 
-    @Mapping(target = "loanee.userIdentity.firstName", source = "firstName")
+    @Mapping(target = "loanee.userIdentity.id", source = "id")
     @Mapping(target = "loanee.userIdentity.lastName", source = "lastName")
+    @Mapping(target = "loanee.userIdentity.firstName", source = "firstName")
     LoanReferral mapProjectionToLoanReferralEntity(LoanReferralProjection loanReferralProjection);
 }

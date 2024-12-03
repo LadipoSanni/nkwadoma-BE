@@ -191,8 +191,6 @@ class CohortPersistenceAdapterTest {
     }
 
 
-
-
     @Test
     void saveCohortWithNullCohort(){
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(null));

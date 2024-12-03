@@ -34,10 +34,12 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         MeedlValidator.validateUUID(loanReferralId);
         Optional<LoanReferralProjection> loanReferralProjection = loanReferralRepository.findLoanReferralById(loanReferralId);
         if (loanReferralProjection.isEmpty()) {
+            log.info("Empty Loan referral projection: {}", loanReferralProjection);
             return Optional.empty();
         }
+        log.info("LoanReferral Projection : {}", loanReferralProjection.get());
         LoanReferral loanReferral = loanReferralMapper.mapProjectionToLoanReferralEntity(loanReferralProjection.get());
-        log.info("Loan referral: {}", loanReferral);
+        log.info("Mapped LoanReferral : {}", loanReferral);
         return Optional.of(loanReferral);
     }
 

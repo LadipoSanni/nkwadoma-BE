@@ -22,13 +22,13 @@ public class LoanReferral {
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
     private String referredBy;
-    String cohortName;
-    String loaneeImage;
-    BigDecimal loanAmountRequested;
-    BigDecimal initialDeposit;
-    BigDecimal tuitionAmount;
-    LocalDate cohortStartDate;
-    String programName;
+    private String cohortName;
+    private String loaneeImage;
+    private BigDecimal loanAmountRequested;
+    private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
+    private LocalDate cohortStartDate;
+    private String programName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);

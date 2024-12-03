@@ -14,6 +14,6 @@ public interface OrganizationEmployeeIdentityMapper {
 
     @Mapping(target = "meedlUser.firstName", source = "firstName")
     @Mapping(target = "meedlUser.lastName", source = "lastName")
-//    @Mapping(target = "status", source = "status")
+    @Mapping(target = "meedlUser.email", source = "email")
     OrganizationEmployeeIdentity toOrganizationEmployeeIdentity(OrganizationEmployeeProjection organizationEmployeeProjection);
 }
