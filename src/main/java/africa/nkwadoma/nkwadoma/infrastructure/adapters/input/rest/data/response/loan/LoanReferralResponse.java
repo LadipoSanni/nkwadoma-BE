@@ -14,6 +14,8 @@ import java.time.*;
 @ToString
 public class LoanReferralResponse {
     private String id;
+    private String firstName;
+    private String lastName;
     private String referredBy;
     private String cohortName;
     private String loaneeImage;
