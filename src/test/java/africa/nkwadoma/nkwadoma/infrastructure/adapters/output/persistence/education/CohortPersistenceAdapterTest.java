@@ -401,7 +401,7 @@ class CohortPersistenceAdapterTest {
         assertEquals(3,cohorts.size());
     }
 
-    @Order(12)
+    @Order(11)
     @Test
     void deleteCohort(){
         Optional<CohortEntity> foundCohort = cohortRepository.findById(cohortOneId);
