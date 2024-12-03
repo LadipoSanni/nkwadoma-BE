@@ -13,11 +13,13 @@ import lombok.Setter;
 public class LoaneeLoanAccount {
 
     private String id;
-    private AccountStatus status;
+    private AccountStatus accountStatus;
     private LoanStatus loanStatus;
+    private String loaneeId;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(status);
+        MeedlValidator.validateObjectInstance(accountStatus);
         MeedlValidator.validateObjectInstance(loanStatus);
+        MeedlValidator.validateUUID(loaneeId);
     }
 }

@@ -20,6 +20,7 @@ public class LoanOffer {
     private LoanProduct loanProduct;
     private LocalDateTime dateTimeOffered;
     private String loaneeId;
+    private String userId;
     private LocalDateTime dateTimeAccepted;
     private LoanOfferResponse loaneeResponse;
 
@@ -30,7 +31,7 @@ public class LoanOffer {
     }
 
     public void validateForAcceptOffer() throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(userId);
         MeedlValidator.validateUUID(id);
     }
 }

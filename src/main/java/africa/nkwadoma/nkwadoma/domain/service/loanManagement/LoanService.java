@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -12,9 +13,11 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOfferMapper loanOfferMapper;
     private final LoanOutputPort loanOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
 
@@ -162,25 +166,39 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
         loanOffer.validateForAcceptOffer();
-        if (loanOffer.getDateTimeOffered().isBefore(LocalDateTime.now())){
-            throw new LoanException(LoanMessages.ACCEPTANCE_TIME_FRAME_PASSED.getMessage());
-        }
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
-        if (! offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
+        Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        loanOffer.setLoaneeId(loanee.get().getId());
+        if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         if (loanOffer.getLoaneeResponse().equals(LoanOfferResponse.ACCEPT)){
             //Loanee Wallet would be Created
-            // Notify Pm
-            return createLoaneeLoanAccount();
+            loanOfferMapper.updateLoanOffer(offer,loanOffer);
+            loanOfferOutputPort.save(offer);
+            notifyPortfolioManager(portfolioManagers,loanOffer);
+            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanOffer.getLoaneeId());
+            if (ObjectUtils.isEmpty(loaneeLoanAccount)){
+                loaneeLoanAccount = createLoaneeLoanAccount(loanOffer.getLoaneeId());
+            }
+            return loaneeLoanAccount;
         }
-        //Notify Pm On Loanee Reposne
+        loanOfferMapper.updateLoanOffer(offer,loanOffer);
+        loanOfferOutputPort.save(offer);
+        notifyPortfolioManager(portfolioManagers,loanOffer);
         return null;
     }
 
-    private LoaneeLoanAccount createLoaneeLoanAccount() throws MeedlException {
+    private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
+        //this and the template would be done on another branch
+    }
+
+
+    private LoaneeLoanAccount createLoaneeLoanAccount(String loaneeId) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
-        loaneeLoanAccount.setStatus(AccountStatus.NEW);
+        loaneeLoanAccount.setLoaneeId(loaneeId);
+        loaneeLoanAccount.setAccountStatus(AccountStatus.NEW);
         loaneeLoanAccount.setLoanStatus(LoanStatus.AWAITING_DISBURSAL);
         loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
         return loaneeLoanAccount;

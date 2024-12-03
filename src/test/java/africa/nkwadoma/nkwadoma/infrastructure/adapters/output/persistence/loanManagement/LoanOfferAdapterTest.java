@@ -58,7 +58,7 @@ public class LoanOfferAdapterTest {
 
     @BeforeAll
     void setUp() {
-        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+        userIdentity = UserIdentity.builder().id("e8cfea66-440d-43bc-84f2-9f1c55029009").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).

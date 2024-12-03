@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -11,6 +12,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
@@ -69,6 +72,13 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         MeedlValidator.validateDataElement(bvn);
         UserEntity userEntity = userEntityRepository.findByBvn(bvn);
         return userIdentityMapper.toUserIdentity(userEntity);
+    }
+
+    @Override
+    public List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateObjectInstance(identityRole);
+        List<UserEntity> userEntities = userEntityRepository.findAllByRole(identityRole);
+        return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 
 

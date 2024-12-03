@@ -151,10 +151,11 @@ public class TestData {
         return loanRequest;
     }
 
-    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status) {
+    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status,String loaneeId) {
         LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
         loaneeLoanAccount.setLoanStatus(loanStatus);
-        loaneeLoanAccount.setStatus(status);
+        loaneeLoanAccount.setAccountStatus(status);
+        loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
 }

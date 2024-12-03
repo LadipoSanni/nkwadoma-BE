@@ -24,10 +24,11 @@ public class LoaneeLoanAccountAdapterTest {
     @Autowired
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private String loaneeLoanAccountId;
+    private String loaneeId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
 
     @BeforeAll
     void setUpLoaneeLoanAccount(){
-        loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW);
+        loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loaneeId);
     }
 
     @Test
@@ -38,7 +39,7 @@ public class LoaneeLoanAccountAdapterTest {
 
     @Test
     void saveLoaneeLoanAccountWithNullAccountStatus(){
-        loaneeLoanAccount.setStatus(null);
+        loaneeLoanAccount.setAccountStatus(null);
         assertThrows(MeedlException.class,()-> loaneeLoanAccountOutputPort.save(loaneeLoanAccount));
     }
 
@@ -52,7 +53,7 @@ public class LoaneeLoanAccountAdapterTest {
         }
         log.info("loan account id {} ",loaneeLoanAccountId);
         assertEquals(LoanStatus.AWAITING_DISBURSAL, loaneeLoanAccount.getLoanStatus() );
-        assertEquals(AccountStatus.NEW, loaneeLoanAccount.getStatus());
+        assertEquals(AccountStatus.NEW, loaneeLoanAccount.getAccountStatus());
     }
 
 

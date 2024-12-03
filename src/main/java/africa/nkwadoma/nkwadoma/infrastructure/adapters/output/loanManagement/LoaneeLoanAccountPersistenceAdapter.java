@@ -31,4 +31,11 @@ public class LoaneeLoanAccountPersistenceAdapter implements LoaneeLoanAccountOut
         MeedlValidator.validateUUID(loaneeLoanAccountId);
         loaneeLoanAccountRepository.deleteById(loaneeLoanAccountId);
     }
+
+    @Override
+    public LoaneeLoanAccount findByLoaneeId(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId);
+        LoaneeLoanAccountEntity loaneeLoanAccountEntity = loaneeLoanAccountRepository.findByLoaneeId(loaneeId);
+        return loaneeLoanAccountMapper.toLoaneeLoanAccount(loaneeLoanAccountEntity);
+    }
 }

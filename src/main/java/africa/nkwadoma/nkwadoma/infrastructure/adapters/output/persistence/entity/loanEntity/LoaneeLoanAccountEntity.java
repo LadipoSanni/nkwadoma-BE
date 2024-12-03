@@ -21,7 +21,9 @@ public class LoaneeLoanAccountEntity {
     @UuidGenerator
     private String id;
     @Enumerated(EnumType.STRING)
-    private AccountStatus status;
+    private AccountStatus accountStatus;
     @Enumerated(EnumType.STRING)
     private LoanStatus loanStatus;
+    private String loaneeId;
+
 }
