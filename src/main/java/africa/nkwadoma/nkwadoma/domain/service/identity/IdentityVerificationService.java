@@ -9,10 +9,12 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -58,15 +60,18 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+        log.info("Verifying identity : {}", identityVerification);
+        String bvn = identityVerification.getBvn();
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
-        if (!userIdentity.isIdentityVerified()){
+        if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
             try{
-             identityVerificationOutputPort.verifyBvn(identityVerification);
+                identityVerificationOutputPort.verifyBvn(identityVerification);
             }catch (MeedlException exception) {
+                LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral();
+                loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
                 IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
-                identityVerificationFailureRecord.setEmail(userIdentity.getEmail());
+                identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
                 identityVerificationFailureRecord.setReferralId(identityVerification.getLoanReferralId());
                 identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
                 identityVerificationFailureRecord.setReason(exception.getMessage());
