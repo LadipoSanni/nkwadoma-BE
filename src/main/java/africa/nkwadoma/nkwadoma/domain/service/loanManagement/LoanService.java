@@ -180,6 +180,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanOffer.getLoaneeResponse().equals(LoanOfferResponse.ACCEPT)){
             //Loanee Wallet would be Created
             loanOfferMapper.updateLoanOffer(offer,loanOffer);
+            offer.setDateTimeAccepted(LocalDateTime.now());
             loanOfferOutputPort.save(offer);
             notifyPortfolioManager(portfolioManagers,loanOffer);
             LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanOffer.getLoaneeId());
