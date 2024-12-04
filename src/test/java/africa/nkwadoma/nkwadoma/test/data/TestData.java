@@ -2,10 +2,7 @@ package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -89,6 +86,19 @@ public class TestData {
         organizationEmployeeIdentity.setOrganization(testId);
         organizationEmployeeIdentity.setMeedlUser(identity);
         return organizationEmployeeIdentity;
+    }
+
+    public static Cohort createCohortData(String name, String programId, String organizationId, List<LoanBreakdown> loanBreakdowns, String meedlUserId) {
+        Cohort elites = new Cohort();
+        elites.setStartDate(LocalDate.of(2024,10,18));
+        elites.setProgramId(programId);
+        elites.setName(name);
+        elites.setCreatedBy(meedlUserId);
+        elites.setLoanBreakdowns(loanBreakdowns);
+        elites.setTuitionAmount(BigDecimal.valueOf(20000));
+        elites.setOrganizationId(organizationId);
+        elites.setCohortStatus(CohortStatus.GRADUATED);
+        return elites;
     }
 
     public static Program createProgramTestData(String programName){
