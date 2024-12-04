@@ -74,8 +74,8 @@ public class CohortController {
 
     @PostMapping("cohort/edit")
     public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
-                                          EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
-        Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
+    EditCohortRequest editCohortRequest) throws MeedlException {
+        Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortRequest);
         cohort.setUpdatedBy(meedlUser.getClaimAsString("sub"));
         cohort = cohortUseCase.editCohort(cohort);
         CohortResponse cohortResponse =
