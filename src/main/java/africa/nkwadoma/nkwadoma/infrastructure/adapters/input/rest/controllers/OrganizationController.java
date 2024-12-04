@@ -83,7 +83,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/search")
-    @Operation(summary = "Search for organization by name")
+    @Operation(summary = "Search for organization(s) by similar or precise name")
     public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Organization name is required") String name)
             throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
@@ -96,7 +96,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/{id}")
-    @Operation(summary = "Search for organization by name")
+    @Operation(summary = "View organization details by organization id")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@PathVariable @Valid @NotBlank(message = "Organization id is required") String id)
             throws MeedlException {
         OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
