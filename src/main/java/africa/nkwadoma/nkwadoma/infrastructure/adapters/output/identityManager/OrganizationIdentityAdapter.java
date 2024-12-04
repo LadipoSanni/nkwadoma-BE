@@ -159,7 +159,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public void deleteServiceOffering(String serviceOfferingId) throws MeedlException {
         MeedlValidator.validateDataElement(serviceOfferingId);
-        Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.findById(serviceOfferingId);
+        Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.
+                findById(serviceOfferingId);
         if (serviceOfferingEntity.isPresent()) {
             log.info("Found service offering: {}", serviceOfferingEntity.get());
             serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getId());

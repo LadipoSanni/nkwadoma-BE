@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -14,7 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -35,6 +35,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+//    private final CohortOutputPort cohortOutputPort;
+    private final CohortRepository cohortRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
@@ -100,7 +102,11 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         ProgramEntity program = programRepository.findById(programId).
-                orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
+                orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
+        List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
+        if (CollectionUtils.isNotEmpty(cohortEntities)) {
+            cohortRepository.deleteAll(cohortEntities);
+        }
         programRepository.delete(program);
     }
 

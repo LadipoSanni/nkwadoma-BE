@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.*;
 
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
-    Optional<CohortEntity> findByProgramId(String programId);
-
     List<CohortEntity> findByNameContainingIgnoreCase(String name);
 
     Page<CohortEntity> findAllByProgramId(String programId, Pageable pageRequest);
@@ -21,4 +19,6 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     CohortEntity findByName(String name);
 
     List<CohortEntity> findByOrganizationIdAndNameContainingIgnoreCase(String organizationId, String name);
+
+    List<CohortEntity> findAllByProgramId(String id);
 }

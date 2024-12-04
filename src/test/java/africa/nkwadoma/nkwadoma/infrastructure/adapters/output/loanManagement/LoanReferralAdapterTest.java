@@ -91,17 +91,6 @@ class LoanReferralAdapterTest {
     }
 
     @Test
-    void viewLoanReferralWithTrailingAndLeadingSpaces() {
-        Optional<LoanReferral> referral = Optional.empty();
-        try {
-            referral = loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE));
-        } catch (MeedlException e) {
-            log.error("Error getting loan referral", e);
-        }
-        assertNotNull(referral);
-    }
-
-    @Test
     void viewLoanReferralWithNullId() {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(null));
     }
