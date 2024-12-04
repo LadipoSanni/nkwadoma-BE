@@ -72,7 +72,7 @@ public class OrganizationController {
         OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(organizationRequest);
         organizationIdentity.setUpdatedBy(meedlUser.getClaim("sub"));
         log.info("Program at controller level: ========>{}", organizationIdentity);
-        organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
+         organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
 
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
@@ -96,6 +96,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organization/{id}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "Search for organization by name")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@PathVariable @Valid @NotBlank(message = "Organization id is required") String id)
             throws MeedlException {
@@ -107,6 +108,22 @@ public class OrganizationController {
                 HttpStatus.OK
         );
     }
+
+    @GetMapping("organization/details")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        String adminId = meedlUser.getClaimAsString("sub");
+        OrganizationIdentity organizationIdentity =
+                viewOrganizationUseCase.viewOrganizationDetailsByOrganizationAdmin(adminId);
+        OrganizationResponse organizationResponse = organizationRestMapper.toOrganizationResponse(organizationIdentity);
+        ApiResponse<OrganizationResponse> apiResponse = ApiResponse.<OrganizationResponse>builder()
+                .data(organizationResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
     @PostMapping("organization/deactivate")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
