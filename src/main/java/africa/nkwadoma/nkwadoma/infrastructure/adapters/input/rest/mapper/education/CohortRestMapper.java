@@ -24,4 +24,6 @@ public interface CohortRestMapper {
     Cohort mapEditCohortRequestToCohort(EditCohortLoanDetailRequest editCohortLoanDetailRequest);
 
     List<CohortResponse> toCohortResponses(List<Cohort> cohorts);
+
+    List<LoanBreakdownResponse> toLoanBreakdownResponses(List<LoanBreakdown> loanBreakdowns);
 }
