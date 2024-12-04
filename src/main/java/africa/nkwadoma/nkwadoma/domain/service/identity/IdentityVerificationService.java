@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
 
@@ -81,14 +83,15 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             try{
                 identityVerificationOutputPort.verifyBvn(identityVerification);
             }catch (MeedlException exception) {
-                LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral();
-                loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
-                IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
-                identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
-                identityVerificationFailureRecord.setReferralId(identityVerification.getLoanReferralId());
-                identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
-                identityVerificationFailureRecord.setReason(exception.getMessage());
-                createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
+//                ZonedDateTime zonedDateTime = ZonedDateTime
+//                LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral();
+//                loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+//                IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
+//                identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
+//                identityVerificationFailureRecord.setReferralId(identityVerification.getLoanReferralId());
+//                identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
+//                identityVerificationFailureRecord.setReason(exception.getMessage());
+//                createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
                 //notify inviter
             }}
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
