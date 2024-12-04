@@ -72,11 +72,14 @@ public class TokenUtils {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException exception) {
+            log.error("Time allocated for this action has expired. Please refresh.");
             throw new MeedlException("Time allocated for this action has expired. Please refresh.");
         } catch (SignatureException | MalformedJwtException exception ) {
+            log.error("You are not authorized to perform this action. Invalid signature");
             throw new MeedlException("You are not authorized to perform this action. Invalid signature");
         }
         if (expiration == null || claims.getExpiration().before(new Date())) {
+            log.info("Token has expired");
             throw new MeedlException("Token has expired");
         }
         return claims;
