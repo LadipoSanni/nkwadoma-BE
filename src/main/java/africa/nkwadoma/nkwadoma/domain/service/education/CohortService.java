@@ -57,6 +57,7 @@ public class CohortService implements CohortUseCase {
         String cohortName = cohort.getName();
         MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
+        cohort.validateLoanBreakDowns();
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
