@@ -45,7 +45,6 @@ class CreditRegistryAdapterTest {
     }
     @Test
     void getSessionCode(){
-        log.info("Test bvn : {}", bvnNumber);
         String sessionCode = creditRegistryOutputPort.getSessionCode();
         assertNotNull(sessionCode);
         assertFalse(sessionCode.isEmpty());

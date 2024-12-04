@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.application.ports.input.education;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -22,4 +24,6 @@ public interface CohortUseCase {
 
     List<Cohort> searchForCohort(String userId,String name) throws MeedlException;
     Page<Cohort> viewAllCohortInOrganization(String actorId,int pageNumber,int pageSize) throws MeedlException ;
+
+    List<LoanBreakdown> getCohortLoanBreakDown( String cohortId) throws MeedlException;
 }

@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -202,6 +203,12 @@ public class CohortService implements CohortUseCase {
                                                     int pageNumber,int pageSize) throws MeedlException {
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
         return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
+    }
+
+    @Override
+    public List<LoanBreakdown> getCohortLoanBreakDown(String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
+         return loanBreakdownOutputPort.findAllByCohortId(cohortId);
     }
 
     @Override
