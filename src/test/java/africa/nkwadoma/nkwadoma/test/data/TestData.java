@@ -77,8 +77,8 @@ public class TestData {
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
         return LoaneeLoanDetail.builder()
-                .amountRequested(BigDecimal.valueOf(9000000.00))
-                .initialDeposit(BigDecimal.valueOf(3000000.00))
+                .amountRequested(BigDecimal.valueOf(9000000))
+                .initialDeposit(BigDecimal.valueOf(3000000))
                 .build();
     }
     public static OrganizationEmployeeIdentity createOrganizationEmployeeIdentityTestData(UserIdentity identity){
@@ -95,7 +95,7 @@ public class TestData {
         elites.setName(name);
         elites.setCreatedBy(meedlUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
-        elites.setTuitionAmount(BigDecimal.valueOf(10000.00));
+        elites.setTuitionAmount(BigDecimal.valueOf(10000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
         return elites;
