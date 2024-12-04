@@ -134,7 +134,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(1)
     void saveProgram() {
         try {
             dataAnalytics.setCreatedBy(userId);
@@ -155,6 +154,23 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNullProgram() {
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram((null)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"    Electrical Engineering", "Cloud Computing      "})
+    void createProgramWithSpacesInProgramName(String programName) {
+        try {
+            dataAnalytics.setName(programName);
+            dataAnalytics.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = savedProgram.getId();
+
+            assertNotNull(savedProgram);
+            assertNotNull(savedProgram.getId());
+            assertEquals(programName.trim(), savedProgram.getName());
+        } catch (MeedlException e) {
+            log.error("Error saving program", e);
+        }
     }
 
     @Test
@@ -185,23 +201,6 @@ class ProgramPersistenceAdapterTest {
             assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataScience));
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"    Electrical Engineering", "Cloud Computing      "})
-    void createProgramWithSpacesInProgramName(String programName) {
-        try {
-            dataAnalytics.setName(programName);
-            dataAnalytics.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
-            dataAnalyticsProgramId = savedProgram.getId();
-
-            assertNotNull(savedProgram);
-            assertNotNull(savedProgram.getId());
-            assertEquals(programName.trim(), savedProgram.getName());
-        } catch (MeedlException e) {
-            log.error("Error saving program", e);
         }
     }
 
@@ -239,7 +238,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(2)
     void findProgramByName() {
         try {
             assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
@@ -310,7 +308,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(3)
     void findProgramById() {
         try {
             dataAnalytics.setCreatedBy(userId);
@@ -349,7 +346,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(4)
     void findAllPrograms() {
         try {
             dataScience.setCreatedBy(organizationIdentity.getCreatedBy());
