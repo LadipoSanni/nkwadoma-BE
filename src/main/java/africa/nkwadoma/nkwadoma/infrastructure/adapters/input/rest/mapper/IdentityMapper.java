@@ -10,7 +10,6 @@ public interface IdentityMapper {
     @Mapping(source = "password", target = "password")
     UserIdentity toIdentity(UserIdentityRequest userIdentityRequest);
 
-    @Mapping(source = "email", target = "email")
     @Mapping(source = "password", target = "password")
     UserIdentity toUserIdentity(PasswordChangeRequest passwordChangeRequest);
 
