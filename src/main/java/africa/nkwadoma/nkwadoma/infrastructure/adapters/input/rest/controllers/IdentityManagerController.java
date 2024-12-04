@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
@@ -118,14 +117,14 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/password/change")
     public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                         @RequestBody PasswordChangeRequest passwordChangeRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toUserIdentity(passwordChangeRequest);
         userIdentity.setId(meedlUser.getClaimAsString("sub"));
         userIdentity.setEmail(meedlUser.getClaimAsString("email"));
         log.info("The user changing the password : {} and ",meedlUser.getClaimAsString("sub"));
         createUserUseCase.changePassword(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
-                data("Password change successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 }
