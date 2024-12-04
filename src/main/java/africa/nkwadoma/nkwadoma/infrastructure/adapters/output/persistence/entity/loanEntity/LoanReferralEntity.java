@@ -17,7 +17,6 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class LoanReferralEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -25,6 +24,4 @@ public class LoanReferralEntity {
     private LoaneeEntity loaneeEntity;
     @Enumerated(EnumType.STRING)
     private LoanReferralStatus loanReferralStatus;
-
-
 }
