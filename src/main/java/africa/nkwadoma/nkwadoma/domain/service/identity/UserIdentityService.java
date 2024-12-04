@@ -147,7 +147,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
             identityManagerOutPutPort.getUserByEmail(foundUser.getEmail());
-            sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
+            sendOrganizationEmployeeEmailUseCase.sendForgotPasswordEmail(foundUser);
         } catch (MeedlException e) {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }

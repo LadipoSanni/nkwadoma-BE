@@ -5,4 +5,5 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 
 public interface SendOrganizationEmployeeEmailUseCase {
     void sendEmail(UserIdentity userIdentity) throws MeedlException;
+    void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException;
 }

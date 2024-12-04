@@ -11,6 +11,7 @@ public enum MeedlMessages {
     EMAIL_NOT_FOUND("Email address cannot be found"),
     EMAIL_ALREADY_EXISTS("Email address already exist"),
     EMAIL_INVITATION_SUBJECT("Invitation to Middl"),
+    RESET_PASSWORD("Reset Password"),
     ORGANIZATION_INVITATION_TEMPLATE("organization-invitation"),
     COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
     DOMAIN_EMAIL_DOES_NOT_MATCH("Domain email does not match"),
