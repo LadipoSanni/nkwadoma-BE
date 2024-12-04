@@ -45,7 +45,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .context(context)
                 .subject(RESET_PASSWORD.getMessage())
                 .to(userIdentity.getEmail())
-                .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
+                .template(FORGOT_PASSWORD_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
