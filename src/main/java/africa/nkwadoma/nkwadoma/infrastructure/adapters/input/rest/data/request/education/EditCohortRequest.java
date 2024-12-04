@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Setter
 @Getter
-public class EditCohortLoanDetailRequest {
+public class EditCohortRequest {
 
     @NotBlank(message = "Cohort Id is required")
     private String id;

@@ -90,6 +90,7 @@ class CohortServiceTest {
     @Test
     void saveCohort() {
         try {
+            elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
@@ -103,6 +104,7 @@ class CohortServiceTest {
     @Test
     void saveCohortWithExistingCohortName() {
         try {
+            xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenThrow(MeedlException.class);
         } catch (MeedlException e) {
@@ -113,8 +115,16 @@ class CohortServiceTest {
 
 
     @Test
+    void saveCohortWithNegativeLoanBreakDownItemAmount(){
+        loanBreakdown.setItemAmount(BigDecimal.valueOf(-2000));
+        xplorers.setLoanBreakdowns(List.of(loanBreakdown));
+        assertThrows(MeedlException.class,() -> cohortService.createCohort(xplorers));
+    }
+
+    @Test
     void saveAnotherCohortInProgram() {
         try {
+            xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
             Cohort cohort = cohortService.createCohort(xplorers);

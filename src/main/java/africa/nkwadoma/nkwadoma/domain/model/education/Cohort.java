@@ -48,10 +48,15 @@ public class Cohort {
         MeedlValidator.validateObjectName(name);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(startDate);
+        MeedlValidator.validateNegativeAmount(tuitionAmount);
     }
 
     public void updateValidation() throws MeedlException {
         MeedlValidator.validateUUID(id);
         MeedlValidator.validateUUID(updatedBy);
+    }
+
+    public void validateLoanBreakDowns() throws MeedlException {
+        MeedlValidator.validateLoanBreakdowns(loanBreakdowns);
     }
 }
