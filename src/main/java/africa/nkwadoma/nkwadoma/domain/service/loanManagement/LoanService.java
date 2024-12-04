@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -112,10 +113,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (foundLoanReferrals.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         } else if (foundLoanReferrals.size() > 1){
-            throw new LoanException("The feature for multiple loan processing has not been handled yet.");
+            throw new LoanException("Multiple loan referrals is currently not allowed");
         } else {
-            return foundLoanReferrals.get(0);
+            return getLoanReferral(foundLoanReferrals);
         }
+    }
+
+    private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
+        LoanReferral loanReferral = foundLoanReferrals.get(0);
+        if (ObjectUtils.isEmpty(loanReferral)) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
+        Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
+                findLoanReferralById(loanReferral.getId());
+        if (loanReferralById.isEmpty()) {
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
+        }
+        return loanReferralById.get();
     }
 
     @Override

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
@@ -156,7 +157,14 @@ public class MeedlValidator {
     public static void validateNegativeAmount(BigDecimal itemAmount) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.ITEM_AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+            throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+        }
+    }
+
+    public static void validateLoanBreakdowns(List<LoanBreakdown> loanBreakdowns) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanBreakdowns);
+        for(LoanBreakdown loanBreakdown : loanBreakdowns){
+            loanBreakdown.validate();
         }
     }
 }

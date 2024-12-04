@@ -176,6 +176,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
+        xplorers.setTuitionAmount(BigDecimal.valueOf(20000));
         xplorers.setOrganizationId(organizationId);
         xplorers.setCohortStatus(CohortStatus.CURRENT);
 
@@ -189,8 +190,6 @@ class CohortPersistenceAdapterTest {
         mavin.setOrganizationId(organizationId);
         mavin.setCohortStatus(CohortStatus.INCOMING);
     }
-
-
 
 
     @Test
@@ -223,6 +222,12 @@ class CohortPersistenceAdapterTest {
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+
+    @Test
+    void cannotSaveCohortWithNegativeTuitionAmount(){
+        elites.setTuitionAmount(BigDecimal.valueOf(-1));
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 
