@@ -72,7 +72,7 @@ public class OrganizationController {
         OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(organizationRequest);
         organizationIdentity.setUpdatedBy(meedlUser.getClaim("sub"));
         log.info("Program at controller level: ========>{}", organizationIdentity);
-        organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
+         organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
 
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
