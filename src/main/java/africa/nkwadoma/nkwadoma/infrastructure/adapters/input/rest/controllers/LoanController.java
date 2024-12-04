@@ -47,7 +47,7 @@ public class LoanController {
     private final LoanReferralRestMapper loanReferralRestMapper;
 
     @PostMapping("/loan-product/create")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid LoanProductRequest request) throws MeedlException {
         log.info("Create loan product called.... ");
@@ -63,7 +63,7 @@ public class LoanController {
             return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @PostMapping("/loan-product/update")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_UPDATE,description = LOAN_PRODUCT_UPDATE_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> updateLoanProduct (@RequestBody LoanProductRequest request) throws MeedlException {
         log.info("Update loan product called with id .... {}", request.getId());
@@ -78,7 +78,7 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
     @GetMapping("/loan-product/all")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
     public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@Valid @RequestBody LoanProductViewAllRequest request) {
         LoanProduct loanProduct = new LoanProduct();
@@ -102,7 +102,7 @@ public class LoanController {
 
 
     @GetMapping("/loan-product/view-details-by-id")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = VIEW_LOAN_PRODUCT_DETAILS,description = VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> viewLoanProductDetailsById (@RequestParam
                                                                           @NotBlank(message = "Provide a valid loan product identifier")
@@ -132,7 +132,7 @@ public class LoanController {
     }
 
     @PostMapping("start")
-    @PreAuthorize("hasAuthority('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
                                                                 String loaneeId,
