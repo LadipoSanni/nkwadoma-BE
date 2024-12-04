@@ -12,5 +12,6 @@ import lombok.*;
 public class OrganizationEmployeeResponse {
     private String id;
     private String fullName;
+    private String email;
     private ActivationStatus status;
 }

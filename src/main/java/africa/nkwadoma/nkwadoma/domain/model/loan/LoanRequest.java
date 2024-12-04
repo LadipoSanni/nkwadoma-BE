@@ -33,6 +33,7 @@ public class LoanRequest {
     private LocalDateTime dateTimeApproved;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
     private String reasonForDecliningLoanRequest;
     private LoanProduct loanProduct;
     private LoanRequestStatus status;
