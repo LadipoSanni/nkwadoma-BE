@@ -83,6 +83,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             try{
                 identityVerificationOutputPort.verifyBvn(identityVerification);
             }catch (MeedlException exception) {
+                log.error("Error verifying user identity... {}", exception.getMessage());
 //                ZonedDateTime zonedDateTime = ZonedDateTime
 //                LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral();
 //                loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);

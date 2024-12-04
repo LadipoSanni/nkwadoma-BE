@@ -156,7 +156,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
-        identityVerification.validateImageUrl();
+//        identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());
         HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
