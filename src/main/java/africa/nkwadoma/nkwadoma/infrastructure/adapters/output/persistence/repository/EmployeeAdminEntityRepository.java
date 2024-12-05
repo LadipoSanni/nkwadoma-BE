@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEmployeeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
 import org.springframework.data.domain.*;
@@ -22,4 +23,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     Optional<OrganizationEmployeeEntity> findByMeedlUser_CreatedBy(String createdBy);
 
     List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
+
+    List<OrganizationEmployeeEntity> findAllByMeedlUser_RoleAndMeedlUser_FirstNameOrMeedlUser_LastNameContainingIgnoreCase
+            (IdentityRole meedlUser_role, String meedlUser_firstName, String meedlUser_lastName);
 }

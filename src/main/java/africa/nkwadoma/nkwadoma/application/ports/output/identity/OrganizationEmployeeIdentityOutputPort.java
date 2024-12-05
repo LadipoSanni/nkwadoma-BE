@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -18,4 +19,5 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
 
+    List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String name, IdentityRole identityRole) throws MeedlException;
 }

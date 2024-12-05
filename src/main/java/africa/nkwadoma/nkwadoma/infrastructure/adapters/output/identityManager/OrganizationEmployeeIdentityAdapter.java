@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -110,6 +111,15 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return employeeEntities.stream()
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
                 .toList();
+    }
+
+    @Override
+    public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String name, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateObjectInstance(identityRole);
+        List<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findAllByMeedlUser_RoleAndMeedlUser_FirstNameOrMeedlUser_LastNameContainingIgnoreCase(identityRole,name,name);
+        return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 
 
