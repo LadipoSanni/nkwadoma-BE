@@ -121,20 +121,26 @@ public class TestData {
                 .itemName("Loan Break").build();
     }
 
-    public static LoanProduct buildLoanProduct(String name) {
-        Vendor vendor = new Vendor();
+    public static LoanProduct buildTestLoanProduct(String name, Vendor vendor) {
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setName(name);
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
-        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000000"));
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
         return loanProduct;
+    }
+    public static Vendor createTestVendor(String name) {
+        Vendor vendor = new Vendor();
+        vendor.setVendorName(name);
+        vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
+        vendor.setProduct(Product.ACCOMMODATION);
+        return vendor;
     }
 
     public static LoanOffer buildLoanOffer(LoanRequest loanRequest, Loanee loanee) {

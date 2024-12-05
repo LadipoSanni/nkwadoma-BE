@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductVendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -112,6 +114,16 @@ public class LoanProductAdapter implements LoanProductOutputPort {
         Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size);
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
+    }
+
+    @Override
+    public List<LoanProduct> search(String loanProductName) throws MeedlException {
+        MeedlValidator.validateDataElement(loanProductName);
+        List<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findByNameContainingIgnoreCase(loanProductName);
+        if (loanProductEntities.isEmpty()){
+            return List.of();
+        }
+        return loanProductEntities.stream().map(loanProductMapper::mapEntityToLoanProduct).toList();
     }
 
 }
