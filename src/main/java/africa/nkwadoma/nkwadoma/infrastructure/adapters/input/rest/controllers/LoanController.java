@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -79,21 +80,21 @@ public class LoanController {
     @GetMapping("/loan-product/all")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
-    public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@Valid @RequestBody LoanProductViewAllRequest request) {
+    public ResponseEntity<ApiResponse<?>> viewAllLoanProduct( @AuthenticationPrincipal Jwt meedl,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) {
         LoanProduct loanProduct = new LoanProduct();
-        loanProduct.setPageSize(request.getPageSize());
-        loanProduct.setPageNumber(request.getPageNumber());
+        loanProduct.setPageSize(pageSize);
+        loanProduct.setPageNumber(pageNumber);
         Page<LoanProduct> loanProductPage = viewLoanProductUseCase.viewAllLoanProduct(loanProduct);
         List<LoanProductResponse> loanProductResponses = loanProductPage.stream().map(loanProductMapper::mapToLoanProductResponse).toList();
-        log.info("View all loan products called.... {}", loanProductResponses.isEmpty());
-        PaginatedResponse<LoanProductResponse> response = new PaginatedResponse<>(
-                loanProductResponses, loanProductPage.hasNext(),
-                loanProductPage.getTotalPages(), request.getPageSize(),
-                request.getPageNumber()
-        );
+        PaginatedResponse<LoanProductResponse> paginatedResponse = new PaginatedResponse<>(
+                loanProductResponses, loanProductPage.hasNext(), loanProductPage.getTotalPages(), pageNumber,pageSize);
+        log.info("View all loan products called successfully.");
+
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                data(response).
+                data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
