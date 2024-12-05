@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.Product;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -248,8 +250,25 @@ class LoanProductAdapterTest {
             log.error("Failed to update loan product");
         }
     }
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
+    void searchLoanProductWithInValidName(String name) {
+        assertThrows(MeedlException.class, () -> loanProductOutputPort.search(name));
+    }
     @Order(7)
+    @Test
+    void searchLoanProduct(){
+        List<LoanProduct> loanProducts  = new ArrayList<>();
+        try{
+            loanProducts  =
+                    loanProductOutputPort.search(gemsLoanProduct.getName());
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(1,loanProducts.size());
+    }
+    @Test
+    @Order(8)
     void deleteLoanProduct() {
         try {
             LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
