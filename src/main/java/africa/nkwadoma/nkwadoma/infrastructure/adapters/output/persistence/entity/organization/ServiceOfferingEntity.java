@@ -21,8 +21,6 @@ public class ServiceOfferingEntity {
     private String name;
     @Enumerated(EnumType.STRING)
     private Industry industry;
-//    @Enumerated(EnumType.STRING)
-//    private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound = BigDecimal.ZERO;
     private BigDecimal transactionUpperBound = BigDecimal.ZERO;
 }
