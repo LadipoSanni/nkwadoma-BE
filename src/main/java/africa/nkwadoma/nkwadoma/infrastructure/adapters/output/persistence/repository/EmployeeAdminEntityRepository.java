@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.*;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 
 import java.util.*;
 
@@ -24,6 +25,10 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
 
     List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 
-    List<OrganizationEmployeeEntity> findAllByMeedlUser_RoleAndMeedlUser_FirstNameOrMeedlUser_LastNameContainingIgnoreCase
-            (IdentityRole meedlUser_role, String meedlUser_firstName, String meedlUser_lastName);
+    @Query("SELECT o FROM OrganizationEmployeeEntity o " +
+            "WHERE o.meedlUser.role = :meedlUserRole " +
+            "AND upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%'))")
+    List<OrganizationEmployeeEntity> findByRoleAndNameFragment(
+    @Param("meedlUserRole") IdentityRole meedlUserRole,
+    @Param("nameFragment") String nameFragment);
 }

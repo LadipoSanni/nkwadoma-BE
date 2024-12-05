@@ -118,7 +118,8 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateObjectInstance(identityRole);
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findAllByMeedlUser_RoleAndMeedlUser_FirstNameOrMeedlUser_LastNameContainingIgnoreCase(identityRole,name,name);
+                employeeAdminEntityRepository.findByRoleAndNameFragment
+                        (identityRole,name);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 

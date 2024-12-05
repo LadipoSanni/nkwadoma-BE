@@ -40,13 +40,13 @@ class OrganizationEmployeeIdentityAdapterTest {
     private String userId;
     private String organizationEmployeeIdentityId;
 
-    @BeforeAll
+//    @BeforeAll
     void init() {
         try {
             joel = TestData.createTestUserIdentity("joel54@johnson.com");
+            joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
             List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
                     .builder().meedlUser(joel).build());
-            joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
             amazingGrace = TestData.createOrganizationTestData(
                     "Amazing Grace Enterprises",
                     "RC79500034",
@@ -135,7 +135,7 @@ class OrganizationEmployeeIdentityAdapterTest {
         List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = new ArrayList<>();
         try{
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole("jo",IdentityRole.ORGANIZATION_ADMIN);
+                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole("oh",IdentityRole.ORGANIZATION_ADMIN);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
@@ -143,24 +143,24 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertEquals(1, organizationEmployeeIdentities.size());
     }
 
-    @AfterAll
-    void tearDown() {
-        try {
-            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
-            userIdentityOutputPort.deleteUserById(userId);
-
-            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
-            String serviceOfferingId = null;
-            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-            }
-            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
-
-            organizationIdentityOutputPort.delete(organizationId);
-        } catch (MeedlException e) {
-            log.error("Error occurred cleaning up", e);
-        }
-    }
+//    @AfterAll
+//    void tearDown() {
+//        try {
+//            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+//            userIdentityOutputPort.deleteUserById(userId);
+//
+//            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
+//                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
+//            String serviceOfferingId = null;
+//            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+//                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+//                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+//            }
+//            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
+//
+//            organizationIdentityOutputPort.delete(organizationId);
+//        } catch (MeedlException e) {
+//            log.error("Error occurred cleaning up", e);
+//        }
+//    }
 }
