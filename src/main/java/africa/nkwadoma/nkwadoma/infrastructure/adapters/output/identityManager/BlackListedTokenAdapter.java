@@ -13,12 +13,12 @@ public class BlackListedTokenAdapter {
 
     private final BlackListedTokenRepository blackListedTokenRepository;
 
-    public List<BlackListedToken> findAll() {
-        return blackListedTokenRepository.findAll();
+    public  List<BlackListedToken> findExpiredTokens(){
+        return blackListedTokenRepository.findExpiredTokens();
     }
 
-    public BlackListedToken blackListToken(BlackListedToken accessToken){
-        return blackListedTokenRepository.save(accessToken);
+    public void blackListToken(BlackListedToken accessToken){
+        blackListedTokenRepository.save(accessToken);
     }
 
     public boolean isPresent(String accessToken) {
