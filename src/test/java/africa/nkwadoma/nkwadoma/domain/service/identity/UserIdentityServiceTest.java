@@ -60,7 +60,7 @@ class UserIdentityServiceTest {
         favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
         favour.setId("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
         favour.setReactivationReason("Reason for reactivation is to test");
-        favour.setDeactivationReason("Reason for deactivation is to test");;
+        favour.setDeactivationReason("Reason for deactivation is to test");
 
         employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setId("1234");
