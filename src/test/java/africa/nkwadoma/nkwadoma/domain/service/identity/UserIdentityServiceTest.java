@@ -2,13 +2,11 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +42,8 @@ class UserIdentityServiceTest {
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     @Mock
     private TokenUtils tokenUtils;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private UserIdentity favour;
 //    private String password;
     private String newPassword;
@@ -81,7 +81,8 @@ class UserIdentityServiceTest {
             when(userIdentityOutputPort.save(any())).thenReturn(favour);
             employeeIdentity.setId(favour.getId());
             when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(employeeIdentity);
-            doNothing().when(sendColleagueEmailUseCase).sendColleagueEmail("",favour);
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(new OrganizationIdentity());
+//            doNothing().when(sendColleagueEmailUseCase).sendColleagueEmail("",favour);
 
             UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
             log.info("invited colleague {}", invitedColleague.getId());
