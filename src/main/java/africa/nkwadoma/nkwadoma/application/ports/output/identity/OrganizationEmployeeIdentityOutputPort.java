@@ -17,4 +17,5 @@ public interface OrganizationEmployeeIdentityOutputPort {
     void deleteEmployee(String id) throws IdentityException;
 
     List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
+
 }
