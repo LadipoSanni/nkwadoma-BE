@@ -68,6 +68,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     private String getForgotPasswordLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token {}", token);
+        log.info("url {}", baseUrl + RESET_PASSWORD_URL+ token);
         return baseUrl + RESET_PASSWORD_URL+ token;
     }
     private String getLink(UserIdentity userIdentity) throws MeedlException {

@@ -81,7 +81,7 @@ class UserIdentityServiceTest {
             when(userIdentityOutputPort.save(any())).thenReturn(favour);
             employeeIdentity.setId(favour.getId());
             when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(employeeIdentity);
-            doNothing().when(sendColleagueEmailUseCase).sendColleagueEmail(favour);
+            doNothing().when(sendColleagueEmailUseCase).sendColleagueEmail("",favour);
 
             UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
             log.info("invited colleague {}", invitedColleague.getId());
