@@ -114,12 +114,13 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String name, IdentityRole identityRole) throws MeedlException {
+    public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
         MeedlValidator.validateDataElement(name);
         MeedlValidator.validateObjectInstance(identityRole);
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
-                employeeAdminEntityRepository.findByRoleAndNameFragment
-                        (identityRole,name);
+                employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment
+                        (organizationId,identityRole,name);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 

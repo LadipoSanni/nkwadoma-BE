@@ -26,9 +26,11 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     List<OrganizationEmployeeEntity> findAllByOrganization(String organizationId);
 
     @Query("SELECT o FROM OrganizationEmployeeEntity o " +
-            "WHERE o.meedlUser.role = :meedlUserRole " +
+            "WHERE o.organization = :organizationId " +
+            "AND o.meedlUser.role = :meedlUserRole " +
             "AND upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) LIKE upper(concat('%', :nameFragment, '%'))")
-    List<OrganizationEmployeeEntity> findByRoleAndNameFragment(
-    @Param("meedlUserRole") IdentityRole meedlUserRole,
-    @Param("nameFragment") String nameFragment);
+    List<OrganizationEmployeeEntity> findByOrganizationIdAndRoleAndNameFragment(
+            @Param("organizationId") String organizationId,
+            @Param("meedlUserRole") IdentityRole meedlUserRole,
+            @Param("nameFragment") String nameFragment);
 }

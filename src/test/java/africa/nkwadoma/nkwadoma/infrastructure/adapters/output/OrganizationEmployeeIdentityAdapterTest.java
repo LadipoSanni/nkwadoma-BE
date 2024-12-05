@@ -135,7 +135,7 @@ class OrganizationEmployeeIdentityAdapterTest {
         List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = new ArrayList<>();
         try{
             organizationEmployeeIdentities =
-                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole("oh",IdentityRole.ORGANIZATION_ADMIN);
+                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole(organizationId, "j", IdentityRole.ORGANIZATION_ADMIN);
         }catch (MeedlException exception){
             log.error("Error finding organization employees", exception);
         }
@@ -143,24 +143,24 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertEquals(1, organizationEmployeeIdentities.size());
     }
 
-//    @AfterAll
-//    void tearDown() {
-//        try {
-//            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
-//            userIdentityOutputPort.deleteUserById(userId);
-//
-//            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-//                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
-//            String serviceOfferingId = null;
-//            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
-//                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
-//                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
-//            }
-//            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
-//
-//            organizationIdentityOutputPort.delete(organizationId);
-//        } catch (MeedlException e) {
-//            log.error("Error occurred cleaning up", e);
-//        }
-//    }
+    @AfterAll
+    void tearDown() {
+        try {
+            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+            userIdentityOutputPort.deleteUserById(userId);
+
+            List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
+                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
+            String serviceOfferingId = null;
+            for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
+                serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
+                organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
+            }
+            organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
+
+            organizationIdentityOutputPort.delete(organizationId);
+        } catch (MeedlException e) {
+            log.error("Error occurred cleaning up", e);
+        }
+    }
 }
