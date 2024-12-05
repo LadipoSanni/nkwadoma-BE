@@ -20,9 +20,9 @@ import java.util.regex.Pattern;
 public class IdentityVerification {
 
     private String identityId;
-    private String loanReferralId;
     private String bvn;
     private String nin;
+    private String loanReferralId;
     private String imageUrl;
     private String email;
     private String token;

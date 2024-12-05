@@ -12,9 +12,8 @@ public class IdentityVerificationRequest {
     @NotBlank(message = "BVN is required")
     private String bvn;
 //    @Pattern(regexp = "^\\d{11}$", message = "Nin must contain exactly 11 digits and no alphabets.")
-    @NotBlank(message = "NON is required")
+    @NotBlank(message = "NIN is required")
     private String nin;
     private String loanReferralId;
-//    @NotBlank(message = "Token not present")
-    private String token;
+    private String imageUrl;
 }
