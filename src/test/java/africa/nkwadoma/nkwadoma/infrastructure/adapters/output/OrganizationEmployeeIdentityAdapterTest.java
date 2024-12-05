@@ -40,7 +40,7 @@ class OrganizationEmployeeIdentityAdapterTest {
     private String userId;
     private String organizationEmployeeIdentityId;
 
-//    @BeforeAll
+    @BeforeAll
     void init() {
         try {
             joel = TestData.createTestUserIdentity("joel54@johnson.com");
