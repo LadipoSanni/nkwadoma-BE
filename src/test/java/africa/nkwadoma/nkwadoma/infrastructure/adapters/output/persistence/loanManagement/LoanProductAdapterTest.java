@@ -1,14 +1,13 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.Product;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -37,24 +36,15 @@ class LoanProductAdapterTest {
     @Autowired
     private VendorEntityRepository vendorEntityRepository;
     private LoanProduct gemsLoanProduct;
+    private LoanProduct goldLoanProduct;
     private Vendor vendor;
+    private Vendor goldVendor;
     @BeforeEach
     void setUp() {
-        vendor = new Vendor();
-        vendor.setVendorName("Test Vendor");
-        vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
-        vendor.setProduct(Product.ACCOMMODATION);
-
-        gemsLoanProduct = new LoanProduct();
-        gemsLoanProduct.setPageSize(10);
-        gemsLoanProduct.setPageNumber(0);
-        gemsLoanProduct.setName("Test Loan Product 2");
-        gemsLoanProduct.setMandate("Test: A new mandate for test");
-        gemsLoanProduct.setSponsors(List.of("Mark", "Jack"));
-        gemsLoanProduct.setLoanProductSize(new BigDecimal("1000.00"));
-        gemsLoanProduct.setObligorLoanLimit(new BigDecimal("1000.00"));
-        gemsLoanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
-        gemsLoanProduct.setVendors(List.of(vendor));
+        vendor = TestData.createTestVendor("test Gems tone Finance");
+        goldVendor = TestData.createTestVendor("test Gold tone");
+        gemsLoanProduct = TestData.buildTestLoanProduct("test Gems", vendor);
+        goldLoanProduct = TestData.buildTestLoanProduct("test Gold Product", goldVendor);
     }
 
     @Test
@@ -62,6 +52,7 @@ class LoanProductAdapterTest {
     void createLoanProduct() {
         try {
             LoanProduct createdLoanProduct = loanProductOutputPort.save(gemsLoanProduct);
+            loanProductOutputPort.save(goldLoanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
             LoanProduct foundLoanProduct = loanProductOutputPort.findById(createdLoanProduct.getId());
@@ -261,11 +252,11 @@ class LoanProductAdapterTest {
         List<LoanProduct> loanProducts  = new ArrayList<>();
         try{
             loanProducts  =
-                    loanProductOutputPort.search(gemsLoanProduct.getName());
+                    loanProductOutputPort.search("test");
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(1,loanProducts.size());
+        assertEquals(2,loanProducts.size());
     }
     @Test
     @Order(8)
@@ -286,11 +277,16 @@ class LoanProductAdapterTest {
     @AfterAll
     void cleanUp() {
         try {
-            VendorEntity foundVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
-            loanProductVendorRepository.deleteAllByVendorEntity(foundVendorEntity);
-            vendorEntityRepository.deleteById(foundVendorEntity.getId());
-            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
-            loanProductOutputPort.deleteById(foundLoanProduct.getId());
+            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
+            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldVendor.getVendorName());
+            loanProductVendorRepository.deleteAllByVendorEntity(foundGemsVendorEntity);
+//            loanProductVendorRepository.deleteAllByVendorEntity(foundGoldVendorEntity);
+            vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
+//            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
+            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(goldLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
+            loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
         } catch (MeedlException e) {
             log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
         }
