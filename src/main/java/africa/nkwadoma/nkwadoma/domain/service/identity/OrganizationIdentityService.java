@@ -113,9 +113,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateUUID(organizationIdentity.getId());
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
         validateNonUpdatableValues(organizationIdentity);
+        log.info("Organization identity input: {}", organizationIdentity);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
         foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization,organizationIdentity);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
+        log.info("Updated organization: {}", foundOrganization);
         return organizationIdentityOutputPort.save(foundOrganization);
     }
 

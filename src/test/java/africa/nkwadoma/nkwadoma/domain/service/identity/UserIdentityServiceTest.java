@@ -155,9 +155,10 @@ class UserIdentityServiceTest {
     void createPassword(){
         try {
             favour.setPassword("Passkey90@");
+            favour.setEmail(favour.getEmail());
             assertNotNull(generatedToken);
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(identityManagerOutPutPort.createPassword(favour.getEmail(), favour.getPassword())).thenReturn(favour);
+            when(identityManagerOutPutPort.createPassword(favour)).thenReturn(favour);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
             userIdentityService.createPassword(generatedToken,favour.getPassword());
         }catch (MeedlException exception){

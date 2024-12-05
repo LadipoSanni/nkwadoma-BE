@@ -107,7 +107,12 @@ public class UserIdentityService implements CreateUserUseCase  {
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+        log.info("Found User Identity: {}", userIdentity);
+        userIdentity.setPassword(password);
+        userIdentity.setEmail(token);
+        userIdentity.setRole(userIdentity.getRole());
+        userIdentity = identityManagerOutPutPort.createPassword(userIdentity);
+        log.info("User identity after password has been created: {}", userIdentity);
         return userIdentity;
     }
 

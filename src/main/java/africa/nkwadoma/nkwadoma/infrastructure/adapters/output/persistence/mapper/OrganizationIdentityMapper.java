@@ -8,7 +8,7 @@ import org.mapstruct.*;
 
 import java.util.*;
 
-@Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class)
+@Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
