@@ -51,6 +51,15 @@ public class TokenUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public String decodeJWT(String token){
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
+    }
+
     public String decodeJWTGetEmail(String token) throws MeedlException {
         MeedlValidator.validateDataElement(token);
         Claims claims;

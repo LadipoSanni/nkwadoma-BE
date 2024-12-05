@@ -109,8 +109,8 @@ public class UserIdentityService implements CreateUserUseCase  {
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         log.info("Found User Identity: {}", userIdentity);
         userIdentity.setPassword(password);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity);
         userIdentity.setRole(userIdentity.getRole());
+        userIdentity = identityManagerOutPutPort.createPassword(userIdentity);
         log.info("User identity after password has been created: {}", userIdentity);
         return userIdentity;
     }

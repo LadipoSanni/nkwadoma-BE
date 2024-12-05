@@ -6,4 +6,5 @@ import org.springframework.data.domain.*;
 
 public interface ViewOrganizationEmployeesUseCase {
     Page<OrganizationEmployeeIdentity> viewOrganizationEmployees(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
+    OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 }

@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
@@ -21,6 +22,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @Slf4j
@@ -30,7 +33,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
     private final CreateOrganizationUseCase createOrganizationUseCase;
-    private final ViewOrganizationUseCase viewOrganizationUseCase;
+    private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final TokenUtils tokenUtils;
     private final IdentityMapper identityMapper;
 
@@ -80,16 +83,17 @@ public class IdentityManagerController {
     }
 
     private void updateOrganizationStatus(UserIdentity userIdentity) throws MeedlException {
-        if (ObjectUtils.isNotEmpty(userIdentity) && ObjectUtils.isNotEmpty(userIdentity.getRole())
-                && StringUtils.isNotEmpty(userIdentity.getAccessToken()) &&
-                userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)
-        ) {
-            String organizationAdminId = tokenUtils.decodeJWTGetId(userIdentity.getAccessToken());
-            OrganizationIdentity organizationIdentity = viewOrganizationUseCase.
-                    viewOrganizationDetailsByOrganizationAdmin(organizationAdminId);
-
-            log.info("Organization found: {}", organizationIdentity);
-            organizationIdentity.setId(organizationIdentity.getId());
+        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getAccessToken());
+        String organizationAdminId = tokenUtils.decodeJWT(userIdentity.getAccessToken());
+        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
+        employeeIdentity.setId(organizationAdminId);
+        employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+        if(ObjectUtils.isNotEmpty(employeeIdentity.getMeedlUser().getRole()) &&
+                employeeIdentity.getMeedlUser().getRole() == IdentityRole.ORGANIZATION_ADMIN)
+        {
+            OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+            organizationIdentity.setId(employeeIdentity.getOrganization());
             organizationIdentity.setUpdatedBy(organizationAdminId);
             organizationIdentity.setStatus(ActivationStatus.ACTIVE);
             organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);

@@ -36,4 +36,11 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         }
         return organizationEmployees;
     }
+
+    @Override
+    public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId());
+        return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
+    }
 }
