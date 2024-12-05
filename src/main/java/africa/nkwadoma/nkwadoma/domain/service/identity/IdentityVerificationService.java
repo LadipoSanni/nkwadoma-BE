@@ -32,10 +32,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Service
 public class IdentityVerificationService implements IdentityVerificationUseCase {
     @Autowired
-    private LoanReferralRestMapper loanReferralRestMapper;
-    @Autowired
-    private ViewLoanReferralsUseCase viewLoanReferralsUseCase;
-    @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
@@ -85,14 +81,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             }catch (MeedlException exception) {
                 log.error("Error verifying user identity... {}", exception.getMessage());
 //                ZonedDateTime zonedDateTime = ZonedDateTime
-//                LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral();
-//                loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
-//                IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
-//                identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
-//                identityVerificationFailureRecord.setReferralId(identityVerification.getLoanReferralId());
-//                identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
-//                identityVerificationFailureRecord.setReason(exception.getMessage());
-//                createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
+                LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())
+                        .orElseThrow(()-> new IdentityVerificationException("Unable to find loan referral"));
+                IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
+                identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
+                identityVerificationFailureRecord.setReferralId(loanReferral.getId());
+                identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
+                identityVerificationFailureRecord.setReason(exception.getMessage());
+                createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
                 //notify inviter
             }}
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
