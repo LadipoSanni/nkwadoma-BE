@@ -45,15 +45,17 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .context(context)
                 .subject(RESET_PASSWORD.getMessage())
                 .to(userIdentity.getEmail())
-                .template(ORGANIZATION_INVITATION_TEMPLATE.getMessage())
+                .template(FORGOT_PASSWORD_TEMPLATE.getMessage())
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
 
     }
     @Override
-    public void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+    public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
+                                                                               userIdentity.getFirstName(),
+                                                                                organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
@@ -66,6 +68,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     private String getForgotPasswordLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token {}", token);
+        log.info("url {}", baseUrl + RESET_PASSWORD_URL+ token);
         return baseUrl + RESET_PASSWORD_URL+ token;
     }
     private String getLink(UserIdentity userIdentity) throws MeedlException {
