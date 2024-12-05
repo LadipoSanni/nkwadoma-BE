@@ -52,8 +52,10 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     }
     @Override
-    public void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+    public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
+                                                                               userIdentity.getFirstName(),
+                                                                                organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
