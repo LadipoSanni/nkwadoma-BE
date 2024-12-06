@@ -167,6 +167,7 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
+            when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
