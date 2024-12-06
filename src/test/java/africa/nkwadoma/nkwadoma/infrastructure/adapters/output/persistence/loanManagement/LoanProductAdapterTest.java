@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputP
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
@@ -39,6 +40,9 @@ class LoanProductAdapterTest {
     private LoanProduct goldLoanProduct;
     private Vendor vendor;
     private Vendor goldVendor;
+    @Autowired
+    private UserIdentityService userIdentityService;
+
     @BeforeEach
     void setUp() {
         vendor = TestData.createTestVendor("test Gems tone Finance");

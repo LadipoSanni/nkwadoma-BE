@@ -30,10 +30,11 @@ public class TokenUtils {
     }
 
     private String buildJwt(Map<String, Object> claims) {
+        long oneYearInMillis = expiration * 1000L * 24 * 365;
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + oneYearInMillis))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
