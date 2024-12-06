@@ -72,6 +72,7 @@ public class CohortService implements CohortUseCase {
         savedCohort.setOrganizationId(program.getOrganizationId());
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
+        savedCohort.setProgramName(program.getName());
         return savedCohort;
     }
 
@@ -114,6 +115,7 @@ public class CohortService implements CohortUseCase {
         List<LoanBreakdown> foundLoanBreakDown = loanBreakdownOutputPort.findAllByCohortId(cohort.getId());
         cohortOutputPort.save(foundCohort);
         foundCohort.setLoanBreakdowns(foundLoanBreakDown);
+        foundCohort.setProgramName(program.getName());
         return foundCohort;
     }
 
@@ -158,7 +160,10 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException {
-        return cohortOutputPort.viewCohortDetails(userId, cohortId);
+        Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        cohort.setProgramName(program.getName());
+        return cohort;
     }
 
     @Override
