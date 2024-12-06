@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +112,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct) {
         int defaultPageSize = BigInteger.TEN.intValue();
         int size = loanProduct.getPageSize() <= BigInteger.ZERO.intValue() ? defaultPageSize : loanProduct.getPageSize();
-        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size);
+        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size, Sort.by(Sort.Order.asc("createdAt")));
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
     }
