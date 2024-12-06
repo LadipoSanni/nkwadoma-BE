@@ -13,6 +13,9 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -46,5 +49,21 @@ public class OrganizationEmployeeController {
         return ResponseEntity.ok(new ApiResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
                 paginatedResponse, HttpStatus.OK.toString())
         );
+    }
+
+    @GetMapping("search/admin")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser, @RequestParam("name") String name) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
+                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(userId,name);
+        List<OrganizationEmployeeResponse> organizationEmployeeResponses =
+                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+        ApiResponse<List<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<List<OrganizationEmployeeResponse>>builder()
+                .data(organizationEmployeeResponses)
+                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
