@@ -55,6 +55,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         MeedlValidator.validateUUID(userId);
             OrganizationEmployeeIdentity organizationEmployeeIdentity
                     = organizationEmployeeOutputPort.findByCreatedBy(userId);
-        return organizationEmployeeOutputPort.findAllAdminInOrganization(userId, IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
+        return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationEmployeeIdentity.getOrganization(),
+                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
     }
 }

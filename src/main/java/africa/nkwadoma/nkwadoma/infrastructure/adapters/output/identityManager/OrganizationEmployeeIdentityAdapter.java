@@ -124,5 +124,18 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 
+    @Override
+    public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateObjectInstance(identityRole);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findAllByOrganizationAndMeedlUserRole(organizationId,identityRole,pageRequest);
+        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
+    }
+
 
 }

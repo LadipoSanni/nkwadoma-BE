@@ -11,5 +11,5 @@ public interface ViewOrganizationEmployeesUseCase {
 
     List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException;
 
-    Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId) throws MeedlException;
+    Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException;
 }
