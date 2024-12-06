@@ -134,13 +134,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     @Override
-    public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
-        OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
-        return organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
-    }
-
-    @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
         MeedlValidator.validateDataElement(organizationName);
         return organizationIdentityOutputPort.findByName(organizationName);
@@ -149,5 +142,15 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
         return organizationIdentityOutputPort.findById(organizationId);
+    }
+
+    @Override
+    public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
+        MeedlValidator.validateUUID(adminId);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        return organizationIdentity;
     }
 }

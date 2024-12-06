@@ -33,4 +33,6 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             @Param("organizationId") String organizationId,
             @Param("meedlUserRole") IdentityRole meedlUserRole,
             @Param("nameFragment") String nameFragment);
+
+    List<OrganizationEmployeeEntity> findByOrganization(String organizationId);
 }
