@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,8 @@ class UserIdentityServiceTest {
     private TokenUtils tokenUtils;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private BlackListedTokenAdapter blackListedTokenAdapter;
     private UserIdentity favour;
 //    private String password;
     private String newPassword;
@@ -237,12 +240,14 @@ class UserIdentityServiceTest {
     @Test
     void createPasswordWithoutSpecialCharacters(){
            favour.setPassword("Password1234");
+           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
            assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
 
     }
     @Test
     void createPasswordWithAllNumbers(){
            favour.setPassword("99900000001234");
+           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
            assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
     }
  @Test
