@@ -11,5 +11,6 @@ public interface LoanReferralRestMapper {
     @Mapping(target = "loanee.userIdentity.id", source = "userId")
     LoanReferral toLoanReferral(String userId);
 
-    LoanReferral maptoLoanReferral(LoanReferralResponseRequest request);
+    @Mapping(target = "loanee.userIdentity.id", source = "userId")
+    LoanReferral maptoLoanReferral(LoanReferralResponseRequest request, String userId);
 }
