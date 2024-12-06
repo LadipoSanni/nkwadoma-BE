@@ -13,6 +13,9 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -46,5 +49,13 @@ public class OrganizationEmployeeController {
         return ResponseEntity.ok(new ApiResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
                 paginatedResponse, HttpStatus.OK.toString())
         );
+    }
+
+
+    @GetMapping("view-all/admin")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
+                viewOrganizationEmployeesUseCase.viewAllAdminInOrganization(meedlUser.getClaimAsString("sub"));
     }
 }

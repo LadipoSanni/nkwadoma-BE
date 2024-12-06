@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -35,5 +36,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
         return organizationEmployees;
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+            OrganizationEmployeeIdentity organizationEmployeeIdentity
+                    = organizationEmployeeOutputPort.findByCreatedBy(userId);
+        return organizationEmployeeOutputPort.findAllAdminInOrganization(userId, IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
     }
 }
