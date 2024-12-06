@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @Builder
 @Slf4j
-public  class Verification {
+public class Verification {
 
     @JsonProperty("status")
     private String status;

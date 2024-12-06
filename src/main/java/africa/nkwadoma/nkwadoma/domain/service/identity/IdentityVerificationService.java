@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     public PremblyResponse createTestPremblyResponse(){
         PremblyResponse response = new PremblyBvnResponse();
+        Verification verifier = Verification.builder().status("VERIFIED").build();
         response.setDetail("VERIFIED");
-        response.setVerification();
+        response.setVerification(verifier);
+        response.setResponseCode("CREATED");
         return response;
     }
 
@@ -74,8 +77,9 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification);
         log.info("Verifying identity : {}", identityVerification);
         String bvn = identityVerification.getBvn();
-        LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(identityVerification.getLoanReferralId())
-                .orElseThrow(()-> new IdentityVerificationException("Unable to find loan referral"));
+        LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
+        log.info("Loan referral {}", loanReferral);
+//        UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId())
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
         if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
