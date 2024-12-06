@@ -140,6 +140,7 @@ class CohortServiceTest {
     void viewCohortDetails(){
         try{
             when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             Cohort cohort = cohortService
                     .viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);
@@ -287,6 +288,7 @@ class CohortServiceTest {
     void deleteCohort(){
         try {
             when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             Cohort cohort = cohortService.viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);
 
