@@ -21,9 +21,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -118,6 +120,13 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getLoanRequest().getLoanAmountRequested(), loanRequest.getLoanAmountRequested());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
+
+//    @Order(2)
+//    @Test
+//    void viewAllLoanOffersByOrganizationAdmin(){
+//        Page<LoanOffer> loanOffers = null;
+//        loanOffers = loanOfferOutputPort.findAllLoanOfferByInOrganization(loa)
+//    }
 
 
     @AfterAll

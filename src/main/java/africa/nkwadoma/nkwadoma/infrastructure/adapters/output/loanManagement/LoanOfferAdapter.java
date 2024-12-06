@@ -8,6 +8,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -35,5 +38,13 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     @Override
     public void deleteLoanOfferById(String loanOfferId) {
         loanOfferEntityRepository.deleteById(loanOfferId);  
+    }
+
+    @Override
+    public Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<LoanOfferEntitiy> loanOfferEntities =
+                loanOfferEntityRepository.findAllLoanOfferInOrganization(organization,pageRequest);
+        return null;
     }
 }

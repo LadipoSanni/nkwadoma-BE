@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,6 +48,8 @@ public class LoanController {
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanOfferUseCase loanOfferUseCase;
+    private final LoanOfferMapper loanOfferMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -167,4 +170,14 @@ public class LoanController {
                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+
+//    @GetMapping("/loanOffer/all")
+//    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+//    public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
+//                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+//                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+//
+//        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+//    }
 }
