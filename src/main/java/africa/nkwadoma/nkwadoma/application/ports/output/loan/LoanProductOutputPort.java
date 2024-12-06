@@ -5,6 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface LoanProductOutputPort {
     LoanProduct save(LoanProduct loanProduct) throws MeedlException;
 
@@ -17,4 +19,6 @@ public interface LoanProductOutputPort {
     LoanProduct findByName(String name) throws MeedlException;
 
     Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct);
+
+    List<LoanProduct> search(String loanProductName) throws MeedlException;
 }

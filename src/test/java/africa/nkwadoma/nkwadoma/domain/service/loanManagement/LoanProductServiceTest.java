@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
@@ -11,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanP
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -185,6 +188,28 @@ class LoanProductServiceTest {
             assertEquals(loanProductList.get(0).getTermsAndCondition(), loanProduct.getTermsAndCondition());
 
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY })
+    void searchForLoanProductWithInvalidName(String name) {
+        loanProduct.setName(name);
+        assertThrows(MeedlException.class, ()-> loanService.search(loanProduct.getName()));
+    }
+    @Test
+    void searchLoanProduct() {
+        List<LoanProduct> loanProducts = new ArrayList<>();
+        try{
+            when(loanProductOutputPort.search(loanProduct.getName()))
+                    .thenReturn(List.of(loanProduct, loanProduct));
+
+            loanProducts = loanService.search(loanProduct.getName());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+
+        assertNotNull(loanProducts);
+        assertEquals(2, loanProducts.size());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void deleteLoanProductWithInvalidId(String value){
