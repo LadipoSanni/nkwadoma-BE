@@ -51,6 +51,22 @@ public class OrganizationEmployeeController {
         );
     }
 
+    @GetMapping("search/admin")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser, @RequestParam("name") String name) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
+                viewOrganizationEmployeesUseCase.searchOrganizationAdmin(userId,name);
+        List<OrganizationEmployeeResponse> organizationEmployeeResponses =
+                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+        ApiResponse<List<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<List<OrganizationEmployeeResponse>>builder()
+                .data(organizationEmployeeResponses)
+                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 
     @GetMapping("view-all/admin")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")

@@ -44,9 +44,9 @@ class OrganizationEmployeeIdentityAdapterTest {
     void init() {
         try {
             joel = TestData.createTestUserIdentity("joel54@johnson.com");
+            joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
             List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
                     .builder().meedlUser(joel).build());
-
             amazingGrace = TestData.createOrganizationTestData(
                     "Amazing Grace Enterprises",
                     "RC79500034",
@@ -128,6 +128,19 @@ class OrganizationEmployeeIdentityAdapterTest {
         String id = organizationIdentity.getId();
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
                 findAllOrganizationEmployees(id, pageNumber, pageSize));
+    }
+
+    @Test
+    void findEmployeeByNameAndRoleTest(){
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = new ArrayList<>();
+        try{
+            organizationEmployeeIdentities =
+                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole(organizationId, "j", IdentityRole.ORGANIZATION_ADMIN);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentities);
+        assertEquals(1, organizationEmployeeIdentities.size());
     }
 
     @AfterAll

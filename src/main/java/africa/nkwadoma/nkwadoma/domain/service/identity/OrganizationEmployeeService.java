@@ -13,6 +13,8 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -36,6 +38,16 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
         return organizationEmployees;
+    }
+
+    @Override
+    public List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity
+                = organizationEmployeeOutputPort.findByCreatedBy(userId);
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
+                name, IdentityRole.ORGANIZATION_ADMIN);
+        return organizationEmployeeIdentities;
     }
 
     @Override
