@@ -32,7 +32,6 @@ public class LoanReferral {
     private String programName;
 
     public void validate() throws MeedlException {
-//        MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanReferralStatus);
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
