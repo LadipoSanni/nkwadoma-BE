@@ -40,7 +40,7 @@ public class SwaggerConfig {
         Server localServer2 = new Server();
         localServer2.setUrl("http://localhost:8080");
         Server devServer = new Server();
-        devServer.setUrl("http://api-dev-meedl.learnspace.africa");
+        devServer.setUrl("https://api-dev-meedl.learnspace.africa");
 
         return List.of(server, localServer1, localServer2, devServer);
     }

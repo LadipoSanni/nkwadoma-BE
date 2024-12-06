@@ -23,7 +23,7 @@ public class Cohort {
     private String id;
     private String programId;
     private String organizationId;
-    @Size( max = 2500, message = "cohort description must no go beyond 2500" )
+    @Size( max = 2500, message = "cohort description must not go beyond 2500" )
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;
@@ -41,6 +41,10 @@ public class Cohort {
     private LoanDetail loanDetail;
     private int numberOfLoanees = 0;
     private int numberOfReferredLoanee = 0;
+    private String programName;
+    private int numberOfEmployed;
+    private int numberOfDropOut;
+
 
 
     public void validate() throws MeedlException {
