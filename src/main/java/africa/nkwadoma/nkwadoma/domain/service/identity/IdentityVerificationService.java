@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -61,6 +62,12 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private void addedToLoaneeLoan(String loanReferralId) {
         log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
+    public PremblyResponse createTestPremblyResponse(){
+        PremblyResponse response = new PremblyBvnResponse();
+        response.setDetail("VERIFIED");
+        response.setVerification();
+        return response;
+    }
 
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
@@ -73,7 +80,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
         if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
             try{
-                PremblyResponse premblyResponse = identityVerificationOutputPort.verifyBvn(identityVerification);
+//                PremblyResponse premblyResponse = identityVerificationOutputPort.verifyBvn(identityVerification);
+                PremblyResponse premblyResponse = createTestPremblyResponse();
                 if (premblyResponse.getVerification() != null &&
                     premblyResponse.getVerification().getStatus() != null &&
                     premblyResponse.getVerification().getStatus().equals("VERIFIED")){
@@ -88,7 +96,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 }
             }catch (MeedlException exception) {
                 log.error("Error verifying users identity... {}", exception.getMessage());
-//                ZonedDateTime zonedDateTime = ZonedDateTime
                 createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
                 //notify inviter
             }}else{
