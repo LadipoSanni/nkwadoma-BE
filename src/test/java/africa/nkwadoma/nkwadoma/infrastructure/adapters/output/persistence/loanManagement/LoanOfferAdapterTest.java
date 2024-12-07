@@ -56,6 +56,8 @@ public class LoanOfferAdapterTest {
     private LoanRequest loanRequest;
     private String loanOfferId;
     private String loanRequestId;
+    private int pageSize = 1;
+    private int pageNumber = 0;
 
 
     @BeforeAll
@@ -66,7 +68,7 @@ public class LoanOfferAdapterTest {
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                 initialDeposit(BigDecimal.valueOf(3000000.00)).build();
         loanee = Loanee.builder().userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy())
+                cohortId("fdc36020-9389-43d2-938d-fd317a870916").createdBy(userIdentity.getCreatedBy())
                 .loaneeLoanDetail(loaneeLoanDetail).build();
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
@@ -121,12 +123,18 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
 
-//    @Order(2)
-//    @Test
-//    void viewAllLoanOffersByOrganizationAdmin(){
-//        Page<LoanOffer> loanOffers = null;
-//        loanOffers = loanOfferOutputPort.findAllLoanOfferByInOrganization(loa)
-//    }
+    @Order(2)
+    @Test
+    void viewAllLoanOffersByOrganizationAdmin(){
+        Page<LoanOffer> loanOffers = null;
+        try {
+            loanOffers = loanOfferOutputPort.findAllLoanOffers( pageSize, pageNumber);
+        }catch (MeedlException exception){
+            log.info(exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getSize());
+    }
+
 
 
     @AfterAll
