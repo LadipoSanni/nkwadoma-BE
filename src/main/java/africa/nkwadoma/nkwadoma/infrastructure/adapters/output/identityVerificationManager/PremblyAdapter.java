@@ -126,6 +126,11 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     public PremblyResponse getBvnDetails(IdentityVerification identityVerification) {
         PremblyResponse premblyBvnResponse = getIdentityDetailsByBvn(identityVerification);
+        updateBvnVerificationStatus(premblyBvnResponse);
+        return premblyBvnResponse;
+    }
+
+    private static void updateBvnVerificationStatus(PremblyResponse premblyBvnResponse) {
         if (!ObjectUtils.isEmpty(premblyBvnResponse)
                 && !ObjectUtils.isEmpty(premblyBvnResponse.getVerification())) {
             premblyBvnResponse.getVerification().updateValidIdentity();
@@ -133,7 +138,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
             log.error("Verification failed. BVN not found.");
         }
         log.info("Verification Result : {}", premblyBvnResponse);
-        return premblyBvnResponse;
     }
 
     private PremblyResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
@@ -155,6 +159,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
+        log.info("Verification started. BVN Likeness check.");
         identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());
@@ -170,6 +175,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
                 PremblyBvnResponse.class
         );
         log.info("bvn Response : {}", responseEntity.getBody());
+        updateBvnVerificationStatus(responseEntity.getBody());
         return responseEntity.getBody();
     }
 
