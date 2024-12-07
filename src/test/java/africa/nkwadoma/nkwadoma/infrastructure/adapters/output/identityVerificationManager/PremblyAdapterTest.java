@@ -55,15 +55,6 @@ class PremblyAdapterTest {
         bvnIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");
         ninIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");
     }
-    @Test
-    void testDecryption() throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
-        TokenUtils tokenUtils = new TokenUtils();
-        String encryptedText = "U2FsdGVkX19n877oXxSiO+2/GFfjdjahTbtp5IgR0BU=";
-
-        String decryptedText = tokenUtils.decryptBvn(encryptedText);
-        log.info("Decrypted text: " + decryptedText);
-
-    }
 
 //    @Test
     void verifyIdentityWithValidNinAndValidImage() throws MeedlException {
