@@ -63,29 +63,19 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private void addedToLoaneeLoan(String loanReferralId) {
         log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
-    public PremblyResponse createTestPremblyResponse(){
-        PremblyResponse response = new PremblyBvnResponse();
-        Verification verifier = Verification.builder().status("VERIFIED").build();
-        response.setDetail("VERIFIED");
-        response.setVerification(verifier);
-        response.setResponseCode("CREATED");
-        return response;
-    }
-
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        log.info("Verifying identity : {}", identityVerification);
+        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
         String bvn = identityVerification.getBvn();
         LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
-        log.info("Loan referral {}", loanReferral);
-//        UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId())
+        log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
         if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
             try{
-//                PremblyResponse premblyResponse = identityVerificationOutputPort.verifyBvn(identityVerification);
-                PremblyResponse premblyResponse = createTestPremblyResponse();
+                PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
+                log.info("prembly bvn response: " + premblyResponse);
                 if (premblyResponse.getVerification() != null &&
                     premblyResponse.getVerification().getStatus() != null &&
                     premblyResponse.getVerification().getStatus().equals("VERIFIED")){
@@ -103,6 +93,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
                 //notify inviter
             }}else{
+                log.info("Verification previously done and was successful");
                 addedToLoaneeLoan(identityVerification.getLoanReferralId());
                 return IDENTITY_VERIFIED.getMessage();
         }
@@ -110,12 +101,13 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        UserIdentity userIdentity;
-        userIdentity = loanReferral.getLoanee().getUserIdentity();
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId());
+        log.info("UserIdentity before update :  {}", userIdentity);
         userIdentity.setIdentityVerified(Boolean.TRUE);
         userIdentity.setBvn(identityVerification.getBvn());
         userIdentity.setNin(identityVerification.getNin());
-        userIdentityOutputPort.save(userIdentity);
+        userIdentity = userIdentityOutputPort.save(userIdentity);
+        log.info("User identity details updated for loanee with bvn {} and user {}", identityVerification.getBvn(), userIdentity);
     }
 
     private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException {

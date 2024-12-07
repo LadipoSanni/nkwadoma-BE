@@ -159,6 +159,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
+        log.info("Verification started. BVN Likeness check.");
         identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());

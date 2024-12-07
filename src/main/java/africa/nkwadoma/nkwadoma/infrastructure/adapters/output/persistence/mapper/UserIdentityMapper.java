@@ -6,9 +6,11 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UserIdentityMapper {
-
+    @Mapping(source = "identityVerified", target = "isIdentityVerified")
+    @Mapping(source = "firstName", target = "firstName")
     UserEntity toUserEntity(UserIdentity userIdentity);
 
+    @Mapping(source = "identityVerified", target = "isIdentityVerified")
     @Mapping(source = "firstName", target = "firstName")
     UserIdentity toUserIdentity(UserEntity userEntity);
 

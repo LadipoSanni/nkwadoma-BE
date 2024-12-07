@@ -14,7 +14,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Slf4j
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
