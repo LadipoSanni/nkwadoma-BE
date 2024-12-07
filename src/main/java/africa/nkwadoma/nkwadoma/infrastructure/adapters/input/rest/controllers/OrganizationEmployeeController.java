@@ -38,7 +38,8 @@ public class OrganizationEmployeeController {
         OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity(organizationId, pageNumber, pageSize);
         Page<OrganizationEmployeeIdentity> employeeIdentities = viewOrganizationEmployeesUseCase.
                 viewOrganizationEmployees(employeeIdentity);
-        List<OrganizationEmployeeResponse> employeeResponses = employeeIdentities.map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).getContent();
+        List<OrganizationEmployeeResponse> employeeResponses = employeeIdentities.
+                map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).getContent();
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =
                 PaginatedResponse.<OrganizationEmployeeResponse>builder()
                         .body(employeeResponses)
