@@ -41,6 +41,10 @@ public class Cohort {
     private LoanDetail loanDetail;
     private int numberOfLoanees = 0;
     private int numberOfReferredLoanee = 0;
+    private String programName;
+    private int numberOfEmployed;
+    private int numberOfDropOut;
+
 
 
     public void validate() throws MeedlException {
