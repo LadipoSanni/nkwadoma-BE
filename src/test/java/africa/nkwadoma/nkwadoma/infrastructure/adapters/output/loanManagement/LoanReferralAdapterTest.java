@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -44,8 +45,6 @@ class LoanReferralAdapterTest {
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
-    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
-    @Autowired
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Autowired
     private CohortOutputPort cohortOutputPort;
@@ -55,11 +54,14 @@ class LoanReferralAdapterTest {
     private CohortUseCase cohortUseCase;
     @Autowired
     private LoaneeUseCase loaneeUseCase;
+    @Autowired
+    private LoaneeLoanBreakDownRepository loaneeLoanBreakDownRepository;
+    @Autowired
+    private LoanBreakdownRepository loanBreakdownRepository;
     private OrganizationIdentity amazingGrace;
     private  UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private String organizationId;
-    private OrganizationEmployeeIdentity savedEmployeeIdentity;
     private String loaneeUserId;
     private String organizationEmployeeIdentityId;
     private LoanReferral loanReferral;
@@ -121,14 +123,15 @@ class LoanReferralAdapterTest {
             cohort = cohortUseCase.createCohort(cohort);
             cohortId = cohort.getId();
 
-            List<LoanBreakdown> cohortLoanBreakdown = loanBreakdownOutputPort.findAllByCohortId(cohortId);
-            LoanBreakdown cohortTuitionBreakdown = cohortLoanBreakdown.get(0);
+            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+            LoanBreakdown cohortTuitionBreakdown = loanBreakdowns.get(0);
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
 
-            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(30000.00)).
+            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
+                    amountRequested(BigDecimal.valueOf(30000.00)).
                     initialDeposit(BigDecimal.valueOf(10000.00)).build();
 
             LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
@@ -136,7 +139,8 @@ class LoanReferralAdapterTest {
                     itemAmount(cohortTuitionBreakdown.getItemAmount()).
                     itemName(cohortTuitionBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).loanBreakdowns(loaneeBreakdowns).
+            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).
+                    loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
             assertNotNull(loanee);
@@ -203,13 +207,17 @@ class LoanReferralAdapterTest {
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
-            loaneeLoanBreakDownOutputPort.deleteAll(loaneeBreakdowns);
+            loaneeBreakdowns.forEach(loaneeLoanBreakdown ->
+                    loaneeLoanBreakDownRepository.deleteById(loaneeLoanBreakdown.getLoaneeLoanBreakdownId())
+            );
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(joel.getId());
             userIdentityOutputPort.deleteUserById(loaneeUserId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
-            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
+            loanBreakdowns.forEach(tuitionBreakdown ->
+                    loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId())
+            );
             cohortOutputPort.deleteCohort(cohortId);
             programOutputPort.deleteProgram(programId);
 
