@@ -56,11 +56,7 @@ public class ProgramService implements AddProgramUseCase {
     public List<Program> viewProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         MeedlValidator.validateDataElement(program.getName());
-        List<Program> programByName = programOutputPort.findProgramByName(program.getName().trim());
-        if (programByName.isEmpty()) {
-            throw new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
-        }
-        return programByName;
+        return programOutputPort.findProgramByName(program.getName().trim());
     }
 
     @Override

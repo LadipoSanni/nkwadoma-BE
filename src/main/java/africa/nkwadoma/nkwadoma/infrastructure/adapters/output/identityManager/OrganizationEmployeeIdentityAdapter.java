@@ -124,5 +124,11 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
     }
 
+    @Override
+    public List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
+        List<OrganizationEmployeeEntity> organizationEmployeeEntities = employeeAdminEntityRepository.findByOrganization(organizationId);
+        return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
 
 }
