@@ -1,10 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -43,9 +44,17 @@ class LoanReferralAdapterTest {
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Autowired
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Autowired
     private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private CohortUseCase cohortUseCase;
+    @Autowired
+    private LoaneeUseCase loaneeUseCase;
     private OrganizationIdentity amazingGrace;
     private  UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
@@ -64,6 +73,7 @@ class LoanReferralAdapterTest {
     private LoanBreakdown loanBreakdown;
     private Cohort cohort;
     private List<LoanBreakdown> loanBreakdowns;
+    private List<LoaneeLoanBreakdown> loaneeBreakdowns;
     private String cohortId;
     private String organizationAdminId;
 
@@ -83,9 +93,9 @@ class LoanReferralAdapterTest {
                     name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
 
-            OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
-            assertNotNull(savedOrganization);
-            organizationId = savedOrganization.getId();
+            amazingGrace = organizationIdentityOutputPort.save(amazingGrace);
+            assertNotNull(amazingGrace);
+            organizationId = amazingGrace.getId();
 
             joel = userIdentityOutputPort.save(joel);
             assertNotNull(joel);
@@ -105,38 +115,50 @@ class LoanReferralAdapterTest {
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             programId = savedProgram.getId();
 
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
             cohort = TestData.createCohortData("Elite", programId, organizationId, loanBreakdowns, organizationAdminId);
-            cohort = cohortOutputPort.save(cohort);
+            cohort = cohortUseCase.createCohort(cohort);
             cohortId = cohort.getId();
 
-            loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdown.setCohort(cohort);
-            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+            List<LoanBreakdown> cohortLoanBreakdown = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+            LoanBreakdown cohortTuitionBreakdown = cohortLoanBreakdown.get(0);
+
+//            loanBreakdown.setCohort(cohort);
+//            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
-            UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
-            loaneeUserId = savedUserIdentity.getId();
+//            UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
 
-            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                    initialDeposit(BigDecimal.valueOf(3000000.00)).build();
+            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(30000.00)).
+                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
 
-            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loaneeLoanDetailId = savedLoaneeLoanDetail.getId();
+//            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
 
-            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).
-                    loaneeLoanDetail(loaneeLoanDetail).cohortId(cohortId).loaneeLoanDetail(savedLoaneeLoanDetail).build();
-            loanee = loaneeOutputPort.save(loanee);
+            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(cohortTuitionBreakdown.getLoanBreakdownId()).
+                    itemAmount(cohortTuitionBreakdown.getItemAmount()).
+                    itemName(cohortTuitionBreakdown.getItemName()).build();
+            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
+            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).loanBreakdowns(loaneeBreakdowns).
+                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
+//            loanee = loaneeOutputPort.save(loanee);
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
-            loanReferral = new LoanReferral();
-            loanReferral.setLoanee(loanee);
-            loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-            LoanReferral savedLoanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
-            assertNotNull(savedLoanReferral);
-            loanReferralId = savedLoanReferral.getId();
+            loanReferral = loaneeUseCase.referLoanee(loaneeId);
+//            loanReferral = new LoanReferral();
+//            loanReferral.setLoanee(loanee);
+//            loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+//            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            assertNotNull(loanReferral);
+            log.info("Loan referral ====> {}", loanReferral);
+            loanReferralId = loanReferral.getId();
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -192,8 +214,11 @@ class LoanReferralAdapterTest {
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+            loaneeLoanBreakDownOutputPort.deleteAll(loaneeBreakdowns);
             loaneeOutputPort.deleteLoanee(loaneeId);
+            userIdentityOutputPort.deleteUserById(joel.getId());
             userIdentityOutputPort.deleteUserById(loaneeUserId);
+            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
             loanBreakdownOutputPort.deleteAll(loanBreakdowns);
             cohortOutputPort.deleteCohort(cohortId);
@@ -208,7 +233,7 @@ class LoanReferralAdapterTest {
                 organizationIdentityOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
             }
             organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
-            organizationIdentityOutputPort.delete(organizationId);
+            organizationIdentityOutputPort.delete(amazingGrace.getId());
         } catch (MeedlException e) {
             log.error("Exception occurred: ", e);
         }
