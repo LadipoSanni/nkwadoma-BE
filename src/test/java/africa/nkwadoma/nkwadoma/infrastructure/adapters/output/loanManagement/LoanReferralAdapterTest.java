@@ -104,11 +104,11 @@ class LoanReferralAdapterTest {
             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationId);
             organizationEmployeeIdentity.setMeedlUser(joel);
-            savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+            organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
 
-            assertNotNull(savedEmployeeIdentity);
-            organizationEmployeeIdentityId = savedEmployeeIdentity.getId();
+            assertNotNull(organizationEmployeeIdentity);
+            organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
 
             dataAnalytics = TestData.createProgramTestData("Data Analytics");
             dataAnalytics.setCreatedBy(organizationAdminId);
@@ -124,18 +124,12 @@ class LoanReferralAdapterTest {
             List<LoanBreakdown> cohortLoanBreakdown = loanBreakdownOutputPort.findAllByCohortId(cohortId);
             LoanBreakdown cohortTuitionBreakdown = cohortLoanBreakdown.get(0);
 
-//            loanBreakdown.setCohort(cohort);
-//            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
-
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
-//            UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(30000.00)).
                     initialDeposit(BigDecimal.valueOf(10000.00)).build();
-
-//            LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
 
             LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
                     loaneeLoanBreakdownId(cohortTuitionBreakdown.getLoanBreakdownId()).
@@ -144,7 +138,6 @@ class LoanReferralAdapterTest {
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
             loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
-//            loanee = loaneeOutputPort.save(loanee);
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
@@ -152,10 +145,6 @@ class LoanReferralAdapterTest {
             loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
             loanReferral = loaneeUseCase.referLoanee(loaneeId);
-//            loanReferral = new LoanReferral();
-//            loanReferral.setLoanee(loanee);
-//            loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-//            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
             assertNotNull(loanReferral);
             log.info("Loan referral ====> {}", loanReferral);
             loanReferralId = loanReferral.getId();
@@ -223,10 +212,9 @@ class LoanReferralAdapterTest {
             loanBreakdownOutputPort.deleteAll(loanBreakdowns);
             cohortOutputPort.deleteCohort(cohortId);
             programOutputPort.deleteProgram(programId);
-            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
 
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
+                    findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
