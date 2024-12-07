@@ -19,6 +19,7 @@ import java.time.*;
 @ToString
 public class LoanReferral {
     private String id;
+    private String loaneeUserId;
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
     private String referredBy;
@@ -31,11 +32,16 @@ public class LoanReferral {
     private String programName;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanReferralStatus);
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber());
+    }
+
+    public void validateViewLoanReferral() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+        MeedlValidator.validateUUID(loanee.getUserIdentity().getId());
     }
 
     public void validateForCreate() throws MeedlException {
