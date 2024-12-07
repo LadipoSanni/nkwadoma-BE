@@ -44,7 +44,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException {
+    public OrganizationEmployeeIdentity  findByEmployeeId(String employeeId) throws MeedlException {
       if(!StringUtils.isEmpty(employeeId)){
           OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
           if (organization == null){
