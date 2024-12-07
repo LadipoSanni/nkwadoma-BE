@@ -98,7 +98,7 @@ public class TestData {
         elites.setName(name);
         elites.setCreatedBy(meedlUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
-        elites.setTuitionAmount(BigDecimal.valueOf(10000));
+        elites.setTuitionAmount(BigDecimal.valueOf(1000000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
         return elites;

@@ -89,6 +89,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             assertEquals(1, organizationEmployees.getContent().size());
             assertEquals("John", employee.getMeedlUser().getFirstName());
             assertEquals("Doe", employee.getMeedlUser().getLastName());
+            assertEquals("joel54@johnson.com", employee.getMeedlUser().getEmail());
             assertEquals(ActivationStatus.INVITED, employee.getStatus());
         } catch (MeedlException e) {
             log.error("Error retrieving organization employees", e);
