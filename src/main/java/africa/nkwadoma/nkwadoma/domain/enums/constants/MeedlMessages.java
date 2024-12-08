@@ -19,7 +19,6 @@ public enum MeedlMessages {
     INVALID_CREATED_BY("Created by id not valid"),
     INVALID_OBJECT("Object not found"),
     UUID_NOT_VALID("UUID not valid"),
-    NON_EXISTING_CREATED_BY("Creator not found"),
     USER_NOT_ENABLED("User not enabled"),
     PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO("Page number must not be less than zero"),
     PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE("Page size must not be less than one"),

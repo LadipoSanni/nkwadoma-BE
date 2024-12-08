@@ -296,8 +296,28 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
                 .serverUrl(SERVER_URL)
                 .build();
     }
+    @Override
+    public UserIdentity getUserById(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+        return mapper.mapUserRepresentationToUserIdentity(getUserRepresentationById(userId));
+    }
 
 
+    private UserRepresentation getUserRepresentationById(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+        UserResource userResource = keycloak
+                .realm(KEYCLOAK_REALM)
+                .users()
+                .get(userId);
+        UserRepresentation userRepresentation;
+        try {
+            userRepresentation = userResource.toRepresentation();
+        } catch (NotFoundException e) {
+            log.error("User not found on keycloak. User id: {}. Error message : {}", userId, e.getMessage());
+            throw new IdentityException("Please register on our platform or contact your admin.");
+        }
+        return userRepresentation;
+    }
     public List<UserRepresentation> getUserRepresentations(String email) {
         return keycloak
                 .realm(KEYCLOAK_REALM)
