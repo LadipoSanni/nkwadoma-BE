@@ -62,7 +62,10 @@ public class LoanRequest {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(loanee.getId());
+        MeedlValidator.validateUUID(loanee.getCohortId());
+        MeedlValidator.validateUUID(loanReferralId);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+        MeedlValidator.validateDataElement(referredBy);
     }
 
 

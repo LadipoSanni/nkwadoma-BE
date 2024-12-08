@@ -80,6 +80,30 @@ class LoanServiceTest {
     }
 
     @Test
+    void createLoanRequestWithNullCohortId() {
+        loanRequest.getLoanee().setCohortId(null);
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+    }
+
+    @Test
+    void createLoanRequestWithNullReferredBy() {
+        loanRequest.setReferredBy(null);
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+    }
+
+    @Test
+    void createLoanRequestWithNullLoanReferralId() {
+        loanRequest.setLoanReferralId(null);
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+    }
+
+    @Test
+    void createLoanRequestWithNullCreatedDate() {
+        loanRequest.setCreatedDate(null);
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+    }
+
+    @Test
     void createLoanRequestWithNullLoanAmountRequested() {
         loanRequest.setLoanAmountRequested(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
