@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.*;
 
@@ -84,5 +88,25 @@ public class TokenUtils {
             throw new MeedlException("Token has expired");
         }
         return claims;
+    }
+    public String decryptAES(String encryptedData) throws MeedlException {
+        MeedlValidator.validateDataElement(encryptedData);
+        String key = String.format("%-16s", "secret_key").substring(0, 16);
+        String ivKey = "4983929933445555";
+
+        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec ivSpec = new IvParameterSpec(ivKey.getBytes(StandardCharsets.UTF_8));
+        byte[] decryptedValue = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+            byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
+            decryptedValue = cipher.doFinal(decodedValue);
+        } catch (Exception e) {
+            log.error("Error processing identity verification. Error decrypting identity with root cause : {}", e.getMessage());
+            throw new MeedlException("Error processing identity verification");
+        }
+        return new String(decryptedValue);
     }
 }

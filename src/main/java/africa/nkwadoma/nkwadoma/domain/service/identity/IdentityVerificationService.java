@@ -67,6 +67,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
+        String decryptedBvn = tokenUtils.decryptAES(identityVerification.getBvn());
+        log.info("the decrypted bvn: " + decryptedBvn);
         String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
