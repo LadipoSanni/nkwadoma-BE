@@ -13,23 +13,22 @@ import java.util.regex.Pattern;
 @Slf4j
 @Setter
 @Getter
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class IdentityVerification {
 
     private String identityId;
-    private String loanReferralId;
     private String bvn;
     private String nin;
+    private String loanReferralId;
     private String imageUrl;
     private String email;
     private String token;
     private IdentityVerificationEnum typeOfIdentity;
 
     public void validate() throws MeedlException {
-        log.info("Validation starting bvn and nin");
+        log.info("Validation started. Bvn and nin check");
 
         String BVN_NIN_REGEX = "^\\d{11}$";
         Pattern pattern = Pattern.compile(BVN_NIN_REGEX);
@@ -44,6 +43,7 @@ public class IdentityVerification {
         }
     }
     public void validateImageUrl() throws MeedlException {
+        log.info("Validation image is present.");
         MeedlValidator.validateDataElement(this.imageUrl);
     }
 }

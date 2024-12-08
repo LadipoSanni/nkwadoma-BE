@@ -13,6 +13,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -52,39 +55,71 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         UserIdentity userIdentity = loanReferral.getLoanee().getUserIdentity();
         if (userIdentity.isIdentityVerified()) {
             addedToLoaneeLoan(loanReferralId);
-            log.info("Identity: Loan referral id {}. Verified ", loanReferralId);
+            log.info("Verified: Loan referral id {}. Verified ", loanReferralId);
             return IDENTITY_VERIFIED.getMessage();
         } else {
-            log.info("Loan referral id {}, not verified ", loanReferralId);
+            log.info("Not verified: Loan referral id {}, not verified ", loanReferralId);
             return IDENTITY_NOT_VERIFIED.getMessage();
         }
     }
 
     private void addedToLoaneeLoan(String loanReferralId) {
-
+        log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
-
     @Override
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        String decryptedBvn = tokenUtils.decryptAES(identityVerification.getBvn());
-        log.info("the decrypted bvn: " + decryptedBvn);
-        String bvn = tokenUtils.decodeJWTGetId(identityVerification.getToken());
+        log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
+        String bvn = identityVerification.getBvn();
+        LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
+        log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
-        if (!userIdentity.isIdentityVerified()){
+        if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
             try{
-             identityVerificationOutputPort.verifyBvn(identityVerification);
+                PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
+                log.info("prembly bvn response: " + premblyResponse);
+                if (premblyResponse.getVerification() != null &&
+                    premblyResponse.getVerification().getStatus() != null &&
+                    premblyResponse.getVerification().getStatus().equals("VERIFIED")){
+                    updateLoaneeDetail(identityVerification, loanReferral);
+                    addedToLoaneeLoan(identityVerification.getLoanReferralId());
+                    log.info("Identity is verified: Loan referral id {}. Verified ", identityVerification.getLoanReferralId());
+                    return IDENTITY_VERIFIED.getMessage();
+                }else {
+                    log.info("Identity: Loan referral id {}. Not verified ", identityVerification.getLoanReferralId());
+                    createVerificationFailure(loanReferral, premblyResponse.getDetail(), ServiceProvider.PREMBLY);
+                    return IDENTITY_NOT_VERIFIED.getMessage();
+                }
             }catch (MeedlException exception) {
-                IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
-                identityVerificationFailureRecord.setEmail(userIdentity.getEmail());
-                identityVerificationFailureRecord.setReferralId(identityVerification.getLoanReferralId());
-                identityVerificationFailureRecord.setServiceProvider(ServiceProvider.PREMBLY);
-                identityVerificationFailureRecord.setReason(exception.getMessage());
-                createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
+                log.error("Error verifying users identity... {}", exception.getMessage());
+                createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
                 //notify inviter
-            }}
+            }}else{
+                log.info("Verification previously done and was successful");
+                addedToLoaneeLoan(identityVerification.getLoanReferralId());
+                return IDENTITY_VERIFIED.getMessage();
+        }
         return IDENTITY_VERIFICATION_PROCESSING.getMessage();
+    }
+
+    private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId());
+        log.info("UserIdentity before update :  {}", userIdentity);
+        userIdentity.setIdentityVerified(Boolean.TRUE);
+        userIdentity.setBvn(identityVerification.getBvn());
+        userIdentity.setNin(identityVerification.getNin());
+        userIdentity = userIdentityOutputPort.save(userIdentity);
+        log.info("User identity details updated for loanee with bvn {} and user {}", identityVerification.getBvn(), userIdentity);
+    }
+
+    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException {
+        IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
+        identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
+        identityVerificationFailureRecord.setReferralId(loanReferral.getId());
+        identityVerificationFailureRecord.setServiceProvider(serviceProvider);
+        identityVerificationFailureRecord.setReason(message);
+        createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
     }
 
 
@@ -101,8 +136,10 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         identityVerificationFailureRecordOutputPort.createIdentityVerificationFailureRecord(identityVerificationFailureRecord);
         Long numberOfFailedVerifications = identityVerificationFailureRecordOutputPort.countByReferralId(identityVerificationFailureRecord.getReferralId());
         if (numberOfFailedVerifications >= 5){
+            log.error("Number of failure verification exceeded for {}", identityVerificationFailureRecord.getReferralId());
             throw new IdentityVerificationException(BLACKLISTED_REFERRAL.getMessage());
         }
+        log.info("Verification failure saved successfully for {}", identityVerificationFailureRecord.getReferralId());
         return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
 }

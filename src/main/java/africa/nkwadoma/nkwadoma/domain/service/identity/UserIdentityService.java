@@ -112,7 +112,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     }
     private void passwordPreviouslyCreated(String token) throws IdentityException {
         if (blackListedTokenAdapter.isPresent(token)){
-            log.info("Password already created befire. Method called more than oce with the same token.");
+            log.info("Password already created before. Method called more than once with the same token.");
             throw new IdentityException("Password already created. Try login or forgot password. Or contact the admin ");
         }
     }
