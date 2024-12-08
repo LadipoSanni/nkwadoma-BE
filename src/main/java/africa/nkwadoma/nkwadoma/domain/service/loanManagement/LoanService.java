@@ -140,14 +140,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         LoanReferral foundLoanReferral = viewLoanReferral(loanReferral);
         MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
-        if (ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateEmail())
-                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternatePhoneNumber())
-                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateContactAddress())
+        log.info("Found loan referral: {}", foundLoanReferral);
+        if (StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateEmail())
+                || StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternatePhoneNumber())
+                || StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateContactAddress())
         ) {
             throw new LoanException(LoanMessages.ADDITIONAL_DETAILS_REQUIRED.getMessage());
         }
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
+            log.info("Mapped loan request: {}", loanRequest);
             createLoanRequest(loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
@@ -158,10 +160,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
         loanRequest.validate();
-        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
-        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
-        }
+        loanRequest.setStatus(LoanRequestStatus.NEW);
         return loanRequestOutputPort.save(loanRequest);
     }
 

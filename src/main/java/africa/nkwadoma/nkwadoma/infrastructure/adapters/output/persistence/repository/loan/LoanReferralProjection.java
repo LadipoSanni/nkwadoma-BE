@@ -5,8 +5,12 @@ import java.time.*;
 
 public interface LoanReferralProjection {
     String getId();
+    String getLoaneeId();
     String getFirstName();
     String getLastName();
+    String getAlternateEmail();
+    String getAlternatePhoneNumber();
+    String getAlternateContactAddress();
     String getCohortName();
     String getLoaneeImage();
     String getReferredBy();

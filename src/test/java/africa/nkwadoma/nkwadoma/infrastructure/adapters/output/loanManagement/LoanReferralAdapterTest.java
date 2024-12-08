@@ -126,10 +126,14 @@ class LoanReferralAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
             LoanBreakdown cohortTuitionBreakdown = loanBreakdowns.get(0);
 
-            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.com").
+                    alternateContactAddress("2, Spencer Street, Yaba, Lagos").alternatePhoneNumber("0908657321").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
-
+            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (foundUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(foundUser.get());
+            }
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
                     amountRequested(BigDecimal.valueOf(30000.00)).
                     initialDeposit(BigDecimal.valueOf(10000.00)).build();
@@ -152,6 +156,7 @@ class LoanReferralAdapterTest {
             assertNotNull(loanReferral);
             log.info("Loan referral ====> {}", loanReferral);
             loanReferralId = loanReferral.getId();
+
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -168,6 +173,12 @@ class LoanReferralAdapterTest {
             assertNotNull(referral.get().getId());
             assertEquals("Adeshina", referral.get().getLoanee().getUserIdentity().getFirstName());
             assertEquals("Qudus", referral.get().getLoanee().getUserIdentity().getLastName());
+            assertEquals(userIdentity.getAlternatePhoneNumber(),
+                    referral.get().getLoanee().getUserIdentity().getAlternatePhoneNumber());
+            assertEquals(userIdentity.getAlternateEmail(),
+                    referral.get().getLoanee().getUserIdentity().getAlternateEmail());
+            assertEquals(userIdentity.getAlternateContactAddress(),
+                    referral.get().getLoanee().getUserIdentity().getAlternateContactAddress());
             assertEquals("Elite", referral.get().getCohortName());
             assertEquals(cohort.getStartDate(), referral.get().getCohortStartDate());
             assertEquals("Data Analytics", referral.get().getProgramName());
@@ -203,7 +214,7 @@ class LoanReferralAdapterTest {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);

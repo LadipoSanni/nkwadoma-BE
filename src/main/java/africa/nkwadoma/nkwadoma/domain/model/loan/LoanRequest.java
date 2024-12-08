@@ -50,6 +50,7 @@ public class LoanRequest {
     private String cohortName;
     private int pageNumber;
     private int pageSize;
+    private String loaneeId;
 
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
@@ -60,9 +61,7 @@ public class LoanRequest {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
-        MeedlValidator.validateObjectInstance(status);
+        MeedlValidator.validateUUID(loanee.getId());
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
     }
 

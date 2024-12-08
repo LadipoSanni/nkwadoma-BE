@@ -69,43 +69,19 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNullLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNonAcceptedLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.DECLINED);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createNullLoanRequest() {
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(null));
     }
 
     @Test
-    void createLoanRequestWithNullLoanee() {
-        loanRequest.setLoanee(null);
+    void createLoanRequestWithNullLoaneeId() {
+        loanRequest.getLoanee().setId(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
     @Test
     void createLoanRequestWithNullLoanAmountRequested() {
         loanRequest.setLoanAmountRequested(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanRequestStatus() {
-        loanRequest.setStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoaneeLoanDetail() {
-        loanRequest.getLoanee().setLoaneeLoanDetail(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
