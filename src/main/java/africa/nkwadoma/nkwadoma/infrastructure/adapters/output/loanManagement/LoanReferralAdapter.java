@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.stereotype.*;
@@ -72,6 +73,13 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         MeedlValidator.validateUUID(userId);
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
+    }
+
+    @Override
+    public LoanReferral findById(String loanReferralId) throws LoanException {
+        LoanReferralEntity loanReferralEntity = loanReferralRepository
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found "));
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 }
 
