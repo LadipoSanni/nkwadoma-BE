@@ -70,11 +70,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
-        String bvn = identityVerification.getBvn();
+        String decryptedBvn = tokenUtils.decryptAES(identityVerification.getBvn());
         LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
         log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
-        UserIdentity userIdentity = userIdentityOutputPort.findByBvn(bvn);
+        UserIdentity userIdentity = userIdentityOutputPort.findByBvn(decryptedBvn);
         if (ObjectUtils.isEmpty(userIdentity) || !userIdentity.isIdentityVerified()){
             try{
                 PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
