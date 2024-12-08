@@ -10,17 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.InvalidKeyException;
 import java.util.*;
 
 @Slf4j
@@ -28,6 +22,10 @@ import java.util.*;
 public class TokenUtils {
     @Value("${jwt_secret}")
     private String secret;
+    @Value("${iv_aes_key}")
+    private String ivAESKey;
+    @Value("${aes_secret_key}")
+    private String AESSecretKey;
 
     @Value("${expiration}")
     private Long expiration;
@@ -97,11 +95,10 @@ public class TokenUtils {
     }
     public String decryptAES(String encryptedData) throws MeedlException {
         MeedlValidator.validateDataElement(encryptedData);
-        String key = String.format("%-16s", "secret_key").substring(0, 16);
-        String ivKey = "4983929933445555";
+        String key = String.format("%-16s", AESSecretKey).substring(0, 16);
 
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(ivKey.getBytes(StandardCharsets.UTF_8));
+        IvParameterSpec ivSpec = new IvParameterSpec(ivAESKey.getBytes(StandardCharsets.UTF_8));
         byte[] decryptedValue = null;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
