@@ -14,7 +14,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
                  o.name as referredBy, lr.loanAmountRequested as loanAmountRequested, lr.createdDate as createdDate,
                  l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, p.name as programName
           from LoanRequestEntity lr
-          join LoaneeEntity l on lr.loaneeEntity.id = l.id
+          join LoaneeEntity l on lr.loaneeId = l.id
           join CohortEntity c on l.cohortId = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationEntity.id = o.id
@@ -31,7 +31,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
                  l.loaneeLoanDetail.amountRequested as loanAmountRequested, lr.createdDate as createdDate
 
           from LoanRequestEntity lr
-          join LoaneeEntity l on lr.loaneeEntity.id = l.id
+          join LoaneeEntity l on lr.loaneeId = l.id
           join CohortEntity c on l.cohortId = c.id
           join NextOfKinEntity n on l.id = n.loaneeEntity.id
           join ProgramEntity p on c.programId = p.id
