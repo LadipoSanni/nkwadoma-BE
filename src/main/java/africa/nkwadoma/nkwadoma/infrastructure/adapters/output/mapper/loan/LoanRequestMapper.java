@@ -22,7 +22,6 @@ public interface LoanRequestMapper {
     @Mapping(target = "userIdentity.image", source = "loaneeImage")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
-    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     @Mapping(target = "cohortId", source = "loanee.cohortId")
     @Mapping(target = "loanReferralId", source = "id")
     @Mapping(target = "loanee.id", source = "loanee.id")
