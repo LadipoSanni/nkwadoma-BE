@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
+import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,6 +52,8 @@ class LoanServiceTest {
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
+        loanRequest.setLoanReferralId(loanReferral.getId());
+        loanRequest.setCreatedDate(LocalDateTime.now());
 
         loan = TestData.createTestLoan(loanee);
     }
@@ -100,7 +103,8 @@ class LoanServiceTest {
     @Test
     void createLoanRequestWithNullCreatedDate() {
         loanRequest.setCreatedDate(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+        MeedlException meedlException = assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
+        log.info("Exception : {}", meedlException.getMessage());
     }
 
     @Test

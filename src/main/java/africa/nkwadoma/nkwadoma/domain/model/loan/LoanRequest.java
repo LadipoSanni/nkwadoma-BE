@@ -64,6 +64,7 @@ public class LoanRequest {
         MeedlValidator.validateUUID(loanee.getId());
         MeedlValidator.validateUUID(loanee.getCohortId());
         MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateObjectInstance(createdDate);
         MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
         MeedlValidator.validateDataElement(referredBy);
     }
