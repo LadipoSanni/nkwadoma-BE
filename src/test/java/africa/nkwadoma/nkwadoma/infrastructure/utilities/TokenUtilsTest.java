@@ -40,8 +40,8 @@ class TokenUtilsTest {
     }
     @Test
     void testValidDecryption() throws Exception {
-        String encryptedData = "XdOd8DBvhyOnf3P017NdLw==";
-        String expectedOutput = "43423323433";
+        String encryptedData = "etlGGJ4BSGNxBkqfv3rPqw==";
+        String expectedOutput = "93289238223";
         String result = tokenUtils.decryptAES(encryptedData);
         assertEquals(expectedOutput, result, "Decrypted output does not match expected value.");
     }
