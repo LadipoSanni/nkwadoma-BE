@@ -75,7 +75,7 @@ class LoaneePersistenceAdapterTest {
                 .createdBy(id).role(IdentityRole.LOANEE).build();
         anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("leke").lastName("ayo")
                 .createdBy(secondId).role(IdentityRole.LOANEE).build();
-        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+        loaneeLoanDetail = LoaneeLoanDetail.builder()
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
