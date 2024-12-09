@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -41,9 +42,9 @@ public class Loanee {
 
     public void validateLoaneeUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateDataElement(userIdentity.getFirstName());
-        MeedlValidator.validateDataElement(userIdentity.getLastName());
-        MeedlValidator.validateDataElement(userIdentity.getEmail());
+        MeedlValidator.validateDataElement(userIdentity.getFirstName(), "User first name is required.");
+        MeedlValidator.validateDataElement(userIdentity.getLastName(), "User last name is required.");
+        MeedlValidator.validateEmail(userIdentity.getEmail());
         MeedlValidator.validateUUID(createdBy);
     }
 

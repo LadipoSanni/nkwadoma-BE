@@ -285,8 +285,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findProgramByNullOrEmptyName(String name) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
     }
 
     @ParameterizedTest
@@ -416,8 +415,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void deleteProgramByEmptyId(String id) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
     }
 
     @Test

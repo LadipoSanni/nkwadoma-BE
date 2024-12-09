@@ -54,9 +54,9 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
-        String cohortName = cohort.getName();
         MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
+        String cohortName = cohort.getName();
         cohort.validateLoanBreakDowns();
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
@@ -86,7 +86,7 @@ public class CohortService implements CohortUseCase {
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        if (program == null) {
+        if (ObjectUtils.isEmpty(program)) {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
@@ -121,7 +121,7 @@ public class CohortService implements CohortUseCase {
 
     private void checkIfCohortNameExist(Cohort cohort, Cohort foundCohort) throws MeedlException {
         Cohort foundCohortByName = null;
-        if (! StringUtils.isEmpty(cohort.getName())) {
+        if (StringUtils.isNotEmpty(cohort.getName())) {
             foundCohortByName = cohortOutputPort.checkIfCohortExistWithName(cohort.getName());
         }
         if (ObjectUtils.isNotEmpty(foundCohortByName)) {
@@ -187,14 +187,14 @@ public class CohortService implements CohortUseCase {
     @Override
     public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
-        MeedlValidator.validateDataElement(cohortName);
+        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
     }
 
 
     @Override
     public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         MeedlValidator.validateUUID(userId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
@@ -239,9 +239,8 @@ public class CohortService implements CohortUseCase {
         }
         return COHORT_INVITED;
     }
-
-        private void inviteTrainee (Loanee loanee) throws MeedlException {
-            loaneeUseCase.referLoanee(loanee.getId());
-        }
+    private void inviteTrainee (Loanee loanee) throws MeedlException {
+        loaneeUseCase.referLoanee(loanee.getId());
+    }
 
 }
