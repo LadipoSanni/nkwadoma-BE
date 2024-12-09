@@ -140,13 +140,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         LoanReferral foundLoanReferral = viewLoanReferral(loanReferral);
         MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
-        log.info("Found loan referral: {}", foundLoanReferral);
-        if (StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateEmail())
-                || StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternatePhoneNumber())
-                || StringUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateContactAddress())
-        ) {
-            throw new LoanException(LoanMessages.ADDITIONAL_DETAILS_REQUIRED.getMessage());
-        }
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             log.info("Mapped loan request: {}", loanRequest);

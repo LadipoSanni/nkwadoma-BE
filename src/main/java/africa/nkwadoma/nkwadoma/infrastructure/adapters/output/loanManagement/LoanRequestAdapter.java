@@ -55,6 +55,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+        log.info("Loan requests retrieved from DB: {}", loanRequests.getContent());
         return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
 }
