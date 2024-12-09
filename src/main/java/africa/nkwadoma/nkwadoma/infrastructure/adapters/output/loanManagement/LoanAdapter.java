@@ -37,6 +37,7 @@ public class LoanAdapter implements LoanOutputPort {
 
     @Override
     public Loan findLoanById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id);
         LoanEntity foundLoanEntity = loanRepository.findById(id).orElseThrow(()->new LoanException("Could not find Loan"));
         return loanMapper.mapToLoan(foundLoanEntity);
     }
