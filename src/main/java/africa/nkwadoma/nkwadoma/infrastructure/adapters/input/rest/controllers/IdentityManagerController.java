@@ -4,11 +4,15 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
@@ -34,10 +39,14 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
     private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final TokenUtils tokenUtils;
     private final IdentityMapper identityMapper;
+    private final OrganizationEntityRepository organizationEntityRepository;
+    private final OrganizationIdentityMapper organizationIdentityMapper;
 
     @PostMapping("auth/login")
     public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
@@ -90,14 +99,27 @@ public class IdentityManagerController {
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().id(foundUserIdentity.getId()).build();
         employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+        log.info("Found employee: {}", employeeIdentity);
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
                 foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
         {
-            OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setId(employeeIdentity.getOrganization());
+            OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
+            log.info("Found organization: {}", organizationIdentity);
+//            organizationIdentity.setId(employeeIdentity.getOrganization());
             organizationIdentity.setUpdatedBy(userIdentity.getId());
             organizationIdentity.setStatus(ActivationStatus.ACTIVE);
-            organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
+            organizationIdentity.setTimeUpdated(LocalDateTime.now());
+//            organizationIdentity.setRcNumber(null);
+//            organizationIdentity.setName(null);
+//            List<OrganizationServiceOffering> organizationServiceOfferings =
+//                    organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(employeeIdentity.getOrganization());
+//            Industry industry = organizationServiceOfferings.get(0).getServiceOffering().getIndustry();
+//            String industryName = organizationServiceOfferings.get(0).getServiceOffering().getName();
+//            List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder().name(industryName).industry(industry).build());
+//            organizationIdentity.setServiceOfferings(serviceOfferings);
+//            organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
+            OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+            organizationEntityRepository.save(organizationEntity);
             log.info("Updated organization status: {}", organizationIdentity.getStatus());
         }
     }
