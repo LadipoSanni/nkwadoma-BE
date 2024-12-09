@@ -33,7 +33,8 @@ public enum LoanMessages {
     LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT("Loan amount approved must be less than or equal to the loan amount requested"),
     LOAN_PRODUCT_NOT_FOUND("Loan product not found"),
     LOAN_REQUEST_STATUS_MUST_BE_NEW("Loan request status must be new"),
-    LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED("Loan request has already been approved");
+    LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED("Loan request has already been approved"),
+    ADDITIONAL_DETAILS_REQUIRED("Loanee must have provided additional details before loan referral can be accepted");
     private final String message;
 
     LoanMessages(String message) {

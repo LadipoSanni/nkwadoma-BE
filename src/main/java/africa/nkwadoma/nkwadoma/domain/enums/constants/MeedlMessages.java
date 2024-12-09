@@ -26,7 +26,8 @@ public enum MeedlMessages {
     LOANEE_REFERRAL_SUBJECT("Loan referral"),
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
-    LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent");
+    LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
+    FORGOT_PASSWORD_TEMPLATE("forget-password");
 
 
     private final String message;

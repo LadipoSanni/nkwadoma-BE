@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 
 import java.time.LocalDateTime;
@@ -112,7 +113,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
@@ -159,7 +160,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public void deleteServiceOffering(String serviceOfferingId) throws MeedlException {
         MeedlValidator.validateDataElement(serviceOfferingId);
-        Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.findById(serviceOfferingId);
+        Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.
+                findById(serviceOfferingId);
         if (serviceOfferingEntity.isPresent()) {
             log.info("Found service offering: {}", serviceOfferingEntity.get());
             serviceOfferEntityRepository.deleteById(serviceOfferingEntity.get().getId());

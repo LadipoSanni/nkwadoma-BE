@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -35,6 +38,16 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
             throw new IdentityException(IdentityMessages.ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
         }
         return organizationEmployees;
+    }
+
+    @Override
+    public List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity
+                = organizationEmployeeOutputPort.findByCreatedBy(userId);
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
+                name, IdentityRole.ORGANIZATION_ADMIN);
+        return organizationEmployeeIdentities;
     }
 
     @Override

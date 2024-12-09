@@ -7,7 +7,6 @@ import java.math.*;
 
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
