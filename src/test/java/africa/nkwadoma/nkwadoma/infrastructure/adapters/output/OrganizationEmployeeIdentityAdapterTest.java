@@ -144,6 +144,28 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertEquals(1, organizationEmployeeIdentities.size());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hdhdh"})
+    void findAllAdminInOrganizationWithInvalidId(String invalid){
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(invalid,
+                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber));
+    }
+
+    @Test
+    void findAllAdminInOrganization(){
+        pageSize = 1;
+        pageNumber = 0;
+        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities = null;
+        try{
+            organizationEmployeeIdentities =
+                    organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(organizationId,IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentities);
+        assertEquals(1, organizationEmployeeIdentities.getSize());
+    }
+
     @AfterAll
     void tearDown() {
         try {
