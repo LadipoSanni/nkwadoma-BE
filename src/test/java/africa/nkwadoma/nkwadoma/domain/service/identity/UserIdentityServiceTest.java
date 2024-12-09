@@ -240,14 +240,14 @@ class UserIdentityServiceTest {
     @Test
     void createPasswordWithoutSpecialCharacters(){
            favour.setPassword("Password1234");
-           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
+//           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
            assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
 
     }
     @Test
     void createPasswordWithAllNumbers(){
            favour.setPassword("99900000001234");
-           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
+//           when(blackListedTokenAdapter.isPresent(generatedToken)).thenReturn(Boolean.FALSE);
            assertThrows(MeedlException.class,()-> userIdentityService.createPassword(generatedToken,favour.getPassword()));
     }
  @Test
