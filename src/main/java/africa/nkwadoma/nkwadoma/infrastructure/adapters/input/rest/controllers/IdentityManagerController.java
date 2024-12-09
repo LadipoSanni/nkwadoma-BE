@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -33,6 +34,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
     private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final UserIdentityOutputPort userIdentityOutputPort;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final TokenUtils tokenUtils;
     private final IdentityMapper identityMapper;
@@ -84,23 +86,19 @@ public class IdentityManagerController {
 
     private void updateOrganizationStatus(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateDataElement(userIdentity.getAccessToken());
-        String organizationAdminId = tokenUtils.decodeJWT(userIdentity.getAccessToken());
-        OrganizationEmployeeIdentity employeeIdentity = new OrganizationEmployeeIdentity();
-        employeeIdentity.setId(organizationAdminId);
+        log.info("User ID: {}", userIdentity.getId());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().id(foundUserIdentity.getId()).build();
         employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
-        if(ObjectUtils.isNotEmpty(employeeIdentity.getMeedlUser().getRole()) &&
-                employeeIdentity.getMeedlUser().getRole() == IdentityRole.ORGANIZATION_ADMIN)
+        if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
+                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
         {
             OrganizationIdentity organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setId(employeeIdentity.getOrganization());
-            organizationIdentity.setUpdatedBy(organizationAdminId);
+            organizationIdentity.setUpdatedBy(userIdentity.getId());
             organizationIdentity.setStatus(ActivationStatus.ACTIVE);
             organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
             log.info("Updated organization status: {}", organizationIdentity.getStatus());
-        }
-        else {
-            log.info("User is not an Organization Admin");
         }
     }
 

@@ -121,6 +121,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
+        log.info("User Identity after password has been created: {}", userIdentity);
         blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
