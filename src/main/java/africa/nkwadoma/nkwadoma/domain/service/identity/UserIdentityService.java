@@ -120,14 +120,11 @@ public class UserIdentityService implements CreateUserUseCase  {
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         log.info("request got into service layer {}",password);
-        passwordPreviouslyCreated(token);
-        log.info("after checking if its previously created  {}",token);
+//        passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         log.info("done getting user identity frm token {}",userIdentity);
         userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
-        log.info("done creating password  {}",password);
-        blackListedTokenAdapter.blackListToken(createBlackList(token));
-        log.info("after blacklisting token {}",token);
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
 
