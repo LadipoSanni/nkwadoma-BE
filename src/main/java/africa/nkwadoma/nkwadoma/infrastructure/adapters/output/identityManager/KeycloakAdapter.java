@@ -82,7 +82,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), "Please provide a valid user identification");
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();
@@ -123,7 +123,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
-        MeedlValidator.validateUUID(organizationIdentity.getId());
+        MeedlValidator.validateUUID(organizationIdentity.getId(), "Please provide a valid organization identification.");
         ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
         log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
         clientRepresentation.setEnabled(Boolean.FALSE);

@@ -27,7 +27,6 @@ import java.util.List;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateUUID;
 
 
 @Slf4j
@@ -43,7 +42,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Cohort viewCohortDetails(String userId, String cohortId) throws MeedlException {
         validateDataElement(userId);
-        validateDataElement(cohortId);
+        MeedlValidator.validateUUID(cohortId, "Please provide a valid cohort identification");
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity == null){
             throw new IdentityException(USER_NOT_FOUND.getMessage());
@@ -54,7 +53,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Transactional
     @Override
     public void deleteCohort(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id, "Please provide a valid cohort identification");
         CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
@@ -88,7 +87,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, "Please provide a valid organization identification");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
         Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationId(organizationId,pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
@@ -97,7 +96,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException {
         MeedlValidator.validateDataElement(name);
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId , "Please provide a valid program identification");
         List<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name);
         if (cohortEntities.isEmpty()){
             return new ArrayList<>();
@@ -113,7 +112,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public List<Cohort> searchCohortInOrganization(String organizationId, String name) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, "Provide a valid organization identification");
         MeedlValidator.validateDataElement(name);
         List<CohortEntity> cohortEntities =
                 cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name);
@@ -133,7 +132,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
-        validateUUID(programId);
+        MeedlValidator.validateUUID(programId, "Provide a valid program identification");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
         Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId, pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);

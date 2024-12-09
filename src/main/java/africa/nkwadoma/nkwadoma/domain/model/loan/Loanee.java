@@ -33,8 +33,8 @@ public class Loanee {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(cohortId);
-        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateUUID(cohortId, "Pleasse provide a valid cohort identification");
+        MeedlValidator.validateUUID(createdBy, "Unable to identify the user performing this action.");
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);
         validateLoaneeUserIdentity();
     }
@@ -44,7 +44,7 @@ public class Loanee {
         MeedlValidator.validateDataElement(userIdentity.getFirstName());
         MeedlValidator.validateDataElement(userIdentity.getLastName());
         MeedlValidator.validateDataElement(userIdentity.getEmail());
-        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateUUID(createdBy, "Unable to identify the user performing this action.");
     }
 
 }
