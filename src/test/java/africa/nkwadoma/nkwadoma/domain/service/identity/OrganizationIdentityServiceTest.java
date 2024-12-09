@@ -185,18 +185,50 @@ class OrganizationIdentityServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void reactivateOrganizationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.reactivateOrganization(id, "test reason"));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void reactivateOrganizationWithEmptyReason(String reason) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.reactivateOrganization(mockId, reason));
+    }
+    @Test
+    void reactivateOrganization() {
+        try {
+            roseCouture.setEnabled(Boolean.TRUE);
+            doNothing().when(identityManagerOutPutPort).enableClient(roseCouture);
+            when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
+                    .thenReturn(orgEmployee);
+            when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+            when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
+            OrganizationIdentity deactivatedOrganization = organizationIdentityService.reactivateOrganization(roseCouture.getId(), "test 2 reason");
+            assertTrue(deactivatedOrganization.isEnabled());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
     void deactivateOrganizationWithInvalidId(String id) {
         assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(id, "test reason"));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void deactivateOrganizationWithEmptyReason(String reason) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(mockId, reason));
+    }
 
+    @Test
     void deactivateOrganization() {
         try {
+            roseCouture.setEnabled(Boolean.FALSE);
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
                     .thenReturn(orgEmployee);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
-            roseCouture.setEnabled(Boolean.FALSE);
             OrganizationIdentity deactivatedOrganization = organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
         } catch (MeedlException exception) {

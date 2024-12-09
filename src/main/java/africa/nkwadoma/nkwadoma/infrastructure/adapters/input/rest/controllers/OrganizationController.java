@@ -127,7 +127,7 @@ public class OrganizationController {
 
     @PostMapping("organization/deactivate")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
+    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = DEACTIVATE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -135,6 +135,17 @@ public class OrganizationController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("organization/reactivate")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = REACTIVATE_ORGANIZATION_TITLE, description = REACTIVATE_ORGANIZATION_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> reactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
+        createOrganizationUseCase.reactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .message(ORGANIZATION_REACTIVATION_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("organization/all")
