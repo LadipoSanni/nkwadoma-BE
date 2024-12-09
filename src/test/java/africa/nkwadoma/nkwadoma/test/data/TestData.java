@@ -8,6 +8,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -95,7 +98,7 @@ public class TestData {
         elites.setName(name);
         elites.setCreatedBy(meedlUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
-        elites.setTuitionAmount(BigDecimal.valueOf(10000));
+        elites.setTuitionAmount(BigDecimal.valueOf(1000000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
         return elites;
@@ -165,5 +168,13 @@ public class TestData {
         loanRequest.setLoanee(loanee);
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequest;
+    }
+    public static PremblyResponse createTestPremblyResponse(){
+        PremblyResponse response = new PremblyBvnResponse();
+        Verification verifier = Verification.builder().status("VERIFIED").build();
+        response.setDetail("VERIFIED");
+        response.setVerification(verifier);
+        response.setResponseCode("CREATED");
+        return response;
     }
 }
