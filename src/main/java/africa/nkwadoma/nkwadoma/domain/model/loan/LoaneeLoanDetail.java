@@ -21,6 +21,5 @@ public class LoaneeLoanDetail {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(initialDeposit);
-        MeedlValidator.validateNegativeAmount(amountRequested);
     }
 }

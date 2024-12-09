@@ -11,6 +11,5 @@ import java.util.List;
 @Getter
 public class LoaneeLoanDetailRequest {
     private BigDecimal initialDeposit;
-    private BigDecimal amountRequested;
     private List<LoaneeLoanBreakdownRequest> loanBreakdown ;
 }
