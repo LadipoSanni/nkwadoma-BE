@@ -32,8 +32,8 @@ public class IdentityVerification {
 
         String BVN_NIN_REGEX = "^\\d{11}$";
         Pattern pattern = Pattern.compile(BVN_NIN_REGEX);
-        MeedlValidator.validateDataElement(this.bvn);
-        MeedlValidator.validateDataElement(this.nin);
+        MeedlValidator.validateDataElement(this.bvn, "Bvn is required");
+    MeedlValidator.validateDataElement(this.nin, "Nin is required");
 
         if (!pattern.matcher(this.bvn).matches()) {
             throw new InvalidInputException("Please provide a valid bvn");
@@ -44,7 +44,7 @@ public class IdentityVerification {
     }
     public void validateImageUrl() throws MeedlException {
         log.info("Validation image is present.");
-        MeedlValidator.validateDataElement(this.imageUrl);
+        MeedlValidator.validateDataElement(this.imageUrl, "Image is required");
     }
 }
 

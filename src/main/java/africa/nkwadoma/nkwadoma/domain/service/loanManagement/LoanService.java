@@ -52,7 +52,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
-        MeedlValidator.validateDataElement(loanProduct.getId());
+        MeedlValidator.validateUUID(loanProduct.getId());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
     @Override
@@ -62,7 +62,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public List<LoanProduct> search(String loanProductName) throws MeedlException {
-        MeedlValidator.validateDataElement(loanProductName);
+        MeedlValidator.validateDataElement(loanProductName, "Loan product name is required");
         return loanProductOutputPort.search(loanProductName);
     }
 

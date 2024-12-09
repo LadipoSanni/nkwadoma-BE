@@ -88,7 +88,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public void delete(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findById(id).
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeAdminEntityRepository.delete(employeeEntity);
@@ -117,7 +117,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Admin name to search for is required.");
         MeedlValidator.validateObjectInstance(identityRole);
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment
