@@ -48,4 +48,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
         return organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
                 name, IdentityRole.ORGANIZATION_ADMIN);
     }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId);
+            OrganizationEmployeeIdentity organizationEmployeeIdentity
+                    = organizationEmployeeOutputPort.findByCreatedBy(userId);
+        return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationEmployeeIdentity.getOrganization(),
+                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
+    }
 }
