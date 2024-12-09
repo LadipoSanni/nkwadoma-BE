@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -42,7 +44,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Cohort viewCohortDetails(String userId, String cohortId) throws MeedlException {
         validateDataElement(userId);
-        MeedlValidator.validateUUID(cohortId, "Please provide a valid cohort identification");
+        MeedlValidator.validateUUID(cohortId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity == null){
             throw new IdentityException(USER_NOT_FOUND.getMessage());
@@ -53,7 +55,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Transactional
     @Override
     public void deleteCohort(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, "Please provide a valid cohort identification");
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);

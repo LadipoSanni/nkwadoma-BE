@@ -16,7 +16,6 @@ public enum MeedlMessages {
     COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
     DOMAIN_EMAIL_DOES_NOT_MATCH("Domain email does not match"),
     EMAIL_INDEX("@"),
-    INVALID_CREATED_BY("Created by id not valid"),
     INVALID_OBJECT("Object not found"),
     UUID_NOT_VALID("UUID not valid"),
     NON_EXISTING_CREATED_BY("Creator not found"),

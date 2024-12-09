@@ -168,7 +168,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(String programId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
         Program foundProgram = programOutputPort.findProgramById(programId);
@@ -180,13 +180,13 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public void deleteCohort(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         cohortOutputPort.deleteCohort(id);
     }
 
     @Override
     public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validateDataElement(cohortName);
         return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
     }

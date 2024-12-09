@@ -2,6 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import jakarta.validation.constraints.Size;
@@ -48,16 +51,16 @@ public class Cohort {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(programId, "Please provide a valid program identification");
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validateObjectName(name);
-        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateUUID(createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         MeedlValidator.validateObjectInstance(startDate);
         MeedlValidator.validateNegativeAmount(tuitionAmount);
     }
 
     public void updateValidation() throws MeedlException {
-        MeedlValidator.validateUUID(id);
-        MeedlValidator.validateUUID(updatedBy);
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(updatedBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
     }
 
     public void validateLoanBreakDowns() throws MeedlException {
