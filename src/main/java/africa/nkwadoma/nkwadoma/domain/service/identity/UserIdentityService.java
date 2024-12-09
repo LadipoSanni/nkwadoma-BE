@@ -120,7 +120,12 @@ public class UserIdentityService implements CreateUserUseCase  {
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+        try {
+            userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+        }catch (MeedlException e) {
+            blackListedTokenAdapter.blackListToken(createBlackList(token));
+            throw new MeedlException(e.getMessage());
+        }
         blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
@@ -130,7 +135,12 @@ public class UserIdentityService implements CreateUserUseCase  {
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
-        identityManagerOutPutPort.resetPassword(userIdentity);
+        try {
+            identityManagerOutPutPort.resetPassword(userIdentity);
+        }catch (MeedlException e) {
+            blackListedTokenAdapter.blackListToken(createBlackList(token));
+            throw new MeedlException(e.getMessage());
+        }
         blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
