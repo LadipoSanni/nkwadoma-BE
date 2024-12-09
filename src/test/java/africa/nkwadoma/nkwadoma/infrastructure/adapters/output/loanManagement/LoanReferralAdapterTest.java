@@ -156,7 +156,6 @@ class LoanReferralAdapterTest {
             assertNotNull(loanReferral);
             log.info("Loan referral ====> {}", loanReferral);
             loanReferralId = loanReferral.getId();
-
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -214,7 +213,7 @@ class LoanReferralAdapterTest {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);

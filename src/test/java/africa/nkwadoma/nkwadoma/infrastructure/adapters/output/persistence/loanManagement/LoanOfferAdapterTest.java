@@ -24,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -92,15 +91,6 @@ public class LoanOfferAdapterTest {
     void setUpLoanOffer() {
         loanOffer = new LoanOffer();
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-//        Optional<LoanRequest> foundLoanRequest = Optional.empty();
-//        try {
-//            foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
-//        } catch (MeedlException e) {
-//            log.error("Exception occurred: ", e);
-//        }
-//        if (foundLoanRequest.isPresent()) {
-//            loanOffer.setLoanRequest(foundLoanRequest.get());
-//        }
         loanOffer.setLoanee(loanee);
         loanOffer.setLoanRequest(loanRequest);
     }

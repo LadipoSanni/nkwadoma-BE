@@ -30,5 +30,6 @@ public class LoanRequestEntity {
     @Enumerated(EnumType.STRING)
     private LoanRequestStatus status;
     private String loanReferralId;
-    private String loaneeId;
+    @ManyToOne
+    private LoaneeEntity loaneeEntity;
 }
