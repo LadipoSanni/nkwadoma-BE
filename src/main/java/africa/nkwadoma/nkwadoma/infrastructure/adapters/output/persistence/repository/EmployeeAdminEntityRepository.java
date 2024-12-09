@@ -34,5 +34,7 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
             @Param("meedlUserRole") IdentityRole meedlUserRole,
             @Param("nameFragment") String nameFragment);
 
+    Page<OrganizationEmployeeEntity> findAllByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole, Pageable pageRequest);
+
     List<OrganizationEmployeeEntity> findByOrganization(String organizationId);
 }
