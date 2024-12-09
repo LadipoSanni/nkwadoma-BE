@@ -43,7 +43,7 @@ public class Loanee {
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), "User first name is required.");
         MeedlValidator.validateDataElement(userIdentity.getLastName(), "User last name is required.");
         MeedlValidator.validateEmail(userIdentity.getEmail());
-        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateUUID(userIdentity.getCreatedBy());
     }
 
 }

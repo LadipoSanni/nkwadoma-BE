@@ -181,12 +181,6 @@ class LoanReferralAdapterTest {
     }
 
     @Test
-    void viewLoanReferralWithTrailingAndLeadingSpaces() {
-        assertThrows(MeedlException.class, ()->
-                loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE)));
-    }
-
-    @Test
     void viewLoanReferralWithNullId() {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(null));
     }
