@@ -57,6 +57,9 @@ class LoanAdapterTest {
         }
         loaneeId = loanee.getId();
         loan = TestData.createTestLoan(loanee);
+        loanee.setUserIdentity(userIdentity);
+        loan.setLoanee(loanee);
+
     }
 
     @Test

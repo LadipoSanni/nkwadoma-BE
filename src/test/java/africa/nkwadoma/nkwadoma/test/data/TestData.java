@@ -73,8 +73,8 @@ public class TestData {
                 .loaneeId(testId)
                 .loanOfferId(testId)
                 .loanee(loanee)
+                .loanAccountId(testId)
                 .startDate(LocalDateTime.now())
-                .loanAccountId("account id")
                 .build();
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){

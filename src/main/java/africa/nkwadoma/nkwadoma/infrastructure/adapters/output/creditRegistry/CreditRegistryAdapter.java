@@ -154,7 +154,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     }
 
     private void validateSessionCode(String sessionCode) throws MeedlException {
-        MeedlValidator.validateDataElement(sessionCode);
+        MeedlValidator.validateDataElement(sessionCode, "No session available at the moment. Please generate new session code, or contact the administrator");
         String regex = "^\\d{6}$";
 
         boolean isValid = Pattern.matches(regex, sessionCode);
@@ -164,7 +164,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         }
     }
     private void validateRegistryId(String registryId) throws MeedlException {
-        MeedlValidator.validateDataElement(registryId);
+        MeedlValidator.validateDataElement(registryId, "Registry ID not valid.");
         String regex = "^\\d{18}$";
 
         boolean isValid = Pattern.matches(regex, registryId);

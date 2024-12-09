@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum MeedlMessages {
     EMPTY_INPUT_FIELD_ERROR("Field cannot be null or empty"),
-    INVALID_REQUEST("Request cannot be null or empty"),
+    TOKEN_REQUIRED("User validation mechanism in form of token is required"),
     INVALID_EMAIL_ADDRESS("Email address is not valid"),
     INVALID_INDUSTRY_OR_SERVICE_OFFERING("Industry or service offering cannot be empty"),
     EMAIL_NOT_FOUND("Email address cannot be found"),
