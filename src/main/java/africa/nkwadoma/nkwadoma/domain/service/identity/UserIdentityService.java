@@ -111,6 +111,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         }
     }
     private void passwordPreviouslyCreated(String token) throws IdentityException {
+        log.info("checking if its previously created  {}",token);
         if (blackListedTokenAdapter.isPresent(token)){
             log.info("Password already created before. Method called more than once with the same token.");
             throw new IdentityException("Password already created. Try login or forgot password. Or contact the admin ");
@@ -118,6 +119,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     }
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
+        log.info("request got into service layer {}",password);
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
