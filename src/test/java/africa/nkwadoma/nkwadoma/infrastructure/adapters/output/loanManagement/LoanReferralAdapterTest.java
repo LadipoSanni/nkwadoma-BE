@@ -139,7 +139,7 @@ class LoanReferralAdapterTest {
                     itemAmount(cohortTuitionBreakdown.getItemAmount()).
                     itemName(cohortTuitionBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).
+            loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);

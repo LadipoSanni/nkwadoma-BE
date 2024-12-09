@@ -57,7 +57,7 @@ public class LoaneeLoanBreakDownPersistenceAdapterTest {
         try{
             userIdentity = identityOutputPort.save(userIdentity);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loanee = Loanee.builder().cohortId(id).createdBy(userIdentity.getId()).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = Loanee.builder().cohortId(id).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeOutputPort.save(loanee);
             loaneeId = loanee.getId();
             loaneeLoanDetailsId = loaneeLoanDetail.getId();

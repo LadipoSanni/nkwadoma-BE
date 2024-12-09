@@ -97,13 +97,11 @@ class LoaneePersistenceAdapterTest {
     public void setUp(){
         firstLoanee = new Loanee();
         firstLoanee.setCohortId(id);
-        firstLoanee.setCreatedBy(id);
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
 
         anotherLoanee = new Loanee();
         anotherLoanee.setCohortId(id);
-        anotherLoanee.setCreatedBy(id);
         anotherLoanee.setUserIdentity(anotherUser);
         anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
 
@@ -153,13 +151,6 @@ class LoaneePersistenceAdapterTest {
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void saveLoaneeWithEmptyUserId(String userId){
-        firstLoanee.setCreatedBy(userId);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
@@ -173,12 +164,6 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setCohortId(null);
         assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
     }
-    @Test
-    void saveLoaneeWithNullMeedleUserId(){
-        firstLoanee.setCreatedBy(null);
-        assertThrows(MeedlException.class,()-> loaneeOutputPort.save(firstLoanee));
-    }
-
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})

@@ -119,7 +119,6 @@ class LoaneeServiceTest {
         firstLoanee = new Loanee();
         firstLoanee.setId(mockId);
         firstLoanee.setUserIdentity(loaneeUserIdentity);
-        firstLoanee.setCreatedBy(mockId);
         firstLoanee.setCohortId(mockId);
 
         loanBreakdown = new LoaneeLoanBreakdown();

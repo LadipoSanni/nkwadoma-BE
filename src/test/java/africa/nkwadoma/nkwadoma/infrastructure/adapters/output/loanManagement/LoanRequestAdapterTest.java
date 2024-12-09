@@ -175,7 +175,7 @@ class LoanRequestAdapterTest {
                     initialDeposit(BigDecimal.valueOf(3000000.00)).build();
 
             loanee = Loanee.builder().userIdentity(userIdentity).
-                    cohortId(eliteCohortId).createdBy(userIdentity.getCreatedBy()).
+                    cohortId(eliteCohortId).
                     loaneeLoanDetail(loaneeLoanDetail).build();
 
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());

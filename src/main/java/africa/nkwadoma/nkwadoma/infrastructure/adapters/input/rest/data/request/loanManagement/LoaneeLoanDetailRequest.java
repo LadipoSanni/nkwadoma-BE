@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Getter
 public class LoaneeLoanDetailRequest {
-    @NotNull(message = "InitialDeposit is required")
+    @NotNull(message = "Initial Deposit is required")
     private BigDecimal initialDeposit;
     private List<LoaneeLoanBreakdownRequest> loanBreakdown ;
 }
