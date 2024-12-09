@@ -10,7 +10,7 @@ public enum MeedlMessages {
     INVALID_INDUSTRY_OR_SERVICE_OFFERING("Industry or service offering cannot be empty"),
     EMAIL_NOT_FOUND("Email address cannot be found"),
     EMAIL_ALREADY_EXISTS("Email address already exist"),
-    EMAIL_INVITATION_SUBJECT("Invitation to Middl"),
+    EMAIL_INVITATION_SUBJECT("Invitation to Meedl"),
     RESET_PASSWORD("Reset Password"),
     ORGANIZATION_INVITATION_TEMPLATE("organization-invitation"),
     COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
