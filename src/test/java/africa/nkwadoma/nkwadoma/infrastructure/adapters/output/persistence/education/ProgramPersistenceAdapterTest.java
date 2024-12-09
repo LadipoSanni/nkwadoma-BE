@@ -341,7 +341,7 @@ class ProgramPersistenceAdapterTest {
     void viewProgramWithNonUUIDId(String programId) {
         dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test
