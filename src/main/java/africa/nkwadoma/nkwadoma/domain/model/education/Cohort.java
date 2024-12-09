@@ -48,7 +48,7 @@ public class Cohort {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, "Please provide a valid program identification");
         MeedlValidator.validateObjectName(name);
         MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(startDate);

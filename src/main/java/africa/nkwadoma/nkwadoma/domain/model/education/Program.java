@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
@@ -46,7 +47,7 @@ public class Program {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectName(this.name);
-        MeedlValidator.validateUUID(this.createdBy);
+        MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         if (this.duration > 24){
             throw new MeedlException("Program duration must not exceed 24 months");
         }

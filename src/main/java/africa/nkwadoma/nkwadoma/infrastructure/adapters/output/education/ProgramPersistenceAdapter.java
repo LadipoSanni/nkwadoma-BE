@@ -84,7 +84,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
-        MeedlValidator.validateUUID(meedlUserId);
+        MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Validating the created by: {}",meedlUserId);
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
@@ -101,7 +101,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public void deleteProgram(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
@@ -114,7 +114,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Program findProgramById(String programId) throws MeedlException {
         MeedlValidator.validateDataElement(programId);
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
