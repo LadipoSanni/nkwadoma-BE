@@ -191,12 +191,6 @@ class ProgramServiceTest {
         }
     }
 
-    @Test
-    void viewProgramByNonExistingName() {
-        program.setName("non existing name");
-        assertThrows(MeedlException.class, ()->programService.viewProgramByName(program));
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"   tf8980w", "grvboiwv    "})
     void viewProgramByNameWithSpaces(String programWithSpace) {

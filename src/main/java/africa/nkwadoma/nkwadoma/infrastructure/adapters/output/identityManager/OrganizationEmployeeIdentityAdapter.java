@@ -125,6 +125,12 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
+    public List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
+        List<OrganizationEmployeeEntity> organizationEmployeeEntities = employeeAdminEntityRepository.findByOrganization(organizationId);
+        return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
+    @Override
     public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
         MeedlValidator.validateObjectInstance(identityRole);
