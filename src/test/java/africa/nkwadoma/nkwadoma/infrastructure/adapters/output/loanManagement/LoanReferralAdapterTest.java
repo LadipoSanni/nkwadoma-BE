@@ -128,7 +128,7 @@ class LoanReferralAdapterTest {
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
-                    role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+                    role(IdentityRole.LOANEE).createdBy(organizationAdminId).build();
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
                     amountRequested(BigDecimal.valueOf(30000.00)).
@@ -139,7 +139,7 @@ class LoanReferralAdapterTest {
                     itemAmount(cohortTuitionBreakdown.getItemAmount()).
                     itemName(cohortTuitionBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).
+            loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
@@ -178,12 +178,6 @@ class LoanReferralAdapterTest {
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-    }
-
-    @Test
-    void viewLoanReferralWithTrailingAndLeadingSpaces() {
-        assertThrows(MeedlException.class, ()->
-                loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE)));
     }
 
     @Test

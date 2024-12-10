@@ -87,7 +87,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public void delete(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findById(id).
                 orElseThrow(()-> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeAdminEntityRepository.delete(employeeEntity);
@@ -116,7 +116,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Admin name to search for is required.");
         MeedlValidator.validateObjectInstance(identityRole);
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
                 employeeAdminEntityRepository.findByOrganizationIdAndRoleAndNameFragment
@@ -128,6 +128,19 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     public List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId) {
         List<OrganizationEmployeeEntity> organizationEmployeeEntities = employeeAdminEntityRepository.findByOrganization(organizationId);
         return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateObjectInstance(identityRole);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findAllByOrganizationAndMeedlUserRole(organizationId,identityRole,pageRequest);
+        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
 

@@ -69,7 +69,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private static void declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateDataElement(loanRequest.getDeclineReason());
+        MeedlValidator.validateDataElement(loanRequest.getDeclineReason(), "Reason for declining is required");
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
         foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
