@@ -107,7 +107,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsCreatedIfLoanOfferIsAccepted(){
-        loanOffer.setLoaneeResponse(LoanOfferResponse.ACCEPT);
+        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
@@ -124,7 +124,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsNotCreatedIfLoanOfferIsDeclined(){
-        loanOffer.setLoaneeResponse(LoanOfferResponse.DECLINE);
+        loanOffer.setLoaneeResponse(LoanDecision.DECLINED);
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));

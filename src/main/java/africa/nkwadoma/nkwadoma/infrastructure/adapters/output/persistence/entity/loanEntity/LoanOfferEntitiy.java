@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
@@ -30,5 +31,5 @@ public class LoanOfferEntitiy {
     private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;
     private LocalDateTime dateTimeAccepted;
-    private LoanOfferResponse loaneeResponse;
+    private LoanDecision loaneeResponse;
 }
