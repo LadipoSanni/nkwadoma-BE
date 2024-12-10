@@ -88,7 +88,7 @@ public class OrganizationController {
             throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
         log.info("Organization {}", organizationIdentities);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -102,7 +102,7 @@ public class OrganizationController {
             throws MeedlException {
         OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
         log.info("Organization {}", organizationIdentity);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -119,7 +119,7 @@ public class OrganizationController {
         ApiResponse<OrganizationResponse> apiResponse = ApiResponse.<OrganizationResponse>builder()
                 .data(organizationResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
