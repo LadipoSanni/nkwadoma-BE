@@ -126,10 +126,7 @@ class LoanReferralAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
             LoanBreakdown cohortTuitionBreakdown = loanBreakdowns.get(0);
 
-            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.com").
-                    alternateContactAddress("2, Spencer Street, Yaba, Lagos").alternatePhoneNumber("0908657321").
-                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
-                    role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+            userIdentity = TestData.createTestUserIdentity("qudus@example.com");
             Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
             if (foundUser.isPresent()) {
                 identityManagerOutputPort.deleteUser(foundUser.get());
@@ -143,7 +140,7 @@ class LoanReferralAdapterTest {
                     itemAmount(cohortTuitionBreakdown.getItemAmount()).
                     itemName(cohortTuitionBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-            loanee = Loanee.builder().userIdentity(userIdentity).createdBy(organizationAdminId).
+            loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
@@ -170,8 +167,8 @@ class LoanReferralAdapterTest {
             assertNotNull(referral);
             assertFalse(referral.isEmpty());
             assertNotNull(referral.get().getId());
-            assertEquals("Adeshina", referral.get().getLoanee().getUserIdentity().getFirstName());
-            assertEquals("Qudus", referral.get().getLoanee().getUserIdentity().getLastName());
+            assertEquals("John", referral.get().getLoanee().getUserIdentity().getFirstName());
+            assertEquals("Doe", referral.get().getLoanee().getUserIdentity().getLastName());
             assertEquals(userIdentity.getAlternatePhoneNumber(),
                     referral.get().getLoanee().getUserIdentity().getAlternatePhoneNumber());
             assertEquals(userIdentity.getAlternateEmail(),

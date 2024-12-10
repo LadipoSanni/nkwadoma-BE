@@ -30,10 +30,12 @@ public class TestData {
                 .createdBy(testId)
                 .role(IdentityRole.LOANEE)
                 .alternateEmail("alt276@example.com")
+                .image("loanee-img.png")
                 .alternatePhoneNumber("0986564534")
                 .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
                 .build();
     }
+
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName(name);

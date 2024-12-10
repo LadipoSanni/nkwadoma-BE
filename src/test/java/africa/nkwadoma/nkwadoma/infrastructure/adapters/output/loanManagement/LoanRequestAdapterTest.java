@@ -151,15 +151,12 @@ class LoanRequestAdapterTest {
                     .itemName("Loan Break").cohort(cohort).build();
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
-            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).image("loanee-img.jpg").
-                    createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.org").
-                    alternateContactAddress("1, Onigbongbo Street, Oshodi, Lagos").alternatePhoneNumber("08075533235").build();
+            userIdentity = TestData.createTestUserIdentity("qudus@example.com");
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                     initialDeposit(BigDecimal.valueOf(3000000.00)).build();
 
             loanee = Loanee.builder().userIdentity(userIdentity).
-                    cohortId(eliteCohortId).createdBy(joelUserId).
+                    cohortId(eliteCohortId).
                     loaneeLoanDetail(loaneeLoanDetail).build();
 
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
@@ -180,7 +177,7 @@ class LoanRequestAdapterTest {
 
             nextOfKin = new NextOfKin();
             nextOfKin.setFirstName("Ahmad");
-            nextOfKin.setLastName("Doe");
+            nextOfKin.setLastName("Awwal");
             nextOfKin.setEmail("ahmad12@gmail.com");
             nextOfKin.setPhoneNumber("0785678901");
             nextOfKin.setNextOfKinRelationship("Brother");
@@ -317,10 +314,10 @@ class LoanRequestAdapterTest {
             assertEquals(foundLoanRequest.get().getCohortStartDate(), cohort.getStartDate());
             assertNotNull(foundLoanRequest.get().getLoanAmountRequested());
             assertNotNull(foundLoanRequest.get().getInitialDeposit());
-            assertEquals("Adeshina", foundLoanRequest.get().getFirstName());
-            assertEquals("Qudus", foundLoanRequest.get().getLastName());
+            assertEquals("John", foundLoanRequest.get().getFirstName());
+            assertEquals("Doe", foundLoanRequest.get().getLastName());
             assertEquals("Ahmad", foundLoanRequest.get().getNextOfKin().getFirstName());
-            assertEquals("Doe", foundLoanRequest.get().getNextOfKin().getLastName());
+            assertEquals("Awwal", foundLoanRequest.get().getNextOfKin().getLastName());
             assertEquals("0785678901", foundLoanRequest.get().getNextOfKin().getPhoneNumber());
             assertEquals("ahmad12@gmail.com", foundLoanRequest.get().getNextOfKin().getEmail());
             assertEquals("Brother", foundLoanRequest.get().getNextOfKin().getNextOfKinRelationship());
