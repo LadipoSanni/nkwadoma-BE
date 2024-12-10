@@ -128,7 +128,7 @@ class LoanReferralAdapterTest {
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
-                    role(IdentityRole.LOANEE).createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+                    role(IdentityRole.LOANEE).createdBy(organizationAdminId).build();
 
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
                     amountRequested(BigDecimal.valueOf(30000.00)).
