@@ -55,8 +55,8 @@ public class OrganizationIdentity {
         log.info("{}",this.serviceOfferings);
         MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateEmail(this.email);
-        MeedlValidator.validateDataElement(this.rcNumber);
-        MeedlValidator.validateDataElement(this.phoneNumber);
+        MeedlValidator.validateDataElement(this.rcNumber, "Company's RC number is required");
+        MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
 
         if (this.serviceOfferings == null
                 || this.serviceOfferings.isEmpty()
@@ -64,7 +64,7 @@ public class OrganizationIdentity {
             log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), this.serviceOfferings);
             throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
         }
-        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name());
+        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name(), "Service offering's name is required");
         log.info("Organization identity validation completed successfully {}", this.name);
 
     }

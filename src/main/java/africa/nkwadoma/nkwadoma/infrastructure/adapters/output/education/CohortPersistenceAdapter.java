@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -26,7 +27,6 @@ import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateUUID;
 
 
@@ -42,8 +42,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public Cohort viewCohortDetails(String userId, String cohortId) throws MeedlException {
-        validateDataElement(userId);
-        validateDataElement(cohortId);
+        MeedlValidator.validateUUID(userId);
+        MeedlValidator.validateUUID(cohortId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity == null){
             throw new IdentityException(USER_NOT_FOUND.getMessage());
@@ -54,7 +54,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Transactional
     @Override
     public void deleteCohort(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
@@ -62,7 +62,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Cohort findCohort(String cohortId) throws CohortException {
+    public Cohort findCohort(String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
         CohortEntity cohortEntity = cohortRepository.findById(cohortId).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
         return cohortMapper.toCohort(cohortEntity);
     }
@@ -78,7 +79,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public List<Cohort> findCohortByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         List<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name);
         if (cohortEntities.isEmpty()){
             return new ArrayList<>();
@@ -96,7 +97,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         MeedlValidator.validateUUID(programId);
         List<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name);
         if (cohortEntities.isEmpty()){
@@ -106,7 +107,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Cohort checkIfCohortExistWithName(String name) {
+    public Cohort checkIfCohortExistWithName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         CohortEntity cohortEntity = cohortRepository.findByName(name);
         return cohortMapper.toCohort(cohortEntity);
     }
@@ -114,7 +116,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public List<Cohort> searchCohortInOrganization(String organizationId, String name) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, COHORT_NAME_REQUIRED.getMessage());
         List<CohortEntity> cohortEntities =
                 cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name);
         if (cohortEntities.isEmpty()){

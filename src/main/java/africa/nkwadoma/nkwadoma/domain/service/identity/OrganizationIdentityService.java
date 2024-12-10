@@ -38,7 +38,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
 
     @Override
-        public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
         Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         if (foundOrganizationEntity.isPresent()) {
@@ -57,7 +57,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(reason);
+        MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         log.info("found organization employees: {}",organizationEmployees);
@@ -136,7 +136,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationName);
+        MeedlValidator.validateDataElement(organizationName, "Organization name is required");
         return organizationIdentityOutputPort.findByName(organizationName);
     }
     @Override

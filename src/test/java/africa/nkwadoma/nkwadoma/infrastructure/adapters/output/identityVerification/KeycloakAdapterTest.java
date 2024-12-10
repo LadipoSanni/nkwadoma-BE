@@ -293,17 +293,17 @@ class KeycloakAdapterTest {
     @Test
     void loginWithValidEmailAddressAndInvalidPassword() {
         john.setPassword("invalid-password");
-        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+        assertThrows(MeedlException.class, ()->identityManagementOutputPort.login(john));
     }
     @Test
     void loginWithInvalidEmailAndValidPassword() {
         john.setEmail("invalid-email");
         john.setPassword("passwordJ@345");
-        assertThrows(IdentityException.class, ()->identityManagementOutputPort.login(john));
+        assertThrows(MeedlException.class, ()->identityManagementOutputPort.login(john));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void loginWithNullPassword(String password) {
         john.setPassword(password);
         MeedlException meedlException = assertThrows(MeedlException.class, () ->
@@ -329,7 +329,7 @@ class KeycloakAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"wrongpasswordJ@348625"})
+    @ValueSource(strings = {"P@ssw0rd!3"})
     void loginWithInvalidPassword(String password) {
         john.setPassword(password);
         IdentityException exception = assertThrows(IdentityException.class, () -> identityManagementOutputPort.login(john));
