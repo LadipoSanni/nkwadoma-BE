@@ -49,7 +49,7 @@ class OrganizationIdentityAdapterTest {
     @Order(1)
     void saveOrganization() {
         try {
-//            assertThrows(MeedlException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
+            assertThrows(MeedlException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             log.info("Organization saved id is : {}", savedOrganization.getId());
             assertNotNull(savedOrganization);
