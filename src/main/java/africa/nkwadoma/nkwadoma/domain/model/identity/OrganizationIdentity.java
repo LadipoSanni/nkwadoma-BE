@@ -21,6 +21,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class OrganizationIdentity {
     private String id;
     private String name;

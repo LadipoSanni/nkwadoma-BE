@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.apache.commons.lang3.*;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 public class Program {
     private String id;
+    @Size(max = 2500, message = "Program description must not exceed 2500 characters")
     private String programDescription;
     private String name;
     private DurationType durationType;

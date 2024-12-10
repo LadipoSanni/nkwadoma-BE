@@ -50,6 +50,13 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
+    public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId());
+        return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
+    }
+
+    @Override
     public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
             OrganizationEmployeeIdentity organizationEmployeeIdentity

@@ -18,6 +18,4 @@ public interface IdentityMapper {
     UserIdentity toPasswordCreateRequest(PasswordCreateRequest passwordCreateRequest);
 
     UserIdentity toLoginUserIdentity(LoginRequest loginRequest);
-
-    IdentityVerification toIdentityVerification(IdentityVerificationRequest identityVerificationRequest);
 }

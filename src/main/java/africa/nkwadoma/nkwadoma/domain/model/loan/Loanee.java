@@ -21,7 +21,6 @@ import java.util.List;
 public class Loanee {
     private String id;
     private String cohortId;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserIdentity userIdentity;
@@ -36,7 +35,6 @@ public class Loanee {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateUUID(createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);
         validateLoaneeUserIdentity();
     }
@@ -46,7 +44,7 @@ public class Loanee {
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), "User first name is required.");
         MeedlValidator.validateDataElement(userIdentity.getLastName(), "User last name is required.");
         MeedlValidator.validateEmail(userIdentity.getEmail());
-        MeedlValidator.validateUUID(createdBy, "Unable to identify the user performing this action.");
+        MeedlValidator.validateUUID(userIdentity.getCreatedBy());
     }
 
 }

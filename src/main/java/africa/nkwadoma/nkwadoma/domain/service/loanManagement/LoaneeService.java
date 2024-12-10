@@ -142,7 +142,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
+                organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         loanee.setReferredBy(organizationIdentity.getName());
