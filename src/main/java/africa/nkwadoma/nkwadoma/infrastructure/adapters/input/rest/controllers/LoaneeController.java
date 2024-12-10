@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoaneeRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,10 +41,9 @@ public class LoaneeController {
     @PostMapping("addLoaneeToCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
-                                                            @RequestBody LoaneeRequest loaneeRequest) throws MeedlException {
+                                                            @RequestBody  @Valid LoaneeRequest loaneeRequest) throws MeedlException {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
-        loanee.setCreatedBy(meedlUser.getClaimAsString("sub"));
-        loanee.getUserIdentity().setCreatedBy(loanee.getCreatedBy());
+        loanee.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         loanee = loaneeUseCase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);

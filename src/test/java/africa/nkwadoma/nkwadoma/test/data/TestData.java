@@ -65,7 +65,6 @@ public class TestData {
                 .id(testId)
                 .userIdentity(userIdentity)
                 .cohortId(testId)
-                .createdBy(userIdentity.getCreatedBy())
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }

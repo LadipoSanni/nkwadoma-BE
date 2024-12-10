@@ -103,12 +103,12 @@ class CohortPersistenceAdapterTest {
             log.error("error deleting cohorts ... {}", e.getMessage());
         }
 
-        meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
+        meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
-        organizationIdentity = TestData.createOrganizationTestData("Organization test","RC345687",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("This name should not duplicate");
-        program2 = TestData.createProgramTestData("Write a test that checks first before creating");
+        organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC345689",List.of(employeeIdentity));
+        program = TestData.createProgramTestData("This name should not duplicate1");
+        program2 = TestData.createProgramTestData("Write a test that checks first before creating1");
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
 
