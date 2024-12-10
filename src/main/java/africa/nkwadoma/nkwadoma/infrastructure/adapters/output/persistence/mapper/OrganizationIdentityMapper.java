@@ -8,7 +8,7 @@ import org.mapstruct.*;
 
 import java.util.*;
 
-@Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class)
+@Mapper(componentModel = "spring", uses = ServiceOfferingMapper.class, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface OrganizationIdentityMapper {
     @Mapping(source = "rcNumber", target = "registrationNumber")
     @Mapping(source = "tin", target = "taxIdentity")
@@ -28,6 +28,8 @@ public interface OrganizationIdentityMapper {
     List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
     @Mapping(target = "serviceOffering", source = "serviceOfferingEntity")
+    @Mapping(target = "serviceOffering.transactionLowerBound", source = "serviceOfferingEntity.transactionLowerBound", defaultValue = "0.00")
+    @Mapping(target = "serviceOffering.transactionUpperBound", source = "serviceOfferingEntity.transactionUpperBound", defaultValue = "0.00")
     OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
 
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);

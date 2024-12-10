@@ -133,12 +133,25 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException {
+    public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(
+            String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(organizationId);
-        log.info("Found org sev offerings in db: {}", organizationServiceOfferings);
+        log.info("Found org service offerings in DB: {}", organizationServiceOfferings);
         return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
+    }
+
+    @Override
+    public List<ServiceOffering> getServiceOfferings(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+        List<OrganizationServiceOffering> organizationServiceOfferings =
+                findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
+        List<ServiceOffering> serviceOfferings = new ArrayList<>();
+        organizationServiceOfferings.forEach(organizationServiceOffering ->
+                serviceOfferings.add(organizationServiceOffering.getServiceOffering()));
+        return serviceOfferings;
     }
 
     @Override
