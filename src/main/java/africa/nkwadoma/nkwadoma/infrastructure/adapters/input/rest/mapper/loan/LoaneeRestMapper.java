@@ -25,7 +25,7 @@ public interface LoaneeRestMapper {
     @Mapping( target= "loaneeLoanDetail.amountRequested",source = "loaneeLoanDetail.amountRequested")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
 
-    @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")
+    @Mapping(target = "loanBreakdownId", source = "loanBreakdownId")
     @Mapping(target = "itemName", source = "itemName")
     @Mapping(target = "itemAmount", source = "itemAmount")
     @Mapping(target = "currency", source = "currency")
