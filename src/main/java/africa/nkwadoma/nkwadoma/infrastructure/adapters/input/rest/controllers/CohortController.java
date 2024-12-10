@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
@@ -73,8 +74,8 @@ public class CohortController {
 
     @PostMapping("cohort/edit")
     public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
-                                          EditCohortLoanDetailRequest editCohortLoanDetailRequest) throws MeedlException {
-        Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortLoanDetailRequest);
+    EditCohortRequest editCohortRequest) throws MeedlException {
+        Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortRequest);
         cohort.setUpdatedBy(meedlUser.getClaimAsString("sub"));
         cohort = cohortUseCase.editCohort(cohort);
         CohortResponse cohortResponse =
@@ -182,4 +183,16 @@ public class CohortController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("cohort/loanbreakdown")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> getLoanBreakDown(@RequestParam @NotBlank(message = "Cohort id is required") String cohortId) throws MeedlException {
+        List<LoanBreakdown> loanBreakdowns = cohortUseCase.getCohortLoanBreakDown(cohortId);
+        List<LoanBreakdownResponse> loanBreakdownResponses = cohortMapper.toLoanBreakdownResponses(loanBreakdowns);
+        ApiResponse<List<LoanBreakdownResponse>> apiResponse = ApiResponse.<List<LoanBreakdownResponse>>builder()
+                .data(loanBreakdownResponses)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }

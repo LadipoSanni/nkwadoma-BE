@@ -131,7 +131,7 @@ class LoanRequestAdapterTest {
             assertNotNull(foundOrganization.getId());
 
             dataAnalytics = new Program();
-            dataAnalytics.setName("Data Analytics");
+            dataAnalytics.setName("Data Analytic1");
             dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
             dataAnalytics.setMode(ProgramMode.FULL_TIME);
             dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
@@ -155,7 +155,7 @@ class LoanRequestAdapterTest {
             elites.setStartDate(LocalDate.of(2024, 10, 18));
             elites.setExpectedEndDate(LocalDate.of(2024, 11, 18));
             elites.setProgramId(savedProgram.getId());
-            elites.setName("Elite");
+            elites.setName("Elites");
             elites.setCreatedBy(userIdentity.getCreatedBy());
             elites.setLoanBreakdowns(loanBreakdowns);
             elites.setTuitionAmount(BigDecimal.valueOf(20000));
@@ -168,14 +168,14 @@ class LoanRequestAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                    lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).image("loanee-img.jpg").
+                    lastName("Qudus").email("tests@example.com").role(IdentityRole.LOANEE).image("loanee-img.jpg").
                     createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").alternateEmail("alt@example.org").
                     alternateContactAddress("1, Onigbongbo Street, Oshodi, Lagos").alternatePhoneNumber("08075533235").build();
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                     initialDeposit(BigDecimal.valueOf(3000000.00)).build();
 
             loanee = Loanee.builder().userIdentity(userIdentity).
-                    cohortId(eliteCohortId).createdBy(userIdentity.getCreatedBy()).
+                    cohortId(eliteCohortId).
                     loaneeLoanDetail(loaneeLoanDetail).build();
 
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());

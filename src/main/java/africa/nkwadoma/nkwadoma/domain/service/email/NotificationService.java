@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.thymeleaf.context.Context;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.CREATE_PASSWORD_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOANEE_OVERVIEW;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,8 +39,23 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     }
     @Override
-    public void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+    public void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(RESET_PASSWORD.getMessage())
+                .to(userIdentity.getEmail())
+                .template(FORGOT_PASSWORD_TEMPLATE.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+
+    }
+    @Override
+    public void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndIndustryName(getLink(userIdentity),
+                                                                               userIdentity.getFirstName(),
+                                                                                organizationName);
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
@@ -51,7 +65,12 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .build();
         sendMail(userIdentity, email);
     }
-
+    private String getForgotPasswordLink(UserIdentity userIdentity) throws MeedlException {
+        String token = tokenUtils.generateToken(userIdentity.getEmail());
+        log.info("Generated token {}", token);
+        log.info("url {}", baseUrl + RESET_PASSWORD_URL+ token);
+        return baseUrl + RESET_PASSWORD_URL+ token;
+    }
     private String getLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token {}", token);

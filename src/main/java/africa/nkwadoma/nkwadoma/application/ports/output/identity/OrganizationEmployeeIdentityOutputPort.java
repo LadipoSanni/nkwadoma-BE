@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -17,4 +18,11 @@ public interface OrganizationEmployeeIdentityOutputPort {
     void deleteEmployee(String id) throws IdentityException;
 
     List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException;
+
+    List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException;
+
+    List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId);
+    Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String userId, IdentityRole identityRole,int pageSize, int pageNumber) throws MeedlException;
+
+
 }

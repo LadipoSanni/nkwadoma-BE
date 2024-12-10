@@ -103,12 +103,12 @@ class CohortPersistenceAdapterTest {
             log.error("error deleting cohorts ... {}", e.getMessage());
         }
 
-        meedleUser = TestData.createTestUserIdentity("ade5@gmail.com");
+        meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
-        organizationIdentity = TestData.createOrganizationTestData("Organization test","RC345687",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("This name should not duplicate");
-        program2 = TestData.createProgramTestData("Write a test that checks first before creating");
+        organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC345689",List.of(employeeIdentity));
+        program = TestData.createProgramTestData("This name should not duplicate1");
+        program2 = TestData.createProgramTestData("Write a test that checks first before creating1");
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
 
@@ -176,6 +176,7 @@ class CohortPersistenceAdapterTest {
         xplorers.setProgramId(programId);
         xplorers.setCreatedBy(meedleUserId);
         xplorers.setLoanBreakdowns(loanBreakdowns);
+        xplorers.setTuitionAmount(BigDecimal.valueOf(20000));
         xplorers.setOrganizationId(organizationId);
         xplorers.setCohortStatus(CohortStatus.CURRENT);
 
@@ -189,8 +190,6 @@ class CohortPersistenceAdapterTest {
         mavin.setOrganizationId(organizationId);
         mavin.setCohortStatus(CohortStatus.INCOMING);
     }
-
-
 
 
     @Test
@@ -223,6 +222,12 @@ class CohortPersistenceAdapterTest {
     @Test
     void saveCohortWithNullStartDate(){
         elites.setStartDate(null);
+        assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
+    }
+
+    @Test
+    void cannotSaveCohortWithNegativeTuitionAmount(){
+        elites.setTuitionAmount(BigDecimal.valueOf(-1));
         assertThrows(MeedlException.class, ()-> cohortOutputPort.save(elites));
     }
 

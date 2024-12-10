@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
@@ -33,7 +34,7 @@ public class MeedlValidator {
 
     public static void validateUUID(String dataElement) throws MeedlException {
         log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement);
+        validateDataElement(dataElement,"An empty id can not be used to perform this operation");
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
@@ -43,7 +44,14 @@ public class MeedlValidator {
     }
     public static void validateDataElement(String dataElement) throws MeedlException {
         if (isEmptyString(dataElement)) {
+            log.error("Empty input field");
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+    }
+    public static void validateDataElement(String dataElement, String message) throws MeedlException {
+        if (isEmptyString(dataElement)) {
+            log.error(message);
+            throw new MeedlException(message);
         }
     }
 
@@ -156,7 +164,14 @@ public class MeedlValidator {
     public static void validateNegativeAmount(BigDecimal itemAmount) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.ITEM_AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+            throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+        }
+    }
+
+    public static void validateLoanBreakdowns(List<LoanBreakdown> loanBreakdowns) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanBreakdowns);
+        for(LoanBreakdown loanBreakdown : loanBreakdowns){
+            loanBreakdown.validate();
         }
     }
 }

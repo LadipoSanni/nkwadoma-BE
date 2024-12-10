@@ -2,15 +2,15 @@ package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -65,7 +65,6 @@ public class TestData {
                 .id(testId)
                 .userIdentity(userIdentity)
                 .cohortId(testId)
-                .createdBy(userIdentity.getCreatedBy())
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
@@ -74,14 +73,14 @@ public class TestData {
                 .loaneeId(testId)
                 .loanOfferId(testId)
                 .loanee(loanee)
+                .loanAccountId(testId)
                 .startDate(LocalDateTime.now())
-                .loanAccountId("account id")
                 .build();
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
         return LoaneeLoanDetail.builder()
-                .amountRequested(BigDecimal.valueOf(9000000.00))
-                .initialDeposit(BigDecimal.valueOf(3000000.00))
+                .amountRequested(BigDecimal.valueOf(9000000))
+                .initialDeposit(BigDecimal.valueOf(3000000))
                 .build();
     }
     public static OrganizationEmployeeIdentity createOrganizationEmployeeIdentityTestData(UserIdentity identity){
@@ -89,6 +88,19 @@ public class TestData {
         organizationEmployeeIdentity.setOrganization(testId);
         organizationEmployeeIdentity.setMeedlUser(identity);
         return organizationEmployeeIdentity;
+    }
+
+    public static Cohort createCohortData(String name, String programId, String organizationId, List<LoanBreakdown> loanBreakdowns, String meedlUserId) {
+        Cohort elites = new Cohort();
+        elites.setStartDate(LocalDate.of(2024,10,18));
+        elites.setProgramId(programId);
+        elites.setName(name);
+        elites.setCreatedBy(meedlUserId);
+        elites.setLoanBreakdowns(loanBreakdowns);
+        elites.setTuitionAmount(BigDecimal.valueOf(1000000));
+        elites.setOrganizationId(organizationId);
+        elites.setCohortStatus(CohortStatus.GRADUATED);
+        return elites;
     }
 
     public static Program createProgramTestData(String programName){
@@ -111,20 +123,26 @@ public class TestData {
                 .itemName("Loan Break").build();
     }
 
-    public static LoanProduct buildLoanProduct(String name) {
-        Vendor vendor = new Vendor();
+    public static LoanProduct buildTestLoanProduct(String name, Vendor vendor) {
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setName(name);
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
-        loanProduct.setObligorLoanLimit(new BigDecimal("100"));
+        loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000000"));
         loanProduct.setPageSize(10);
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
         return loanProduct;
+    }
+    public static Vendor createTestVendor(String name) {
+        Vendor vendor = new Vendor();
+        vendor.setVendorName(name);
+        vendor.setTermsAndConditions("Test: A new vendor for test with terms and condition imaginary");
+        vendor.setProduct(Product.ACCOMMODATION);
+        return vendor;
     }
 
     public static LoanOffer buildLoanOffer(LoanRequest loanRequest, Loanee loanee) {
@@ -157,5 +175,13 @@ public class TestData {
         loaneeLoanAccount.setAccountStatus(status);
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
+    }
+    public static PremblyResponse createTestPremblyResponse(){
+        PremblyResponse response = new PremblyBvnResponse();
+        Verification verifier = Verification.builder().status("VERIFIED").build();
+        response.setDetail("VERIFIED");
+        response.setVerification(verifier);
+        response.setResponseCode("CREATED");
+        return response;
     }
 }

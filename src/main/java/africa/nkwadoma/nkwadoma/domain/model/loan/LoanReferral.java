@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.*;
+import java.time.*;
+
 @Getter
 @Setter
 @Builder
@@ -15,17 +18,30 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class LoanReferral {
-
     private String id;
+    private String loaneeUserId;
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
+    private String referredBy;
+    private String cohortName;
+    private String loaneeImage;
+    private BigDecimal loanAmountRequested;
+    private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
+    private LocalDate cohortStartDate;
+    private String programName;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanReferralStatus);
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), "Alternate Contact Address is required");
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber());
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), "Alternate Phone Number is required");
+    }
+
+    public void validateViewLoanReferral() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+        MeedlValidator.validateUUID(loanee.getUserIdentity().getId());
     }
 
     public void validateForCreate() throws MeedlException {

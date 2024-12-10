@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum LoaneeLoanBreakdownMessages {
 
 
-    ITEM_AMOUNT_CANNOT_BE_LESS_THAN_ZERO("Item Amount Cannot Be Less Than Zero");
+    AMOUNT_CANNOT_BE_LESS_THAN_ZERO("Amount Cannot Be Less Than Zero");
 
     private final String message;
     LoaneeLoanBreakdownMessages(String message) {

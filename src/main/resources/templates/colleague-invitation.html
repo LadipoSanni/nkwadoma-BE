@@ -3,154 +3,44 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-    <title></title>
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <meta name="x-apple-disable-message-reformatting">
+    <meta name="x-apple-disable-message-reformatting"/>
+    <title>Email Template</title>
 </head>
-<style>
-    #responsiveDiv {
-        margin-top: 40px;
-        height: 28px;
-        background: #0EAA4F;
-        flex-shrink: 0;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 0;
-    }
-
-    @media (min-width: 769px) {
-        #responsiveDiv {
-            width: 100%;
-        }
-    }
-</style>
-<body style="margin: 0; padding: 10px;background-color: #F8FAFD; font-family: 'IBM Plex Sans',sans-serif; ">
-<div id="responsiveDiv"></div>
-<table
-        align="center"
-        border="0"
-        cellpadding="0"
-        cellspacing="0"
-        role="presentation"
-        style="border-collapse:collapse; margin: auto"
->
+<body style="margin: 0; padding: 0; background-color: #FFFFFF;  font-family: 'IBM Plex Sans', Arial, sans-serif; color: #344054;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; height: 642px; background-color: #FFFFFF; margin: 20px auto; border: 20px solid #f7f7fc;">
     <tr>
-        <td style="padding: 20px;" align="center">
-            <img alt="socialIcons"
-                 src="https://res.cloudinary.com/dwyiuc4ov/image/upload/v1713954926/Group_56841_w8iphd.png"
-                 style="position:relative; margin-top:8px; "/>
+        <td style=" text-align: left;">
+            <img src="https://res.cloudinary.com/dfkxvsiiu/image/upload/v1732709444/Meedle_Logo_Primary_Main_f5tmbe.svg"
+                 alt="Meedl Logo"
+                 style="display: block; width: 115px; height: 31px;">
         </td>
     </tr>
     <tr>
-        <td
-                align="center"
-                style=""
-        >
-            <table
-                    border="0"
-                    cellpadding="0"
-                    cellspacing="0"
-                    style="border-collapse: collapse;background-color: #fff"
-                    width="100%"
-            >
-                <tr>
-                    <td style="padding: 40px 20px 20px 40px; max-width: 550px; color: #344054">
-                        <img alt="icon"
-                             src="https://res.cloudinary.com/dwyiuc4ov/image/upload/v1713282955/Icon_ranubu.png"
-                             style="margin-bottom: 5px; margin-top: 10px"/>
-
-                        <p
-                                style="margin: 0; font-style: normal; font-weight: 600; padding-top: 10px;
-                            font-size: 18px; letter-spacing:  -0.414px;
-                            line-height: 27px; color: #475467; ;"
-                        >
-                            Welcome to LearnSpace
-                        </p>
-                    </td>
-                </tr>
-
-
-                <tr>
-                    <td
-                            style="padding: 20px 20px 20px 40px; max-width: 550px; color: #344054"
-                    >
-
-                        <p style="padding-bottom: 24px; margin: 0; font-size: 16px; line-height: 24px">
-                            Hello <span th:text="${firstName}"></span>,
-                        </p>
-                        <p style="padding-bottom: 2px; margin: 0; font-size: 16px; font-weight: 400; line-height: 24px">
-                            You have been invited to join LearnSpace as a <span th:text="${invitedColleague}"></span> </p>
-                        <p>
-                            To accept this invitation, click on the button below to create your password. </p>
-
-                        <div style="gap: 24px">
-                            <a th:href="@{${token}}" style="text-decoration: none;color: white;" target="_blank">
-                                <p style="
-                                           border-radius: 4px;
-                                           border: 1px solid #0EAA4F;
-                                           background: #0EAA4F;
-                                           color: #FFF;
-                                           padding: 10px;
-                                           width: 123px;
-                                           font-size: 16px;
-                                           font-style: normal;
-                                           cursor: pointer;
-                                           font-weight: 500;"
-                                >
-                                    Create Password
-                                </p>
-                            </a>
-                        </div>
-                        <span style="padding-bottom: 24px; margin: 0; font-size: 16px; line-height: 24px">
-                                          For further inquiries, kindly reach out to our support team at
-                            <a href="mailto:support@learnspace.africa" style="text-decoration: none; color: #0EAA4F">support@learnspace.africa</a>
-            </span>
-                        <p style=" font-size: 16px; line-height: 24px; margin-top: 29px">
-                            Cheers,
-                            <br>
-                            LearnSpace Team.
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center"
-                        style="padding: 0 20px 0 40px;color: #FFF2C7;"
-                    >
-                        <img
-                                alt="twitterPage"
-                                border="0"
-                                src="https://res.cloudinary.com/enum-africa/image/upload/v1696001338/Twitter_X_New_aanevb.png"
-                                style="width: 20px; margin-right: 0.8em;"
-                        />
-
-                        <img
-                                alt="facebookPage"
-                                border="0"
-                                src="https://res.cloudinary.com/enum-africa/image/upload/v1696001513/Social_icon_kpna9c.png"
-                                style="width: 20px; margin-right: 0.8em;"
-                        />
-
-                        <img
-                                alt="instagramPage"
-                                border="0"
-                                src="https://res.cloudinary.com/enum-africa/image/upload/v1696001679/insta_ikhy0m.png"
-                                style="width: 20px; margin-right: 0.8em;"
-                        />
-                        <p style="color: #475467; font-size: 12px;line-height: 20px;">
-                            © <span th:text="${currentYear}"></span> Learnspace Africa<br/>
-                            312, Herbert Macaulay way Sabo Yaba, Lagos
-                        </p>
-                    </td>
-                </tr>
-            </table>
+        <td style="padding: 20px; font-size: 16px; line-height: 24px;">
+            <p>Hi <span th:text="${firstName}"></span>,</p>
+            <p>You’ve been invited to join <b th:text="${organizationName}"></b> on Meedl.</p>
+            <p>By accepting this invitation, you will gain access to the<br> organization’s workspace.</p>
+            <div style="text-align: left; margin: 20px 0;">
+                <a th:href="@{${token}}" target="_blank"
+                   style="display: inline-block; background-color: #142854; color: #FFFFFF; text-decoration: none;
+                    padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 4px; ">
+                    Accept Invite
+                </a>
+            </div>
+            <p>Thank you,<br>The Meedl Team</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px; border-top: 1px solid #e0e0e0; text-align: left; color: #6a6b6a; font-size: 14px; line-height: 10px;">
+            <p  style="margin-top: 10px;">If you have any questions, please don’t hesitate to </p>
+            <p>contact us at<a href="mailto:help@meedl.africa" style="color:#6A6B6A; text-decoration: none; font-size: 16px"> help@meedl.africa</a>.</p>
+            <div style="margin-top: 25px; text-align: left ; line-height: 24px; font-size: 14px ; font-weight: 400">
+                <a href="https://x.com/trymeedl?s=21" target="_blank" style="margin-right: 10px; color: #142854; text-decoration: underline;">X</a>
+                <a href="https://www.instagram.com/trymeedl/profilecard/?igsh=MWNxZ2hpcDM2ejJ2NA==" target="_blank" style="color: #142854; text-decoration: underline;">Instagram</a>
+            </div>
         </td>
     </tr>
 </table>
 </body>
 </html>
-
-

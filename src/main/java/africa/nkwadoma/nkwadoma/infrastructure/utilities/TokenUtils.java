@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.utilities;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import io.jsonwebtoken.*;
@@ -10,7 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.InvalidKeyException;
 import java.util.*;
 
 @Slf4j
@@ -30,10 +37,11 @@ public class TokenUtils {
     }
 
     private String buildJwt(Map<String, Object> claims) {
+        long oneYearInMillis = expiration * 1000L * 24 * 365;
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + oneYearInMillis))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -52,13 +60,13 @@ public class TokenUtils {
     }
 
     public String decodeJWTGetEmail(String token) throws MeedlException {
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
         Claims claims;
         claims = getClaims(token);
         return claims.get("email").toString();
     }
     public String decodeJWTGetId(String token) throws MeedlException {
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
         Claims claims;
         claims = getClaims(token);
         return claims.get("id").toString();
@@ -72,11 +80,14 @@ public class TokenUtils {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException exception) {
+            log.error("Time allocated for this action has expired. Please refresh.");
             throw new MeedlException("Time allocated for this action has expired. Please refresh.");
         } catch (SignatureException | MalformedJwtException exception ) {
+            log.error("You are not authorized to perform this action. Invalid signature");
             throw new MeedlException("You are not authorized to perform this action. Invalid signature");
         }
         if (expiration == null || claims.getExpiration().before(new Date())) {
+            log.info("Token has expired");
             throw new MeedlException("Token has expired");
         }
         return claims;

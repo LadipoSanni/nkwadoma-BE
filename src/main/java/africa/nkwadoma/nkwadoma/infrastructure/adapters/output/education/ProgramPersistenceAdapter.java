@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -14,7 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -26,8 +26,6 @@ import java.math.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
-
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -35,13 +33,15 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+//    private final CohortOutputPort cohortOutputPort;
+    private final CohortRepository cohortRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
 
     @Override
     public List<Program> findProgramByName(String programName) throws MeedlException {
-        validateDataElement(programName);
+        MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         List<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName.trim());
         log.info("Program entities: {}", programEntities);
         if (programEntities.isEmpty()) {
@@ -65,6 +65,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
         programEntity.setOrganizationEntity(organizationEntity);
+        programEntity.setProgramStatus(ActivationStatus.ACTIVE);
         programEntity = programRepository.save(programEntity);
         updateOrganization(program, organizationEntity);
         Program retrivedProgram  = programMapper.toProgram(programEntity);
@@ -92,7 +93,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public boolean programExists(String programName) throws MeedlException {
-        validateDataElement(programName);
+        MeedlValidator.validateDataElement(programName,ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         return programRepository.existsByName(programName);
     }
 
@@ -100,13 +101,16 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         ProgramEntity program = programRepository.findById(programId).
-                orElseThrow(() -> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
+                orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
+        List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
+        if (CollectionUtils.isNotEmpty(cohortEntities)) {
+            cohortRepository.deleteAll(cohortEntities);
+        }
         programRepository.delete(program);
     }
 
     @Override
     public Program findProgramById(String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
         MeedlValidator.validateUUID(programId);
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
@@ -119,7 +123,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(foundOrganizationIdentity.getId(), pageRequest);
         return programEntities.map(programMapper::toProgram);
     }

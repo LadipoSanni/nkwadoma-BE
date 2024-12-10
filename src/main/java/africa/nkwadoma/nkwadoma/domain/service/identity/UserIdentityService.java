@@ -5,10 +5,13 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
@@ -18,15 +21,18 @@ import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.*;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +51,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @Override
@@ -62,14 +69,16 @@ public class UserIdentityService implements CreateUserUseCase  {
         organizationEmployeeIdentity.setMeedlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
-        sendEmail.sendColleagueEmail(userIdentity);
+        OrganizationIdentity organizationIdentity =
+                organizationIdentityOutputPort.findById(foundEmployee.getOrganization());
+        sendEmail.sendColleagueEmail(organizationIdentity.getName(),userIdentity);
 
         return userIdentity;
     }
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
-        MeedlValidator.validateDataElement(userIdentity.getEmail());
-        MeedlValidator.validateDataElement(userIdentity.getPassword());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validatePassword(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
 
@@ -78,49 +87,62 @@ public class UserIdentityService implements CreateUserUseCase  {
         identityManagerOutPutPort.logout(userIdentity);
         blackListedTokenAdapter.blackListToken(createBlackList(userIdentity.getAccessToken()));
     }
-    private BlackListedToken createBlackList(String accessToken){
+    private BlackListedToken createBlackList(String accessToken) throws MeedlException {
         BlackListedToken blackListedToken = new BlackListedToken();
         blackListedToken.setAccess_token(accessToken);
+        blackListedToken.setExpirationDate(getExpirationDate(accessToken));
         return blackListedToken;
     }
     @Scheduled(cron = "0 0 8,20 * * *") // Runs at 8 AM and 8 PM every day
-    public void clearBlackListedToken() throws MeedlException {
-        if(!blackListedTokenAdapter.findAll().isEmpty()) {
-            for (BlackListedToken blackListedToken : blackListedTokenAdapter.findAll()) {
-                if (isExpired(blackListedToken.getAccess_token())) {
-                    blackListedTokenAdapter.deleteToken(blackListedToken);
-                }
-            }
-            log.info("cron is running....");
-        }
+    public void clearBlackListedToken() {
+        log.info("cron job deleting expired blacklisted tokens...");
+        List<BlackListedToken> expiredTokens = blackListedTokenAdapter.findExpiredTokens();
+        expiredTokens.forEach(blackListedTokenAdapter::deleteToken);
     }
 
-    private boolean isExpired(String accessToken) throws MeedlException {
+    private LocalDateTime getExpirationDate(String token) throws MeedlException {
         try {
-            JWT jwt = JWTParser.parse(accessToken);
+            JWT jwt = JWTParser.parse(token);
             Date expirationDate = jwt.getJWTClaimsSet().getExpirationTime();
-            return Objects.requireNonNull(expirationDate).toInstant().isBefore(Instant.now());
+            return expirationDate.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
         } catch (ParseException e) {
-            throw new MeedlException("Parse error...  : "+ e.getMessage());
+            throw new MeedlException("Error extracting date and time from token ...  : "+ e.getMessage());
+        }
+    }
+    private void passwordPreviouslyCreated(String token) throws IdentityException {
+        log.info("checking if its previously created  {}",token);
+        if (blackListedTokenAdapter.isPresent(token)){
+            log.info("Password already created before. Method called more than once with the same token.");
+            throw new IdentityException("Password already created. Try login or forgot password. Or contact the admin ");
         }
     }
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
+        log.info("request got into service layer {}",password);
+//        passwordPreviouslyCreated(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
+        passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
+        log.info("done getting user identity frm token {}",userIdentity);
         userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
 
     @Override
     public void resetPassword(String token, String password) throws MeedlException {
+        passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
         identityManagerOutPutPort.resetPassword(userIdentity);
+        blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
         String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);
@@ -147,7 +169,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         try {
             UserIdentity foundUser = userIdentityOutputPort.findByEmail(email);
             identityManagerOutPutPort.getUserByEmail(foundUser.getEmail());
-            sendOrganizationEmployeeEmailUseCase.sendEmail(foundUser);
+            sendOrganizationEmployeeEmailUseCase.sendForgotPasswordEmail(foundUser);
         } catch (MeedlException e) {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
@@ -156,7 +178,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
-        MeedlValidator.validateDataElement(userIdentity.getReactivationReason());
+        MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
@@ -167,7 +189,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(userIdentity.getId());
-        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
+        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);

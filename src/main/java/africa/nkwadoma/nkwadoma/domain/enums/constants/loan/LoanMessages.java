@@ -34,6 +34,7 @@ public enum LoanMessages {
     LOAN_PRODUCT_NOT_FOUND("Loan product not found"),
     LOAN_REQUEST_STATUS_MUST_BE_NEW("Loan request status must be new"),
     LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED("Loan request has already been approved"),
+    ADDITIONAL_DETAILS_REQUIRED("Loanee must have provided additional details before loan referral can be accepted"),
     ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
     LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
     LOAN_OFFER_NOT_FOUND("Loan Offer Not Found");

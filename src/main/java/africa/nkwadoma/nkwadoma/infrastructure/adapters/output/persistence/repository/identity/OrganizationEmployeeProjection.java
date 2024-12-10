@@ -7,4 +7,5 @@ public interface OrganizationEmployeeProjection {
     ActivationStatus getStatus();
     String getFirstName();
     String getLastName();
+    String getEmail();
 }

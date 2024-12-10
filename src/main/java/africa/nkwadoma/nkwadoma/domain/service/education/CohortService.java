@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +54,10 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
-        String cohortName = cohort.getName();
         MeedlValidator.validateObjectInstance(cohort);
         cohort.validate();
+        String cohortName = cohort.getName();
+        cohort.validateLoanBreakDowns();
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
@@ -70,6 +72,7 @@ public class CohortService implements CohortUseCase {
         savedCohort.setOrganizationId(program.getOrganizationId());
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
+        savedCohort.setProgramName(program.getName());
         return savedCohort;
     }
 
@@ -83,7 +86,7 @@ public class CohortService implements CohortUseCase {
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        if (program == null) {
+        if (ObjectUtils.isEmpty(program)) {
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
@@ -112,12 +115,13 @@ public class CohortService implements CohortUseCase {
         List<LoanBreakdown> foundLoanBreakDown = loanBreakdownOutputPort.findAllByCohortId(cohort.getId());
         cohortOutputPort.save(foundCohort);
         foundCohort.setLoanBreakdowns(foundLoanBreakDown);
+        foundCohort.setProgramName(program.getName());
         return foundCohort;
     }
 
     private void checkIfCohortNameExist(Cohort cohort, Cohort foundCohort) throws MeedlException {
         Cohort foundCohortByName = null;
-        if (! StringUtils.isEmpty(cohort.getName())) {
+        if (StringUtils.isNotEmpty(cohort.getName())) {
             foundCohortByName = cohortOutputPort.checkIfCohortExistWithName(cohort.getName());
         }
         if (ObjectUtils.isNotEmpty(foundCohortByName)) {
@@ -156,7 +160,10 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException {
-        return cohortOutputPort.viewCohortDetails(userId, cohortId);
+        Cohort cohort = cohortOutputPort.viewCohortDetails(userId, cohortId);
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        cohort.setProgramName(program.getName());
+        return cohort;
     }
 
     @Override
@@ -180,14 +187,14 @@ public class CohortService implements CohortUseCase {
     @Override
     public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
-        MeedlValidator.validateDataElement(cohortName);
+        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
     }
 
 
     @Override
     public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         MeedlValidator.validateUUID(userId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
@@ -202,6 +209,12 @@ public class CohortService implements CohortUseCase {
                                                     int pageNumber,int pageSize) throws MeedlException {
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
         return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
+    }
+
+    @Override
+    public List<LoanBreakdown> getCohortLoanBreakDown(String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId);
+         return loanBreakdownOutputPort.findAllByCohortId(cohortId);
     }
 
     @Override
@@ -226,9 +239,8 @@ public class CohortService implements CohortUseCase {
         }
         return COHORT_INVITED;
     }
-
-        private void inviteTrainee (Loanee loanee) throws MeedlException {
-            loaneeUseCase.referLoanee(loanee.getId());
-        }
+    private void inviteTrainee (Loanee loanee) throws MeedlException {
+        loaneeUseCase.referLoanee(loanee.getId());
+    }
 
 }

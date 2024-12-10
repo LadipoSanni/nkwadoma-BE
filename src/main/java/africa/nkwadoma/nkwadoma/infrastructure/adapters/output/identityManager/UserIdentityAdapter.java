@@ -32,7 +32,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         userIdentity.validate();
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
-        log.info("UserIdentity saved {}", userIdentity);
+        log.info("UserIdentity saved {}", userEntity);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 
@@ -69,7 +69,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findByBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateDataElement(bvn);
+        MeedlValidator.validateDataElement(bvn, "Bvn is required");
         UserEntity userEntity = userEntityRepository.findByBvn(bvn);
         return userIdentityMapper.toUserIdentity(userEntity);
     }

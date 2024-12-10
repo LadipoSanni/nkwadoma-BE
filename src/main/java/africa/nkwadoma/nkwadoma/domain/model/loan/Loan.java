@@ -29,7 +29,7 @@ public class Loan {
         MeedlValidator.validateObjectInstance(loanee);
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
         loanee.getUserIdentity().validate();
-        MeedlValidator.validateDataElement(loanAccountId);
+        MeedlValidator.validateUUID(loanAccountId);
         MeedlValidator.validateObjectInstance(startDate);
     }
 

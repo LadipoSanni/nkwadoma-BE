@@ -41,10 +41,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         formData.put(EMAIL.getValue(), EmailAddress);
         formData.put(SUBSCRIBER_ID.getValue(), SubscriberID);
         formData.put(PASSWORD.getValue(), Password);
-        log.info("Credit registry url : {}", url);
-        log.info("Credit registry email : {}", EmailAddress);
-        log.info("Credit registry subscriber id : {}", SubscriberID);
-        log.info("Credit registry password : {}", Password);
+//        log.info("Credit registry url : {}", url);
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(formData, headers);
         ResponseEntity<CreditRegistryLoginResponse> responseEntity = ResponseEntity.ofNullable(new CreditRegistryLoginResponse());
@@ -157,7 +154,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
     }
 
     private void validateSessionCode(String sessionCode) throws MeedlException {
-        MeedlValidator.validateDataElement(sessionCode);
+        MeedlValidator.validateDataElement(sessionCode, "No session available at the moment. Please generate new session code, or contact the administrator");
         String regex = "^\\d{6}$";
 
         boolean isValid = Pattern.matches(regex, sessionCode);
@@ -167,7 +164,7 @@ public class CreditRegistryAdapter implements CreditRegistryOutputPort {
         }
     }
     private void validateRegistryId(String registryId) throws MeedlException {
-        MeedlValidator.validateDataElement(registryId);
+        MeedlValidator.validateDataElement(registryId, "Registry ID not valid.");
         String regex = "^\\d{18}$";
 
         boolean isValid = Pattern.matches(regex, registryId);

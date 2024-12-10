@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -16,4 +18,9 @@ public class LoanBreakdown {
     private BigDecimal itemAmount;
     private String currency;
     private Cohort cohort;
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateNegativeAmount(itemAmount);
+        MeedlValidator.validateObjectName(itemName);
+    }
 }

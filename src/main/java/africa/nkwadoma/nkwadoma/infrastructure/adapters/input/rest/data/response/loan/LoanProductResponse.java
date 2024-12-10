@@ -25,6 +25,7 @@ public class LoanProductResponse {
     private BigDecimal totalAmountDisbursed ;
     private BigDecimal totalAmountRepaid ;
     private String mandate;
+    private String costOfFund;
     private List<String> sponsors;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;

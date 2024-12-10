@@ -4,5 +4,5 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 
 public interface SendColleagueEmailUseCase {
-    void sendColleagueEmail(UserIdentity userIdentity) throws MeedlException;
+    void sendColleagueEmail(String organizationName,UserIdentity userIdentity) throws MeedlException;
 }
