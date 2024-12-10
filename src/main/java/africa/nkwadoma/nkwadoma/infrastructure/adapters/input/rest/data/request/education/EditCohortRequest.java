@@ -19,4 +19,5 @@ public class EditCohortRequest {
     private String name;
     private LocalDate startDate;
     private BigDecimal tuitionAmount;
+    private String imageUrl;
 }

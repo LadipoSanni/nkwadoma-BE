@@ -194,6 +194,21 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
+    void findOrganizationServiceOfferings() {
+        try {
+            List<OrganizationServiceOffering> organizationServiceOfferings =
+                    organizationOutputPort.findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
+
+            assertNotNull(organizationServiceOfferings);
+            assertEquals(organizationServiceOfferings.get(0).getOrganizationId(), amazingGrace.getId());
+            assertNotNull(organizationServiceOfferings.get(0).getId());
+            assertNotNull(organizationServiceOfferings.get(0).getServiceOffering());
+        } catch (MeedlException meedlException) {
+            log.info("{}", meedlException.getMessage());
+        }
+    }
+
+    @Test
     @Order(3)
     void viewAllOrganization() {
         try {

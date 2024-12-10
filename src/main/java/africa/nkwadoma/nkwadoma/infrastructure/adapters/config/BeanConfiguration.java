@@ -173,14 +173,6 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public OrganizationEmployeeIdentityAdapter organizationOrganizationEmployeeIdentityAdapter(
-            EmployeeAdminEntityRepository employeeAdminEntityRepository,
-            OrganizationEmployeeIdentityMapper organizationEmployeeIdentityMapper
-    ){
-       return new OrganizationEmployeeIdentityAdapter(employeeAdminEntityRepository,organizationEmployeeIdentityMapper);
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }

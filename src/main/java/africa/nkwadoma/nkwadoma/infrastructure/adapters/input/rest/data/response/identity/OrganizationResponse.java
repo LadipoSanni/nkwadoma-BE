@@ -36,7 +36,6 @@ public class OrganizationResponse {
     private double repaymentRate;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
-//    private List<ServiceOffering> serviceOfferings;
     private String logoImage;
     private String bannerImage;
     private String address;
