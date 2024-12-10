@@ -115,7 +115,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
         identityManagerOutPutPort.enableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.TRUE);
-        foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
+        foundOrganization.setStatus(ActivationStatus.ACTIVATED);
         return foundOrganization;
     }
     @Override
