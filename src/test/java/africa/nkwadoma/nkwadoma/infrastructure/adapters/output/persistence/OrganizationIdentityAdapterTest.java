@@ -306,7 +306,7 @@ class OrganizationIdentityAdapterTest {
         }
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         if (StringUtils.isNotEmpty(amazingGraceId)) {
             try {
