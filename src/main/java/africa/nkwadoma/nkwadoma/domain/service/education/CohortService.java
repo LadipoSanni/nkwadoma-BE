@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -14,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -50,6 +52,7 @@ public class CohortService implements CohortUseCase {
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @Override
@@ -73,6 +76,15 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        List<OrganizationServiceOffering> serviceOfferings =
+                organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
+        List<ServiceOffering> offerings = serviceOfferings.stream()
+                .map(OrganizationServiceOffering::getServiceOffering)
+                .toList();
+        organizationIdentity.setServiceOfferings(offerings);
+        organizationIdentityOutputPort.save(organizationIdentity);
         return savedCohort;
     }
 
