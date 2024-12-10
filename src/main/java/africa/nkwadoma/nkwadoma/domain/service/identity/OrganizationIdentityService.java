@@ -133,8 +133,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
-        Page<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
-        return organizationIdentities;
+        return organizationIdentityOutputPort.viewAllOrganization(organizationIdentity);
     }
 
     @Override

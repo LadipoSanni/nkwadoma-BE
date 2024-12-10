@@ -55,11 +55,13 @@ public class OrganizationController {
             organizationIdentity.setOrganizationEmployees(orgEmployee);
             organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
+            log.info("Organization identity from service level: {}", organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = organizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
+            log.info("Mapped Organization identity from service level: {}", organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
-                    .statusCode(HttpStatus.CREATED.toString())
+                    .statusCode(HttpStatus.CREATED.name())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
 
@@ -77,7 +79,7 @@ public class OrganizationController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
                 .message(UPDATE_ORGANIZATION_SUCCESS)
-                .statusCode(HttpStatus.CREATED.toString())
+                .statusCode(HttpStatus.CREATED.name())
                 .build();
         return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }

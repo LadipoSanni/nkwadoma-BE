@@ -14,6 +14,6 @@ public class InviteOrganizationResponse {
     private String createdBy;
     private String email;
     private ServiceOffering serviceOffering;
+    private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
-
 }
