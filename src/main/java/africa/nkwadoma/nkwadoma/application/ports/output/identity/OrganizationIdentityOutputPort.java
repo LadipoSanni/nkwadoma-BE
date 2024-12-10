@@ -14,7 +14,7 @@ public interface OrganizationIdentityOutputPort {
     Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException;
 
     OrganizationIdentity findByEmail(String email) throws MeedlException;
-    void delete(String rcNumber) throws MeedlException;
+    void delete(String id) throws MeedlException;
     OrganizationIdentity findById(String id) throws MeedlException;
 
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;

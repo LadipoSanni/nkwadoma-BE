@@ -43,6 +43,12 @@ class OrganizationIdentityAdapterTest {
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
 
         amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC87877", userIdentities);
+        try {
+            organizationOutputPort.delete(amazingGrace.getId());
+        } catch (MeedlException e) {
+            log.error("Failed to delete organization with id : {} , because {} ",amazingGrace.getId(), e.getMessage());
+        }
+
     }
 
     @Test
