@@ -1,12 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerification;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -26,12 +23,10 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
-import static africa.nkwadoma.nkwadoma.test.data.TestData.createTestUserIdentity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -128,7 +123,8 @@ class KeycloakAdapterTest {
             assertFalse(existingUser.get().isEmailVerified());
 
             john.setPassword(password);
-            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+            john.setEmail(john.getEmail());
+            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john);
 
             assertNotNull(userIdentity);
             assertNotNull(userIdentity.getId());
@@ -251,8 +247,10 @@ class KeycloakAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
     void createPasswordWithNullPassword(String password) {
+        john.setEmail(john.getEmail());
+        john.setPassword(password);
         MeedlException meedlException = assertThrows(MeedlException.class, () ->
-                identityManagementOutputPort.createPassword(john.getEmail(), password));
+                identityManagementOutputPort.createPassword(john));
         assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
     }
 
@@ -260,7 +258,8 @@ class KeycloakAdapterTest {
     @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
     void createPasswordWithSpaces(String password) {
         try {
-            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john.getEmail(), password);
+            john.setEmail(john.getEmail());
+            UserIdentity userIdentity = identityManagementOutputPort.createPassword(john);
             assertNotNull(userIdentity);
             assertNotNull(userIdentity.getId());
             assertTrue(userIdentity.isEmailVerified());
@@ -280,8 +279,9 @@ class KeycloakAdapterTest {
     @Order(9)
     void login(){
         try {
+            john.setEmail(john.getEmail());
             john.setPassword(password);
-            identityManagementOutputPort.createPassword(john.getEmail(), john.getPassword());
+            identityManagementOutputPort.createPassword(john);
             AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
             assertNotNull(accessTokenResponse);
             assertNotNull(accessTokenResponse.getToken());

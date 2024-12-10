@@ -160,26 +160,26 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
 
     @Override
-    public UserIdentity createPassword(String email, String password) throws MeedlException {
-        email = email.trim();
-        validateEmailAndPassword(email, password);
-        password = password.trim();
-        UserIdentity userIdentity = getUserByEmail(email.trim())
+    public UserIdentity createPassword(UserIdentity userIdentity) throws MeedlException {
+        validateEmailAndPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        String email = userIdentity.getEmail().trim();
+        String password = userIdentity.getPassword().trim();
+        UserIdentity foundUserIdentity = getUserByEmail(email)
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-        userIdentity.setNewPassword(password);
-        log.info("User ID for user creating password : {}", userIdentity);
-        if (userIdentity.isEmailVerified() && userIdentity.isEnabled()) {
-            log.error("User already verified can not create new password for this user {}", userIdentity.getEmail());
+        foundUserIdentity.setNewPassword(password);
+        log.info("User ID for user creating password : {}", foundUserIdentity);
+        if (foundUserIdentity.isEmailVerified() && foundUserIdentity.isEnabled()) {
+            log.error("User already verified can not create new password for this user {}", foundUserIdentity.getEmail());
             throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
         }
-        userIdentity = enableUserAccount(userIdentity);
-        setPassword(userIdentity);
-        userIdentity.setPassword(password);
-        userIdentity.setEmail(email);
-        AccessTokenResponse response = login(userIdentity);
-        userIdentity.setAccessToken(response.getToken());
+        foundUserIdentity = enableUserAccount(foundUserIdentity);
+        setPassword(foundUserIdentity);
+        foundUserIdentity.setPassword(password);
+        foundUserIdentity.setEmail(email);
+        AccessTokenResponse response = login(foundUserIdentity);
+        foundUserIdentity.setAccessToken(response.getToken());
 
-        return userIdentity;
+        return foundUserIdentity;
     }
 
     @Override
