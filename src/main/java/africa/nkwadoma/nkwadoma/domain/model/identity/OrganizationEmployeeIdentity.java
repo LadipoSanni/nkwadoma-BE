@@ -10,7 +10,6 @@ import java.math.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class OrganizationEmployeeIdentity {
     private String id;
     private UserIdentity meedlUser;

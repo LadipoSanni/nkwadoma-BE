@@ -38,12 +38,9 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
-    private final CreateOrganizationUseCase createOrganizationUseCase;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
-    private final TokenUtils tokenUtils;
     private final IdentityMapper identityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
@@ -96,15 +93,14 @@ public class IdentityManagerController {
 
     private void updateOrganizationStatus(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        log.info("User ID: {}", userIdentity.getId());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().id(foundUserIdentity.getId()).build();
         employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
-        log.info("Found employee: {}", employeeIdentity);
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
                 foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
         {
-            OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
+            OrganizationIdentity organizationIdentity =
+                    viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", organizationIdentity);
             organizationIdentity.setUpdatedBy(userIdentity.getId());
             organizationIdentity.setStatus(ActivationStatus.ACTIVE);
