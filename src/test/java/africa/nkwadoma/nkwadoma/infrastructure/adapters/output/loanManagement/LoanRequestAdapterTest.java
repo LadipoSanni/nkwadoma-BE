@@ -131,7 +131,7 @@ class LoanRequestAdapterTest {
             assertNotNull(foundOrganization.getId());
 
             dataAnalytics = new Program();
-            dataAnalytics.setName("Data Analytics");
+            dataAnalytics.setName("Data Analytic");
             dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
             dataAnalytics.setMode(ProgramMode.FULL_TIME);
             dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
