@@ -167,7 +167,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         UserIdentity foundUserIdentity = getUserByEmail(email)
                 .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         foundUserIdentity.setNewPassword(password);
-        log.info("User ID for user creating password : {}", foundUserIdentity);
+        log.info("User ID for user creating password : {}", foundUserIdentity.getId());
         if (foundUserIdentity.isEmailVerified() && foundUserIdentity.isEnabled()) {
             log.error("User already verified can not create new password for this user {}", foundUserIdentity.getEmail());
             throw new IdentityException(USER_PREVIOUSLY_VERIFIED.getMessage());
