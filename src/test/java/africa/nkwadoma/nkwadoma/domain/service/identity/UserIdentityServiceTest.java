@@ -63,7 +63,7 @@ class UserIdentityServiceTest {
         favour.setRole(IdentityRole.ORGANIZATION_ADMIN);
         favour.setId("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
         favour.setReactivationReason("Reason for reactivation is to test");
-        favour.setDeactivationReason("Reason for deactivation is to test");;
+        favour.setDeactivationReason("Reason for deactivation is to test");
 
         employeeIdentity = new OrganizationEmployeeIdentity();
         employeeIdentity.setId("1234");
@@ -159,9 +159,10 @@ class UserIdentityServiceTest {
     void createPassword(){
         try {
             favour.setPassword("Passkey90@");
+            favour.setEmail(favour.getEmail());
             assertNotNull(generatedToken);
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
-            when(identityManagerOutPutPort.createPassword(favour.getEmail(), favour.getPassword())).thenReturn(favour);
+            when(identityManagerOutPutPort.createPassword(any())).thenReturn(favour);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
             userIdentityService.createPassword(generatedToken,favour.getPassword());
         }catch (MeedlException exception){
