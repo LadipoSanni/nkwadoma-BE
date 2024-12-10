@@ -176,6 +176,7 @@ public class CohortService implements CohortUseCase {
         MeedlValidator.validatePageSize(pageSize);
         Program foundProgram = programOutputPort.findProgramById(programId);
         if (ObjectUtils.isEmpty(foundProgram)) {
+            log.error("While trying to view all cohort in a program, the program {} was not found.", programId);
             throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
         }
         return cohortOutputPort.findAllCohortInAProgram(programId, pageSize, pageNumber);

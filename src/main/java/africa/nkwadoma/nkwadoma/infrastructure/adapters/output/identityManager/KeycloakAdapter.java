@@ -214,7 +214,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
-        MeedlValidator.validateUUID(userRepresentation.getId());
+        MeedlValidator.validateUUID(userRepresentation.getId(),"Please provide a valid identification for the representation of this user.");
         if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
             throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
         }
@@ -360,7 +360,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()
