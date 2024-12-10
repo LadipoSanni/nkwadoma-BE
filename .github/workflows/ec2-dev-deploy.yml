@@ -72,21 +72,19 @@ jobs:
   
       - name: Run Flyway migrations
         run: |
+          mkdir -p logs
           flyway -url=${{ secrets.DATABASE_URL }} \
                  -user=${{ secrets.DATABASE_USERNAME }} \
                  -password=${{ secrets.DATABASE_PASSWORD }} \
                  -locations=filesystem:./migrations \
-                 migrate
+                 -verbose migrate | tee logs/flyway-output.log
   
-      - name: Save Flyway logs
-        run: |
-          mkdir -p logs
-          cp flyway-output.json logs/
       - name: Upload Flyway Logs
         uses: actions/upload-artifact@v3
         with:
           name: flyway-logs
           path: logs/
+
 
         
 

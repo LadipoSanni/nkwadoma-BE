@@ -28,6 +28,7 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
         if (foundLoanee.isEmpty()) {
             throw new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage());
         }
+        nextOfKin.setLoanee(foundLoanee.get());
         return nextOfKinIdentityOutputPort.save(nextOfKin);
     }
 
