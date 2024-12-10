@@ -128,8 +128,8 @@ public class UserIdentityService implements CreateUserUseCase  {
         userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
         log.info("User Identity after password has been created: {}", userIdentity);
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
-        log.info("done getting user identity frm token {}",userIdentity);
-        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
+//        log.info("done getting user identity frm token {}",userIdentity);
+//        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
