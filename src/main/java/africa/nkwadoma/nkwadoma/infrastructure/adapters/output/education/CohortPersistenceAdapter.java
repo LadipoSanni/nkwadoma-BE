@@ -55,7 +55,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
-        CohortEntity cohortEntity = cohortRepository.findById(id).orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
+        CohortEntity cohortEntity = cohortRepository.findById(id).
+                orElseThrow(() -> new CohortException(COHORT_DOES_NOT_EXIST.getMessage()));
         programCohortOutputPort.deleteAllByCohort(cohortEntity);
         loanBreakdownRepository.deleteAllByCohort(cohortEntity);
         cohortRepository.deleteById(id);
