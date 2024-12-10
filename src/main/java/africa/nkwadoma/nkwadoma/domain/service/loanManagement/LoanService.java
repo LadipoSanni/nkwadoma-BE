@@ -177,7 +177,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        if (loanOffer.getLoaneeResponse().equals(LoanOfferResponse.ACCEPT)){
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             //Loanee Wallet would be Created
             loanOfferMapper.updateLoanOffer(offer,loanOffer);
             offer.setDateTimeAccepted(LocalDateTime.now());

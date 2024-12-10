@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -22,7 +23,7 @@ public class LoanOffer {
     private String loaneeId;
     private String userId;
     private LocalDateTime dateTimeAccepted;
-    private LoanOfferResponse loaneeResponse;
+    private LoanDecision loaneeResponse;
 
 
 
