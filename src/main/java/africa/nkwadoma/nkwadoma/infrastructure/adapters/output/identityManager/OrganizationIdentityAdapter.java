@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -60,7 +61,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
         log.info("Find organization with rcNumber {}", rcNumber);
-        MeedlValidator.validateDataElement(rcNumber, "Company RC number is required");
+        MeedlValidator.validateDataElement(rcNumber, OrganizationMessages.INVALID_RC_NUMBER.getMessage());
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 
@@ -89,7 +90,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void delete(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
@@ -97,7 +98,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
@@ -117,13 +118,13 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public boolean existsById(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         return organizationEntityRepository.existsById(organizationId);
     }
 
     @Override
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_SERVICE_OFFERING_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
@@ -134,7 +135,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(organizationId);
         log.info("Found org sev offerings in db: {}", organizationServiceOfferings);
@@ -143,7 +144,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationServiceOfferingId);
+        MeedlValidator.validateUUID(organizationServiceOfferingId, OrganizationMessages.INVALID_SERVICE_OFFERING_ID.getMessage());
         Optional<OrganizationServiceOfferingEntity> organizationServiceOffering =
                 organizationServiceOfferingRepository.findById(organizationServiceOfferingId);
         if (organizationServiceOffering.isPresent()) {
@@ -155,7 +156,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void deleteServiceOffering(String serviceOfferingId) throws MeedlException {
-        MeedlValidator.validateUUID(serviceOfferingId);
+        MeedlValidator.validateUUID(serviceOfferingId, OrganizationMessages.INVALID_SERVICE_OFFERING_ID.getMessage());
         Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.
                 findById(serviceOfferingId);
         if (serviceOfferingEntity.isPresent()) {
