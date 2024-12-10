@@ -58,8 +58,8 @@ public class LoanProduct {
     public void validateLoanProductDetails() throws MeedlException {
         log.info("Started loan product validation");
         MeedlValidator.validateObjectName(name);
-        MeedlValidator.validateDataElement(termsAndCondition);
-        MeedlValidator.validateDataElement(mandate);
+        MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
+        MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
         validateLoanProductSize();
         validateObligorLimit();
         log.info("ended loan product validation successfully... ");

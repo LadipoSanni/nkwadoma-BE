@@ -122,7 +122,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Loanee name is required.");
         MeedlValidator.validateUUID(cohortId);
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
@@ -142,7 +142,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
-                organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getCreatedBy());
+                organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         loanee.setReferredBy(organizationIdentity.getName());
