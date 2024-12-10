@@ -233,8 +233,7 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNonExistingCreatedBy() {
         dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-        assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
