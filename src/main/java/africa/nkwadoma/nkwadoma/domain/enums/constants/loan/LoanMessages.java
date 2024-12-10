@@ -26,6 +26,7 @@ public enum LoanMessages {
     LOAN_ID_REQUIRED("Loan id is required"),
     INVALID_LOAN_PRODUCT_ID("Please provide a valid loan product identification"),
     INVALID_LOANEE_ID("Please provide a valid loanee identification"),
+    INVALID_LOAN_ID("Please provide a valid loan identification"),
     TENOR_STATUS_MONTH_BOND("Tenor should be between 1 TO 120 months"),
     LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED("Loan referral must be accepted"),
     LOAN_REFERRAL_NOT_FOUND("Loan referral not found"),
