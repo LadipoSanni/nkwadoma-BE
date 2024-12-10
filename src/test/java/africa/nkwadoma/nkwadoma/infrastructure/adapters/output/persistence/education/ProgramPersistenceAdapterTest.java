@@ -84,7 +84,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel094@johnson.com");
+        userIdentity.setEmail("joel0949@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
