@@ -2,11 +2,18 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -50,6 +57,15 @@ class CohortServiceTest {
     private LoanBreakdown loanBreakdown;
     @Mock
     private CohortMapper cohortMapper;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private OrganizationIdentity organizationIdentity;
+    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    private ServiceOffering serviceOffering;
+    private UserIdentity userIdentity;
+
 
     @BeforeEach
     void setUp() {
@@ -85,6 +101,11 @@ class CohortServiceTest {
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
 
+        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
+        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
+        organizationIdentity =
+                TestData.createOrganizationTestData("testOrg1","rc34rhchjdg",List.of(organizationEmployeeIdentity));
+
     }
 
     @Test
@@ -93,6 +114,11 @@ class CohortServiceTest {
             elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
+            when(organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(any()))
+                    .thenReturn(List.of(new OrganizationServiceOffering()));
+            when(organizationIdentityOutputPort.save(organizationIdentity))
+                    .thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
@@ -127,6 +153,11 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
+            when(organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(any()))
+                    .thenReturn(List.of(new OrganizationServiceOffering()));
+            when(organizationIdentityOutputPort.save(organizationIdentity))
+                    .thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());

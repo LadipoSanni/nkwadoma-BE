@@ -39,6 +39,7 @@ public class OrganizationIdentity {
     private ActivationStatus status;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
+    private int numberOfCohort;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;
