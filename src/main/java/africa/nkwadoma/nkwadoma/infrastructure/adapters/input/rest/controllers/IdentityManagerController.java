@@ -106,19 +106,9 @@ public class IdentityManagerController {
         {
             OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", organizationIdentity);
-//            organizationIdentity.setId(employeeIdentity.getOrganization());
             organizationIdentity.setUpdatedBy(userIdentity.getId());
             organizationIdentity.setStatus(ActivationStatus.ACTIVE);
             organizationIdentity.setTimeUpdated(LocalDateTime.now());
-//            organizationIdentity.setRcNumber(null);
-//            organizationIdentity.setName(null);
-//            List<OrganizationServiceOffering> organizationServiceOfferings =
-//                    organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(employeeIdentity.getOrganization());
-//            Industry industry = organizationServiceOfferings.get(0).getServiceOffering().getIndustry();
-//            String industryName = organizationServiceOfferings.get(0).getServiceOffering().getName();
-//            List<ServiceOffering> serviceOfferings = List.of(ServiceOffering.builder().name(industryName).industry(industry).build());
-//            organizationIdentity.setServiceOfferings(serviceOfferings);
-//            organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
             OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
             organizationEntityRepository.save(organizationEntity);
             log.info("Updated organization status: {}", organizationIdentity.getStatus());
