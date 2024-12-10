@@ -145,29 +145,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         foundOrganization.setStatus(ActivationStatus.ACTIVATED);
         return foundOrganization;
     }
-    @Override
-    public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
-        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
-        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
-        log.info("found organization employees to deactivate: {}",organizationEmployees.size());
-        organizationEmployees
-                .forEach(organizationEmployeeIdentity -> {
-                    try {
-                        log.info("Deactivating user {}", organizationEmployeeIdentity.getMeedlUser());
-                        organizationEmployeeIdentity.getMeedlUser().setDeactivationReason(reason);
-                        identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMeedlUser());
-                    } catch (MeedlException e) {
-                        log.error("Error disabling organization user : {}", e.getMessage());
-                    }
-                });
-
-        identityManagerOutPutPort.disableClient(foundOrganization);
-        foundOrganization.setEnabled(Boolean.FALSE);
-        foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
-        return foundOrganization;
-    }
 
     private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {
         if (StringUtils.isNotEmpty(organizationIdentity.getName())) {

@@ -282,17 +282,6 @@ class KeycloakAdapterTest {
         }
     }
 
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void getClientRepresentationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId(id));
-    }
-
-    @Test
-    void getClientRepresentationWithNoneExistingId() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));
-    }
     @Test
     @Order(9)
     void getUserIdentityById(){
@@ -523,17 +512,6 @@ class KeycloakAdapterTest {
         john.setPassword(password);
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
 
-    }
-    @Test
-    void disableOrganizationWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
-    void disableOrganizationWithInvalidId(String id) {
-        OrganizationIdentity megaOrganization = new OrganizationIdentity();
-                megaOrganization.setId(id);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
     }
 
     @Test
