@@ -12,6 +12,7 @@ import lombok.*;
 public class ProgramUpdateRequest {
     @NotBlank(message = "Program Id is required")
     private String id;
+    @Size(max = 2500, message = "Program description must not exceed 2500 characters")
     private String programDescription;
     private String name;
     private DurationType durationType;

@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ViewOrganizationEmployeesUseCase {
     Page<OrganizationEmployeeIdentity> viewOrganizationEmployees(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
+    OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException;
 
     List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException;
 
