@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
@@ -19,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOfferin
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +53,7 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
 
 
     @Override
@@ -76,6 +77,11 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
+        reflectNumberOfCohortInOrganization(program);
+        return savedCohort;
+    }
+
+    private void reflectNumberOfCohortInOrganization(Program program) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         List<OrganizationServiceOffering> serviceOfferings =
                 organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
@@ -84,8 +90,8 @@ public class CohortService implements CohortUseCase {
                 .map(OrganizationServiceOffering::getServiceOffering)
                 .toList();
         organizationIdentity.setServiceOfferings(offerings);
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
-        return savedCohort;
     }
 
     private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {
