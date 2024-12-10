@@ -17,6 +17,7 @@ public class ProgramCreateRequest {
     @NotBlank(message = "Program name is required")
     private String programName;
     private String objectives;
+    @Size(max = 2500, message = "Program description must not exceed 2500 characters")
     private String programDescription;
     private ActivationStatus programStatus;
     @Positive(message = "Program duration must be a positive number")

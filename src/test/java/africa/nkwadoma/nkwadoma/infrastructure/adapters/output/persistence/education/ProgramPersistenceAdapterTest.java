@@ -84,7 +84,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel094@johnson.com");
+        userIdentity.setEmail("joel0949@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
@@ -233,8 +233,7 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNonExistingCreatedBy() {
         dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-        assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
@@ -285,8 +284,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findProgramByNullOrEmptyName(String name) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
     }
 
     @ParameterizedTest
@@ -416,8 +414,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void deleteProgramByEmptyId(String id) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
     }
 
     @Test

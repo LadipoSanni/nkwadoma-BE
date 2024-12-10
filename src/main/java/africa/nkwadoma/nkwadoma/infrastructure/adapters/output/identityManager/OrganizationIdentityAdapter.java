@@ -25,7 +25,6 @@ import java.util.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,7 +41,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.validate();
         MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
 
-        validate(organizationIdentity);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity.setInvitedDate(LocalDateTime.now());
         organizationEntity.setStatus(ActivationStatus.INVITED);
@@ -59,13 +57,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
-    public void validate(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity);
-        organizationIdentity.validate();
-        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
-    }
     @Override
-    public Optional<OrganizationEntity> findByRcNumber(String rcNumber) {
+    public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
+        log.info("Find organization with rcNumber {}", rcNumber);
+        MeedlValidator.validateDataElement(rcNumber, "Company RC number is required");
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 
@@ -86,7 +81,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public OrganizationIdentity findByEmail(String email) throws MeedlException {
-        validateEmail(email);
+        MeedlValidator.validateEmail(email);
         OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).
                 orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
         return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
@@ -94,7 +89,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void delete(String id) throws MeedlException {
-        validateDataElement(id);
+        MeedlValidator.validateUUID(id);
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
                 orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
         organizationEntityRepository.delete(organizationEntity);
@@ -121,7 +116,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public boolean existsById(String organizationId) {
+    public boolean existsById(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
         return organizationEntityRepository.existsById(organizationId);
     }
 
@@ -137,17 +133,30 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationId);
+    public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(
+            String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(organizationId);
-        log.info("Found org sev offerings in db: {}", organizationServiceOfferings);
+        log.info("Found org service offerings in DB: {}", organizationServiceOfferings);
         return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
     }
 
     @Override
+    public List<ServiceOffering> getServiceOfferings(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+        List<OrganizationServiceOffering> organizationServiceOfferings =
+                findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
+        List<ServiceOffering> serviceOfferings = new ArrayList<>();
+        organizationServiceOfferings.forEach(organizationServiceOffering ->
+                serviceOfferings.add(organizationServiceOffering.getServiceOffering()));
+        return serviceOfferings;
+    }
+
+    @Override
     public void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationServiceOfferingId);
+        MeedlValidator.validateUUID(organizationServiceOfferingId);
         Optional<OrganizationServiceOfferingEntity> organizationServiceOffering =
                 organizationServiceOfferingRepository.findById(organizationServiceOfferingId);
         if (organizationServiceOffering.isPresent()) {
@@ -159,7 +168,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public void deleteServiceOffering(String serviceOfferingId) throws MeedlException {
-        MeedlValidator.validateDataElement(serviceOfferingId);
+        MeedlValidator.validateUUID(serviceOfferingId);
         Optional<ServiceOfferingEntity> serviceOfferingEntity = serviceOfferEntityRepository.
                 findById(serviceOfferingId);
         if (serviceOfferingEntity.isPresent()) {
@@ -168,19 +177,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
     }
-
     @Override
     public List<OrganizationIdentity> findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Organization name is required");
         log.info("Searching for organizations with name {}", name);
         List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
         log.info("Found {} organizations", organizationEntities);
         return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
-    }
-
-    private OrganizationIdentity saveAndGetUserIdentity(OrganizationIdentity organizationIdentity) {
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        organizationEntity = organizationEntityRepository.save(organizationEntity);
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
     }
 }

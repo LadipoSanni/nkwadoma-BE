@@ -1,23 +1,34 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.keycloak.representations.*;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.*;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -27,8 +38,12 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
-    private final IdentityVerificationUseCase verificationUseCase;
+    private final ViewOrganizationUseCase viewOrganizationUseCase;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final IdentityMapper identityMapper;
+    private final OrganizationEntityRepository organizationEntityRepository;
+    private final OrganizationIdentityMapper organizationIdentityMapper;
 
     @PostMapping("auth/login")
     public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
@@ -64,12 +79,38 @@ public class IdentityManagerController {
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
+        log.info("got the request {}",passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
+
+        userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        updateOrganizationStatus(userIdentity);
+
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword())).
+                data(userIdentity).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+
+    private void updateOrganizationStatus(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity);
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
+        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().id(foundUserIdentity.getId()).build();
+        employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+        if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
+                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
+        {
+            OrganizationIdentity organizationIdentity =
+                    viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
+            log.info("Found organization: {}", organizationIdentity);
+            organizationIdentity.setUpdatedBy(userIdentity.getId());
+            organizationIdentity.setStatus(ActivationStatus.ACTIVE);
+            organizationIdentity.setTimeUpdated(LocalDateTime.now());
+            OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+            organizationEntityRepository.save(organizationEntity);
+            log.info("Updated organization status: {}", organizationIdentity.getStatus());
+        }
+    }
+
     @PostMapping("auth/password/forgotPassword")
     public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
         createUserUseCase.forgotPassword(email);

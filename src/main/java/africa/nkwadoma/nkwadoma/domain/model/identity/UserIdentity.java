@@ -48,8 +48,8 @@ public class UserIdentity {
         if (ObjectUtils.isEmpty(this.role)|| StringUtils.isEmpty(this.role.name()))
             throw new IdentityException(INVALID_VALID_ROLE.getMessage());
         MeedlValidator.validateEmail(this.email);
-        MeedlValidator.validateDataElement(this.firstName);
-        MeedlValidator.validateDataElement(this.lastName);
+        MeedlValidator.validateDataElement(this.firstName, "User first name is required");
+        MeedlValidator.validateDataElement(this.lastName, "User last name is required");
         MeedlValidator.validateUUID(this.createdBy);
     }
 

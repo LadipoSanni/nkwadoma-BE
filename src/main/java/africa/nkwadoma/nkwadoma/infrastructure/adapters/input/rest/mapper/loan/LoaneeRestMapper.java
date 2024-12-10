@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeReferralResponse;
@@ -30,6 +31,9 @@ public interface LoaneeRestMapper {
     @Mapping(target = "itemAmount", source = "itemAmount")
     @Mapping(target = "currency", source = "currency")
     LoanBreakdownResponse toLoanBreakdownResponse(LoaneeLoanBreakdown loanBreakdown);
+
+    @Mapping(target = "loaneeLoanBreakdownId", source = "loanBreakdownId")
+    LoaneeLoanBreakdown mapToLoanBreakdown(LoaneeLoanBreakdownRequest breakdownRequest);
 
     LoaneeReferralResponse toLoaneeReferralResponse(LoanReferral loanReferral);
 

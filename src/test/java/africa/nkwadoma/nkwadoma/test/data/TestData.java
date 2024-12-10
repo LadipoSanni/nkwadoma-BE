@@ -43,6 +43,8 @@ public class TestData {
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
+        organizationIdentity.getServiceOfferings().get(0).setTransactionUpperBound(new BigDecimal("0.00"));
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
@@ -65,7 +67,6 @@ public class TestData {
                 .id(testId)
                 .userIdentity(userIdentity)
                 .cohortId(testId)
-                .createdBy(userIdentity.getCreatedBy())
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
@@ -74,8 +75,8 @@ public class TestData {
                 .loaneeId(testId)
                 .loanOfferId(testId)
                 .loanee(loanee)
+                .loanAccountId(testId)
                 .startDate(LocalDateTime.now())
-                .loanAccountId("account id")
                 .build();
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){

@@ -9,9 +9,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
@@ -21,8 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
 
@@ -39,7 +37,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
 
     @Override
-        public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
         Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         if (foundOrganizationEntity.isPresent()) {
@@ -48,6 +46,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
@@ -55,10 +55,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
        return organizationIdentity;
     }
 
+
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(reason);
+        MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         log.info("found organization employees: {}",organizationEmployees);
@@ -113,9 +114,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateUUID(organizationIdentity.getId());
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
         validateNonUpdatableValues(organizationIdentity);
+        log.info("Organization identity input: {}", organizationIdentity);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
         foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization,organizationIdentity);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
+        log.info("Updated organization: {}", foundOrganization);
         return organizationIdentityOutputPort.save(foundOrganization);
     }
 
@@ -135,13 +138,16 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationName);
+        MeedlValidator.validateDataElement(organizationName, "Organization name is required");
         return organizationIdentityOutputPort.findByName(organizationName);
     }
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        return organizationIdentityOutputPort.findById(organizationId);
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
+        return organizationIdentity;
     }
 
     @Override
@@ -151,6 +157,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                 organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
     }
 }
