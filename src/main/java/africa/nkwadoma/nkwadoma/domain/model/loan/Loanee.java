@@ -20,7 +20,6 @@ import java.util.List;
 public class Loanee {
     private String id;
     private String cohortId;
-    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserIdentity userIdentity;
@@ -35,7 +34,6 @@ public class Loanee {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(cohortId);
-        MeedlValidator.validateUUID(createdBy);
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);
         validateLoaneeUserIdentity();
     }
@@ -45,7 +43,7 @@ public class Loanee {
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), "User first name is required.");
         MeedlValidator.validateDataElement(userIdentity.getLastName(), "User last name is required.");
         MeedlValidator.validateEmail(userIdentity.getEmail());
-        MeedlValidator.validateUUID(createdBy);
+        MeedlValidator.validateUUID(userIdentity.getCreatedBy());
     }
 
 }
