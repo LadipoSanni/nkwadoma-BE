@@ -32,10 +32,8 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
-
     @InjectMocks
     private OrganizationIdentityService organizationIdentityService;
-
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
@@ -49,8 +47,8 @@ class OrganizationIdentityServiceTest {
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
-    private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
+    private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
@@ -80,7 +78,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setName("rose couture6");
         roseCouture.setEmail("iamoluchimercy@gmail.com");
         roseCouture.setTin("7682-5627");
-        roseCouture.setRcNumber("RC87899");
+        roseCouture.setRcNumber("RC8789905");
         roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
         roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         roseCouture.setPhoneNumber("09876365713");
@@ -93,7 +91,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation = null;
+        OrganizationIdentity invitedOrganisation;
         try {
             when(identityManagerOutPutPort.createOrganization(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
@@ -116,11 +114,13 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
 
-    @Test
-    void inviteOrganizationWithInvalidRCNumber() {
-        roseCouture.setRcNumber("WrongRcNumber");
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongRcNumber", "RC123456", "OP1234567", "rc1234567", "123456789", "ABCDEFG"})
+    void inviteOrganizationWithInvalidRCNumber(String rcNumber) {
+        roseCouture.setRcNumber(rcNumber);
         assertThrows(MeedlException.class, ()-> organizationIdentityService.inviteOrganization(roseCouture));
     }
+
     @Test
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));

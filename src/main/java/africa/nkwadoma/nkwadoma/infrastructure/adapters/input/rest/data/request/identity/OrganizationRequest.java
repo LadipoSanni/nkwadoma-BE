@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class OrganizationRequest {
     private String name;
     private String email;
     private String websiteAddress;
-    @Pattern(regexp = "^RC\\d{7}$", message = "Registration number must start with 'RC' followed by exactly 7 digits.")
+    @Pattern(regexp = "^RC\\d{7}$", message = ErrorMessages.INVALID_RC_NUMBER)
     private String rcNumber;
     private String tin;
     private String phoneNumber;

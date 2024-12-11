@@ -174,4 +174,11 @@ public class MeedlValidator {
             loanBreakdown.validate();
         }
     }
+
+    public static void validateRCNumber(String rcNumber) throws MeedlException {
+        boolean patternMatches = Pattern.compile("^RC\\d{7}$").matcher(rcNumber).matches();
+        if (!patternMatches) {
+            throw new MeedlException(MeedlMessages.INVALID_RC_NUMBER.getMessage());
+        }
+    }
 }

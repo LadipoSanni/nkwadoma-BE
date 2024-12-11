@@ -57,6 +57,7 @@ public class OrganizationIdentity {
         MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.rcNumber, "Company's RC number is required");
+        MeedlValidator.validateRCNumber(this.rcNumber);
         MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
 
         if (this.serviceOfferings == null

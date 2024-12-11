@@ -26,7 +26,7 @@ public enum MeedlMessages {
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
-    FORGOT_PASSWORD_TEMPLATE("forget-password");
+    FORGOT_PASSWORD_TEMPLATE("forget-password"), INVALID_RC_NUMBER("Registration number must start with 'RC' followed by exactly 7 digits.");
 
 
     private final String message;
