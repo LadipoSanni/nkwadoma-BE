@@ -38,7 +38,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationServiceOfferingRepository organizationServiceOfferingRepository;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Lazy
     private final ProgramOutputPort programOutputPort;
 
     @Override

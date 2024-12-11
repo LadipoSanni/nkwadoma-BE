@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
@@ -36,14 +37,13 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
     @Lazy
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final CohortRepository cohortRepository;
-//    private final CohortOutputPort cohortOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
-//    private final ProgramCohortOutputPort programCohortOutputPort;
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
@@ -83,6 +83,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
         if (StringUtils.isEmpty(program.getId())) {
             organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
+            log.info("Updating total number of programs in organization to {}",organizationEntity.getNumberOfPrograms());
             organizationEntityRepository.save(organizationEntity);
         }
     }
