@@ -104,10 +104,10 @@ class LoanRequestAdapterTest {
             organizationIdentity.setName("Amazing Grace Enterprises");
             organizationIdentity.setEmail("rachel@gmail.com");
             organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC345677");
+            organizationIdentity.setRcNumber("RC3456778");
             organizationIdentity.setId("e66eb97f-cf79-47b0-96fa-6a460ffa7f63");
             organizationIdentity.setPhoneNumber("0907658483");
-            organizationIdentity.setTin("Tin5678");
+            organizationIdentity.setTin("Tin589-678");
             organizationIdentity.setNumberOfPrograms(0);
             organizationIdentity.setCreatedBy(testId);
             ServiceOffering serviceOffering = new ServiceOffering();
