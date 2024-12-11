@@ -178,7 +178,14 @@ public class MeedlValidator {
     public static void validateRCNumber(String rcNumber) throws MeedlException {
         boolean patternMatches = Pattern.compile("^RC\\d{7}$").matcher(rcNumber).matches();
         if (!patternMatches) {
-            throw new MeedlException(MeedlMessages.INVALID_RC_NUMBER.getMessage());
+            throw new MeedlException(INVALID_RC_NUMBER.getMessage());
+        }
+    }
+
+    public static void validateTin(String tin) throws MeedlException {
+        boolean patternMatches = Pattern.compile("^[a-zA-Z0-9-]{9,15}$").matcher(tin).matches();
+        if (!patternMatches) {
+            throw new MeedlException(MeedlMessages.INVALID_TIN.getMessage());
         }
     }
 }

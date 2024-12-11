@@ -21,6 +21,7 @@ public class OrganizationRequest {
     private String websiteAddress;
     @Pattern(regexp = "^RC\\d{7}$", message = ErrorMessages.INVALID_RC_NUMBER)
     private String rcNumber;
+    @Pattern(regexp = "^[a-zA-Z0-9-]{9,15}$", message = ErrorMessages.INVALID_TIN)
     private String tin;
     private String phoneNumber;
     private String createdBy;

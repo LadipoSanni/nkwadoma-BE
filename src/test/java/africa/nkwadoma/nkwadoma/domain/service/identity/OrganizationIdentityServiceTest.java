@@ -121,6 +121,13 @@ class OrganizationIdentityServiceTest {
         assertThrows(MeedlException.class, ()-> organizationIdentityService.inviteOrganization(roseCouture));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongTIN", "ABCDEFG"})
+    void inviteOrganizationWithInvalidTIN(String tin) {
+        roseCouture.setTin(tin);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
     @Test
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
