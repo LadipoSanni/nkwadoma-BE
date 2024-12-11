@@ -110,11 +110,17 @@ class OrganizationIdentityServiceTest {
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-
     }
+
     @Test
     void inviteOrganizationWithEmptyOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
+    }
+
+    @Test
+    void inviteOrganizationWithInvalidRCNumber() {
+        roseCouture.setRcNumber("WrongRcNumber");
+        assertThrows(MeedlException.class, ()-> organizationIdentityService.inviteOrganization(roseCouture));
     }
     @Test
     void inviteOrganizationWithNullOrganization() {
