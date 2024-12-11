@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -176,14 +176,14 @@ public class MeedlValidator {
     }
 
     public static void validateRCNumber(String rcNumber) throws MeedlException {
-        boolean patternMatches = Pattern.compile("^RC\\d{7}$").matcher(rcNumber).matches();
+        boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
         if (!patternMatches) {
             throw new MeedlException(INVALID_RC_NUMBER.getMessage());
         }
     }
 
     public static void validateTin(String tin) throws MeedlException {
-        boolean patternMatches = Pattern.compile("^[a-zA-Z0-9-]{9,15}$").matcher(tin).matches();
+        boolean patternMatches = Pattern.compile(MeedlPatterns.TIN_REGEX_PATTERN).matcher(tin).matches();
         if (!patternMatches) {
             throw new MeedlException(MeedlMessages.INVALID_TIN.getMessage());
         }
