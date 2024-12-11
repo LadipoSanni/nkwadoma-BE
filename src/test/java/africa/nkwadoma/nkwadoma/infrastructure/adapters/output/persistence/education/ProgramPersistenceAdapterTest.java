@@ -364,7 +364,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), dataScience.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), dataScience.getNumberOfLoanees());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
         }

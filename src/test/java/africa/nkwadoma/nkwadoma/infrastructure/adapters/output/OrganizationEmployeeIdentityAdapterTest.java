@@ -52,6 +52,7 @@ class OrganizationEmployeeIdentityAdapterTest {
                     "RC79500034",
                     employees
             );
+            organizationIdentityOutputPort.delete(amazingGrace.getId());
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
                     name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));

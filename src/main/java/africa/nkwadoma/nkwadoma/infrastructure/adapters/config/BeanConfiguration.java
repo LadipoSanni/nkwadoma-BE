@@ -121,13 +121,6 @@ public class BeanConfiguration {
         return new QoreIdAdapter();
     }
 
-
-    @Bean
-    public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository,
-                                                                   OrganizationIdentityMapper organizationIdentityMapper,
-                                                                   ServiceOfferEntityRepository serviceOfferEntityRepository, OrganizationServiceOfferingRepository organizationServiceOfferingRepository){
-        return new OrganizationIdentityAdapter(organizationEntityRepository, serviceOfferEntityRepository, organizationIdentityMapper, organizationServiceOfferingRepository);
-    }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
                                                    UserIdentityMapper userIdentityMapper,
@@ -203,23 +196,6 @@ public class BeanConfiguration {
     @Bean
     public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository){
         return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository);
-    }
-
-    @Bean
-    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort,
-                                       UserIdentityOutputPort userIdentityOutputPort,
-                                       IdentityManagerOutputPort identityManagerOutputPort,
-                                       CohortOutputPort cohortOutputPort,
-                                       LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
-                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase,
-                                       LoanReferralOutputPort loanReferralOutputPort,
-                                       LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort){
-        return new LoaneeService(organizationEmployeeIdentityOutputPort,
-                loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,
-                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort,loaneeLoanBreakDownOutputPort);
     }
 
     @Bean

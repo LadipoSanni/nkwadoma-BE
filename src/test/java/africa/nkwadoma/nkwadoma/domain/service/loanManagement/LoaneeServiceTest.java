@@ -85,15 +85,14 @@ class LoaneeServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
-    private SendLoaneeEmailUsecase loaneeEmailUsecase;
-    @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
+    @Mock
+    private ProgramCohort programCohort;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
-    private ProgramCohort programCohort;
     private Cohort elites;
     private Loanee firstLoanee;
     private final String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";

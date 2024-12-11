@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUse
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -21,10 +22,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -47,12 +47,13 @@ import java.util.Optional;
 @Service
 public class LoaneeService implements LoaneeUseCase {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort identityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortOutputPort cohortOutputPort;
+    private final ProgramOutputPort programOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
@@ -81,21 +82,24 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setLoanBreakdowns(loanBreakdowns);
         cohort.setNumberOfLoanees(cohort.getNumberOfLoanees() + 1);
         cohortOutputPort.save(cohort);
-        reflectNumberOfLoaneeInOrganization(cohort);
+        increaseNumberOfLoaneesInProgram(cohort);
+        increaseNumberOfLoaneesInOrganization(cohort);
         return loanee;
     }
 
-    private void reflectNumberOfLoaneeInOrganization(Cohort cohort) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-        List<OrganizationServiceOffering> serviceOfferings =
-                organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
-        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfLoanees() + 1);
-        List<ServiceOffering> offerings = serviceOfferings.stream()
-                .map(OrganizationServiceOffering::getServiceOffering)
-                .toList();
-        organizationIdentity.setServiceOfferings(offerings);
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+    private void increaseNumberOfLoaneesInOrganization(Cohort cohort) throws MeedlException {
+        OrganizationIdentity organizationIdentity =
+                organizationIdentityOutputPort.findById(cohort.getOrganizationId());
+        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
         organizationIdentityOutputPort.save(organizationIdentity);
+        log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
+    }
+
+    private void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        program.setNumberOfLoanees(program.getNumberOfLoanees() + 1);
+        program = programOutputPort.saveProgram(program);
+        log.info("Total number of loanees in a program has been increased to : {}, in program with id : {}", program.getNumberOfLoanees(), program.getId());
     }
 
     @Override
