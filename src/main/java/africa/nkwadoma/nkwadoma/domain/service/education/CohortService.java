@@ -90,14 +90,17 @@ public class CohortService implements CohortUseCase {
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        log.info("Checking if cohort name exists in program found : {}", program);
         if (ObjectUtils.isEmpty(program)) {
+            log.info("Program selected for cohort creation was not found. Cohort name {}, {}",cohortName, ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
-                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohortName))
+                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(cohortName))
                 .findFirst();
         if (existingProgramCohort.isPresent()) {
+            log.info("Cohort with name {} already exists in program. Cohort id {}", cohortName, existingProgramCohort.get().getId());
             throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
         }
         return program;

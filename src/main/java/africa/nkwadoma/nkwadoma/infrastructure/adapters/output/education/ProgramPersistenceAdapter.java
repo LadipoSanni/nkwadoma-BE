@@ -23,6 +23,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.*;
 import java.util.*;
@@ -42,7 +43,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
-//    private final ProgramCohortPersistenceAdapter programCohortOutputPort;
+//    private final ProgramCohortOutputPort programCohortOutputPort;
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
@@ -110,11 +111,13 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
+    @Transactional
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId);
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
+
         if (CollectionUtils.isNotEmpty(cohortEntities)) {
             for (CohortEntity cohortEntity : cohortEntities) {
                 if (cohortEntity.getNumberOfLoanees() > 0) {

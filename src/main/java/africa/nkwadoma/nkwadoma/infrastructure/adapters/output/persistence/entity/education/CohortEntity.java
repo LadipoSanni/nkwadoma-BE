@@ -20,7 +20,6 @@ public class CohortEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(unique = true)
     private String name;
     private String programId;
     private String organizationId;
