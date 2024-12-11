@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -21,7 +22,7 @@ public class ProgramCreateRequest {
     private String programDescription;
     private ActivationStatus programStatus;
     @Positive(message = "Program duration must be a positive number")
-    @Max(value = Integer.MAX_VALUE - 1, message = "Program duration must not exceed 24 months.")
+    @Max(value = 48, message = "Program duration must not exceed 24 months.")
     private int programDuration;
     private DeliveryType deliveryType;
     private ProgramMode programMode;

@@ -49,7 +49,7 @@ public class Program {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateUUID(this.createdBy);
-        if (this.duration > 24){
+        if (this.duration > 48){
             throw new MeedlException("Program duration must not exceed 24 months");
         }
         if (this.programDescription.length() > 2500) {
