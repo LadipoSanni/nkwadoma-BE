@@ -202,7 +202,10 @@ public class CohortService implements CohortUseCase {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
-        cohortOutputPort.deleteCohort(id);
+        if (loaneeOutputPort.findAllLoaneesByCohortId(id).isEmpty()){
+            cohortOutputPort.deleteCohort(id);
+        }
+        throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
     }
 
     @Override
