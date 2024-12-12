@@ -40,8 +40,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
-        Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
-        validateUniqueValues(organizationIdentity, foundOrganizationEntity);
+        validateUniqueValues(organizationIdentity);
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -54,10 +53,12 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
        return organizationIdentity;
     }
 
-    private void validateUniqueValues(OrganizationIdentity organizationIdentity, Optional<OrganizationEntity> foundOrganizationEntity) throws MeedlException {
+    private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
+        Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
         if (foundOrganizationEntity.isPresent()) {
             throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
         }
+
         Optional<OrganizationIdentity> foundOrganizationIdentity =
                 organizationIdentityOutputPort.findByTin(organizationIdentity.getTin());
         if (foundOrganizationIdentity.isPresent()) {
