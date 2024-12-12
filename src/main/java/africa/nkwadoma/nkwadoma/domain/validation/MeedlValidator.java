@@ -45,7 +45,7 @@ public class MeedlValidator {
     }
     public static void validateUUID(String dataElement, String message) throws MeedlException {
         log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement);
+        validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
@@ -105,7 +105,7 @@ public class MeedlValidator {
         }
     }
     public static void validateBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateDataElement(bvn);
+        MeedlValidator.validateDataElement(bvn, "Invalid bvn provided");
         String regex = "^\\d{11}$";
 
         boolean isValid = Pattern.matches(regex, bvn);
@@ -128,7 +128,7 @@ public class MeedlValidator {
         }
     }
     public static void validateObjectName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Name can not be empty");
         String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' -]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
@@ -175,6 +175,7 @@ public class MeedlValidator {
     public static void validateNegativeAmount(BigDecimal itemAmount) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
+            log.info("{} --- {}",LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage(),itemAmount);
             throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
         }
     }
@@ -189,6 +190,7 @@ public class MeedlValidator {
     public static void validateRCNumber(String rcNumber) throws MeedlException {
         boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
         if (!patternMatches) {
+            log.error("{} - {}", OrganizationMessages.INVALID_RC_NUMBER.getMessage(), rcNumber);
             throw new MeedlException(OrganizationMessages.INVALID_RC_NUMBER.getMessage());
         }
     }
@@ -196,6 +198,7 @@ public class MeedlValidator {
     public static void validateTin(String tin) throws MeedlException {
         boolean patternMatches = Pattern.compile(MeedlPatterns.TIN_REGEX_PATTERN).matcher(tin).matches();
         if (!patternMatches) {
+            log.error("{} - {}", MeedlMessages.INVALID_TIN.getMessage(), tin);
             throw new MeedlException(MeedlMessages.INVALID_TIN.getMessage());
         }
     }
