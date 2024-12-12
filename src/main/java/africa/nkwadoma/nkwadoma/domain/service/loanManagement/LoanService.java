@@ -52,7 +52,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
-        MeedlValidator.validateUUID(loanProduct.getId());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
     @Override

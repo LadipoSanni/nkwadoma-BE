@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -32,7 +35,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         Optional<LoanReferralProjection> loanReferralProjection = loanReferralRepository.findLoanReferralById(loanReferralId);
         if (loanReferralProjection.isEmpty()) {
             log.info("Empty Loan referral projection: {}", loanReferralProjection);
@@ -47,7 +50,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public void deleteLoanReferral(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
         if (loanReferralEntity.isPresent()) {
             log.info("Found loan referral: {}", loanReferralEntity.get());
@@ -71,7 +74,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId);
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
     }

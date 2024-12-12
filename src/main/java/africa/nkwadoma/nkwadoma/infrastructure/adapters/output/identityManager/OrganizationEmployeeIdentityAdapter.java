@@ -107,7 +107,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public List<OrganizationEmployeeIdentity> findAllByOrganization(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         List<OrganizationEmployeeEntity> employeeEntities = employeeAdminEntityRepository.findAllByOrganization(organizationId);
         return employeeEntities.stream()
                 .map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity)
@@ -116,7 +116,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateDataElement(name, "Admin name to search for is required.");
         MeedlValidator.validateObjectInstance(identityRole);
         List<OrganizationEmployeeEntity> organizationEmployeeEntities =
@@ -133,7 +133,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
 
     @Override
     public Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String organizationId, IdentityRole identityRole, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectInstance(identityRole);
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
