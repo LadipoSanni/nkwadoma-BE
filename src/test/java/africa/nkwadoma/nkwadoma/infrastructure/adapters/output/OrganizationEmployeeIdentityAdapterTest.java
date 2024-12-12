@@ -31,19 +31,16 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private OrganizationIdentity amazingGrace;
-    private  UserIdentity joel;
-    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
     private String organizationId;
-    private OrganizationEmployeeIdentity savedEmployeeIdentity;
     private String userId;
     private String organizationEmployeeIdentityId;
 
     @BeforeAll
     void init() {
-        String testId = "ead0f7cb-5483-4bb8-b271-813970a9c367";
-        joel = TestData.createTestUserIdentity("joel54@johnson.com");
+        String testId = "ead0f7cb-5483-4bb8-b371-813970a9c367";
+        UserIdentity joel = TestData.createTestUserIdentity("joel54@johnson.com");
         joel.setId(testId);
         joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
         List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
@@ -76,10 +73,10 @@ class OrganizationEmployeeIdentityAdapterTest {
             assertNotNull(joel);
             userId = joel.getId();
 
-            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationId);
             organizationEmployeeIdentity.setMeedlUser(joel);
-            savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
 
             assertNotNull(savedEmployeeIdentity);
