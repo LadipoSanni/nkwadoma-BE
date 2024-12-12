@@ -189,7 +189,7 @@ public class MeedlValidator {
     public static void validateRCNumber(String rcNumber) throws MeedlException {
         boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
         if (!patternMatches) {
-            throw new MeedlException(INVALID_RC_NUMBER.getMessage());
+            throw new MeedlException(OrganizationMessages.INVALID_RC_NUMBER.getMessage());
         }
     }
 
