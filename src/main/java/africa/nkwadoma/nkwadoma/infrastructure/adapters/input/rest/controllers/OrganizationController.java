@@ -138,6 +138,17 @@ public class OrganizationController {
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @PostMapping("organization/service")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
+        createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .message(ORGANIZATION_DEACTIVATION_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
     @GetMapping("organization/all")
     @Operation(summary = "View all Organizations", description = "Fetch all organizations ")
