@@ -90,7 +90,7 @@ public class CohortService implements CohortUseCase {
                 .map(OrganizationServiceOffering::getServiceOffering)
                 .toList();
         organizationIdentity.setServiceOfferings(offerings);
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 
@@ -203,10 +203,11 @@ public class CohortService implements CohortUseCase {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
-        if (loaneeOutputPort.findAllLoaneesByCohortId(id).isEmpty()){
-            cohortOutputPort.deleteCohort(id);
+        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(id);
+        if (ObjectUtils.isNotEmpty(loanees)) {
+            throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
         }
-        throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
+        cohortOutputPort.deleteCohort(id);
     }
 
     @Override
