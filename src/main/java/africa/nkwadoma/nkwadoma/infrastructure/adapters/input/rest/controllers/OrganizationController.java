@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
@@ -145,6 +146,15 @@ public class OrganizationController {
         createOrganizationUseCase.reactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .message(ORGANIZATION_REACTIVATION_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("organization/reference/data")
+    @Operation(summary = REFERENCE_DATA_TITLE, description = REFERENCE_DATA_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> referenceData(){
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(new ReferenceDataResponse())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
