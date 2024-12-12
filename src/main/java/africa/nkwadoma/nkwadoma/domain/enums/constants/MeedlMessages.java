@@ -28,7 +28,8 @@ public enum MeedlMessages {
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
-    INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character.");
+    INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character."),
+    TIN_CANNOT_BE_EMPTY("Tax identity number cannot be empty");
 
 
     private final String message;
