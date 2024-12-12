@@ -104,18 +104,6 @@ public class LoaneeService implements LoaneeUseCase {
         program = programOutputPort.saveProgram(program);
         log.info("Total number of loanees in a program has been increased to : {}, in program with id : {}", program.getNumberOfLoanees(), program.getId());
     }
-//    private void reflectNumberOfLoaneeInOrganization(Cohort cohort) throws MeedlException {
-//        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-//        List<OrganizationServiceOffering> serviceOfferings =
-//                organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
-//        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
-//        List<ServiceOffering> offerings = serviceOfferings.stream()
-//                .map(OrganizationServiceOffering::getServiceOffering)
-//                .toList();
-//        organizationIdentity.setServiceOfferings(offerings);
-//        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-//        organizationIdentityOutputPort.save(organizationIdentity);
-//    }
     @Override
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);

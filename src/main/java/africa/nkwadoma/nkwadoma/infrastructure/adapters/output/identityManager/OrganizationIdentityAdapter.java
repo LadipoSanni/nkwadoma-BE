@@ -115,11 +115,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(organizationId)
                 .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-        List<OrganizationServiceOffering> serviceOfferings = findOrganizationServiceOfferingsByOrganizationId(organizationId);
-        List<ServiceOffering> offerings = serviceOfferings.stream()
-                .map(OrganizationServiceOffering::getServiceOffering)
-                .toList();
-        organizationIdentity.setServiceOfferings(offerings);
+        organizationIdentity.setServiceOfferings(getServiceOfferings(organizationIdentity));
         return organizationIdentity;
     }
     @Override
@@ -166,12 +162,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public List<ServiceOffering> getServiceOfferings(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
-        List<OrganizationServiceOffering> organizationServiceOfferings =
-                findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
-        List<ServiceOffering> serviceOfferings = new ArrayList<>();
-        organizationServiceOfferings.forEach(organizationServiceOffering ->
-                serviceOfferings.add(organizationServiceOffering.getServiceOffering()));
-        return serviceOfferings;
+        return findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId())
+                .stream()
+                .map(OrganizationServiceOffering::getServiceOffering)
+                .toList();
     }
 
     @Override
