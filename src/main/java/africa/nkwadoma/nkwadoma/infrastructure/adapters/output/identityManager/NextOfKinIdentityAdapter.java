@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -51,11 +52,9 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
 
     @Override
     public void deleteNextOfKin(String nextOfKinId) throws MeedlException {
-        MeedlValidator.validateUUID(nextOfKinId);
+        MeedlValidator.validateUUID(nextOfKinId, "Please provide a valid next of kin identification.");
         Optional<NextOfKinEntity> foundNextOfKin = nextOfKinRepository.findById(nextOfKinId);
-        if (foundNextOfKin.isPresent()) {
-            nextOfKinRepository.delete(foundNextOfKin.get());
-        }
+        foundNextOfKin.ifPresent(nextOfKinRepository::delete);
     }
 
     @Override
@@ -71,7 +70,7 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
 
     @Override
     public Optional<NextOfKin> findByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
         Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByLoaneeEntityId(loaneeId);
         return nextOfKinEntity.map(nextOfKinMapper::toNextOfKin);
     }

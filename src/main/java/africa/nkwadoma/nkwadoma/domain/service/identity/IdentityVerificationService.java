@@ -42,7 +42,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
     @Override
     public String verifyIdentity(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         checkIfAboveThreshold(loanReferralId);
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
                                     .orElseThrow(()-> new ResourceNotFoundException("Could not find loan referral"));

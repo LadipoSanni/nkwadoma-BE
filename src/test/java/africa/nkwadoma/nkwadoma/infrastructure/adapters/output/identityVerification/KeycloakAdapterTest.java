@@ -200,6 +200,16 @@ class KeycloakAdapterTest {
         log.info("Client representation {}", clientRepresentation.getName());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void getClientRepresentationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId(id));
+    }
+
+    @Test
+    void getClientRepresentationWithNoneExistingId() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));
+    }
     @Test
     @Order(7)
     void disableClient(){
@@ -216,9 +226,49 @@ class KeycloakAdapterTest {
             log.error("Failed to disable organization identity {} ", e.getMessage());
         }
     }
+    @Test
+    void disableOrganizationWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
+    void disableOrganizationWithInvalidId(String id) {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+        megaOrganization.setId(id);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
+    void enableOrganizationWithInvalidId(String id) {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+        megaOrganization.setId(id);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableClient(megaOrganization));
+    }
+    @Test
+    void enableOrganizationWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableClient(null));
+    }
 
     @Test
     @Order(8)
+    void enableClient(){
+        try {
+            ClientRepresentation representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertFalse(representation.isEnabled());
+            rizzGallery.setId(rizzGalleryId);
+            identityManagementOutputPort.enableClient(rizzGallery);
+            representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertTrue(representation.isEnabled());
+        }catch (MeedlException e){
+            log.error("Failed to disable organization identity {} ", e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(9)
     void deleteClient(){
         try {
             ClientRepresentation clientRepresentation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
@@ -232,17 +282,6 @@ class KeycloakAdapterTest {
         }
     }
 
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
-    void getClientRepresentationWithInvalidId(String id) {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId(id));
-    }
-
-    @Test
-    void getClientRepresentationWithNoneExistingId() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));
-    }
     @Test
     @Order(9)
     void getUserIdentityById(){
@@ -473,17 +512,6 @@ class KeycloakAdapterTest {
         john.setPassword(password);
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
 
-    }
-    @Test
-    void disableOrganizationWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
-    void disableOrganizationWithInvalidId(String id) {
-        OrganizationIdentity megaOrganization = new OrganizationIdentity();
-                megaOrganization.setId(id);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
     }
 
     @Test

@@ -17,7 +17,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
           join LoaneeEntity l on lr.loaneeEntity.id = l.id
           join CohortEntity c on l.cohortId = c.id
           join ProgramEntity p on c.programId = p.id
-          join OrganizationEntity o on p.organizationEntity.id = o.id
+          join OrganizationEntity o on p.organizationIdentity.id = o.id
     """)
     Page<LoanRequestProjection> findAllLoanRequests(Pageable pageable);
 
@@ -35,7 +35,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
           join CohortEntity c on l.cohortId = c.id
           join NextOfKinEntity n on l.id = n.loaneeEntity.id
           join ProgramEntity p on c.programId = p.id
-          join OrganizationEntity o on p.organizationEntity.id = o.id
+          join OrganizationEntity o on p.organizationIdentity.id = o.id
           where lr.id = :id
     """)
     Optional<LoanRequestProjection> findLoanRequestById(@Param("id") String id);

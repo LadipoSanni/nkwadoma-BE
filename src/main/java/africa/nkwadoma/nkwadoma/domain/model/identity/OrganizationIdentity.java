@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -58,6 +59,7 @@ public class OrganizationIdentity {
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.rcNumber, "Company's RC number is required");
         MeedlValidator.validateRCNumber(this.rcNumber);
+        MeedlValidator.validateDataElement(this.rcNumber, OrganizationMessages.INVALID_RC_NUMBER.getMessage());
         MeedlValidator.validateTin(this.tin);
         MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
 

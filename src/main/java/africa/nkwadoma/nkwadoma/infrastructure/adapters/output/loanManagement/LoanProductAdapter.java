@@ -83,7 +83,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity loanProductEntity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
         loanProductVendorRepository.deleteAllByLoanProductEntity(loanProductEntity);
         loanProductEntityRepository.deleteById(id);
@@ -97,7 +97,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public LoanProduct findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
