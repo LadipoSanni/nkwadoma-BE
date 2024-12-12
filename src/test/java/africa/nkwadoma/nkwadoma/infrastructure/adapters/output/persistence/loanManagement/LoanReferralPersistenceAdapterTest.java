@@ -18,15 +18,15 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanReferralRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -53,7 +53,7 @@ public class LoanReferralPersistenceAdapterTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private String loanReferralId ;
-
+    private String loaneeId;
 
 
     @BeforeAll
@@ -64,28 +64,34 @@ public class LoanReferralPersistenceAdapterTest {
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
         try {
+            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (foundUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(foundUser.get());
+            }
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
             loanee = Loanee.builder().cohortId(id).userIdentity(userIdentity).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeOutputPort.save(loanee);
+            assertNotNull(loanee);
+            assertNotNull(loanee.getId());
+            loaneeId = loanee.getId();
         } catch (MeedlException e) {
-            log.error(e.getMessage());
+            log.error("Exception occurred while saving set up test data", e);
         }
     }
-
 
     @Test
     @Order(1)
     void saveLoanReferral() {
         LoanReferral loanReferral = new LoanReferral();
         try {
-             loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
-             loanReferralId = loanReferral.getId();
+            loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
+            loanReferralId = loanReferral.getId();
         }catch (MeedlException exception){
-            log.error(exception.getMessage());
+            log.error("Exception occurred while trying to create a loan referral ", exception);
         }
-        assertEquals(loanReferral.getLoanee().getId(),loanee.getId());
+        assertEquals(loanReferral.getLoanee().getId(), loanee.getId());
     }
 
     @Test
