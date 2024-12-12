@@ -154,33 +154,17 @@ class CohortServiceTest {
 
     @Test
     void viewCohortWithNullUserId(){
-        try {
-            when(cohortOutputPort.viewCohortDetails(null, mockId)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null,
-                    mockId));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
+        assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null, mockId));
     }
 
     @Test
     void viewCohortWithNullCohortId() {
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId,  null)).thenThrow(MeedlException.class);
             assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId, null));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyUserId(String userId){
-        try {
-            when(cohortOutputPort.viewCohortDetails(userId,  mockId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(userId,
                         mockId));
@@ -189,11 +173,6 @@ class CohortServiceTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyCohortId(String cohortId){
-        try {
-            when(cohortOutputPort.viewCohortDetails( mockId, cohortId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(mockId,
                         cohortId));
