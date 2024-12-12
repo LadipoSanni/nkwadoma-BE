@@ -40,7 +40,7 @@ do
   cat << EOF > /tmp/email.html
 From: builds@semicolon.africa
 To: $email
-Subject: Build Success for Enumverse
+Subject: Build Success for Nkwadoma_Be
 Content-Type: text/html
 MIME-Version: 1.0
 
@@ -49,7 +49,7 @@ MIME-Version: 1.0
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Build Success for Enumverse</title>
+    <title>Build Success for Nkwadoma_Be</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 20px; margin-bottom: 20px;">

@@ -61,6 +61,8 @@ class CohortServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private ServiceOffering serviceOffering;

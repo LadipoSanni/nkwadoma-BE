@@ -14,7 +14,8 @@ public enum CohortMessages {
     AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE("Amount Requested Can't be greater than total cohortFee"),
     CREATEDBY_NOT_EXIST_IN_ORGANIZATION("Created-By Doesnt Exist In Organization"),
     COHORT_NAME_REQUIRED("Cohort name is required"),
-    COHORT_WITH_NAME_EXIST("Cohort With Name Exist");
+    COHORT_WITH_NAME_EXIST("Cohort With Name Exist"),
+    COHORT_WITH_LOANEE_CANNOT_BE_DELETED("Cohort With Loanee Cannot Be Deleted");
 
     private final String message;
 

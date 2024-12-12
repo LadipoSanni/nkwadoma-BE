@@ -26,7 +26,8 @@ public enum MeedlMessages {
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
-    FORGOT_PASSWORD_TEMPLATE("forget-password");
+    FORGOT_PASSWORD_TEMPLATE("forget-password"), INVALID_RC_NUMBER("Registration number must start with 'RC' followed by exactly 7 digits."),
+    INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character.");
 
 
     private final String message;

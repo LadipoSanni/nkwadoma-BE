@@ -164,7 +164,8 @@ public class CohortService implements CohortUseCase {
         if (cohort.getStartDate().isAfter(now)) {
             cohort.setActivationStatus(ActivationStatus.INACTIVE);
             cohort.setCohortStatus(CohortStatus.INCOMING);
-        } else if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)) {
+        } else if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)
+                || cohort.getStartDate().equals(now) && cohort.getExpectedEndDate().isAfter(now)) {
             cohort.setActivationStatus(ActivationStatus.ACTIVE);
             cohort.setCohortStatus(CohortStatus.CURRENT);
         } else if (cohort.getExpectedEndDate().isBefore(now) || cohort.getExpectedEndDate().isEqual(now)) {
@@ -202,7 +203,10 @@ public class CohortService implements CohortUseCase {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id);
-        cohortOutputPort.deleteCohort(id);
+        if (loaneeOutputPort.findAllLoaneesByCohortId(id).isEmpty()){
+            cohortOutputPort.deleteCohort(id);
+        }
+        throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
     }
 
     @Override

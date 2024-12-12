@@ -89,7 +89,7 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         List<OrganizationServiceOffering> serviceOfferings =
                 organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
-        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfLoanees() + 1);
+        organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
         List<ServiceOffering> offerings = serviceOfferings.stream()
                 .map(OrganizationServiceOffering::getServiceOffering)
                 .toList();
