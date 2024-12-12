@@ -129,7 +129,6 @@ class LoanReferralAdapterTest {
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy(organizationAdminId).build();
-
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
                     amountRequested(BigDecimal.valueOf(30000.00)).
                     initialDeposit(BigDecimal.valueOf(10000.00)).build();
@@ -148,12 +147,13 @@ class LoanReferralAdapterTest {
             loaneeUserId = loanee.getUserIdentity().getId();
             loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
+
             loanReferral = loaneeUseCase.referLoanee(loaneeId);
             assertNotNull(loanReferral);
             log.info("Loan referral ====> {}", loanReferral);
             loanReferralId = loanReferral.getId();
         } catch (MeedlException e) {
-            log.error("", e);
+            log.error("Error creating set up test data", e);
         }
     }
 
@@ -225,7 +225,7 @@ class LoanReferralAdapterTest {
             organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
             organizationIdentityOutputPort.delete(amazingGrace.getId());
         } catch (MeedlException e) {
-            log.error("Exception occurred: ", e);
+            log.error("Exception occurred cleaning up test data: ", e);
         }
     }
 }

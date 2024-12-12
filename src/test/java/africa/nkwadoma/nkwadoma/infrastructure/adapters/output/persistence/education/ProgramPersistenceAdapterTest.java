@@ -1,14 +1,18 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
+import java.math.*;
 import java.time.*;
 import java.util.*;
 
@@ -29,6 +34,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProgramPersistenceAdapterTest {
+    private final int pageSize = 10;
+    private final int pageNumber = 0;
+    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6788";
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -43,18 +51,37 @@ class ProgramPersistenceAdapterTest {
     private ProgramRepository programRepository;
     @Autowired
     private LoaneeUseCase loaneeUseCase;
+    @Autowired
+    private CohortUseCase cohortUseCase;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private LoanBreakdownRepository loanBreakdownRepository;
     private Cohort elites;
     private Program dataAnalytics;
     private Program dataScience;
     private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
+    private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdowns;
+    private List<LoaneeLoanBreakdown> loaneeBreakdowns;
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
     private String organizationId;
-    private final int pageSize = 10;
-    private final int pageNumber = 0;
-    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6788";
+    private String cohortId;
+    private Loanee loanee;
+    private String loaneeId;
+    private String loaneeUserId;
+    private String loaneeLoanDetailId;
+    @Autowired
+    private LoaneeLoanBreakDownRepository loaneeLoanBreakDownRepository;
+    @Autowired
+    private LoaneeOutputPort loaneeOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -76,10 +103,11 @@ class ProgramPersistenceAdapterTest {
         dataScience.setDeliveryType(DeliveryType.ONSITE);
         dataScience.setDurationType(DurationType.YEARS);
 
-        elites = new Cohort();
-        elites.setStartDate(LocalDate.of(2024, 10, 18));
-        elites.setName("Elites");
-        elites.setCreatedBy(userIdentity.getCreatedBy());
+    }
+
+    @AfterEach
+    void clean() {
+
     }
 
     @BeforeAll
@@ -398,17 +426,53 @@ class ProgramPersistenceAdapterTest {
     @Test
     void deleteProgramThatHasLoanees() {
         try {
+            OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
+                    findByCreatedBy(userId);
             dataScience.setCreatedBy(userId);
-            Program savedProgram = programOutputPort.saveProgram(dataScience);
-            assertNotNull(savedProgram);
-//            elites =
-            programOutputPort.deleteProgram(savedProgram.getId());
+            dataScience = programOutputPort.saveProgram(dataScience);
+            assertNotNull(dataScience);
+            assertNotNull(dataScience.getId());
+            dataScienceProgramId = dataScience.getId();
 
-            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
-            assertTrue(programByName.isEmpty());
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
+                    loanBreakdowns, employeeIdentity.getId());
+            elites = cohortUseCase.createCohort(elites);
+            assertNotNull(elites);
+            assertNotNull(elites.getId());
+            cohortId = elites.getId();
+
+            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+            loanBreakdown = loanBreakdowns.get(0);
+
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
+                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
+                    image("loanee-img.png").role(LOANEE).createdBy(employeeIdentity.getId()).build();
+            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
+                    amountRequested(BigDecimal.valueOf(30000.00)).
+                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
+
+            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdown.getLoanBreakdownId()).
+                    itemAmount(loanBreakdown.getItemAmount()).
+                    itemName(loanBreakdown.getItemName()).build();
+            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
+            loanee = Loanee.builder().userIdentity(userIdentity).
+                    loanBreakdowns(loaneeBreakdowns).
+                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            assertNotNull(loanee);
+            assertNotNull(loanee.getUserIdentity());
+            loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);
         }
+        MeedlException exception = assertThrows(MeedlException.class, ()-> programOutputPort.deleteProgram(dataScience.getId()));
+        log.info("Exception message: {}", exception.getMessage());
+
     }
 
     @Test
@@ -460,14 +524,30 @@ class ProgramPersistenceAdapterTest {
     @AfterAll
     void tearDown() {
         try {
+            loaneeBreakdowns.forEach(loaneeLoanBreakdown -> {
+                        if (StringUtils.isNotEmpty(loaneeLoanBreakdown.getLoaneeLoanBreakdownId())) {
+                            loaneeLoanBreakDownRepository.deleteById(loaneeLoanBreakdown.getLoaneeLoanBreakdownId());
+                        }
+                    }
+            );
+            loaneeOutputPort.deleteLoanee(loaneeId);
+            userIdentityOutputPort.deleteUserById(loaneeUserId);
+            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
+            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+            loanBreakdowns.forEach(tuitionBreakdown ->
+                    {
+                        if (StringUtils.isNotEmpty(tuitionBreakdown.getLoanBreakdownId())) {
+                            loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId());
+                        }
+                    }
+            );
+            cohortOutputPort.deleteCohort(cohortId);
+
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
                     findByCreatedBy(userId);
             employeeIdentityOutputPort.delete(employeeIdentity.getId());
-            userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
-
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(organizationId);
-
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
@@ -478,7 +558,7 @@ class ProgramPersistenceAdapterTest {
             organizationOutputPort.delete(organizationId);
             assertThrows(ResourceNotFoundException.class, () -> organizationOutputPort.findById(organizationId));
         } catch (MeedlException e) {
-            log.error("Error while deleting service offerings", e);
+            log.error("Error while cleaning up", e);
         }
     }
 
