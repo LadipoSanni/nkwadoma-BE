@@ -28,6 +28,7 @@ public class MeedlValidator {
 
     public static void validateEmail(String email) throws MeedlException {
         if (isEmptyString(email) || !EmailValidator.getInstance().isValid(email.trim())) {
+            log.info("Invalid email address provided : {}", email);
             throw new MeedlException(MeedlMessages.INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
@@ -40,6 +41,16 @@ public class MeedlValidator {
         } catch (IllegalArgumentException e) {
             log.info("{}. The invalid UUID {}", e.getMessage(), dataElement);
             throw new MeedlException(UUID_NOT_VALID.getMessage());
+        }
+    }
+    public static void validateUUID(String dataElement, String message) throws MeedlException {
+        log.info("validateUUID {}", dataElement);
+        validateDataElement(dataElement);
+        try {
+            UUID.fromString(dataElement);
+        } catch (IllegalArgumentException e) {
+            log.info("{}. The invalid UUID : {} : {}", e.getMessage(), dataElement, message);
+            throw new MeedlException(message);
         }
     }
     public static void validateDataElement(String dataElement) throws MeedlException {
@@ -178,7 +189,7 @@ public class MeedlValidator {
     public static void validateRCNumber(String rcNumber) throws MeedlException {
         boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
         if (!patternMatches) {
-            throw new MeedlException(INVALID_RC_NUMBER.getMessage());
+            throw new MeedlException(OrganizationMessages.INVALID_RC_NUMBER.getMessage());
         }
     }
 

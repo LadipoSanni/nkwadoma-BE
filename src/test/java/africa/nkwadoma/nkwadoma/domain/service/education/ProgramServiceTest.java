@@ -273,7 +273,7 @@ class ProgramServiceTest {
     void viewProgramWithNonUUIDId(String programId) {
         program.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewProgramById(program));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test

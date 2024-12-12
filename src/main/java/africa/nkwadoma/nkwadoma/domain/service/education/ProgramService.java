@@ -43,7 +43,7 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateUUID(program.getId());
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
             foundProgram = programMapper.updateProgram(program, foundProgram);
@@ -62,7 +62,7 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public void deleteProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateUUID(program.getId());
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         programOutputPort.deleteProgram(foundProgram.getId());
     }
@@ -70,7 +70,7 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public Program viewProgramById(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateUUID(program.getId());
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         return programOutputPort.findProgramById(program.getId());
     }
 

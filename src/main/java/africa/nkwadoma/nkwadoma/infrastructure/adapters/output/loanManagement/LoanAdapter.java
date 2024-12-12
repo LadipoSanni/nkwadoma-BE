@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -30,14 +31,14 @@ public class LoanAdapter implements LoanOutputPort {
 
     @Override
     public void deleteById(String loanId) throws MeedlException {
-        MeedlValidator.validateUUID(loanId);
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
         loanRepository.deleteById(loanId);
         log.info("Loan with id {} deleted successfully",loanId);
     }
 
     @Override
     public Loan findLoanById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_ID.getMessage());
         LoanEntity foundLoanEntity = loanRepository.findById(id).orElseThrow(()->new LoanException("Could not find Loan"));
         return loanMapper.mapToLoan(foundLoanEntity);
     }

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
@@ -32,7 +33,7 @@ public class NextOfKin {
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), nextOfKin.concat("alternate contact address is required"));
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), nextOfKin.concat("alternate phone number is required"));
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
-        MeedlValidator.validateUUID(loanee.getUserIdentity().getId());
+        MeedlValidator.validateUUID(loanee.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
     }
 
     public void setFirstName(String firstName) {
