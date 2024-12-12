@@ -26,7 +26,7 @@ public class Program {
     private DurationType durationType;
     private LocalDate programStartDate;
     private int duration;
-    private int numberOfTrainees;
+    private int numberOfLoanees;
     private int numberOfCohort;
     private ProgramMode mode;
     private DeliveryType deliveryType;

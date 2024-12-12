@@ -168,7 +168,7 @@ class ProgramServiceTest {
             assertEquals(programsList.get(0).getName(), program.getName());
             assertEquals(programsList.get(0).getDuration(), program.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), program.getNumberOfLoanees());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountDisbursed());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountOutstanding());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountRepaid());

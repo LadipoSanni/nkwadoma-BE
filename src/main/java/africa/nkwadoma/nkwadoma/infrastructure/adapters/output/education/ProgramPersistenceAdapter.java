@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,14 +36,14 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Lazy
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final CohortRepository cohortRepository;
-//    private final CohortOutputPort cohortOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final LoanBreakdownRepository loanBreakdownRepository;
-//    private final ProgramCohortOutputPort programCohortOutputPort;
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
@@ -69,7 +71,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
 
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
-        programEntity.setOrganizationEntity(organizationEntity);
+        programEntity.setOrganizationIdentity(organizationEntity);
         programEntity.setProgramStatus(ActivationStatus.ACTIVE);
         programEntity = programRepository.save(programEntity);
         updateOrganization(program, organizationEntity);
@@ -81,6 +83,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
         if (StringUtils.isEmpty(program.getId())) {
             organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
+            log.info("Updating total number of programs in organization to {}",organizationEntity.getNumberOfPrograms());
             organizationEntityRepository.save(organizationEntity);
         }
     }
@@ -89,12 +92,19 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Validating the created by: {}",meedlUserId);
+        MeedlValidator.validateUUID(meedlUserId);
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
             log.error("Unable to find employee performing this action on the data base. {}", MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
             throw new EducationException(MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         }
         return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
+    }
+
+    @Override
+    public List<Program> findAllProgramsByOrganizationId(String organizationId) {
+         List<ProgramEntity> programEntities = programRepository.findProgramEntitiesByOrganizationIdentityId(organizationId);
+         return programEntities.stream().map(programMapper::toProgram).toList();
     }
 
     @Override
@@ -134,7 +144,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         Program program = programMapper.toProgram(programEntity);
-        program.setOrganizationId(programEntity.getOrganizationEntity().getId());
+        program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
         return program;
     }
 
@@ -142,7 +152,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
-        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(foundOrganizationIdentity.getId(), pageRequest);
+        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {

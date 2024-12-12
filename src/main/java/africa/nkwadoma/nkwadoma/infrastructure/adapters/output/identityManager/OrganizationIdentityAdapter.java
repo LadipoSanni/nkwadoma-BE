@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -14,10 +16,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Component;
 
 
 import java.time.LocalDateTime;
@@ -25,15 +29,17 @@ import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMAIL_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateEmail;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPort {
     private final OrganizationEntityRepository organizationEntityRepository;
     private final ServiceOfferEntityRepository serviceOfferEntityRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationServiceOfferingRepository organizationServiceOfferingRepository;
+    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final ProgramOutputPort programOutputPort;
 
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -91,17 +97,27 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public void delete(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
-                orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id)
+                .orElseThrow(()-> new IdentityException(ORGANIZATION_NOT_FOUND.getMessage()));
+        List<Program> programs = programOutputPort.findAllProgramsByOrganizationId(organizationEntity.getId());
+        programs.forEach(program -> {
+            try {
+                programOutputPort.deleteProgram(program.getId());
+            } catch (MeedlException e) {
+                log.error("Error deleting program with id {}, while attempting to delete organization with id {}. Error message : {}", program, organizationEntity.getId(), e.getMessage());
+            }
+        });
         organizationEntityRepository.delete(organizationEntity);
     }
 
     @Override
-    public OrganizationIdentity findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        OrganizationEntity organizationEntity = organizationEntityRepository.findById(id).
-                orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+    public OrganizationIdentity findById(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        OrganizationEntity organizationEntity = organizationEntityRepository.findById(organizationId)
+                .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+        OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity.setServiceOfferings(getServiceOfferings(organizationIdentity));
+        return organizationIdentity;
     }
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -146,12 +162,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public List<ServiceOffering> getServiceOfferings(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
-        List<OrganizationServiceOffering> organizationServiceOfferings =
-                findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
-        List<ServiceOffering> serviceOfferings = new ArrayList<>();
-        organizationServiceOfferings.forEach(organizationServiceOffering ->
-                serviceOfferings.add(organizationServiceOffering.getServiceOffering()));
-        return serviceOfferings;
+        return findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId())
+                .stream()
+                .map(OrganizationServiceOffering::getServiceOffering)
+                .toList();
     }
 
     @Override
@@ -184,5 +198,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
         log.info("Found {} organizations", organizationEntities);
         return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
+    }
+    @Override
+    public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
+        OrganizationIdentity organizationIdentity = findById(organizationId);
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        save(organizationIdentity);
     }
 }
