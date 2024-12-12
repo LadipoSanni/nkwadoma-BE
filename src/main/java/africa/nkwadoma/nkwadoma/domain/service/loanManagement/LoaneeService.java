@@ -61,6 +61,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
+        log.info("Validating loanee before adding");
         MeedlValidator.validateObjectInstance(loanee);
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
@@ -181,11 +182,14 @@ public class LoaneeService implements LoaneeUseCase {
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
+            log.error("{}. {}", LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage(), loanee.getUserIdentity().getEmail());
             throw new LoaneeException(LoaneeMessages.LOANEE_WITH_EMAIL_EXIST_IN_COHORT.getMessage());
         }
+        log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());
     }
 
     private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) {
+        log.info("Calculating amount requested for loanee {}", loanee.getUserIdentity().getEmail());
         loanee.getLoaneeLoanDetail().
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
                         subtract(loanee.getLoaneeLoanDetail().getInitialDeposit()));
@@ -203,32 +207,38 @@ public class LoaneeService implements LoaneeUseCase {
     private Loanee createLoaneeAccount(Loanee loanee) throws MeedlException {
         Optional<UserIdentity> foundUserIdentity = identityManagerOutputPort.getUserByEmail(loanee.getUserIdentity().getEmail());
         if (foundUserIdentity.isPresent()) {
+            log.info("User with email {} already exists. Unable to create account for loanee while attempting to add loanee to cohort", loanee.getUserIdentity().getEmail());
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
         userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
         userIdentity = identityOutputPort.save(userIdentity);
+        log.info("User identity saved successfully with id {}. Now proceeding to save loanee ", userIdentity.getId());
         loanee.setUserIdentity(userIdentity);
         loanee.setFullName(loanee.getUserIdentity().getFirstName().concat(loanee.getUserIdentity().getLastName()));
         loanee.setLoaneeStatus(LoaneeStatus.ADDED);
         loanee = loaneeOutputPort.save(loanee);
+        log.info("Loanee added successfully to a cohort. loanee id : {}. ",loanee.getId());
         return loanee;
     }
 
     private static void checkIfAmountRequestedIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
         if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(cohort.getTotalCohortFee()) > 0) {
+            log.info("{}. Cohort id: {}", CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
             throw new CohortException(CohortMessages.AMOUNT_REQUESTED_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfInitialDepositIsNotGreaterThanTotalCohortFee(Loanee loanee, Cohort cohort) throws CohortException {
         if (loanee.getLoaneeLoanDetail().getInitialDeposit().compareTo(cohort.getTotalCohortFee()) > 0) {
+            log.info("{}. Cohort id: {}",CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage(), cohort.getId());
             throw new CohortException(CohortMessages.INITIAL_DEPOSIT_CANNOT_BE_GREATER_THAT_TOTAL_COHORT_FEE.getMessage());
         }
     }
 
     private static void checkIfCohortTuitionDetailsHaveBeenUpdated(Cohort cohort) throws CohortException {
         if (ObjectUtils.isEmpty(cohort.getTuitionAmount())) {
+            log.info("Cohort does not have any cohort tuition details. Cohort id: {}", cohort.getId());
             throw new CohortException(CohortMessages.COHORT_TUITION_DETAILS_MUST_HAVE_BEEN_UPDATED.getMessage());
         }
     }
