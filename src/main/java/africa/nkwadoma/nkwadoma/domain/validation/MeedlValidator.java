@@ -141,7 +141,7 @@ public class MeedlValidator {
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
     public static void validateOrganizationUserIdentities(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
-        log.info("Started validdating for user identities (List) : {}", userIdentities);
+        log.info("Started validating for user identities (List) : {}", userIdentities);
         log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
         if (CollectionUtils.isEmpty(userIdentities)){
             log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);

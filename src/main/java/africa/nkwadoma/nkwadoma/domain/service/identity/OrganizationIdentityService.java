@@ -158,6 +158,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        log.info("Total number loanees {}",organizationIdentity.getNumberOfLoanees());
+        log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
     }
