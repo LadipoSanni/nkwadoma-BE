@@ -106,13 +106,13 @@ public class LoaneeService implements LoaneeUseCase {
     }
     @Override
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         return loaneeOutputPort.findLoaneeById(id);
     }
 
     @Override
     public Page<Loanee> viewAllLoaneeInCohort(String cohortId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         return loaneeOutputPort.findAllLoaneeByCohortId(cohortId, pageSize, pageNumber);
     }
 
@@ -123,7 +123,7 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public LoanReferral referLoanee(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         List<LoaneeLoanBreakdown> loanBreakdowns =
@@ -145,7 +145,7 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Loanee name is required.");
-        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
 

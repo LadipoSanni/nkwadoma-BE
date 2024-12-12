@@ -1,16 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public enum UserConstants {
+public enum UserMessages {
 
     INVALID_EMAIL("Email is invalid"),
+    INVALID_USER_ID("Please provide a valid user identification."),
     INVALID_FIRST_NAME("First name is invalid");
     private final String message;
 
-    UserConstants(String message) {
+    UserMessages(String message) {
         this.message = message;
     }
 }

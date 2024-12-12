@@ -90,11 +90,13 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
+        MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Validating the created by: {}",meedlUserId);
         MeedlValidator.validateUUID(meedlUserId);
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
-            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+            log.error("Unable to find employee performing this action on the data base. {}", MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         }
         return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
     }
@@ -114,7 +116,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     @Transactional
     public void deleteProgram(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
@@ -136,7 +138,8 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program findProgramById(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));

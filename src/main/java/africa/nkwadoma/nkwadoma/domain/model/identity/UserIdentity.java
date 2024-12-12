@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -50,7 +51,7 @@ public class UserIdentity {
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.firstName, "User first name is required");
         MeedlValidator.validateDataElement(this.lastName, "User last name is required");
-        MeedlValidator.validateUUID(this.createdBy);
+        MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
     }
 
 }
