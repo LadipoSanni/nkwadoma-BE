@@ -49,9 +49,9 @@ public class Program {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectName(this.name);
-        MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
-        if (this.duration > 24){
-            throw new MeedlException("Program duration must not exceed 24 months");
+        MeedlValidator.validateUUID(this.createdBy,  MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
+        if (this.duration > 48){
+            throw new MeedlException("Program duration must not exceed 48 months");
         }
         if (this.programDescription.length() > 2500) {
             throw new MeedlException("Program duration must not exceed 2500 characters");

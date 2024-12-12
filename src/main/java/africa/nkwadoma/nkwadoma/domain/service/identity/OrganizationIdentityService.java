@@ -22,8 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
 
@@ -49,6 +48,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
@@ -144,7 +145,10 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        return organizationIdentityOutputPort.findById(organizationId);
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
+        return organizationIdentity;
     }
 
     @Override
@@ -154,6 +158,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                 organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
     }
 }

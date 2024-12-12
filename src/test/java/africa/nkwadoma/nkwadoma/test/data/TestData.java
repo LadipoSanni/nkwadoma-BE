@@ -43,6 +43,8 @@ public class TestData {
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
+        organizationIdentity.getServiceOfferings().get(0).setTransactionUpperBound(new BigDecimal("0.00"));
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());

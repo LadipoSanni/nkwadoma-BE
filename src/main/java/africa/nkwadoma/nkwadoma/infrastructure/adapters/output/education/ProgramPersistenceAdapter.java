@@ -15,12 +15,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.*;
 import java.util.*;
@@ -33,11 +35,14 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-//    private final CohortOutputPort cohortOutputPort;
     private final CohortRepository cohortRepository;
+//    private final CohortOutputPort cohortOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    private final LoanBreakdownRepository loanBreakdownRepository;
+//    private final ProgramCohortOutputPort programCohortOutputPort;
+    private final ProgramCohortRepository programCohortRepository;
 
     @Override
     public List<Program> findProgramByName(String programName) throws MeedlException {
@@ -99,13 +104,24 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
+    @Transactional
     public void deleteProgram(String programId) throws MeedlException {
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
+
         if (CollectionUtils.isNotEmpty(cohortEntities)) {
-            cohortRepository.deleteAll(cohortEntities);
+            for (CohortEntity cohortEntity : cohortEntities) {
+                if (cohortEntity.getNumberOfLoanees() > 0) {
+                    throw new EducationException("Program with loanee cannot be deleted");
+                }
+                else {
+                    programCohortRepository.deleteAllByCohort(cohortEntity);
+                    loanBreakdownRepository.deleteAllByCohort(cohortEntity);
+                    cohortRepository.deleteById(cohortEntity.getId());
+                }
+            }
         }
         programRepository.delete(program);
     }

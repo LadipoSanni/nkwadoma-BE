@@ -153,9 +153,12 @@ public class BeanConfiguration {
                                        LoanDetailsOutputPort loanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
                                        LoaneeUseCase loaneeUseCase,
-                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort){
+                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort,
+                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                       OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,organizationIdentityOutputPort,
+                organizationEmployeeIdentityOutputPort);
     }
 
     @Bean
@@ -167,14 +170,6 @@ public class BeanConfiguration {
         return new CohortPersistenceAdapter(cohortRepository,
                 cohortMapper,userIdentityOutputPort,programCohortOutputPort,
                  loanBreakdownRepository);
-    }
-
-    @Bean
-    public OrganizationEmployeeIdentityAdapter organizationOrganizationEmployeeIdentityAdapter(
-            EmployeeAdminEntityRepository employeeAdminEntityRepository,
-            OrganizationEmployeeIdentityMapper organizationEmployeeIdentityMapper
-    ){
-       return new OrganizationEmployeeIdentityAdapter(employeeAdminEntityRepository,organizationEmployeeIdentityMapper);
     }
 
     @Bean

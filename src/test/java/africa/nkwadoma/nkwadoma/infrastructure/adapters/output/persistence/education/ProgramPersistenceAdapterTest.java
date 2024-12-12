@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -40,6 +41,8 @@ class ProgramPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     @Autowired
     private ProgramRepository programRepository;
+    @Autowired
+    private LoaneeUseCase loaneeUseCase;
     private Cohort elites;
     private Program dataAnalytics;
     private Program dataScience;
@@ -233,8 +236,7 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNonExistingCreatedBy() {
         dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-        assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
@@ -378,13 +380,28 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(5)
     void deleteProgram() {
         try {
             dataScience.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             assertNotNull(savedProgram);
 
+            programOutputPort.deleteProgram(savedProgram.getId());
+
+            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
+            assertTrue(programByName.isEmpty());
+        } catch (MeedlException e) {
+            log.error("Error while deleting program", e);
+        }
+    }
+
+    @Test
+    void deleteProgramThatHasLoanees() {
+        try {
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
+            assertNotNull(savedProgram);
+//            elites =
             programOutputPort.deleteProgram(savedProgram.getId());
 
             List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());

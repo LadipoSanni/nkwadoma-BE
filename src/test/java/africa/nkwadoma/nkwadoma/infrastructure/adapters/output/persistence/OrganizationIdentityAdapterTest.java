@@ -42,7 +42,7 @@ class OrganizationIdentityAdapterTest {
         organizationEmployeeIdentity.setMeedlUser(joel);
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
 
-        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC87877", userIdentities);
+        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC8787767", userIdentities);
     }
 
     @Test
@@ -188,6 +188,21 @@ class OrganizationIdentityAdapterTest {
             OrganizationIdentity organizationIdentity = organizationOutputPort.findById(amazingGrace.getId());
             assertNotNull(organizationIdentity);
             assertEquals(organizationIdentity.getName(), amazingGrace.getName());
+        } catch (MeedlException meedlException) {
+            log.info("{}", meedlException.getMessage());
+        }
+    }
+
+    @Test
+    void findOrganizationServiceOfferings() {
+        try {
+            List<OrganizationServiceOffering> organizationServiceOfferings =
+                    organizationOutputPort.findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
+
+            assertNotNull(organizationServiceOfferings);
+            assertEquals(organizationServiceOfferings.get(0).getOrganizationId(), amazingGrace.getId());
+            assertNotNull(organizationServiceOfferings.get(0).getId());
+            assertNotNull(organizationServiceOfferings.get(0).getServiceOffering());
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
         }

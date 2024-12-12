@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -15,10 +17,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,8 @@ public class CohortService implements CohortUseCase {
     private final CohortMapper cohortMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
 
 
     @Override
@@ -74,7 +78,21 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
+        reflectNumberOfCohortInOrganization(program);
         return savedCohort;
+    }
+
+    private void reflectNumberOfCohortInOrganization(Program program) throws MeedlException {
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        List<OrganizationServiceOffering> serviceOfferings =
+                organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(organizationIdentity.getId());
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
+        List<ServiceOffering> offerings = serviceOfferings.stream()
+                .map(OrganizationServiceOffering::getServiceOffering)
+                .toList();
+        organizationIdentity.setServiceOfferings(offerings);
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {
@@ -87,14 +105,17 @@ public class CohortService implements CohortUseCase {
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        log.info("Checking if cohort name exists in program found : {}", program);
         if (ObjectUtils.isEmpty(program)) {
+            log.info("Program selected for cohort creation was not found. Cohort name {}, {}",cohortName, ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
             throw new CohortException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
         }
         List<ProgramCohort> programCohortList = programCohortOutputPort.findAllByProgramId(cohort.getProgramId());
         Optional<ProgramCohort> existingProgramCohort = programCohortList.stream()
-                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equals(cohortName))
+                .filter(eachProgramCohort -> eachProgramCohort.getCohort().getName().equalsIgnoreCase(cohortName))
                 .findFirst();
         if (existingProgramCohort.isPresent()) {
+            log.info("Cohort with name {} already exists in program. Cohort id {}", cohortName, existingProgramCohort.get().getId());
             throw new CohortException(CohortMessages.COHORT_WITH_NAME_EXIST.getMessage());
         }
         return program;
@@ -144,7 +165,8 @@ public class CohortService implements CohortUseCase {
         if (cohort.getStartDate().isAfter(now)) {
             cohort.setActivationStatus(ActivationStatus.INACTIVE);
             cohort.setCohortStatus(CohortStatus.INCOMING);
-        } else if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)) {
+        } else if (cohort.getStartDate().isBefore(now) && cohort.getExpectedEndDate().isAfter(now)
+                || cohort.getStartDate().equals(now) && cohort.getExpectedEndDate().isAfter(now)) {
             cohort.setActivationStatus(ActivationStatus.ACTIVE);
             cohort.setCohortStatus(CohortStatus.CURRENT);
         } else if (cohort.getExpectedEndDate().isBefore(now) || cohort.getExpectedEndDate().isEqual(now)) {
@@ -185,7 +207,10 @@ public class CohortService implements CohortUseCase {
     @Override
     public void deleteCohort(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
-        cohortOutputPort.deleteCohort(id);
+        if (loaneeOutputPort.findAllLoaneesByCohortId(id).isEmpty()){
+            cohortOutputPort.deleteCohort(id);
+        }
+        throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
     }
 
     @Override

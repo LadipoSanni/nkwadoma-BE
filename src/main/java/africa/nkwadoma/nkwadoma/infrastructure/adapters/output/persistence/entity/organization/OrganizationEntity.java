@@ -28,6 +28,8 @@ public class OrganizationEntity {
     private String createdBy;
     private String updatedBy;
     private LocalDateTime timeUpdated;
+    private int numberOfLoanees;
+    private int numberOfCohort;
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;

@@ -8,9 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -35,10 +32,8 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
-
     @InjectMocks
     private OrganizationIdentityService organizationIdentityService;
-
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
@@ -52,8 +47,8 @@ class OrganizationIdentityServiceTest {
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
-    private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
+    private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
@@ -83,7 +78,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setName("rose couture6");
         roseCouture.setEmail("iamoluchimercy@gmail.com");
         roseCouture.setTin("7682-5627");
-        roseCouture.setRcNumber("RC87899");
+        roseCouture.setRcNumber("RC8789905");
         roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
         roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         roseCouture.setPhoneNumber("09876365713");
@@ -96,7 +91,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation = null;
+        OrganizationIdentity invitedOrganisation;
         try {
             when(identityManagerOutPutPort.createOrganization(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
@@ -107,16 +102,32 @@ class OrganizationIdentityServiceTest {
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
             assertNotNull(invitedOrganisation);
+            assertNotNull(invitedOrganisation.getServiceOfferings());
             assertEquals(roseCouture.getName(), invitedOrganisation.getName());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-
     }
+
     @Test
     void inviteOrganizationWithEmptyOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongRcNumber", "RC123456", "OP1234567", "rc1234567", "123456789", "ABCDEFG"})
+    void inviteOrganizationWithInvalidRCNumber(String rcNumber) {
+        roseCouture.setRcNumber(rcNumber);
+        assertThrows(MeedlException.class, ()-> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongTIN", "ABCDEFG"})
+    void inviteOrganizationWithInvalidTIN(String tin) {
+        roseCouture.setTin(tin);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
     @Test
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));

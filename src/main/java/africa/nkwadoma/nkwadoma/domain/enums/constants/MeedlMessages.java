@@ -23,7 +23,12 @@ public enum MeedlMessages {
     USER_NOT_ENABLED("User not enabled"),
     PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO("Page number must not be less than zero"),
     PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE("Page size must not be less than one"),
-    FORGOT_PASSWORD_TEMPLATE("forget-password");
+    FORGOT_PASSWORD_TEMPLATE("forget-password"),
+    LOANEE_REFERRAL_SUBJECT("Loan referral"),
+    LOANEE_REFERRAL("loan-referral"),
+    LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
+    LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
+    INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character.");
 
 
     private final String message;
