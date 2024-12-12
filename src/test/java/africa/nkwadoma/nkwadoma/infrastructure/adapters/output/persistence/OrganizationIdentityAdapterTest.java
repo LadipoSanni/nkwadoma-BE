@@ -45,6 +45,7 @@ class OrganizationIdentityAdapterTest {
         amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC8787767", userIdentities);
         try {
             organizationOutputPort.delete(amazingGrace.getId());
+            log.info("Successfully deleted existing organization with similar details before starting test");
         } catch (MeedlException e) {
             log.error("Failed to delete organization with id : {} , because {} ",amazingGrace.getId(), e.getMessage());
         }
@@ -218,8 +219,6 @@ class OrganizationIdentityAdapterTest {
     @Order(3)
     void viewAllOrganization() {
         try {
-            amazingGrace.setId(amazingGraceId);
-
             Page<OrganizationIdentity> foundOrganizationIdentities = organizationOutputPort.viewAllOrganization(amazingGrace);
             assertNotNull(foundOrganizationIdentities);
             List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
