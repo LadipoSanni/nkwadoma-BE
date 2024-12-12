@@ -121,6 +121,18 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         return organizationIdentity;
     }
     @Override
+    public void enableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId());
+        ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
+        log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
+        clientRepresentation.setEnabled(Boolean.TRUE);
+
+        ClientResource clientResource = getClientResource(organizationIdentity.getId());
+        clientResource.update(clientRepresentation);
+        log.info("Client enabled on keycloak {}", organizationIdentity.getName());
+    }
+    @Override
     public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId(), "Please provide a valid organization identification.");

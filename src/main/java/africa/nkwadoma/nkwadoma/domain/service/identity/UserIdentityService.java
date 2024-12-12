@@ -123,7 +123,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         log.info("request got into service layer {}",password);
 //        passwordPreviouslyCreated(token);
-        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
+        MeedlValidator.validateDataElement(token);
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
@@ -137,16 +137,16 @@ public class UserIdentityService implements CreateUserUseCase  {
 
     @Override
     public void resetPassword(String token, String password) throws MeedlException {
-        passwordPreviouslyCreated(token);
+//        passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
         identityManagerOutPutPort.resetPassword(userIdentity);
-        blackListedTokenAdapter.blackListToken(createBlackList(token));
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
-        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
+        MeedlValidator.validateDataElement(token);
         String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);

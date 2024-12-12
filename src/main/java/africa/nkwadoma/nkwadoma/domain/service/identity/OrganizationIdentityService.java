@@ -123,6 +123,30 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         return organizationIdentityOutputPort.save(foundOrganization);
     }
 
+    @Override
+    public OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(reason);
+        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        log.info("found organization employees to reactivate: {}",organizationEmployees.size());
+        organizationEmployees
+                .forEach(organizationEmployeeIdentity -> {
+                    try {
+                        log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
+                        organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
+                        identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
+                    } catch (MeedlException e) {
+                        log.error("Error enabling organization user : {}", e.getMessage());
+                    }
+                });
+
+        identityManagerOutPutPort.enableClient(foundOrganization);
+        foundOrganization.setEnabled(Boolean.TRUE);
+        foundOrganization.setStatus(ActivationStatus.ACTIVATED);
+        return foundOrganization;
+    }
+
     private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {
         if (StringUtils.isNotEmpty(organizationIdentity.getName())) {
             throw new MeedlException("Company name cannot be updated!");
