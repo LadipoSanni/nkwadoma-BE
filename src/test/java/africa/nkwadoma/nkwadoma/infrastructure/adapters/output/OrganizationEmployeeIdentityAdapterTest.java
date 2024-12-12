@@ -49,7 +49,7 @@ class OrganizationEmployeeIdentityAdapterTest {
                     .builder().meedlUser(joel).build());
             amazingGrace = TestData.createOrganizationTestData(
                     "Amazing Grace Enterprises",
-                    "RC79500034",
+                    "RC7950004",
                     employees
             );
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().

@@ -58,7 +58,7 @@ class KeycloakAdapterTest {
         List<OrganizationEmployeeIdentity> employeePeter = new ArrayList<>();
         employeePeter.add(employeeIdentity);
 
-        rizzGallery = TestData.createOrganizationTestData("Rizz Gallery 1' alone", "RC87899",employeePeter);
+        rizzGallery = TestData.createOrganizationTestData("Rizz Gallery 1' alone", "RC8789945",employeePeter);
     }
 
     @Test

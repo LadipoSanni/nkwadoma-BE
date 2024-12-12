@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
@@ -14,7 +13,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
@@ -28,7 +26,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.*;
-import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -94,11 +91,12 @@ public class IdentityManagerController {
     private void updateOrganizationStatus(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
-        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().id(foundUserIdentity.getId()).build();
-        employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
                 foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
         {
+            OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
+                    id(foundUserIdentity.getId()).build();
+            employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
             OrganizationIdentity organizationIdentity =
                     viewOrganizationUseCase.viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", organizationIdentity);
@@ -107,7 +105,7 @@ public class IdentityManagerController {
             organizationIdentity.setTimeUpdated(LocalDateTime.now());
             OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
             organizationEntityRepository.save(organizationEntity);
-            log.info("Updated organization status: {}", organizationIdentity.getStatus());
+            log.info("Updated organization status successfully: {}", organizationIdentity.getStatus());
         }
     }
 

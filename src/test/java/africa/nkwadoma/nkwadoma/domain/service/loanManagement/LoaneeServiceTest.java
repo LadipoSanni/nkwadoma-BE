@@ -179,6 +179,11 @@ class LoaneeServiceTest {
         when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
         when(cohortOutputPort.save(any())).thenReturn(elites);
+        when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
+        when(organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(any()))
+                .thenReturn(List.of(new OrganizationServiceOffering()));
+        when(organizationIdentityOutputPort.save(organizationIdentity))
+                .thenReturn(organizationIdentity);
         Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
         assertEquals(firstLoanee.getUserIdentity().getFirstName(), loanee.getUserIdentity().getFirstName());
         verify(loaneeOutputPort, times(1)).save(firstLoanee);

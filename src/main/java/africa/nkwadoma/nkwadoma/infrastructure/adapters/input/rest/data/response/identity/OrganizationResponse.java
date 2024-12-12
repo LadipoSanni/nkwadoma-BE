@@ -29,6 +29,7 @@ public class OrganizationResponse {
     private ActivationStatus status;
     private String createdBy;
     private int numberOfLoanees;
+    private int numberOfCohort;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;
