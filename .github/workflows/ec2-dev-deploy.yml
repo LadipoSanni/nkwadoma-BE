@@ -153,7 +153,7 @@ jobs:
           echo "Container started successfully!"
           # Clean up unused Docker resources without affecting running containers
           echo "Performing safe Docker cleanup..."
-          docker system prune -af --filter "until=24h" || true
+          docker system prune -f
       
           EOF
 
@@ -165,22 +165,36 @@ jobs:
   
     steps:
       - uses: actions/checkout@v3
-
       - name: Set environment variables
         run: |
-          PROJECT_NAME="NKWADOMA"
           echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          if [ -n "${{ github.head_ref }}" ]; then
-            echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+          # Determine the branch name based on the event type
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+             BRANCH_NAME=$(echo "${GITHUB_HEAD_REF}")
           else
-            echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+             BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
           fi
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GITHUB_ENV
-          sanitized_commit_message=$(git log -1 --pretty=%B | tr -d '\n' | tr -d '\r')
-          echo "COMMIT_MESSAGE=${sanitized_commit_message}" >> $GITHUB_ENV
-          commit_message_summary=$(git log -1 --pretty=%s | tr -d '\n' | tr -d '\r')
-          CUSTOM_TAG="${PROJECT_NAME}-${BRANCH_NAME}-${commit_message_summary// /_}"
-          echo "TAG=${CUSTOM_TAG}" >> $GITHUB_ENV
+          # Capture full commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          # Escape special characters
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\\/\\\\}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\"/\\\"}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\(/\\(}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//\)/\\)}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//#/\\#}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\n'/\\n}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\r'/}"
+          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+    
+          echo "This is the Commit Message: $COMMIT_MESSAGE"
+          echo "SONARQUBE_URL_SET=${{ needs.build_and_analyze.outputs.sonarqube_url_set }}" >> $GITHUB_ENV
+          echo "MAVEN_REPORT_URL_SET=${{ needs.deploy.outputs.maven_report_url_set }}" >> $GITHUB_ENV
+          echo "AUTOMATION_TEST_URL_SET=${{ needs.run_tests.outputs.automation_test_url_set }}" >> $GITHUB_ENV
+          
       - name: Send build success email notification
         if: success()
         env:
