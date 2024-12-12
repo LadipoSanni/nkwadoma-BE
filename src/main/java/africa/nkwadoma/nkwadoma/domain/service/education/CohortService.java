@@ -90,7 +90,7 @@ public class CohortService implements CohortUseCase {
                 .map(OrganizationServiceOffering::getServiceOffering)
                 .toList();
         organizationIdentity.setServiceOfferings(offerings);
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
     }
 
