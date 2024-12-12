@@ -12,4 +12,6 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 
     List<OrganizationEntity> findByNameContainingIgnoreCase(String trim);
+
+    Optional<OrganizationEntity> findByTaxIdentity(String tin);
 }

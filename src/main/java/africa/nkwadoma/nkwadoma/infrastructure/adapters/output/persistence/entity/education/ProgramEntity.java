@@ -11,7 +11,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -34,7 +33,7 @@ public class ProgramEntity {
     @Enumerated(EnumType.STRING)
     private DurationType durationType;
     private int duration;
-    private int numberOfTrainees;
+    private int numberOfLoanees;
     private int numberOfCohort;
     @Enumerated(EnumType.STRING)
     private ProgramMode mode;
@@ -55,5 +54,5 @@ public class ProgramEntity {
     private String createdBy;
     private String updatedBy;
     @ManyToOne(cascade = CascadeType.MERGE)
-    private OrganizationEntity organizationEntity;
+    private OrganizationEntity organizationIdentity;
 }

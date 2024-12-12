@@ -18,7 +18,6 @@ public class VendorEntity {
     @UuidGenerator
     private String id;
     private Product product;
-    @Column(unique = true)
     private String vendorName;
     private String termsAndConditions;
 }
