@@ -94,6 +94,8 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(cohort.getOrganizationId());
         organizationIdentity.setNumberOfLoanees(organizationIdentity.getNumberOfLoanees() + 1);
+        organizationIdentity.setOrganizationEmployees(
+                organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         organizationIdentityOutputPort.save(organizationIdentity);
         log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
     }
