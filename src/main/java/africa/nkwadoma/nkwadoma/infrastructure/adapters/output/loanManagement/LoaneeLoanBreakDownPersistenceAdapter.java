@@ -9,11 +9,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanBreakDownMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanBreakDownRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDownOutputPort {
@@ -32,6 +34,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownMapper.toLoaneeLoanBreakdownEntities(loaneeLoanBreakdowns);
         loanBreakdownEntities = loaneeLoanBreakDownRepository.saveAll(loanBreakdownEntities);
+        log.info("Saved all loanee loan break down for loanee : {}", loanee.getUserIdentity().getEmail());
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 

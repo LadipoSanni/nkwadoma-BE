@@ -116,11 +116,6 @@ class CohortServiceTest {
             elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
-            when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
-            when(organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(any()))
-                    .thenReturn(List.of(new OrganizationServiceOffering()));
-            when(organizationIdentityOutputPort.save(organizationIdentity))
-                    .thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
@@ -155,11 +150,6 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
-            when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
-            when(organizationIdentityOutputPort.findOrganizationServiceOfferingsByOrganizationId(any()))
-                    .thenReturn(List.of(new OrganizationServiceOffering()));
-            when(organizationIdentityOutputPort.save(organizationIdentity))
-                    .thenReturn(organizationIdentity);
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());

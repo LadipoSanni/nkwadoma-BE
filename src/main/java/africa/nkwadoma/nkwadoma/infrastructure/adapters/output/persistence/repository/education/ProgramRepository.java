@@ -8,7 +8,8 @@ import java.util.*;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
     List<ProgramEntity> findByNameContainingIgnoreCase(String programName);
+    List<ProgramEntity> findProgramEntitiesByOrganizationIdentityId(String organizationIdentityId);
     boolean existsByName(String programName);
 
-    Page<ProgramEntity> findAllByOrganizationEntityId(String organizationId, Pageable pageable);
+    Page<ProgramEntity> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
 }
