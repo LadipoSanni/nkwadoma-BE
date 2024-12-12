@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutput
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -16,7 +17,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -205,5 +205,15 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         save(organizationIdentity);
+    }
+
+    @Override
+    public Optional<OrganizationIdentity> findByTin(String tin) throws MeedlException {
+        MeedlValidator.validateDataElement(tin, MeedlMessages.TIN_CANNOT_BE_EMPTY.getMessage());
+        log.info("Searching for organization with tin {}", tin);
+        Optional<OrganizationEntity> organizationEntity = organizationEntityRepository.findByTaxIdentity(tin);
+        if (organizationEntity.isEmpty()) return Optional.empty();
+        log.info("Found organization: {}", organizationEntity);
+        return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 }

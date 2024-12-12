@@ -26,5 +26,6 @@ public interface OrganizationIdentityOutputPort {
     List<OrganizationIdentity> findByName(String name) throws MeedlException;
 
     void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException;
+    Optional<OrganizationIdentity> findByTin(String tin) throws MeedlException;
 }
 
