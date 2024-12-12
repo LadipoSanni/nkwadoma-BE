@@ -125,7 +125,7 @@ public class LoaneeService implements LoaneeUseCase {
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
-//        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
+        getOrganizationEmployeeIdentity(loanee);
         for (UserIdentity userIdentity : identityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             notifyPortfolioManager(userIdentity);
         }
