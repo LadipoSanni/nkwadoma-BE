@@ -45,7 +45,7 @@ public class MeedlValidator {
     }
     public static void validateUUID(String dataElement, String message) throws MeedlException {
         log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement, message.concat("").concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
+        validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
