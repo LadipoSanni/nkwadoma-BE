@@ -100,7 +100,6 @@ class AdminInitializerTest {
             } catch (MeedlException e) {
                 log.error(e.getMessage());
             }
-            log.info("{}", foundUserInDb.getId());
             assertNull(foundUserInDb);
         }
     }
