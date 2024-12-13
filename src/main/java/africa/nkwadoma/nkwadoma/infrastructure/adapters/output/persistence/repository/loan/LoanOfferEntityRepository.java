@@ -16,7 +16,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntiti
         JOIN lo.loanee l
         JOIN CohortEntity c ON l.cohortId = c.id
         JOIN ProgramEntity p ON c.programId = p.id
-        JOIN p.organizationEntity o
+        JOIN p.organizationIdentity o
         WHERE o.id = :organizationId
     """)
     Page<LoanOfferEntitiy> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);

@@ -49,7 +49,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
     private final LoanOfferUseCase loanOfferUseCase;
-    private final LoanOfferMapper loanOfferMapper;
+    private final LoanOfferRestMapper loanOfferRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -172,12 +172,22 @@ public class LoanController {
     }
 
 
-//    @GetMapping("/loanOffer/all")
-//    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-//    public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
-//                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-//                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-//
-//        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
-//    }
+    @GetMapping("/loanOffer/all")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+        List<LoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
+        PaginatedResponse<LoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
+                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }

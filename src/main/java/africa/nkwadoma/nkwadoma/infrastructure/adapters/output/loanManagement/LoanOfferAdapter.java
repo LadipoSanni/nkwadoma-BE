@@ -41,10 +41,21 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) {
+    public Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organization);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferEntitiy> loanOfferEntities =
                 loanOfferEntityRepository.findAllLoanOfferInOrganization(organization,pageRequest);
-        return null;
+        return loanOfferEntities.map(loanOfferMapper::toLoanOffer);
+    }
+
+    @Override
+    public Page<LoanOffer> findAllLoanOffers(int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<LoanOfferEntitiy> loanOfferEntities =
+                loanOfferEntityRepository.findAll(pageRequest);
+        return loanOfferEntities.map(loanOfferMapper::toLoanOffer);
     }
 }

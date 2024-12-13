@@ -190,9 +190,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
            OrganizationEmployeeIdentity organizationEmployeeIdentity =
                    organizationEmployeeIdentityOutputPort.findByCreatedBy(userId);
-           Page<LoanOffer> loanOffers = loanOfferOutputPort.findLoanOfferInOrganization(organizationEmployeeIdentity.getOrganization(),
+            return loanOfferOutputPort.findLoanOfferInOrganization(organizationEmployeeIdentity.getOrganization(),
                    pageSize,pageNumber);
         }
-        return null;
+        return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
     }
 }

@@ -10,5 +10,7 @@ public interface LoanOfferOutputPort {
 
     void deleteLoanOfferById(String loanOfferId);
 
-    Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber);
+    Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) throws MeedlException;
+
+    Page<LoanOffer> findAllLoanOffers(int pageSize, int pageNumber) throws MeedlException;
 }
