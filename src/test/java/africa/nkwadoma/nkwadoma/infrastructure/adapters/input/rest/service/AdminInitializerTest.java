@@ -30,7 +30,7 @@ class AdminInitializerTest {
     @BeforeEach
     void setUp() {
        userIdentity = UserIdentity.builder()
-               .email("kobih47727@paxnw.com")
+               .email("kobih727@paxnw.com")
                .firstName("test: super admin first name ")
                .lastName("test: super admin last name")
                .role(PORTFOLIO_MANAGER)
@@ -100,6 +100,7 @@ class AdminInitializerTest {
             } catch (MeedlException e) {
                 log.error(e.getMessage());
             }
+            log.info("{}", foundUserInDb.getId());
             assertNull(foundUserInDb);
         }
     }
