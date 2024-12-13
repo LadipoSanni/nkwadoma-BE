@@ -82,7 +82,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), "Please provide a valid user identification");
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();
@@ -121,9 +121,21 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         return organizationIdentity;
     }
     @Override
-    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public void enableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
+        ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
+        log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
+        clientRepresentation.setEnabled(Boolean.TRUE);
+
+        ClientResource clientResource = getClientResource(organizationIdentity.getId());
+        clientResource.update(clientRepresentation);
+        log.info("Client enabled on keycloak {}", organizationIdentity.getName());
+    }
+    @Override
+    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId(), "Please provide a valid organization identification.");
         ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
         log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
         clientRepresentation.setEnabled(Boolean.FALSE);
@@ -214,7 +226,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
-        MeedlValidator.validateUUID(userRepresentation.getId());
+        MeedlValidator.validateUUID(userRepresentation.getId(),"Please provide a valid identification for the representation of this user.");
         if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
             throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
         }
@@ -380,7 +392,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()

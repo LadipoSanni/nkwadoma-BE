@@ -28,7 +28,7 @@ public class ProgramResponse{
     private ActivationStatus programStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private int numberOfTrainees;
+    private int numberOfLoanees;
     private int numberOfCohort;
     private String createdBy;
     private String updatedBy;

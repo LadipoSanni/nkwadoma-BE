@@ -56,6 +56,7 @@ class OrganizationIdentityAdapterTest {
     @Order(1)
     void saveOrganization() {
         try {
+            organizationOutputPort.delete(amazingGrace.getId());
             assertThrows(MeedlException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             log.info("Organization saved id is : {}", savedOrganization.getId());
@@ -296,7 +297,10 @@ class OrganizationIdentityAdapterTest {
     void updateOrganization() {
         try {
             OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
+            assertNotNull(existingUser);
             assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
+            assertNotNull(existingUser.getServiceOfferings());
+            assertFalse(existingUser.getServiceOfferings().isEmpty());
             assertNotNull(existingUser.getServiceOfferings().get(0).getIndustry());
 
             existingUser.setName("Felicia");

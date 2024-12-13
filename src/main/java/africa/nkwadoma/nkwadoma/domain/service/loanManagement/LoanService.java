@@ -52,7 +52,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
-        MeedlValidator.validateUUID(loanProduct.getId());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
     @Override
@@ -69,7 +69,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
-        MeedlValidator.validateUUID(loanProduct.getId());
+        MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
         if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
@@ -84,7 +84,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
         MeedlValidator.validateObjectInstance(loan);
-        MeedlValidator.validateUUID(loan.getLoaneeId());
+        MeedlValidator.validateUUID(loan.getLoaneeId(), "Please provide a valid loanee identification");
         Loanee foundLoanee = loaneeOutputPort.findByUserId(loan.getLoaneeId())
                             .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
         loan.setLoanee(foundLoanee);
@@ -104,7 +104,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanProduct viewLoanProductDetailsById(String loanProductId) throws MeedlException {
-        MeedlValidator.validateUUID(loanProductId);
+        MeedlValidator.validateUUID(loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         return loanProductOutputPort.findById(loanProductId);
     }
 

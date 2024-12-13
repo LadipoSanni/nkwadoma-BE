@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -33,7 +34,7 @@ public class Loanee {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);
         validateLoaneeUserIdentity();
     }

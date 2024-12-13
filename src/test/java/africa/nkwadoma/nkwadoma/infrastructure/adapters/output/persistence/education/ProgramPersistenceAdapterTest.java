@@ -343,7 +343,7 @@ class ProgramPersistenceAdapterTest {
     void viewProgramWithNonUUIDId(String programId) {
         dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test
@@ -367,7 +367,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), dataScience.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), dataScience.getNumberOfLoanees());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
         }

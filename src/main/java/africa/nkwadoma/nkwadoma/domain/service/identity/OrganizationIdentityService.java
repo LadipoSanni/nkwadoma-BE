@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -39,10 +40,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
-        Optional<OrganizationEntity> foundOrganizationEntity = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
-        if (foundOrganizationEntity.isPresent()) {
-            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
-        }
+        validateUniqueValues(organizationIdentity);
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -55,10 +53,24 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
        return organizationIdentity;
     }
 
+    private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
+        Optional<OrganizationEntity> foundOrganizationEntity =
+                organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        if (foundOrganizationEntity.isPresent()) {
+            throw new MeedlException(ORGANIZATION_RC_NUMBER_ALREADY_EXIST.getMessage());
+        }
+
+        Optional<OrganizationIdentity> foundOrganizationIdentity =
+                organizationIdentityOutputPort.findByTin(organizationIdentity.getTin());
+        if (foundOrganizationIdentity.isPresent()) {
+            throw new MeedlException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
+        }
+    }
+
 
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
@@ -111,8 +123,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     @Override
     public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
-        MeedlValidator.validateUUID(organizationIdentity.getId());
-        MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy());
+        MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy(), MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         validateNonUpdatableValues(organizationIdentity);
         log.info("Organization identity input: {}", organizationIdentity);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
@@ -120,6 +132,30 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         foundOrganization.setTimeUpdated(LocalDateTime.now());
         log.info("Updated organization: {}", foundOrganization);
         return organizationIdentityOutputPort.save(foundOrganization);
+    }
+
+    @Override
+    public OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateDataElement(reason);
+        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
+        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
+        log.info("found organization employees to reactivate: {}",organizationEmployees.size());
+        organizationEmployees
+                .forEach(organizationEmployeeIdentity -> {
+                    try {
+                        log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
+                        organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
+                        identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
+                    } catch (MeedlException e) {
+                        log.error("Error enabling organization user : {}", e.getMessage());
+                    }
+                });
+
+        identityManagerOutPutPort.enableClient(foundOrganization);
+        foundOrganization.setEnabled(Boolean.TRUE);
+        foundOrganization.setStatus(ActivationStatus.ACTIVATED);
+        return foundOrganization;
     }
 
     private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -143,7 +179,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
         organizationIdentity.setServiceOfferings(serviceOfferings);
@@ -152,12 +188,14 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     @Override
     public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
-        MeedlValidator.validateUUID(adminId);
+        MeedlValidator.validateUUID(adminId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        log.info("Total number loanees {}",organizationIdentity.getNumberOfLoanees());
+        log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
     }
