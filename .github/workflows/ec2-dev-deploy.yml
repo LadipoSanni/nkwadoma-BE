@@ -13,6 +13,8 @@ env:
   CLUSTER: learnspace-africa
   SERVICE: learnspace-backend-systest
   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
+  IV_AES_KEY: ${{secrets.IV_AES_KEY}}
+  AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
 
 jobs:
   build-and-push:
@@ -34,6 +36,8 @@ jobs:
           CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
           CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
           TEST_BVN: ${{ secrets.TEST_BVN_VALUE }}
+          IV_AES_KEY: ${{secrets.IV_AES_KEY}}
+          AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
         run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
@@ -95,6 +99,8 @@ jobs:
       CREDIT_REGISTRY_SUBSCRIBER_ID: ${{ secrets.CREDIT_REGISTRY_SUBSCRIBERID }}
       CREDIT_REGISTRY_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
       CREDIT_REGISTRY_BASE_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
+      IV_AES_KEY: ${{secrets.IV_AES_KEY}}
+      AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
     needs: [build-and-push, migrate-database]
     steps:
       - name: Checkout code
@@ -109,6 +115,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           S3_BUCKET_NAME: semicolon-delivery
           S3_REGION: eu-west-1
+          IV_AES_KEY: ${{secrets.IV_AES_KEY}}
+          AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
