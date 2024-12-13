@@ -140,14 +140,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         LoanReferral foundLoanReferral = viewLoanReferral(loanReferral);
         MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
-        if (ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateEmail())
-                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternatePhoneNumber())
-                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateContactAddress())
-        ) {
-            throw new LoanException(LoanMessages.ADDITIONAL_DETAILS_REQUIRED.getMessage());
-        }
+//        if (ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateEmail())
+//                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternatePhoneNumber())
+//                || ObjectUtils.isEmpty(foundLoanReferral.getLoanee().getUserIdentity().getAlternateContactAddress())
+//        ) {
+//            throw new LoanException(LoanMessages.ADDITIONAL_DETAILS_REQUIRED.getMessage());
+//        }
+        log.info("Loanee decision is : {}", loanReferral.getLoanReferralStatus());
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
+            loanRequest.setLoanReferralStatus(loanReferral.getLoanReferralStatus());
+            log.info("Loan request to create {} ", loanRequest);
             createLoanRequest(loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
@@ -157,9 +160,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
+        log.info("validate loan request");
         loanRequest.validate();
+        log.info("validating loan request referral status");
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
         if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            log.info("");
             throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
         return loanRequestOutputPort.save(loanRequest);

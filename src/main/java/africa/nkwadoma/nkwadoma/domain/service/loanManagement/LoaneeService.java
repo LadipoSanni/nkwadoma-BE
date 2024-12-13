@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -58,6 +59,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final LoanReferralOutputPort loanReferralOutputPort;
+    private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
 
@@ -109,7 +111,12 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        return loaneeOutputPort.findLoaneeById(id);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(id);
+        return updateLoaneeCreditScore(loanee);
+    }
+
+    private Loanee updateLoaneeCreditScore(Loanee loanee) {
+        creditRegistryOutputPort;
     }
 
     @Override
