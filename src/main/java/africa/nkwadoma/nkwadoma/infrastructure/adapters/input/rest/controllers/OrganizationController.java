@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.InviteOrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.OrganizationResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
@@ -55,11 +56,13 @@ public class OrganizationController {
             organizationIdentity.setOrganizationEmployees(orgEmployee);
             organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
+            log.info("Organization identity from service level: {}", organizationIdentity);
             InviteOrganizationResponse inviteOrganizationResponse = organizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
+            log.info("Mapped Organization identity from service level: {}", organizationIdentity);
             ApiResponse<Object> apiResponse = ApiResponse.builder()
                     .data(inviteOrganizationResponse)
                     .message(INVITE_ORGANIZATION_SUCCESS)
-                    .statusCode(HttpStatus.CREATED.toString())
+                    .statusCode(HttpStatus.CREATED.name())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
 
@@ -77,7 +80,7 @@ public class OrganizationController {
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
                 .message(UPDATE_ORGANIZATION_SUCCESS)
-                .statusCode(HttpStatus.CREATED.toString())
+                .statusCode(HttpStatus.CREATED.name())
                 .build();
         return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
@@ -88,7 +91,7 @@ public class OrganizationController {
             throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
         log.info("Organization {}", organizationIdentities);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -102,7 +105,7 @@ public class OrganizationController {
             throws MeedlException {
         OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewOrganizationDetails(id);
         log.info("Organization {}", organizationIdentity);
-        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationRestMapper.toOrganizationResponse(organizationIdentity)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -119,7 +122,7 @@ public class OrganizationController {
         ApiResponse<OrganizationResponse> apiResponse = ApiResponse.<OrganizationResponse>builder()
                 .data(organizationResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
@@ -127,7 +130,7 @@ public class OrganizationController {
 
     @PostMapping("organization/deactivate")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
+    @Operation(summary = DEACTIVATE_ORGANIZATION_TITLE, description = DEACTIVATE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> deactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
             createOrganizationUseCase.deactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
             ApiResponse<Object> apiResponse = ApiResponse.builder()
@@ -135,6 +138,26 @@ public class OrganizationController {
                     .statusCode(HttpStatus.OK.toString())
                     .build();
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("organization/reactivate")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @Operation(summary = REACTIVATE_ORGANIZATION_TITLE, description = REACTIVATE_ORGANIZATION_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> reactivateOrganization(@RequestBody @Valid AccountActivationRequest accountActivationRequest) throws MeedlException {
+        createOrganizationUseCase.reactivateOrganization(accountActivationRequest.getId(), accountActivationRequest.getReason());
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .message(ORGANIZATION_REACTIVATION_SUCCESS)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("organization/reference/data")
+    @Operation(summary = REFERENCE_DATA_TITLE, description = REFERENCE_DATA_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> referenceData(){
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(new ReferenceDataResponse())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("organization/all")

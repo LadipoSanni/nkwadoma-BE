@@ -2,11 +2,18 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -50,6 +57,17 @@ class CohortServiceTest {
     private LoanBreakdown loanBreakdown;
     @Mock
     private CohortMapper cohortMapper;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
+    private OrganizationIdentity organizationIdentity;
+    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    private ServiceOffering serviceOffering;
+    private UserIdentity userIdentity;
+
 
     @BeforeEach
     void setUp() {
@@ -84,6 +102,11 @@ class CohortServiceTest {
         loanBreakdown.setItemName("juno");
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
+
+        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
+        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
+        organizationIdentity =
+                TestData.createOrganizationTestData("testOrg1","rc34rhchjdg",List.of(organizationEmployeeIdentity));
 
     }
 
@@ -154,33 +177,17 @@ class CohortServiceTest {
 
     @Test
     void viewCohortWithNullUserId(){
-        try {
-            when(cohortOutputPort.viewCohortDetails(null, mockId)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null,
-                    mockId));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
+        assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null, mockId));
     }
 
     @Test
     void viewCohortWithNullCohortId() {
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId,  null)).thenThrow(MeedlException.class);
             assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId, null));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyUserId(String userId){
-        try {
-            when(cohortOutputPort.viewCohortDetails(userId,  mockId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(userId,
                         mockId));
@@ -189,11 +196,6 @@ class CohortServiceTest {
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyCohortId(String cohortId){
-        try {
-            when(cohortOutputPort.viewCohortDetails( mockId, cohortId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(mockId,
                         cohortId));

@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -54,8 +55,8 @@ public class LoanRequest {
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validateUUID(loanRequest.getId());
-        MeedlValidator.validateUUID(loanRequest.getLoanProductId());
+        MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan product identification");
+        MeedlValidator.validateUUID(loanRequest.getLoanProductId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
     }
 

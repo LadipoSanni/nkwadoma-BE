@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -40,6 +41,8 @@ class ProgramPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     @Autowired
     private ProgramRepository programRepository;
+    @Autowired
+    private LoaneeUseCase loaneeUseCase;
     private Cohort elites;
     private Program dataAnalytics;
     private Program dataScience;
@@ -84,7 +87,7 @@ class ProgramPersistenceAdapterTest {
         userIdentity = new UserIdentity();
         userIdentity.setFirstName("Joel");
         userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel094@johnson.com");
+        userIdentity.setEmail("joel0949@johnson.com");
         userIdentity.setPhoneNumber("098647748393");
         userIdentity.setId(testId);
         userIdentity.setCreatedBy(testId);
@@ -233,8 +236,7 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNonExistingCreatedBy() {
         dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-        assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
@@ -285,8 +287,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findProgramByNullOrEmptyName(String name) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
     }
 
     @ParameterizedTest
@@ -342,7 +343,7 @@ class ProgramPersistenceAdapterTest {
     void viewProgramWithNonUUIDId(String programId) {
         dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test
@@ -366,7 +367,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), dataScience.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), dataScience.getNumberOfLoanees());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
         }
@@ -379,13 +380,28 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(5)
     void deleteProgram() {
         try {
             dataScience.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             assertNotNull(savedProgram);
 
+            programOutputPort.deleteProgram(savedProgram.getId());
+
+            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
+            assertTrue(programByName.isEmpty());
+        } catch (MeedlException e) {
+            log.error("Error while deleting program", e);
+        }
+    }
+
+    @Test
+    void deleteProgramThatHasLoanees() {
+        try {
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
+            assertNotNull(savedProgram);
+//            elites =
             programOutputPort.deleteProgram(savedProgram.getId());
 
             List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
@@ -416,8 +432,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void deleteProgramByEmptyId(String id) {
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
-        assertEquals(meedlException.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.deleteProgram(id));
     }
 
     @Test

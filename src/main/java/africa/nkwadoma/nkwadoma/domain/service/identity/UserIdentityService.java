@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -76,8 +78,8 @@ public class UserIdentityService implements CreateUserUseCase  {
     }
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
-        MeedlValidator.validateDataElement(userIdentity.getEmail());
-        MeedlValidator.validateDataElement(userIdentity.getPassword());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validatePassword(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
 
@@ -111,27 +113,35 @@ public class UserIdentityService implements CreateUserUseCase  {
         }
     }
     private void passwordPreviouslyCreated(String token) throws IdentityException {
+        log.info("checking if its previously created  {}",token);
         if (blackListedTokenAdapter.isPresent(token)){
-            log.info("Password already created befire. Method called more than oce with the same token.");
+            log.info("Password already created before. Method called more than once with the same token.");
             throw new IdentityException("Password already created. Try login or forgot password. Or contact the admin ");
         }
     }
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
+        log.info("request got into service layer {}",password);
+//        passwordPreviouslyCreated(token);
+        MeedlValidator.validateDataElement(token);
         passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
-        userIdentity = identityManagerOutPutPort.createPassword(userIdentity.getEmail(), password);
-        blackListedTokenAdapter.blackListToken(createBlackList(token));
+        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
+        log.info("User Identity after password has been created: {}", userIdentity);
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
+//        log.info("done getting user identity frm token {}",userIdentity);
+//        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
         return userIdentity;
     }
 
     @Override
     public void resetPassword(String token, String password) throws MeedlException {
-        passwordPreviouslyCreated(token);
+//        passwordPreviouslyCreated(token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
         identityManagerOutPutPort.resetPassword(userIdentity);
-        blackListedTokenAdapter.blackListToken(createBlackList(token));
+//        blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
@@ -147,14 +157,18 @@ public class UserIdentityService implements CreateUserUseCase  {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
+        if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
+            log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+            throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+        }
         if(checkNewPasswordMatchLastFive(userIdentity)){
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
-        userIdentity.setPassword(userIdentity.getNewPassword());
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         identityManagerOutPutPort.setPassword(userIdentity);
+        log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
 
     @Override
@@ -171,8 +185,8 @@ public class UserIdentityService implements CreateUserUseCase  {
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
-        MeedlValidator.validateDataElement(userIdentity.getReactivationReason());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         userIdentity = identityManagerOutPutPort.enableUserAccount(foundUserIdentity);
         log.info("User reactivated successfully {}", userIdentity.getId());
@@ -182,8 +196,8 @@ public class UserIdentityService implements CreateUserUseCase  {
     @Override
     public UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
-        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Reason for deactivation required");
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
         foundUserIdentity.setDeactivationReason(userIdentity.getDeactivationReason());
         userIdentity = identityManagerOutPutPort.disableUserAccount(foundUserIdentity);

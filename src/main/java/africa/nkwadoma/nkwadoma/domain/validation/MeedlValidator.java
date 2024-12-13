@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -28,13 +28,14 @@ public class MeedlValidator {
 
     public static void validateEmail(String email) throws MeedlException {
         if (isEmptyString(email) || !EmailValidator.getInstance().isValid(email.trim())) {
+            log.info("Invalid email address provided : {}", email);
             throw new MeedlException(MeedlMessages.INVALID_EMAIL_ADDRESS.getMessage());
         }
     }
 
     public static void validateUUID(String dataElement) throws MeedlException {
         log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement);
+        validateDataElement(dataElement,"An empty id can not be used to perform this operation");
         try {
             UUID.fromString(dataElement);
         } catch (IllegalArgumentException e) {
@@ -42,9 +43,26 @@ public class MeedlValidator {
             throw new MeedlException(UUID_NOT_VALID.getMessage());
         }
     }
+    public static void validateUUID(String dataElement, String message) throws MeedlException {
+        log.info("validateUUID {}", dataElement);
+        validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
+        try {
+            UUID.fromString(dataElement);
+        } catch (IllegalArgumentException e) {
+            log.info("{}. The invalid UUID : {} : {}", e.getMessage(), dataElement, message);
+            throw new MeedlException(message);
+        }
+    }
     public static void validateDataElement(String dataElement) throws MeedlException {
         if (isEmptyString(dataElement)) {
+            log.error("Empty input field");
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        }
+    }
+    public static void validateDataElement(String dataElement, String message) throws MeedlException {
+        if (isEmptyString(dataElement)) {
+            log.error(message);
+            throw new MeedlException(message);
         }
     }
 
@@ -87,7 +105,7 @@ public class MeedlValidator {
         }
     }
     public static void validateBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateDataElement(bvn);
+        MeedlValidator.validateDataElement(bvn, "Invalid bvn provided");
         String regex = "^\\d{11}$";
 
         boolean isValid = Pattern.matches(regex, bvn);
@@ -103,14 +121,14 @@ public class MeedlValidator {
         }
     }
     public static void validatePassword(String password) throws MeedlException {
-        validateDataElement(password);
+        validateDataElement(password, "Password can not be empty");
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()) {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
     public static void validateObjectName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, "Name can not be empty");
         String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' -]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
@@ -134,7 +152,7 @@ public class MeedlValidator {
         return StringUtils.equals(inviterEmailDomain, inviteeEmailDomain);
     }
     public static void validateOrganizationUserIdentities(List<OrganizationEmployeeIdentity> userIdentities) throws MeedlException {
-        log.info("Started validdating for user identities (List) : {}", userIdentities);
+        log.info("Started validating for user identities (List) : {}", userIdentities);
         log.info("validating to check for empty list : {}", CollectionUtils.isEmpty(userIdentities));
         if (CollectionUtils.isEmpty(userIdentities)){
             log.error("{} - {}", USER_IDENTITY_CANNOT_BE_NULL.getMessage(), userIdentities);
@@ -157,6 +175,7 @@ public class MeedlValidator {
     public static void validateNegativeAmount(BigDecimal itemAmount) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
+            log.info("{} --- {}",LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage(),itemAmount);
             throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
         }
     }
@@ -165,6 +184,22 @@ public class MeedlValidator {
         MeedlValidator.validateObjectInstance(loanBreakdowns);
         for(LoanBreakdown loanBreakdown : loanBreakdowns){
             loanBreakdown.validate();
+        }
+    }
+
+    public static void validateRCNumber(String rcNumber) throws MeedlException {
+        boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
+        if (!patternMatches) {
+            log.error("{} - {}", OrganizationMessages.INVALID_RC_NUMBER.getMessage(), rcNumber);
+            throw new MeedlException(OrganizationMessages.INVALID_RC_NUMBER.getMessage());
+        }
+    }
+
+    public static void validateTin(String tin) throws MeedlException {
+        boolean patternMatches = Pattern.compile(MeedlPatterns.TIN_REGEX_PATTERN).matcher(tin).matches();
+        if (!patternMatches) {
+            log.error("{} - {}", MeedlMessages.INVALID_TIN.getMessage(), tin);
+            throw new MeedlException(MeedlMessages.INVALID_TIN.getMessage());
         }
     }
 }

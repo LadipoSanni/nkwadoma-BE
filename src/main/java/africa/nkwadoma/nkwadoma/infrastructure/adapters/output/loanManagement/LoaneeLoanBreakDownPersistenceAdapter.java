@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
@@ -9,11 +10,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeLoanBreakDownMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanBreakDownRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDownOutputPort {
@@ -32,6 +35,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownMapper.toLoaneeLoanBreakdownEntities(loaneeLoanBreakdowns);
         loanBreakdownEntities = loaneeLoanBreakDownRepository.saveAll(loanBreakdownEntities);
+        log.info("Saved all loanee loan break down for loanee : {}", loanee.getUserIdentity().getEmail());
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);
     }
 
@@ -47,7 +51,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
 
     @Override
     public List<LoaneeLoanBreakdown> findAllByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOAN_ID.getMessage());
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownRepository.findAllByLoaneeId(loaneeId);
         return loaneeLoanBreakDownMapper.toLoaneeLoanBreakdown(loanBreakdownEntities);

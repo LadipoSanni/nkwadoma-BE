@@ -10,6 +10,7 @@ public interface OrganizationEmployeeRestMapper {
             "java(concatenateNames(organizationEmployeeIdentity.getMeedlUser().getFirstName()," +
                     " organizationEmployeeIdentity.getMeedlUser().getLastName()))"
     )
+    @Mapping(target = "email", source = "meedlUser.email")
     OrganizationEmployeeResponse toOrganizationEmployeeResponse(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
     default String concatenateNames(String firstName, String lastName) {

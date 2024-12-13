@@ -10,8 +10,11 @@ import lombok.*;
 public class UserIdentityRequest {
 
     private String id;
+    @NotBlank(message = "Email is required")
     private String email;
+    @NotBlank(message = "First Name is required")
     private String firstName;
+    @NotBlank(message = "Last Name is required")
     private String lastName;
     private String phoneNumber;
     private String createdBy;

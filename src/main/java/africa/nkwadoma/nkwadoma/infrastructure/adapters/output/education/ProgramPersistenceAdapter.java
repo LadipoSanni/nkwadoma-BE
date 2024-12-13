@@ -15,35 +15,40 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
 import org.apache.commons.lang3.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.validateDataElement;
-
 @RequiredArgsConstructor
 @Component
 @Slf4j
 public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramRepository programRepository;
     private final ProgramMapper programMapper;
-    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-//    private final CohortOutputPort cohortOutputPort;
+    @Lazy
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final CohortRepository cohortRepository;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    private final LoanBreakdownRepository loanBreakdownRepository;
+    private final ProgramCohortRepository programCohortRepository;
 
     @Override
     public List<Program> findProgramByName(String programName) throws MeedlException {
-        validateDataElement(programName);
+        MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         List<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName.trim());
         log.info("Program entities: {}", programEntities);
         if (programEntities.isEmpty()) {
@@ -66,7 +71,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
 
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
-        programEntity.setOrganizationEntity(organizationEntity);
+        programEntity.setOrganizationIdentity(organizationEntity);
         programEntity.setProgramStatus(ActivationStatus.ACTIVE);
         programEntity = programRepository.save(programEntity);
         updateOrganization(program, organizationEntity);
@@ -78,35 +83,55 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private void updateOrganization(Program program, OrganizationEntity organizationEntity) {
         if (StringUtils.isEmpty(program.getId())) {
             organizationEntity.setNumberOfPrograms(organizationEntity.getNumberOfPrograms() + BigInteger.ONE.intValue());
+            log.info("Updating total number of programs in organization to {}",organizationEntity.getNumberOfPrograms());
             organizationEntityRepository.save(organizationEntity);
         }
     }
 
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
-        MeedlValidator.validateUUID(meedlUserId);
+        MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         log.info("Validating the created by: {}",meedlUserId);
+        MeedlValidator.validateUUID(meedlUserId);
         OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(meedlUserId);
         if (ObjectUtils.isEmpty(employeeIdentity)) {
-            throw new EducationException(MeedlMessages.INVALID_CREATED_BY.getMessage());
+            log.error("Unable to find employee performing this action on the data base. {}", MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
+            throw new EducationException(MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         }
         return organizationIdentityOutputPort.findById(employeeIdentity.getOrganization());
     }
 
     @Override
+    public List<Program> findAllProgramsByOrganizationId(String organizationId) {
+         List<ProgramEntity> programEntities = programRepository.findProgramEntitiesByOrganizationIdentityId(organizationId);
+         return programEntities.stream().map(programMapper::toProgram).toList();
+    }
+
+    @Override
     public boolean programExists(String programName) throws MeedlException {
-        validateDataElement(programName);
+        MeedlValidator.validateDataElement(programName,ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         return programRepository.existsByName(programName);
     }
 
     @Override
+    @Transactional
     public void deleteProgram(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         ProgramEntity program = programRepository.findById(programId).
                 orElseThrow(()-> new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage()));
         List<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(program.getId());
+
         if (CollectionUtils.isNotEmpty(cohortEntities)) {
-            cohortRepository.deleteAll(cohortEntities);
+            for (CohortEntity cohortEntity : cohortEntities) {
+                if (cohortEntity.getNumberOfLoanees() > 0) {
+                    throw new EducationException("Program with loanee cannot be deleted");
+                }
+                else {
+                    programCohortRepository.deleteAllByCohort(cohortEntity);
+                    loanBreakdownRepository.deleteAllByCohort(cohortEntity);
+                    cohortRepository.deleteById(cohortEntity.getId());
+                }
+            }
         }
         programRepository.delete(program);
     }
@@ -114,12 +139,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Program findProgramById(String programId) throws MeedlException {
         MeedlValidator.validateDataElement(programId);
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         Program program = programMapper.toProgram(programEntity);
-        program.setOrganizationId(programEntity.getOrganizationEntity().getId());
+        program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
         return program;
     }
 
@@ -127,7 +152,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
-        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationEntityId(foundOrganizationIdentity.getId(), pageRequest);
+        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {

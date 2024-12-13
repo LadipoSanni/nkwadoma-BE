@@ -42,13 +42,14 @@ class OrganizationIdentityAdapterTest {
         organizationEmployeeIdentity.setMeedlUser(joel);
         List<OrganizationEmployeeIdentity> userIdentities = List.of(organizationEmployeeIdentity);
 
-        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC87877", userIdentities);
+        amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC8787767", userIdentities);
     }
 
     @Test
     @Order(1)
     void saveOrganization() {
         try {
+            organizationOutputPort.delete(amazingGrace.getId());
             assertThrows(MeedlException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             log.info("Organization saved id is : {}", savedOrganization.getId());
@@ -194,6 +195,21 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
+    void findOrganizationServiceOfferings() {
+        try {
+            List<OrganizationServiceOffering> organizationServiceOfferings =
+                    organizationOutputPort.findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
+
+            assertNotNull(organizationServiceOfferings);
+            assertEquals(organizationServiceOfferings.get(0).getOrganizationId(), amazingGrace.getId());
+            assertNotNull(organizationServiceOfferings.get(0).getId());
+            assertNotNull(organizationServiceOfferings.get(0).getServiceOffering());
+        } catch (MeedlException meedlException) {
+            log.info("{}", meedlException.getMessage());
+        }
+    }
+
+    @Test
     @Order(3)
     void viewAllOrganization() {
         try {
@@ -276,7 +292,10 @@ class OrganizationIdentityAdapterTest {
     void updateOrganization() {
         try {
             OrganizationIdentity existingUser = organizationOutputPort.findById(amazingGrace.getId());
+            assertNotNull(existingUser);
             assertEquals(existingUser.getPhoneNumber(), amazingGrace.getPhoneNumber());
+            assertNotNull(existingUser.getServiceOfferings());
+            assertFalse(existingUser.getServiceOfferings().isEmpty());
             assertNotNull(existingUser.getServiceOfferings().get(0).getIndustry());
 
             existingUser.setName("Felicia");

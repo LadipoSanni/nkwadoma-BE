@@ -8,6 +8,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,6 +43,8 @@ public class TestData {
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
+        organizationIdentity.getServiceOfferings().get(0).setTransactionUpperBound(new BigDecimal("0.00"));
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
@@ -62,7 +67,6 @@ public class TestData {
                 .id(testId)
                 .userIdentity(userIdentity)
                 .cohortId(testId)
-                .createdBy(userIdentity.getCreatedBy())
                 .loaneeLoanDetail(loaneeLoanDetail)
                 .build();
     }
@@ -71,8 +75,8 @@ public class TestData {
                 .loaneeId(testId)
                 .loanOfferId(testId)
                 .loanee(loanee)
+                .loanAccountId(testId)
                 .startDate(LocalDateTime.now())
-                .loanAccountId("account id")
                 .build();
     }
     public static LoaneeLoanDetail createTestLoaneeLoanDetail(){
@@ -95,7 +99,7 @@ public class TestData {
         elites.setName(name);
         elites.setCreatedBy(meedlUserId);
         elites.setLoanBreakdowns(loanBreakdowns);
-        elites.setTuitionAmount(BigDecimal.valueOf(10000));
+        elites.setTuitionAmount(BigDecimal.valueOf(1000000));
         elites.setOrganizationId(organizationId);
         elites.setCohortStatus(CohortStatus.GRADUATED);
         return elites;
@@ -165,5 +169,13 @@ public class TestData {
         loanRequest.setLoanee(loanee);
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequest;
+    }
+    public static PremblyResponse createTestPremblyResponse(){
+        PremblyResponse response = new PremblyBvnResponse();
+        Verification verifier = Verification.builder().status("VERIFIED").build();
+        response.setDetail("VERIFIED");
+        response.setVerification(verifier);
+        response.setResponseCode("CREATED");
+        return response;
     }
 }

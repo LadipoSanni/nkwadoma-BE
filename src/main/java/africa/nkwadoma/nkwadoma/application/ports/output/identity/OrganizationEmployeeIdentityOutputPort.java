@@ -22,4 +22,7 @@ public interface OrganizationEmployeeIdentityOutputPort {
     List<OrganizationEmployeeIdentity> findEmployeesByNameAndRole(String organizationId, String name, IdentityRole identityRole) throws MeedlException;
 
     List<OrganizationEmployeeIdentity> findAllOrganizationEmployees(String organizationId);
+    Page<OrganizationEmployeeIdentity> findAllAdminInOrganization(String userId, IdentityRole identityRole,int pageSize, int pageNumber) throws MeedlException;
+
+
 }

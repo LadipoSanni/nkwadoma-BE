@@ -25,7 +25,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
             (OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
-        MeedlValidator.validateUUID(organizationEmployeeIdentity.getOrganization());
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getOrganization(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
         Page<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeOutputPort.
@@ -42,11 +42,26 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
 
     @Override
     public List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException {
-        MeedlValidator.validateUUID(userId);
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         OrganizationEmployeeIdentity organizationEmployeeIdentity
                 = organizationEmployeeOutputPort.findByCreatedBy(userId);
-        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
+        return organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
                 name, IdentityRole.ORGANIZATION_ADMIN);
-        return organizationEmployeeIdentities;
+    }
+
+    @Override
+    public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId());
+        return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> viewAllAdminInOrganization(String userId,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+            OrganizationEmployeeIdentity organizationEmployeeIdentity
+                    = organizationEmployeeOutputPort.findByCreatedBy(userId);
+        return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationEmployeeIdentity.getOrganization(),
+                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
     }
 }

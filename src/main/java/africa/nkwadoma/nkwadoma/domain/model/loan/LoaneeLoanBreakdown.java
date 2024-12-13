@@ -22,8 +22,8 @@ public class LoaneeLoanBreakdown {
     private Loanee loanee;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loaneeLoanBreakdownId);
+        MeedlValidator.validateUUID(loaneeLoanBreakdownId, "Please provide a valid loanee's loan break down identification.");
         MeedlValidator.validateNegativeAmount(itemAmount);
-        MeedlValidator.validateDataElement(itemName);
+        MeedlValidator.validateDataElement(itemName, "Item name is required");
     }
 }

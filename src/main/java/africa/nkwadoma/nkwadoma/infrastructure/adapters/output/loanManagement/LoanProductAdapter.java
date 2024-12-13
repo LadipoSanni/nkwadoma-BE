@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
@@ -65,7 +66,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                             .build()))
                     .collect(Collectors.toList());
         }
-        return null;
+        return List.of();
     }
 
     private List<Vendor> saveVendors(LoanProduct loanProduct) {
@@ -76,13 +77,13 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                     .map(loanProductMapper::mapVendorEntityToVendor)
                     .toList();
         }
-        return null;
+        return List.of();
     }
 
     @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity loanProductEntity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
         loanProductVendorRepository.deleteAllByLoanProductEntity(loanProductEntity);
         loanProductEntityRepository.deleteById(id);
@@ -90,20 +91,20 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public boolean existsByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductEntityRepository.existsByName(name);
     }
 
     @Override
     public LoanProduct findById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
 
     @Override
     public LoanProduct findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
@@ -119,7 +120,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public List<LoanProduct> search(String loanProductName) throws MeedlException {
-        MeedlValidator.validateDataElement(loanProductName);
+        MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         List<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findByNameContainingIgnoreCase(loanProductName);
         if (loanProductEntities.isEmpty()){
             return List.of();

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -17,10 +18,10 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.INVA
 @Slf4j
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class OrganizationIdentity {
     private String id;
     private String name;
@@ -39,6 +40,7 @@ public class OrganizationIdentity {
     private ActivationStatus status;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
+    private int numberOfCohort;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;
@@ -55,8 +57,11 @@ public class OrganizationIdentity {
         log.info("{}",this.serviceOfferings);
         MeedlValidator.validateObjectName(this.name);
         MeedlValidator.validateEmail(this.email);
-        MeedlValidator.validateDataElement(this.rcNumber);
-        MeedlValidator.validateDataElement(this.phoneNumber);
+        MeedlValidator.validateDataElement(this.rcNumber, "Company's RC number is required");
+        MeedlValidator.validateRCNumber(this.rcNumber);
+        MeedlValidator.validateDataElement(this.rcNumber, OrganizationMessages.INVALID_RC_NUMBER.getMessage());
+        MeedlValidator.validateTin(this.tin);
+        MeedlValidator.validateDataElement(this.phoneNumber, "Phone number is required");
 
         if (this.serviceOfferings == null
                 || this.serviceOfferings.isEmpty()
@@ -64,7 +69,7 @@ public class OrganizationIdentity {
             log.error("{} : {}", INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage(), this.serviceOfferings);
             throw new IdentityException(INVALID_INDUSTRY_OR_SERVICE_OFFERING.getMessage());
         }
-        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name());
+        MeedlValidator.validateDataElement(this.serviceOfferings.get(0).getIndustry().name(), "Service offering's name is required");
         log.info("Organization identity validation completed successfully {}", this.name);
 
     }

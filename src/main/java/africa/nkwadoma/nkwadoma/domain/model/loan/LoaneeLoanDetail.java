@@ -18,9 +18,9 @@ public class LoaneeLoanDetail {
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private BigDecimal amountReceived = BigDecimal.ZERO;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(initialDeposit);
-        MeedlValidator.validateNegativeAmount(amountRequested);
     }
 }

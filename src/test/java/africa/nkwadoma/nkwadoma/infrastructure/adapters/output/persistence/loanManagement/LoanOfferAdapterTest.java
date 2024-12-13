@@ -66,7 +66,7 @@ public class LoanOfferAdapterTest {
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                 initialDeposit(BigDecimal.valueOf(3000000.00)).build();
         loanee = Loanee.builder().userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy())
+                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f")
                 .loaneeLoanDetail(loaneeLoanDetail).build();
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);

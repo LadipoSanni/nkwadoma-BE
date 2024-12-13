@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.utilities;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import io.jsonwebtoken.*;
@@ -10,7 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.InvalidKeyException;
 import java.util.*;
 
 @Slf4j
@@ -52,14 +59,23 @@ public class TokenUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public String decodeJWT(String token){
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
+    }
+
     public String decodeJWTGetEmail(String token) throws MeedlException {
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
         Claims claims;
         claims = getClaims(token);
         return claims.get("email").toString();
     }
     public String decodeJWTGetId(String token) throws MeedlException {
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, MeedlMessages.TOKEN_REQUIRED.getMessage());
         Claims claims;
         claims = getClaims(token);
         return claims.get("id").toString();
