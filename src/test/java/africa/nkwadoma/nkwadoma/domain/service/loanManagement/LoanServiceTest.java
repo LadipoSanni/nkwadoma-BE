@@ -115,10 +115,9 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
-            when(loanReferralOutputPort.findLoanReferralById(
-                    loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
+            when(loanReferralOutputPort.findById(
+                    loanReferral.getId())).thenReturn(loanReferral);
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-            log.info("found loan referral : {}",foundLoanReferral);
             assertNotNull(foundLoanReferral);
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
@@ -168,7 +167,7 @@ class LoanServiceTest {
         LoanReferral referral = null;
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);

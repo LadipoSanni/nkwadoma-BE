@@ -110,14 +110,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanReferral viewLoanReferral(LoanReferral loanReferral) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanReferral);
+        MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         loanReferral.validateViewLoanReferral();
         List<LoanReferral> foundLoanReferrals = loanReferralOutputPort.findLoanReferralByUserId(
                 loanReferral.getLoanee().getUserIdentity().getId());
         if (foundLoanReferrals.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         } else if (foundLoanReferrals.size() > 1){
-            throw new LoanException("Multiple loan referrals is currently not allowed");
+            throw new LoanException(LoanMessages.MULTIPLE_LOAN_REFERRALS_IS_CURRENTLY_NOT_ALLOWED.getMessage());
         } else {
             return getLoanReferral(foundLoanReferrals);
         }
@@ -126,14 +126,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
         LoanReferral loanReferral = foundLoanReferrals.get(0);
         if (ObjectUtils.isEmpty(loanReferral)) {
+            log.info("Empty Loan referral returned");
             throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
         }
-        Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
-                findLoanReferralById(loanReferral.getId());
-        if (loanReferralById.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        return loanReferralById.get();
+        loanReferral = loanReferralOutputPort.findById(loanReferral.getId());
+        log.info("Found Loan referral by it's ID: {}", loanReferral);
+        return loanReferral;
     }
 
     @Override

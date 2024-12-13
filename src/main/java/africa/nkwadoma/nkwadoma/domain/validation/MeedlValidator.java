@@ -93,6 +93,12 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateObjectInstance(Object instance, String message) throws MeedlException {
+        if (ObjectUtils.isEmpty(instance)){
+            throw new MeedlException(message);
+        }
+    }
+
     public static void validatePageNumber(int pageNumber) throws MeedlException {
         if (pageNumber < BigInteger.ZERO.intValue()) {
             throw new MeedlException(MeedlMessages.PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO.getMessage());

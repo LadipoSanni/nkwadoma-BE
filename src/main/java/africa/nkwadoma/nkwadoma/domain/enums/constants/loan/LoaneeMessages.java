@@ -13,7 +13,8 @@ public enum LoaneeMessages {
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
-    LOANEE_MUST_BE_ADDED_TO_COHORT("Loanee Must Be Added To Cohort Before Referral");
+    LOANEE_MUST_BE_ADDED_TO_COHORT("Loanee Must Be Added To Cohort Before Referral"),
+    LOANEE_CANNOT_BE_EMPTY("Loanee cannot be empty");
 
     private final String message;
 
