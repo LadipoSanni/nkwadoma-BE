@@ -41,6 +41,8 @@ env:
   CREDIT_REGISTRY_AGENT_PASSWORD: ${{ secrets.CREDIT_REGISTRY_AGENT_PASSWORD }}
   CREDIT_REGISTRY_URL: ${{ secrets.CREDIT_REGISTRY_URL }}
   TEST_BVN_VALUE: ${{ secrets.TEST_BVN_VALUE }}
+  IV_AES_KEY: ${{secrets.IV_AES_KEY}}
+  AES_SECRET_KEY: ${{secrets.AES_SECRET_KEY}}
   AWS_REGION: "eu-west-1"  # Updated to match the S3 region in the URL
   DEV_FRONTEND_BASE_URL: http://localhost:3000
   DEV_FRONTEND_BASE_URL2: http://localhost:3000

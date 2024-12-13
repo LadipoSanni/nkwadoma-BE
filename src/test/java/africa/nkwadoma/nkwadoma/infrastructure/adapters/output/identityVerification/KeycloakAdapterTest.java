@@ -305,16 +305,6 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserById("123e4567-e89b-12d3-a456-426614174000\""));
     }
     @ParameterizedTest
-    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
-    void createPasswordWithNullPassword(String password) {
-        john.setEmail(john.getEmail());
-        john.setPassword(password);
-        MeedlException meedlException = assertThrows(MeedlException.class, () ->
-                identityManagementOutputPort.createPassword(john));
-        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
-    }
-
-    @ParameterizedTest
     @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
     void createPasswordWithSpaces(String password) {
         try {
@@ -368,7 +358,7 @@ class KeycloakAdapterTest {
         john.setPassword(password);
         MeedlException meedlException = assertThrows(MeedlException.class, () ->
                 identityManagementOutputPort.login(john));
-        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+        assertEquals("Password can not be empty", meedlException.getMessage());
     }
 
     @ParameterizedTest

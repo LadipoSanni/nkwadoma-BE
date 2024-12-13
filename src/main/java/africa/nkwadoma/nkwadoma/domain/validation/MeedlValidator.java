@@ -121,7 +121,7 @@ public class MeedlValidator {
         }
     }
     public static void validatePassword(String password) throws MeedlException {
-        validateDataElement(password);
+        validateDataElement(password, "Password can not be empty");
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()) {
             throw new IdentityException(WEAK_PASSWORD.getMessage());

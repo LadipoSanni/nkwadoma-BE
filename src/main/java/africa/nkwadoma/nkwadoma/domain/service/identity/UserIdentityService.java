@@ -157,14 +157,18 @@ public class UserIdentityService implements CreateUserUseCase  {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
+        if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
+            log.warn("{}", UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+            throw new IdentityException(UserMessages.NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME.getMessage());
+        }
         if(checkNewPasswordMatchLastFive(userIdentity)){
             throw new IdentityException(PASSWORD_NOT_ACCEPTED.getMessage());
         }
-        userIdentity.setPassword(userIdentity.getNewPassword());
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         identityManagerOutPutPort.setPassword(userIdentity);
+        log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
 
     @Override

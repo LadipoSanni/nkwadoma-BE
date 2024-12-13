@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
@@ -36,4 +38,21 @@ class TokenUtilsTest {
     void generateTokenWithNullEmail(){
         assertThrows(MeedlException.class,()-> tokenUtils.generateToken(StringUtils.EMPTY));
     }
+    @Test
+    void testValidDecryption() throws Exception {
+        String encryptedData = "etlGGJ4BSGNxBkqfv3rPqw==";
+        String expectedOutput = "93289238223";
+        String result = tokenUtils.decryptAES(encryptedData);
+        assertEquals(expectedOutput, result, "Decrypted output does not match expected value.");
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE,  "INVALID_BASE64"})
+    void testInvalidBase64Data(String emptyData) {
+        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(emptyData), "Should throw an exception for empty encrypted data.");
+    }
+    @Test
+    void testNullEncryptedData() {
+        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(null), "Should throw an exception for null encrypted data.");
+    }
+
 }
