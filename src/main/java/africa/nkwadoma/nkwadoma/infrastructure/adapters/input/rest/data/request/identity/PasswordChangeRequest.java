@@ -10,4 +10,6 @@ import lombok.*;
 public class PasswordChangeRequest {
     @NotBlank(message = "Password is required")
     private String password;
+    @NotBlank(message = "New password is required")
+    private String newPassword;
 }
