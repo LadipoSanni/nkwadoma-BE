@@ -82,33 +82,9 @@ class ProgramPersistenceAdapterTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
-
-    @BeforeEach
-    void setUp() {
-        dataAnalytics = new Program();
-        dataAnalytics.setName("Data analysis");
-        dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
-        dataAnalytics.setMode(ProgramMode.FULL_TIME);
-        dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
-        dataAnalytics.setDuration(2);
-        dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
-        dataAnalytics.setDurationType(DurationType.MONTHS);
-
-        dataScience = new Program();
-        dataScience.setName("Data sciences");
-        dataScience.setProgramDescription("The art of putting thought into solving problems");
-        dataScience.setMode(ProgramMode.FULL_TIME);
-        dataScience.setProgramStatus(ActivationStatus.ACTIVE);
-        dataScience.setDuration(1);
-        dataScience.setDeliveryType(DeliveryType.ONSITE);
-        dataScience.setDurationType(DurationType.YEARS);
-
-    }
-
-    @AfterEach
-    void clean() {
-
-    }
+    private String organizationAdminId;
+    private LoaneeLoanBreakdown loaneeLoanBreakdown;
+    private LoaneeLoanDetail loaneeLoanDetail;
 
     @BeforeAll
     void init() {
@@ -152,6 +128,48 @@ class ProgramPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.error("Error creating organization", e);
         }
+    }
+
+    @BeforeEach
+    void setUp() {
+        dataAnalytics = new Program();
+        dataAnalytics.setName("Data analysis");
+        dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
+        dataAnalytics.setMode(ProgramMode.FULL_TIME);
+        dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
+        dataAnalytics.setDuration(2);
+        dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
+        dataAnalytics.setDurationType(DurationType.MONTHS);
+
+        dataScience = new Program();
+        dataScience.setName("Data sciences");
+        dataScience.setProgramDescription("The art of putting thought into solving problems");
+        dataScience.setMode(ProgramMode.FULL_TIME);
+        dataScience.setProgramStatus(ActivationStatus.ACTIVE);
+        dataScience.setDuration(1);
+        dataScience.setDeliveryType(DeliveryType.ONSITE);
+        dataScience.setDurationType(DurationType.YEARS);
+
+        OrganizationEmployeeIdentity employeeIdentity;
+        try {
+            employeeIdentity = employeeIdentityOutputPort.
+                    findByCreatedBy(userId);
+            organizationAdminId = employeeIdentity.getId();
+            dataScience.setCreatedBy(userId);
+            dataScience = programOutputPort.saveProgram(dataScience);
+            assertNotNull(dataScience);
+            assertNotNull(dataScience.getId());
+            dataScienceProgramId = dataScience.getId();
+
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
+                    loanBreakdowns, employeeIdentity.getId());
+
+        } catch (MeedlException e) {
+            log.error("Error finding organization employee:", e);
+        }
+
     }
 
     @AfterEach
@@ -426,38 +444,26 @@ class ProgramPersistenceAdapterTest {
     @Test
     void deleteProgramThatHasLoanees() {
         try {
-            OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
-                    findByCreatedBy(userId);
-            dataScience.setCreatedBy(userId);
-            dataScience = programOutputPort.saveProgram(dataScience);
-            assertNotNull(dataScience);
-            assertNotNull(dataScience.getId());
-            dataScienceProgramId = dataScience.getId();
-
-            loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdowns = List.of(loanBreakdown);
-            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
-                    loanBreakdowns, employeeIdentity.getId());
             elites = cohortUseCase.createCohort(elites);
             assertNotNull(elites);
             assertNotNull(elites.getId());
             cohortId = elites.getId();
 
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
+                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
+                    image("loanee-img.png").role(LOANEE).createdBy(organizationAdminId).build();
+            loaneeLoanDetail = LoaneeLoanDetail.builder().
+                    amountRequested(BigDecimal.valueOf(30000.00)).
+                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
             loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
             loanBreakdown = loanBreakdowns.get(0);
 
-            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
-                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
-                    image("loanee-img.png").role(LOANEE).createdBy(employeeIdentity.getId()).build();
-            LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
-                    amountRequested(BigDecimal.valueOf(30000.00)).
-                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
-
-            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+            loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
                     loaneeLoanBreakdownId(loanBreakdown.getLoanBreakdownId()).
                     itemAmount(loanBreakdown.getItemAmount()).
                     itemName(loanBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
+
             loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
@@ -471,8 +477,7 @@ class ProgramPersistenceAdapterTest {
             log.error("Error while deleting program", e);
         }
         MeedlException exception = assertThrows(MeedlException.class, ()-> programOutputPort.deleteProgram(dataScience.getId()));
-        log.info("Exception message: {}", exception.getMessage());
-
+        log.debug(exception.getMessage());
     }
 
     @Test
