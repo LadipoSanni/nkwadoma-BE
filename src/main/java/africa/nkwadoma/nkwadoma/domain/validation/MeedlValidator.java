@@ -76,6 +76,12 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateBigDecimalDataElement(BigDecimal dataElement, String message) throws MeedlException {
+        if (dataElement == null) {
+            throw new MeedlException(message);
+        }
+    }
+
     public static void validateFloatDataElement(Float dataElement) throws MeedlException {
         if (dataElement == null){
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());

@@ -88,7 +88,7 @@ class LoanReferralAdapterTest {
 
             amazingGrace = TestData.createOrganizationTestData(
                     "Amazing Grace Enterprises",
-                    "RC79500034",
+                    "RC7950005",
                     employees
             );
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
@@ -197,7 +197,7 @@ class LoanReferralAdapterTest {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);

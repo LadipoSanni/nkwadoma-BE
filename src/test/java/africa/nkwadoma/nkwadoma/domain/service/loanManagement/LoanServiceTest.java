@@ -92,12 +92,6 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNullLoanAmountRequested() {
-        loanRequest.setLoanAmountRequested(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createLoanRequestWithNullLoanRequestStatus() {
         loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
@@ -105,7 +99,7 @@ class LoanServiceTest {
 
     @Test
     void createLoanRequestWithNullLoaneeLoanDetail() {
-        loanRequest.getLoanee().setLoaneeLoanDetail(null);
+        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
@@ -115,8 +109,8 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
-            when(loanReferralOutputPort.findById(
-                    loanReferral.getId())).thenReturn(loanReferral);
+            when(loanReferralOutputPort.
+                    findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
             assertNotNull(foundLoanReferral);
             verify(loanReferralOutputPort, times(1)).
@@ -166,7 +160,7 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
+//            when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);

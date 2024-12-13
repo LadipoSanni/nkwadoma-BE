@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -61,10 +61,9 @@ public class LoanRequest {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanee.getLoaneeLoanDetail());
-        MeedlValidator.validateObjectInstance(status);
-        MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(status, LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateBigDecimalDataElement(loanee.getLoaneeLoanDetail().getAmountRequested(), LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
     }
 
 
