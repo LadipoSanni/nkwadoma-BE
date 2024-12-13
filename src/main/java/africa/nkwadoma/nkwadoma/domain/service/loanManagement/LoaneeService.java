@@ -115,8 +115,13 @@ public class LoaneeService implements LoaneeUseCase {
         return updateLoaneeCreditScore(loanee);
     }
 
-    private Loanee updateLoaneeCreditScore(Loanee loanee) {
-        creditRegistryOutputPort;
+    private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        if (loanee.getCreditScoreUpdatedAt() == null){
+            loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
+            loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
+        }
+        creditRegistryOutputPort.getCreditScoreWithRegistryId("");
     }
 
     @Override
