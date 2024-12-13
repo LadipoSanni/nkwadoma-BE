@@ -85,6 +85,8 @@ class ProgramPersistenceAdapterTest {
     private String organizationAdminId;
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     private LoaneeLoanDetail loaneeLoanDetail;
+    @Autowired
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @BeforeAll
     void init() {
@@ -123,8 +125,8 @@ class ProgramPersistenceAdapterTest {
             userId = userIdentityOutputPort.save(userIdentity).getId();
             OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
             employeeIdentity.setOrganization(organizationId);
-            organizationIdentity.getOrganizationEmployees().forEach(
-                    organizationEmployeeIdentity -> employeeIdentityOutputPort.save(employeeIdentity));
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = employeeIdentityOutputPort.save(employeeIdentity);
+            organizationAdminId = organizationEmployeeIdentity.getMeedlUser().getId();
         } catch (MeedlException e) {
             log.error("Error creating organization", e);
         }
@@ -149,27 +151,6 @@ class ProgramPersistenceAdapterTest {
         dataScience.setDuration(1);
         dataScience.setDeliveryType(DeliveryType.ONSITE);
         dataScience.setDurationType(DurationType.YEARS);
-
-        OrganizationEmployeeIdentity employeeIdentity;
-        try {
-            employeeIdentity = employeeIdentityOutputPort.
-                    findByCreatedBy(userId);
-            organizationAdminId = employeeIdentity.getId();
-            dataScience.setCreatedBy(userId);
-            dataScience = programOutputPort.saveProgram(dataScience);
-            assertNotNull(dataScience);
-            assertNotNull(dataScience.getId());
-            dataScienceProgramId = dataScience.getId();
-
-            loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdowns = List.of(loanBreakdown);
-            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
-                    loanBreakdowns, employeeIdentity.getId());
-
-        } catch (MeedlException e) {
-            log.error("Error finding organization employee:", e);
-        }
-
     }
 
     @AfterEach
@@ -441,44 +422,6 @@ class ProgramPersistenceAdapterTest {
         }
     }
 
-    @Test
-    void deleteProgramThatHasLoanees() {
-        try {
-            elites = cohortUseCase.createCohort(elites);
-            assertNotNull(elites);
-            assertNotNull(elites.getId());
-            cohortId = elites.getId();
-
-            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
-                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
-                    image("loanee-img.png").role(LOANEE).createdBy(organizationAdminId).build();
-            loaneeLoanDetail = LoaneeLoanDetail.builder().
-                    amountRequested(BigDecimal.valueOf(30000.00)).
-                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
-            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
-            loanBreakdown = loanBreakdowns.get(0);
-
-            loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
-                    loaneeLoanBreakdownId(loanBreakdown.getLoanBreakdownId()).
-                    itemAmount(loanBreakdown.getItemAmount()).
-                    itemName(loanBreakdown.getItemName()).build();
-            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
-
-            loanee = Loanee.builder().userIdentity(userIdentity).
-                    loanBreakdowns(loaneeBreakdowns).
-                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
-            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
-            assertNotNull(loanee);
-            assertNotNull(loanee.getUserIdentity());
-            loaneeId = loanee.getId();
-            loaneeUserId = loanee.getUserIdentity().getId();
-            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
-        } catch (MeedlException e) {
-            log.error("Error while deleting program", e);
-        }
-        MeedlException exception = assertThrows(MeedlException.class, ()-> programOutputPort.deleteProgram(dataScience.getId()));
-        log.debug(exception.getMessage());
-    }
 
     @Test
     void deleteNonExistingProgram() {
@@ -506,11 +449,10 @@ class ProgramPersistenceAdapterTest {
 
     @Test
     void deleteProgramWithCohort() {
-        Program savedProgram;
         Cohort savedCohort;
         try {
             dataAnalytics.setCreatedBy(userId);
-            savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
             dataAnalyticsProgramId = savedProgram.getId();
 
@@ -519,33 +461,81 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedCohort);
 
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
-            Cohort cohort = cohortOutputPort.findCohort(savedCohort.getId());
-            assertNull(cohort);
+            savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
+            assertNull(savedCohort);
         } catch (MeedlException e) {
             log.error("Error while creating program {}", e.getMessage());
         }
     }
 
+    @Test
+    void deleteProgramThatHasLoanees() {
+        try {
+            dataScience.setCreatedBy(userId);
+            dataScience = programOutputPort.saveProgram(dataScience);
+            assertNotNull(dataScience);
+            assertNotNull(dataScience.getId());
+            dataScienceProgramId = dataScience.getId();
+
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
+                    loanBreakdowns, userId);
+
+            elites = cohortUseCase.createCohort(elites);
+            assertNotNull(elites);
+            assertNotNull(elites.getId());
+            cohortId = elites.getId();
+
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
+                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
+                    image("loanee-img.png").role(LOANEE).createdBy(organizationAdminId).build();
+            loaneeLoanDetail = LoaneeLoanDetail.builder().
+                    amountRequested(BigDecimal.valueOf(30000.00)).
+                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
+            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+            loanBreakdown = loanBreakdowns.get(0);
+
+            loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdown.getLoanBreakdownId()).
+                    itemAmount(loanBreakdown.getItemAmount()).
+                    itemName(loanBreakdown.getItemName()).build();
+            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
+
+            loanee = Loanee.builder().userIdentity(userIdentity).
+                    loanBreakdowns(loaneeBreakdowns).
+                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            assertNotNull(loanee);
+            assertNotNull(loanee.getUserIdentity());
+            assertNotNull(loanee.getLoaneeLoanDetail());
+            loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
+        } catch (MeedlException e) {
+            log.error("Error while deleting program", e);
+        }
+        assertThrows(MeedlException.class, ()-> programOutputPort.deleteProgram(dataScience.getId()));
+    }
+
     @AfterAll
     void tearDown() {
         try {
-            loaneeBreakdowns.forEach(loaneeLoanBreakdown -> {
-                        if (StringUtils.isNotEmpty(loaneeLoanBreakdown.getLoaneeLoanBreakdownId())) {
-                            loaneeLoanBreakDownRepository.deleteById(loaneeLoanBreakdown.getLoaneeLoanBreakdownId());
-                        }
-                    }
-            );
+            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+            loaneeBreakdowns.forEach(loaneeBreakdown -> {
+                if (StringUtils.isNotEmpty(loaneeBreakdown.getLoaneeLoanBreakdownId())) {
+                    loaneeLoanBreakDownRepository.deleteById(loaneeBreakdown.getLoaneeLoanBreakdownId());
+                }
+            });
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(loaneeUserId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
-            loanBreakdowns.forEach(tuitionBreakdown ->
-                    {
-                        if (StringUtils.isNotEmpty(tuitionBreakdown.getLoanBreakdownId())) {
-                            loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId());
-                        }
-                    }
-            );
+            loanBreakdowns.forEach(tuitionBreakdown -> {
+                if (StringUtils.isNotEmpty(tuitionBreakdown.getLoanBreakdownId())) {
+                    loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId());
+                }
+            });
             cohortOutputPort.deleteCohort(cohortId);
 
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
