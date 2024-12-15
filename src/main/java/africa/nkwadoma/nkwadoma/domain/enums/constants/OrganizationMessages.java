@@ -10,7 +10,8 @@ public enum OrganizationMessages {
     INVALID_RC_NUMBER("Company's RC number is required"),
     INVALID_SERVICE_OFFERING_ID("Please provide a valid service offering identification."),
     ORGANIZATION_ALREADY_EXISTS("Organization already exists"),
-    INVALID_INDUSTRY("Organization's industry must be BANKING or EDUCATION");
+    INVALID_INDUSTRY("Organization's industry must be BANKING or EDUCATION"),
+    ORGANIZATIOM_MUST_NOT_BE_EMPTY("Organization must not be empty");
 
     private final String message;
     OrganizationMessages(String message) {

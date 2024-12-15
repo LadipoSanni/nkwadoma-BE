@@ -52,17 +52,7 @@ import org.thymeleaf.TemplateEngine;
 @Configuration
 public class BeanConfiguration {
     private RestTemplate restTemplate;
-    @Bean
-    public OrganizationIdentityService organizationIdentityService(
-            OrganizationIdentityOutputPort organizationIdentityOutputPort,
-            IdentityManagerOutputPort identityManagerOutPutPort,
-            UserIdentityOutputPort userIdentityOutputPort,
-            OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
-            OrganizationIdentityMapper organizationIdentityMapper
-            ){
-        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,organizationIdentityMapper, userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
-    }
+
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
                                                    IdentityManagerOutputPort identityManagerOutPutPort,

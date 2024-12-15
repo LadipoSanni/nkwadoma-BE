@@ -1,9 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -15,10 +14,12 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,6 +29,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.O
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
@@ -35,6 +37,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    private final ViewOrganizationEmployeesUseCase employeesUseCase;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
 
     @Override
@@ -132,6 +136,28 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         foundOrganization.setTimeUpdated(LocalDateTime.now());
         log.info("Updated organization: {}", foundOrganization);
         return organizationIdentityOutputPort.save(foundOrganization);
+    }
+
+    public void updateOrganizationStatus(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATIOM_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
+        if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
+                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
+        {
+            OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
+                    id(foundUserIdentity.getId()).build();
+            employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+            OrganizationIdentity foundOrganizationIdentity =
+                    viewOrganizationDetails(employeeIdentity.getOrganization());
+            log.info("Found organization: {}", foundOrganizationIdentity);
+            foundOrganizationIdentity.setUpdatedBy(organizationIdentity.getUserIdentity().getId());
+            foundOrganizationIdentity.setStatus(ActivationStatus.ACTIVE);
+            foundOrganizationIdentity.setTimeUpdated(LocalDateTime.now());
+            OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(foundOrganizationIdentity);
+            organizationEntityRepository.save(organizationEntity);
+            log.info("Updated organization status successfully: {}", foundOrganizationIdentity.getStatus());
+        }
     }
 
     @Override
