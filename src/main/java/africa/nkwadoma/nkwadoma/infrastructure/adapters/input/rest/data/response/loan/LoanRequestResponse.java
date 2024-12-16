@@ -31,5 +31,6 @@ public class LoanRequestResponse {
     private BigDecimal initialDeposit;
     private LocalDate cohortStartDate;
     private String programName;
+    private String cohortName;
     private NextOfKinResponse nextOfKin;
 }

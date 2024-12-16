@@ -62,7 +62,6 @@ public class LoanRequest {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-//        MeedlValidator.validateObjectInstance(status, LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanee.getLoaneeLoanDetail().getAmountRequested(), LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
     }
 
