@@ -164,9 +164,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus(), LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
-        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
-        }
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setCreatedDate(LocalDateTime.now());
         return loanRequestOutputPort.save(loanRequest);

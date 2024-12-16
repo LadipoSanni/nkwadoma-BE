@@ -79,9 +79,10 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public LoanReferral findById(String loanReferralId) throws LoanException {
+    public LoanReferral findById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
         LoanReferralEntity loanReferralEntity = loanReferralRepository
-                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found "));
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 }

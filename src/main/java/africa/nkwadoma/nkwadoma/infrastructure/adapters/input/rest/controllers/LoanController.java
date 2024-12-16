@@ -45,9 +45,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
-    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
-    private final LoanReferralRestMapper loanReferralRestMapper;
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoanOfferRestMapper loanOfferRestMapper;
 
@@ -135,19 +133,6 @@ public class LoanController {
                 .statusCode(HttpStatus.FOUND.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
-    }
-
-    @GetMapping("loan-referral")
-    public ResponseEntity<ApiResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(meedlUser.getClaimAsString("sub"));
-        LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
-        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
-        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
-                .data(loanReferralResponse)
-                .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.name())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PostMapping("start")

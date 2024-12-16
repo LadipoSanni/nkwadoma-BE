@@ -7,10 +7,9 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanReferralRestMapper {
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
     LoanReferralResponse toLoanReferralResponse(LoanReferral loanReferral);
     @Mapping(target = "loanee.userIdentity.id", source = "userId")
     LoanReferral toLoanReferral(String userId);
-
-    @Mapping(target = "loanee.userIdentity.id", source = "userId")
-    LoanReferral maptoLoanReferral(LoanReferralResponseRequest request, String userId);
 }
