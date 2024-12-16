@@ -50,7 +50,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
         organizationEntity.setInvitedDate(LocalDateTime.now());
-        organizationEntity.setStatus(ActivationStatus.INVITED);
         organizationEntity = organizationEntityRepository.save(organizationEntity);
 
         List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
@@ -74,6 +73,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     private List<ServiceOfferingEntity> saveServiceOfferingEntities(OrganizationIdentity organizationIdentity) {
         List<ServiceOffering> serviceOfferings = organizationIdentity.getServiceOfferings();
         List<ServiceOfferingEntity> serviceOfferingEntity = organizationIdentityMapper.toServiceOfferingEntity(serviceOfferings);
+        log.info("Saving all service offerings");
         return serviceOfferEntityRepository.saveAll(serviceOfferingEntity);
     }
 
@@ -103,6 +103,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         programs.forEach(program -> {
             try {
                 programOutputPort.deleteProgram(program.getId());
+                log.info("Deleted program with id {} successfully while deleting organization with id {}", program.getId(), organizationEntity.getId());
             } catch (MeedlException e) {
                 log.error("Error deleting program with id {}, while attempting to delete organization with id {}. Error message : {}", program, organizationEntity.getId(), e.getMessage());
             }
@@ -117,6 +118,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
                 .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         organizationIdentity.setServiceOfferings(getServiceOfferings(organizationIdentity));
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationId));
         return organizationIdentity;
     }
     @Override
@@ -144,8 +146,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
+            log.info("No service offerings found for organization with id: {}", id);
             throw new IdentityException("Service offering not found");
         }
+        log.info("Found service offerings in DB with size: {}", organizationServiceOfferings.size());
         return organizationIdentityMapper.toServiceOfferings(organizationServiceOfferings);
     }
 

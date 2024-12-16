@@ -34,8 +34,6 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-//import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
-
 
 @RequiredArgsConstructor
 @Slf4j
@@ -86,6 +84,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();
+            log.info("User deleted on keycloak: {}", userIdentity.getId());
         }catch (NotFoundException exception) {
             log.info("deleteUser called with invalid user id: {}", userIdentity.getId());
             throw new MeedlException("User does not exist");
@@ -97,10 +96,12 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         MeedlValidator.validateEmail(email);
         List<UserRepresentation> foundUsers = getUserRepresentations(email);
         if (foundUsers.isEmpty()) {
+            log.warn("Could not find user with email {}", email);
             return Optional.empty();
         }
         UserRepresentation userRepresentation = foundUsers.get(0);
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        log.info("Found user with email {} ", email);
         return Optional.of(userIdentity);
     }
 
@@ -116,6 +117,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             organizationIdentity.setId(clientRepresentation.getId());
             log.info("Client created successfully. Name: {}", organizationIdentity.getName());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+            log.error("{} - Client already exists.",response.getStatusInfo());
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
@@ -164,6 +166,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
+            log.info("Login successful for user {}", userIdentity.getEmail());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
             log.info("Error logging in user: {}", exception.getMessage());
