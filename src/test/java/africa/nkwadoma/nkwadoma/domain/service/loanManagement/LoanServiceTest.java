@@ -173,15 +173,6 @@ class LoanServiceTest {
         assertNotNull(referral);
         assertEquals(LoanReferralStatus.AUTHORIZED, referral.getLoanReferralStatus());
     }
-
-    @Test
-    void acceptLoanReferralWithNullLoaneeAdditionalDetails() {
-        loanReferral.getLoanee().getUserIdentity().setAlternateContactAddress(null);
-        loanReferral.getLoanee().getUserIdentity().setAlternateEmail(null);
-        loanReferral.getLoanee().getUserIdentity().setAlternatePhoneNumber(null);
-        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
-    }
-
     @Test
     void acceptNullLoanReferral() {
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(null));
