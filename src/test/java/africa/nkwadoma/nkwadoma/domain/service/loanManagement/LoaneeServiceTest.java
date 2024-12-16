@@ -258,6 +258,7 @@ class LoaneeServiceTest {
                     .thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(mockId)).
                     thenReturn(organizationIdentity);
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)).thenReturn(List.of(loaneeUserIdentity));
             when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());

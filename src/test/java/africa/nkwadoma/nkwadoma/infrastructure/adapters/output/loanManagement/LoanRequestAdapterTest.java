@@ -271,7 +271,7 @@ class LoanRequestAdapterTest {
 
     @Test
     void saveLoanRequestWithNullLoanAmountRequested() {
-        loanRequest.setLoanAmountRequested(null);
+        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 
@@ -282,8 +282,8 @@ class LoanRequestAdapterTest {
     }
 
     @Test
-    void saveLoanRequestWithNullLoaneeLoanDetail() {
-        loanRequest.getLoanee().setLoaneeLoanDetail(null);
+    void saveLoanRequestWithNullLoaneeLoanDetailAmountRequested() {
+        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 

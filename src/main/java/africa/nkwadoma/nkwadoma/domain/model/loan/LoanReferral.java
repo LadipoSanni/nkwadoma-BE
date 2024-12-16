@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import lombok.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -40,8 +41,8 @@ public class LoanReferral {
     }
 
     public void validateViewLoanReferral() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanee.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
     }
 

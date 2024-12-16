@@ -9,6 +9,7 @@ import org.mapstruct.*;
 public interface LoanRequestMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
     @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
+//    @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
     LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 
     @InheritInverseConfiguration
