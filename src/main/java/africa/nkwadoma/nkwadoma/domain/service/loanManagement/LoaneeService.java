@@ -145,8 +145,8 @@ public class LoaneeService implements LoaneeUseCase {
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
-        notifyPortfolioManager(organizationEmployeeIdentity.getMeedlUser());
+        getOrganizationEmployeeIdentity(loanee);
+        notifyAllPortfolioManager();
         loaneeOutputPort.save(loanee);
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
@@ -154,6 +154,12 @@ public class LoaneeService implements LoaneeUseCase {
         refer(loanee,loanReferral.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         return  loanReferral;
+    }
+
+    private void notifyAllPortfolioManager() throws MeedlException {
+        for (UserIdentity userIdentity : identityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
+            notifyPortfolioManager(userIdentity);
+        }
     }
 
     @Override

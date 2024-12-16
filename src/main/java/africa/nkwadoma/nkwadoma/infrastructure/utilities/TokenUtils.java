@@ -11,13 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.InvalidKeyException;
 import java.util.*;
 
 @Slf4j
@@ -25,6 +23,10 @@ import java.util.*;
 public class TokenUtils {
     @Value("${jwt_secret}")
     private String secret;
+    @Value("${iv_aes_key}")
+    private String ivAESKey;
+    @Value("${aes_secret_key}")
+    private String AESSecretKey;
 
     @Value("${expiration}")
     private Long expiration;
@@ -100,5 +102,24 @@ public class TokenUtils {
             throw new MeedlException("Token has expired");
         }
         return claims;
+    }
+    public String decryptAES(String encryptedData) throws MeedlException {
+        MeedlValidator.validateDataElement(encryptedData);
+        String key = String.format("%-16s", AESSecretKey).substring(0, 16);
+
+        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec ivSpec = new IvParameterSpec(ivAESKey.getBytes(StandardCharsets.UTF_8));
+        byte[] decryptedValue = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+            byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
+            decryptedValue = cipher.doFinal(decodedValue);
+        } catch (Exception e) {
+            log.error("Error processing identity verification. Error decrypting identity with root cause : {}", e.getMessage());
+            throw new MeedlException("Error processing identity verification");
+        }
+        return new String(decryptedValue);
     }
 }

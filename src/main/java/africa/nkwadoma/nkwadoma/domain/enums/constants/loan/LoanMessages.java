@@ -37,7 +37,12 @@ public enum LoanMessages {
     LOAN_PRODUCT_NOT_FOUND("Loan product not found"),
     LOAN_REQUEST_STATUS_MUST_BE_NEW("Loan request status must be new"),
     LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED("Loan request has already been approved"),
-    ADDITIONAL_DETAILS_REQUIRED("Loanee must have provided additional details before loan referral can be accepted");
+    ADDITIONAL_DETAILS_REQUIRED("Loanee must have provided additional details before loan referral can be accepted"),
+    MULTIPLE_LOAN_REFERRALS_IS_CURRENTLY_NOT_ALLOWED("Multiple loan referrals is currently not allowed"),
+    LOAN_REFERRAL_CANNOT_BE_EMPTY("Loan referral cannot be empty"),
+    LOAN_REQUEST_CANNOT_BE_EMPTY("Loan request cannot be empty"),
+    LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY("Loan amount rquested must not be empty"),
+    LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY("Loan referral status must not be empty");
     private final String message;
 
     LoanMessages(String message) {

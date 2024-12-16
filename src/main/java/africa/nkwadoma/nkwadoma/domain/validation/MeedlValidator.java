@@ -76,6 +76,12 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateBigDecimalDataElement(BigDecimal dataElement, String message) throws MeedlException {
+        if (dataElement == null) {
+            throw new MeedlException(message);
+        }
+    }
+
     public static void validateFloatDataElement(Float dataElement) throws MeedlException {
         if (dataElement == null){
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
@@ -90,6 +96,12 @@ public class MeedlValidator {
     public static void validateObjectInstance(Object instance) throws MeedlException {
         if (ObjectUtils.isEmpty(instance)){
             throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
+        }
+    }
+
+    public static void validateObjectInstance(Object instance, String message) throws MeedlException {
+        if (ObjectUtils.isEmpty(instance)){
+            throw new MeedlException(message);
         }
     }
 
@@ -121,7 +133,7 @@ public class MeedlValidator {
         }
     }
     public static void validatePassword(String password) throws MeedlException {
-        validateDataElement(password);
+        validateDataElement(password, "Password can not be empty");
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());
         if (!pattern.matcher(password).matches()) {
             throw new IdentityException(WEAK_PASSWORD.getMessage());

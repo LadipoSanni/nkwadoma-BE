@@ -160,7 +160,7 @@ public class IdentityManagerController {
         UserIdentity userIdentity = identityMapper.toUserIdentity(passwordChangeRequest);
         userIdentity.setId(meedlUser.getClaimAsString("sub"));
         userIdentity.setEmail(meedlUser.getClaimAsString("email"));
-        log.info("The user changing the password : {} and ",meedlUser.getClaimAsString("sub"));
+        log.info("The user changing the password : {} ",meedlUser.getClaimAsString("sub"));
         createUserUseCase.changePassword(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
                 data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
