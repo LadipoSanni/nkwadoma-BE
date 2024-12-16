@@ -66,7 +66,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
         log.info("Find organization with rcNumber {}", rcNumber);
-        MeedlValidator.validateDataElement(rcNumber, OrganizationMessages.INVALID_RC_NUMBER.getMessage());
+        MeedlValidator.validateDataElement(rcNumber, OrganizationMessages.RC_NUMBER_IS_REQUIRED.getMessage());
         return organizationEntityRepository.findByRcNumber(rcNumber);
     }
 

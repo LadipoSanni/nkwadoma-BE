@@ -51,7 +51,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
-    public OrganizationEmployeeIdentity findByEmployeeId(String employeeId) throws MeedlException {
+    public OrganizationEmployeeIdentity  findByEmployeeId(String employeeId) throws MeedlException {
       if(!StringUtils.isEmpty(employeeId)){
           OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
           if (organization == null){
@@ -60,7 +60,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
           }
           return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
       }
-        throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
+      throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
 
     @Override
