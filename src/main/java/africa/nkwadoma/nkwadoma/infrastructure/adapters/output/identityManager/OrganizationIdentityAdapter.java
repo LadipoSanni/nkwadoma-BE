@@ -46,25 +46,23 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity);
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        if (StringUtils.isNotEmpty(organizationIdentity.getId())) {
-            organizationEntity.setTimeUpdated(LocalDateTime.now());
-            organizationEntity = organizationEntityRepository.save(organizationEntity);
-            log.info("Organization entity status updated successfully {}", organizationEntity.getStatus());
-        }
-        else {
-            organizationIdentity.validate();
-            MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
-            organizationEntity = organizationEntityRepository.save(organizationEntity);
+        organizationIdentity.validate();
+        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
 
-            List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
-            saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-            List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
-                    toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
-            organizationIdentity.setServiceOfferings(savedServiceOfferings);
-            log.info("Organization entity saved successfully");
-        }
+        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
+        organizationEntity.setInvitedDate(LocalDateTime.now());
+        organizationEntity.setStatus(ActivationStatus.INVITED);
+        organizationEntity = organizationEntityRepository.save(organizationEntity);
+
+        List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
+        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
+        log.info("Organization entity saved successfully {}", organizationEntity);
+        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
+                toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
+        log.info("Organization entity saved successfully");
+
         organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
 

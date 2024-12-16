@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,8 @@ class OrganizationIdentityServiceTest {
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private OrganizationEntityRepository organizationEntityRepository;
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private UserIdentity sarah;
@@ -214,7 +218,6 @@ class OrganizationIdentityServiceTest {
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
-            when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.reactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertTrue(deactivatedOrganization.isEnabled());
@@ -245,7 +248,8 @@ class OrganizationIdentityServiceTest {
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
-            when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
+            when(organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(roseCouture))).
+                    thenReturn(any());
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());

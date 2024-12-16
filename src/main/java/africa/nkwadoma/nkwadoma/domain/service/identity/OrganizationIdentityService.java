@@ -96,7 +96,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
         foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
-        foundOrganization = organizationIdentityOutputPort.save(foundOrganization);
+        organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(foundOrganization));
         return foundOrganization;
     }
 
@@ -194,7 +194,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         foundOrganization.setEnabled(Boolean.TRUE);
         foundOrganization.setStatus(ActivationStatus.ACTIVATED);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
-        foundOrganization = organizationIdentityOutputPort.save(foundOrganization);
+        organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(foundOrganization));
         log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
         return foundOrganization;
     }
