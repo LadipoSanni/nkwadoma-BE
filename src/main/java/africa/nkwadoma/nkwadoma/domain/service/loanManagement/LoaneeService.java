@@ -100,7 +100,6 @@ public class LoaneeService implements LoaneeUseCase {
         organizationIdentityOutputPort.save(organizationIdentity);
         log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
     }
-
     private void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         program.setNumberOfLoanees(program.getNumberOfLoanees() + 1);
