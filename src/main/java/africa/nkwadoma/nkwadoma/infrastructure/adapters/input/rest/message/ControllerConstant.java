@@ -26,4 +26,5 @@ public class ControllerConstant {
    public static final String  START_LOAN = "Start loan";
 
 
+   public static final String RESPONSE_IS_SUCCESSFUL = "Response is successful";
 }

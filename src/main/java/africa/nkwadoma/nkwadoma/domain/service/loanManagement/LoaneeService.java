@@ -24,10 +24,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -41,6 +39,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -117,11 +116,28 @@ public class LoaneeService implements LoaneeUseCase {
 
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee);
-        if (loanee.getCreditScoreUpdatedAt() == null){
-            loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
-            loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+
+        if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
+                creditScoreIsAboveOrEqualOneMonth(loanee)){
+            return updateCreditScore(loanee);
         }
-        creditRegistryOutputPort.getCreditScoreWithRegistryId("");
+            log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+            return loanee;
+    }
+
+    private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn());
+        log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
+        loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
+        loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
+        return loaneeOutputPort.save(loanee);
+    }
+
+    private boolean creditScoreIsAboveOrEqualOneMonth(Loanee loanee) {
+        Duration duration = Duration.between(loanee.getCreditScoreUpdatedAt(), LocalDateTime.now());
+        log.info("Is credit score above or equal one month ago {} for loanee with id {}", duration.toDays() >= 30, loanee.getId());
+        return duration.toDays() >= 30;
     }
 
     @Override
