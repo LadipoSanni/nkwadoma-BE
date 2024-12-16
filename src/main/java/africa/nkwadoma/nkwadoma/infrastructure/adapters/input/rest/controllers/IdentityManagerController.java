@@ -75,7 +75,6 @@ public class IdentityManagerController {
             organizationIdentity.setUserIdentity(userIdentity);
             createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
         }
-
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(userIdentity).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).

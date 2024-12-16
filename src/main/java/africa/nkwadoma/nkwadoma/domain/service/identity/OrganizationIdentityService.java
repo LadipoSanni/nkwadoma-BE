@@ -84,6 +84,9 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                             try {
                                 log.info("Deactivating user {}", organizationEmployeeIdentity.getMeedlUser());
                                 organizationEmployeeIdentity.getMeedlUser().setDeactivationReason(reason);
+                                organizationEmployeeIdentity.setStatus(ActivationStatus.DEACTIVATED);
+                                organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+                                log.info("Updated organization status: {}", organizationEmployeeIdentity.getStatus());
                                 identityManagerOutPutPort.disableUserAccount(organizationEmployeeIdentity.getMeedlUser());
                             } catch (MeedlException e) {
                                 log.error("Error disabling organization user : {}", e.getMessage());
@@ -93,6 +96,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
         foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
+        foundOrganization = organizationIdentityOutputPort.save(foundOrganization);
         return foundOrganization;
     }
 
@@ -115,13 +119,15 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     private OrganizationEmployeeIdentity saveOrganisationIdentityToDatabase(OrganizationIdentity organizationIdentity) throws MeedlException {
         organizationIdentity.setEnabled(Boolean.TRUE);
+        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setStatus(ActivationStatus.INVITED);
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
+        organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
         organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now().toString());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
-
         return organizationEmployeeIdentity;
     }
     @Override
@@ -151,12 +157,15 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
             OrganizationIdentity foundOrganizationIdentity =
                     viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", foundOrganizationIdentity);
-            foundOrganizationIdentity.setUpdatedBy(organizationIdentity.getUserIdentity().getId());
+            employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            log.info("Updated Organization Employee Status: {}", employeeIdentity.getStatus());
             foundOrganizationIdentity.setStatus(ActivationStatus.ACTIVE);
+            foundOrganizationIdentity.setUpdatedBy(organizationIdentity.getUserIdentity().getId());
             foundOrganizationIdentity.setTimeUpdated(LocalDateTime.now());
             OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(foundOrganizationIdentity);
-            organizationEntityRepository.save(organizationEntity);
-            log.info("Updated organization status successfully: {}", foundOrganizationIdentity.getStatus());
+            organizationEntity = organizationEntityRepository.save(organizationEntity);
+            log.info("Updated Organization Entity Status: {}", organizationEntity.getStatus());
         }
     }
 
@@ -172,6 +181,9 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                     try {
                         log.info("Reactivating user {}", organizationEmployeeIdentity.getMeedlUser());
                         organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
+                        organizationEmployeeIdentity.setStatus(ActivationStatus.ACTIVE);
+                        organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+                        log.info("Updated Organization employee status: {}", organizationEmployeeIdentity.getStatus());
                         identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
                     } catch (MeedlException e) {
                         log.error("Error enabling organization user : {}", e.getMessage());
@@ -181,6 +193,9 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         identityManagerOutPutPort.enableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.TRUE);
         foundOrganization.setStatus(ActivationStatus.ACTIVATED);
+        foundOrganization.setTimeUpdated(LocalDateTime.now());
+        foundOrganization = organizationIdentityOutputPort.save(foundOrganization);
+        log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
         return foundOrganization;
     }
 

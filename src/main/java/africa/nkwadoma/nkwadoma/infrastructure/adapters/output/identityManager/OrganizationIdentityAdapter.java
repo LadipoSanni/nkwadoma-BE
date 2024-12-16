@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,25 +46,28 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
         MeedlValidator.validateObjectInstance(organizationIdentity);
-        organizationIdentity.validate();
-        MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
-
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-        organizationEntity.setInvitedDate(LocalDateTime.now());
-        organizationEntity.setStatus(ActivationStatus.INVITED);
-        organizationEntity = organizationEntityRepository.save(organizationEntity);
+        if (StringUtils.isNotEmpty(organizationIdentity.getId())) {
+            organizationEntity.setTimeUpdated(LocalDateTime.now());
+            organizationEntity = organizationEntityRepository.save(organizationEntity);
+            log.info("Organization entity status updated successfully {}", organizationEntity.getStatus());
+        }
+        else {
+            organizationIdentity.validate();
+            MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
+            organizationEntity = organizationEntityRepository.save(organizationEntity);
 
-        List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
-        saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
-        log.info("Organization entity saved successfully {}", organizationEntity);
-        List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
-                toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
-        log.info("Organization entity saved successfully");
-
+            List<ServiceOfferingEntity> serviceOfferingEntities = saveServiceOfferingEntities(organizationIdentity);
+            saveOrganizationServiceOfferings(serviceOfferingEntities, organizationEntity);
+            List<ServiceOffering> savedServiceOfferings = organizationIdentityMapper.
+                    toServiceOfferingEntitiesServiceOfferings(serviceOfferingEntities);
+            organizationIdentity.setServiceOfferings(savedServiceOfferings);
+            log.info("Organization entity saved successfully");
+        }
         organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
-        organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
+
     @Override
     public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
         log.info("Find organization with rcNumber {}", rcNumber);
