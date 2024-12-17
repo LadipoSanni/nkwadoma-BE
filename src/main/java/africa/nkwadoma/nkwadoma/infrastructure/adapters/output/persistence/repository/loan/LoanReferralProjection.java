@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+
 import java.math.*;
 import java.time.*;
 
@@ -15,4 +17,5 @@ public interface LoanReferralProjection {
     BigDecimal getTuitionAmount();
     LocalDate getCohortStartDate();
     String getProgramName();
+    LoanReferralStatus getStatus();
 }

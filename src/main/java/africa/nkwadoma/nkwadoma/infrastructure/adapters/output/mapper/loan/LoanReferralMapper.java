@@ -20,6 +20,7 @@ public interface LoanReferralMapper {
     @Mapping(target = "loanee.userIdentity.id", source = "id")
     @Mapping(target = "loanee.userIdentity.lastName", source = "lastName")
     @Mapping(target = "loanee.userIdentity.firstName", source = "firstName")
+    @Mapping(target = "loanReferralStatus", source = "status")
     LoanReferral mapProjectionToLoanReferralEntity(LoanReferralProjection loanReferralProjection);
 
     List<LoanReferral> toLoanReferrals(List<LoanReferralEntity> loanReferralEntities);
