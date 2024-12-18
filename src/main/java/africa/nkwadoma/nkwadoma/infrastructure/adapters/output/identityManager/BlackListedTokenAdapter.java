@@ -3,10 +3,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.BlackListedTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class BlackListedTokenAdapter {
@@ -18,6 +20,7 @@ public class BlackListedTokenAdapter {
     }
 
     public void blackListToken(BlackListedToken accessToken){
+        log.info("Token blacklisted!");
         blackListedTokenRepository.save(accessToken);
     }
 

@@ -28,6 +28,7 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class LoanRequestAdapterTest {
+    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
     @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
     @Autowired
@@ -54,6 +56,8 @@ class LoanRequestAdapterTest {
     @Autowired
     private LoanDetailsOutputPort loanDetailsOutputPort;
     @Autowired
+    private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoanRequestRepository loanRequestRepository;
@@ -67,6 +71,7 @@ class LoanRequestAdapterTest {
     private LoanRequest loanRequest;
     private LoaneeLoanDetail loaneeLoanDetail;
     private Loanee loanee;
+    private Cohort elites;
     private String organizationId;
     private String dataAnalyticsProgramId;
     private String eliteCohortId;
@@ -81,6 +86,7 @@ class LoanRequestAdapterTest {
     private List<LoanBreakdown> loanBreakdowns;
     private String loanDetailId;
     private UserIdentity userIdentity;
+    private OrganizationIdentity organizationIdentity;
     private String nextOfKinId;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
@@ -203,7 +209,6 @@ class LoanRequestAdapterTest {
         Loanee foundLoanee = null;
         try {
             foundLoanee = loaneeOutputPort.findLoaneeById(loaneeId);
-            log.info("Found loanee: {}", foundLoanee);
         } catch (MeedlException e) {
             log.error("", e);
         }

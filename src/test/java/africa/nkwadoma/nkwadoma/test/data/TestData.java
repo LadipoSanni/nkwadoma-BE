@@ -52,8 +52,8 @@ public class TestData {
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
-        organizationIdentity.setPageSize(10);
-        organizationIdentity.setPageNumber(0);
+        organizationIdentity.setPageSize(0);
+        organizationIdentity.setPageNumber(10);
 
         return organizationIdentity;
     }

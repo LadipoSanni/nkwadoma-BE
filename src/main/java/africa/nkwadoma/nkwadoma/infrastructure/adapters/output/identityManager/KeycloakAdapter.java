@@ -34,8 +34,6 @@ import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
-//import static africa.nkwadoma.nkwadoma.domain.validation.OrganizationIdentityValidator.validateOrganizationIdentity;
-
 
 @RequiredArgsConstructor
 @Slf4j
@@ -82,10 +80,11 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), "Please provide a valid user identification");
         UserResource userResource = getUserResource(userIdentity);
         try{
             userResource.remove();
+            log.info("User deleted on keycloak: {}", userIdentity.getId());
         }catch (NotFoundException exception) {
             log.info("deleteUser called with invalid user id: {}", userIdentity.getId());
             throw new MeedlException("User does not exist");
@@ -97,10 +96,12 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         MeedlValidator.validateEmail(email);
         List<UserRepresentation> foundUsers = getUserRepresentations(email);
         if (foundUsers.isEmpty()) {
+            log.warn("Could not find user with email {}", email);
             return Optional.empty();
         }
         UserRepresentation userRepresentation = foundUsers.get(0);
         UserIdentity userIdentity = mapper.mapUserRepresentationToUserIdentity(userRepresentation);
+        log.info("Found user with email {} ", email);
         return Optional.of(userIdentity);
     }
 
@@ -116,14 +117,27 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
             organizationIdentity.setId(clientRepresentation.getId());
             log.info("Client created successfully. Name: {}", organizationIdentity.getName());
         }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+            log.error("{} - Client already exists.",response.getStatusInfo());
             throw new MeedlException(CLIENT_EXIST.getMessage());
         }
         return organizationIdentity;
     }
     @Override
-    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public void enableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         MeedlValidator.validateUUID(organizationIdentity.getId());
+        ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
+        log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
+        clientRepresentation.setEnabled(Boolean.TRUE);
+
+        ClientResource clientResource = getClientResource(organizationIdentity.getId());
+        clientResource.update(clientRepresentation);
+        log.info("Client enabled on keycloak {}", organizationIdentity.getName());
+    }
+    @Override
+    public void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateUUID(organizationIdentity.getId(), "Please provide a valid organization identification.");
         ClientRepresentation clientRepresentation = getClientRepresentationByClientId(organizationIdentity.getName());
         log.info("ClientRepresentation {} {}", clientRepresentation.getName() , clientRepresentation.getId());
         clientRepresentation.setEnabled(Boolean.FALSE);
@@ -152,6 +166,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         try {
             Keycloak keycloakClient = getKeycloak(userIdentity);
             TokenManager tokenManager = keycloakClient.tokenManager();
+            log.info("Login successful for user {}", userIdentity.getEmail());
             return tokenManager.getAccessToken();
         } catch (NotAuthorizedException | BadRequestException exception ) {
             log.info("Error logging in user: {}", exception.getMessage());
@@ -214,7 +229,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     public UserIdentity verifyUserExistsAndIsEnabled(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
         UserRepresentation userRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
-        MeedlValidator.validateUUID(userRepresentation.getId());
+        MeedlValidator.validateUUID(userRepresentation.getId(),"Please provide a valid identification for the representation of this user.");
         if (!(userRepresentation.isEnabled() && userRepresentation.isEmailVerified())){
             throw new MeedlException(MeedlMessages.USER_NOT_ENABLED.getMessage());
         }
@@ -380,7 +395,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
     public UserResource getUserResource(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         return keycloak
                 .realm(KEYCLOAK_REALM)
                 .users()

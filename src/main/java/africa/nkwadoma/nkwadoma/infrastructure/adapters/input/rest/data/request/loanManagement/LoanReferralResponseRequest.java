@@ -10,5 +10,6 @@ import lombok.*;
 @ToString
 @Builder(toBuilder = true)
 public class LoanReferralResponseRequest {
+    private String id;
     private LoanReferralStatus loanReferralStatus;
 }

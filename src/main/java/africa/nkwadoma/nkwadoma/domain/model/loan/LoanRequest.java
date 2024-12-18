@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -55,18 +56,14 @@ public class LoanRequest {
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validateUUID(loanRequest.getId());
-        MeedlValidator.validateUUID(loanRequest.getLoanProductId());
+        MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan product identification");
+        MeedlValidator.validateUUID(loanRequest.getLoanProductId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanee.getId());
-        MeedlValidator.validateUUID(loanee.getCohortId());
-        MeedlValidator.validateUUID(loanReferralId);
-        MeedlValidator.validateObjectInstance(createdDate);
-        MeedlValidator.validateBigDecimalDataElement(loanAmountRequested);
-        MeedlValidator.validateDataElement(referredBy);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateBigDecimalDataElement(loanee.getLoaneeLoanDetail().getAmountRequested(), LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
     }
 
 

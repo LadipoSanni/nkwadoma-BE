@@ -1,25 +1,19 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
-import africa.nkwadoma.nkwadoma.domain.service.loanManagement.LoaneeService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.OrganizationEmployeeIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
@@ -28,21 +22,16 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.K
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.SmileIdAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.InvestmentVehicleAdapter;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.OrganizationIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.UserIdentityAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoanBreakdownPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneeLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneePersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationEmployeeIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.EmployeeAdminEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.OrganizationEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeLoanDetailRepository;
@@ -121,13 +110,6 @@ public class BeanConfiguration {
         return new QoreIdAdapter();
     }
 
-
-    @Bean
-    public OrganizationIdentityAdapter organizationIdentityAdapter(OrganizationEntityRepository organizationEntityRepository,
-                                                                   OrganizationIdentityMapper organizationIdentityMapper,
-                                                                   ServiceOfferEntityRepository serviceOfferEntityRepository, OrganizationServiceOfferingRepository organizationServiceOfferingRepository){
-        return new OrganizationIdentityAdapter(organizationEntityRepository, serviceOfferEntityRepository, organizationIdentityMapper, organizationServiceOfferingRepository);
-    }
     @Bean
     public UserIdentityAdapter userIdentityAdapter(UserEntityRepository userEntityRepository,
                                                    UserIdentityMapper userIdentityMapper,
@@ -153,9 +135,12 @@ public class BeanConfiguration {
                                        LoanDetailsOutputPort loanDetailsOutputPort,
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
                                        LoaneeUseCase loaneeUseCase,
-                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort){
+                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort,
+                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                       OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,organizationIdentityOutputPort,
+                organizationEmployeeIdentityOutputPort);
     }
 
     @Bean
@@ -200,23 +185,6 @@ public class BeanConfiguration {
     @Bean
     public LoaneePersistenceAdapter loaneePersistenceAdapter(LoaneeMapper loaneeMapper, LoaneeRepository loaneeRepository){
         return new LoaneePersistenceAdapter(loaneeMapper,loaneeRepository);
-    }
-
-    @Bean
-    public LoaneeService loaneeService(OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort,
-                                       UserIdentityOutputPort userIdentityOutputPort,
-                                       IdentityManagerOutputPort identityManagerOutputPort,
-                                       CohortOutputPort cohortOutputPort,
-                                       LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort,
-                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                       SendLoaneeEmailUsecase sendLoaneeEmailUsecase,
-                                       LoanReferralOutputPort loanReferralOutputPort,
-                                       LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort){
-        return new LoaneeService(organizationEmployeeIdentityOutputPort,
-                loaneeOutputPort,userIdentityOutputPort,
-                identityManagerOutputPort,cohortOutputPort,loaneeLoanDetailsOutputPort,
-                organizationIdentityOutputPort,sendLoaneeEmailUsecase,loanReferralOutputPort,loaneeLoanBreakDownOutputPort);
     }
 
     @Bean

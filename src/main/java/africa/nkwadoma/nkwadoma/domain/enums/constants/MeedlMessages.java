@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum MeedlMessages {
-    EMPTY_INPUT_FIELD_ERROR("Field cannot be null or empty"),
+    EMPTY_INPUT_FIELD_ERROR("Field cannot be empty"),
     TOKEN_REQUIRED("User validation mechanism in form of token is required"),
     INVALID_EMAIL_ADDRESS("Email address is not valid"),
     INVALID_INDUSTRY_OR_SERVICE_OFFERING("Industry or service offering cannot be empty"),
@@ -16,17 +16,20 @@ public enum MeedlMessages {
     COLLEAGUE_INVITATION_TEMPLATE("colleague-invitation"),
     DOMAIN_EMAIL_DOES_NOT_MATCH("Domain email does not match"),
     EMAIL_INDEX("@"),
-    INVALID_CREATED_BY("Created by id not valid"),
     INVALID_OBJECT("Object not found"),
     UUID_NOT_VALID("UUID not valid"),
+    NON_EXISTING_CREATED_BY("Creator not found"),
+    INVALID_CREATED_BY_ID("Please provide a valid identification for the user performing this action"),
     USER_NOT_ENABLED("User not enabled"),
     PAGE_NUMBER_CANNOT_BE_LESS_THAN_ZERO("Page number must not be less than zero"),
     PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE("Page size must not be less than one"),
+    FORGOT_PASSWORD_TEMPLATE("forget-password"),
     LOANEE_REFERRAL_SUBJECT("Loan referral"),
     LOANEE_REFERRAL("loan-referral"),
     LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
-    FORGOT_PASSWORD_TEMPLATE("forget-password");
+    INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character."),
+    TIN_CANNOT_BE_EMPTY("Tax identity number cannot be empty");
 
 
     private final String message;
