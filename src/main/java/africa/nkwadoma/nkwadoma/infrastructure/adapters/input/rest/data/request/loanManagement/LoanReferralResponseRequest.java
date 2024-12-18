@@ -11,8 +11,8 @@ import lombok.*;
 @ToString
 @Builder(toBuilder = true)
 public class LoanReferralResponseRequest {
+    @NotBlank(message = "Loan referral ID is required")
     private String id;
-    @NotBlank(message = "Loan referral decision is required")
     private LoanReferralStatus loanReferralStatus;
     private String reason;
 }

@@ -1,8 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -10,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownExcept
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -39,7 +36,7 @@ public class MeedlValidator {
     public static void validateLoanDecision(String loanReferralStatus) throws LoanException {
         boolean matches = Pattern.matches("^(ACCEPTED|DECLINED)$", loanReferralStatus);
         if (!matches) {
-            throw new LoanException(ErrorMessages.INVALID_LOAN_REFERRAL_STATUS);
+            throw new LoanException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
         }
     }
 

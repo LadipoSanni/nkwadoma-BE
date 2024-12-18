@@ -47,7 +47,8 @@ public enum LoanMessages {
     ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
     LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
     LOAN_OFFER_NOT_FOUND("Loan Offer Not Found"),
-    REASON_IS_REQUIRED("Reason for declining loan request is required");
+    REASON_IS_REQUIRED("Reason for declining loan request is required"),
+    INVALID_LOAN_DECISION(   "Loan decision must either be ACCEPTED or DECLINED");
     private final String message;
 
     LoanMessages(String message) {

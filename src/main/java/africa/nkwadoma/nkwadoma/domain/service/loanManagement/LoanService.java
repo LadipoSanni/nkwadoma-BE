@@ -153,7 +153,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus(),
+                LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
         log.info("Found Loan Referral: {}", foundLoanReferral);
