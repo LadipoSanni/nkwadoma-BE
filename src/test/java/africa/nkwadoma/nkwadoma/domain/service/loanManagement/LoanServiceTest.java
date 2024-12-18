@@ -136,7 +136,7 @@ class LoanServiceTest {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
-            when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -183,7 +183,7 @@ class LoanServiceTest {
         LoanReferral referral = null;
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
-            when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);

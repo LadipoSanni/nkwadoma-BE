@@ -190,7 +190,7 @@ class LoanRequestAdapterTest {
             loanReferral = new LoanReferral();
             loanReferral.setLoanee(loanee);
             loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            loanReferral = loanReferralOutputPort.save(loanReferral);
             assertNotNull(loanReferral);
             loanReferralId = loanReferral.getId();
         } catch (MeedlException e) {

@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
@@ -13,8 +12,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -23,20 +20,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.math.*;
-import java.time.*;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -49,7 +37,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
-    private final LoanReferralMapper loanReferralMapper;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
@@ -165,22 +152,25 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
-        log.info("Found LoanReferral: {}", foundLoanReferral);
+        log.info("Found Loan Referral: {}", foundLoanReferral);
         MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
+        foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
+        return foundLoanReferral;
+    }
+
+    private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
-            foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
         else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
-//            MeedlValidator.validateDataElement(loanReferral.getReasonForDeclining(), LoanMessages.REASON_IS_REQUIRED.getMessage());
             foundLoanReferral.setReasonForDeclining(loanReferral.getReasonForDeclining());
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.UNAUTHORIZED);
-            foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
+        foundLoanReferral = loanReferralOutputPort.save(foundLoanReferral);
         log.info("Updated loan referral: {}", foundLoanReferral);
         return foundLoanReferral;
     }

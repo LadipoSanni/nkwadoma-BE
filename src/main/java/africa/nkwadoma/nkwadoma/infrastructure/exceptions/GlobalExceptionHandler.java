@@ -1,9 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.exceptions;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +18,7 @@ import java.util.Map;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, ExceptionResponse>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
@@ -31,6 +34,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IdentityVerificationException.class)
     public ResponseEntity<ExceptionResponse> handleValidationExceptions(IdentityVerificationException ex) {
         return new ResponseEntity<>(errorResponseBuilder(ex.getMessage()), HttpStatus.EXPECTATION_FAILED);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionResponse> handleEnumValidationExceptions(HttpMessageNotReadableException ex) {
+        return new ResponseEntity<>(errorResponseBuilder(ErrorMessages.INVALID_LOAN_DECISION), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MeedlException.class)
