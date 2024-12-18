@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutpu
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.service.identity.OrganizationIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
@@ -28,7 +27,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.Lo
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneePersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
@@ -52,17 +50,7 @@ import org.thymeleaf.TemplateEngine;
 @Configuration
 public class BeanConfiguration {
     private RestTemplate restTemplate;
-    @Bean
-    public OrganizationIdentityService organizationIdentityService(
-            OrganizationIdentityOutputPort organizationIdentityOutputPort,
-            IdentityManagerOutputPort identityManagerOutPutPort,
-            UserIdentityOutputPort userIdentityOutputPort,
-            OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
-            SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
-            OrganizationIdentityMapper organizationIdentityMapper
-            ){
-        return new OrganizationIdentityService(organizationIdentityOutputPort,identityManagerOutPutPort,organizationIdentityMapper, userIdentityOutputPort,organizationEmployeeIdentityOutputPort, sendOrganizationEmployeeEmailUseCase);
-    }
+
     @Bean
     public UserIdentityService userIdentityService(UserIdentityOutputPort userIdentityOutputPort,
                                                    IdentityManagerOutputPort identityManagerOutPutPort,
