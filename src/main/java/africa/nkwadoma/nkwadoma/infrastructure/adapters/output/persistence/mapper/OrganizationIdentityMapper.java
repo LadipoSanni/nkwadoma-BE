@@ -16,7 +16,6 @@ public interface OrganizationIdentityMapper {
     OrganizationEntity toOrganizationEntity(OrganizationIdentity organizationIdentity);
 
     @InheritInverseConfiguration
-    @Mapping(target = "status", source = "status")
     OrganizationIdentity toOrganizationIdentity(OrganizationEntity organizationEntity);
 
     List<ServiceOfferingEntity> toServiceOfferingEntity(List<ServiceOffering> serviceOfferings);
@@ -28,6 +27,8 @@ public interface OrganizationIdentityMapper {
     List<ServiceOffering> toServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
     @Mapping(target = "serviceOffering", source = "serviceOfferingEntity")
+    @Mapping(target = "serviceOffering.transactionLowerBound", source = "serviceOfferingEntity.transactionLowerBound", defaultValue = "0.00")
+    @Mapping(target = "serviceOffering.transactionUpperBound", source = "serviceOfferingEntity.transactionUpperBound", defaultValue = "0.00")
     OrganizationServiceOffering toOrganizationServiceOffering(OrganizationServiceOfferingEntity organizationServiceOfferingEntity);
 
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);

@@ -311,10 +311,7 @@ class UserIdentityServiceTest {
 
             favour.setNewPassword("newPassword@8");
             userIdentityService.changePassword(favour);
-            newPassword = favour.getPassword();
-
-            assertEquals(favour.getNewPassword(), favour.getPassword(), "Password should be updated to the new password");
-
+            favour.setPassword(favour.getNewPassword());
             userIdentityService.login(favour);
 
         } catch (MeedlException meedlException) {

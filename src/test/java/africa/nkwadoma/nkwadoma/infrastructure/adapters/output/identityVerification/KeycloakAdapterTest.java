@@ -58,7 +58,7 @@ class KeycloakAdapterTest {
         List<OrganizationEmployeeIdentity> employeePeter = new ArrayList<>();
         employeePeter.add(employeeIdentity);
 
-        rizzGallery = TestData.createOrganizationTestData("Rizz Gallery 1' alone", "RC87899",employeePeter);
+        rizzGallery = TestData.createOrganizationTestData("Rizz Gallery 1' alone", "RC8789945",employeePeter);
     }
 
     @Test
@@ -70,6 +70,7 @@ class KeycloakAdapterTest {
             assertNotNull(createdUser);
             assertNotNull(createdUser.getId());
             assertEquals(john.getId(), createdUser.getId());
+            johnId = createdUser.getId();
             assertEquals(createdUser.getEmail(), john.getEmail());
             assertEquals(createdUser.getFirstName(), john.getFirstName());
             assertEquals(createdUser.getLastName(), john.getLastName());
@@ -112,7 +113,6 @@ class KeycloakAdapterTest {
         john.setLastName(null);
         assertThrows(MeedlException.class,()-> identityManagementOutputPort.createUser(john));
     }
-
     @Test
     @Order(2)
     void createPassword(){
@@ -138,7 +138,7 @@ class KeycloakAdapterTest {
             assertNotNull(accessTokenResponse.getToken());
             assertNotNull(accessTokenResponse.getRefreshToken());
         }catch (MeedlException e){
-            log.info("{} {}",e.getClass().getName(),e.getMessage());
+            log.error("{} {}",e.getClass().getName(),e.getMessage());
         }
     }
     @Test
@@ -186,8 +186,6 @@ class KeycloakAdapterTest {
             log.error("{}",e.getMessage());
         }
     }
-
-
     @Test
     @Order(6)
     void getClientRepresentationById() {
@@ -212,7 +210,6 @@ class KeycloakAdapterTest {
     void getClientRepresentationWithNoneExistingId() {
         assertThrows(MeedlException.class, () -> identityManagementOutputPort.getClientRepresentationByClientId("none existing id"));
     }
-
     @Test
     @Order(7)
     void disableClient(){
@@ -229,9 +226,49 @@ class KeycloakAdapterTest {
             log.error("Failed to disable organization identity {} ", e.getMessage());
         }
     }
+    @Test
+    void disableOrganizationWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
+    void disableOrganizationWithInvalidId(String id) {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+        megaOrganization.setId(id);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
+    void enableOrganizationWithInvalidId(String id) {
+        OrganizationIdentity megaOrganization = new OrganizationIdentity();
+        megaOrganization.setId(id);
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableClient(megaOrganization));
+    }
+    @Test
+    void enableOrganizationWithNull() {
+        assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableClient(null));
+    }
 
     @Test
     @Order(8)
+    void enableClient(){
+        try {
+            ClientRepresentation representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertFalse(representation.isEnabled());
+            rizzGallery.setId(rizzGalleryId);
+            identityManagementOutputPort.enableClient(rizzGallery);
+            representation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
+            assertNotNull(representation);
+            assertTrue(representation.isEnabled());
+        }catch (MeedlException e){
+            log.error("Failed to disable organization identity {} ", e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(9)
     void deleteClient(){
         try {
             ClientRepresentation clientRepresentation = identityManagementOutputPort.getClientRepresentationByName(rizzGallery.getName());
@@ -244,16 +281,29 @@ class KeycloakAdapterTest {
             log.error("{}",e.getMessage());
         }
     }
-    @ParameterizedTest
-    @ValueSource(strings = {"    ", StringUtils.SPACE, StringUtils.EMPTY})
-    void createPasswordWithNullPassword(String password) {
-        john.setEmail(john.getEmail());
-        john.setPassword(password);
-        MeedlException meedlException = assertThrows(MeedlException.class, () ->
-                identityManagementOutputPort.createPassword(john));
-        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
-    }
 
+    @Test
+    @Order(9)
+    void getUserIdentityById(){
+        UserIdentity userIdentity = null;
+        try {
+            userIdentity = identityManagementOutputPort.getUserById(johnId);
+        } catch (MeedlException e) {
+            log.error("User with this Id : {} , not found ", johnId);
+        }
+        assertNotNull(userIdentity);
+        assertNotNull(userIdentity.getEmail());
+        log.info("UserRepresentation : {}", userIdentity.getEmail());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid id"})
+    void getUserIdentityByInvalidId(String id){
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserById(id));
+    }
+    @Test
+    void getUserIdentityByValidNoneExistingId() throws MeedlException {
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserById("123e4567-e89b-12d3-a456-426614174000\""));
+    }
     @ParameterizedTest
     @ValueSource(strings = {"passwordJ@345    ", "    passwordJ@345"})
     void createPasswordWithSpaces(String password) {
@@ -276,7 +326,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void login(){
         try {
             john.setEmail(john.getEmail());
@@ -308,7 +358,7 @@ class KeycloakAdapterTest {
         john.setPassword(password);
         MeedlException meedlException = assertThrows(MeedlException.class, () ->
                 identityManagementOutputPort.login(john));
-        assertEquals(EMPTY_INPUT_FIELD_ERROR.getMessage(), meedlException.getMessage());
+        assertEquals("Password can not be empty", meedlException.getMessage());
     }
 
     @ParameterizedTest
@@ -408,7 +458,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void changePasswordWithValidPassword() {
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(password);
@@ -453,20 +503,9 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.login(john));
 
     }
-    @Test
-    void disableOrganizationWithNull() {
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invaliduuid"})
-    void disableOrganizationWithInvalidId(String id) {
-        OrganizationIdentity megaOrganization = new OrganizationIdentity();
-                megaOrganization.setId(id);
-        assertThrows(MeedlException.class, () -> identityManagementOutputPort.disableClient(megaOrganization));
-    }
 
     @Test
-    @Order(11)
+    @Order(12)
     void resetPasswordWithValidPassword() {
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(newPassword);
@@ -509,7 +548,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -542,7 +581,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(13)
+    @Order(14)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -556,7 +595,7 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(14)
+    @Order(15)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 

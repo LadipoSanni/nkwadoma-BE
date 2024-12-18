@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
@@ -41,7 +43,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public void deleteLoanee(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findById(loaneeId);
         if (loaneeEntity.isPresent()) {
             log.info("Found loanee: {}", loaneeEntity.get());
@@ -58,7 +60,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize,int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId);
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId,pageRequest);
         return loaneeEntities.map(loaneeMapper::toLoanee);
@@ -66,15 +68,15 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortId(id);
         return loaneeMapper.toListOfLoanee(loanees);
     }
 
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId);
-        MeedlValidator.validateDataElement(name, "Loanee name is required");
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateDataElement(name, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         List<LoaneeEntity> loaneeEntities =
                 loaneeRepository.findByCohortIdAndFullNameContainingIgnoreCase(cohortId,name);
         if (loaneeEntities.isEmpty()){
@@ -87,14 +89,15 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         List<LoaneeEntity> loanees = loaneeRepository.findAllLoaneesByCohortIdAndLoaneeIds(id,loaneeIds);
         return loaneeMapper.toListOfLoanee(loanees);
     }
 
 
     @Override
-    public Optional<Loanee> findByUserId(String userId) {
+    public Optional<Loanee> findByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         Optional<LoaneeEntity> loaneeEntity = loaneeRepository.findLoaneeByUserIdentityId(userId);
         if (loaneeEntity.isEmpty()) {
             return Optional.empty();
@@ -105,7 +108,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Loanee findLoaneeById(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         LoaneeEntity loaneeEntity = loaneeRepository.findById(loaneeId)
                  .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
         return loaneeMapper.toLoanee(loaneeEntity);

@@ -20,14 +20,18 @@ public class OrganizationEntity {
     private String websiteAddress;
     private LocalDateTime invitedDate;
     private String registrationNumber;
+    @Column(unique = true)
     private String taxIdentity;
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private ActivationStatus status;
+    @Column(unique = true)
     private String rcNumber;
     private String createdBy;
     private String updatedBy;
     private LocalDateTime timeUpdated;
+    private int numberOfLoanees;
+    private int numberOfCohort;
     private boolean isEnabled;
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int numberOfPrograms;

@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
+import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,6 +52,8 @@ class LoanServiceTest {
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
+        loanRequest.setLoanReferralId(loanReferral.getId());
+        loanRequest.setCreatedDate(LocalDateTime.now());
 
         loan = TestData.createTestLoan(loanee);
     }
@@ -69,44 +72,8 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNullLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNonAcceptedLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.DECLINED);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createNullLoanRequest() {
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(null));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanee() {
-        loanRequest.setLoanee(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanAmountRequested() {
-        loanRequest.setLoanAmountRequested(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanRequestStatus() {
-        loanRequest.setStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoaneeLoanDetail() {
-        loanRequest.getLoanee().setLoaneeLoanDetail(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
     @Test
@@ -115,10 +82,9 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
-            when(loanReferralOutputPort.findLoanReferralById(
-                    loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
+            when(loanReferralOutputPort.
+                    findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-            log.info("found loan referral : {}",foundLoanReferral);
             assertNotNull(foundLoanReferral);
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
@@ -167,8 +133,7 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
             when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);

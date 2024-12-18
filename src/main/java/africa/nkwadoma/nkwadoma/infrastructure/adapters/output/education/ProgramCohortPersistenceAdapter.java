@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.ProgramCohort;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
@@ -31,7 +32,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
 
     @Override
     public ProgramCohort findByProgramId(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         ProgramCohortEntity programCohortEntity =
                 programCohortRepository.findByProgramId(programId);
         return programCohortMapper.toProgramCohort(programCohortEntity);
@@ -39,7 +40,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
 
     @Override
     public List<ProgramCohort> findAllByProgramId(String programId) throws MeedlException {
-        MeedlValidator.validateUUID(programId);
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         List<ProgramCohortEntity> programCohortEntities =
          programCohortRepository.findAllByProgramId(programId);
         return programCohortMapper.toProgramCohortList(programCohortEntities);
@@ -57,7 +58,7 @@ public class ProgramCohortPersistenceAdapter implements ProgramCohortOutputPort 
     @Transactional
     @Override
     public void delete(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         programCohortRepository.deleteAllByProgramId(id);
         programOutputPort.deleteProgram(id);
     }

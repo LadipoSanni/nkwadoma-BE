@@ -30,10 +30,12 @@ public class TestData {
                 .createdBy(testId)
                 .role(IdentityRole.LOANEE)
                 .alternateEmail("alt276@example.com")
+                .image("loanee-img.png")
                 .alternatePhoneNumber("0986564534")
                 .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
                 .build();
     }
+
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName(name);
@@ -43,13 +45,15 @@ public class TestData {
         organizationIdentity.setRcNumber(rcNumber);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
+        organizationIdentity.getServiceOfferings().get(0).setTransactionUpperBound(new BigDecimal("0.00"));
         organizationIdentity.getServiceOfferings().get(0).setName(ServiceOfferingType.TRAINING.name());
         organizationIdentity.setPhoneNumber("09876365713");
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
-        organizationIdentity.setPageSize(10);
-        organizationIdentity.setPageNumber(0);
+        organizationIdentity.setPageSize(0);
+        organizationIdentity.setPageNumber(10);
 
         return organizationIdentity;
     }

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.LOANEE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +50,24 @@ class UserIdentityAdapterTest {
             log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
         }
     }
+
+    @Test
+    void findAllUserWithNullRole(){
+        assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findAllByRole(null));
+    }
+
+    @Test
+    void findAllUserByRole(){
+        List<UserIdentity> userIdentities = new ArrayList<>();
+        try{
+            userIdentities = userIdentityOutputPort.findAllByRole(LOANEE);
+        }catch (MeedlException exception){
+            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(userIdentities);
+        assertEquals(1, userIdentities.size());
+    }
+
     @Test
     void saveUserWithExistingEmail(){
         try{

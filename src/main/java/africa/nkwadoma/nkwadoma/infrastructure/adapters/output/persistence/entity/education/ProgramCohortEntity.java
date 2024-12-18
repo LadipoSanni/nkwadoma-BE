@@ -15,7 +15,6 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProgramCohortEntity{
-
     @Id
     @UuidGenerator
     private String id;

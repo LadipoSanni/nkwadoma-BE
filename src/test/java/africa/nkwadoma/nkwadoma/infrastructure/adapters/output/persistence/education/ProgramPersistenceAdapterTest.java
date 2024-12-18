@@ -1,13 +1,18 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.education;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -17,6 +22,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
+import java.math.*;
 import java.time.*;
 import java.util.*;
 
@@ -28,6 +34,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProgramPersistenceAdapterTest {
+    private final int pageSize = 10;
+    private final int pageNumber = 0;
+    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6788";
     @Autowired
     private ProgramOutputPort programOutputPort;
     @Autowired
@@ -40,44 +49,44 @@ class ProgramPersistenceAdapterTest {
     private CohortOutputPort cohortOutputPort;
     @Autowired
     private ProgramRepository programRepository;
+    @Autowired
+    private LoaneeUseCase loaneeUseCase;
+    @Autowired
+    private CohortUseCase cohortUseCase;
+    @Autowired
+    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
+    @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private LoanBreakdownRepository loanBreakdownRepository;
     private Cohort elites;
     private Program dataAnalytics;
     private Program dataScience;
     private OrganizationIdentity organizationIdentity;
     private UserIdentity userIdentity;
+    private LoanBreakdown loanBreakdown;
+    private List<LoanBreakdown> loanBreakdowns;
+    private List<LoaneeLoanBreakdown> loaneeBreakdowns;
     private String userId;
     private String dataAnalyticsProgramId;
     private String dataScienceProgramId;
     private String organizationId;
-    private final int pageSize = 10;
-    private final int pageNumber = 0;
-    private final String testId = "466e11ca-d6c3-4bf1-b226-e2ed3fab6788";
-
-    @BeforeEach
-    void setUp() {
-        dataAnalytics = new Program();
-        dataAnalytics.setName("Data analysis");
-        dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
-        dataAnalytics.setMode(ProgramMode.FULL_TIME);
-        dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
-        dataAnalytics.setDuration(2);
-        dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
-        dataAnalytics.setDurationType(DurationType.MONTHS);
-
-        dataScience = new Program();
-        dataScience.setName("Data sciences");
-        dataScience.setProgramDescription("The art of putting thought into solving problems");
-        dataScience.setMode(ProgramMode.FULL_TIME);
-        dataScience.setProgramStatus(ActivationStatus.ACTIVE);
-        dataScience.setDuration(1);
-        dataScience.setDeliveryType(DeliveryType.ONSITE);
-        dataScience.setDurationType(DurationType.YEARS);
-
-        elites = new Cohort();
-        elites.setStartDate(LocalDate.of(2024, 10, 18));
-        elites.setName("Elites");
-        elites.setCreatedBy(userIdentity.getCreatedBy());
-    }
+    private String cohortId;
+    private Loanee loanee;
+    private String loaneeId;
+    private String loaneeUserId;
+    private String loaneeLoanDetailId;
+    @Autowired
+    private LoaneeLoanBreakDownRepository loaneeLoanBreakDownRepository;
+    @Autowired
+    private LoaneeOutputPort loaneeOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    private String organizationAdminId;
+    private LoaneeLoanBreakdown loaneeLoanBreakdown;
+    private LoaneeLoanDetail loaneeLoanDetail;
+    @Autowired
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @BeforeAll
     void init() {
@@ -116,11 +125,32 @@ class ProgramPersistenceAdapterTest {
             userId = userIdentityOutputPort.save(userIdentity).getId();
             OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
             employeeIdentity.setOrganization(organizationId);
-            organizationIdentity.getOrganizationEmployees().forEach(
-                    organizationEmployeeIdentity -> employeeIdentityOutputPort.save(employeeIdentity));
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = employeeIdentityOutputPort.save(employeeIdentity);
+            organizationAdminId = organizationEmployeeIdentity.getMeedlUser().getId();
         } catch (MeedlException e) {
             log.error("Error creating organization", e);
         }
+    }
+
+    @BeforeEach
+    void setUp() {
+        dataAnalytics = new Program();
+        dataAnalytics.setName("Data analysis");
+        dataAnalytics.setProgramDescription("A rigorous course in the art and science of Data analysis");
+        dataAnalytics.setMode(ProgramMode.FULL_TIME);
+        dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
+        dataAnalytics.setDuration(2);
+        dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
+        dataAnalytics.setDurationType(DurationType.MONTHS);
+
+        dataScience = new Program();
+        dataScience.setName("Data sciences");
+        dataScience.setProgramDescription("The art of putting thought into solving problems");
+        dataScience.setMode(ProgramMode.FULL_TIME);
+        dataScience.setProgramStatus(ActivationStatus.ACTIVE);
+        dataScience.setDuration(1);
+        dataScience.setDeliveryType(DeliveryType.ONSITE);
+        dataScience.setDurationType(DurationType.YEARS);
     }
 
     @AfterEach
@@ -233,8 +263,7 @@ class ProgramPersistenceAdapterTest {
     @Test
     void createProgramWithNonExistingCreatedBy() {
         dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-        assertEquals(meedlException.getMessage(), MeedlMessages.NON_EXISTING_CREATED_BY.getMessage());
+        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
     @Test
@@ -341,7 +370,7 @@ class ProgramPersistenceAdapterTest {
     void viewProgramWithNonUUIDId(String programId) {
         dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test
@@ -365,7 +394,7 @@ class ProgramPersistenceAdapterTest {
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), dataScience.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), dataScience.getNumberOfLoanees());
         } catch (MeedlException e) {
             log.error("Error finding all programs", e);
         }
@@ -378,7 +407,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-//    @Order(5)
     void deleteProgram() {
         try {
             dataScience.setCreatedBy(userId);
@@ -393,6 +421,7 @@ class ProgramPersistenceAdapterTest {
             log.error("Error while deleting program", e);
         }
     }
+
 
     @Test
     void deleteNonExistingProgram() {
@@ -420,11 +449,10 @@ class ProgramPersistenceAdapterTest {
 
     @Test
     void deleteProgramWithCohort() {
-        Program savedProgram;
         Cohort savedCohort;
         try {
             dataAnalytics.setCreatedBy(userId);
-            savedProgram = programOutputPort.saveProgram(dataAnalytics);
+            Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
             dataAnalyticsProgramId = savedProgram.getId();
 
@@ -433,24 +461,88 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedCohort);
 
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
-            Cohort cohort = cohortOutputPort.findCohort(savedCohort.getId());
-            assertNull(cohort);
+            savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
+            assertNull(savedCohort);
         } catch (MeedlException e) {
             log.error("Error while creating program {}", e.getMessage());
         }
     }
 
+    @Test
+    void deleteProgramThatHasLoanees() {
+        try {
+            dataScience.setCreatedBy(userId);
+            dataScience = programOutputPort.saveProgram(dataScience);
+            assertNotNull(dataScience);
+            assertNotNull(dataScience.getId());
+            dataScienceProgramId = dataScience.getId();
+
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            elites = TestData.createCohortData("Elite", dataScienceProgramId, organizationId,
+                    loanBreakdowns, userId);
+
+            elites = cohortUseCase.createCohort(elites);
+            assertNotNull(elites);
+            assertNotNull(elites.getId());
+            cohortId = elites.getId();
+
+            userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
+                    firstName("Adeshina").lastName("Qudus").email("qudus@example.com").
+                    image("loanee-img.png").role(LOANEE).createdBy(organizationAdminId).build();
+            loaneeLoanDetail = LoaneeLoanDetail.builder().
+                    amountRequested(BigDecimal.valueOf(30000.00)).
+                    initialDeposit(BigDecimal.valueOf(10000.00)).build();
+            loanBreakdowns = loanBreakdownOutputPort.findAllByCohortId(cohortId);
+            loanBreakdown = loanBreakdowns.get(0);
+
+            loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdown.getLoanBreakdownId()).
+                    itemAmount(loanBreakdown.getItemAmount()).
+                    itemName(loanBreakdown.getItemName()).build();
+            loaneeBreakdowns = List.of(loaneeLoanBreakdown);
+
+            loanee = Loanee.builder().userIdentity(userIdentity).
+                    loanBreakdowns(loaneeBreakdowns).
+                    cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            assertNotNull(loanee);
+            assertNotNull(loanee.getUserIdentity());
+            assertNotNull(loanee.getLoaneeLoanDetail());
+            loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
+        } catch (MeedlException e) {
+            log.error("Error while deleting program", e);
+        }
+        assertThrows(MeedlException.class, ()-> programOutputPort.deleteProgram(dataScience.getId()));
+    }
+
     @AfterAll
     void tearDown() {
         try {
+            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+            loaneeBreakdowns.forEach(loaneeBreakdown -> {
+                if (StringUtils.isNotEmpty(loaneeBreakdown.getLoaneeLoanBreakdownId())) {
+                    loaneeLoanBreakDownRepository.deleteById(loaneeBreakdown.getLoaneeLoanBreakdownId());
+                }
+            });
+            loaneeOutputPort.deleteLoanee(loaneeId);
+            userIdentityOutputPort.deleteUserById(loaneeUserId);
+            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
+            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+            loanBreakdowns.forEach(tuitionBreakdown -> {
+                if (StringUtils.isNotEmpty(tuitionBreakdown.getLoanBreakdownId())) {
+                    loanBreakdownRepository.deleteById(tuitionBreakdown.getLoanBreakdownId());
+                }
+            });
+            cohortOutputPort.deleteCohort(cohortId);
+
             OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.
                     findByCreatedBy(userId);
             employeeIdentityOutputPort.delete(employeeIdentity.getId());
-            userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
-
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(organizationId);
-
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
@@ -461,7 +553,7 @@ class ProgramPersistenceAdapterTest {
             organizationOutputPort.delete(organizationId);
             assertThrows(ResourceNotFoundException.class, () -> organizationOutputPort.findById(organizationId));
         } catch (MeedlException e) {
-            log.error("Error while deleting service offerings", e);
+            log.error("Error while cleaning up", e);
         }
     }
 

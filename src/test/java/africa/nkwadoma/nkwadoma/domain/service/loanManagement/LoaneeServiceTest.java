@@ -4,39 +4,27 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUse
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import lombok.extern.slf4j.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,15 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.junit.jupiter.api.extension.*;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.*;
 import java.time.*;
 import java.util.*;
 import java.math.BigDecimal;
@@ -73,6 +53,8 @@ class LoaneeServiceTest {
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
+    private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    @Mock
     private CohortOutputPort cohortOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
@@ -85,16 +67,18 @@ class LoaneeServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
-    private SendLoaneeEmailUsecase loaneeEmailUsecase;
-    @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
+    @Mock
+    private ProgramCohort programCohort;
+    @Mock
+    private ProgramOutputPort programOutputPort;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
-    private ProgramCohort programCohort;
     private Cohort elites;
+    private Program atlasProgram;
     private Loanee firstLoanee;
     private final String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private UserIdentity loaneeUserIdentity;
@@ -164,6 +148,7 @@ class LoaneeServiceTest {
         organizationIdentity.setOrganizationEmployees(List.of(organizationEmployeeIdentity));
         organizationIdentity.setCreatedBy(mockId);
 
+        atlasProgram = TestData.createProgramTestData("AtlasProgram");
 
     }
 
@@ -179,6 +164,12 @@ class LoaneeServiceTest {
         when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
         when(cohortOutputPort.save(any())).thenReturn(elites);
+        when(programOutputPort.findProgramById(any())).thenReturn(atlasProgram);
+        when(programOutputPort.saveProgram(any())).thenReturn(atlasProgram);
+        when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
+//
+        when(organizationIdentityOutputPort.save(organizationIdentity))
+                .thenReturn(organizationIdentity);
         Loanee loanee = loaneeService.addLoaneeToCohort(firstLoanee);
         assertEquals(firstLoanee.getUserIdentity().getFirstName(), loanee.getUserIdentity().getFirstName());
         verify(loaneeOutputPort, times(1)).save(firstLoanee);
@@ -267,8 +258,10 @@ class LoaneeServiceTest {
                     .thenReturn(organizationEmployeeIdentity);
             when(organizationIdentityOutputPort.findById(mockId)).
                     thenReturn(organizationIdentity);
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)).thenReturn(List.of(loaneeUserIdentity));
             when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
+            doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());
             when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
             LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee.getId());
             assertEquals(loanReferral.getLoanee().getUserIdentity().getFirstName()

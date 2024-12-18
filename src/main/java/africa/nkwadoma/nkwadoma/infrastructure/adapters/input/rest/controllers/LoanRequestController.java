@@ -60,11 +60,12 @@ public class LoanRequestController {
         LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
         log.info("Loan request: {}", foundLoanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
+        log.info("Mapped Loan request: {}", loanRequestResponse);
         ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

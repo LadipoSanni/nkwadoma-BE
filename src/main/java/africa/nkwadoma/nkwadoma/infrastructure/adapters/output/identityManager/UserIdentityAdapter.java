@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -38,14 +40,14 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity findById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         return userIdentityMapper.toUserIdentity(userEntity);
     }
 
     @Override
     public void deleteUserById(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         log.info("Deleting user {}", id);
         UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
         employeeIdentityOutputPort.deleteEmployee(id);
@@ -78,6 +80,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityRole);
         List<UserEntity> userEntities = userEntityRepository.findAllByRole(identityRole);
+        log.info("Found {} users by Role ", userEntities.size());
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();
     }
 

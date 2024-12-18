@@ -24,6 +24,9 @@ public enum LoanMessages {
     MANDATE_REQUIRED("Loan mandate is required"),
     FUND_PRODUCT_ID_REQUIRED("Please select a fund product."),
     LOAN_ID_REQUIRED("Loan id is required"),
+    INVALID_LOAN_PRODUCT_ID("Please provide a valid loan product identification"),
+    INVALID_LOANEE_ID("Please provide a valid loanee identification"),
+    INVALID_LOAN_ID("Please provide a valid loan identification"),
     TENOR_STATUS_MONTH_BOND("Tenor should be between 1 TO 120 months"),
     LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED("Loan referral must be accepted"),
     LOAN_REFERRAL_NOT_FOUND("Loan referral not found"),
@@ -35,9 +38,12 @@ public enum LoanMessages {
     LOAN_REQUEST_STATUS_MUST_BE_NEW("Loan request status must be new"),
     LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED("Loan request has already been approved"),
     ADDITIONAL_DETAILS_REQUIRED("Loanee must have provided additional details before loan referral can be accepted"),
-    ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
-    LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
-    LOAN_OFFER_NOT_FOUND("Loan Offer Not Found");
+    MULTIPLE_LOAN_REFERRALS_IS_CURRENTLY_NOT_ALLOWED("Multiple loan referrals is currently not allowed"),
+    LOAN_REFERRAL_CANNOT_BE_EMPTY("Loan referral cannot be empty"),
+    LOAN_REQUEST_CANNOT_BE_EMPTY("Loan request cannot be empty"),
+    LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY("Loan amount rquested must not be empty"),
+    LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY("Loan referral status must not be empty"),
+    LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY("Loan referral ID must not be empty");
 
     private final String message;
 

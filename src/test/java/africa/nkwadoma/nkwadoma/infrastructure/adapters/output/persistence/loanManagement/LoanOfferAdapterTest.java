@@ -15,15 +15,17 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,6 +56,8 @@ public class LoanOfferAdapterTest {
     private LoanRequest loanRequest;
     private String loanOfferId;
     private String loanRequestId;
+    private int pageSize = 1;
+    private int pageNumber = 0;
 
 
     @BeforeAll
@@ -64,7 +68,7 @@ public class LoanOfferAdapterTest {
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
                 initialDeposit(BigDecimal.valueOf(3000000.00)).build();
         loanee = Loanee.builder().userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f")
+                cohortId("fdc36020-9389-43d2-938d-fd317a870916")
                 .loaneeLoanDetail(loaneeLoanDetail).build();
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
@@ -75,9 +79,12 @@ public class LoanOfferAdapterTest {
             loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
             loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
-                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
+                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee).createdDate(LocalDateTime.now()).
+                    loaneeId("88ee2dd8-df66-4f67-b718-dfd1635f8053").loanReferralId(loanReferral.getId()).cohortId("3012eabb-4cc7-4f48-bae9-04c0056518f0")
                     .dateTimeApproved(LocalDateTime.now()).build();
             loanRequest = loanRequestOutputPort.save(loanRequest);
+            log.info("Loan request saved: {}", loanRequest);
+            assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
@@ -141,6 +148,19 @@ public class LoanOfferAdapterTest {
         }
         assertEquals(offer.getId(), loanOfferId);
     }
+
+    @Order(2)
+    @Test
+    void viewAllLoanOffersByOrganizationAdmin(){
+        Page<LoanOffer> loanOffers = null;
+        try {
+            loanOffers = loanOfferOutputPort.findAllLoanOffers( pageSize, pageNumber);
+        }catch (MeedlException exception){
+            log.info(exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getSize());
+    }
+
 
 
     @AfterAll

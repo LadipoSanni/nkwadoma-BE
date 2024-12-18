@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -32,14 +34,13 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         Optional<LoanReferralProjection> loanReferralProjection = loanReferralRepository.findLoanReferralById(loanReferralId);
         if (loanReferralProjection.isEmpty()) {
             log.info("Empty Loan referral projection: {}", loanReferralProjection);
             return Optional.empty();
         }
         log.info("LoanReferral Projection : {}", loanReferralProjection.get());
-        //TODO: this projection is not retrieving the loanReferral details properly
         LoanReferral loanReferral = loanReferralMapper.mapProjectionToLoanReferralEntity(loanReferralProjection.get());
         log.info("Mapped LoanReferral : {}", loanReferral);
         return Optional.of(loanReferral);
@@ -47,7 +48,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public void deleteLoanReferral(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId);
+        MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
         if (loanReferralEntity.isPresent()) {
             log.info("Found loan referral: {}", loanReferralEntity.get());
@@ -71,15 +72,16 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public List<LoanReferral> findLoanReferralByUserId(String userId) throws MeedlException {
-        MeedlValidator.validateUUID(userId);
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
     }
 
     @Override
-    public LoanReferral findById(String loanReferralId) throws LoanException {
+    public LoanReferral findById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
         LoanReferralEntity loanReferralEntity = loanReferralRepository
-                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found "));
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 }

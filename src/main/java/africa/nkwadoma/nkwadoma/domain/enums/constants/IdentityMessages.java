@@ -25,7 +25,7 @@ public enum IdentityMessages{
     CONTEXT_ORGANIZATION_NAME("organizationName"),
     CONTEXT_CURRENT_YEAR("currentYear"),
     PASSWORD_HAS_BEEN_CREATED("Password has been created Already"),
-    PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%-=()*?&]{8,16}$"),
+    PASSWORD_PATTERN("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%-=()*?&#]{8,16}$"),
     WEAK_PASSWORD("Password should be up to 8 characters and must contain at least 1 alphabet, number and special characters."),
     INVALID_CREDENTIALS("invalid credentials"),
     ERROR_FETCHING_USER_INFORMATION("Error fetching user information"),
@@ -40,7 +40,8 @@ public enum IdentityMessages{
     IDENTITY_VERIFIED("Identity Verified"),
     IDENTITY_NOT_VERIFIED("Identity Not Verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
-    LOANEE_NOT_FOUND("Loanee not found");
+    LOANEE_NOT_FOUND("Loanee not found"),
+    ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists");
 
     public String format(Object... args) {
         return String.format(message, args);

@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
@@ -22,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,6 +45,10 @@ public class LoanOfferServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private LoanOffer loanOffer;
     private LoanRequest loanRequest;
     private Loanee loanee;
@@ -47,8 +56,6 @@ public class LoanOfferServiceTest {
     private UserIdentity userIdentityLoanee;
     private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
     private String mockId2 = "96f2eb2b-1a78-4838-b5d8-76e95cc9ae9f";
-    @Mock
-    private UserIdentityOutputPort userIdentityOutputPort;
     private LoaneeLoanAccount loaneeLoanAccount;
     @Mock
     private LoanOfferMapper loanOfferMapper;
@@ -60,7 +67,8 @@ public class LoanOfferServiceTest {
 
     @BeforeEach
     void setUpLoanOffer() {
-        userIdentity = UserIdentity.builder().id(mockId).firstName("qudus").lastName("ade").email("qudusa55@gmail.com").build();
+        userIdentity = UserIdentity.builder().id(mockId).firstName("qudus").lastName("ade")
+                .email("qudusa55@gmail.com").role(IdentityRole.PORTFOLIO_MANAGER).build();
         loanee = Loanee.builder().id(mockId).userIdentity(userIdentity).build();
         loanRequest = LoanRequest.builder().id(mockId).loanAmountRequested(BigDecimal.valueOf(340000))
                 .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
@@ -134,6 +142,19 @@ public class LoanOfferServiceTest {
             log.error(exception.getMessage());
         }
         assertNull(loaneeLoanAccount);
+    }
+    @Test
+    void viewAllLoanOffer(){
+        Page<LoanOffer> loanOffers = null;
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(loanOfferOutputPort.findAllLoanOffers(1,0)).
+                    thenReturn(new PageImpl<>(List.of(loanOffer)));
+            loanOffers = loanService.viewAllLoanOffers(mockId,1,0);
+        }catch (MeedlException exception){
+            log.info(exception.getMessage());
+        }
+        assertEquals(1,loanOffers.getSize());
     }
 
 }

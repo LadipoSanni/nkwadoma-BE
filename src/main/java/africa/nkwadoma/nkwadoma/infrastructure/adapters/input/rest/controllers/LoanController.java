@@ -1,13 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -46,7 +45,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
-    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanProductRestMapper loanProductMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
     private final LoanOfferUseCase loanOfferUseCase;
@@ -139,19 +137,6 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
     }
 
-    @GetMapping("loan-referral")
-    public ResponseEntity<ApiResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(meedlUser.getClaimAsString("sub"));
-        LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
-        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
-        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
-                .data(loanReferralResponse)
-                .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.name())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
     @PostMapping("start")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
@@ -188,5 +173,25 @@ public class LoanController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/loanOffer/all")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoanOffers(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
+        List<LoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
+        PaginatedResponse<LoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
+                loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 }

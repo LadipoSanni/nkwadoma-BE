@@ -29,13 +29,13 @@ public class OrganizationResponse {
     private ActivationStatus status;
     private String createdBy;
     private int numberOfLoanees;
+    private int numberOfCohort;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;
     private double repaymentRate;
     private List<ServiceOffering> serviceOfferings;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
-//    private List<ServiceOffering> serviceOfferings;
     private String logoImage;
     private String bannerImage;
     private String address;
