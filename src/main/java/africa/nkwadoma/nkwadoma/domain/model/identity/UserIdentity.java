@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -14,7 +15,6 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.I
 @Slf4j
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,8 +25,10 @@ public class UserIdentity {
     private String lastName;
     private String phoneNumber;
     private boolean emailVerified;
+    private boolean isIdentityVerified;
     private boolean enabled;
     private String createdAt;
+    private String image;
     private IdentityRole role;
     private String createdBy;
     private String alternateEmail;
@@ -39,15 +41,17 @@ public class UserIdentity {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+    private String bvn;
+    private String nin;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
         if (ObjectUtils.isEmpty(this.role)|| StringUtils.isEmpty(this.role.name()))
             throw new IdentityException(INVALID_VALID_ROLE.getMessage());
         MeedlValidator.validateEmail(this.email);
-        MeedlValidator.validateDataElement(this.firstName);
-        MeedlValidator.validateDataElement(this.lastName);
-        MeedlValidator.validateUUID(this.createdBy);
+        MeedlValidator.validateDataElement(this.firstName, "User first name is required");
+        MeedlValidator.validateDataElement(this.lastName, "User last name is required");
+        MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
     }
 
 }

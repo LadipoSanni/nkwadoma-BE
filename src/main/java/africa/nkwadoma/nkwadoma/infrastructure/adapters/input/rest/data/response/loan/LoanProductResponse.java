@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.DurationType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +25,7 @@ public class LoanProductResponse {
     private BigDecimal totalAmountDisbursed ;
     private BigDecimal totalAmountRepaid ;
     private String mandate;
+    private String costOfFund;
     private List<String> sponsors;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class CohortResponse {
 
     private String id;
     private String programId;
+    private String organizationId;
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;
@@ -31,9 +33,14 @@ public class CohortResponse {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime startDate;
-    private LocalDateTime expectedEndDate;
+    private String imageUrl;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
     private LoanDetailResponse loanDetail;
-
+    private int numberOfLoanees = 0;
+    private int numberOfReferredLoanee = 0;
+    private String programName;
+    private int numberOfEmployed;
+    private int numberOfDropOut;
 }

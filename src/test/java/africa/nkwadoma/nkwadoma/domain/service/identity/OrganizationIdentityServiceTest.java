@@ -1,17 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
+
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.Industry;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -35,10 +34,8 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class OrganizationIdentityServiceTest {
-
     @InjectMocks
     private OrganizationIdentityService organizationIdentityService;
-
     @Mock
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
@@ -50,10 +47,11 @@ class OrganizationIdentityServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
+    private OrganizationEntityRepository organizationEntityRepository;
+    @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
-
-    private OrganizationIdentity roseCouture;
     private UserIdentity sarah;
+    private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
@@ -83,7 +81,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setName("rose couture6");
         roseCouture.setEmail("iamoluchimercy@gmail.com");
         roseCouture.setTin("7682-5627");
-        roseCouture.setRcNumber("RC87899");
+        roseCouture.setRcNumber("RC8789905");
         roseCouture.setServiceOfferings(List.of(new ServiceOffering()));
         roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         roseCouture.setPhoneNumber("09876365713");
@@ -96,7 +94,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation = null;
+        OrganizationIdentity invitedOrganisation;
         try {
             when(identityManagerOutPutPort.createOrganization(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
@@ -107,16 +105,33 @@ class OrganizationIdentityServiceTest {
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
             assertNotNull(invitedOrganisation);
+            assertNotNull(invitedOrganisation.getServiceOfferings());
             assertEquals(roseCouture.getName(), invitedOrganisation.getName());
+            assertEquals(ActivationStatus.INVITED, employeeSarah.getStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-
     }
+
     @Test
     void inviteOrganizationWithEmptyOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(new OrganizationIdentity()));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongRcNumber", "RC123456", "OP1234567", "rc1234567", "123456789", "ABCDEFG"})
+    void inviteOrganizationWithInvalidRCNumber(String rcNumber) {
+        roseCouture.setRcNumber(rcNumber);
+        assertThrows(MeedlException.class, ()-> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"WrongTIN", "ABCDEFG"})
+    void inviteOrganizationWithInvalidTIN(String tin) {
+        roseCouture.setTin(tin);
+        assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(roseCouture));
+    }
+
     @Test
     void inviteOrganizationWithNullOrganization() {
         assertThrows(MeedlException.class, () -> organizationIdentityService.inviteOrganization(null));
@@ -185,20 +200,61 @@ class OrganizationIdentityServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
+    void reactivateOrganizationWithInvalidId(String id) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.reactivateOrganization(id, "test reason"));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void reactivateOrganizationWithEmptyReason(String reason) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.reactivateOrganization(mockId, reason));
+    }
+    @Test
+    void reactivateOrganization() {
+        try {
+            roseCouture.setEnabled(Boolean.TRUE);
+            doNothing().when(identityManagerOutPutPort).enableClient(roseCouture);
+            when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
+                    .thenReturn(orgEmployee);
+            when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
+            when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
+            when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
+            OrganizationIdentity deactivatedOrganization =
+                    organizationIdentityService.reactivateOrganization(roseCouture.getId(), "test 2 reason");
+            assertTrue(deactivatedOrganization.isEnabled());
+            assertEquals(ActivationStatus.ACTIVE, employeeSarah.getStatus());
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "fndnkfjdf"})
     void deactivateOrganizationWithInvalidId(String id) {
         assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(id, "test reason"));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void deactivateOrganizationWithEmptyReason(String reason) {
+        assertThrows(MeedlException.class, () -> organizationIdentityService.deactivateOrganization(mockId, reason));
+    }
 
+    @Test
     void deactivateOrganization() {
         try {
+            roseCouture.setEnabled(Boolean.FALSE);
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
             when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
                     .thenReturn(orgEmployee);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
-            roseCouture.setEnabled(Boolean.FALSE);
-            OrganizationIdentity deactivatedOrganization = organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
+            when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
+            when(organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(roseCouture))).
+                    thenReturn(any());
+            OrganizationIdentity deactivatedOrganization =
+                    organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());
+            assertEquals(ActivationStatus.DEACTIVATED, deactivatedOrganization.getStatus());
+            assertEquals(ActivationStatus.DEACTIVATED, employeeSarah.getStatus());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }

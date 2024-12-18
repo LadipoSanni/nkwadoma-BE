@@ -9,7 +9,9 @@ import java.util.Optional;
 public interface OrganizationEntityRepository extends JpaRepository<OrganizationEntity,String> {
     Optional<OrganizationEntity> findByEmail(String email);
 
-    List<OrganizationEntity> findAllByName(String name);
-
     Optional<OrganizationEntity> findByRcNumber(String rcNumber);
+
+    List<OrganizationEntity> findByNameContainingIgnoreCase(String trim);
+
+    Optional<OrganizationEntity> findByTaxIdentity(String tin);
 }

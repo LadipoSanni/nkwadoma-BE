@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.exceptions;
 
-public class InfrastructureException extends Exception{
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+
+public class InfrastructureException extends MeedlException {
 
     public InfrastructureException(String message) {
         super(message);

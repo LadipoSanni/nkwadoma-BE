@@ -14,9 +14,15 @@ COMMIT_MESSAGE=${11}
 
 CURRENT_TIME=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
 
-# Count successful and failed PR builds
-SUCCESSFUL_PR_BUILDS=$(echo "$BUILDS" | jq '[.[] | select(.status == "success")] | length')
-FAILED_PR_BUILDS=$(echo "$BUILDS" | jq '[.[] | select(.status == "failure")] | length')
+# Convert CURRENT_TIME to seconds since epoch for comparison
+CURRENT_TIME_SECONDS=$(date --utc --date="$CURRENT_TIME" +%s)
+
+# Filter builds that occurred in the last 4 hours (14400 seconds)
+RECENT_BUILDS=$(echo "$BUILDS" | jq -c ".[] | select((($CURRENT_TIME_SECONDS - (strptime(.timestamp) | mktime)) <= 14400))")
+
+# Count successful and failed PR builds in the last 4 hours
+SUCCESSFUL_PR_BUILDS=$(echo "$RECENT_BUILDS" | jq '[select(.status == "success")] | length')
+FAILED_PR_BUILDS=$(echo "$RECENT_BUILDS" | jq '[select(.status == "failure")] | length')
 
 # Build detail rows
 BUILD_DETAILS=""
@@ -25,7 +31,7 @@ while IFS= read -r build; do
     AUTHOR=$(echo "$build" | jq -r '.author')
     MESSAGE=$(echo "$build" | jq -r '.message')
     BUILD_DETAILS+="<tr><td>${TIMESTAMP}</td><td>${AUTHOR}</td><td>${MESSAGE}</td></tr>"
-done < <(echo "$BUILDS" | jq -c '.[]')
+done < <(echo "$RECENT_BUILDS" | jq -c '.')
 
 # HTML email body with a table
 read -r -d '' HTML_BODY <<EOF
@@ -52,8 +58,8 @@ read -r -d '' HTML_BODY <<EOF
   <h1>Activity Summary</h1>
   <p><strong>Commits Verified:</strong> ${CURRENT_TIMESTAMP}</p>
   <p><strong>Merged Pull Requests:</strong> ${LAST_TIMESTAMP}</p>
-  <p><strong>Failed PR Builds:</strong> ${FAILED_PR_BUILDS}</p>
-  <p><strong>Successful PR Builds:</strong> ${SUCCESSFUL_PR_BUILDS}</p>
+  <p><strong>Failed PR Builds (Last 4 hours):</strong> ${FAILED_PR_BUILDS}</p>
+  <p><strong>Successful PR Builds (Last 4 hours):</strong> ${SUCCESSFUL_PR_BUILDS}</p>
   <p><strong>Last Commit Author:</strong> ${COMMIT_AUTHOR}</p>
   <p><strong>Last Commit Message:</strong> ${COMMIT_MESSAGE}</p>
   <p><strong>Build Details:</strong></p>

@@ -27,9 +27,9 @@ public class InvestmentVehicle {
     private InvestmentVehicleFinancier contributors;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateObjectName(name);
         MeedlValidator.validateIntegerDataElement(tenure);
-        MeedlValidator.validateDataElement(investmentVehicleType.toString());
+        MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         MeedlValidator.validateFloatDataElement(rate);
         MeedlValidator.validateBigDecimalDataElement(size);
     }

@@ -6,71 +6,95 @@ on:
     - cron: "0 11 * * *"
     - cron: "0 13 * * *"
     - cron: "0 17 * * *"
+  workflow_run:
+    workflows:
+      - Artifact Creation  # Name of the first workflow
+    types:
+      - completed
 
 jobs:
-  check-all-workflows:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Run Check All Workflows Script
-        run: |
-          chmod +x .github/workflows/scripts/check-all-workflows.sh
-          .github/workflows/scripts/check-all-workflows.sh
-
   track-build:
-    needs: check-all-workflows
     runs-on: ubuntu-latest
-    if: always()  # Runs regardless of success or failure of the previous job
+    if: always()  # Ensures this job runs even if the previous workflow fails
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Load Previous Build Count and Details
+      # Download the build-tracker artifact created in the previous workflow
+      - name: Retrieve Build Tracker Artifact
         uses: actions/download-artifact@v3
         with:
           name: build-tracker
           path: ./build_tracker.json
-        continue-on-error: true  # Allow missing artifact gracefully
+        continue-on-error: true  # Continue even if the artifact is not found
 
       - name: Initialize or Increment Build Count
         id: build_count
         run: |
+          # Function to initialize the build tracker
           initialize_tracker() {
-            # Remove build_tracker.json directory if it exists
-            if [ -d "./build_tracker.json" ]; then
-              rm -rf ./build_tracker.json
-            fi
-      
-            echo "Initializing build tracker..."
-            echo '{"count": 1, "builds": []}' > ./build_tracker.json
-            echo "::set-output name=count::1"
+              echo "Initializing build tracker..."
+              echo '{"count": 1, "builds": []}' > ./build_tracker.json
+              echo "count=1" >> $GITHUB_ENV
           }
 
+          # Function to update the build tracker
+          update_tracker() {
+              local new_count=$1
+              local builds=$2
+              local new_build=$3
+
+              echo "Updating build tracker..."
+
+              # Ensure builds is a valid JSON array
+              if [ -z "$builds" ] || [ "$builds" = "null" ]; then
+                  builds="[]"
+              fi
+
+              # Add the new build to the builds array
+              updated_builds=$(echo "$builds" | jq ". += [$new_build]")
+              if [ $? -ne 0 ]; then
+                  echo "Error updating builds with jq."
+                  exit 1
+              fi
+
+              # Update the JSON file
+              echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
+          }
+
+          # Check if the build tracker file exists
           if [ -f "./build_tracker.json" ]; then
-            count=$(jq '.count' ./build_tracker.json)
-            builds=$(jq '.builds' ./build_tracker.json)
-            last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json)
-            new_count=$((count + 1))
+              echo "Build tracker found. Loading existing data..."
+              count=$(jq '.count' ./build_tracker.json)
+              builds=$(jq '.builds' ./build_tracker.json)
+              last_timestamp=$(jq -r '.builds[-1].timestamp' ./build_tracker.json)
+              new_count=$((count + 1))
           else
-            initialize_tracker
-            last_timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-            new_count=1
-            builds="[]"
+              echo "Build tracker not found. Initializing new tracker..."
+              initialize_tracker
+              last_timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+              new_count=1
+              builds="[]"
           fi
 
+          # Generate metadata for the new build
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
-          BRANCH="${{ github.head_ref || github.ref_name }}"
           COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
           new_build="{\"branch\":\"$BRANCH\",\"author\":\"$AUTHOR\",\"timestamp\":\"$BUILD_TIMESTAMP\",\"message\":\"$COMMIT_MESSAGE\"}"
 
+          # Update the tracker with the new build
           update_tracker $new_count "$builds" "$new_build"
 
-          TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
+          # Calculate time difference between the last and current builds
+          if [ -n "$last_timestamp" ]; then
+              TIME_DIFF=$(( ($(date -d "$BUILD_TIMESTAMP" +%s) - $(date -d "$last_timestamp" +%s)) / 3600 ))
+          else
+              TIME_DIFF=0
+          fi
 
+          # Export environment variables for use in subsequent steps
           echo "count=$new_count" >> $GITHUB_ENV
           echo "builds=$builds" >> $GITHUB_ENV
           echo "timestamp=$BUILD_TIMESTAMP" >> $GITHUB_ENV
@@ -78,12 +102,10 @@ jobs:
           echo "last_timestamp=$last_timestamp" >> $GITHUB_ENV
           echo "time_diff=$TIME_DIFF" >> $GITHUB_ENV
 
-      - name: Upload Updated Build Tracker
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-tracker
-          path: ./build_tracker.json
+          echo "Build tracker updated successfully."
 
+
+      # Send Inactivity Email
       - name: Send Inactivity Email
         if: ${{ env.count == 0 }}
         env:
@@ -99,6 +121,7 @@ jobs:
             "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
             "${{ env.timestamp }}" "${{ env.last_timestamp }}" "${{ env.time_diff }}"
 
+      # Send Activity Summary Email
       - name: Send Activity Summary Email
         if: ${{ env.count > 0 }}
         env:
@@ -109,7 +132,7 @@ jobs:
           EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
           BUILDS: ${{ env.builds }}
           LAST_COMMIT_AUTHOR: ${{ env.author }}
-          LAST_COMMIT_MESSAGE: $(jq -r '.[-1].message' <<< ${{ env.builds }})
+          LAST_COMMIT_MESSAGE: ${{ steps.build_count.outputs.LAST_COMMIT_MESSAGE }}
         run: |
           chmod +x .github/workflows/scripts/activity_email.sh
           .github/workflows/scripts/activity_email.sh \
