@@ -38,6 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionResponse> handleEnumValidationExceptions(HttpMessageNotReadableException ex) {
+        log.error("Error validating enum: {}", ex.getMessage());
         return new ResponseEntity<>(errorResponseBuilder(ErrorMessages.INVALID_LOAN_DECISION), HttpStatus.BAD_REQUEST);
     }
 

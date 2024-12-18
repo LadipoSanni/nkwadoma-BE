@@ -203,6 +203,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.validateForAcceptOffer();
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        if (loanee.isEmpty()) {
+            throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
+        }
         loanOffer.setLoaneeId(loanee.get().getId());
         if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
