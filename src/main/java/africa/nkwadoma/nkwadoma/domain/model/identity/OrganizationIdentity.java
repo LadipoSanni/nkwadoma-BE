@@ -38,6 +38,7 @@ public class OrganizationIdentity {
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;
+    private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
     private int numberOfCohort;

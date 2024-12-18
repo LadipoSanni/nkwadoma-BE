@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +64,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         organizationIdentity.setServiceOfferings(savedServiceOfferings);
         return organizationIdentity;
     }
+
     @Override
     public Optional<OrganizationEntity> findByRcNumber(String rcNumber) throws MeedlException {
         log.info("Find organization with rcNumber {}", rcNumber);
