@@ -25,7 +25,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
         join LoaneeEntity l on lre.loaneeEntity.id = l.id
         join CohortEntity c on l.cohortId = c.id
         join ProgramEntity p on c.programId = p.id
-        join OrganizationEntity o on p.organizationEntity.id = o.id
+        join OrganizationEntity o on p.organizationIdentity.id = o.id
         where lre.id = :id
     """)
     Optional<LoanReferralProjection> findLoanReferralById(@Param("id") String id);

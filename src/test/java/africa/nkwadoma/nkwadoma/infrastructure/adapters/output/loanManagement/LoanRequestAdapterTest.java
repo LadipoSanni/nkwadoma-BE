@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -28,7 +27,6 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -56,8 +54,6 @@ class LoanRequestAdapterTest {
     @Autowired
     private LoanDetailsOutputPort loanDetailsOutputPort;
     @Autowired
-    private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private LoanRequestRepository loanRequestRepository;
@@ -71,7 +67,6 @@ class LoanRequestAdapterTest {
     private LoanRequest loanRequest;
     private LoaneeLoanDetail loaneeLoanDetail;
     private Loanee loanee;
-    private Cohort elites;
     private String organizationId;
     private String dataAnalyticsProgramId;
     private String eliteCohortId;
@@ -86,7 +81,6 @@ class LoanRequestAdapterTest {
     private List<LoanBreakdown> loanBreakdowns;
     private String loanDetailId;
     private UserIdentity userIdentity;
-    private OrganizationIdentity organizationIdentity;
     private String nextOfKinId;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
@@ -110,7 +104,7 @@ class LoanRequestAdapterTest {
 
             amazingGrace = TestData.createOrganizationTestData(
                     "Amazing Grace Enterprises",
-                    "RC79500034",
+                    "RC9500034",
                     employees
             );
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
@@ -200,7 +194,7 @@ class LoanRequestAdapterTest {
             assertNotNull(loanReferral);
             loanReferralId = loanReferral.getId();
         } catch (MeedlException e) {
-            log.error("Error saving organization", e);
+            log.error("Error saving set up test data", e);
         }
     }
 
@@ -255,13 +249,13 @@ class LoanRequestAdapterTest {
 
     @Test
     void saveLoanRequestWithNullLoaneeId() {
-        loanRequest.getLoanee().setId(null);
+        loanRequest.setLoanee(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 
     @Test
-    void saveLoanRequestWithNullLoanAmountRequested() {
-        loanRequest.setLoanAmountRequested(null);
+    void saveLoanRequestWithNullLoaneeLoanDetailAmountRequested() {
+        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 

@@ -171,8 +171,8 @@ class LoanReferralAdapterTest {
             assertNotNull(referral);
             assertFalse(referral.isEmpty());
             assertNotNull(referral.get().getId());
-            assertEquals("John", referral.get().getLoanee().getUserIdentity().getFirstName());
-            assertEquals("Doe", referral.get().getLoanee().getUserIdentity().getLastName());
+            assertEquals("Adeshina", referral.get().getLoanee().getUserIdentity().getFirstName());
+            assertEquals("Qudus", referral.get().getLoanee().getUserIdentity().getLastName());
             assertEquals(userIdentity.getAlternatePhoneNumber(),
                     referral.get().getLoanee().getUserIdentity().getAlternatePhoneNumber());
             assertEquals(userIdentity.getAlternateEmail(),
@@ -215,7 +215,7 @@ class LoanReferralAdapterTest {
         assertThrows(MeedlException.class, ()->loanReferralOutputPort.findLoanReferralById(loanReferralId));
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         try {
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
