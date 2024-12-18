@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownExcept
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,6 +33,13 @@ public class MeedlValidator {
         if (isEmptyString(email) || !EmailValidator.getInstance().isValid(email.trim())) {
             log.info("Invalid email address provided : {}", email);
             throw new MeedlException(MeedlMessages.INVALID_EMAIL_ADDRESS.getMessage());
+        }
+    }
+
+    public static void validateLoanDecision(String loanReferralStatus) throws LoanException {
+        boolean matches = Pattern.matches("^(ACCEPTED|DECLINED)$", loanReferralStatus);
+        if (!matches) {
+            throw new LoanException(ErrorMessages.INVALID_LOAN_REFERRAL_STATUS);
         }
     }
 

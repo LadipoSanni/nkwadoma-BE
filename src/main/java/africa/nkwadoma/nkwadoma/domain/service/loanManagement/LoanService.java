@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -151,9 +153,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
+        MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
         log.info("Found Loan Referral: {}", foundLoanReferral);
-        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
         foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
         return foundLoanReferral;
     }

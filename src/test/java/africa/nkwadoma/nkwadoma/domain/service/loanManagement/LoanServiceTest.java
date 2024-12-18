@@ -159,21 +159,9 @@ class LoanServiceTest {
     }
 
     @Test
-    void startLoanWithNull() {
-        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "invalid uuid"})
-    void startLoanWithInvalidId(String loaneeId) {
-        loan.setLoaneeId(loaneeId);
-        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
-    }
-
-    @Test
-    void acceptLoanReferralWithNullLoanReferralId() {
-        loanReferral.setId(null);
-        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+    void respondToLoanReferralWithInvalidLoanReferralStatus() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
     }
 
     @Test
@@ -192,4 +180,23 @@ class LoanServiceTest {
         assertEquals(LoanReferralStatus.UNAUTHORIZED, referral.getLoanReferralStatus());
         assertEquals("I just don't want a loan", referral.getReasonForDeclining());
     }
+
+    @Test
+    void startLoanWithNull() {
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "invalid uuid"})
+    void startLoanWithInvalidId(String loaneeId) {
+        loan.setLoaneeId(loaneeId);
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+
+    @Test
+    void acceptLoanReferralWithNullLoanReferralId() {
+        loanReferral.setId(null);
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+    }
+
 }
