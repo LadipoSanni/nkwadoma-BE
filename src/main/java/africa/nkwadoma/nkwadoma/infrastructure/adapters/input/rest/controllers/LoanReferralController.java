@@ -33,7 +33,7 @@ public class LoanReferralController {
         referral.setId(request.getId());
         referral.setLoanReferralStatus(request.getLoanReferralStatus());
         referral.setReasonForDeclining(request.getReason());
-        log.info("Loan referral: {}", referral);
+        log.info("Loan referral model: {}", referral);
         referral = respondToLoanReferralUseCase.respondToLoanReferral(referral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(referral);
         log.info("Loan referral response: {}", loanReferralResponse);
