@@ -92,7 +92,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loan);
+        MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), "Please provide a valid loanee identification");
         Loanee foundLoanee = loaneeOutputPort.findByUserId(loan.getLoaneeId())
                             .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
@@ -157,7 +157,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             log.info("Mapped loan request: {}", loanRequest);
-            createLoanRequest(loanRequest);
+            loanRequest = createLoanRequest(loanRequest);
+            log.info("Loan request created: {}", loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }

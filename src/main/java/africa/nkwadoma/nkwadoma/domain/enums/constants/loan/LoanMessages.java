@@ -46,7 +46,8 @@ public enum LoanMessages {
     LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY("Loan referral ID must not be empty"),
     ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
     LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
-    LOAN_OFFER_NOT_FOUND("Loan Offer Not Found");
+    LOAN_OFFER_NOT_FOUND("Loan Offer Not Found"),
+    LOAN_CANNOT_BE_EMPTY("Loan cannot be empty");
     private final String message;
 
     LoanMessages(String message) {
