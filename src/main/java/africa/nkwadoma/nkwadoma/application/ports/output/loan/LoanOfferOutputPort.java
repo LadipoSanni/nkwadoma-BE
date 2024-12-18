@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 public interface LoanOfferOutputPort {
     LoanOffer save(LoanOffer loanOffer) throws MeedlException;
-    LoanOffer findLoanOfferById(String loanOfferId);
+    LoanOffer findLoanOfferById(String loanOfferId) throws MeedlException;
 
     void deleteLoanOfferById(String loanOfferId);
 

@@ -15,15 +15,18 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -40,8 +43,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOfferMapper loanOfferMapper;
     private final LoanOutputPort loanOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
 
 
     @Override
@@ -180,6 +185,48 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
         return loanOffer;
+    }
+
+    @Override
+    public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        loanOffer.validateForAcceptOffer();
+        LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
+        Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        loanOffer.setLoaneeId(loanee.get().getId());
+        if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
+            throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
+        }
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
+            //Loanee Wallet would be Created
+            loanOfferMapper.updateLoanOffer(offer,loanOffer);
+            offer.setDateTimeAccepted(LocalDateTime.now());
+            loanOfferOutputPort.save(offer);
+            notifyPortfolioManager(portfolioManagers,loanOffer);
+            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanOffer.getLoaneeId());
+            if (ObjectUtils.isEmpty(loaneeLoanAccount)){
+                loaneeLoanAccount = createLoaneeLoanAccount(loanOffer.getLoaneeId());
+            }
+            return loaneeLoanAccount;
+        }
+        loanOfferMapper.updateLoanOffer(offer,loanOffer);
+        loanOfferOutputPort.save(offer);
+        notifyPortfolioManager(portfolioManagers,loanOffer);
+        return null;
+    }
+
+    private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
+        //this and the template would be done on another branch
+    }
+
+
+    private LoaneeLoanAccount createLoaneeLoanAccount(String loaneeId) throws MeedlException {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setLoaneeId(loaneeId);
+        loaneeLoanAccount.setAccountStatus(AccountStatus.NEW);
+        loaneeLoanAccount.setLoanStatus(LoanStatus.AWAITING_DISBURSAL);
+        loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
+        return loaneeLoanAccount;
     }
 
     @Override

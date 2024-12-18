@@ -62,7 +62,7 @@ public class LoanOfferAdapterTest {
 
     @BeforeAll
     void setUp() {
-        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
+        userIdentity = UserIdentity.builder().id("e8cfea66-440d-43bc-84f2-9f1c55029009").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
         loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
@@ -124,6 +124,29 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getLoanRequest().getId(), loanRequest.getId());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanAmountRequested(), loanRequest.getLoanAmountRequested());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"kjkjdjksjk"})
+    void findLoanOfferWithInvalidId(String invalidId){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(invalidId));
+    }
+
+    @Test
+    void findLoanOfferWithNullId(){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(null));
+    }
+
+    @Order(2)
+    @Test
+    void findLoanOfferById(){
+        LoanOffer offer = new LoanOffer();
+        try{
+            offer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(offer.getId(), loanOfferId);
     }
 
     @Order(2)

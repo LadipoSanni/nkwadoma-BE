@@ -172,6 +172,14 @@ public class TestData {
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequest;
     }
+
+    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status,String loaneeId) {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setLoanStatus(loanStatus);
+        loaneeLoanAccount.setAccountStatus(status);
+        loaneeLoanAccount.setLoaneeId(loaneeId);
+        return loaneeLoanAccount;
+    }
     public static PremblyResponse createTestPremblyResponse(){
         PremblyResponse response = new PremblyBvnResponse();
         Verification verifier = Verification.builder().status("VERIFIED").build();

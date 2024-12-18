@@ -43,7 +43,10 @@ public enum LoanMessages {
     LOAN_REQUEST_CANNOT_BE_EMPTY("Loan request cannot be empty"),
     LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY("Loan amount rquested must not be empty"),
     LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY("Loan referral status must not be empty"),
-    LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY("Loan referral ID must not be empty");
+    LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY("Loan referral ID must not be empty"),
+    ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
+    LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
+    LOAN_OFFER_NOT_FOUND("Loan Offer Not Found");
     private final String message;
 
     LoanMessages(String message) {

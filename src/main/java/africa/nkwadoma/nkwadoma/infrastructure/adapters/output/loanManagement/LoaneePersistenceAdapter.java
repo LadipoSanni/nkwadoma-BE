@@ -85,6 +85,8 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         return loaneeEntities.stream().map(loaneeMapper::toLoanee).toList();
     }
 
+
+
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
         MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
