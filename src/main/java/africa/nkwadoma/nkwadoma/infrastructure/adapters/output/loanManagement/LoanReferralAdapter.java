@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
@@ -79,9 +78,10 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
-    public LoanReferral findById(String loanReferralId) throws LoanException {
+    public LoanReferral findById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
         LoanReferralEntity loanReferralEntity = loanReferralRepository
-                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found "));
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 }

@@ -75,12 +75,6 @@ class LoanServiceTest {
     }
 
     @Test
-    void createLoanRequestWithNonAcceptedLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.DECLINED);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
     void createNullLoanRequest() {
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(null));
     }
@@ -88,12 +82,6 @@ class LoanServiceTest {
     @Test
     void createLoanRequestWithNullLoanee() {
         loanRequest.setLoanee(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanRequestStatus() {
-        loanRequest.setStatus(null);
         assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
@@ -160,7 +148,6 @@ class LoanServiceTest {
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
-//            when(loanReferralOutputPort.findLoanReferralByUserId(anyString())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);

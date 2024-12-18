@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -129,6 +130,10 @@ class LoanReferralAdapterTest {
             userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").
                     firstName("Adeshina").lastName("Qudus").email("qudus@example.com").image("loanee-img.png").
                     role(IdentityRole.LOANEE).createdBy(organizationAdminId).build();
+            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (foundUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(foundUser.get());
+            }
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().
                     amountRequested(BigDecimal.valueOf(30000.00)).
                     initialDeposit(BigDecimal.valueOf(10000.00)).build();
@@ -175,6 +180,7 @@ class LoanReferralAdapterTest {
             assertNotNull(referral.get().getTuitionAmount());
             assertNotNull(referral.get().getInitialDeposit());
             assertNotNull(referral.get().getLoanAmountRequested());
+            assertEquals(LoanReferralStatus.PENDING, referral.get().getLoanReferralStatus());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }

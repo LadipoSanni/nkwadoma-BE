@@ -14,7 +14,7 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
 
     @Query("""
         select lre.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
-               c.name as cohortName, p.name as programName, c.startDate as cohortStartDate,
+               c.name as cohortName, p.name as programName, c.startDate as cohortStartDate, lre.loanReferralStatus as status,
                c.tuitionAmount as tuitionAmount, l.loaneeLoanDetail.initialDeposit as initialDeposit,
                l.loaneeLoanDetail.amountRequested as loanAmountRequested, l.userIdentity.image as loaneeImage
         from LoanReferralEntity lre

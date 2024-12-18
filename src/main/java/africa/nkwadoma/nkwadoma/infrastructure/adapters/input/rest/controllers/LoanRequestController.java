@@ -60,6 +60,7 @@ public class LoanRequestController {
         LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
         log.info("Loan request: {}", foundLoanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
+        log.info("Mapped Loan request: {}", loanRequestResponse);
         ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
