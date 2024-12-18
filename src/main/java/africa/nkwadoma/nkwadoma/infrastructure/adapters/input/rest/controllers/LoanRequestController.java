@@ -65,7 +65,7 @@ public class LoanRequestController {
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

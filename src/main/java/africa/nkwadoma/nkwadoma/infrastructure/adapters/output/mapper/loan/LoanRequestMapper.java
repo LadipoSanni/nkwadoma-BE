@@ -8,8 +8,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanRequestMapper {
     @Mapping(target = "loaneeEntity", source = "loanee")
-    @Mapping(target = "loaneeEntity.userIdentity", source = "loanee.userIdentity")
-//    @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
     LoanRequestEntity toLoanRequestEntity(LoanRequest loanRequest);
 
     @InheritInverseConfiguration
@@ -28,6 +26,7 @@ public interface LoanRequestMapper {
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
     @Mapping(target = "cohortId", source = "loanee.cohortId")
     @Mapping(target = "loanReferralId", source = "id")
+    @Mapping(target = "loanee.id", source = "loanee.id")
     @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

@@ -22,7 +22,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     private final LoanOfferEntityRepository loanOfferEntityRepository;
 
     @Override
-    public LoanOffer save(LoanOffer loanOffer) throws MeedlException {
+    public LoanOffer  save(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanOffer);
         loanOffer.validate();
         LoanOfferEntitiy loanOfferEntitiy = loanOfferMapper.toLoanOfferEntity(loanOffer);

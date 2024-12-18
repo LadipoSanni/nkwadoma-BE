@@ -35,8 +35,10 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     @Override
     public Optional<LoanRequest> findById(String loanRequestId) throws MeedlException {
         MeedlValidator.validateUUID(loanRequestId);
-        Optional<LoanRequestProjection> loanRequestProjection = loanRequestRepository.findLoanRequestById(loanRequestId);
+        Optional<LoanRequestProjection> loanRequestProjection =
+                loanRequestRepository.findLoanRequestById(loanRequestId);
         if (loanRequestProjection.isEmpty()) {
+            log.info("Empty Loan request returned");
             return Optional.empty();
         }
         LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection.get());
@@ -55,6 +57,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequests(
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))));
+        log.info("Loan requests retrieved from DB: {}", loanRequests.getContent());
         return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
 }

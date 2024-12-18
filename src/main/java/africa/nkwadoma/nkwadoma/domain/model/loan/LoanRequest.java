@@ -51,6 +51,7 @@ public class LoanRequest {
     private String cohortName;
     private int pageNumber;
     private int pageSize;
+    private String loaneeId;
 
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {

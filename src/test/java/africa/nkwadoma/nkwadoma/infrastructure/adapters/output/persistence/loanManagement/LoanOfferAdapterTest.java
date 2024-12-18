@@ -15,7 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -79,9 +79,12 @@ public class LoanOfferAdapterTest {
             loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
             loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
-                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
+                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee).createdDate(LocalDateTime.now()).
+                    loaneeId("88ee2dd8-df66-4f67-b718-dfd1635f8053").loanReferralId(loanReferral.getId()).cohortId("3012eabb-4cc7-4f48-bae9-04c0056518f0")
                     .dateTimeApproved(LocalDateTime.now()).build();
             loanRequest = loanRequestOutputPort.save(loanRequest);
+            log.info("Loan request saved: {}", loanRequest);
+            assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
         } catch (MeedlException exception) {
             log.error(exception.getMessage());

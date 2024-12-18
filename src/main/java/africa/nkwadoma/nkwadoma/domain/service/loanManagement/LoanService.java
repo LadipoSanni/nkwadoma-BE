@@ -151,7 +151,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
-            log.info("Mapped loan request from Loan referral: {}", loanRequest);
+            log.info("Mapped loan request: {}", loanRequest);
             createLoanRequest(loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
