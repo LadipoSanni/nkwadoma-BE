@@ -170,17 +170,18 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             log.info("Mapped loan request: {}", loanRequest);
-            createLoanRequest(loanRequest);
+            loanRequest = createLoanRequest(loanRequest);
+            log.info("Created loan request: {}", loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
             foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
-        else if (updatedLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
-            MeedlValidator.validateDataElement(updatedLoanReferral.getReasonForDeclining());
-            updatedLoanReferral.setReasonForDeclining(updatedLoanReferral.getReasonForDeclining());
-            updatedLoanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
-            updatedLoanReferral = loanReferralOutputPort.saveLoanReferral(updatedLoanReferral);
+        else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+//            MeedlValidator.validateDataElement(loanReferral.getReasonForDeclining(), LoanMessages.REASON_IS_REQUIRED.getMessage());
+            foundLoanReferral.setReasonForDeclining(loanReferral.getReasonForDeclining());
+            foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.UNAUTHORIZED);
+            foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
-        log.info("Updated loan referral: {}", updatedLoanReferral);
+        log.info("Updated loan referral: {}", foundLoanReferral);
         return foundLoanReferral;
     }
 

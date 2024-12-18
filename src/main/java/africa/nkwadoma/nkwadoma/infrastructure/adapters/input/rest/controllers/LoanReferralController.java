@@ -35,10 +35,10 @@ public class LoanReferralController {
         log.info("Loan referral: {}", referral);
         referral = respondToLoanReferralUseCase.respondToLoanReferral(referral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(referral);
-        log.info("LOan referral response: {}", loanReferralResponse);
+        log.info("Loan referral response: {}", loanReferralResponse);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder().
                 data(loanReferralResponse).
-                message(SuccessMessages.SUCCESSFUL_RESPONSE).
+                message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY).
                 statusCode(HttpStatus.OK.name()).build();
         return ResponseEntity.ok(apiResponse);
     }

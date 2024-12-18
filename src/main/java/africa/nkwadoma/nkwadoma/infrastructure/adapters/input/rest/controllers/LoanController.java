@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -11,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoaneeLoanAccountMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,10 +44,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
-    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
-    private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final LoanProductRestMapper loanProductMapper;
-    private final LoanReferralRestMapper loanReferralRestMapper;
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoanOfferRestMapper loanOfferRestMapper;
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
@@ -198,17 +193,17 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @PostMapping("/respond-to-loan-referral")
-    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(@Valid @RequestBody LoanReferralRequest request) throws MeedlException {
-        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(request);
-        log.info("Mapped Loan referral from loan referral request: {}", loanReferral);
-        LoanReferral updatedLoanReferral = respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
-        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(updatedLoanReferral);
-        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
-                .data(loanReferralResponse)
-                .message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
+//    @PostMapping("/respond-to-loan-referral")
+//    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(@Valid @RequestBody LoanReferralRequest request) throws MeedlException {
+//        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(request);
+//        log.info("Mapped Loan referral from loan referral request: {}", loanReferral);
+//        LoanReferral updatedLoanReferral = respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
+//        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(updatedLoanReferral);
+//        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
+//                .data(loanReferralResponse)
+//                .message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY)
+//                .statusCode(HttpStatus.OK.toString())
+//                .build();
+//        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+//    }
 }
