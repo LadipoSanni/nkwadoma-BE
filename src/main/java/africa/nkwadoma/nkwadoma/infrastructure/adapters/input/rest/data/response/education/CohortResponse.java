@@ -22,6 +22,7 @@ public class CohortResponse {
 
     private String id;
     private String programId;
+    private String organizationId;
     private String cohortDescription;
     private String name;
     private ActivationStatus activationStatus;
@@ -37,5 +38,9 @@ public class CohortResponse {
     private LocalDate expectedEndDate;
     private List<LoanBreakdownResponse> loanBreakdowns = new ArrayList<>();
     private LoanDetailResponse loanDetail;
-
+    private int numberOfLoanees = 0;
+    private int numberOfReferredLoanee = 0;
+    private String programName;
+    private int numberOfEmployed;
+    private int numberOfDropOut;
 }

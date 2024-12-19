@@ -1,13 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
-import org.apache.commons.validator.routines.EmailValidator;
 
-import java.math.BigDecimal;
+import java.math.*;
 
 @Getter
 @Setter
@@ -37,8 +34,6 @@ public class LoanDetail {
         MeedlValidator.validateDoubleDataElement(repaymentPercentage);
         MeedlValidator.validateDoubleDataElement(debtPercentage);
     }
-
-
 
 
 }

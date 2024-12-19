@@ -10,8 +10,10 @@ import java.util.List;
 @Getter
 public class LoaneeLoanDetailResponse {
 
+    private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private BigDecimal amountReceived;
     private List<LoanBreakdownResponse> loanBreakdown;
 
 }

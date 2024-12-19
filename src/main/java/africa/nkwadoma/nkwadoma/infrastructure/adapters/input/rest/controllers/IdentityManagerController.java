@@ -1,20 +1,21 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateUserUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.*;
 import org.keycloak.representations.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
-    private final IdentityVerificationUseCase verificationUseCase;
+    private final CreateOrganizationUseCase createOrganizationUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
@@ -64,12 +65,23 @@ public class IdentityManagerController {
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
+        log.info("got the request {}",passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
+        userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
+        if(ObjectUtils.isNotEmpty(userIdentity) &&
+                userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN
+        ) {
+            OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+            organizationIdentity.setUserIdentity(userIdentity);
+            createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
+        }
         return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword())).
+                data(userIdentity).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+
+
     @PostMapping("auth/password/forgotPassword")
     public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
         createUserUseCase.forgotPassword(email);
@@ -84,21 +96,9 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
-    @PostMapping("auth/identity/confirm/token/verify")
-    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam @Valid String token) throws MeedlException, IdentityVerificationException {
-        return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.isIdentityVerified(token))
-                .statusCode(HttpStatus.OK.name()).build());
-    }
-    @PostMapping("auth/identity/verify")
-    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
-        IdentityVerification identityVerification = identityMapper.toIdentityVerification(identityVerificationRequest);
-        return ResponseEntity.ok(ApiResponse.<String>builder()
-                .data(verificationUseCase.isIdentityVerified(identityVerification))
-                .statusCode(HttpStatus.OK.name()).build());
-    }
 
     @PostMapping("auth/user/reactivate")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
@@ -113,6 +113,7 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/deactivate")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
@@ -128,14 +129,14 @@ public class IdentityManagerController {
     }
     @PostMapping("auth/password/change")
     public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
-                                                         @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
-        UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
+                                                         @RequestBody PasswordChangeRequest passwordChangeRequest) throws MeedlException {
+        UserIdentity userIdentity = identityMapper.toUserIdentity(passwordChangeRequest);
         userIdentity.setId(meedlUser.getClaimAsString("sub"));
         userIdentity.setEmail(meedlUser.getClaimAsString("email"));
-        log.info("The user changing the password : {} and ",meedlUser.getClaimAsString("sub"));
+        log.info("The user changing the password : {} ",meedlUser.getClaimAsString("sub"));
         createUserUseCase.changePassword(userIdentity);
         return ResponseEntity.ok(ApiResponse.<String>builder().
-                data("Password change successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 }

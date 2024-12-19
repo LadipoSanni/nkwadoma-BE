@@ -10,14 +10,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator.isEmptyString;
 
 @Slf4j
 @Getter
@@ -32,7 +29,7 @@ public class LoanProduct {
     private int tenor;
     private double interestRate;
     private double costOfFund;
-    @Size(max=15000)
+    @Size(max = 15000)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
@@ -59,11 +56,13 @@ public class LoanProduct {
     private int pageNumber;
 
     public void validateLoanProductDetails() throws MeedlException {
-        MeedlValidator.validateDataElement(name);
-        MeedlValidator.validateDataElement(termsAndCondition);
-        MeedlValidator.validateDataElement(mandate);
+        log.info("Started loan product validation");
+        MeedlValidator.validateObjectName(name);
+        MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
+        MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
         validateLoanProductSize();
         validateObligorLimit();
+        log.info("ended loan product validation successfully... ");
     }
 
     private void validateObligorLimit() throws MeedlException {
@@ -87,6 +86,7 @@ public class LoanProduct {
             this.tenor = tenor;
         }
     }
+
     public void setMoratorium(int moratorium) {
         if (moratorium < BigInteger.ZERO.intValue()){
             this.moratorium = BigInteger.ZERO.intValue();

@@ -2,11 +2,18 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -50,6 +57,17 @@ class CohortServiceTest {
     private LoanBreakdown loanBreakdown;
     @Mock
     private CohortMapper cohortMapper;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
+    private OrganizationIdentity organizationIdentity;
+    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    private ServiceOffering serviceOffering;
+    private UserIdentity userIdentity;
+
 
     @BeforeEach
     void setUp() {
@@ -61,7 +79,7 @@ class CohortServiceTest {
         elites = new Cohort();
         elites.setId(mockId);
         elites.setProgramId(program.getId());
-        elites.setName("Elite");
+        elites.setName("x-man");
         elites.setCreatedBy(mockId);
         elites.setStartDate(LocalDate.of(2024,11,29));
         elites.setExpectedEndDate(LocalDate.of( 2025,6,29));
@@ -85,11 +103,17 @@ class CohortServiceTest {
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
 
+        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
+        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
+        organizationIdentity =
+                TestData.createOrganizationTestData("testOrg1","rc34rhchjdg",List.of(organizationEmployeeIdentity));
+
     }
 
     @Test
     void saveCohort() {
         try {
+            elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
@@ -103,6 +127,7 @@ class CohortServiceTest {
     @Test
     void saveCohortWithExistingCohortName() {
         try {
+            xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenThrow(MeedlException.class);
         } catch (MeedlException e) {
@@ -113,8 +138,16 @@ class CohortServiceTest {
 
 
     @Test
+    void saveCohortWithNegativeLoanBreakDownItemAmount(){
+        loanBreakdown.setItemAmount(BigDecimal.valueOf(-2000));
+        xplorers.setLoanBreakdowns(List.of(loanBreakdown));
+        assertThrows(MeedlException.class,() -> cohortService.createCohort(xplorers));
+    }
+
+    @Test
     void saveAnotherCohortInProgram() {
         try {
+            xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
             Cohort cohort = cohortService.createCohort(xplorers);
@@ -129,12 +162,13 @@ class CohortServiceTest {
     @Test
     void viewCohortDetails(){
         try{
-            when(cohortOutputPort.viewCohortDetails(mockId,mockId,mockId)).thenReturn(xplorers);
+            when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             Cohort cohort = cohortService
-                    .viewCohortDetails(mockId,mockId, mockId);
+                    .viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);
             assertEquals(cohort.getName(),xplorers.getName());
-            verify(cohortOutputPort, times(1)).viewCohortDetails(any(), any(), any());
+            verify(cohortOutputPort, times(1)).viewCohortDetails(any(), any());
         }catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -143,97 +177,45 @@ class CohortServiceTest {
 
     @Test
     void viewCohortWithNullUserId(){
-        try {
-            when(cohortOutputPort.viewCohortDetails(null,mockId, mockId)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null,
-                    mockId, mockId));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
-    }
-    @Test
-    void viewCohortWithNullProgramId(){
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId,null, mockId )).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId,
-                    null,mockId));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
+        assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(null, mockId));
     }
 
     @Test
     void viewCohortWithNullCohortId() {
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId, mockId, null)).thenThrow(MeedlException.class);
-            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId,
-                    mockId, null));
-        } catch (MeedlException e) {
-            log.error("Failed {}", e.getMessage());
-        }
+            assertThrows(MeedlException.class, () -> cohortService.viewCohortDetails(mockId, null));
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyUserId(String userId){
-        try {
-            when(cohortOutputPort.viewCohortDetails(userId, mockId, mockId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(userId,
-                        mockId,
-                        mockId));
-    }
-    @ParameterizedTest
-    @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
-    void viewCohortWithEmptyProgramId(String programId){
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId, programId , mockId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
-        assertThrows(MeedlException.class, ()->
-                cohortService.viewCohortDetails(mockId,
-                        programId,
                         mockId));
     }
 
     @ParameterizedTest
     @ValueSource(strings= {StringUtils.EMPTY, StringUtils.SPACE})
     void viewCohortWithEmptyCohortId(String cohortId){
-        try {
-            when(cohortOutputPort.viewCohortDetails(mockId, mockId, cohortId)).thenThrow(MeedlException.class);
-        } catch (MeedlException e) {
-            log.error("{}", e.getMessage());
-        }
         assertThrows(MeedlException.class, ()->
                 cohortService.viewCohortDetails(mockId,
-                        mockId,
                         cohortId));
     }
 
     @Order(6)
     @Test
     void searchForCohort() {
-        Cohort expectedCohort = new Cohort();
-        expectedCohort.setName(xplorers.getName());
-        expectedCohort.setProgramId(xplorers.getProgramId());
-        Cohort searchedCohort = new Cohort();
+        List<Cohort> searchedCohort = new ArrayList<>();
         try{
-            when(cohortOutputPort.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId()))
-                    .thenReturn(expectedCohort);
+            when(cohortOutputPort.searchForCohortInAProgram(anyString(), eq(xplorers.getProgramId())))
+                    .thenReturn(List.of(elites, xplorers));
 
-
-            searchedCohort = cohortService.searchForCohortInAProgram(xplorers.getName(), xplorers.getProgramId());
+            searchedCohort = cohortService.searchForCohortInAProgram("x", xplorers.getProgramId());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
         assertNotNull(searchedCohort);
-        assertEquals(expectedCohort.getName(), searchedCohort.getName());
-        assertEquals(expectedCohort.getProgramId(), searchedCohort.getProgramId());
+        assertEquals(2, searchedCohort.size());
     }
 
     @Test
@@ -307,15 +289,16 @@ class CohortServiceTest {
     @Test
     void deleteCohort(){
         try {
-            when(cohortOutputPort.viewCohortDetails(mockId,mockId,mockId)).thenReturn(xplorers);
-            Cohort cohort = cohortService.viewCohortDetails(mockId,mockId, mockId);
+            when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
+            Cohort cohort = cohortService.viewCohortDetails(mockId, mockId);
             assertNotNull(cohort);
 
             doNothing().when(cohortOutputPort).deleteCohort(mockId);
             cohortService.deleteCohort(mockId);
 
-            doThrow(MeedlException.class).when(cohortOutputPort).viewCohortDetails(mockId, mockId, mockId);
-            assertThrows(MeedlException.class, ()-> cohortService.viewCohortDetails(mockId,mockId,mockId));
+            doThrow(MeedlException.class).when(cohortOutputPort).viewCohortDetails(mockId, mockId);
+            assertThrows(MeedlException.class, ()-> cohortService.viewCohortDetails(mockId,mockId));
         } catch (MeedlException e) {
             log.error("Error deleting cohort {}",e.getMessage());
         }
@@ -335,7 +318,7 @@ class CohortServiceTest {
             elites.setUpdatedBy(mockId);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.findCohort(elites.getId())).thenReturn(elites);
-            when(cohortOutputPort.findCohortByName(elites.getName())).thenReturn(elites);
+            when(cohortOutputPort.checkIfCohortExistWithName(elites.getName())).thenReturn(elites);
             when(loanBreakdownOutputPort.findAllByCohortId(elites.getId())).thenReturn(List.of(loanBreakdown));
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort editedCohort = cohortService.editCohort(elites);

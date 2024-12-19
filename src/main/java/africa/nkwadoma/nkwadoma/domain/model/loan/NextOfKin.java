@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
@@ -22,21 +23,17 @@ public class NextOfKin {
     private Loanee loanee;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(firstName);
-        MeedlValidator.validateDataElement(lastName);
+        String nextOfKin = "Next of kin ";
+        MeedlValidator.validateDataElement(firstName, nextOfKin.concat("first name is required"));
+        MeedlValidator.validateDataElement(lastName, nextOfKin.concat("last name is required"));
         MeedlValidator.validateEmail(email);
-        MeedlValidator.validateDataElement(phoneNumber);
-        MeedlValidator.validateDataElement(nextOfKinRelationship);
-        MeedlValidator.validateDataElement(contactAddress);
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress());
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber());
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateEmail());
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getId());
-        MeedlValidator.validateUUID(loanee.getUserIdentity().getId());
-    }
-
-    public void setId(String id) {
-        this.id = id.trim();
+        MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
+        MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
+        MeedlValidator.validateDataElement(contactAddress, nextOfKin.concat("contact address is required"));
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), nextOfKin.concat("alternate contact address is required"));
+        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), nextOfKin.concat("alternate phone number is required"));
+        MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
+        MeedlValidator.validateUUID(loanee.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
     }
 
     public void setFirstName(String firstName) {

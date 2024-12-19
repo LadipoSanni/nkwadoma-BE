@@ -1,15 +1,16 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanProductVendor;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.VendorEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanProductVendorRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.VendorEntityRepository;
@@ -19,11 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +66,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                             .build()))
                     .collect(Collectors.toList());
         }
-        return null;
+        return List.of();
     }
 
     private List<Vendor> saveVendors(LoanProduct loanProduct) {
@@ -74,13 +77,13 @@ public class LoanProductAdapter implements LoanProductOutputPort {
                     .map(loanProductMapper::mapVendorEntityToVendor)
                     .toList();
         }
-        return null;
+        return List.of();
     }
 
     @Transactional
     @Override
     public void deleteById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
+        MeedlValidator.validateUUID(id, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProductEntity loanProductEntity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
         loanProductVendorRepository.deleteAllByLoanProductEntity(loanProductEntity);
         loanProductEntityRepository.deleteById(id);
@@ -88,20 +91,20 @@ public class LoanProductAdapter implements LoanProductOutputPort {
 
     @Override
     public boolean existsByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         return loanProductEntityRepository.existsByName(name);
     }
 
     @Override
     public LoanProduct findById(String id) throws MeedlException {
-        MeedlValidator.validateDataElement(id);
-        LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product doesn't exist"));
+        MeedlValidator.validateUUID(id, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
+        LoanProductEntity entity = loanProductEntityRepository.findById(id).orElseThrow(()-> new LoanException("Loan product not found"));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
 
     @Override
     public LoanProduct findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name);
+        MeedlValidator.validateDataElement(name, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
         LoanProductEntity entity = loanProductEntityRepository.findByName(name).orElseThrow(()-> new LoanException("Loan product doesn't exist' whit this name " + name));
         return loanProductMapper.mapEntityToLoanProduct(entity);
     }
@@ -110,9 +113,19 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     public Page<LoanProduct> findAllLoanProduct(LoanProduct loanProduct) {
         int defaultPageSize = BigInteger.TEN.intValue();
         int size = loanProduct.getPageSize() <= BigInteger.ZERO.intValue() ? defaultPageSize : loanProduct.getPageSize();
-        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size);
+        Pageable pageRequest = PageRequest.of(loanProduct.getPageNumber(), size, Sort.by(Sort.Order.asc("createdAt")));
         Page<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findAll(pageRequest);
         return loanProductEntities.map(loanProductMapper::mapEntityToLoanProduct);
+    }
+
+    @Override
+    public List<LoanProduct> search(String loanProductName) throws MeedlException {
+        MeedlValidator.validateDataElement(loanProductName, LoanMessages.LOAN_PRODUCT_NAME_REQUIRED.getMessage());
+        List<LoanProductEntity> loanProductEntities = loanProductEntityRepository.findByNameContainingIgnoreCase(loanProductName);
+        if (loanProductEntities.isEmpty()){
+            return List.of();
+        }
+        return loanProductEntities.stream().map(loanProductMapper::mapEntityToLoanProduct).toList();
     }
 
 }

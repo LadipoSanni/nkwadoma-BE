@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education;
 
-import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanBreakdownEntity;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -23,10 +20,10 @@ public class CohortEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(unique = true)
     private String name;
     private String programId;
-    @Size(max = 2500, message = "cohort description must no go beyond 2500")
+    private String organizationId;
+    @Size(max = 2500, message = "cohort description must not go beyond 2500")
     private String cohortDescription;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
@@ -45,4 +42,5 @@ public class CohortEntity {
     @OneToOne
     private LoanDetailEntity loanDetail;
     private Integer numberOfLoanees = 0;
+    private Integer numberOfReferredLoanee = 0;
 }

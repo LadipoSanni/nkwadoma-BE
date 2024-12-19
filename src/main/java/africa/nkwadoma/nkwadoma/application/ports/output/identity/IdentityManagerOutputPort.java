@@ -21,9 +21,9 @@ public interface IdentityManagerOutputPort {
     Optional<UserIdentity> getUserByEmail(String email) throws MeedlException;
 
     OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
-    UserIdentity createPassword(String email, String password) throws MeedlException;
+    UserIdentity createPassword(UserIdentity userIdentity) throws MeedlException;
     void logout(UserIdentity userIdentity) throws MeedlException;
-
+    void enableClient(OrganizationIdentity foundOrganization) throws MeedlException;
     void disableClient(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
@@ -39,7 +39,6 @@ public interface IdentityManagerOutputPort {
     UserIdentity enableUserAccount(UserIdentity userIdentity) throws MeedlException;
     UserIdentity disableUserAccount(UserIdentity userIdentity) throws MeedlException;
 
-
     UserRepresentation getUserRepresentation(UserIdentity userIdentity, Boolean exactMatch) throws MeedlException;
 
     ClientRepresentation getClientRepresentationByName(String clientName) throws MeedlException;
@@ -49,7 +48,10 @@ public interface IdentityManagerOutputPort {
     UserResource getUserResource(UserIdentity userIdentity) throws MeedlException;
     RoleRepresentation getRoleRepresentation(UserIdentity userIdentity) throws MeedlException;
 
+    UserIdentity getUserById(String userId) throws MeedlException;
+
     ClientResource getClientResource(String clientId);
 
     void deleteClient(String clientId);
+
 }

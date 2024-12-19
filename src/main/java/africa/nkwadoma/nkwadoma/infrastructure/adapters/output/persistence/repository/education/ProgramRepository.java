@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.*;
 import java.util.*;
 
 public interface ProgramRepository extends JpaRepository<ProgramEntity, String> {
-    @Query("select p from ProgramEntity p where p.name like '%'")
-    List<ProgramEntity> findAllByNameLikeIgnoreCase(String programName);
+    List<ProgramEntity> findByNameContainingIgnoreCase(String programName);
+    List<ProgramEntity> findProgramEntitiesByOrganizationIdentityId(String organizationIdentityId);
     boolean existsByName(String programName);
 
-    Page<ProgramEntity> findAllByOrganizationEntityId(String organizationId, Pageable pageable);
+    Page<ProgramEntity> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
 }

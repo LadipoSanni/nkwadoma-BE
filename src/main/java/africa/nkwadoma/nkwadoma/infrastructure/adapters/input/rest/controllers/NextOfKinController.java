@@ -26,7 +26,7 @@ public class NextOfKinController {
     private final CreateNextOfKinUseCase createNextOfKinUseCase;
     private final NextOfKinRestMapper nextOfKinRestMapper;
 
-    @PostMapping("next-of-kin-details")
+    @PostMapping("additional-details")
     public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
                                                                           @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
         log.info("User ID =====> " + meedlUserId.getClaim("sub"));

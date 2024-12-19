@@ -18,7 +18,10 @@ public class UserEntity {
     private String email;
     private String firstName;
     private String lastName;
+    private String image;
     private String phoneNumber;
+    @Column(columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean isIdentityVerified;
     private boolean emailVerified;
     private boolean enabled;
     private String createdAt;
@@ -30,4 +33,6 @@ public class UserEntity {
     private String createdBy;
     private String reactivationReason;
     private String deactivationReason;
+    private String bvn;
+    private String nin;
 }

@@ -1,12 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 
-import java.math.*;
 import java.time.*;
 import java.util.*;
 
@@ -31,53 +30,67 @@ class LoanServiceTest {
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
-    private LoanRequestOutputPort loanRequestOutputPort;
-    @Mock
     private LoanRequestMapper loanRequestMapper;
+    @Mock
+    private LoanRequestOutputPort loanRequestOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
+    private Loan loan;
+    private UserIdentity userIdentity;
+    private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
 
     @BeforeEach
     void setUp() {
-        UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
-                alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+        userIdentity = TestData.createTestUserIdentity("test@example.com");
+        LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
 
-        LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
-        Loanee loanee = Loanee.builder().id("b1b832a2-5f73-46d8-a073-e5d812304a4b").userIdentity(userIdentity).
-                cohortId("3a6d1124-1349-4f5b-831a-ac269369a90f").createdBy(userIdentity.getCreatedBy()).
-                loaneeLoanDetail(loaneeLoanDetail).build();
-
-        loanReferral = LoanReferral.builder().id("3a6d1124-1349-4f5b-831a-ac269369a90f").loanee(loanee).
+        loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
+        Vendor vendor = TestData.createTestVendor("Large vendor");
+        LoanProduct loanProduct = TestData.buildTestLoanProduct("Test Loan Product - unit testing within application", vendor);
 
-        loanRequest = new LoanRequest();
-        loanRequest.setLoanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested());
-        loanRequest.setStatus(LoanRequestStatus.APPROVED);
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-        loanRequest.setReferredBy("Brown Hills Institute");
-        loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-        loanRequest.setLoanee(loanee);
-        loanRequest.setDateTimeApproved(LocalDateTime.now());
+        loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
+        loanRequest.setLoanProductId(loanProduct.getId());
+        loanRequest.setLoanReferralId(loanReferral.getId());
+        loanRequest.setCreatedDate(LocalDateTime.now());
+
+        loan = TestData.createTestLoan(loanee);
     }
 
+    @Test
+    void createLoanRequest() {
+        try {
+            when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
+
+            verify(loanRequestOutputPort, times(1)).save(loanRequest);
+            assertNotNull(createdLoanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+    }
+
+    @Test
+    void createNullLoanRequest() {
+        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(null));
+    }
 
     @Test
     void viewLoanReferral() {
         LoanReferral foundLoanReferral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId()))
-                    .thenReturn(Optional.ofNullable(loanReferral));
+            when(loanReferralOutputPort.findLoanReferralByUserId(
+                    loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
+            when(loanReferralOutputPort.
+                    findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-
+            assertNotNull(foundLoanReferral);
             verify(loanReferralOutputPort, times(1)).
-                    findLoanReferralById(foundLoanReferral.getId());
+                    findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-
         assertNotNull(foundLoanReferral);
     }
 
@@ -92,16 +105,8 @@ class LoanServiceTest {
             "    96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f   "}
     )
     void viewLoanReferralWithTrailingAndLeadingSpaces(String loanReferralId) {
-        LoanReferral foundLoanReferral = null;
-        try {
-            loanReferral.setId(loanReferralId);
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId().trim()))
-                    .thenReturn(Optional.ofNullable(loanReferral));
-            foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-        } catch (MeedlException e) {
-            log.error("Error getting loan referral", e);
-        }
-        assertNotNull(foundLoanReferral);
+        loanReferral.setId(loanReferralId);
+        assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
     }
 
     @Test
@@ -119,78 +124,19 @@ class LoanServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid id", "89954"})
-    void viewLoanReferralByNonUUID(String loanReferralId) {
-        loanReferral.setId(loanReferralId);
+    void viewLoanReferralByNonUUID(String id) {
+        loanReferral.setId(id);
         assertThrows(MeedlException.class, ()->loanService.viewLoanReferral(loanReferral));
-    }
-
-    @Test
-    void createLoanRequest() {
-        try {
-            when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
-            LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
-
-            verify(loanRequestOutputPort, times(1)).save(loanRequest);
-            assertNotNull(createdLoanRequest);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNonAcceptedLoanReferralStatus() {
-        loanRequest.setLoanReferralStatus(LoanReferralStatus.DECLINED);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createNullLoanRequest() {
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(null));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanee() {
-        loanRequest.setLoanee(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanAmountRequested() {
-        loanRequest.setLoanAmountRequested(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullDateTimeApproved() {
-        loanRequest.setDateTimeApproved(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoanRequestStatus() {
-        loanRequest.setStatus(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
-    }
-
-    @Test
-    void createLoanRequestWithNullLoaneeLoanDetail() {
-        loanRequest.getLoanee().setLoaneeLoanDetail(null);
-        assertThrows(MeedlException.class, ()-> loanService.createLoanRequest(loanRequest));
     }
 
     @Test
     void acceptLoanReferral() {
         LoanReferral referral = null;
         try {
-            when(loanReferralOutputPort.findLoanReferralById(loanReferral.getId())).thenReturn(Optional.of(loanReferral));
+            when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
-            when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
+            when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -213,8 +159,44 @@ class LoanServiceTest {
     }
 
     @Test
+    void respondToLoanReferralWithInvalidLoanReferralStatus() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
+    }
+
+    @Test
+    void declineLoanReferral() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.DECLINED);
+        loanReferral.setReasonForDeclining("I just don't want a loan");
+        LoanReferral referral = null;
+        try {
+            when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            referral = loanService.respondToLoanReferral(loanReferral);
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+        assertNotNull(referral);
+        assertEquals(LoanReferralStatus.UNAUTHORIZED, referral.getLoanReferralStatus());
+        assertEquals("I just don't want a loan", referral.getReasonForDeclining());
+    }
+
+    @Test
+    void startLoanWithNull() {
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={StringUtils.EMPTY, StringUtils.SPACE, "invalid uuid"})
+    void startLoanWithInvalidId(String loaneeId) {
+        loan.setLoaneeId(loaneeId);
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+
+    @Test
     void acceptLoanReferralWithNullLoanReferralId() {
         loanReferral.setId(null);
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
+
 }

@@ -46,7 +46,6 @@ public class AdminInitializer {
                 .createdBy(CREATED_BY)
                 .build();
     }
-
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = saveUserToKeycloak(userIdentity);
@@ -81,7 +80,7 @@ public class AdminInitializer {
         try {
             userIdentity = identityManagerOutPutPort.createUser(userIdentity);
             log.info("User created successfully on keycloak sending email to user");
-            sendEmail.sendColleagueEmail(userIdentity);
+            sendEmail.sendColleagueEmail("MEEDL",userIdentity);
         } catch (MeedlException e) {
             log.warn("Unable to create user on identity manager, error : {}", e.getMessage());
             UserRepresentation userRepresentation = identityManagerOutPutPort.getUserRepresentation(userIdentity, Boolean.TRUE);

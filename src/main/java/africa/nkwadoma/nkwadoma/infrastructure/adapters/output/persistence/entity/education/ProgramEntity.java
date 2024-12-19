@@ -4,13 +4,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -23,6 +23,8 @@ public class ProgramEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Column(length = 2500)
+    @Size(max = 2500, message = "Program description must not exceed 2500 characters")
     private String programDescription;
     @Column(unique = true)
     private String name;
@@ -31,7 +33,7 @@ public class ProgramEntity {
     @Enumerated(EnumType.STRING)
     private DurationType durationType;
     private int duration;
-    private int numberOfTrainees;
+    private int numberOfLoanees;
     private int numberOfCohort;
     @Enumerated(EnumType.STRING)
     private ProgramMode mode;
@@ -52,5 +54,5 @@ public class ProgramEntity {
     private String createdBy;
     private String updatedBy;
     @ManyToOne(cascade = CascadeType.MERGE)
-    private OrganizationEntity organizationEntity;
+    private OrganizationEntity organizationIdentity;
 }

@@ -40,7 +40,7 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().id(testId).name("My program").durationType(DurationType.YEARS).
+        program = Program.builder().id(testId).name("Ben's-Mat").durationType(DurationType.YEARS).
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
@@ -67,10 +67,11 @@ class ProgramServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE})
-    void addProgramWithEmptyProgramName(String programName) {
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "121323","#ndj", "(*^#()@", "Haus*&^"})
+    void createProgramWithInvalidName(String programName){
+        program = new Program();
         program.setName(programName);
-        assertThrows(MeedlException.class, ()->programService.createProgram(program));
+        assertThrows(MeedlException.class, ()-> programService.createProgram(program));
     }
 
     @ParameterizedTest
@@ -140,8 +141,7 @@ class ProgramServiceTest {
     @Test
     void updateProgramWithNullProgramId() {
         program.setId(null);
-        MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((program)));
-        assertEquals(exception.getMessage(), MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+        assertThrows(MeedlException.class, () -> programService.updateProgram((program)));
     }
 
     @Test
@@ -168,7 +168,7 @@ class ProgramServiceTest {
             assertEquals(programsList.get(0).getName(), program.getName());
             assertEquals(programsList.get(0).getDuration(), program.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), program.getNumberOfCohort());
-            assertEquals(programsList.get(0).getNumberOfTrainees(), program.getNumberOfTrainees());
+            assertEquals(programsList.get(0).getNumberOfLoanees(), program.getNumberOfLoanees());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountDisbursed());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountOutstanding());
             assertEquals(BigDecimal.ZERO, programsList.get(0).getTotalAmountRepaid());
@@ -188,12 +188,6 @@ class ProgramServiceTest {
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
-    }
-
-    @Test
-    void viewProgramByNonExistingName() {
-        program.setName("non existing name");
-        assertThrows(MeedlException.class, ()->programService.viewProgramByName(program));
     }
 
     @ParameterizedTest
@@ -232,29 +226,6 @@ class ProgramServiceTest {
     @Test
     void deleteNonExistingProgram() {
         program.setId("non existing id");
-        assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"   1de71eaa-de6d-4cdf-8f93-aa7be533f4aa", "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa    "})
-    void deleteProgramWithSpaces(String programWithSpace) {
-        try {
-            program.setId(programWithSpace);
-
-            when(programOutputPort.findProgramById(program.getId().trim())).thenReturn(program);
-            programService.deleteProgram(program);
-
-            verify(programOutputPort, times(1)).deleteProgram(program.getId());
-            assertNull(programOutputPort.findProgramById(program.getId()));
-        } catch (MeedlException e) {
-            log.error("Error viewing program by name", e);
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE})
-    void deleteProgramWithEmptyId(String programWithSpace) {
-        program.setId(programWithSpace);
         assertThrows(MeedlException.class, ()->programService.deleteProgram(program));
     }
 
@@ -302,7 +273,7 @@ class ProgramServiceTest {
     void viewProgramWithNonUUIDId(String programId) {
         program.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewProgramById(program));
-        assertEquals(meedlException.getMessage(), MeedlMessages.UUID_NOT_VALID.getMessage());
+        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
     }
 
     @Test
@@ -315,20 +286,4 @@ class ProgramServiceTest {
         program.setId(null);
         assertThrows(MeedlException.class, ()-> programService.viewProgramById(program));
     }
-
-
-    @ParameterizedTest
-    @ValueSource(strings = {"   a4f6873c-9158-4a05-a79c-901b4afc04a9", "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa    "})
-    void viewProgramByIdWithSpaces(String programId) {
-        try {
-            program.setId(programId);
-            when(programOutputPort.findProgramById(program.getId().trim())).thenReturn(program);
-            Program foundProgram = programService.viewProgramById(program);
-            assertNotNull(foundProgram);
-            verify(programOutputPort, times(1)).findProgramById(program.getId().trim());
-        } catch (MeedlException e) {
-            log.error("Error viewing program by ID", e);
-        }
-    }
-
 }

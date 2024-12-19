@@ -4,14 +4,14 @@ import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseC
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.*;
 
 import java.util.*;
 
@@ -26,6 +26,7 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
+        log.info("Creating program {}", program);
         program.validate();
         boolean programExists = programOutputPort.programExists(program.getName());
         if (programExists) {
@@ -42,7 +43,7 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public Program updateProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateUUID(program.getId());
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         if (ObjectUtils.isNotEmpty(foundProgram)) {
             foundProgram = programMapper.updateProgram(program, foundProgram);
@@ -54,31 +55,23 @@ public class ProgramService implements AddProgramUseCase {
     @Override
     public List<Program> viewProgramByName(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateDataElement(program.getName());
-        List<Program> programByName = programOutputPort.findProgramByName(program.getName().trim());
-        if (programByName.isEmpty()) {
-            throw new ResourceNotFoundException(ProgramMessages.PROGRAM_NOT_FOUND.getMessage());
-        }
-        return programByName;
+        MeedlValidator.validateDataElement(program.getName(), ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+        return programOutputPort.findProgramByName(program.getName().trim());
     }
 
     @Override
     public void deleteProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateDataElement(program.getId());
-        String programId = program.getId().trim();
-        MeedlValidator.validateUUID(programId);
-        Program foundProgram = programOutputPort.findProgramById(programId);
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        Program foundProgram = programOutputPort.findProgramById(program.getId());
         programOutputPort.deleteProgram(foundProgram.getId());
     }
 
     @Override
     public Program viewProgramById(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateDataElement(program.getId());
-        String programId = program.getId().trim();
-        MeedlValidator.validateUUID(programId);
-        return programOutputPort.findProgramById(programId);
+        MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        return programOutputPort.findProgramById(program.getId());
     }
 
 }

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.data.domain.*;
 
-import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,73 +31,79 @@ class OrganizationEmployeeIdentityAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private OrganizationIdentity amazingGrace;
-    private  UserIdentity joel;
-    private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private int pageNumber = 0;
     private int pageSize = 10;
-    private String testId = "0e08ce92-60dc-4374-8d5f-19b31cd8c781";
+    private String organizationId;
+    private String userId;
+    private String organizationEmployeeIdentityId;
 
     @BeforeAll
     void init() {
+        String testId = "ead0f7cb-5483-4bb8-b371-813970a9c367";
+        UserIdentity joel = TestData.createTestUserIdentity("joel54@johnson.com");
+        joel.setId(testId);
+        joel.setRole(IdentityRole.ORGANIZATION_ADMIN);
+        List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
+                .builder().meedlUser(joel).build());
+        amazingGrace = TestData.createOrganizationTestData(
+                "Amazing Grace Enterprises",
+                "RC7950004",
+                employees
+        );
         try {
-            amazingGrace = new OrganizationIdentity();
-            amazingGrace.setName("Amazing Grace Enterprises");
-            amazingGrace.setEmail("rachel@gmail.com");
-            amazingGrace.setInvitedDate(LocalDateTime.now().toString());
-            amazingGrace.setRcNumber("RC345677");
-            amazingGrace.setPhoneNumber("0907658483");
-            amazingGrace.setTin("Tin5678");
-            amazingGrace.setCreatedBy(testId);
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(amazingGrace.getId());
+            organizationIdentityOutputPort.delete(organizationIdentity.getId());
+        }catch (MeedlException e){
+            log.info("Couldn't find or delete organization with id {}", amazingGrace.getId());
+        }
+        try {
+
             amazingGrace.setId(testId);
-            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().name(ServiceOfferingType.TRAINING.name()).
+            amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
+                    name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
-            amazingGrace.setWebsiteAddress("webaddress.org");
 
-            joel = new UserIdentity();
-            joel.setFirstName("Joel");
-            joel.setLastName("Jacobs");
-            joel.setEmail("joel@johnson.com");
-            joel.setId(amazingGrace.getCreatedBy());
-            joel.setPhoneNumber("098647748393");
-            joel.setEmailVerified(Boolean.TRUE);
-            joel.setEnabled(Boolean.TRUE);
-            joel.setCreatedAt(LocalDateTime.now().toString());
-            joel.setRole(IdentityRole.PORTFOLIO_MANAGER);
-            joel.setCreatedBy(amazingGrace.getCreatedBy());
-
-            amazingGrace.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().meedlUser(joel).build()));
+            log.info("Saving the organization for testing.");
             OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(amazingGrace);
             assertNotNull(savedOrganization);
+            log.info("Saved organization for testing : {}",savedOrganization.getId());
+            organizationId = savedOrganization.getId();
 
-            UserIdentity userIdentity = userIdentityOutputPort.save(joel);
-            assertNotNull(userIdentity);
+            joel = userIdentityOutputPort.save(joel);
+            assertNotNull(joel);
+            userId = joel.getId();
+
+            OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
+            organizationEmployeeIdentity.setOrganization(organizationId);
+            organizationEmployeeIdentity.setMeedlUser(joel);
+            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
+                    save(organizationEmployeeIdentity);
+
+            assertNotNull(savedEmployeeIdentity);
+            log.info("Saved employee identity: {}", savedEmployeeIdentity.getId());
+            organizationEmployeeIdentityId = savedEmployeeIdentity.getId();
         } catch (MeedlException e) {
-            log.error("Error saving organization", e);
+            log.error("Error saving organization : {}", e.getMessage());
         }
     }
 
     @Test
     void findAllOrganizationEmployees() {
         try {
-            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
-            UserIdentity userIdentity = userIdentityOutputPort.findByEmail(joel.getEmail());
-
-            organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
-            organizationEmployeeIdentity.setOrganization(organizationIdentity.getId());
-            organizationEmployeeIdentity.setMeedlUser(userIdentity);
-            OrganizationEmployeeIdentity savedEmployeeIdentity = organizationEmployeeIdentityOutputPort.
-                    save(organizationEmployeeIdentity);
-            assertNotNull(savedEmployeeIdentity);
-
             Page<OrganizationEmployeeIdentity> organizationEmployees =
-                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId(),
-                            pageNumber, pageSize);
+                    organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(
+                            amazingGrace.getId(), pageNumber, pageSize);
 
             assertNotNull(organizationEmployees);
+            OrganizationEmployeeIdentity employee = organizationEmployees.getContent().get(0);
+            assertEquals(1, organizationEmployees.getContent().size());
+            assertEquals("John", employee.getMeedlUser().getFirstName());
+            assertEquals("Doe", employee.getMeedlUser().getLastName());
+            assertEquals("joel54@johnson.com", employee.getMeedlUser().getEmail());
+//            assertEquals(ActivationStatus.INVITED, employee.getStatus());
         } catch (MeedlException e) {
-            log.error("Error saving organization to the DB", e);
+            log.error("Error retrieving organization employees", e);
         }
-
     }
 
     @ParameterizedTest
@@ -117,15 +123,8 @@ class OrganizationEmployeeIdentityAdapterTest {
     @ParameterizedTest
     @ValueSource(ints = {-1})
     void viewAllOrganizationEmployeesWithInvalidPageNumber(int pageNumber) {
-        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-        try {
-            organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
-        } catch (MeedlException e) {
-            log.error("Error occurred ===>", e);
-        }
-        String id = organizationIdentity.getId();
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
-                findAllOrganizationEmployees(id, pageNumber, pageSize));
+                findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
     }
 
     @ParameterizedTest
@@ -133,34 +132,58 @@ class OrganizationEmployeeIdentityAdapterTest {
     void viewAllOrganizationEmployeesWithInvalidPageSize(int pageSize) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         try {
-            organizationIdentity = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         } catch (MeedlException e) {
-            log.error("Error finding organization", e);
+            log.error("Error finding organization employees", e);
         }
         String id = organizationIdentity.getId();
         assertThrows(MeedlException.class, ()-> organizationEmployeeIdentityOutputPort.
                 findAllOrganizationEmployees(id, pageNumber, pageSize));
     }
 
+    @Test
+    void findEmployeeByNameAndRoleTest(){
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = new ArrayList<>();
+        try{
+            organizationEmployeeIdentities =
+                    organizationEmployeeIdentityOutputPort.findEmployeesByNameAndRole(amazingGrace.getId(), "j", IdentityRole.ORGANIZATION_ADMIN);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentities);
+        assertEquals(1, organizationEmployeeIdentities.size());
+    }
 
     @ParameterizedTest
-    @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
-    void viewAllOrganizationEmployeesWithNonExistingOrganizationId(String organizationId) {
-        assertThrows(MeedlException.class, () -> organizationEmployeeIdentityOutputPort.
-                findAllOrganizationEmployees(organizationId, pageNumber, pageSize));
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hdhdh"})
+    void findAllAdminInOrganizationWithInvalidId(String invalid){
+        assertThrows(MeedlException.class,()-> organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(invalid,
+                IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber));
+    }
+
+    @Test
+    void findAllAdminInOrganization(){
+        pageSize = 1;
+        pageNumber = 0;
+        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities = null;
+        try{
+            organizationEmployeeIdentities =
+                    organizationEmployeeIdentityOutputPort.findAllAdminInOrganization(amazingGrace.getId(),IdentityRole.ORGANIZATION_ADMIN,pageSize,pageNumber);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentities);
+        assertEquals(1, organizationEmployeeIdentities.getSize());
     }
 
     @AfterAll
     void tearDown() {
         try {
-            OrganizationEmployeeIdentity employeeIdentity = organizationEmployeeIdentityOutputPort.findByCreatedBy(joel.getCreatedBy());
-            organizationEmployeeIdentityOutputPort.delete(employeeIdentity.getId());
-            userIdentityOutputPort.deleteUserByEmail(joel.getEmail());
-
-            OrganizationIdentity organization = organizationIdentityOutputPort.findByEmail(amazingGrace.getEmail());
+            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+            userIdentityOutputPort.deleteUserById(userId);
 
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
-                    findOrganizationServiceOfferingsByOrganizationId(organization.getId());
+                    findOrganizationServiceOfferingsByOrganizationId(organizationId);
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
@@ -168,7 +191,7 @@ class OrganizationEmployeeIdentityAdapterTest {
             }
             organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
 
-            organizationIdentityOutputPort.delete(organization.getId());
+            organizationIdentityOutputPort.delete(organizationId);
         } catch (MeedlException e) {
             log.error("Error occurred cleaning up", e);
         }

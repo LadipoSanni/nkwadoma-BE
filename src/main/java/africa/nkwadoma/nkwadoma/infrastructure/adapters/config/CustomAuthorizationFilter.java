@@ -29,19 +29,24 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Entering CustomAuthorizationFilter for request: {}", request.getRequestURI());
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof Jwt) {
             Jwt jwt = (Jwt) authentication.getPrincipal();
             if (isLoggedOutOnSystem(jwt.getTokenValue())) {
+                log.info("JWT token is blacklisted: {}", jwt.getTokenValue());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(Map.of("Error", "No More Session for this user")));
                 return;
             }
         }
+        log.info("Passing request down the filter chain for URI: {}", request.getRequestURI());
         filterChain.doFilter(request, response);
+        log.info("Exiting CustomAuthorizationFilter for request: {}", request.getRequestURI());
     }
 
     private boolean isLoggedOutOnSystem(String accessToken) {
+        log.info("check if token is black listed {}",blackListedTokenAdapter.isPresent(accessToken));
         return blackListedTokenAdapter.isPresent(accessToken);
     }
 }
