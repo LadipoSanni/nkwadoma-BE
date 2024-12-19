@@ -47,7 +47,7 @@ public class LoanRequestController {
                 <PaginatedResponse<LoanRequestResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -58,7 +58,7 @@ public class LoanRequestController {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setId(id);
         LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
-        log.info("Loan request: {}", foundLoanRequest);
+        log.info("Loan request body: {}", foundLoanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
         log.info("Mapped Loan request: {}", loanRequestResponse);
         ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.

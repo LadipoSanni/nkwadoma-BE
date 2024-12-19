@@ -18,5 +18,4 @@ public class LoaneeResponse {
     private UserIdentityResponse userIdentity;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
     private LoaneeStatus loaneeStatus;
-
 }

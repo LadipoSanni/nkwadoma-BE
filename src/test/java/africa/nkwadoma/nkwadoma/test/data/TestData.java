@@ -31,6 +31,13 @@ public class TestData {
                 .role(IdentityRole.LOANEE)
                 .alternateEmail("alt276@example.com")
                 .image("loanee-img.png")
+                .gender("Male")
+                .nationality("Nigerian")
+                .stateOfOrigin("Osun")
+                .dateOfBirth("29th April 1990")
+                .maritalStatus("Single")
+                .stateOfResidence("Lagos")
+                .residentialAddress("1, Spencer Street, Yaba, Lagos")
                 .alternatePhoneNumber("0986564534")
                 .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
                 .build();
