@@ -25,7 +25,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,7 +76,7 @@ public class LoanOfferAdapterTest {
             loanee.setUserIdentity(userIdentity);
             loanee = loaneeOutputPort.save(loanee);
             loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            loanReferral = loanReferralOutputPort.save(loanReferral);
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
                     .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee).createdDate(LocalDateTime.now()).
                     loaneeId("88ee2dd8-df66-4f67-b718-dfd1635f8053").loanReferralId(loanReferral.getId()).cohortId("3012eabb-4cc7-4f48-bae9-04c0056518f0")

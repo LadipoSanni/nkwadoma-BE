@@ -1,9 +1,8 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.loan;
 
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
-import org.springframework.data.domain.Page;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 

@@ -28,5 +28,6 @@ public interface LoanRequestMapper {
     @Mapping(target = "loanReferralId", source = "id")
     @Mapping(target = "loanee.id", source = "loanee.id")
     @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

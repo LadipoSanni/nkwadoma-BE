@@ -136,7 +136,7 @@ class LoanServiceTest {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
-            when(loanReferralOutputPort.saveLoanReferral(loanReferral)).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -159,6 +159,29 @@ class LoanServiceTest {
     }
 
     @Test
+    void respondToLoanReferralWithInvalidLoanReferralStatus() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
+    }
+
+    @Test
+    void declineLoanReferral() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.DECLINED);
+        loanReferral.setReasonForDeclining("I just don't want a loan");
+        LoanReferral referral = null;
+        try {
+            when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
+            when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            referral = loanService.respondToLoanReferral(loanReferral);
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+        assertNotNull(referral);
+        assertEquals(LoanReferralStatus.UNAUTHORIZED, referral.getLoanReferralStatus());
+        assertEquals("I just don't want a loan", referral.getReasonForDeclining());
+    }
+
+    @Test
     void startLoanWithNull() {
         assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
     }
@@ -175,4 +198,5 @@ class LoanServiceTest {
         loanReferral.setId(null);
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
+
 }

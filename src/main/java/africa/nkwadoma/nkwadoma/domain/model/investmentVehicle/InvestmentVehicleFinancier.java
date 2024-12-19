@@ -1,10 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 
-import java.util.List;
+import java.util.*;
 
 public class InvestmentVehicleFinancier {
 

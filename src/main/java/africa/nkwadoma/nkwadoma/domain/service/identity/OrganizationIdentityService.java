@@ -23,8 +23,10 @@ import org.springframework.stereotype.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.time.*;
+import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.ORGANIZATION_RC_NUMBER_ALREADY_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 
 @RequiredArgsConstructor
@@ -53,8 +55,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
-        log.info("organization identity saved is : {}",organizationIdentity);
-       return organizationIdentity;
+        log.info("organization identity saved is : {}", organizationIdentity);
+        return organizationIdentity;
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -104,7 +106,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateDataElement(reason, "Deactivation reason is required");
         List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
-        log.info("found organization employees: {}",organizationEmployees);
+        log.info("found organization employees: {}", organizationEmployees);
         organizationEmployees
                 .forEach(organizationEmployeeIdentity -> {
                             try {
@@ -156,6 +158,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());
         return organizationEmployeeIdentity;
     }
+
     @Override
     public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
@@ -164,7 +167,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         validateNonUpdatableValues(organizationIdentity);
         log.info("Organization identity input: {}", organizationIdentity);
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationIdentity.getId());
-        foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization,organizationIdentity);
+        foundOrganization = organizationIdentityMapper.updateOrganizationIdentity(foundOrganization, organizationIdentity);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
         log.info("Updated organization: {}", foundOrganization);
         return organizationIdentityOutputPort.save(foundOrganization);
@@ -244,6 +247,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         MeedlValidator.validateDataElement(organizationName, "Organization name is required");
         return organizationIdentityOutputPort.findByName(organizationName);
     }
+
     @Override
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());

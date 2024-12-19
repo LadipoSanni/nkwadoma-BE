@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @AllArgsConstructor
@@ -10,6 +11,8 @@ import lombok.*;
 @ToString
 @Builder(toBuilder = true)
 public class LoanReferralResponseRequest {
+    @NotBlank(message = "Loan referral ID is required")
     private String id;
     private LoanReferralStatus loanReferralStatus;
+    private String reason;
 }

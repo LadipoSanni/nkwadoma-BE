@@ -21,6 +21,7 @@ import java.time.*;
 @ToString
 public class LoanReferral {
     private String id;
+    private String reasonForDeclining;
     private String firstName;
     private String lastName;
     private String loaneeUserId;

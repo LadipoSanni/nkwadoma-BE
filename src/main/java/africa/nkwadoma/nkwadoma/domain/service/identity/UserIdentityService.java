@@ -18,14 +18,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.B
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.BlackListedToken;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.nimbusds.jwt.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
 import org.keycloak.representations.*;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.keycloak.representations.idm.*;
+import org.springframework.scheduling.annotation.*;
+import org.springframework.security.crypto.password.*;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -37,7 +36,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 
 @Slf4j
 @RequiredArgsConstructor
-public class UserIdentityService implements CreateUserUseCase  {
+public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -71,6 +70,7 @@ public class UserIdentityService implements CreateUserUseCase  {
 
         return userIdentity;
     }
+
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
         MeedlValidator.validateEmail(userIdentity.getEmail());
@@ -89,6 +89,7 @@ public class UserIdentityService implements CreateUserUseCase  {
         blackListedToken.setExpirationDate(getExpirationDate(accessToken));
         return blackListedToken;
     }
+
     @Scheduled(cron = "0 0 8,20 * * *") // Runs at 8 AM and 8 PM every day
     public void clearBlackListedToken() {
         log.info("cron job deleting expired blacklisted tokens...");
@@ -114,6 +115,7 @@ public class UserIdentityService implements CreateUserUseCase  {
             throw new IdentityException("Password already created. Try login or forgot password. Or contact the admin ");
         }
     }
+
     @Override
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         log.info("request got into service layer {}",password);
@@ -177,6 +179,7 @@ public class UserIdentityService implements CreateUserUseCase  {
             log.error("Error : either user doesn't exist on our platform or email sending was not successful. {}'", e.getMessage());
         }
     }
+
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity);
@@ -201,7 +204,7 @@ public class UserIdentityService implements CreateUserUseCase  {
     }
 
     @Override
-    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity){
+    public boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) {
         List<UserRepresentation> userRepresentations = identityManagerOutPutPort.getUserRepresentations(userIdentity);
         return false;
     }

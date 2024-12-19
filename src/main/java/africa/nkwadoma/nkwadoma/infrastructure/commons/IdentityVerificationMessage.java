@@ -12,6 +12,7 @@ public enum IdentityVerificationMessage {
 
 
     private final String message;
+
     IdentityVerificationMessage(String message) {
         this.message = message;
     }
