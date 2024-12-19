@@ -48,7 +48,8 @@ public enum LoanMessages {
     LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE("Loan Offer Not Assigned To Loanee"),
     LOAN_OFFER_NOT_FOUND("Loan Offer Not Found"),
     REASON_IS_REQUIRED("Reason for declining loan request is required"),
-    INVALID_LOAN_DECISION(   "Loan decision must either be ACCEPTED or DECLINED");
+    INVALID_LOAN_DECISION(   "Loan decision must either be ACCEPTED or DECLINED"),
+    LOAN_REQUEST_ID_CANNOT_BE_EMPTY("Loan request ID must not be empty");
     private final String message;
 
     LoanMessages(String message) {

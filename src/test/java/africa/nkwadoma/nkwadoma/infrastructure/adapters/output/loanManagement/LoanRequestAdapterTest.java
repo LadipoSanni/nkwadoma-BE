@@ -219,7 +219,7 @@ class LoanRequestAdapterTest {
         }
     }
 
-    @AfterEach
+//    @AfterEach
     void tearDown() {
         if (StringUtils.isNotEmpty(loanRequestId)) {
             Optional<LoanRequestEntity> loanRequestEntity = loanRequestRepository.findById(loanRequestId);
@@ -321,6 +321,13 @@ class LoanRequestAdapterTest {
             assertEquals("ahmad12@gmail.com", foundLoanRequest.get().getNextOfKin().getEmail());
             assertEquals("Brother", foundLoanRequest.get().getNextOfKin().getNextOfKinRelationship());
             assertEquals("2, Spencer Street, Yaba, Lagos", foundLoanRequest.get().getNextOfKin().getContactAddress());
+            assertEquals(joel.getGender(), foundLoanRequest.get().getUserIdentity().getGender());
+            assertEquals(joel.getMaritalStatus(), foundLoanRequest.get().getUserIdentity().getMaritalStatus());
+            assertEquals(joel.getResidentialAddress(), foundLoanRequest.get().getUserIdentity().getResidentialAddress());
+            assertEquals(joel.getNationality(), foundLoanRequest.get().getUserIdentity().getNationality());
+            assertEquals(joel.getDateOfBirth(), foundLoanRequest.get().getUserIdentity().getDateOfBirth());
+            assertEquals(joel.getStateOfOrigin(), foundLoanRequest.get().getUserIdentity().getStateOfOrigin());
+            assertEquals(joel.getStateOfResidence(), foundLoanRequest.get().getUserIdentity().getStateOfResidence());
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -337,14 +344,13 @@ class LoanRequestAdapterTest {
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(id));
     }
 
-    @AfterAll
+//    @AfterAll
     void cleanUp() {
         try {
             nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(userId);
-            userIdentityOutputPort.deleteUserById(joelUserId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
             cohortOutputPort.deleteCohort(eliteCohortId);
             programOutputPort.deleteProgram(dataAnalyticsProgramId);

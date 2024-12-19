@@ -24,4 +24,11 @@ public class UserIdentityResponse {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
+    private String gender;
+    private String dateOfBirth;
+    private String stateOfOrigin;
+    private String maritalStatus;
+    private String stateOfResidence;
+    private String nationality;
+    private String residentialAddress;
 }

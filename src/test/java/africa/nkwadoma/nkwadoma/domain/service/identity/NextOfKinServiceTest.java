@@ -36,8 +36,10 @@ class NextOfKinServiceTest {
     @BeforeEach
     void setUp() {
         userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").
+                lastName("Qudus").email("test@example.com").gender("Male").nationality("Nigerian").
+                stateOfOrigin("Osun").dateOfBirth("29th April 1990").maritalStatus("Single").stateOfResidence("Lagos").
                 role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").alternatePhoneNumber("0986564534").
+                residentialAddress("1, Spencer Street, Yaba, Lagos").
                 alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
 
