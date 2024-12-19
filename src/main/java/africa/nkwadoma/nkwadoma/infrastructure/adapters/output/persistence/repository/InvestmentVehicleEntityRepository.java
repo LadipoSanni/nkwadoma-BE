@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface InvestmentVehicleEntityRepository extends JpaRepository<InvestmentVehicleEntity,String> {
 
 
-    Optional<InvestmentVehicleEntity> findByName(String name);
+    InvestmentVehicleEntity findByName(String name);
 }

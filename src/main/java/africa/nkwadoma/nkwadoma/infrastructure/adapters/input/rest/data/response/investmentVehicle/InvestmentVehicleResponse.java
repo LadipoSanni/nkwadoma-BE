@@ -5,8 +5,11 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class InvestmentVehicleResponse {
@@ -16,14 +19,15 @@ public class InvestmentVehicleResponse {
     private InvestmentVehicleType investmentVehicleType;
     private String mandate;
     private String sponsors;
-    private String tenure;
+    private int tenure;
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
-    private BigDecimal totalAmountInInvestmentVehicle;
-    private BigDecimal amountRaised;
-    private BigDecimal amountDisbursed;
-    private BigDecimal amountAvailable;
+    private BigDecimal totalAmountInInvestmentVehicle =BigDecimal.ZERO;
+    private BigDecimal amountRaised = BigDecimal.ZERO;
+    private BigDecimal amountDisbursed = BigDecimal.ZERO;
+    private BigDecimal amountAvailable = BigDecimal.ZERO;
     private BigDecimal totalIncomeGenerated;
     private BigDecimal netAssetValue;
+    private LocalDate startDate;
 }

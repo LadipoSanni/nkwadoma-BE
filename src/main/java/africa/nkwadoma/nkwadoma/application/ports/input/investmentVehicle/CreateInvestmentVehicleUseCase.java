@@ -6,7 +6,7 @@ import org.springframework.data.domain.*;
 
 public interface CreateInvestmentVehicleUseCase {
 
-    InvestmentVehicle createOrUpdateInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
+    InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
     InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException;
 
