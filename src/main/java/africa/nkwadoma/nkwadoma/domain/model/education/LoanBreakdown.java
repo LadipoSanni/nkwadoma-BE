@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 
-import java.math.BigDecimal;
+import java.math.*;
 
 @Builder
 @AllArgsConstructor

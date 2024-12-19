@@ -21,6 +21,13 @@ public interface LoanRequestMapper {
     @Mapping(target = "nextOfKin.contactAddress", source = "nextOfKinContactAddress")
     @Mapping(target = "nextOfKin.nextOfKinRelationship", source = "nextOfKinRelationship")
     @Mapping(target = "userIdentity.image", source = "loaneeImage")
+    @Mapping(target = "userIdentity.gender", source = "gender")
+    @Mapping(target = "userIdentity.dateOfBirth", source = "dateOfBirth")
+    @Mapping(target = "userIdentity.nationality", source = "nationality")
+    @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
+    @Mapping(target = "userIdentity.stateOfOrigin", source = "stateOfOrigin")
+    @Mapping(target = "userIdentity.maritalStatus", source = "maritalStatus")
+    @Mapping(target = "userIdentity.residentialAddress", source = "residentialAddress")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")
@@ -28,5 +35,6 @@ public interface LoanRequestMapper {
     @Mapping(target = "loanReferralId", source = "id")
     @Mapping(target = "loanee.id", source = "loanee.id")
     @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "dateTimeApproved", expression = "java(java.time.LocalDateTime.now())")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
 }

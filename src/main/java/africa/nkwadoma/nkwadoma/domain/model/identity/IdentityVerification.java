@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 @Slf4j
 @Setter

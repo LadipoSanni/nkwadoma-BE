@@ -25,7 +25,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     private final LoanReferralMapper loanReferralMapper;
 
     @Override
-    public LoanReferral saveLoanReferral(LoanReferral loanReferral) throws MeedlException {
+    public LoanReferral save(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral);
         LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
         LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);

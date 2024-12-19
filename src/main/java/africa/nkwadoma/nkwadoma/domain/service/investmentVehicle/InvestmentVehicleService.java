@@ -1,13 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-
-import java.util.List;
+import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import lombok.*;
+import org.springframework.data.domain.*;
 
 @RequiredArgsConstructor
 
@@ -32,8 +30,8 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
 
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize , int pageNumber) {
-        return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize,pageNumber);
+    public Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber) {
+        return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize, pageNumber);
     }
 
 

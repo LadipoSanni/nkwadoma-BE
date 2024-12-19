@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 
 public interface LoanReferralOutputPort {
-    LoanReferral saveLoanReferral(LoanReferral loanReferral) throws MeedlException;
+    LoanReferral save(LoanReferral loanReferral) throws MeedlException;
 
     Optional<LoanReferral> findLoanReferralById(String loanReferralId) throws MeedlException;
 

@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.constants;
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 public enum MeedlMessages {

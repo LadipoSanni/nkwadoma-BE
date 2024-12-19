@@ -5,5 +5,5 @@ public enum LoanReferralStatus {
     REJECTED,
     PENDING,
     AUTHORIZED,
-    DECLINED
+    UNAUTHORIZED, DECLINED
 }

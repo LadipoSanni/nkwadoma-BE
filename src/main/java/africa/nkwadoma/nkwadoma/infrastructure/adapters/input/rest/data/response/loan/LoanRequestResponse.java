@@ -26,8 +26,10 @@ public class LoanRequestResponse {
     private String alternatePhoneNumber;
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
     private String cohortName;
+    private UserIdentityResponse userIdentity;
     private NextOfKinResponse nextOfKin;
 }

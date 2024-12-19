@@ -13,20 +13,18 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -58,12 +56,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product {} created successfully", loanProduct.getName());
         return loanProductOutputPort.save(loanProduct);
     }
+
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
+
     @Override
     public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
         return loanProductOutputPort.findAllLoanProduct(loanProduct);
@@ -80,12 +80,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
-        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
+        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()) {
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-        log.info("Loan product updated {}",  foundLoanProduct);
+        log.info("Loan product updated {}", foundLoanProduct);
 
         return loanProductOutputPort.save(foundLoanProduct);
     }
@@ -151,17 +151,29 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus(),
+                LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
-        log.info("Found LoanReferral: {}", foundLoanReferral);
-        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
+        log.info("Found Loan Referral: {}", foundLoanReferral);
+        foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
+        return foundLoanReferral;
+    }
+
+    private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
-            log.info("Loan request created: {}", loanRequest);
+            log.info("Created loan request: {}", loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
-            foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
+        else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+            foundLoanReferral.setReasonForDeclining(loanReferral.getReasonForDeclining());
+            foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.UNAUTHORIZED);
+        }
+        foundLoanReferral = loanReferralOutputPort.save(foundLoanReferral);
+        log.info("Updated loan referral: {}", foundLoanReferral);
         return foundLoanReferral;
     }
 
@@ -193,6 +205,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.validateForAcceptOffer();
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        if (loanee.isEmpty()) {
+            throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
+        }
         loanOffer.setLoaneeId(loanee.get().getId());
         if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());

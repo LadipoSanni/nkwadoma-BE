@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
@@ -42,7 +43,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
-
     private final CohortOutputPort cohortOutputPort;
     private final ProgramOutputPort programOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;

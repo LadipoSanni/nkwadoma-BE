@@ -17,7 +17,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.math.*;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL;
@@ -30,6 +30,13 @@ public class MeedlValidator {
         if (isEmptyString(email) || !EmailValidator.getInstance().isValid(email.trim())) {
             log.info("Invalid email address provided : {}", email);
             throw new MeedlException(MeedlMessages.INVALID_EMAIL_ADDRESS.getMessage());
+        }
+    }
+
+    public static void validateLoanDecision(String loanReferralStatus) throws LoanException {
+        boolean matches = Pattern.matches("^(ACCEPTED|DECLINED)$", loanReferralStatus);
+        if (!matches) {
+            throw new LoanException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
         }
     }
 
@@ -71,7 +78,7 @@ public class MeedlValidator {
     }
 
     public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
@@ -83,18 +90,19 @@ public class MeedlValidator {
     }
 
     public static void validateFloatDataElement(Float dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
+
     public static void validateIntegerDataElement(int dataElement) throws MeedlException {
-        if (dataElement == 0){
+        if (dataElement == 0) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
 
     public static void validateObjectInstance(Object instance) throws MeedlException {
-        if (ObjectUtils.isEmpty(instance)){
+        if (ObjectUtils.isEmpty(instance)) {
             throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
         }
     }
@@ -128,10 +136,11 @@ public class MeedlValidator {
     }
 
     public static void validateDoubleDataElement(Double dataElement) throws MeedlException {
-        if (dataElement == null){
+        if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
         }
     }
+
     public static void validatePassword(String password) throws MeedlException {
         validateDataElement(password, "Password can not be empty");
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN.getMessage());

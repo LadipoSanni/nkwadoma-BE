@@ -38,7 +38,9 @@ class NextOfKinIdentityAdapterTest {
     @BeforeAll
     void init() {
         userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
+                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).gender("Male").nationality("Nigerian").
+                stateOfOrigin("Osun").dateOfBirth("29th April 1990").maritalStatus("Single").stateOfResidence("Lagos").
+                residentialAddress("1, Spencer Street, Yaba, Lagos").
                 createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
 
         loanee = Loanee.builder().userIdentity(userIdentity).

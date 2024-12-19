@@ -29,7 +29,7 @@ public class LoanProduct {
     private int tenor;
     private double interestRate;
     private double costOfFund;
-    @Size(max=15000)
+    @Size(max = 15000)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
@@ -86,6 +86,7 @@ public class LoanProduct {
             this.tenor = tenor;
         }
     }
+
     public void setMoratorium(int moratorium) {
         if (moratorium < BigInteger.ZERO.intValue()){
             this.moratorium = BigInteger.ZERO.intValue();

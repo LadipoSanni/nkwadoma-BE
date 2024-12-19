@@ -25,5 +25,6 @@ public class ControllerConstant {
    public static final String  START_LOAN_DESCRIPTION = "At this point the loan starts. Requirement is the loanee id and the loan offer (id) given to the loanee";
    public static final String  START_LOAN = "Start loan";
 
-
+   public static final String LOAN_REFERRAL_STATUS_TYPE = "(?i)^(ACCEPTED|DECLINED)$" ;
+   public static final String LOAN_REFERRAL_ID_IS_REQUIRED = "Loan referral ID is required";
 }
