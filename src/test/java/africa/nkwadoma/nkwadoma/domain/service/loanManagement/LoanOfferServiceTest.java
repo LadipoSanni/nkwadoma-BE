@@ -16,10 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAccount;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +54,7 @@ public class LoanOfferServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private LoanOffer loanOffer;
+    private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private Loanee loanee;
     private UserIdentity userIdentity;
@@ -76,26 +74,19 @@ public class LoanOfferServiceTest {
 
     @BeforeEach
     void setUpLoanOffer() {
-        userIdentity = UserIdentity.builder().id(mockId).firstName("qudus").lastName("ade")
-                .email("qudusa55@gmail.com").role(IdentityRole.PORTFOLIO_MANAGER).build();
-        loanee = Loanee.builder().id(mockId).userIdentity(userIdentity).build();
-        loanRequest = LoanRequest.builder().id(mockId).loanAmountRequested(BigDecimal.valueOf(340000))
-                .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
-                .dateTimeApproved(LocalDateTime.now()).build();
-        loanOffer = new LoanOffer();
-        loanOffer.setDateTimeOffered(LocalDateTime.now());
-        loanOffer.setLoanRequest(loanRequest);
-        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        loanOffer.setLoanee(loanee);
-        loanOffer.setUserId(mockId);
-        loanOffer.setId(mockId);
-
+        userIdentity =TestData.createTestUserIdentity("test@example.com");
+                        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
+                 loanee.setId(userIdentity.getId());
+        loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
+        loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
-        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
     }
 
     @Test
     void createLoanOfferWithValidLoanRequestId() {
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
@@ -130,7 +121,7 @@ public class LoanOfferServiceTest {
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
-            when(loaneeLoanAccountOutputPort.findByLoaneeId(mockId)).thenReturn(null);
+            when(loaneeLoanAccountOutputPort.findByLoaneeId(userIdentity.getId())).thenReturn(null);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
