@@ -14,5 +14,6 @@ public interface LoanMapper {
     LoanEntity mapToLoanEntity(Loan loan);
 
     @InheritInverseConfiguration
+    @Mapping(target = "loaneeId", source = "loaneeEntity.id")
     Loan mapToLoan(LoanEntity loanEntity);
 }

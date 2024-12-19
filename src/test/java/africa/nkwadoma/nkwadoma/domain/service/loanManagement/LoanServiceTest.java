@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
@@ -32,18 +34,27 @@ class LoanServiceTest {
     @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
+    private LoaneeOutputPort loaneeOutputPort;
+    @Mock
+    private LoanOutputPort loanOutputPort;
+    @Mock
+    private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
+    @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
+    private Loanee loanee;
     private UserIdentity userIdentity;
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private LoaneeLoanAccount loaneeLoanAccount;
 
     @BeforeEach
     void setUp() {
         userIdentity = TestData.createTestUserIdentity("test@example.com");
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
-        Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
 
         loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
@@ -179,6 +190,23 @@ class LoanServiceTest {
         assertNotNull(referral);
         assertEquals(LoanReferralStatus.UNAUTHORIZED, referral.getLoanReferralStatus());
         assertEquals("I just don't want a loan", referral.getReasonForDeclining());
+    }
+
+    @Test
+    void startLoan() {
+        Loan startedLoan = null;
+        try {
+            when(loaneeOutputPort.findByUserId(loan.getLoaneeId())).thenReturn(Optional.ofNullable(loanee));
+            when(loanOutputPort.save(loan)).thenReturn(loan);
+            when(loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId())).thenReturn(loaneeLoanAccount);
+            startedLoan = loanService.startLoan(loan);
+        } catch (MeedlException e) {
+            log.error("Failed to start loan", e);
+        }
+        assertNotNull(startedLoan);
+        assertEquals(LoanStatus.PERFORMING, startedLoan.getLoanStatus());
+        assertEquals(loaneeLoanAccount.getId(), startedLoan.getLoanAccountId());
+        assertEquals(loanee.getId(), startedLoan.getLoaneeId());
     }
 
     @Test

@@ -107,8 +107,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loan;
     }
 
-    private String getLoanAccountId(Loanee foundLoanee) {
-        return null;
+    private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
+        LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
+        log.info("Found loanee account: {}", loaneeLoanAccount);
+        if (ObjectUtils.isEmpty(loaneeLoanAccount)) {
+            log.info("Empty Loanee loan account returned: {}", loaneeLoanAccount);
+            throw new LoanException(LoanMessages.LOANEE_ACCOUNT_NOT_FOUND.getMessage());
+        }
+        return loaneeLoanAccount.getId();
     }
 
     @Override
