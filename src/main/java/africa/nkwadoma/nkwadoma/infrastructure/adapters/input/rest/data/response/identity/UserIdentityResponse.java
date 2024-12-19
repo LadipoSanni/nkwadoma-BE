@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@ToString
 public class UserIdentityResponse {
     private String id;
     private String email;

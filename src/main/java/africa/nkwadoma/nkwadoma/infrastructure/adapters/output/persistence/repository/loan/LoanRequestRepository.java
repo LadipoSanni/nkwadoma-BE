@@ -30,7 +30,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
                  n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship,
                  l.loaneeLoanDetail.amountRequested as loanAmountRequested, lr.createdDate as createdDate,
                  l.userIdentity.gender as gender, l.userIdentity.maritalStatus as maritalStatus,
-                 l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.residentialAddress as residentialAddress,
+                 l.userIdentity.dateOfBirth as dateOfBirth, l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
                  l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence as stateOfResidence
 
           from LoanRequestEntity lr
