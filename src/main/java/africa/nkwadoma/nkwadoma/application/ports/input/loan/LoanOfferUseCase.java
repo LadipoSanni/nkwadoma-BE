@@ -6,8 +6,7 @@ import org.springframework.data.domain.Page;
 
 public interface LoanOfferUseCase {
     LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException;
-
     Page<LoanOffer> viewAllLoanOffers(String userId,int pageSize , int pageNumber) throws MeedlException;
-
+    LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException;
     LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException;
 }

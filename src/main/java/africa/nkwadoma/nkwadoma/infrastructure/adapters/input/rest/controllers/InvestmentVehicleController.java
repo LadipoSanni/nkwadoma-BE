@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
+import jakarta.validation.Valid;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
@@ -31,34 +32,17 @@ public class InvestmentVehicleController {
 
     @PostMapping("investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@RequestBody CreateInvestmentVehicleRequest
+    public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@Valid @RequestBody CreateInvestmentVehicleRequest
                                                                           investmentVehicleRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
-        investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
+        investmentVehicle = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(investmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_CREATED)
                 .statusCode(HttpStatus.CREATED.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-    }
-
-    @PostMapping("update-investment-vehicle")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> updateInvestmentVehicle(@RequestBody UpdateInvestmentVehicleRequest
-                                                                          investmentVehicleRequest) throws MeedlException {
-        InvestmentVehicle investmentVehicle =
-                investmentVehicleRestMapper.mapUpdateInvestmentVehicleRequestToInvestmentVehicle(investmentVehicleRequest);
-        investmentVehicle = investmentVehicleUseCase.createOrUpdateInvestmentVehicle(investmentVehicle);
-        InvestmentVehicleResponse updateInvestmentVehicleResponse =
-                investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
-        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
-                .data(updateInvestmentVehicleResponse)
-                .message(INVESTMENT_VEHICLE_UPDATED)
-                .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -75,7 +59,7 @@ public class InvestmentVehicleController {
                 .message(INVESTMENT_VEHICLE_VIEWED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("view-all-investment-vehicle")

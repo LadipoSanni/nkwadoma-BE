@@ -12,6 +12,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -177,8 +179,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanRequest);
+        log.info("validate loan request");
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus(), LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        log.info("validating loan request referral status");
+        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            log.info("");
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
+        }
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setCreatedDate(LocalDateTime.now());
         return loanRequestOutputPort.save(loanRequest);
@@ -253,5 +263,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                    pageSize,pageNumber);
         }
         return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
+    }
+
+
+    @Override
+    public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
+                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                throw new LoanOfferException(
+                        LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
+            }
+        return loanOffer;
     }
 }

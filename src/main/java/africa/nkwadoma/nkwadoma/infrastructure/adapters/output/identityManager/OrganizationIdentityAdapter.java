@@ -160,7 +160,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
                 organizationServiceOfferingRepository.findByOrganizationId(organizationId);
-        log.info("Found org service offerings in DB: {}", organizationServiceOfferings);
+//        log.info("Found org service offerings in DB: {}", organizationServiceOfferings);
         return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
     }
 
