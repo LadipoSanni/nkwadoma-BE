@@ -58,7 +58,7 @@ public class OrganizationIdentity {
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);
         log.info("{}",this.serviceOfferings);
-        MeedlValidator.validateObjectName(this.name);
+        MeedlValidator.validateObjectName(this.name,"Name cannot be empty");
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.rcNumber, OrganizationMessages.RC_NUMBER_IS_REQUIRED.getMessage());
         MeedlValidator.validateRCNumber(this.rcNumber);

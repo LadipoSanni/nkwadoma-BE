@@ -46,7 +46,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public InvestmentVehicle findByName(String name) throws MeedlException {
-        MeedlValidator.validateObjectName(name);
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
         InvestmentVehicleEntity investmentVehicleEntity =
                 investmentVehicleRepository.findByName(name);
         return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);

@@ -71,6 +71,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         MeedlValidator.validateObjectInstance(identityVerification);
         log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
         String decryptedBvn = tokenUtils.decryptAES(identityVerification.getBvn());
+        log.info("decrypted bvn {}", decryptedBvn);
         LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
         log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
