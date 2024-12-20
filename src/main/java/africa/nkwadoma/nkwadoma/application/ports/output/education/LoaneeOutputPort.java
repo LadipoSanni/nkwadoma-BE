@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import org.springframework.data.domain.Page;
 
@@ -25,4 +24,6 @@ public interface LoaneeOutputPort {
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
 
     List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException;
+
+
 }

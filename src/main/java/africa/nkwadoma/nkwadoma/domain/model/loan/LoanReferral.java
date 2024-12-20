@@ -21,6 +21,9 @@ import java.time.*;
 @ToString
 public class LoanReferral {
     private String id;
+    private String reasonForDeclining;
+    private String firstName;
+    private String lastName;
     private String loaneeUserId;
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
@@ -47,8 +50,8 @@ public class LoanReferral {
     }
 
     public void validateForCreate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanReferralStatus);
+        MeedlValidator.validateObjectInstance(loanee, "Loanee Object is required");
+        MeedlValidator.validateObjectInstance(loanReferralStatus,"LoanReferral Status is required");
     }
 
 }

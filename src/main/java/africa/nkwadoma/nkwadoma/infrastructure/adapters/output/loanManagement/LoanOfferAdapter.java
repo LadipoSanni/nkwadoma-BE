@@ -1,12 +1,17 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntitiy;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +27,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     private final LoanOfferEntityRepository loanOfferEntityRepository;
 
     @Override
-    public LoanOffer save(LoanOffer loanOffer) throws MeedlException {
+    public LoanOffer  save(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanOffer);
         loanOffer.validate();
         LoanOfferEntitiy loanOfferEntitiy = loanOfferMapper.toLoanOfferEntity(loanOffer);
@@ -31,8 +36,11 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public LoanOffer findLoanOfferById(String loanOfferId){
-        return null;
+    public LoanOffer findLoanOfferById(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        LoanOfferEntitiy loanOfferEntitiy = loanOfferEntityRepository.findById(loanOfferId)
+                .orElseThrow(()-> new LoanException(LoanMessages.LOAN_OFFER_NOT_FOUND.getMessage()));
+        return loanOfferMapper.toLoanOffer(loanOfferEntitiy);
     }
 
     @Override

@@ -9,11 +9,16 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.email.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.email.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.thymeleaf.context.Context;
+import org.thymeleaf.context.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -28,7 +33,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     @Override
     public void sendEmail(UserIdentity userIdentity) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity), userIdentity.getFirstName());
         Email email = Email.builder()
                 .context(context)
                 .subject(EMAIL_INVITATION_SUBJECT.getMessage())
@@ -39,6 +44,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         sendMail(userIdentity, email);
 
     }
+
     @Override
     public void sendForgotPasswordEmail(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getForgotPasswordLink(userIdentity),userIdentity.getFirstName());

@@ -29,7 +29,7 @@ public class LoanProduct {
     private int tenor;
     private double interestRate;
     private double costOfFund;
-    @Size(max=15000)
+    @Size(max = 15000)
     private String termsAndCondition;
     private BigDecimal obligorLoanLimit;
     private BigDecimal loanProductSize;
@@ -57,7 +57,7 @@ public class LoanProduct {
 
     public void validateLoanProductDetails() throws MeedlException {
         log.info("Started loan product validation");
-        MeedlValidator.validateObjectName(name);
+        MeedlValidator.validateObjectName(name,"Name cannot be empty|");
         MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
         MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
         validateLoanProductSize();
@@ -86,6 +86,7 @@ public class LoanProduct {
             this.tenor = tenor;
         }
     }
+
     public void setMoratorium(int moratorium) {
         if (moratorium < BigInteger.ZERO.intValue()){
             this.moratorium = BigInteger.ZERO.intValue();

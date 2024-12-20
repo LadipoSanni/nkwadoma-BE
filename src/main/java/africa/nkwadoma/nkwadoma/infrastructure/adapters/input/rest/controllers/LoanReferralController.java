@@ -23,19 +23,39 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class LoanReferralController {
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
+    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanReferralRestMapper loanReferralRestMapper;
 
     @PostMapping("loan-referrals/respond")
-    public ResponseEntity<ApiResponse<?>> respondToLoanReferral(@RequestBody LoanReferralResponseRequest request,
-                                                                @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        LoanReferral referral = loanReferralRestMapper.maptoLoanReferral(request, meedlUser.getClaim("sub"));
-        log.info("Loan referral to be responded to: {}", referral);
+    public ResponseEntity<ApiResponse<?>> respondToLoanReferral
+            (@RequestBody LoanReferralResponseRequest request) throws MeedlException {
+        LoanReferral referral = new LoanReferral();
+        referral.setId(request.getId());
+        referral.setLoanReferralStatus(request.getLoanReferralStatus());
+        referral.setReasonForDeclining(request.getReason());
+        log.info("Loan referral model: {}", referral);
         referral = respondToLoanReferralUseCase.respondToLoanReferral(referral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(referral);
+        log.info("Loan referral response: {}", loanReferralResponse);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder().
                 data(loanReferralResponse).
-                message(SuccessMessages.SUCCESSFUL_RESPONSE).
+                message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY).
                 statusCode(HttpStatus.OK.name()).build();
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("loan-referral")
+    public ResponseEntity<ApiResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(meedlUser.getClaimAsString("sub"));
+        LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
+        log.info("Found loan referral: {}", foundLoanReferral);
+        LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
+        log.info("Mapped Loan referral response: {}", loanReferralResponse);
+        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
+                .data(loanReferralResponse)
+                .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

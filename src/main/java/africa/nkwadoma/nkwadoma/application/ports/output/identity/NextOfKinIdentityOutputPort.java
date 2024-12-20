@@ -7,7 +7,9 @@ import java.util.*;
 
 public interface NextOfKinIdentityOutputPort {
     NextOfKin save(NextOfKin nextOfKin) throws MeedlException;
+
     void deleteNextOfKin(String nextOfKinId) throws MeedlException;
+
     NextOfKin findByEmail(String email) throws MeedlException;
 
     Optional<NextOfKin> findByLoaneeId(String id) throws MeedlException;

@@ -27,4 +27,6 @@ public class ControllerConstant {
 
 
    public static final String RESPONSE_IS_SUCCESSFUL = "Response is successful";
+   public static final String LOAN_REFERRAL_STATUS_TYPE = "(?i)^(ACCEPTED|DECLINED)$" ;
+   public static final String LOAN_REFERRAL_ID_IS_REQUIRED = "Loan referral ID is required";
 }

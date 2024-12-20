@@ -44,7 +44,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
 
     @Override
-    public String verifyIdentity(String loanReferralId) throws MeedlException {
+    public String verifyIdentity(String loanReferralId) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         checkIfAboveThreshold(loanReferralId);
         LoanReferral loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferralId)
@@ -67,10 +67,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
     @Override
-    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
+    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException, IdentityVerificationException {
         MeedlValidator.validateObjectInstance(identityVerification);
         log.info("Verifying user identity. Loan referral id: {}", identityVerification.getLoanReferralId());
         String decryptedBvn = tokenUtils.decryptAES(identityVerification.getBvn());
+        log.info("decrypted bvn {}", decryptedBvn);
         LoanReferral loanReferral = loanReferralOutputPort.findById(identityVerification.getLoanReferralId());
         log.info("User referred : {}", loanReferral.getLoanee().getUserIdentity().getId());
         checkIfAboveThreshold(identityVerification.getLoanReferralId());
@@ -113,7 +114,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         log.info("User identity details updated for loanee with bvn {} and user {}", identityVerification.getBvn(), userIdentity);
     }
 
-    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException {
+    private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException, IdentityVerificationException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = new IdentityVerificationFailureRecord();
         identityVerificationFailureRecord.setEmail(loanReferral.getLoanee().getUserIdentity().getEmail());
         identityVerificationFailureRecord.setReferralId(loanReferral.getId());

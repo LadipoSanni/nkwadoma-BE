@@ -27,6 +27,13 @@ public class UserEntity {
     private String createdAt;
     @Enumerated(EnumType.STRING)
     private IdentityRole role;
+    private String gender;
+    private String dateOfBirth;
+    private String stateOfOrigin;
+    private String maritalStatus;
+    private String stateOfResidence;
+    private String nationality;
+    private String residentialAddress;
     private String alternateEmail;
     private String alternatePhoneNumber;
     private String alternateContactAddress;

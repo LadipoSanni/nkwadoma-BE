@@ -1,12 +1,14 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
@@ -30,10 +32,19 @@ public class TestData {
                 .createdBy(testId)
                 .role(IdentityRole.LOANEE)
                 .alternateEmail("alt276@example.com")
+                .image("loanee-img.png")
+                .gender("Male")
+                .nationality("Nigerian")
+                .stateOfOrigin("Osun")
+                .dateOfBirth("29th April 1990")
+                .maritalStatus("Single")
+                .stateOfResidence("Lagos")
+                .residentialAddress("1, Spencer Street, Yaba, Lagos")
                 .alternatePhoneNumber("0986564534")
                 .alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State")
                 .build();
     }
+
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName(name);
@@ -170,6 +181,14 @@ public class TestData {
         loanRequest.setDateTimeApproved(LocalDateTime.now());
         return loanRequest;
     }
+
+    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status,String loaneeId) {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setLoanStatus(loanStatus);
+        loaneeLoanAccount.setAccountStatus(status);
+        loaneeLoanAccount.setLoaneeId(loaneeId);
+        return loaneeLoanAccount;
+    }
     public static PremblyResponse createTestPremblyResponse(){
         PremblyResponse response = new PremblyBvnResponse();
         Verification verifier = Verification.builder().status("VERIFIED").build();
@@ -177,5 +196,33 @@ public class TestData {
         response.setVerification(verifier);
         response.setResponseCode("CREATED");
         return response;
+    }
+
+    public static InvestmentVehicle buildInvestmentVehicle(String name) {
+        InvestmentVehicle investmentVehicle = new InvestmentVehicle();
+        investmentVehicle.setName(name);
+        investmentVehicle.setSize(BigDecimal.valueOf(4000));
+        investmentVehicle.setRate(13F);
+        investmentVehicle.setMandate("Long-term Growth");
+        investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
+        investmentVehicle.setTenure(12);
+        investmentVehicle.setCustodian("Custodian");
+        investmentVehicle.setBankPartner("Gt Bank");
+        investmentVehicle.setFundManager("Gt Manager");
+        investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
+        investmentVehicle.setTrustee("trustee");
+        investmentVehicle.setSponsor("sponsors");
+        return investmentVehicle;
+    }
+
+    public static LoanOffer buildLoanOffer(LoanRequest loanRequest,Loanee loanee, String id){
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setLoanee(loanee);
+        loanOffer.setUserId(id);
+        loanOffer.setId(id);
+        return loanOffer;
     }
 }

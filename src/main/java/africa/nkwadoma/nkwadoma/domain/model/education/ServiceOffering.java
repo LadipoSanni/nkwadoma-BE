@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import lombok.*;
 
 import java.math.*;
-import java.util.*;
 
 @Getter
 @Setter
@@ -16,7 +15,7 @@ public class ServiceOffering {
     private String id;
     private String name;
     private Industry industry;
-//    private ServiceOfferingType serviceOfferingType;
+    //    private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound;
     private BigDecimal transactionUpperBound;
 }

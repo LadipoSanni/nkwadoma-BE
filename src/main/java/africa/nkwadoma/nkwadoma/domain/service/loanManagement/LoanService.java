@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -12,14 +11,17 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -41,8 +43,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final LoanOfferOutputPort loanOfferOutputPort;
+    private final LoanOfferMapper loanOfferMapper;
     private final LoanOutputPort loanOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
 
 
     @Override
@@ -54,12 +58,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product {} created successfully", loanProduct.getName());
         return loanProductOutputPort.save(loanProduct);
     }
+
     @Override
     public void deleteLoanProductById(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         loanProductOutputPort.deleteById(loanProduct.getId());
     }
+
     @Override
     public Page<LoanProduct> viewAllLoanProduct(LoanProduct loanProduct) {
         return loanProductOutputPort.findAllLoanProduct(loanProduct);
@@ -76,12 +82,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         LoanProduct foundLoanProduct = loanProductOutputPort.findById(loanProduct.getId());
-        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()){
+        if (foundLoanProduct.getTotalNumberOfLoanees() > BigInteger.ZERO.intValue()) {
             throw new LoanException("Loan product " + foundLoanProduct.getName() + " cannot be updated as it has already been loaned out");
         }
-        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct,loanProduct);
+        foundLoanProduct = loanProductMapper.updateLoanProduct(foundLoanProduct, loanProduct);
         foundLoanProduct.setUpdatedAt(LocalDateTime.now());
-        log.info("Loan product updated {}",  foundLoanProduct);
+        log.info("Loan product updated {}", foundLoanProduct);
 
         return loanProductOutputPort.save(foundLoanProduct);
     }
@@ -141,23 +147,35 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         log.info("Found Loan referral by it's ID: {}", loanReferralById.get());
         return loanReferralById.get();
+
     }
 
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus(),
+                LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
-        log.info("Found LoanReferral: {}", foundLoanReferral);
-        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus());
+        log.info("Found Loan Referral: {}", foundLoanReferral);
+        foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
+        return foundLoanReferral;
+    }
+
+    private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
-            log.info("Mapped loan request from Loan referral: {}", loanRequest);
-            loanRequest.setLoanReferralStatus(loanReferral.getLoanReferralStatus());
-            log.info("Loan request to create {} ", loanRequest);
-            createLoanRequest(loanRequest);
+            log.info("Mapped loan request: {}", loanRequest);
+            loanRequest = createLoanRequest(loanRequest);
+            log.info("Created loan request: {}", loanRequest);
             foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
-            foundLoanReferral = loanReferralOutputPort.saveLoanReferral(foundLoanReferral);
         }
+        else if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.DECLINED)) {
+            foundLoanReferral.setReasonForDeclining(loanReferral.getReasonForDeclining());
+            foundLoanReferral.setLoanReferralStatus(LoanReferralStatus.UNAUTHORIZED);
+        }
+        foundLoanReferral = loanReferralOutputPort.save(foundLoanReferral);
+        log.info("Updated loan referral: {}", foundLoanReferral);
         return foundLoanReferral;
     }
 
@@ -193,6 +211,51 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
+    public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        loanOffer.validateForAcceptOffer();
+        LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
+        Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        if (loanee.isEmpty()) {
+            throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
+        }
+        loanOffer.setLoaneeId(loanee.get().getId());
+        if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
+            throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
+        }
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
+            //Loanee Wallet would be Created
+            loanOfferMapper.updateLoanOffer(offer,loanOffer);
+            offer.setDateTimeAccepted(LocalDateTime.now());
+            loanOfferOutputPort.save(offer);
+            notifyPortfolioManager(portfolioManagers,loanOffer);
+            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanOffer.getLoaneeId());
+            if (ObjectUtils.isEmpty(loaneeLoanAccount)){
+                loaneeLoanAccount = createLoaneeLoanAccount(loanOffer.getLoaneeId());
+            }
+            return loaneeLoanAccount;
+        }
+        loanOfferMapper.updateLoanOffer(offer,loanOffer);
+        loanOfferOutputPort.save(offer);
+        notifyPortfolioManager(portfolioManagers,loanOffer);
+        return null;
+    }
+
+    private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
+        //this and the template would be done on another branch
+    }
+
+
+    private LoaneeLoanAccount createLoaneeLoanAccount(String loaneeId) throws MeedlException {
+        LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
+        loaneeLoanAccount.setLoaneeId(loaneeId);
+        loaneeLoanAccount.setAccountStatus(AccountStatus.NEW);
+        loaneeLoanAccount.setLoanStatus(LoanStatus.AWAITING_DISBURSAL);
+        loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
+        return loaneeLoanAccount;
+    }
+
+    @Override
     public Page<LoanOffer> viewAllLoanOffers(String userId,int pageSize , int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
@@ -202,5 +265,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                    pageSize,pageNumber);
         }
         return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
+    }
+
+
+    @Override
+    public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
+                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                throw new LoanOfferException(
+                        LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
+            }
+        return loanOffer;
     }
 }

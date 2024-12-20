@@ -29,6 +29,13 @@ public class UserIdentity {
     private boolean enabled;
     private String createdAt;
     private String image;
+    private String gender;
+    private String dateOfBirth;
+    private String stateOfOrigin;
+    private String maritalStatus;
+    private String stateOfResidence;
+    private String nationality;
+    private String residentialAddress;
     private IdentityRole role;
     private String createdBy;
     private String alternateEmail;

@@ -14,8 +14,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,7 +26,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,14 +62,9 @@ public class LoanOfferAdapterTest {
 
     @BeforeAll
     void setUp() {
-        userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
-                lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
-        loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                initialDeposit(BigDecimal.valueOf(3000000.00)).build();
-        loanee = Loanee.builder().userIdentity(userIdentity).
-                cohortId("fdc36020-9389-43d2-938d-fd317a870916")
-                .loaneeLoanDetail(loaneeLoanDetail).build();
+        userIdentity = TestData.createTestUserIdentity("test@example.com");
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
@@ -77,11 +72,14 @@ public class LoanOfferAdapterTest {
             loanee.setUserIdentity(userIdentity);
             loanee = loaneeOutputPort.save(loanee);
             loanReferral = LoanReferral.builder().loanee(loanee).loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-            loanReferral = loanReferralOutputPort.saveLoanReferral(loanReferral);
+            loanReferral = loanReferralOutputPort.save(loanReferral);
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
-                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
+                    .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee).createdDate(LocalDateTime.now()).
+                    loaneeId("88ee2dd8-df66-4f67-b718-dfd1635f8053").loanReferralId(loanReferral.getId()).cohortId("3012eabb-4cc7-4f48-bae9-04c0056518f0")
                     .dateTimeApproved(LocalDateTime.now()).build();
             loanRequest = loanRequestOutputPort.save(loanRequest);
+            log.info("Loan request saved: {}", loanRequest);
+            assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
@@ -123,7 +121,30 @@ public class LoanOfferAdapterTest {
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"kjkjdjksjk"})
+    void findLoanOfferWithInvalidId(String invalidId){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(invalidId));
+    }
+
+    @Test
+    void findLoanOfferWithNullId(){
+        assertThrows(MeedlException.class,()-> loanOfferOutputPort.findLoanOfferById(null));
+    }
+
     @Order(2)
+    @Test
+    void findLoanOfferById(){
+        LoanOffer offer = new LoanOffer();
+        try{
+            offer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(offer.getId(), loanOfferId);
+    }
+
+    @Order(3)
     @Test
     void viewAllLoanOffersByOrganizationAdmin(){
         Page<LoanOffer> loanOffers = null;
@@ -135,7 +156,18 @@ public class LoanOfferAdapterTest {
         assertEquals(1,loanOffers.getSize());
     }
 
-
+    @Order(4)
+    @Test
+    void findLoanOfferWithValidId(){
+        LoanOffer foundLoanOffer = new LoanOffer();
+        try{
+            foundLoanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertEquals(loanOfferId, foundLoanOffer.getId());
+        assertEquals(loanOffer.getLoanRequest().getId(), foundLoanOffer.getLoanRequest().getId());
+    }
 
     @AfterAll
     void cleanUp() {

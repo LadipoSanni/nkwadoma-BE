@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.AccountActivationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.OrganizationUpdateRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ReferenceDataResponse;
@@ -70,9 +71,9 @@ public class OrganizationController {
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationRequest organizationRequest,
+    public ResponseEntity<ApiResponse<?>> updateOrganization(@RequestBody @Valid OrganizationUpdateRequest organizationUpdateRequest,
                                                              @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(organizationRequest);
+        OrganizationIdentity organizationIdentity = organizationRestMapper.maptoOrganizationIdentity(organizationUpdateRequest);
         organizationIdentity.setUpdatedBy(meedlUser.getClaim("sub"));
         log.info("Program at controller level: ========>{}", organizationIdentity);
          organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);

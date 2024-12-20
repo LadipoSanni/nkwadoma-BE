@@ -51,19 +51,20 @@ public class LoanRequest {
     private String cohortName;
     private int pageNumber;
     private int pageSize;
+    private String loaneeId;
 
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest);
-        MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan product identification");
+        MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan request identification");
         MeedlValidator.validateUUID(loanRequest.getLoanProductId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
     }
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(status, LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateBigDecimalDataElement(loanee.getLoaneeLoanDetail().getAmountRequested(), LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateBigDecimalDataElement(loanee.getLoaneeLoanDetail().getAmountRequested(),
+                LoanMessages.LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY.getMessage());
     }
 
 

@@ -9,6 +9,8 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.*;
+import java.util.*;
 import java.math.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +40,7 @@ public class OrganizationIdentity {
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;
+    private UserIdentity userIdentity;
     private List<OrganizationEmployeeIdentity> organizationEmployees;
     private int numberOfLoanees;
     private int numberOfCohort;
@@ -55,7 +58,7 @@ public class OrganizationIdentity {
     public void validate() throws MeedlException {
         log.info("The organization being validated : {}", this.name);
         log.info("{}",this.serviceOfferings);
-        MeedlValidator.validateObjectName(this.name);
+        MeedlValidator.validateObjectName(this.name,"Name cannot be empty");
         MeedlValidator.validateEmail(this.email);
         MeedlValidator.validateDataElement(this.rcNumber, OrganizationMessages.RC_NUMBER_IS_REQUIRED.getMessage());
         MeedlValidator.validateRCNumber(this.rcNumber);
