@@ -12,4 +12,6 @@ public interface InvestmentVehicleOutputPort {
     void deleteInvestmentVehicle(String id) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicle(int pageSize, int pageNumber);
+
+    InvestmentVehicle findByName(String name) throws MeedlException;
 }
