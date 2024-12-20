@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -36,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanRequestAdapterTest {
     private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
     @Autowired
+    private LoaneeUseCase loaneeUseCase;
+    @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
@@ -66,6 +69,8 @@ class LoanRequestAdapterTest {
     @Autowired
     private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
     private LoanDetailRepository loanDetailRepository;
     private NextOfKin nextOfKin;
     private Program dataAnalytics;
@@ -93,6 +98,7 @@ class LoanRequestAdapterTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private Cohort cohort;
     private String organizationEmployeeIdentityId;
+    private String loaneeUserId;
 
 
     @BeforeAll
@@ -152,27 +158,32 @@ class LoanRequestAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
             userIdentity = TestData.createTestUserIdentity("qudus@example.com");
-            loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                    initialDeposit(BigDecimal.valueOf(3000000.00)).build();
+            loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
+                    initialDeposit(BigDecimal.valueOf(1000000.00)).build();
+            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdowns.get(0).getLoanBreakdownId()).
+                    itemAmount(loanBreakdown.getItemAmount()).
+                    itemName(loanBreakdown.getItemName()).build();
 
-            loanee = Loanee.builder().userIdentity(userIdentity).
-                    cohortId(eliteCohortId).
-                    loaneeLoanDetail(loaneeLoanDetail).build();
-
-            UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
+            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (foundUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(foundUser.get());
+            }
+            UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
             userId = savedUserIdentity.getId();
 
-            loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
-            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loaneeLoanDetailId = loaneeLoanDetail.getId();
-
+            loanee = new Loanee();
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanee.setUserIdentity(savedUserIdentity);
-            loanee.setCohortId(cohort.getId());
+            loanee.setCohortId(eliteCohortId);
             loanee.setReferredBy(amazingGrace.getName());
-            loanee = loaneeOutputPort.save(loanee);
+            loanee.setLoanBreakdowns(List.of(loaneeLoanBreakdown));
+
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
             nextOfKin = TestData.createNextOfKinData(loanee);
             NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
