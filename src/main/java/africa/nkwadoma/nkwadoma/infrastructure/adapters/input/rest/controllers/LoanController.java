@@ -10,8 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -101,7 +99,7 @@ public class LoanController {
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(paginatedResponse).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
                 build(), HttpStatus.OK
         );
     }
@@ -190,7 +188,7 @@ public class LoanController {
         );
         ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
                 .data(paginatedResponse)
-                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
