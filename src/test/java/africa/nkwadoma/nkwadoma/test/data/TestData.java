@@ -233,4 +233,16 @@ public class TestData {
                 .itemAmount(new BigDecimal(100000))
                 .currency("NGN").build();
     }
+
+    public static NextOfKin createNextOfKinData(Loanee loanee) {
+        NextOfKin nextOfKin = new NextOfKin();
+        nextOfKin.setFirstName("Ahmad");
+        nextOfKin.setLastName("Awwal");
+        nextOfKin.setEmail("ahmad12@gmail.com");
+        nextOfKin.setPhoneNumber("0785678901");
+        nextOfKin.setNextOfKinRelationship("Brother");
+        nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
+        nextOfKin.setLoanee(loanee);
+        return nextOfKin;
+    }
 }

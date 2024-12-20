@@ -56,12 +56,18 @@ class LoanRequestAdapterTest {
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Autowired
+    private CohortUseCase cohortUseCase;
+    @Autowired
     private LoanRequestRepository loanRequestRepository;
-    private NextOfKin nextOfKin;
     @Autowired
     private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     @Autowired
     private LoanDetailRepository loanDetailRepository;
+    private NextOfKin nextOfKin;
     private Program dataAnalytics;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
@@ -82,12 +88,6 @@ class LoanRequestAdapterTest {
     private String loanDetailId;
     private UserIdentity userIdentity;
     private String nextOfKinId;
-    @Autowired
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Autowired
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Autowired
-    private CohortUseCase cohortUseCase;
     private OrganizationIdentity amazingGrace;
     private  UserIdentity joel;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
@@ -172,17 +172,9 @@ class LoanRequestAdapterTest {
             loanee.setReferredBy(amazingGrace.getName());
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
-            log.info("Loanee ID: {}", loanee.getId());
             loaneeId = loanee.getId();
 
-            nextOfKin = new NextOfKin();
-            nextOfKin.setFirstName("Ahmad");
-            nextOfKin.setLastName("Awwal");
-            nextOfKin.setEmail("ahmad12@gmail.com");
-            nextOfKin.setPhoneNumber("0785678901");
-            nextOfKin.setNextOfKinRelationship("Brother");
-            nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-            nextOfKin.setLoanee(loanee);
+            nextOfKin = TestData.createNextOfKinData(loanee);
             NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();

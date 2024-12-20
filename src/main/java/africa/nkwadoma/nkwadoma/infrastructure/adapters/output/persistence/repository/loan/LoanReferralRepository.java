@@ -10,8 +10,6 @@ import java.util.*;
 import java.util.List;
 
 public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity, String> {
-    LoanReferralEntity findByLoaneeEntityId(String loanReferralId);
-
     @Query("""
         select lre.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
                l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,
