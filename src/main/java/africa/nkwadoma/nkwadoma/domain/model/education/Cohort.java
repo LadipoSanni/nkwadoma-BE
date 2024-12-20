@@ -52,7 +52,7 @@ public class Cohort {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateObjectName(name);
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
         MeedlValidator.validateUUID(createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         MeedlValidator.validateObjectInstance(startDate);
         MeedlValidator.validateNegativeAmount(tuitionAmount);

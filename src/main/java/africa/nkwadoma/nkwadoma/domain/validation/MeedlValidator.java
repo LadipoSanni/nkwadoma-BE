@@ -89,15 +89,15 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateFloatDataElement(Float dataElement) throws MeedlException {
+    public static void validateFloatDataElement(Float dataElement , String message) throws MeedlException {
         if (dataElement == null) {
-            throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+            throw new MeedlException(message);
         }
     }
 
-    public static void validateIntegerDataElement(int dataElement) throws MeedlException {
+    public static void validateIntegerDataElement(int dataElement , String message) throws MeedlException {
         if (dataElement == 0) {
-            throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
+            throw new MeedlException(message);
         }
     }
 
@@ -148,8 +148,8 @@ public class MeedlValidator {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
-    public static void validateObjectName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, "Name can not be empty");
+    public static void validateObjectName(String name,  String message) throws MeedlException {
+        MeedlValidator.validateDataElement(name, message);
         String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' -]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();

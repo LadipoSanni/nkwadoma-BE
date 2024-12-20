@@ -40,15 +40,15 @@ public class InvestmentVehicle {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectName(name);
-        MeedlValidator.validateObjectName(trustee);
-        MeedlValidator.validateObjectName(custodian);
-        MeedlValidator.validateObjectName(bankPartner);
-        MeedlValidator.validateObjectName(fundManager);
-        MeedlValidator.validateObjectName(sponsor);
-        MeedlValidator.validateIntegerDataElement(tenure);
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty");
+        MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty");
+        MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
+        MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
+        MeedlValidator.validateObjectName(sponsor,"Sponsor cannot be empty");
+        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less that 1");
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
-        MeedlValidator.validateFloatDataElement(rate);
+        MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be null");
         MeedlValidator.validateBigDecimalDataElement(size);
         MeedlValidator.validateBigDecimalDataElement(minimumInvestmentAmount);
     }
