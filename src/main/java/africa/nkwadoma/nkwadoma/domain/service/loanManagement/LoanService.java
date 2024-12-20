@@ -11,6 +11,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -255,5 +257,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                    pageSize,pageNumber);
         }
         return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
+    }
+
+
+    @Override
+    public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
+                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                throw new LoanOfferException(
+                        LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
+            }
+        return loanOffer;
     }
 }
