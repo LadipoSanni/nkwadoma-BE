@@ -1,27 +1,31 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAccount;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,11 +54,14 @@ public class LoanOfferServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private LoanOffer loanOffer;
+    private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private Loanee loanee;
     private UserIdentity userIdentity;
     private UserIdentity userIdentityLoanee;
     private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
+    private String loaneeId = "1f732a03-00ad-4187-825d-94969153c3d1";
+
     private String mockId2 = "96f2eb2b-1a78-4838-b5d8-76e95cc9ae9f";
     private LoaneeLoanAccount loaneeLoanAccount;
     @Mock
@@ -67,26 +74,19 @@ public class LoanOfferServiceTest {
 
     @BeforeEach
     void setUpLoanOffer() {
-        userIdentity = UserIdentity.builder().id(mockId).firstName("qudus").lastName("ade")
-                .email("qudusa55@gmail.com").role(IdentityRole.PORTFOLIO_MANAGER).build();
-        loanee = Loanee.builder().id(mockId).userIdentity(userIdentity).build();
-        loanRequest = LoanRequest.builder().id(mockId).loanAmountRequested(BigDecimal.valueOf(340000))
-                .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee)
-                .dateTimeApproved(LocalDateTime.now()).build();
-        loanOffer = new LoanOffer();
-        loanOffer.setDateTimeOffered(LocalDateTime.now());
-        loanOffer.setLoanRequest(loanRequest);
-        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
-        loanOffer.setLoanee(loanee);
-        loanOffer.setUserId(mockId);
-        loanOffer.setId(mockId);
-
+        userIdentity =TestData.createTestUserIdentity("test@example.com");
+                        userIdentity.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
+        loanee = TestData.createTestLoanee(userIdentity,loaneeLoanDetail);
+                 loanee.setId(userIdentity.getId());
+        loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
+        loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
-        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
     }
 
     @Test
     void createLoanOfferWithValidLoanRequestId() {
+        loanRequest.setStatus(LoanRequestStatus.APPROVED);
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
@@ -121,7 +121,7 @@ public class LoanOfferServiceTest {
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
-            when(loaneeLoanAccountOutputPort.findByLoaneeId(mockId)).thenReturn(null);
+            when(loaneeLoanAccountOutputPort.findByLoaneeId(userIdentity.getId())).thenReturn(null);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
@@ -157,5 +157,49 @@ public class LoanOfferServiceTest {
         assertEquals(1,loanOffers.getSize());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE,"hjdhjdbdjbff"})
+    void viewLoanOfferWithInvalidLoanOfferId(String invalidId){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanOfferDetails(mockId,invalidId));
+    }
+
+    @Test
+    void viewLoanOfferWithNullLoanOFferId(){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanOfferDetails(mockId,null));
+    }
+
+    @Test
+    void loaneeCannotViewLoanOfferThatNotAssignedToLoanee() {
+        userIdentity.setRole(IdentityRole.LOANEE);
+        try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            LoanOffer mockLoanOffer = new LoanOffer();
+            Loanee mockLoanee = new Loanee();
+            UserIdentity mockLoaneeIdentity = new UserIdentity();
+            mockLoaneeIdentity.setId(loaneeId);
+            mockLoanee.setUserIdentity(mockLoaneeIdentity);
+            mockLoanOffer.setLoanee(mockLoanee);
+            when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
+            assertThrows(
+                    LoanOfferException.class,
+                    () -> loanService.viewLoanOfferDetails(mockId, mockId)
+            );
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+    }
+
+    @Test
+    void viewLoanOfferDetails(){
+        try {
+            userIdentity.setRole(IdentityRole.LOANEE);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
+            loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(loanOffer.getLoanRequest(),loanRequest);
+    }
 }
 

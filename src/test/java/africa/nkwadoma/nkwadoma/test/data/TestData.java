@@ -214,4 +214,15 @@ public class TestData {
         investmentVehicle.setSponsor("sponsors");
         return investmentVehicle;
     }
+
+    public static LoanOffer buildLoanOffer(LoanRequest loanRequest,Loanee loanee, String id){
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setDateTimeOffered(LocalDateTime.now());
+        loanOffer.setLoanRequest(loanRequest);
+        loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
+        loanOffer.setLoanee(loanee);
+        loanOffer.setUserId(id);
+        loanOffer.setId(id);
+        return loanOffer;
+    }
 }
