@@ -57,7 +57,7 @@ public class LoanProduct {
 
     public void validateLoanProductDetails() throws MeedlException {
         log.info("Started loan product validation");
-        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateObjectName(name,"Name cannot be empty|");
         MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
         MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
         validateLoanProductSize();

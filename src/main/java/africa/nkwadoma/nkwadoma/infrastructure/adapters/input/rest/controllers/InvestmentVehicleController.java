@@ -59,7 +59,7 @@ public class InvestmentVehicleController {
                 .message(INVESTMENT_VEHICLE_VIEWED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("view-all-investment-vehicle")
