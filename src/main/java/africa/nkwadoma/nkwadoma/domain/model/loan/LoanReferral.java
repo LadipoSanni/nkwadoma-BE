@@ -50,8 +50,8 @@ public class LoanReferral {
     }
 
     public void validateForCreate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanReferralStatus);
+        MeedlValidator.validateObjectInstance(loanee, "Loanee Object is required");
+        MeedlValidator.validateObjectInstance(loanReferralStatus,"LoanReferral Status is required");
     }
 
 }
