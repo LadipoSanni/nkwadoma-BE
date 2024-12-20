@@ -195,4 +195,12 @@ public class TestData {
         response.setResponseCode("CREATED");
         return response;
     }
+
+    public static LoaneeLoanBreakdown createTestLoaneeLoanBreakdown(String loaneeBreakdownId) {
+        return LoaneeLoanBreakdown.builder()
+                .loaneeLoanBreakdownId(loaneeBreakdownId)
+                .itemName("Feeding")
+                .itemAmount(new BigDecimal(100000))
+                .currency("NGN").build();
+    }
 }

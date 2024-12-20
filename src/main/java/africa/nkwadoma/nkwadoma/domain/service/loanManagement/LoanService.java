@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -45,6 +46,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanOutputPort loanOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
+    private final IdentityVerificationUseCase verificationUseCase;
 
 
     @Override
@@ -134,18 +136,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
         LoanReferral loanReferral = foundLoanReferrals.get(0);
-        if (ObjectUtils.isEmpty(loanReferral)) {
-            log.info("Empty Loan referral returned");
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
-                findLoanReferralById(loanReferral.getId());
-        if (loanReferralById.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        log.info("Found Loan referral by it's ID: {}", loanReferralById.get());
-        return loanReferralById.get();
-
+        MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
+        loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
+                .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
+        String identityVerified = verificationUseCase.verifyIdentity(loanReferral.getId());
+        log.info("Verification status: {}", identityVerified);
+        loanReferral.setIdentityVerified(identityVerified);
+        log.info("Found Loan referral by it's ID: {}", loanReferral);
+        return loanReferral;
     }
 
     @Override

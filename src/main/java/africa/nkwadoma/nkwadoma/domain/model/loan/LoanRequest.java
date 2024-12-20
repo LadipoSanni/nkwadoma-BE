@@ -41,6 +41,7 @@ public class LoanRequest {
     private Loanee loanee;
     private LoaneeLoanDetail loaneeLoanDetail;
     private List<LoanBreakdown> loanBreakdowns;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private String alternateEmail;
     private String alternateContactAddress;
     private String alternatePhoneNumber;
