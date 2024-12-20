@@ -1,12 +1,14 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
@@ -194,6 +196,23 @@ public class TestData {
         response.setVerification(verifier);
         response.setResponseCode("CREATED");
         return response;
+    }
+
+    public static InvestmentVehicle buildInvestmentVehicle(String name) {
+        InvestmentVehicle investmentVehicle = new InvestmentVehicle();
+        investmentVehicle.setName(name);
+        investmentVehicle.setSize(BigDecimal.valueOf(4000));
+        investmentVehicle.setRate(13F);
+        investmentVehicle.setMandate("Long-term Growth");
+        investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
+        investmentVehicle.setTenure(12);
+        investmentVehicle.setCustodian("Custodian");
+        investmentVehicle.setBankPartner("Gt Bank");
+        investmentVehicle.setFundManager("Gt Manager");
+        investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
+        investmentVehicle.setTrustee("trustee");
+        investmentVehicle.setSponsor("sponsors");
+        return investmentVehicle;
     }
 
     public static LoanOffer buildLoanOffer(LoanRequest loanRequest,Loanee loanee, String id){
