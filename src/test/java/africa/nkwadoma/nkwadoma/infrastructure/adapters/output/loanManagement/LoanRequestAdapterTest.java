@@ -72,6 +72,8 @@ class LoanRequestAdapterTest {
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
     private LoanDetailRepository loanDetailRepository;
+    @Autowired
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private NextOfKin nextOfKin;
     private Program dataAnalytics;
     private LoanReferral loanReferral;
@@ -91,10 +93,10 @@ class LoanRequestAdapterTest {
     private LoanBreakdown loanBreakdown;
     private List<LoanBreakdown> loanBreakdowns;
     private String loanDetailId;
-    private UserIdentity userIdentity;
     private String nextOfKinId;
     private OrganizationIdentity amazingGrace;
-    private  UserIdentity joel;
+    private UserIdentity joel;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private Cohort cohort;
     private String organizationEmployeeIdentityId;
@@ -157,7 +159,7 @@ class LoanRequestAdapterTest {
                     .itemName("Loan Break").cohort(cohort).build();
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
-            userIdentity = TestData.createTestUserIdentity("qudus@example.com");
+            UserIdentity userIdentity = TestData.createTestUserIdentity("qudus@example.com");
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
                     initialDeposit(BigDecimal.valueOf(1000000.00)).build();
             LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
@@ -177,7 +179,8 @@ class LoanRequestAdapterTest {
             loanee.setUserIdentity(savedUserIdentity);
             loanee.setCohortId(eliteCohortId);
             loanee.setReferredBy(amazingGrace.getName());
-            loanee.setLoanBreakdowns(List.of(loaneeLoanBreakdown));
+            loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
+            loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
             assertNotNull(loanee);
@@ -352,15 +355,19 @@ class LoanRequestAdapterTest {
         try {
             nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+            loaneeLoanBreakDownOutputPort.deleteAll(loaneeLoanBreakdowns);
             loaneeOutputPort.deleteLoanee(loaneeId);
+            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
+            userIdentityOutputPort.deleteUserById(loaneeUserId);
             userIdentityOutputPort.deleteUserById(userId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+            loanDetailRepository.deleteById(loanDetailId);
+            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
             cohortOutputPort.deleteCohort(eliteCohortId);
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
 
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(organizationId);
-
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
@@ -368,11 +375,8 @@ class LoanRequestAdapterTest {
             }
             organizationOutputPort.deleteServiceOffering(serviceOfferingId);
             organizationOutputPort.delete(organizationId);
-
-            loanDetailRepository.deleteById(loanDetailId);
-            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
         } catch (MeedlException e) {
-            log.error("Exception occurred: ", e);
+            log.error("Exception occurred deleting test data: ", e);
         }
     }
 }
