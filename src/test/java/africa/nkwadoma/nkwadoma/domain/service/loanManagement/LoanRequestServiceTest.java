@@ -34,9 +34,12 @@ class LoanRequestServiceTest {
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
     private LoanOfferUseCase loanOfferUseCase;
     private LoanRequest loanRequest;
     private LoanOffer loanOffer;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private LoanProduct loanProduct;
 
     @BeforeEach
@@ -48,6 +51,10 @@ class LoanRequestServiceTest {
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        LoaneeLoanBreakdown loaneeLoanBreakdown =
+                TestData.createTestLoaneeLoanBreakdown("1886df42-1f75-4d17-bdef-e0b016707885");
+        loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
+
         Vendor vendor = TestData.createTestVendor("vendor for test");
         loanProduct = TestData.buildTestLoanProduct("Test Loan Product - unit testing within application", vendor);
 
@@ -61,10 +68,12 @@ class LoanRequestServiceTest {
     void viewLoanRequestById() {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(Optional.of(loanRequest));
+            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
             LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).findById(loanRequest.getId());
             assertNotNull(retrievedLoanRequest);
+            assertNotNull(retrievedLoanRequest.getLoaneeLoanBreakdowns());
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }

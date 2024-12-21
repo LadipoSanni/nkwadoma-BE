@@ -28,6 +28,7 @@ public class LoanReferral {
     private Loanee loanee;
     private LoanReferralStatus loanReferralStatus;
     private String referredBy;
+    private String identityVerified;
     private String cohortName;
     private String loaneeImage;
     private BigDecimal loanAmountRequested;

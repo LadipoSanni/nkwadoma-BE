@@ -24,5 +24,6 @@ public class LoanReferralResponse {
     private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
+    private String identityVerified;
     private LoanReferralStatus loanReferralStatus;
 }

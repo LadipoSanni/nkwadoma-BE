@@ -10,15 +10,13 @@ import java.util.*;
 import java.util.List;
 
 public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity, String> {
-    LoanReferralEntity findByLoaneeEntityId(String loanReferralId);
-
     @Query("""
         select lre.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
                l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,
                l.userIdentity.alternateEmail as alternateEmail, l.id as loaneeId,
                l.userIdentity.alternateContactAddress as alternateContactAddress,
                c.name as cohortName, p.name as programName, c.startDate as cohortStartDate,
-               lre.loanReferralStatus as status,
+               lre.loanReferralStatus as status, o.name as referredBy,
                c.tuitionAmount as tuitionAmount, l.loaneeLoanDetail.initialDeposit as initialDeposit,
                l.loaneeLoanDetail.amountRequested as loanAmountRequested, l.userIdentity.image as loaneeImage
         from LoanReferralEntity lre
