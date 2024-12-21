@@ -21,7 +21,7 @@ public class LoanProductRequest {
     private BigDecimal totalAmountDisbursed;
     private BigDecimal totalAmountRepaid;
 
-    private ActivationStatus loanProductStatus;
+//    private ActivationStatus loanProductStatus;
     private String bankPartner;
     private String disbursementTerms;
     @PositiveOrZero(message = "Interest rate must be zero or positive")
