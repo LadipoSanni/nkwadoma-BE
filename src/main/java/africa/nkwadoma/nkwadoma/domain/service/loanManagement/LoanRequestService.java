@@ -21,6 +21,7 @@ import java.util.*;
 public class LoanRequestService implements LoanRequestUseCase {
     private final LoanRequestOutputPort loanRequestOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
 
     @Override
@@ -41,7 +42,12 @@ public class LoanRequestService implements LoanRequestUseCase {
         if (foundLoanRequest.isEmpty()) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
         }
-        return foundLoanRequest.get();
+        loanRequest = foundLoanRequest.get();
+        log.info("Found loan request: {}", loanRequest);
+        List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId());
+        loanRequest.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
+        return loanRequest;
     }
 
     @Override

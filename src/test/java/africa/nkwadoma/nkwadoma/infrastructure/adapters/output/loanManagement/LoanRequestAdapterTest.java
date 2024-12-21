@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -36,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanRequestAdapterTest {
     private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
     @Autowired
+    private LoaneeUseCase loaneeUseCase;
+    @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
@@ -56,12 +59,22 @@ class LoanRequestAdapterTest {
     @Autowired
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Autowired
+    private CohortUseCase cohortUseCase;
+    @Autowired
     private LoanRequestRepository loanRequestRepository;
-    private NextOfKin nextOfKin;
     @Autowired
     private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
     private LoanDetailRepository loanDetailRepository;
+    @Autowired
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    private NextOfKin nextOfKin;
     private Program dataAnalytics;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
@@ -80,19 +93,14 @@ class LoanRequestAdapterTest {
     private LoanBreakdown loanBreakdown;
     private List<LoanBreakdown> loanBreakdowns;
     private String loanDetailId;
-    private UserIdentity userIdentity;
     private String nextOfKinId;
-    @Autowired
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Autowired
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Autowired
-    private CohortUseCase cohortUseCase;
     private OrganizationIdentity amazingGrace;
-    private  UserIdentity joel;
+    private UserIdentity joel;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private Cohort cohort;
     private String organizationEmployeeIdentityId;
+    private String loaneeUserId;
 
 
     @BeforeAll
@@ -151,38 +159,36 @@ class LoanRequestAdapterTest {
                     .itemName("Loan Break").cohort(cohort).build();
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
 
-            userIdentity = TestData.createTestUserIdentity("qudus@example.com");
-            loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(9000000.00)).
-                    initialDeposit(BigDecimal.valueOf(3000000.00)).build();
+            UserIdentity userIdentity = TestData.createTestUserIdentity("qudus@example.com");
+            loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
+                    initialDeposit(BigDecimal.valueOf(1000000.00)).build();
+            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdowns.get(0).getLoanBreakdownId()).
+                    itemAmount(loanBreakdown.getItemAmount()).
+                    itemName(loanBreakdown.getItemName()).build();
 
-            loanee = Loanee.builder().userIdentity(userIdentity).
-                    cohortId(eliteCohortId).
-                    loaneeLoanDetail(loaneeLoanDetail).build();
-
-            UserIdentity savedUserIdentity = userIdentityOutputPort.save(loanee.getUserIdentity());
+            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (foundUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(foundUser.get());
+            }
+            UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
             userId = savedUserIdentity.getId();
 
-            loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
-            loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            loaneeLoanDetailId = loaneeLoanDetail.getId();
-
+            loanee = new Loanee();
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanee.setUserIdentity(savedUserIdentity);
-            loanee.setCohortId(cohort.getId());
+            loanee.setCohortId(eliteCohortId);
             loanee.setReferredBy(amazingGrace.getName());
-            loanee = loaneeOutputPort.save(loanee);
-            assertNotNull(loanee);
-            log.info("Loanee ID: {}", loanee.getId());
-            loaneeId = loanee.getId();
+            loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
+            loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
-            nextOfKin = new NextOfKin();
-            nextOfKin.setFirstName("Ahmad");
-            nextOfKin.setLastName("Awwal");
-            nextOfKin.setEmail("ahmad12@gmail.com");
-            nextOfKin.setPhoneNumber("0785678901");
-            nextOfKin.setNextOfKinRelationship("Brother");
-            nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-            nextOfKin.setLoanee(loanee);
+            loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            assertNotNull(loanee);
+            loaneeId = loanee.getId();
+            loaneeUserId = loanee.getUserIdentity().getId();
+            loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
+
+            nextOfKin = TestData.createNextOfKinData(loanee);
             NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();
@@ -349,27 +355,29 @@ class LoanRequestAdapterTest {
         try {
             nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
+            loaneeLoanBreakDownOutputPort.deleteAll(loaneeLoanBreakdowns);
             loaneeOutputPort.deleteLoanee(loaneeId);
-            userIdentityOutputPort.deleteUserById(userId);
+            identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
+            userIdentityOutputPort.deleteUserById(loaneeUserId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+            loanDetailRepository.deleteById(loanDetailId);
+            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
             cohortOutputPort.deleteCohort(eliteCohortId);
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
 
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(organizationId);
-
             String serviceOfferingId = null;
             for (OrganizationServiceOffering organizationServiceOffering : organizationServiceOfferings) {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
                 organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
             }
+            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+            userIdentityOutputPort.deleteUserById(userId);
             organizationOutputPort.deleteServiceOffering(serviceOfferingId);
             organizationOutputPort.delete(organizationId);
-
-            loanDetailRepository.deleteById(loanDetailId);
-            loanBreakdownOutputPort.deleteAll(loanBreakdowns);
         } catch (MeedlException e) {
-            log.error("Exception occurred: ", e);
+            log.error("Exception occurred deleting test data: ", e);
         }
     }
 }

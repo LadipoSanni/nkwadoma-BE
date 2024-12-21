@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -34,6 +36,8 @@ class LoanServiceTest {
     private LoanRequestMapper loanRequestMapper;
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
+    @Mock
+    private IdentityVerificationUseCase verificationUseCase;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -79,20 +83,25 @@ class LoanServiceTest {
 
     @Test
     void viewLoanReferral() {
-        LoanReferral foundLoanReferral = null;
+        LoanReferral foundLoanReferral;
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.
                     findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
+            when(verificationUseCase.verifyIdentity(loanReferral.getId())).
+                    thenReturn(IdentityMessages.IDENTITY_VERIFIED.getMessage());
+
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-            assertNotNull(foundLoanReferral);
+
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
+            verify(verificationUseCase, times(1)).verifyIdentity(foundLoanReferral.getId());
+            assertNotNull(foundLoanReferral);
+            assertEquals(foundLoanReferral.getIdentityVerified(), IdentityMessages.IDENTITY_VERIFIED.getMessage());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(foundLoanReferral);
     }
 
     @Test
