@@ -359,7 +359,6 @@ class LoanRequestAdapterTest {
             loaneeOutputPort.deleteLoanee(loaneeId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());
             userIdentityOutputPort.deleteUserById(loaneeUserId);
-            userIdentityOutputPort.deleteUserById(userId);
             loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
             loanDetailRepository.deleteById(loanDetailId);
             loanBreakdownOutputPort.deleteAll(loanBreakdowns);
@@ -373,6 +372,8 @@ class LoanRequestAdapterTest {
                 serviceOfferingId = organizationServiceOffering.getServiceOffering().getId();
                 organizationOutputPort.deleteOrganizationServiceOffering(organizationServiceOffering.getId());
             }
+            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
+            userIdentityOutputPort.deleteUserById(userId);
             organizationOutputPort.deleteServiceOffering(serviceOfferingId);
             organizationOutputPort.delete(organizationId);
         } catch (MeedlException e) {
