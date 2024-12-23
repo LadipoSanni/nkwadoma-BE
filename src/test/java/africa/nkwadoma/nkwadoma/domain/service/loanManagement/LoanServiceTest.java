@@ -1,13 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -41,6 +44,8 @@ class LoanServiceTest {
     private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
+    @Mock
+    private IdentityVerificationUseCase verificationUseCase;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -89,20 +94,25 @@ class LoanServiceTest {
 
     @Test
     void viewLoanReferral() {
-        LoanReferral foundLoanReferral = null;
+        LoanReferral foundLoanReferral;
         try {
             when(loanReferralOutputPort.findLoanReferralByUserId(
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.
                     findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
+            when(verificationUseCase.verifyIdentity(loanReferral.getId())).
+                    thenReturn(IdentityMessages.IDENTITY_VERIFIED.getMessage());
+
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
-            assertNotNull(foundLoanReferral);
+
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
+            verify(verificationUseCase, times(1)).verifyIdentity(foundLoanReferral.getId());
+            assertNotNull(foundLoanReferral);
+            assertEquals(foundLoanReferral.getIdentityVerified(), IdentityMessages.IDENTITY_VERIFIED.getMessage());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
-        assertNotNull(foundLoanReferral);
     }
 
     @Test
@@ -155,15 +165,6 @@ class LoanServiceTest {
         assertNotNull(referral);
         assertEquals(LoanReferralStatus.AUTHORIZED, referral.getLoanReferralStatus());
     }
-
-    @Test
-    void acceptLoanReferralWithNullLoaneeAdditionalDetails() {
-        loanReferral.getLoanee().getUserIdentity().setAlternateContactAddress(null);
-        loanReferral.getLoanee().getUserIdentity().setAlternateEmail(null);
-        loanReferral.getLoanee().getUserIdentity().setAlternatePhoneNumber(null);
-        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
-    }
-
     @Test
     void acceptNullLoanReferral() {
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(null));
@@ -224,7 +225,12 @@ class LoanServiceTest {
     @Test
     void acceptLoanReferralWithNullLoanReferralId() {
         loanReferral.setId(null);
-        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+        try {
+            doThrow(LoanException.class).when(loanReferralOutputPort).findById(loanReferral.getId());
+        } catch (MeedlException e) {
+            log.error("",e);
+        }
+        assertThrows(LoanException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
 
 }

@@ -15,8 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferRestMapper {
 
-
-
+    LoanOfferResponse toLoanOfferResponse(LoanOffer loanOffer);
     @Mapping(target = "id", source = "loanOfferId")
     LoanOffer toLoanOffer(@Valid LoanOfferAcceptRequest loanOfferRequest);
     List<LoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);

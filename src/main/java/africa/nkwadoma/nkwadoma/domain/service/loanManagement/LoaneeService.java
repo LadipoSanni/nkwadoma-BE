@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
@@ -23,10 +24,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
-import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -42,6 +41,11 @@ import org.springframework.stereotype.Service;
 import java.math.*;
 import java.time.*;
 import java.util.*;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
@@ -57,6 +61,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final LoanReferralOutputPort loanReferralOutputPort;
+    private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
 
@@ -98,7 +103,6 @@ public class LoaneeService implements LoaneeUseCase {
         organizationIdentityOutputPort.save(organizationIdentity);
         log.info("Total number of loanees in an organization has been increased to : {}, in organization with id : {}", organizationIdentity.getNumberOfLoanees(), organizationIdentity.getId());
     }
-
     private void increaseNumberOfLoaneesInProgram(Cohort cohort) throws MeedlException {
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
         program.setNumberOfLoanees(program.getNumberOfLoanees() + 1);
@@ -108,7 +112,34 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        return loaneeOutputPort.findLoaneeById(id);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(id);
+        return updateLoaneeCreditScore(loanee);
+    }
+
+    private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+
+        if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
+                creditScoreIsAboveOrEqualOneMonth(loanee)){
+            return updateCreditScore(loanee);
+        }
+            log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+            return loanee;
+    }
+
+    private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn());
+        log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
+        loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
+        loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
+        return loaneeOutputPort.save(loanee);
+    }
+
+    private boolean creditScoreIsAboveOrEqualOneMonth(Loanee loanee) {
+        Duration duration = Duration.between(loanee.getCreditScoreUpdatedAt(), LocalDateTime.now());
+        log.info("Is credit score above or equal one month ago {} for loanee with id {}", duration.toDays() >= 30, loanee.getId());
+        return duration.toDays() >= 30;
     }
 
     @Override

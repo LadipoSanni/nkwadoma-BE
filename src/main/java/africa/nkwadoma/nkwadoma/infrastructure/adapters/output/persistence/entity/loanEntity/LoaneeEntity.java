@@ -22,6 +22,9 @@ public class LoaneeEntity {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime creditScoreUpdatedAt;
+    private int creditScore;
+    private String registryId;
     @OneToOne
     private UserEntity userIdentity;
     @OneToOne

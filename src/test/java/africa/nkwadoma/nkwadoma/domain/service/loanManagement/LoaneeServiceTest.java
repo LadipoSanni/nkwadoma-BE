@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -54,6 +55,8 @@ class LoaneeServiceTest {
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
     private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    @Mock
+    private CreditRegistryOutputPort creditRegistryOutputPort;
     @Mock
     private CohortOutputPort cohortOutputPort;
     @Mock
@@ -211,18 +214,6 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void findLoanee(){
-        Loanee loanee = new Loanee();
-        try {
-             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-             loanee = loaneeService.viewLoaneeDetails(mockId);
-        } catch (MeedlException exception) {
-            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-        assertEquals(loanee.getUserIdentity().getEmail(),firstLoanee.getUserIdentity().getEmail());
-    }
-
-    @Test
     void viewAllLoaneeInCohort() throws MeedlException {
         when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber)).
                 thenReturn(new PageImpl<>(List.of(firstLoanee)));
@@ -282,6 +273,96 @@ class LoaneeServiceTest {
     void cannotFindLoaneeWithInvalidUuid(String id){
         assertThrows(MeedlException.class,() -> loaneeService.viewLoaneeDetails(id));
     }
+
+    @Test
+    void findLoanee(){
+        Loanee loanee = new Loanee();
+        try {
+            firstLoanee.setId(mockId);
+            firstLoanee.getUserIdentity().setBvn("12345678901");
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+            when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+            loanee = loaneeService.viewLoaneeDetails(mockId);
+            verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
+        } catch (MeedlException exception) {
+            log.error("Error occured",  exception);
+        }
+        assertEquals(firstLoanee.getId(), loanee.getId());
+        assertEquals(firstLoanee.getUserIdentity().getEmail(), loanee.getUserIdentity().getEmail());
+    }
+
+    @Test
+    void cannotFindLoaneeWithNonExistentId() {
+        try {
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(null);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
+    }
+
+    @Test
+    void cannotUpdateLoaneeCreditScoreWithNullUserIdentity() throws MeedlException {
+        firstLoanee.setUserIdentity(null);
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
+    }
+
+    @Test
+    void updateLoaneeCreditScoreWhenCreditScoreUpdateIsDue() throws MeedlException {
+        firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusMonths(2));
+        firstLoanee.getUserIdentity().setBvn("12345678900");
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+
+        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+
+        assertNotNull(result);
+        assertEquals(firstLoanee.getId(), result.getId());
+        verify(loaneeOutputPort, times(1)).save(firstLoanee);
+    }
+
+    @Test
+    void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {
+        firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(15));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+
+        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+
+        assertNotNull(result);
+        assertEquals(firstLoanee.getId(), result.getId());
+        verify(loaneeOutputPort, never()).save(firstLoanee);
+    }
+
+    @Test
+    void cannotUpdateLoaneeCreditScoreWithInvalidBVN() throws MeedlException {
+        firstLoanee.getUserIdentity().setBvn(null);
+        firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusMonths(2));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+
+        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
+    }
+
+    @Test
+    void loaneeDetailsSuccessfullyRetrievedWhenCreditScoreUpdateIsSkipped() throws MeedlException {
+        firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(10));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+
+        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+
+        assertNotNull(result);
+        assertEquals(firstLoanee.getCreditScoreUpdatedAt(), result.getCreditScoreUpdatedAt());
+        verify(loaneeOutputPort, never()).save(firstLoanee);
+    }
+
+
+
+
+
+
+
 
     @Test
     void searchLoaneeInACohort(){

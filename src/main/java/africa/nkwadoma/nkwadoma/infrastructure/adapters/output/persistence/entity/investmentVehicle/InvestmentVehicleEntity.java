@@ -11,10 +11,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.apache.james.mime4j.dom.datetime.DateTime;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @ToString
 @Setter
@@ -31,6 +34,7 @@ public class InvestmentVehicleEntity {
     private String name;
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleType investmentVehicleType;
+    @Size( max = 2500, message = "Investment vehicle mandate must not exceed 2500 characters")
     private String mandate;
     private String sponsors;
     private int tenure;
@@ -42,5 +46,12 @@ public class InvestmentVehicleEntity {
     private InvestmentVehicleFinancierEntity leads;
     @OneToOne
     private InvestmentVehicleFinancierEntity contributors;
+    private String trustee;
+    private String custodian;
+    private String bankPartner;
+    private String fundManager;
+    private String sponsor;
+    private BigDecimal minimumInvestmentAmount;
+    private LocalDate startDate;
 
 }

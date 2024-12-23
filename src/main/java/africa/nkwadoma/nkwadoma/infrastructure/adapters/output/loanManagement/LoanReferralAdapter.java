@@ -40,9 +40,8 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
             log.info("Empty Loan referral projection: {}", loanReferralProjection);
             return Optional.empty();
         }
-        log.info("LoanReferral Projection : {}", loanReferralProjection.get());
         LoanReferral loanReferral = loanReferralMapper.mapProjectionToLoanReferralEntity(loanReferralProjection.get());
-        log.info("Mapped LoanReferral : {}", loanReferral);
+        log.info("Mapped LoanReferral: {}", loanReferral);
         return Optional.of(loanReferral);
     }
 

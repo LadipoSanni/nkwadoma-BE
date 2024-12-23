@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -11,6 +12,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -45,6 +48,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanOutputPort loanOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
+    private final IdentityVerificationUseCase verificationUseCase;
 
 
     @Override
@@ -140,18 +144,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private LoanReferral getLoanReferral(List<LoanReferral> foundLoanReferrals) throws MeedlException {
         LoanReferral loanReferral = foundLoanReferrals.get(0);
-        if (ObjectUtils.isEmpty(loanReferral)) {
-            log.info("Empty Loan referral returned");
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        Optional<LoanReferral> loanReferralById = loanReferralOutputPort.
-                findLoanReferralById(loanReferral.getId());
-        if (loanReferralById.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage());
-        }
-        log.info("Found Loan referral by it's ID: {}", loanReferralById.get());
-        return loanReferralById.get();
-
+        MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
+        loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
+                .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
+        String identityVerified = verificationUseCase.verifyIdentity(loanReferral.getId());
+        log.info("Verification status: {}", identityVerified);
+        loanReferral.setIdentityVerified(identityVerified);
+        log.info("Found Loan referral by it's ID: {}", loanReferral);
+        return loanReferral;
     }
 
     @Override
@@ -185,8 +185,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanRequest);
+        log.info("validate loan request");
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus(), LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        log.info("validating loan request referral status");
+        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
+        if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
+            log.info("");
+            throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
+        }
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setCreatedDate(LocalDateTime.now());
         return loanRequestOutputPort.save(loanRequest);
@@ -261,5 +269,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                    pageSize,pageNumber);
         }
         return loanOfferOutputPort.findAllLoanOffers(pageSize,pageNumber);
+    }
+
+
+    @Override
+    public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
+                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                throw new LoanOfferException(
+                        LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
+            }
+        return loanOffer;
     }
 }

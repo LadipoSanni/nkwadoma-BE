@@ -10,7 +10,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,6 +33,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_RETRIEVED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.ACCEPT_LOAN_OFFER;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOAN_OFFER_FOUND;
 
 
 @RequestMapping(BASE_URL + LOAN)
@@ -48,6 +48,7 @@ public class LoanController {
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoanOfferRestMapper loanOfferRestMapper;
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
+    private final LoanReferralRestMapper loanReferralRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -98,7 +99,7 @@ public class LoanController {
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(paginatedResponse).
-                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL).
                 build(), HttpStatus.OK
         );
     }
@@ -187,9 +188,24 @@ public class LoanController {
         );
         ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
                 .data(paginatedResponse)
-                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @GetMapping("view-loan-offer/{loanOfferId}")
+    @PreAuthorize("hasRole('LOANEE') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewLoanOffer(@AuthenticationPrincipal Jwt meedlUser, @PathVariable @NotBlank(message = "LoanOffer ID is required")
+                                                            String loanOfferId ) throws MeedlException {
+        LoanOffer loanOffer = loanOfferUseCase.viewLoanOfferDetails((meedlUser.getClaimAsString("sub")),loanOfferId);
+        LoanOfferResponse loanOfferResponse = loanOfferRestMapper.toLoanOfferResponse(loanOffer);
+        ApiResponse<LoanOfferResponse> apiResponse = ApiResponse.<LoanOfferResponse>builder()
+                .data(loanOfferResponse)
+                .message(LOAN_OFFER_FOUND)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 }

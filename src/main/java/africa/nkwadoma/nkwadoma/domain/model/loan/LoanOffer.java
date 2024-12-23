@@ -28,11 +28,11 @@ public class LoanOffer {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequest.getId());
+        MeedlValidator.validateUUID(loanRequest.getId(),"LoanRequest Id");
     }
 
     public void validateForAcceptOffer() throws MeedlException {
         MeedlValidator.validateUUID(userId);
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id,"LoanOffer Id");
     }
 }
