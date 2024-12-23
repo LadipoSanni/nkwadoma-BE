@@ -49,7 +49,9 @@ public enum LoanMessages {
     LOAN_OFFER_NOT_FOUND("Loan Offer Not Found"),
     REASON_IS_REQUIRED("Reason for declining loan request is required"),
     INVALID_LOAN_DECISION(   "Loan decision must either be ACCEPTED or DECLINED"),
-    LOAN_REQUEST_ID_CANNOT_BE_EMPTY("Loan request ID must not be empty");
+    LOAN_REQUEST_ID_CANNOT_BE_EMPTY("Loan request ID must not be empty"),
+    LOAN_CANNOT_BE_EMPTY("Loan cannot be empty"),
+    LOANEE_ACCOUNT_NOT_FOUND("Loan account not found");
     private final String message;
 
     LoanMessages(String message) {
