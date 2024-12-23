@@ -4,19 +4,22 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,9 +37,14 @@ class LoanAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private Loan loan;
+    private LoaneeLoanAccount loaneeLoanAccount;
     private String savedLoanId;
     private String loaneeId;
     private String loanId;
+    @Autowired
+    private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
+    private String loaneeLoanAccountId;
+
     @BeforeAll
     public void setUp(){
         UserIdentity userIdentity = TestData.createTestUserIdentity("testuser@email.com");
@@ -55,17 +63,29 @@ class LoanAdapterTest {
             log.error("Error saving loanee {}", e.getMessage());
             throw new RuntimeException(e);
         }
+        loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
+        try {
+            LoaneeLoanAccount foundLoaneeAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId());
+            if (ObjectUtils.isEmpty(foundLoaneeAccount)) {
+                loaneeLoanAccount = loaneeLoanAccountOutputPort.save(loaneeLoanAccount);
+                loaneeLoanAccountId = loaneeLoanAccount.getId();
+            }
+            else loaneeLoanAccountOutputPort.deleteLoaneeLoanAccount(foundLoaneeAccount.getId());
+        } catch (MeedlException e) {
+            log.error("Error saving loanee account", e);
+        }
         loaneeId = loanee.getId();
         loan = TestData.createTestLoan(loanee);
         loanee.setUserIdentity(userIdentity);
         loan.setLoanee(loanee);
-
+        loan.setStartDate(LocalDateTime.now());
+        loan.setLoanAccountId(loaneeLoanAccountId);
     }
 
     @Test
     @Order(1)
     void saveLoan(){
-        Loan savedLoan = null;
+        Loan savedLoan;
         try {
             savedLoan = loanOutputPort.save(loan);
             savedLoanId = savedLoan.getId();
@@ -77,6 +97,9 @@ class LoanAdapterTest {
         }
         assertNotNull(savedLoan);
         assertNotNull(savedLoan.getId());
+        assertNotNull(savedLoan.getStartDate());
+        assertEquals(loaneeLoanAccountId, savedLoan.getLoanAccountId());
+        assertEquals(loaneeId, savedLoan.getLoaneeId());
     }
     @Test
     void saveLoanWithNull() {
@@ -125,6 +148,13 @@ class LoanAdapterTest {
     }
 
     private void deleteLoan() {
+        if (StringUtils.isNotEmpty(loaneeLoanAccountId)) {
+            try {
+                loaneeLoanAccountOutputPort.deleteLoaneeLoanAccount(loaneeLoanAccountId);
+            } catch (MeedlException e) {
+                log.error("Error deleting loanee account", e);
+            }
+        }
         if (StringUtils.isNotEmpty(savedLoanId)) {
             try {
                 loanOutputPort.deleteById(savedLoanId);
