@@ -122,9 +122,11 @@ public class UserIdentityService implements CreateUserUseCase {
 //        passwordPreviouslyCreated(token);
         MeedlValidator.validateDataElement(token);
         passwordPreviouslyCreated(token);
-        UserIdentity userIdentity = getUserIdentityFromToken(password, token);
-        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
-        log.info("User Identity after password has been created: {}", userIdentity);
+        UserIdentity foundUser = getUserIdentityFromToken(password, token);
+        UserIdentity userIdentity = identityManagerOutPutPort.createPassword(
+                UserIdentity.builder().email(foundUser.getEmail()).password(password).build());
+        userIdentity.setRole(foundUser.getRole());
+        log.info("User Identity after password has been created: {}", foundUser);
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
 //        log.info("done getting user identity frm token {}",userIdentity);
 //        userIdentity = identityManagerOutPutPort.createPassword(UserIdentity.builder().email(userIdentity.getEmail()).password(password).build());
