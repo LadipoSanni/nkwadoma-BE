@@ -183,6 +183,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
             OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
                     id(foundUserIdentity.getId()).build();
             employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+            log.info("Found Employee identity: {}", employeeIdentity);
             OrganizationIdentity foundOrganizationIdentity =
                     viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", foundOrganizationIdentity);
