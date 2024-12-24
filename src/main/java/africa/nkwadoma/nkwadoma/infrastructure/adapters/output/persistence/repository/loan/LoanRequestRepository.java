@@ -42,4 +42,5 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
           where lr.id = :id
     """)
     Optional<LoanRequestProjection> findLoanRequestById(@Param("id") String id);
+
 }

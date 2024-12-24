@@ -14,7 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -22,8 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.time.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
