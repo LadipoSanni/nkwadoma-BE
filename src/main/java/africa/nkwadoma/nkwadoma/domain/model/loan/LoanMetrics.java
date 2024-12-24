@@ -7,6 +7,7 @@ import lombok.*;
 @ToString
 @Getter
 @Setter
+@Builder
 public class LoanMetrics {
     private String id;
     private String organizationId;

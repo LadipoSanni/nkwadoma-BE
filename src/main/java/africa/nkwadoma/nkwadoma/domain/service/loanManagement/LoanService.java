@@ -37,6 +37,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanOfferUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
+    private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
@@ -192,11 +193,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("validating loan request referral status");
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
         if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
-            log.info("");
             throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setCreatedDate(LocalDateTime.now());
+        int loanRequestCount = 0;
+        loanMetricsOutputPort.save(LoanMetrics.builder().
+                organizationId(loanRequest.getReferredBy()).
+                loanRequestCount(loanRequestCount + 1).build()
+        );
         return loanRequestOutputPort.save(loanRequest);
     }
 
