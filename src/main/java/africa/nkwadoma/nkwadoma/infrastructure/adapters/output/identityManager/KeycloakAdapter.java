@@ -251,7 +251,8 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         for (UserRepresentation userRepresentation : userRepresentations){
             userRepresentation.setEnabled(true);
             UserResource userResource = getUserResourceByKeycloakId(userRepresentation.getId());
-            userResource.update(userRepresentation);}
+            userResource.update(userRepresentation);
+        }
         UserRepresentation userRepresentation = mapper.map(foundUser);
         userRepresentation.setEnabled(Boolean.TRUE);
         userRepresentation.setEmailVerified(Boolean.TRUE);
