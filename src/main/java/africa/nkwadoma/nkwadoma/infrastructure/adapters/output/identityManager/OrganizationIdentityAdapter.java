@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -196,12 +197,23 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
     @Override
     public List<OrganizationIdentity> findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, "Organization name is required");
+        MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
         log.info("Searching for organizations with name {}", name);
         List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
         log.info("Found {} organizations", organizationEntities);
         return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
     }
+
+    @Override
+    public OrganizationIdentity findOrganizationByName(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
+        Optional<OrganizationEntity> foundOrganization = organizationEntityRepository.findByName(name);
+        if (foundOrganization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        return organizationIdentityMapper.toOrganizationIdentity(foundOrganization.get());
+    }
+
     @Override
     public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
         OrganizationIdentity organizationIdentity = findById(organizationId);

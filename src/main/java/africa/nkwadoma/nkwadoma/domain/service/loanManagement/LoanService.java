@@ -3,18 +3,15 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -47,6 +44,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoanOfferOutputPort loanOfferOutputPort;
     private final LoanOfferMapper loanOfferMapper;
     private final LoanOutputPort loanOutputPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private final IdentityVerificationUseCase verificationUseCase;
@@ -186,12 +184,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loanRequest);
-        log.info("validate loan request");
         loanRequest.validate();
         MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus(), LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
-        log.info("validating loan request referral status");
-        MeedlValidator.validateObjectInstance(loanRequest.getLoanReferralStatus());
         if (!loanRequest.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             throw new LoanException(LoanMessages.LOAN_REFERRAL_STATUS_MUST_BE_ACCEPTED.getMessage());
         }
@@ -199,13 +193,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanRequest.setCreatedDate(LocalDateTime.now());
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request {}", request);
-        int loanRequestCount = 0;
+        updateLoanMetrics(loanRequest);
+        return request;
+    }
 
+    private void updateLoanMetrics(LoanRequest loanRequest) throws MeedlException {
+        int loanRequestCount = 0;
+        OrganizationIdentity organization = organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         loanMetricsOutputPort.save(LoanMetrics.builder().
-                organizationId(loanRequest.getOrganizationId()).
+                organizationId(organization.getId()).
                 loanRequestCount(loanRequestCount + 1).build()
         );
-        return request;
     }
 
     @Override
