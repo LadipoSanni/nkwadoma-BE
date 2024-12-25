@@ -9,7 +9,8 @@ public enum OrganizationMessages {
     INVALID_SERVICE_OFFERING_ID("Please provide a valid service offering identification."),
     INVALID_INDUSTRY("Organization's industry must be BANKING or EDUCATION"),
     INVALID_RC_NUMBER("Invalid Registration number"),
-    ORGANIZATIOM_MUST_NOT_BE_EMPTY("Organization identity must not be empty");
+    ORGANIZATIOM_MUST_NOT_BE_EMPTY("Organization identity must not be empty"),
+    LOAN_METRICS_NOT_FOUND("No loan metrics found");
 
     private final String message;
     OrganizationMessages(String message) {

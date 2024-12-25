@@ -8,4 +8,5 @@ import java.util.*;
 public interface LoanMetricsOutputPort {
     LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException;
     Optional<LoanMetrics> findTopOrganizationWithLoanRequest();
+    void delete(String loanMetricsId) throws MeedlException;
 }

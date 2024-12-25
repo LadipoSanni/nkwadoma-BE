@@ -37,4 +37,14 @@ public class LoanMetricsPersistenceAdapter implements LoanMetricsOutputPort {
         }
         return Optional.of(loanMetricsMapper.toLoanMetrics(loanMetricsEntity.get()));
     }
+
+    @Override
+    public void delete(String loanMetricsId) throws MeedlException {
+        MeedlValidator.validateUUID(loanMetricsId,
+                OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        Optional<LoanMetricsEntity> loanMetricsEntity = loanMetricsRepository.findById(loanMetricsId);
+        if (loanMetricsEntity.isPresent()) {
+            loanMetricsRepository.delete(loanMetricsEntity.get());
+        }
+    }
 }
