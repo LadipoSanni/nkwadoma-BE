@@ -105,7 +105,7 @@ class LoanServiceTest {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
-                    thenReturn(organizationIdentity);
+                    thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
@@ -186,7 +186,7 @@ class LoanServiceTest {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
-                    thenReturn(organizationIdentity);
+                    thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);

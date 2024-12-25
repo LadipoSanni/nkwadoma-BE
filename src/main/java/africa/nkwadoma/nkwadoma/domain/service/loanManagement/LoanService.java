@@ -6,8 +6,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
@@ -198,9 +200,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateLoanMetrics(LoanRequest loanRequest) throws MeedlException {
         int loanRequestCount = 0;
-        OrganizationIdentity organization = organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
+        Optional<OrganizationIdentity> organization = organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
+        if (organization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
         loanMetricsOutputPort.save(LoanMetrics.builder().
-                organizationId(organization.getId()).
+                organizationId(organization.get().getId()).
                 loanRequestCount(loanRequestCount + 1).build()
         );
     }

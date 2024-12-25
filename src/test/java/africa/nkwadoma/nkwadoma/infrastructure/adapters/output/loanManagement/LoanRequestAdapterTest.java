@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class LoanRequestAdapterTest {
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
     @Autowired
     private LoaneeUseCase loaneeUseCase;
     @Autowired
@@ -115,6 +114,10 @@ class LoanRequestAdapterTest {
                     "RC9500034",
                     employees
             );
+            Optional<OrganizationIdentity> organization = organizationIdentityOutputPort.findOrganizationByName(amazingGrace.getName());
+            if (organization.isPresent()) {
+                organizationIdentityOutputPort.delete(organization.get().getId());
+            }
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
                     name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));

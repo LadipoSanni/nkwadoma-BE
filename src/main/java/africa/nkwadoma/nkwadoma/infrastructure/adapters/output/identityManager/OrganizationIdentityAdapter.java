@@ -205,13 +205,14 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public OrganizationIdentity findOrganizationByName(String name) throws MeedlException {
+    public Optional<OrganizationIdentity> findOrganizationByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
         Optional<OrganizationEntity> foundOrganization = organizationEntityRepository.findByName(name);
         if (foundOrganization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+            return Optional.empty();
+//            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
-        return organizationIdentityMapper.toOrganizationIdentity(foundOrganization.get());
+        return Optional.of(organizationIdentityMapper.toOrganizationIdentity(foundOrganization.get()));
     }
 
     @Override
