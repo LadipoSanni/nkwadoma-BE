@@ -329,11 +329,10 @@ class OrganizationIdentityAdapterTest {
                 if (StringUtils.isNotEmpty(serviceOfferingId)) {
                     organizationOutputPort.deleteServiceOffering(serviceOfferingId);
                 }
-                organizationOutputPort.delete(amazingGrace.getId());
+                organizationOutputPort.delete(amazingGraceId);
             } catch (MeedlException e) {
                 log.error("", e);
             }
-            organizationEntityRepository.deleteById(amazingGraceId);
         }
     }
 }

@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
@@ -100,6 +101,8 @@ class LoanRequestAdapterTest {
     private Cohort cohort;
     private String organizationEmployeeIdentityId;
     private String loaneeUserId;
+    @Autowired
+    private OrganizationEntityRepository organizationEntityRepository;
 
 
     @BeforeAll
@@ -114,7 +117,7 @@ class LoanRequestAdapterTest {
                     "RC9500034",
                     employees
             );
-            Optional<OrganizationIdentity> organization = organizationIdentityOutputPort.findOrganizationByName(amazingGrace.getName());
+            Optional<OrganizationEntity> organization = organizationEntityRepository.findById(amazingGrace.getId());
             if (organization.isPresent()) {
                 organizationIdentityOutputPort.delete(organization.get().getId());
             }
