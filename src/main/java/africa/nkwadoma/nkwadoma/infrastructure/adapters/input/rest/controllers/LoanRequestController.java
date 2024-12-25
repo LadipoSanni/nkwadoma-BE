@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
+import io.swagger.v3.oas.annotations.*;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -53,6 +54,7 @@ public class LoanRequestController {
     }
 
     @GetMapping("{organizationId}/loan-requests")
+    @Operation(summary = "View all loan requests in an organization")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(@Valid
             @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
