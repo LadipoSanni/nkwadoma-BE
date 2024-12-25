@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
@@ -29,7 +30,14 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlValidator.validateObjectInstance(loanRequest);
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
-        Page<LoanRequest> loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+        Page<LoanRequest> loanRequests;
+        if (StringUtils.isNotEmpty(loanRequest.getOrganizationId())) {
+            loanRequests = loanRequestOutputPort.viewAll
+                    (loanRequest.getOrganizationId(), loanRequest.getPageNumber(), loanRequest.getPageSize());
+        }
+        else {
+            loanRequests = loanRequestOutputPort.viewAll(loanRequest.getPageNumber(), loanRequest.getPageSize());
+        }
         log.info("Loan requests from repository: {}", loanRequests.getContent());
         return loanRequests;
     }
@@ -65,23 +73,25 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+        LoanRequest updatedLoanRequest = null;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            approveLoanRequest(loanRequest, foundLoanRequest);
+            updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
         }
         else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
-            declineLoanRequest(loanRequest, foundLoanRequest);
+            updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
         }
-        return loanRequestOutputPort.save(foundLoanRequest);
+        return loanRequestOutputPort.save(updatedLoanRequest);
     }
 
-    private static void declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+    private static LoanRequest declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         MeedlValidator.validateDataElement(loanRequest.getDeclineReason(), "Reason for declining is required");
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
         foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
+        return foundLoanRequest;
     }
 
-    private void approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
+    private LoanRequest approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
         if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
             throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
@@ -92,5 +102,6 @@ public class LoanRequestService implements LoanRequestUseCase {
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
         loanOfferUseCase.createLoanOffer(foundLoanRequest);
+        return foundLoanRequest;
     }
 }

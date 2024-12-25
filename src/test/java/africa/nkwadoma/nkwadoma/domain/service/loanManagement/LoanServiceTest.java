@@ -35,6 +35,8 @@ class LoanServiceTest {
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
+    private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
@@ -53,6 +55,8 @@ class LoanServiceTest {
     private UserIdentity userIdentity;
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoaneeLoanAccount loaneeLoanAccount;
+    private LoanMetrics loanMetrics;
+
 
     @BeforeEach
     void setUp() {
@@ -71,6 +75,11 @@ class LoanServiceTest {
         loanRequest.setLoanReferralId(loanReferral.getId());
         loanRequest.setCreatedDate(LocalDateTime.now());
 
+        loanMetrics = LoanMetrics.builder()
+                .organizationId("ead0f7cb-5483-4bb8-b271-813970a9c368")
+                .loanRequestCount(1)
+                .build();
+
         loan = TestData.createTestLoan(loanee);
     }
 
@@ -78,6 +87,11 @@ class LoanServiceTest {
     void createLoanRequest() {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            int loanRequestCount = 0;
+            when(loanMetricsOutputPort.save(LoanMetrics.builder().
+                    organizationId(loanRequest.getOrganizationId()).
+                    loanRequestCount(loanRequestCount + 1).build()
+            )).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
@@ -157,6 +171,11 @@ class LoanServiceTest {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
+            int loanRequestCount = 0;
+            when(loanMetricsOutputPort.save(LoanMetrics.builder().
+                    organizationId(loanRequest.getOrganizationId()).
+                    loanRequestCount(loanRequestCount + 1).build()
+            )).thenReturn(loanMetrics);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {

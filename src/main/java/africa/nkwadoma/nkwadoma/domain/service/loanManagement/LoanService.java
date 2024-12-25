@@ -197,12 +197,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         loanRequest.setStatus(LoanRequestStatus.NEW);
         loanRequest.setCreatedDate(LocalDateTime.now());
+        LoanRequest request = loanRequestOutputPort.save(loanRequest);
+        log.info("Saved loan request {}", request);
         int loanRequestCount = 0;
+
         loanMetricsOutputPort.save(LoanMetrics.builder().
-                organizationId(loanRequest.getReferredBy()).
+                organizationId(loanRequest.getOrganizationId()).
                 loanRequestCount(loanRequestCount + 1).build()
         );
-        return loanRequestOutputPort.save(loanRequest);
+        return request;
     }
 
     @Override

@@ -240,6 +240,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         if (loanMetrics.isEmpty()){
             throw new EducationException(OrganizationMessages.LOAN_METRICS_NOT_FOUND.getMessage());
         }
+        log.info("Loan metrics found: {}", loanMetrics);
         return organizationIdentityOutputPort.findById(loanMetrics.get().getOrganizationId());
     }
 

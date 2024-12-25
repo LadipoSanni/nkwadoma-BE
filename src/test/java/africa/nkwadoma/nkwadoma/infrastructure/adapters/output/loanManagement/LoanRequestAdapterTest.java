@@ -284,6 +284,26 @@ class LoanRequestAdapterTest {
         assertEquals(1, loanRequests.getTotalElements());
     }
 
+    @Test
+    void viewAllLoanRequestsByOrganizationId() {
+        try {
+            LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
+            assertNotNull(savedLoanRequest);
+            loanRequestId = savedLoanRequest.getId();
+        } catch (MeedlException e) {
+            log.error("Error saving loan request: ", e);
+        }
+        Page<LoanRequest> loanRequests = Page.empty();
+        try {
+            loanRequests = loanRequestOutputPort.viewAll(organizationId, 0, 10);
+        } catch (MeedlException e) {
+            log.error("Error viewing all loan requests ", e);
+        }
+        assertNotNull(loanRequests.getContent());
+        assertEquals(1, loanRequests.getTotalElements());
+        assertNotNull(loanRequests.getContent().get(0).getReferredBy(), amazingGrace.getName());
+    }
+
     @ParameterizedTest
     @ValueSource(ints = -1)
     void viewAllLoanRequestsWithInvalidPageNumber(int pageNumber) {

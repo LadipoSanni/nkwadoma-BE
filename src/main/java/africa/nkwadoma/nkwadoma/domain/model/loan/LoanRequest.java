@@ -21,6 +21,7 @@ import java.util.*;
 public class LoanRequest {
     private String id;
     private String loanProductId;
+    private String organizationId;
     private String referredBy;
     private String firstName;
     private String lastName;

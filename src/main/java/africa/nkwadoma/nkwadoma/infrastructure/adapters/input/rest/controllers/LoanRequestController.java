@@ -52,6 +52,33 @@ public class LoanRequestController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("{organizationId}/loan-requests")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(@Valid
+            @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setOrganizationId(organizationId);
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
+        Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
+        log.info("Loan requests returned from service layer: {}", loanRequests.getContent());
+        List<LoanRequestResponse> loanRequestResponses =
+                loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
+        log.info("Loan request response: {}", loanRequestResponses);
+        PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
+                loanRequestResponses, loanRequests.hasNext(),
+                loanRequests.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+                <PaginatedResponse<LoanRequestResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @GetMapping("/loan-requests/{id}")
     public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
             (message = "Loan request ID is required") String id) throws MeedlException {

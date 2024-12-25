@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class OrganizationEntity {
     @Id
     private String id;
+    @Column(unique = true)
     private String name;
     private String email;
     private String websiteAddress;
