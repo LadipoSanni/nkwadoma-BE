@@ -37,22 +37,20 @@ class LoanMetricsPersistenceAdapterTest {
 
     @AfterEach
     void tearDown() {
-        if (StringUtils.isNotEmpty(loanMetricsId) ||
-                StringUtils.isNotEmpty(secondLoanMetricsId)) {
+        if (StringUtils.isNotEmpty(loanMetricsId)) {
             try {
                 loanMetricsOutputPort.delete(loanMetricsId);
+            } catch (MeedlException e) {
+                log.error("Exception occurred deleting loan metrics {}", e.getMessage());
+            }
+        }
+        if (StringUtils.isNotEmpty(secondLoanMetricsId)) {
+            try {
                 loanMetricsOutputPort.delete(secondLoanMetricsId);
             } catch (MeedlException e) {
                 log.error("Exception occurred deleting loan metrics {}", e.getMessage());
             }
         }
-//        if (StringUtils.isNotEmpty(secondLoanMetricsId)) {
-//            try {
-//                loanMetricsOutputPort.delete(secondLoanMetricsId);
-//            } catch (MeedlException e) {
-//                log.error("Exception occurred deleting loan metrics {}", e.getMessage());
-//            }
-//        }
     }
 
     @Test

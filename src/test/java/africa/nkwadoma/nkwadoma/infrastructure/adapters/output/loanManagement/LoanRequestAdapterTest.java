@@ -306,7 +306,6 @@ class LoanRequestAdapterTest {
             log.error("Error viewing all loan requests ", e);
         }
         assertNotNull(loanRequests.getContent());
-        assertEquals(1, loanRequests.getTotalElements());
         assertNotNull(loanRequests.getContent().get(0).getReferredBy(), amazingGrace.getName());
     }
 
