@@ -131,9 +131,9 @@ public class LoanController {
         ApiResponse<LoanProductResponse> apiResponse = ApiResponse.<LoanProductResponse>builder()
                 .data(loanProductResponse)
                 .message(LOAN_PRODUCT_FOUND_SUCCESSFULLY)
-                .statusCode(HttpStatus.FOUND.toString())
+                .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.FOUND);
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
     @PostMapping("start")
