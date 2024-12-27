@@ -23,5 +23,10 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 
-    List<LoaneeEntity> findByCohortIdAndFullNameContainingIgnoreCase(String cohortId, String name);
+    @Query("SELECT  l FROM LoaneeEntity  l "+
+            "WHERE l.cohortId = :cohortId "+
+            "AND upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName))" +
+            "LIKE upper(concat('%', :nameFragment, '%'))")
+    List<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
+                                                     @Param("nameFragment") String nameFragment);
 }

@@ -33,5 +33,4 @@ public class LoaneeEntity {
     private LoaneeStatus loaneeStatus;
     private LocalDateTime referralDateTime;
     private String referredBy;
-    private String fullName;
 }

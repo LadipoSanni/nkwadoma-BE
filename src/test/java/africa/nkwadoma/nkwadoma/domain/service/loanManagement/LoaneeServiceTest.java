@@ -368,7 +368,6 @@ class LoaneeServiceTest {
     void searchLoaneeInACohort(){
         List<Loanee> loanees = new ArrayList<>();
         try {
-            firstLoanee.setFullName(loaneeUserIdentity.getFirstName().concat(loaneeUserIdentity.getLastName()));
             when(loaneeOutputPort.searchForLoaneeInCohort("le", mockId)).thenReturn(List.of(firstLoanee));
             loanees = loaneeService.searchForLoaneeInCohort("le", mockId);
         }catch (MeedlException exception){
