@@ -23,7 +23,7 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
       o.logoImage as logoImage,
       lm.loanRequestCount as loanRequestCount
       from OrganizationEntity o
-      left join LoanMetricsEntity lm on lm.organizationId = o.id
+      join LoanMetricsEntity lm on lm.organizationId = o.id
 """)
     List<OrganizationProjection> findAllWithLoanRequests();
 

@@ -106,7 +106,8 @@ public class OrganizationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found all organizations",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OrganizationIdentity.class)) })
+                            schema = @Schema(implementation = OrganizationIdentity.class))
+            })
     })
     public ResponseEntity<APIResponse<?>> viewAllOrganizationWithLoanRequest() throws MeedlException {
         List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsWithLoanRequest();
