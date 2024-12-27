@@ -37,6 +37,7 @@ public class OrganizationIdentity {
     private boolean isEnabled;
     private String createdBy;
     private String updatedBy;
+    private int loanRequestCount;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;

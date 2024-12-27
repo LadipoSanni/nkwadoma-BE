@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -195,6 +196,19 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
     }
+
+    @Override
+    public List<OrganizationIdentity> findAllWithLoanRequests() {
+        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanRequests();
+        if (CollectionUtils.isEmpty(organizations)) {
+            return new ArrayList<>();
+        }
+        List<OrganizationIdentity> organizationIdentities = organizations.stream().
+                map(organizationIdentityMapper::projectionToOrganizationIdentity).toList();
+        log.info("Mapped organization identities: {}", organizationIdentities);
+        return organizationIdentities;
+    }
+
     @Override
     public List<OrganizationIdentity> findByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());

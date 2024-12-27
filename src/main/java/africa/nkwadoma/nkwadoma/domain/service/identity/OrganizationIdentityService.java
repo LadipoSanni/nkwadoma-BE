@@ -245,6 +245,11 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     @Override
+    public List<OrganizationIdentity> viewAllOrganizationsWithLoanRequest() {
+        return organizationIdentityOutputPort.findAllWithLoanRequests();
+    }
+
+    @Override
     public OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException {
         MeedlValidator.validateUUID(adminId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
