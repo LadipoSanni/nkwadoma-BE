@@ -17,16 +17,6 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 
     Optional<OrganizationEntity> findByName(String name);
 
-//    @Query("""
-//          select o.id as organizationId,
-//           o.name as name,
-//           o.logoImage as logoImage,
-//           lm.loanRequestCount as loanRequestCount
-//          from OrganizationEntity o
-//          join LoanMetricsEntity lm on lm.organizationId = o.id
-//    """)
-//    List<OrganizationProjection> findAllWithLoanRequests();
-
     @Query("""
       select o.id as organizationId,
       o.name as name,
