@@ -125,7 +125,7 @@ public class MeedlValidator {
         }
     }
     public static void validateBvn(String bvn) throws MeedlException {
-        MeedlValidator.validateDataElement(bvn, "Invalid bvn provided");
+        MeedlValidator.validateDataElement(bvn, "bvn is empty");
         String regex = "^\\d{11}$";
 
         boolean isValid = Pattern.matches(regex, bvn);

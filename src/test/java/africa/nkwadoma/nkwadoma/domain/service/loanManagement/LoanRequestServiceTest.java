@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
@@ -34,6 +35,8 @@ class LoanRequestServiceTest {
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
+    private LoaneeUseCase loaneeUseCase;
+    @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     @Mock
     private LoanOfferUseCase loanOfferUseCase;
@@ -44,11 +47,10 @@ class LoanRequestServiceTest {
 
     @BeforeEach
     void setUp() {
-//        OrganizationIdentity organizationIdentity = TestData.createOrganizationTestData()
         UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
                 alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").build();
+                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").bvn("587907453").build();
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
@@ -71,9 +73,11 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(Optional.of(loanRequest));
             when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
+            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId())).thenReturn(loanRequest.getLoanee());
             LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).findById(loanRequest.getId());
+            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId());
             assertNotNull(retrievedLoanRequest);
             assertNotNull(retrievedLoanRequest.getLoaneeLoanBreakdowns());
         } catch (MeedlException e) {
