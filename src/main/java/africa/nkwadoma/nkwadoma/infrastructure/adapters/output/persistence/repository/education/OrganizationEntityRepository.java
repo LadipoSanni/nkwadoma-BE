@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +14,6 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     List<OrganizationEntity> findByNameContainingIgnoreCase(String trim);
 
     Optional<OrganizationEntity> findByTaxIdentity(String tin);
+
+    Optional<OrganizationEntity> findByName(String name);
 }

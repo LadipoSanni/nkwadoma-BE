@@ -6,15 +6,18 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -22,8 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.time.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
@@ -35,6 +36,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
+    private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
@@ -73,32 +75,6 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
             throw new MeedlException(IdentityMessages.ORGANIZATION_TIN_ALREADY_EXIST.getMessage());
         }
     }
-
-//    @Override
-//    public OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException {
-//        MeedlValidator.validateUUID(organizationId);
-//        MeedlValidator.validateDataElement(reason);
-//        List<OrganizationEmployeeIdentity> organizationEmployees = organizationEmployeeIdentityOutputPort.findAllByOrganization(organizationId);
-//        OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
-//        log.info("found organization employees to reactivate: {}",organizationEmployees.size());
-//        organizationEmployees
-//                .forEach(organizationEmployeeIdentity -> {
-//                    try {
-//                        log.info("Reactivating user {}, while reactivating organization", organizationEmployeeIdentity.getMeedlUser());
-//                        organizationEmployeeIdentity.getMeedlUser().setReactivationReason(reason);
-//                        identityManagerOutPutPort.enableUserAccount(organizationEmployeeIdentity.getMeedlUser());
-//                    } catch (MeedlException e) {
-//                        log.error("Error enabling organization user : {}", e.getMessage());
-//                    }
-//                });
-//
-//        identityManagerOutPutPort.enableClient(foundOrganization);
-//        foundOrganization.setEnabled(Boolean.TRUE);
-//        foundOrganization.setStatus(ActivationStatus.ACTIVATED);
-//        organizationIdentityOutputPort.save(foundOrganization);
-//        log.info("Organization reactivated successfully. Organization id : {}", organizationId);
-//        return foundOrganization;
-//    }
 
     @Override
     public OrganizationIdentity deactivateOrganization(String organizationId, String reason) throws MeedlException {
@@ -256,6 +232,16 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
         organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
+    }
+
+    @Override
+    public OrganizationIdentity viewTopOrganizationByLoanRequest() throws MeedlException {
+        Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findTopOrganizationWithLoanRequest();
+        if (loanMetrics.isEmpty()){
+            throw new EducationException(OrganizationMessages.LOAN_METRICS_NOT_FOUND.getMessage());
+        }
+        log.info("Loan metrics found: {}", loanMetrics);
+        return organizationIdentityOutputPort.findById(loanMetrics.get().getOrganizationId());
     }
 
     @Override

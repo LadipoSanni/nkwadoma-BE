@@ -10,6 +10,7 @@ public interface ViewOrganizationUseCase {
     List<OrganizationIdentity> search(String organizationName) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException;
+    OrganizationIdentity viewTopOrganizationByLoanRequest() throws MeedlException;
 
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 
