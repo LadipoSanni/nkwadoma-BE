@@ -32,7 +32,7 @@ public class LoanRequestController {
 
     @GetMapping("/loan-requests")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
+    public ResponseEntity<APIResponse<?>> viewAllLoanRequests(
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
@@ -46,7 +46,7 @@ public class LoanRequestController {
                 loanRequestResponses, loanRequests.hasNext(),
                 loanRequests.getTotalPages(), pageNumber, pageSize
         );
-        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+        APIResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = APIResponse.
                 <PaginatedResponse<LoanRequestResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
@@ -57,10 +57,10 @@ public class LoanRequestController {
 
     @GetMapping("{organizationId}/loan-requests")
     @Operation(summary = "View all loan requests in an organization")
-    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(@Valid
+    public ResponseEntity<APIResponse<?>> viewAllLoanRequests(@Valid
             @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
-            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setOrganizationId(organizationId);
         loanRequest.setPageNumber(pageNumber);
@@ -74,7 +74,7 @@ public class LoanRequestController {
                 loanRequestResponses, loanRequests.hasNext(),
                 loanRequests.getTotalPages(), pageNumber, pageSize
         );
-        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+        APIResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = APIResponse.
                 <PaginatedResponse<LoanRequestResponse>>builder()
                 .data(paginatedResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
@@ -84,7 +84,7 @@ public class LoanRequestController {
     }
 
     @GetMapping("/loan-requests/{id}")
-    public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
+    public ResponseEntity<APIResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
             (message = "Loan request ID is required") String id) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setId(id);
@@ -92,7 +92,7 @@ public class LoanRequestController {
         log.info("Loan request body: {}", foundLoanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
         log.info("Mapped Loan request: {}", loanRequestResponse);
-        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
+        APIResponse<LoanRequestResponse> apiResponse = APIResponse.
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
                 .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
@@ -102,12 +102,12 @@ public class LoanRequestController {
     }
 
     @PostMapping("/loan-request/response")
-    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
+    public ResponseEntity<APIResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
             throws MeedlException {
         LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
         loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
-        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
+        APIResponse<LoanRequestResponse> apiResponse = APIResponse.
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)
                 .message(SuccessMessages.SUCCESSFUL_RESPONSE)

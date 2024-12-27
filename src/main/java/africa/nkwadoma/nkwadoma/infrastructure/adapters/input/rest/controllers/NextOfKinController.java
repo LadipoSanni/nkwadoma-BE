@@ -27,13 +27,13 @@ public class NextOfKinController {
     private final NextOfKinRestMapper nextOfKinRestMapper;
 
     @PostMapping("additional-details")
-    public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
+    public ResponseEntity<APIResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
                                                                           @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
         log.info("User ID =====> " + meedlUserId.getClaim("sub"));
         NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request);
         nextOfKin.getLoanee().getUserIdentity().setId(meedlUserId.getClaim("sub"));
         NextOfKin createdNextOfKin = createNextOfKinUseCase.saveAdditionalDetails(nextOfKin);
-        return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
+        return ResponseEntity.ok(APIResponse.<NextOfKinResponse>builder()
                .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))
                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
                .statusCode(HttpStatus.OK.name())

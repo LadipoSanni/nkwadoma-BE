@@ -27,7 +27,7 @@ public class LoanReferralController {
     private final LoanReferralRestMapper loanReferralRestMapper;
 
     @PostMapping("loan-referrals/respond")
-    public ResponseEntity<ApiResponse<?>> respondToLoanReferral
+    public ResponseEntity<APIResponse<?>> respondToLoanReferral
             (@RequestBody LoanReferralResponseRequest request) throws MeedlException {
         LoanReferral referral = new LoanReferral();
         referral.setId(request.getId());
@@ -37,7 +37,7 @@ public class LoanReferralController {
         referral = respondToLoanReferralUseCase.respondToLoanReferral(referral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(referral);
         log.info("Loan referral response: {}", loanReferralResponse);
-        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder().
+        APIResponse<LoanReferralResponse> apiResponse = APIResponse.<LoanReferralResponse>builder().
                 data(loanReferralResponse).
                 message(SuccessMessages.LOAN_REFERRAL_UPDATED_SUCCESSFULLY).
                 statusCode(HttpStatus.OK.name()).build();
@@ -45,13 +45,13 @@ public class LoanReferralController {
     }
 
     @GetMapping("loan-referral")
-    public ResponseEntity<ApiResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+    public ResponseEntity<APIResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(meedlUser.getClaimAsString("sub"));
         LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
         log.info("Found loan referral: {}", foundLoanReferral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
         log.info("Mapped Loan referral response: {}", loanReferralResponse);
-        ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
+        APIResponse<LoanReferralResponse> apiResponse = APIResponse.<LoanReferralResponse>builder()
                 .data(loanReferralResponse)
                 .message(SuccessMessages.LOAN_REFERRAL_FOUND_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.name())

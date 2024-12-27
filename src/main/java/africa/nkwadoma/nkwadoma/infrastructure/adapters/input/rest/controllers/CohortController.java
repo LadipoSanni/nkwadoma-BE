@@ -37,7 +37,7 @@ public class CohortController {
 
     @PostMapping("cohort/create")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
+    public ResponseEntity<APIResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
             CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
         cohort.setCreatedBy(meedlUser.getClaimAsString("sub"));
@@ -46,7 +46,7 @@ public class CohortController {
         cohortResponse.setLoanBreakdowns(cohort.getLoanBreakdowns().stream()
                 .map(cohortMapper::toLoanBreakdownResponse)
                 .toList());
-        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+        APIResponse<CohortResponse> apiResponse = APIResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_CREATED)
                 .statusCode(HttpStatus.OK.toString())
@@ -56,14 +56,14 @@ public class CohortController {
 
     @GetMapping("cohort-details")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewCohortDetails(
+    public ResponseEntity<APIResponse<?>> viewCohortDetails(
             @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam @NotBlank(message = "Cohort ID is required") String cohortId) throws MeedlException {
 
         Cohort cohort = cohortUseCase.viewCohortDetails(meedlUser.getClaimAsString("sub"), cohortId);
         CohortResponse cohortResponse =
                 cohortMapper.toCohortResponse(cohort);
-        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+        APIResponse<CohortResponse> apiResponse = APIResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_VIEWED)
                 .statusCode(HttpStatus.OK.toString())
@@ -73,14 +73,14 @@ public class CohortController {
 
 
     @PostMapping("cohort/edit")
-    public ResponseEntity<ApiResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
+    public ResponseEntity<APIResponse<?>> editCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     EditCohortRequest editCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.mapEditCohortRequestToCohort(editCohortRequest);
         cohort.setUpdatedBy(meedlUser.getClaimAsString("sub"));
         cohort = cohortUseCase.editCohort(cohort);
         CohortResponse cohortResponse =
                 cohortMapper.toCohortResponse(cohort);
-        ApiResponse<CohortResponse> apiResponse = ApiResponse.<CohortResponse>builder()
+        APIResponse<CohortResponse> apiResponse = APIResponse.<CohortResponse>builder()
                 .data(cohortResponse)
                 .message(COHORT_EDITED_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.toString())
@@ -90,10 +90,10 @@ public class CohortController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a cohort by it's ID")
-    public ResponseEntity<ApiResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
+    public ResponseEntity<APIResponse<?>> deleteCohort(@PathVariable @Valid @NotBlank(message = "Cohort id is required") String id)
             throws MeedlException {
         cohortUseCase.deleteCohort(id);
-        return new ResponseEntity<>(ApiResponse.builder().
+        return new ResponseEntity<>(APIResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 message("Cohort " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK
@@ -102,27 +102,27 @@ public class CohortController {
 
     @PostMapping("cohort/loanee/refer")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> inviteCohort(
+    public ResponseEntity<APIResponse<?>> inviteCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestBody ReferCohortRequest referCohortRequest) throws MeedlException {
         String message = cohortUseCase.
                 inviteCohort(meedl.getClaimAsString("sub"),
                 referCohortRequest.getCohortId(),
                 referCohortRequest.getLoaneeIds());
-        return new ResponseEntity<>(ApiResponse.<String>builder()
+        return new ResponseEntity<>(APIResponse.<String>builder()
                 .message(message)
                 .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
     @GetMapping("program/searchCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
+    public ResponseEntity<APIResponse<?>> searchCohortInAProgram(
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
             @RequestParam @NotBlank(message = "Program ID is required") String programId) throws MeedlException {
         List<Cohort> cohorts = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
         List<CohortResponse> cohortResponses =
                 cohortMapper.toCohortResponses(cohorts);
-        ApiResponse<List<CohortResponse>> apiResponse = ApiResponse.<List<CohortResponse>>builder()
+        APIResponse<List<CohortResponse>> apiResponse = APIResponse.<List<CohortResponse>>builder()
                 .data(cohortResponses)
                 .message(COHORT_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
@@ -132,12 +132,12 @@ public class CohortController {
 
     @GetMapping("searchCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchCohort(
+    public ResponseEntity<APIResponse<?>> searchCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName) throws MeedlException {
         List<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohortName);
         List<CohortResponse> cohortResponses =  cohortMapper.toCohortResponses(cohorts);
-        ApiResponse<List<CohortResponse>> apiResponse = ApiResponse.<List<CohortResponse>>builder()
+        APIResponse<List<CohortResponse>> apiResponse = APIResponse.<List<CohortResponse>>builder()
                 .data(cohortResponses)
                 .message(COHORT_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
@@ -147,7 +147,7 @@ public class CohortController {
 
     @GetMapping("cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
+    public ResponseEntity<APIResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
@@ -155,7 +155,7 @@ public class CohortController {
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
-        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+        APIResponse<PaginatedResponse<CohortResponse>> apiResponse = APIResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())
@@ -166,7 +166,7 @@ public class CohortController {
 
     @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+    public ResponseEntity<APIResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
@@ -175,7 +175,7 @@ public class CohortController {
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
-        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+        APIResponse<PaginatedResponse<CohortResponse>> apiResponse = APIResponse.<PaginatedResponse<CohortResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())
@@ -185,10 +185,10 @@ public class CohortController {
 
     @GetMapping("cohort/loanbreakdown")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> getLoanBreakDown(@RequestParam @NotBlank(message = "Cohort id is required") String cohortId) throws MeedlException {
+    public ResponseEntity<APIResponse<?>> getLoanBreakDown(@RequestParam @NotBlank(message = "Cohort id is required") String cohortId) throws MeedlException {
         List<LoanBreakdown> loanBreakdowns = cohortUseCase.getCohortLoanBreakDown(cohortId);
         List<LoanBreakdownResponse> loanBreakdownResponses = cohortMapper.toLoanBreakdownResponses(loanBreakdowns);
-        ApiResponse<List<LoanBreakdownResponse>> apiResponse = ApiResponse.<List<LoanBreakdownResponse>>builder()
+        APIResponse<List<LoanBreakdownResponse>> apiResponse = APIResponse.<List<LoanBreakdownResponse>>builder()
                 .data(loanBreakdownResponses)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())

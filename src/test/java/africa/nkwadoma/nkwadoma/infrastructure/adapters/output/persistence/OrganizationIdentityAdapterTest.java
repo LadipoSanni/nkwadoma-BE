@@ -55,7 +55,7 @@ class OrganizationIdentityAdapterTest {
         }
     }
 
-//    @AfterEach
+    @AfterEach
     void clear() {
         if (StringUtils.isNotEmpty(amazingGraceId)) {
             try {
@@ -359,7 +359,7 @@ class OrganizationIdentityAdapterTest {
         }
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         if (StringUtils.isNotEmpty(amazingGraceId)) {
             try {

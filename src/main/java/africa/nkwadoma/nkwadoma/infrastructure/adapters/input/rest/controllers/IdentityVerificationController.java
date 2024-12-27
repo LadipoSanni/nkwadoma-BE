@@ -6,11 +6,10 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationFailureRecordRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.APIResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.IdentityVerificationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,25 +28,25 @@ public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
     @PostMapping("/is-verified")
-    public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam
+    public ResponseEntity<APIResponse<?>> isUserIdentityVerified(@RequestParam
                                                                  @NotBlank(message = "Loan referral id is required")
                                                                  String loanReferralId) throws MeedlException {
-        return ResponseEntity.ok(ApiResponse.<String>builder()
+        return ResponseEntity.ok(APIResponse.<String>builder()
                 .data(identityVerificationUseCase.verifyIdentity(loanReferralId))
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
+    public ResponseEntity<APIResponse<?>> verifyIdentity(@RequestBody @Valid IdentityVerificationRequest identityVerificationRequest) throws MeedlException, IdentityVerificationException {
         IdentityVerification identityVerification = identityVerificationMapper.toIdentityVerification(identityVerificationRequest);
         String response = identityVerificationUseCase.verifyIdentity(identityVerification);
-        return ResponseEntity.ok(ApiResponse.<String>builder()
+        return ResponseEntity.ok(APIResponse.<String>builder()
                 .data(response)
                 .statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("/failure-record/create")
-    public ResponseEntity<ApiResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityVerificationException {
+    public ResponseEntity<APIResponse<?>> identityVerificationFailed(@RequestBody @Valid IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest) throws IdentityVerificationException {
         IdentityVerificationFailureRecord identityVerificationFailureRecord = identityVerificationMapper.toIdentityVerificationFailureRecord(identityVerificationFailureRecordRequest);
-        return ResponseEntity.ok(ApiResponse.<String>builder()
+        return ResponseEntity.ok(APIResponse.<String>builder()
                 .data(identityVerificationUseCase.createIdentityVerificationFailureRecord(identityVerificationFailureRecord))
                 .statusCode(HttpStatus.OK.name()).build());
     }
