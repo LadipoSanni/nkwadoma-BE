@@ -254,7 +254,6 @@ public class LoaneeService implements LoaneeUseCase {
         userIdentity = identityOutputPort.save(userIdentity);
         log.info("User identity saved successfully with id {}. Now proceeding to save loanee ", userIdentity.getId());
         loanee.setUserIdentity(userIdentity);
-        loanee.setFullName(loanee.getUserIdentity().getFirstName().concat(loanee.getUserIdentity().getLastName()));
         loanee.setLoaneeStatus(LoaneeStatus.ADDED);
         loanee = loaneeOutputPort.save(loanee);
         log.info("Loanee added successfully to a cohort. loanee id : {}. ",loanee.getId());

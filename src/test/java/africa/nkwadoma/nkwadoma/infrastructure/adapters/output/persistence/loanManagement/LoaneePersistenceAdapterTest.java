@@ -186,7 +186,6 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveLoanee(){
         Loanee loanee = new Loanee();
-        firstLoanee.setFullName(userIdentity.getFirstName().concat(userIdentity.getLastName()));
         try {
             UserIdentity savedUserIdentity = identityOutputPort.save(firstLoanee.getUserIdentity());
             firstLoanee.setUserIdentity(savedUserIdentity);
@@ -207,7 +206,6 @@ class LoaneePersistenceAdapterTest {
     @Test
     void saveAnotherLoanee(){
         Loanee loanee = new Loanee();
-        anotherLoanee.setFullName(anotherUser.getFirstName().concat(anotherUser.getLastName()));
         try{
             loanee = loaneeOutputPort.save(anotherLoanee);
             secondLoaneeId = loanee.getId();
