@@ -99,6 +99,21 @@ public class OrganizationController {
         );
     }
 
+    @GetMapping("organizations")
+    @Operation(summary = "Search for organization(s) by similar or precise name")
+    public ResponseEntity<ApiResponse<?>> viewAllOrganizationWithLoanRequest() throws MeedlException {
+        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsWithLoanRequest();
+        log.info("Organizations retrieved: {}", organizationIdentities);
+        List<OrganizationResponse> organizationResponses =
+                organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        log.info("Organization response mapped: {}", organizationResponses);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
+                data(organizationResponses).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
     @GetMapping("organization/{id}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View organization details by organization id")

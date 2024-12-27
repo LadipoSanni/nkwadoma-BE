@@ -30,6 +30,7 @@ public class OrganizationResponse {
     private String createdBy;
     private int numberOfLoanees;
     private int numberOfCohort;
+    private int loanRequestCount;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;

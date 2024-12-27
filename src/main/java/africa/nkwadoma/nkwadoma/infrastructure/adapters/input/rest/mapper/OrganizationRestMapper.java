@@ -17,6 +17,7 @@ public interface OrganizationRestMapper {
     @Mapping(target = "totalCurrentDebt", source = "totalCurrentDebt", defaultValue = "0")
     @Mapping(target = "totalHistoricalDebt", source = "totalHistoricalDebt", defaultValue = "0")
     @Mapping(target = "repaymentRate", source = "repaymentRate", defaultValue = "0.0")
+    @Mapping(target = "loanRequestCount", source = "loanRequestCount")
     OrganizationResponse toOrganizationResponse(OrganizationIdentity organizationIdentity);
 
     OrganizationIdentity maptoOrganizationIdentity(@Valid OrganizationUpdateRequest organizationUpdateRequest);

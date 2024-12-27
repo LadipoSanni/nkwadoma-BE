@@ -246,7 +246,9 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
     @Override
     public List<OrganizationIdentity> viewAllOrganizationsWithLoanRequest() {
-        return organizationIdentityOutputPort.findAllWithLoanRequests();
+        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanRequests();
+        log.info("Organizations returned: {}", organizationIdentities);
+        return organizationIdentities;
     }
 
     @Override

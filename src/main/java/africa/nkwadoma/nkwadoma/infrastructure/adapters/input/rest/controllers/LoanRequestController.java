@@ -15,6 +15,7 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class LoanRequestController {
     private final LoanRequestRestMapper loanRequestRestMapper;
 
     @GetMapping("/loan-requests")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {

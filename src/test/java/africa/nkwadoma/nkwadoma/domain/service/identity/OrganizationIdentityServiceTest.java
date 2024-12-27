@@ -5,10 +5,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,7 +61,6 @@ class OrganizationIdentityServiceTest {
 
     @BeforeEach
     void setUp() {
-
         sarah = new UserIdentity();
         sarah.setRole(IdentityRole.PORTFOLIO_MANAGER);
         sarah.setId(mockId);
@@ -111,6 +113,16 @@ class OrganizationIdentityServiceTest {
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+    }
+
+    @Test
+    void viewAllOrganizationsWithLoanRequests() {
+        List<OrganizationIdentity> organizationIdentities;
+        when(organizationIdentityOutputPort.findAllWithLoanRequests()).thenReturn(List.of(roseCouture));
+        organizationIdentities = organizationIdentityService.viewAllOrganizationsWithLoanRequest();
+        assertNotNull(organizationIdentities);
+        assertEquals(organizationIdentities.get(0).getName(), roseCouture.getName());
+        assertEquals(organizationIdentities.get(0).getLogoImage(), roseCouture.getLogoImage());
     }
 
     @Test

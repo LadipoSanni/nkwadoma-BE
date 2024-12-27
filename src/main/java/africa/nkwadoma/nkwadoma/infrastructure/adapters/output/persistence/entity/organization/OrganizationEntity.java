@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,9 @@ import java.time.LocalDateTime;
 public class OrganizationEntity {
     @Id
     private String id;
+    @NotBlank
     private String name;
+    @NotBlank
     private String email;
     private String websiteAddress;
     private LocalDateTime invitedDate;
