@@ -9,6 +9,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -18,6 +20,7 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -57,10 +60,17 @@ public class LoanRequestController {
 
     @GetMapping("{organizationId}/loan-requests")
     @Operation(summary = "View all loan requests in an organization")
-    public ResponseEntity<APIResponse<?>> viewAllLoanRequests(@Valid
-            @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
-                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loan requests returned successfully",
+                    content =  @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Invalid organization ID provided", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Organization not found", content = @Content)
+    })
+    public ResponseEntity<APIResponse<?>> viewAllLoanRequests(
+            @Valid @PathVariable @NotBlank(message = "Organization ID is required")
+            @Parameter(description = "ID of the organization", required = true) String organizationId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setOrganizationId(organizationId);
         loanRequest.setPageNumber(pageNumber);
