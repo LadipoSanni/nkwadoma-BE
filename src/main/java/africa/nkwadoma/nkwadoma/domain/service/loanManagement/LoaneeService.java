@@ -14,8 +14,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutput
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -117,15 +116,15 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
         if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
                 creditScoreIsAboveOrEqualOneMonth(loanee)){
             return updateCreditScore(loanee);
         }
-            log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
-            return loanee;
+        log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+        return loanee;
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {

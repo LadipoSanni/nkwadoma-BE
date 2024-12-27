@@ -22,6 +22,7 @@ public class LoanRequestResponse {
     private String lastName;
     private LoanRequestStatus status;
     private String image;
+    private int creditScore;
     private BigDecimal loanAmountRequested;
     private String alternateEmail;
     private String alternateContactAddress;

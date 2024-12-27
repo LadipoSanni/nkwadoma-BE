@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
@@ -24,6 +25,8 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
+    private final LoaneeUseCase loaneeUseCase;
+    private final CreditRegistryOutputPort creditRegistryOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -54,6 +57,10 @@ public class LoanRequestService implements LoanRequestUseCase {
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId());
+        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
+        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId());
+        log.info("Credit score returned: {}", loanee.getCreditScore());
+        loanRequest.setCreditScore(loanRequest.getCreditScore());
         loanRequest.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return loanRequest;
     }
