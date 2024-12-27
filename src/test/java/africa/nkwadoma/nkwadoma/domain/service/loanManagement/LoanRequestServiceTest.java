@@ -44,6 +44,7 @@ class LoanRequestServiceTest {
 
     @BeforeEach
     void setUp() {
+//        OrganizationIdentity organizationIdentity = TestData.createOrganizationTestData()
         UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
                 alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
@@ -60,6 +61,7 @@ class LoanRequestServiceTest {
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
+
 
         loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
     }
@@ -111,6 +113,22 @@ class LoanRequestServiceTest {
             Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).viewAll(0, 10);
+            assertNotNull(loanRequests.getContent());
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    @Test
+    void viewAllLoanRequestsByOrganizationId() {
+        try {
+            loanRequest.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
+            when(loanRequestOutputPort.viewAll(loanRequest.getOrganizationId(), 0, 10)).
+                    thenReturn(new PageImpl<>(List.of(loanRequest)));
+            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+
+            verify(loanRequestOutputPort, times(1)).
+                    viewAll(loanRequest.getOrganizationId(),0, 10);
             assertNotNull(loanRequests.getContent());
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);

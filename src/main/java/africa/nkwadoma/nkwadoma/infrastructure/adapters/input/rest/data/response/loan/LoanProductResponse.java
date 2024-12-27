@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Getter
 @Setter
-public class LoanProductResponse {
+public class
+LoanProductResponse {
     private String id;
     private String name;
     private int moratorium;

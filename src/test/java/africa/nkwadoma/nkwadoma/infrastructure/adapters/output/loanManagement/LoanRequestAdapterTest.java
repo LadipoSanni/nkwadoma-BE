@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
@@ -35,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class LoanRequestAdapterTest {
-    private final String testId = "81d45178-9b05-4f35-8d96-5759f9fc5ea7";
     @Autowired
     private LoaneeUseCase loaneeUseCase;
     @Autowired
@@ -101,6 +101,8 @@ class LoanRequestAdapterTest {
     private Cohort cohort;
     private String organizationEmployeeIdentityId;
     private String loaneeUserId;
+    @Autowired
+    private OrganizationEntityRepository organizationEntityRepository;
 
 
     @BeforeAll
@@ -115,6 +117,10 @@ class LoanRequestAdapterTest {
                     "RC9500034",
                     employees
             );
+            Optional<OrganizationEntity> organization = organizationEntityRepository.findById(amazingGrace.getId());
+            if (organization.isPresent()) {
+                organizationIdentityOutputPort.delete(organization.get().getId());
+            }
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
                     name(ServiceOfferingType.TRAINING.name()).
                     industry(Industry.EDUCATION).build()));
@@ -282,6 +288,25 @@ class LoanRequestAdapterTest {
         }
         assertNotNull(loanRequests.getContent());
         assertEquals(1, loanRequests.getTotalElements());
+    }
+
+    @Test
+    void viewAllLoanRequestsByOrganizationId() {
+        try {
+            LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
+            assertNotNull(savedLoanRequest);
+            loanRequestId = savedLoanRequest.getId();
+        } catch (MeedlException e) {
+            log.error("Error saving loan request: ", e);
+        }
+        Page<LoanRequest> loanRequests = Page.empty();
+        try {
+            loanRequests = loanRequestOutputPort.viewAll(organizationId, 0, 10);
+        } catch (MeedlException e) {
+            log.error("Error viewing all loan requests ", e);
+        }
+        assertNotNull(loanRequests.getContent());
+        assertNotNull(loanRequests.getContent().get(0).getReferredBy(), amazingGrace.getName());
     }
 
     @ParameterizedTest

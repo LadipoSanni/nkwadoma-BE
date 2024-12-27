@@ -51,7 +51,8 @@ public enum LoanMessages {
     INVALID_LOAN_DECISION(   "Loan decision must either be ACCEPTED or DECLINED"),
     LOAN_REQUEST_ID_CANNOT_BE_EMPTY("Loan request ID must not be empty"),
     LOAN_CANNOT_BE_EMPTY("Loan cannot be empty"),
-    LOANEE_ACCOUNT_NOT_FOUND("Loan account not found");
+    LOANEE_ACCOUNT_NOT_FOUND("Loan account not found"),
+    LOAN_METRICS_ENTITY_MUST_NOT_BE_EMPTY("Loan metrics object must not be empty");
     private final String message;
 
     LoanMessages(String message) {

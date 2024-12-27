@@ -113,6 +113,20 @@ public class OrganizationController {
         );
     }
 
+    @GetMapping("organization")
+    @Operation(summary = "View top organization with the highest number of loan requests")
+    public ResponseEntity<ApiResponse<?>> viewTopOrganizationByLoanRequest() throws MeedlException {
+        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewTopOrganizationByLoanRequest();
+        log.info("Organization identity details: ===> {}", organizationIdentity);
+        OrganizationResponse organizationResponse = organizationRestMapper.toOrganizationResponse(organizationIdentity);
+        log.info("Organization response: ===> {}", organizationResponse);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
+                data(organizationResponse).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
     @GetMapping("organization/details")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewOrganizationDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {

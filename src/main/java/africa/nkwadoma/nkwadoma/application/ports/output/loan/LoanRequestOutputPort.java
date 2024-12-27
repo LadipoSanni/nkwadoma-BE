@@ -13,4 +13,5 @@ public interface LoanRequestOutputPort {
 
     void deleteLoanRequestById(String id);
     Page<LoanRequest> viewAll(int pageNumber, int pageSize) throws MeedlException;
+    Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException;
 }

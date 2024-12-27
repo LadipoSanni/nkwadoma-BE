@@ -60,4 +60,15 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         log.info("Loan requests retrieved from DB: {}", loanRequests.getContent());
         return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
+
+    @Override
+    public Page<LoanRequest> viewAll(String organizationId, int pageNumber, int pageSize) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        Page<LoanRequestProjection> loanRequests = loanRequestRepository.findAllLoanRequestsByOrganizationId
+                (PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdDate"))), organizationId);
+        log.info("Loan requests retrieved: {}", loanRequests.getContent());
+        return loanRequests.map(loanRequestMapper::mapProjectionToLoanRequest);
+    }
 }

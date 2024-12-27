@@ -2,10 +2,13 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
@@ -35,6 +38,8 @@ class LoanServiceTest {
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
+    private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
@@ -46,6 +51,8 @@ class LoanServiceTest {
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
     private IdentityVerificationUseCase verificationUseCase;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -53,9 +60,23 @@ class LoanServiceTest {
     private UserIdentity userIdentity;
     private String testId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoaneeLoanAccount loaneeLoanAccount;
+    private LoanMetrics loanMetrics;
+    private OrganizationIdentity organizationIdentity;
+
 
     @BeforeEach
     void setUp() {
+        organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        organizationIdentity.setName("Brown Hills Institute");
+        organizationIdentity.setEmail("iamoluchimercy@gmail.com");
+        organizationIdentity.setTin("7682-5627");
+        organizationIdentity.setRcNumber("RC8789905");
+        organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
+        organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        organizationIdentity.setPhoneNumber("09876365713");
+        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setWebsiteAddress("rosecouture.org");
         userIdentity = TestData.createTestUserIdentity("test@example.com");
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
@@ -71,6 +92,11 @@ class LoanServiceTest {
         loanRequest.setLoanReferralId(loanReferral.getId());
         loanRequest.setCreatedDate(LocalDateTime.now());
 
+        loanMetrics = LoanMetrics.builder()
+                .organizationId(organizationIdentity.getId())
+                .loanRequestCount(1)
+                .build();
+
         loan = TestData.createTestLoan(loanee);
     }
 
@@ -78,6 +104,9 @@ class LoanServiceTest {
     void createLoanRequest() {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
@@ -156,7 +185,9 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
-            when(loanService.createLoanRequest(loanRequest)).thenReturn(loanRequest);
+            when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
