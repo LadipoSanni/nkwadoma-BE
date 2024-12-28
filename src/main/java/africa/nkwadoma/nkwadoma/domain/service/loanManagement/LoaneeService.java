@@ -128,7 +128,7 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
         loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
         loanee.setCreditScoreUpdatedAt(LocalDateTime.now());

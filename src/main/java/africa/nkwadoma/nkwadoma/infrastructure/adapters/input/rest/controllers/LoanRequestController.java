@@ -5,10 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -57,8 +60,8 @@ public class LoanRequestController {
     @Operation(summary = "View all loan requests in an organization")
     public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(@Valid
             @PathVariable @NotBlank(message = "Organization ID is required") String organizationId,
-            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setOrganizationId(organizationId);
         loanRequest.setPageNumber(pageNumber);
@@ -81,9 +84,18 @@ public class LoanRequestController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @Operation(summary = "View a loan request by its id")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Found the loan request",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoanRequestResponse.class)) }),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid id supplied",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Loan request not found",
+                    content = @Content) })
     @GetMapping("/loan-requests/{id}")
     public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
-            (message = "Loan request ID is required") String id) throws MeedlException {
+            (message = "Loan request ID is required") @Parameter(description = "ID of the loan request to be returned", required = true) String id) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setId(id);
         LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);

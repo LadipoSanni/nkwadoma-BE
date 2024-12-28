@@ -133,7 +133,7 @@ public class TestData {
 
     public static LoanBreakdown createLoanBreakDown(){
         return LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
-                .itemName("Loan Break").build();
+                .itemName("Accommodation").build();
     }
 
     public static LoanProduct buildTestLoanProduct(String name, Vendor vendor) {

@@ -82,7 +82,7 @@ public class OrganizationEmployeeController {
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
                 organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),organizationEmployeeIdentities.getTotalPages(),pageNumber,pageSize
         );
-        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse =ApiResponse.<PaginatedResponse
+        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
                         <OrganizationEmployeeResponse>>builder()
                 .data(paginatedResponse)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())

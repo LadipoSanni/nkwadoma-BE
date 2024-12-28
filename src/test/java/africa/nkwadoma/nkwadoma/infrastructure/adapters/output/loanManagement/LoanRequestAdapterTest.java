@@ -90,7 +90,6 @@ class LoanRequestAdapterTest {
     private String userId;
     private String loanRequestId;
     private LoanDetail loanDetail;
-    private LoanBreakdown loanBreakdown;
     private List<LoanBreakdown> loanBreakdowns;
     private String loanDetailId;
     private String nextOfKinId;
@@ -155,23 +154,27 @@ class LoanRequestAdapterTest {
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetailId = loanDetail.getId();
 
-            loanBreakdown = TestData.createLoanBreakDown();
-            loanBreakdowns = List.of(loanBreakdown);
+            LoanBreakdown accommodation = TestData.createLoanBreakDown();
+            LoanBreakdown feeding = LoanBreakdown.builder()
+                    .currency("NGN").itemAmount(new BigDecimal("9000000"))
+                    .itemName("Feeding").build();
+            loanBreakdowns = List.of(accommodation, feeding);
             cohort = TestData.createCohortData("Elite", dataAnalyticsProgramId, organizationId, loanBreakdowns, joelUserId);
             cohort = cohortUseCase.createCohort(cohort);
             eliteCohortId = cohort.getId();
-
-            loanBreakdown = LoanBreakdown.builder().currency("USD").itemAmount(new BigDecimal("50000"))
-                    .itemName("Loan Break").cohort(cohort).build();
-            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+            loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
 
             UserIdentity userIdentity = TestData.createTestUserIdentity("qudus@example.com");
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
                     initialDeposit(BigDecimal.valueOf(1000000.00)).build();
-            LoaneeLoanBreakdown loaneeLoanBreakdown = LoaneeLoanBreakdown.builder().
+            LoaneeLoanBreakdown accommodationBreakdown = LoaneeLoanBreakdown.builder().
                     loaneeLoanBreakdownId(loanBreakdowns.get(0).getLoanBreakdownId()).
-                    itemAmount(loanBreakdown.getItemAmount()).
-                    itemName(loanBreakdown.getItemName()).build();
+                    itemAmount(accommodation.getItemAmount()).
+                    itemName(accommodation.getItemName()).build();
+            LoaneeLoanBreakdown feedingBreakdown = LoaneeLoanBreakdown.builder().
+                    loaneeLoanBreakdownId(loanBreakdowns.get(1).getLoanBreakdownId()).
+                    itemAmount(feeding.getItemAmount()).
+                    itemName(feeding.getItemName()).build();
 
             Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
             if (foundUser.isPresent()) {
@@ -185,7 +188,7 @@ class LoanRequestAdapterTest {
             loanee.setUserIdentity(savedUserIdentity);
             loanee.setCohortId(eliteCohortId);
             loanee.setReferredBy(amazingGrace.getName());
-            loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
+            loaneeLoanBreakdowns = List.of(accommodationBreakdown, feedingBreakdown);
             loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
@@ -231,7 +234,7 @@ class LoanRequestAdapterTest {
         }
     }
 
-    @AfterEach
+//    @AfterEach
     void tearDown() {
         if (StringUtils.isNotEmpty(loanRequestId)) {
             Optional<LoanRequestEntity> loanRequestEntity = loanRequestRepository.findById(loanRequestId);
@@ -375,7 +378,7 @@ class LoanRequestAdapterTest {
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(id));
     }
 
-    @AfterAll
+//    @AfterAll
     void cleanUp() {
         try {
             nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
