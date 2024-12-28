@@ -35,14 +35,14 @@ public class ProgramController {
 
     @PostMapping("")
     @Operation(summary = "Add a program to an Institute")
-    public ResponseEntity<APIResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
+    public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         log.info("Creating program is Meedl User with ID: {}", meedlUser.getClaimAsString("sub"));
         Program program = programRestMapper.toProgram(programCreateRequest, meedlUser.getClaimAsString("sub"));
 
         program = addProgramUseCase.createProgram(program);
 
-        return new ResponseEntity<>(APIResponse.builder().statusCode(HttpStatus.CREATED.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.CREATED.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.CREATED
@@ -51,7 +51,7 @@ public class ProgramController {
 
     @GetMapping("/programs/all")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
-    public ResponseEntity<APIResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         Program program = new Program();
@@ -68,7 +68,7 @@ public class ProgramController {
                 programResponses, programs.hasNext(),
                 programs.getTotalPages(), pageNumber, pageSize
         );
-        return new ResponseEntity<>(APIResponse.builder().
+        return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
@@ -78,7 +78,7 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
-    public ResponseEntity<APIResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name")
+    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name")
                                                                   @NotBlank(message = "Program name is required") String name)
             throws MeedlException {
         Program program = new Program();
@@ -86,7 +86,7 @@ public class ProgramController {
         List<Program> programs = addProgramUseCase.viewProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
-        return new ResponseEntity<>(APIResponse.builder().
+        return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(programResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
@@ -96,13 +96,13 @@ public class ProgramController {
 
     @GetMapping("/{id}")
     @Operation(summary = "View a program by ID")
-    public ResponseEntity<APIResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
+    public ResponseEntity<ApiResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
             throws MeedlException {
         Program program = new Program();
         program.setId(id.trim());
         program = addProgramUseCase.viewProgramById(program);
 
-        return new ResponseEntity<>(APIResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
@@ -111,14 +111,14 @@ public class ProgramController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update an existing program")
-    public ResponseEntity<APIResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
+    public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         Program program = programRestMapper.toUpdatedProgram(programUpdateRequest);
         program.setCreatedBy(meedlUser.getClaim("sub"));
         log.info("Program at controller level: ========>{}", program);
         program = addProgramUseCase.updateProgram(program);
 
-        return new ResponseEntity<>(APIResponse.builder().statusCode(HttpStatus.OK.toString()).
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.toString()).
                 data(programRestMapper.toProgramResponse(program)).
                 message(String.format("Program %s", ControllerConstant.UPDATED_SUCCESSFULLY.getMessage())).build(),
                 HttpStatus.OK
@@ -127,13 +127,13 @@ public class ProgramController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a program by it's ID")
-    public ResponseEntity<APIResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
+    public ResponseEntity<ApiResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
             throws MeedlException {
         Program program = new Program();
         program.setId(id.trim());
         addProgramUseCase.deleteProgram(program);
 
-        return new ResponseEntity<>(APIResponse.builder().
+        return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 message("Program " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(),
                 HttpStatus.OK

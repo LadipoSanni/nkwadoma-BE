@@ -48,7 +48,7 @@ public class OrganizationEmployeeController {
                         .pageSize(pageSize)
                         .totalPages(employeeIdentities.getTotalPages())
                         .pageNumber(pageNumber).build();
-        return ResponseEntity.ok(new APIResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
+        return ResponseEntity.ok(new ApiResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
                 paginatedResponse, HttpStatus.OK.toString())
         );
     }
@@ -61,7 +61,7 @@ public class OrganizationEmployeeController {
                 viewOrganizationEmployeesUseCase.searchOrganizationAdmin(userId,name);
         List<OrganizationEmployeeResponse> organizationEmployeeResponses =
                 organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
-        APIResponse<List<OrganizationEmployeeResponse>> apiResponse = APIResponse.<List<OrganizationEmployeeResponse>>builder()
+        ApiResponse<List<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<List<OrganizationEmployeeResponse>>builder()
                 .data(organizationEmployeeResponses)
                 .message(SuccessMessages.SUCCESSFUL_RESPONSE)
                 .statusCode(HttpStatus.OK.toString())
@@ -82,7 +82,7 @@ public class OrganizationEmployeeController {
         PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
                 organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),organizationEmployeeIdentities.getTotalPages(),pageNumber,pageSize
         );
-        APIResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = APIResponse.<PaginatedResponse
+        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
                         <OrganizationEmployeeResponse>>builder()
                 .data(paginatedResponse)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())

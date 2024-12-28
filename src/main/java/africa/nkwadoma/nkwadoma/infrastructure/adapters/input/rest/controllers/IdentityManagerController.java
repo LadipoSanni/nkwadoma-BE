@@ -32,39 +32,39 @@ public class IdentityManagerController {
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
-    public ResponseEntity<APIResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid LoginRequest loginRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toLoginUserIdentity(loginRequest);
         AccessTokenResponse tokenResponse = createUserUseCase.login(userIdentity);
-        return ResponseEntity.ok(APIResponse.<AccessTokenResponse>builder().
+        return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
                 data(tokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
     @PostMapping("auth/logout")
-    public ResponseEntity<APIResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
         String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
         UserIdentity userIdentity =  UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
         userIdentity.setAccessToken(accessToken);
         createUserUseCase.logout(userIdentity);
-        return ResponseEntity.ok(APIResponse.<String>builder().
+        return ResponseEntity.ok(ApiResponse.<String>builder().
                 message(ControllerConstant.LOGOUT_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
     @PostMapping("auth/colleague/invite")
-    public ResponseEntity<APIResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> inviteColleague(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestBody UserIdentityRequest userIdentityRequest) throws MeedlException {
             UserIdentity userIdentity = identityMapper.toIdentity(userIdentityRequest);
             userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
             log.info("The user id of user inviting a colleague : {} ",meedlUser.getClaimAsString("sub"));
             UserIdentity createdUserIdentity = createUserUseCase.inviteColleague(userIdentity);
-            return ResponseEntity.ok(APIResponse.<UserIdentity>builder().
+            return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                     data(createdUserIdentity).message(ControllerConstant.COLLEAGUE_INVITED.getMessage()).
                     statusCode(HttpStatus.CREATED.name()).build());
     }
 
     @PostMapping("auth/password/create")
-    public ResponseEntity<APIResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
         log.info("got the request {}",passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
@@ -75,7 +75,7 @@ public class IdentityManagerController {
             organizationIdentity.setUserIdentity(userIdentity);
             createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
         }
-        return ResponseEntity.ok(APIResponse.<UserIdentity>builder().
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(userIdentity).
                 message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
@@ -83,23 +83,23 @@ public class IdentityManagerController {
 
 
     @PostMapping("auth/password/forgotPassword")
-    public ResponseEntity<APIResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> forgotPassword(@RequestParam String email) throws MeedlException {
         createUserUseCase.forgotPassword(email);
-        return ResponseEntity.ok(APIResponse.<String>builder().
+        return ResponseEntity.ok(ApiResponse.<String>builder().
                 message("Please check your email to create new password. "+email).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/reset")
-    public ResponseEntity<APIResponse<?>> resetPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
         createUserUseCase.resetPassword(passwordCreateRequest.getToken(), passwordCreateRequest.getPassword());
-        return ResponseEntity.ok(APIResponse.<UserIdentity>builder().
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
 
     @PostMapping("auth/user/reactivate")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
                 .reactivationReason(accountActivationRequest.getReason())
@@ -108,13 +108,13 @@ public class IdentityManagerController {
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the reactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.reactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(APIResponse.<UserIdentity>builder().
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/user/deactivate")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
                 .deactivationReason(accountActivationRequest.getReason())
@@ -123,19 +123,19 @@ public class IdentityManagerController {
         userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
         log.info("The user id of user performing the deactivation: {}",meedlUser.getClaimAsString("sub"));
         UserIdentity createdUserIdentity = createUserUseCase.deactivateUserAccount(userIdentity);
-        return ResponseEntity.ok(APIResponse.<UserIdentity>builder().
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
                 data(createdUserIdentity).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
     @PostMapping("auth/password/change")
-    public ResponseEntity<APIResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> changePassword(@AuthenticationPrincipal Jwt meedlUser,
                                                          @RequestBody PasswordChangeRequest passwordChangeRequest) throws MeedlException {
         UserIdentity userIdentity = identityMapper.toUserIdentity(passwordChangeRequest);
         userIdentity.setId(meedlUser.getClaimAsString("sub"));
         userIdentity.setEmail(meedlUser.getClaimAsString("email"));
         log.info("The user changing the password : {} ",meedlUser.getClaimAsString("sub"));
         createUserUseCase.changePassword(userIdentity);
-        return ResponseEntity.ok(APIResponse.<String>builder().
+        return ResponseEntity.ok(ApiResponse.<String>builder().
                 data("Password changed successfully.").message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }

@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanProductUseC
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.APIResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoanProductRestMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +76,7 @@ class LoanControllerTest {
         when(loanProductMapper.mapToLoanProduct(loanProductRequest)).thenReturn(loanProduct);
         when(loanProductMapper.mapToLoanProductResponse(loanProduct)).thenReturn(loanProductResponse);
 
-        ResponseEntity<APIResponse<?>> apiResponse  = null;
+        ResponseEntity<ApiResponse<?>> apiResponse  = null;
         try {
             when(createLoanProductUseCase.createLoanProduct(loanProduct)).thenReturn(loanProduct);
             apiResponse = loanController.createLoanProduct(jwt, loanProductRequest);
@@ -118,7 +118,7 @@ class LoanControllerTest {
     @Test
     void viewLoanProductDetailsById() {
         when(loanProductMapper.mapToLoanProductResponse(loanProduct)).thenReturn(loanProductResponse);
-        ResponseEntity<APIResponse<?>> apiResponse = null;
+        ResponseEntity<ApiResponse<?>> apiResponse = null;
         try {
             when(viewLoanProductUseCase.viewLoanProductDetailsById(loanProduct.getId())).thenReturn(loanProduct);
             apiResponse = loanController.viewLoanProductDetailsById(loanProduct.getId());

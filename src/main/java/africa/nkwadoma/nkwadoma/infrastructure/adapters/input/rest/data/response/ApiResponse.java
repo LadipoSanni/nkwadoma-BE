@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @Setter
 @Getter
-public class APIResponse<T>{
+public class ApiResponse<T>{
     private String message;
     private T data;
     private String statusCode;

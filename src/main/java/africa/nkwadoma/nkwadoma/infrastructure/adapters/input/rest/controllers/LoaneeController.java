@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.APIResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
@@ -40,14 +40,14 @@ public class LoaneeController {
 
     @PostMapping("addLoaneeToCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<APIResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
+    public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestBody  @Valid LoaneeRequest loaneeRequest) throws MeedlException {
         Loanee loanee = loaneeRestMapper.toLoanee(loaneeRequest);
         loanee.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         loanee = loaneeUseCase.addLoaneeToCohort(loanee);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
-        APIResponse<LoaneeResponse> apiResponse = APIResponse.<LoaneeResponse>builder()
+        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
                 .data(loaneeResponse)
                 .message(LOANEE_ADDED_TO_COHORT)
                 .statusCode(HttpStatus.OK.toString())
@@ -57,11 +57,11 @@ public class LoaneeController {
 
     @GetMapping("view/loaneeDetails/{loaneeId}")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
-    public ResponseEntity<APIResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
         Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
-        APIResponse<LoaneeResponse> apiResponse = APIResponse.<LoaneeResponse>builder()
+        ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
                 .data(loaneeResponse)
                 .message(LOANEE_VIEWED)
                 .statusCode(HttpStatus.OK.toString())
@@ -70,7 +70,7 @@ public class LoaneeController {
     }
     @GetMapping("cohort/all/loanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> viewAllLoaneeInCohort(
+    public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
@@ -84,7 +84,7 @@ public class LoaneeController {
                 loaneeResponses,loanees.hasNext(),
                 loanees.getTotalPages(),pageNumber,pageSize
         );
-        APIResponse<PaginatedResponse<LoaneeResponse>> apiResponse = APIResponse.<PaginatedResponse<LoaneeResponse>>builder()
+        ApiResponse<PaginatedResponse<LoaneeResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeResponse>>builder()
                 .data(paginatedResponse)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
                 .statusCode(HttpStatus.OK.toString())
@@ -95,11 +95,11 @@ public class LoaneeController {
 
     @PostMapping("referLoanee/{loaneeId}")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<APIResponse<?>> referLoanee(@PathVariable String loaneeId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> referLoanee(@PathVariable String loaneeId) throws MeedlException {
         LoanReferral loanReferral = loaneeUseCase.referLoanee(loaneeId);
         LoaneeReferralResponse loaneeReferralResponse =
                 loaneeRestMapper.toLoaneeReferralResponse(loanReferral);
-        APIResponse<LoaneeReferralResponse> apiResponse = APIResponse.<LoaneeReferralResponse>builder()
+        ApiResponse<LoaneeReferralResponse> apiResponse = ApiResponse.<LoaneeReferralResponse>builder()
                 .data(loaneeReferralResponse)
                 .message(LOANEE_HAS_BEEN_REFERED)
                 .statusCode(HttpStatus.OK.toString())
@@ -109,11 +109,11 @@ public class LoaneeController {
 
     @GetMapping("cohort/searchForLoanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<APIResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
+    public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId) throws MeedlException {
        List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId);
        List<LoaneeResponse> loaneeResponse = loaneeRestMapper.toLoaneeResponses(loanee);
-       APIResponse<List<LoaneeResponse>> apiResponse = APIResponse.<List<LoaneeResponse>>builder()
+       ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
                .data(loaneeResponse)
                .message(LOANEE_RETRIEVED)
                .statusCode(HttpStatus.OK.toString())

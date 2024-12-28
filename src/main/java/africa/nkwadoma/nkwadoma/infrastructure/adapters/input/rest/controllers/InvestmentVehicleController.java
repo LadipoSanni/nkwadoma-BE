@@ -32,14 +32,14 @@ public class InvestmentVehicleController {
 
     @PostMapping("investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> createInvestmentVehicle(@Valid @RequestBody CreateInvestmentVehicleRequest
+    public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@Valid @RequestBody CreateInvestmentVehicleRequest
                                                                           investmentVehicleRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
         investmentVehicle = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
-        APIResponse<Object> apiResponse = APIResponse.builder()
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
                 .data(investmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_CREATED)
                 .statusCode(HttpStatus.CREATED.toString())
@@ -49,12 +49,12 @@ public class InvestmentVehicleController {
 
     @GetMapping("investment-vehicle-details/{id}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
-        APIResponse<InvestmentVehicleResponse> apiResponse = APIResponse.<InvestmentVehicleResponse>builder()
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
                 .data(investmentVehicleResponse)
                 .message(INVESTMENT_VEHICLE_VIEWED)
                 .statusCode(HttpStatus.OK.toString())
@@ -64,7 +64,7 @@ public class InvestmentVehicleController {
 
     @GetMapping("view-all-investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<APIResponse<?>> viewAllInvestmentVehicleDetails(
+    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
             @RequestParam int pageSize,
             @RequestParam int pageNumber) {
 
@@ -73,7 +73,7 @@ public class InvestmentVehicleController {
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
-        APIResponse<List<InvestmentVehicleResponse>> apiResponse = APIResponse.<List<InvestmentVehicleResponse>>builder()
+        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
                 .data(investmentVehicleResponse)
                 .message(VIEW_ALL_INVESTMENT_VEHICLE)
                 .statusCode(HttpStatus.OK.toString())
