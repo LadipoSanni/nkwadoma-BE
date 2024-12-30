@@ -115,7 +115,7 @@ public class IdentityManagerController {
     @PostMapping("auth/user/deactivate")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> deactivateUser(@AuthenticationPrincipal Jwt meedlUser,
-                                                          @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
+                                                         @RequestBody AccountActivationRequest accountActivationRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder()
                 .deactivationReason(accountActivationRequest.getReason())
                 .id(accountActivationRequest.getId())

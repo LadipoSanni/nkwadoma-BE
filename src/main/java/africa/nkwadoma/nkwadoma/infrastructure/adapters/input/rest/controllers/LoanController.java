@@ -84,9 +84,9 @@ public class LoanController {
     @GetMapping("/loan-product/all")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_VIEW_ALL, description = LOAN_PRODUCT_VIEW_ALL_DESCRIPTION )
-    public ResponseEntity<ApiResponse<?>> viewAllLoanProduct( @AuthenticationPrincipal Jwt meedl,
-                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) {
+    public ResponseEntity<ApiResponse<?>> viewAllLoanProduct(@AuthenticationPrincipal Jwt meedl,
+                                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) {
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setPageSize(pageSize);
         loanProduct.setPageNumber(pageNumber);

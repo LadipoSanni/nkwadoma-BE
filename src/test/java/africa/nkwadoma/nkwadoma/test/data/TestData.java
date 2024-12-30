@@ -61,6 +61,7 @@ public class TestData {
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
+        organizationIdentity.setLogoImage("logo-img.png");
         organizationIdentity.setPageSize(0);
         organizationIdentity.setPageNumber(10);
 
