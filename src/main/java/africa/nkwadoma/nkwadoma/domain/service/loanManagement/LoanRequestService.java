@@ -58,9 +58,14 @@ public class LoanRequestService implements LoanRequestUseCase {
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId());
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
-        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId());
+        Loanee loanee = new Loanee();
+        try {
+            loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId());
+        } catch (MeedlException e) {
+            log.error("Error retrieving loanee credit score {}", e.getMessage());
+        }
         log.info("Credit score returned: {}", loanee.getCreditScore());
-        loanRequest.setCreditScore(loanRequest.getCreditScore());
+        loanRequest.setCreditScore(loanee.getCreditScore());
         loanRequest.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return loanRequest;
     }

@@ -93,9 +93,18 @@ public class LoanRequestController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @Operation(summary = "View a loan request by its id")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Found the loan request",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoanRequestResponse.class)) }),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid id supplied",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Loan request not found",
+                    content = @Content) })
     @GetMapping("/loan-requests/{id}")
     public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
-            (message = "Loan request ID is required") String id) throws MeedlException {
+            (message = "Loan request ID is required") @Parameter(description = "ID of the loan request to be returned", required = true) String id) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setId(id);
         LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
