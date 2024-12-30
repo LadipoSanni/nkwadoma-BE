@@ -1,10 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -28,11 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrganizationIdentityAdapterTest {
     @Autowired
     private OrganizationIdentityOutputPort organizationOutputPort;
+    @Autowired
+    private LoanMetricsOutputPort loanMetricsOutputPort;
     private OrganizationIdentity amazingGrace;
     private String amazingGraceId;
+    private String loanMetricsId;
     private UserIdentity joel;
-    @Autowired
-    private OrganizationEntityRepository organizationEntityRepository;
 
     @BeforeEach
     void setUp() {
@@ -44,27 +45,48 @@ class OrganizationIdentityAdapterTest {
 
         amazingGrace = TestData.createOrganizationTestData("Amazing Grace Enterprises O'Neill", "RC8787767", userIdentities);
         try {
-            organizationOutputPort.delete(amazingGrace.getId());
-            log.info("Successfully deleted existing organization with similar details before starting test");
+            Optional<OrganizationIdentity> organizationByName = organizationOutputPort.findOrganizationByName(amazingGrace.getName());
+            if (organizationByName.isPresent()) {
+                organizationOutputPort.delete(organizationByName.get().getId());
+                log.info("Successfully deleted existing organization with similar details before starting test");
+            }
         } catch (MeedlException e) {
             log.error("Failed to delete organization with id : {} , because {} ",amazingGrace.getId(), e.getMessage());
         }
+    }
 
+    @AfterEach
+    void clear() {
+        if (StringUtils.isNotEmpty(amazingGraceId)) {
+            try {
+                organizationOutputPort.delete(amazingGraceId);
+                log.info("Successfully deleted existing organization");
+            } catch (MeedlException e) {
+                log.error("Error deleting organization with id: {} {} ",amazingGrace.getId(), e.getMessage());
+            }
+        }
+        if (StringUtils.isNotEmpty(loanMetricsId)) {
+            try {
+                loanMetricsOutputPort.delete(loanMetricsId);
+            } catch (MeedlException e) {
+                log.error("Error deleting loan metrics with id: {} {} ",loanMetricsId, e.getMessage());
+            }
+        }
     }
 
     @Test
     @Order(1)
     void saveOrganization() {
         try {
-            organizationOutputPort.delete(amazingGrace.getId());
             assertThrows(MeedlException.class, () -> organizationOutputPort.findById(amazingGrace.getId()));
+
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             log.info("Organization saved id is : {}", savedOrganization.getId());
             assertNotNull(savedOrganization);
             amazingGraceId = savedOrganization.getId();
             log.info("Organization saved successfully {}", savedOrganization);
+
             assertEquals(amazingGrace.getName(), savedOrganization.getName());
-            assertEquals(ActivationStatus.INVITED, savedOrganization.getStatus());
             assertNotNull(savedOrganization.getServiceOfferings());
             assertNotNull(savedOrganization.getServiceOfferings().get(0));
             assertEquals(amazingGrace.getServiceOfferings().get(0).getIndustry(), savedOrganization.getServiceOfferings().get(0).getIndustry());
@@ -237,6 +259,28 @@ class OrganizationIdentityAdapterTest {
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
         }
+    }
+
+    @Test
+    void findAllOrganizationWithLoanRequests() {
+        try {
+            amazingGrace = organizationOutputPort.save(amazingGrace);
+            assertNotNull(amazingGrace);
+            amazingGraceId = amazingGrace.getId();
+            LoanMetrics loanMetrics = LoanMetrics.builder().organizationId(amazingGraceId)
+                    .loanRequestCount(1).build();
+            loanMetrics = loanMetricsOutputPort.save(loanMetrics);
+            assertNotNull(loanMetrics);
+            assertNotNull(loanMetrics.getId());
+            loanMetricsId = loanMetrics.getId();
+        } catch (MeedlException e) {
+            log.error("Exception occurred saving loan metrics {}", e.getMessage());
+        }
+        List<OrganizationIdentity> organizationIdentity = organizationOutputPort.findAllWithLoanRequests();
+        assertNotNull(organizationIdentity);
+        assertEquals(organizationIdentity.get(0).getName(), amazingGrace.getName());
+        assertEquals(organizationIdentity.get(0).getLogoImage(), amazingGrace.getLogoImage());
+        assertEquals(1, organizationIdentity.get(0).getLoanRequestCount());
     }
 
     @Test

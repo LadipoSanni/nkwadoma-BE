@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
@@ -16,6 +15,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -195,6 +195,19 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
             log.info("Deleted service offering: {}", serviceOfferingEntity.get());
         }
     }
+
+    @Override
+    public List<OrganizationIdentity> findAllWithLoanRequests() {
+        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanRequests();
+        if (CollectionUtils.isEmpty(organizations)) {
+            return new ArrayList<>();
+        }
+        List<OrganizationIdentity> organizationIdentities =
+                organizationIdentityMapper.projectionToOrganizationIdentity(organizations);
+        log.info("Mapped organization identities: {}", organizationIdentities);
+        return organizationIdentities;
+    }
+
     @Override
     public List<OrganizationIdentity> findByName(String name) throws MeedlException {
         MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
@@ -210,7 +223,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         Optional<OrganizationEntity> foundOrganization = organizationEntityRepository.findByName(name);
         if (foundOrganization.isEmpty()) {
             return Optional.empty();
-//            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         return Optional.of(organizationIdentityMapper.toOrganizationIdentity(foundOrganization.get()));
     }

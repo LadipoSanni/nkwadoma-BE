@@ -9,8 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.*;
-import java.util.*;
 import java.math.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +35,7 @@ public class OrganizationIdentity {
     private boolean isEnabled;
     private String createdBy;
     private String updatedBy;
+    private int loanRequestCount;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;

@@ -4,6 +4,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import org.mapstruct.*;
 
 import java.util.*;
@@ -34,4 +35,8 @@ public interface OrganizationIdentityMapper {
     List<OrganizationServiceOffering> toOrganizationServiceOfferings(List<OrganizationServiceOfferingEntity> organizationServiceOfferings);
 
     OrganizationIdentity updateOrganizationIdentity(@MappingTarget OrganizationIdentity organizationIdentityMapTo, OrganizationIdentity organizationIdentityMapFrom);
+
+    List<OrganizationIdentity> projectionToOrganizationIdentity(List<OrganizationProjection> organizations);
+    @Mapping(target = "id", source = "organizationId")
+    OrganizationIdentity projectionToOrganizationIdentity(OrganizationProjection organization);
 }

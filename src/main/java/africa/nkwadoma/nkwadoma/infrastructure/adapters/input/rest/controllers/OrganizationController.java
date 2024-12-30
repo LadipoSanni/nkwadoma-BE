@@ -17,6 +17,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.OrganizationRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -94,6 +96,27 @@ public class OrganizationController {
         log.info("Organization {}", organizationIdentities);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("organizations")
+    @Operation(summary = "View all organizations with their loan requests")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Found all organizations",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OrganizationIdentity.class))
+            })
+    })
+    public ResponseEntity<ApiResponse<?>> viewAllOrganizationWithLoanRequest() throws MeedlException {
+        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsWithLoanRequest();
+        log.info("Organizations retrieved: {}", organizationIdentities);
+        List<OrganizationResponse> organizationResponses =
+                organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        log.info("Organization response mapped: {}", organizationResponses);
+        return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
+                data(organizationResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );

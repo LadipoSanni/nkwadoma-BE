@@ -11,7 +11,7 @@ public interface ViewOrganizationUseCase {
 
     OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException;
     OrganizationIdentity viewTopOrganizationByLoanRequest() throws MeedlException;
-
+    List<OrganizationIdentity> viewAllOrganizationsWithLoanRequest() throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException;
