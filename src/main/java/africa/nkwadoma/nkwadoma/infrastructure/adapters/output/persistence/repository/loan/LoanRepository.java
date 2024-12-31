@@ -8,16 +8,16 @@ import org.springframework.data.repository.query.*;
 public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     @Query("""
           select
-          lr.id as id,
+          le.id as id,
+          le.startDate as loanStartDate,
           l.userIdentity.firstName as firstName,
           l.userIdentity.lastName as lastName,
-          le.startDate as loanStartDate,
-          o.name as referredBy,
+          l.loaneeLoanDetail.initialDeposit as initialDeposit,
           lr.loanAmountRequested as loanAmountRequested,
           lr.createdDate as createdDate,
-          l.loaneeLoanDetail.initialDeposit as initialDeposit,
           c.startDate as cohortStartDate,
-          p.name as programName
+          p.name as programName,
+          o.name as referredBy
     
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
