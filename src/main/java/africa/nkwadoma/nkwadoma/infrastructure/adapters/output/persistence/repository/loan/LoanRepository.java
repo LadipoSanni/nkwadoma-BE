@@ -13,8 +13,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           l.userIdentity.firstName as firstName,
           l.userIdentity.lastName as lastName,
           l.loaneeLoanDetail.initialDeposit as initialDeposit,
-          lr.loanAmountRequested as loanAmountRequested,
-          lr.createdDate as createdDate,
+          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
           c.startDate as cohortStartDate,
           p.name as programName,
           o.name as referredBy

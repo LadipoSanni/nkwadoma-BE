@@ -215,22 +215,16 @@ class LoanRequestAdapterTest {
 
     @BeforeEach
     void init() {
-        Loanee foundLoanee = null;
-        try {
-            foundLoanee = loaneeOutputPort.findLoaneeById(loaneeId);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
-        if (ObjectUtils.isNotEmpty(foundLoanee) && StringUtils.isNotEmpty(foundLoanee.getId())) {
+        if (ObjectUtils.isNotEmpty(loanee) && StringUtils.isNotEmpty(loanee.getId())) {
             loanRequest = new LoanRequest();
             loanRequest.setStatus(LoanRequestStatus.APPROVED);
             loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
-            loanRequest.setLoanee(foundLoanee);
+            loanRequest.setLoanee(loanee);
             loanRequest.setLoanReferralId(loanReferralId);
             loanRequest.setCohortId(eliteCohortId);
             loanRequest.setCreatedDate(LocalDateTime.now());
-            loanRequest.setLoanAmountRequested(foundLoanee.getLoaneeLoanDetail().getAmountRequested());
+            loanRequest.setLoanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
         }
     }
 
@@ -309,7 +303,7 @@ class LoanRequestAdapterTest {
             log.error("Error viewing all loan requests ", e);
         }
         assertNotNull(loanRequests.getContent());
-        assertNotNull(loanRequests.getContent().get(0).getReferredBy(), amazingGrace.getName());
+        assertEquals(loanRequests.getContent().get(0).getReferredBy(), amazingGrace.getName());
     }
 
     @ParameterizedTest

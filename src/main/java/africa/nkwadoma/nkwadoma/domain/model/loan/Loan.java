@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -26,11 +28,11 @@ public class Loan {
     private LoanStatus loanStatus;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
-        MeedlValidator.validateObjectInstance(loanee.getUserIdentity());
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         loanee.getUserIdentity().validate();
         MeedlValidator.validateUUID(loanAccountId, "Please provide a valid loan account identification.");
-        MeedlValidator.validateObjectInstance(startDate);
+        MeedlValidator.validateObjectInstance(startDate, LoanMessages.LOAN_START_DATE_MUST_NOT_BE_EMPTY.getMessage());
     }
 
 }

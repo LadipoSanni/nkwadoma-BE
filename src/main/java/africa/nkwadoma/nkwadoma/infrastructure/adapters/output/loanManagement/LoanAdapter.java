@@ -23,7 +23,7 @@ public class LoanAdapter implements LoanOutputPort {
     private final LoanRepository loanRepository;
     @Override
     public Loan save(Loan loan) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loan);
+        MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         loan.validate();
         log.info("Loan: {}", loan);
         LoanEntity loanEntity  = loanMapper.mapToLoanEntity(loan);
