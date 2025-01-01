@@ -111,6 +111,18 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loan;
     }
 
+    @Override
+    public Page<Loan> viewAllLoansByOrganizationId(Loan loan) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(loan.getOrganizationId(), LoanMessages.LOAN_ID_REQUIRED.getMessage());
+        MeedlValidator.validatePageSize(loan.getPageSize());
+        MeedlValidator.validatePageNumber(loan.getPageNumber());
+        Page<Loan> loans = loanOutputPort.findAllByOrganizationId
+                (loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
+        log.info("Loans returned from output port: {}", loans.getTotalElements());
+        return loans;
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);

@@ -35,6 +35,9 @@ public class Loan {
     private BigDecimal amountRequested;
     private String cohortName;
     private String programName;
+    private String organizationId;
+    private int pageNumber;
+    private int pageSize;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
