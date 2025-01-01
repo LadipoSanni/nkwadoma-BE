@@ -11,12 +11,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,9 +46,10 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class LoanController {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
-    private final LoanProductRestMapper loanProductMapper;
     private final LoanOfferUseCase loanOfferUseCase;
+    private final LoanRestMapper loanRestMapper;
     private final LoanOfferRestMapper loanOfferRestMapper;
+    private final LoanProductRestMapper loanProductMapper;
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
 
@@ -155,6 +158,43 @@ public class LoanController {
                .statusCode(HttpStatus.OK.toString())
                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/loan-disbursals")
+    @Operation(summary = "View all loan disbursals by organization ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+                    description = "Loan disbursals retrieved", content = {
+                    @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoanQueryRequest.class))
+            }),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+                    description = "Organization not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+                    description = "Invalid organization ID provided")
+    })
+    public ResponseEntity<ApiResponse<PaginatedResponse<LoanQueryResponse>>>
+    viewAllLoansByOrganizationId(@Valid @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Input to view all loans disbursed", required = true,
+            content = @Content(mediaType = "application/json", examples = @ExampleObject(value =
+                    "{\"organizationId\": \"b95805d1-2e2d-47f8-a037-7bcd264914fc\", \"pageSize\": 10, \"pageNumber\": 0}"),
+                    schema = @Schema(implementation = PaginatedResponse.class)
+            )) LoanQueryRequest loanQueryRequest) throws MeedlException {
+        Loan loan = loanRestMapper.toLoan(loanQueryRequest);
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoansByOrganizationId(loan);
+        log.info("Mapped Loan responses: {}", loans.getContent().toArray());
+        Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
+        log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
+        PaginatedResponse<LoanQueryResponse> paginatedResponse =
+                PaginatedResponse.<LoanQueryResponse>builder()
+                        .body(loanResponses.getContent())
+                        .pageSize(loanQueryRequest.getPageSize())
+                        .pageNumber(loanQueryRequest.getPageNumber())
+                        .totalPages(loanResponses.getTotalPages())
+                        .hasNextPage(loanResponses.hasNext())
+                        .build();
+        return ResponseEntity.ok(new ApiResponse<>
+                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name()));
     }
 
     @PostMapping("/accept/loan-offer")

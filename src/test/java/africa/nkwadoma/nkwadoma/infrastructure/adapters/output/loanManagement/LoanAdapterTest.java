@@ -8,7 +8,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.*;
@@ -234,7 +233,7 @@ class LoanAdapterTest {
     @Test
     @Order(2)
     void findLoanById() {
-        Loan loan = null;
+        Loan loan;
         try {
             log.info("loan id before finding : {}", loanId);
             loan = loanOutputPort.findLoanById(loanId);

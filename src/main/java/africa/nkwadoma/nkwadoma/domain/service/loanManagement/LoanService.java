@@ -119,7 +119,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validatePageNumber(loan.getPageNumber());
         Page<Loan> loans = loanOutputPort.findAllByOrganizationId
                 (loan.getOrganizationId(), loan.getPageSize(), loan.getPageNumber());
-        log.info("Loans returned from output port: {}", loans.getTotalElements());
+        log.info("Loans returned from output port: {}", loans.getContent().toArray());
         return loans;
     }
 
