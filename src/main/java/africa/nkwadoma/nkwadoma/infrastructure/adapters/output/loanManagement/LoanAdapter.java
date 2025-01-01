@@ -57,7 +57,7 @@ public class LoanAdapter implements LoanOutputPort {
             return Page.empty();
         }
         Page<Loan> loanPage = loanProjectionPage.map(loanMapper::mapProjectionToLoan);
-        log.info("Mapped loan page: {}", loanPage);
+        log.info("Mapped loan page: {}", loanPage.getContent());
         return loanPage;
     }
 }

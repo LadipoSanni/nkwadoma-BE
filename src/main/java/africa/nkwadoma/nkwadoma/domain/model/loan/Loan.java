@@ -8,7 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.math.*;
+import java.time.*;
 
 @Slf4j
 @Getter
@@ -19,13 +20,21 @@ import java.time.LocalDateTime;
 public class Loan {
     private String id;
     private Loanee loanee;
+    private String firstName;
+    private String lastName;
     private String loaneeId;
     private String loanOfferId;
     private String loanAccountId;
     private LocalDateTime startDate;
+    private LocalDate cohortStartDate;
+    private LocalDateTime offerDate;
     private LocalDateTime lastUpdatedDate;
     private LoanOffer loanOffer;
     private LoanStatus loanStatus;
+    private BigDecimal initialDeposit;
+    private BigDecimal amountRequested;
+    private String cohortName;
+    private String programName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());

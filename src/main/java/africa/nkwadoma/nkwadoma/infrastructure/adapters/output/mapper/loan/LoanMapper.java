@@ -18,5 +18,6 @@ public interface LoanMapper {
     @Mapping(target = "loaneeId", source = "loaneeEntity.id")
     Loan mapToLoan(LoanEntity loanEntity);
 
+    @Mapping(target = "amountRequested", source = "loanAmountRequested")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 }

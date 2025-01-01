@@ -5,15 +5,13 @@ import java.time.*;
 
 public interface LoanProjection {
     String getId();
-    String getLoaneeId();
     String getFirstName();
     String getLastName();
     String getCohortName();
-    String getReferredBy();
+    String getProgramName();
     BigDecimal getLoanAmountRequested();
-    LocalDateTime getCreatedDate();
-    LocalDateTime getLoanStartDate();
+    LocalDateTime getOfferDate();
+    LocalDateTime getStartDate();
     BigDecimal getInitialDeposit();
-    BigDecimal getTuitionAmount();
     LocalDate getCohortStartDate();
 }

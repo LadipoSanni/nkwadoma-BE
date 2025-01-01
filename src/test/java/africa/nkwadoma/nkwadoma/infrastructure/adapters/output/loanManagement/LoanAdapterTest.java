@@ -49,6 +49,8 @@ class LoanAdapterTest {
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
     @Autowired
+    private LoanOfferOutputPort loanOfferOutputPort;
+    @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private LoanRequestOutputPort loanRequestOutputPort;
@@ -74,8 +76,10 @@ class LoanAdapterTest {
     private Loanee loanee;
     private UserIdentity savedLoaneeUser;
     private String userId;
+    private String loanOfferId;
     private String organizationEmployeeIdentityId;
-
+    private Cohort cohort;
+    private Program program;
 
     @BeforeAll
     public void setUp(){
@@ -112,14 +116,14 @@ class LoanAdapterTest {
             assertNotNull(organizationEmployeeIdentity);
             organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
 
-            Program program = TestData.createProgramTestData("Data Analytics");
+            program = TestData.createProgramTestData("Data Analytics");
             program.setCreatedBy(userId);
             program = programOutputPort.saveProgram(program);
             assertNotNull(program);
             assertNotNull(program.getId());
             programId = program.getId();
 
-            Cohort cohort = TestData.createCohortData
+            cohort = TestData.createCohortData
                     ("elite", programId, amazingGraceId,
                             loanBreakdowns, userId);
             cohort = cohortOutputPort.save(cohort);
@@ -142,7 +146,6 @@ class LoanAdapterTest {
             loanee = TestData.createTestLoanee(savedLoaneeUser, loaneeLoanDetail);
             loanee.setUserIdentity(savedLoaneeUser);
             loanee.setCohortId(cohortId);
-//            loanee.setReferredBy(amazingGrace.getName());
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
@@ -172,6 +175,11 @@ class LoanAdapterTest {
             log.info("Loan request saved: {}", loanRequest);
             assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
+
+            LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+            loanOffer = loanOfferOutputPort.save(loanOffer);
+            assertNotNull(loanOffer);
+            loanOfferId = loanOffer.getId();
         } catch (MeedlException e) {
             log.error("Error deleting test data: {}", e.getMessage());
         }
@@ -181,7 +189,6 @@ class LoanAdapterTest {
     void init() {
         loan = TestData.createTestLoan(loanee);
         loan.setLoanee(loanee);
-//        loanee.setUserIdentity(savedLoaneeUser);
         loan.setStartDate(LocalDateTime.now());
         loan.setLoanAccountId(loaneeLoanAccountId);
     }
@@ -252,9 +259,19 @@ class LoanAdapterTest {
         } catch (MeedlException e) {
             log.error("Error finding loans by organization: {}", e.getMessage());
         }
+
         assertNotNull(loans);
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
+        assertEquals(loans.getContent().get(0).getFirstName(), loanee.getUserIdentity().getFirstName());
+        assertEquals(loans.getContent().get(0).getLastName(), loanee.getUserIdentity().getLastName());
+        assertEquals(loans.getContent().get(0).getInitialDeposit(), loanee.getLoaneeLoanDetail().getInitialDeposit());
+        assertEquals(loans.getContent().get(0).getAmountRequested(), loanee.getLoaneeLoanDetail().getAmountRequested());
+        assertNotNull(loans.getContent().get(0).getOfferDate());
+        assertNotNull(loans.getContent().get(0).getStartDate());
+        assertEquals(loans.getContent().get(0).getCohortStartDate(), cohort.getStartDate());
+        assertEquals(loans.getContent().get(0).getCohortName(), cohort.getName());
+        assertEquals(loans.getContent().get(0).getProgramName(), program.getName());
     }
 
     @ParameterizedTest
@@ -267,8 +284,6 @@ class LoanAdapterTest {
     void tearDown() {
         deleteLoan();
 
-
-
         try {
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(amazingGraceId);
@@ -280,7 +295,6 @@ class LoanAdapterTest {
             if (StringUtils.isNotEmpty(serviceOfferingId)) {
                 organizationIdentityOutputPort.deleteServiceOffering(serviceOfferingId);
             }
-            organizationEmployeeIdentityOutputPort.delete(organizationEmployeeIdentityId);
             organizationIdentityOutputPort.delete(amazingGraceId);
         } catch (MeedlException e) {
             log.error("Error deleting organization", e);
@@ -309,6 +323,10 @@ class LoanAdapterTest {
             } catch (MeedlException e) {
                 log.error("Error deleting loan referral: {}", e.getMessage());
             }
+        }
+
+        if (StringUtils.isNotEmpty(loanOfferId)) {
+            loanOfferOutputPort.deleteLoanOfferById(loanOfferId);
         }
 
         if (StringUtils.isNotEmpty(loanRequestId)) {
