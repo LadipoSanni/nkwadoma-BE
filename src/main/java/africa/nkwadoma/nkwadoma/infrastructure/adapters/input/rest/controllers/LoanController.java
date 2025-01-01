@@ -166,7 +166,7 @@ public class LoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
                     description = "Loan disbursals retrieved", content = {
                     @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LoanQueryRequest.class))
+                            schema = @Schema(implementation = LoanQueryResponse.class))
             }),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
                     description = "Organization not found"),
