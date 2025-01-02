@@ -7,4 +7,6 @@ import java.util.*;
 
 public interface LoanMetricsRepository extends JpaRepository<LoanMetricsEntity, String> {
     Optional<LoanMetricsEntity> findDistinctTopByOrderByLoanRequestCountDesc();
+
+    Optional<LoanMetricsEntity> findByOrganizationId(String organizationId);
 }

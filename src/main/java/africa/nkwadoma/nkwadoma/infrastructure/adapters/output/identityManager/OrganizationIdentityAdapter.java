@@ -197,8 +197,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationIdentity> findAllWithLoanRequests() {
-        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanRequests();
+    public List<OrganizationIdentity> findAllWithLoanMetrics() {
+        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanMetrics();
         if (CollectionUtils.isEmpty(organizations)) {
             return new ArrayList<>();
         }

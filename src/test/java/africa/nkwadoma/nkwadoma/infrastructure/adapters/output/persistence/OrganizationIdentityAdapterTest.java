@@ -276,7 +276,7 @@ class OrganizationIdentityAdapterTest {
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan metrics {}", e.getMessage());
         }
-        List<OrganizationIdentity> organizationIdentity = organizationOutputPort.findAllWithLoanRequests();
+        List<OrganizationIdentity> organizationIdentity = organizationOutputPort.findAllWithLoanMetrics();
         assertNotNull(organizationIdentity);
         assertEquals(organizationIdentity.get(0).getName(), amazingGrace.getName());
         assertEquals(organizationIdentity.get(0).getLogoImage(), amazingGrace.getLogoImage());

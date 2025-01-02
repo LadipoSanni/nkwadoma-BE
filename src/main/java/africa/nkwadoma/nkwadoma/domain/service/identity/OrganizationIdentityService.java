@@ -235,7 +235,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     @Override
-    public OrganizationIdentity viewTopOrganizationByLoanRequest() throws MeedlException {
+    public OrganizationIdentity viewTopOrganizationByLoanRequestCount() throws MeedlException {
         Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findTopOrganizationWithLoanRequest();
         if (loanMetrics.isEmpty()){
             throw new EducationException(OrganizationMessages.LOAN_METRICS_NOT_FOUND.getMessage());
@@ -245,8 +245,8 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     }
 
     @Override
-    public List<OrganizationIdentity> viewAllOrganizationsWithLoanRequest() {
-        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanRequests();
+    public List<OrganizationIdentity> viewAllOrganizationsLoanMetrics() {
+        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics();
         log.info("Organizations returned: {}", organizationIdentities);
         return organizationIdentities;
     }

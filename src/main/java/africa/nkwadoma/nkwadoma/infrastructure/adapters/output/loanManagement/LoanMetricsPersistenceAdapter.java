@@ -10,10 +10,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.stereotype.*;
 
 import java.util.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LoanMetricsPersistenceAdapter implements LoanMetricsOutputPort {
@@ -46,5 +48,13 @@ public class LoanMetricsPersistenceAdapter implements LoanMetricsOutputPort {
         if (loanMetricsEntity.isPresent()) {
             loanMetricsRepository.delete(loanMetricsEntity.get());
         }
+    }
+
+    @Override
+    public Optional<LoanMetrics> findByOrganizationId(String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        Optional<LoanMetricsEntity> loanMetricsEntity = loanMetricsRepository.findByOrganizationId(organizationId);
+        log.info("Loan metrics entity retrieved from db: {}", loanMetricsEntity);
+        return loanMetricsEntity.map(loanMetricsMapper::toLoanMetrics);
     }
 }

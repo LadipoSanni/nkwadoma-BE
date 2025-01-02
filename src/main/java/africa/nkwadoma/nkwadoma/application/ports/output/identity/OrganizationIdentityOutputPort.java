@@ -26,7 +26,7 @@ public interface OrganizationIdentityOutputPort {
     void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException;
 
     void deleteServiceOffering(String serviceOfferingId) throws MeedlException;
-    List<OrganizationIdentity> findAllWithLoanRequests();
+    List<OrganizationIdentity> findAllWithLoanMetrics();
     List<OrganizationIdentity> findByName(String name) throws MeedlException;
     Optional<OrganizationIdentity> findOrganizationByName(String name) throws MeedlException;
     void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException;
