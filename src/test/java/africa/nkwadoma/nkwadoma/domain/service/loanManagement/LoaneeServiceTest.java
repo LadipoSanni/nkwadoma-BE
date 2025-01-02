@@ -22,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -224,19 +223,19 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void viewAllLoaneeInCohortWithNullId() throws MeedlException {
+    void viewAllLoaneeInCohortWithNullId() {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void viewAllLoaneeInCohortWithEmptyId(String cohortId) throws MeedlException {
+    void viewAllLoaneeInCohortWithEmptyId(String cohortId) {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
-    void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
+    void viewAllLoaneeInCohortWithInvalidId(String cohortId) {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
     @Test
