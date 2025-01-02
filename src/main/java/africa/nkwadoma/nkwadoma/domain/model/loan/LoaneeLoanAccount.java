@@ -5,13 +5,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.AccountStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@ToString
 public class LoaneeLoanAccount {
-
     private String id;
     private AccountStatus accountStatus;
     private LoanStatus loanStatus;

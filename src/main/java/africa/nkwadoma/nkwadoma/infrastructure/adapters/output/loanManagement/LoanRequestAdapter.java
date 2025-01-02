@@ -47,7 +47,8 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     }
 
     @Override
-    public void deleteLoanRequestById(String id) {
+    public void deleteLoanRequestById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoanMessages.LOAN_REQUEST_ID_CANNOT_BE_EMPTY.getMessage());
         loanRequestRepository.deleteById(id);
     }
 

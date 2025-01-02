@@ -20,11 +20,10 @@ public interface OrganizationIdentityOutputPort {
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
     boolean existsById(String organizationId) throws MeedlException;
     List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException;
-
+    Optional<OrganizationIdentity> findByOrganizationId(String organizationId) throws MeedlException;
     List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException;
 
     void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException;
-
     void deleteServiceOffering(String serviceOfferingId) throws MeedlException;
     List<OrganizationIdentity> findAllWithLoanMetrics();
     List<OrganizationIdentity> findByName(String name) throws MeedlException;

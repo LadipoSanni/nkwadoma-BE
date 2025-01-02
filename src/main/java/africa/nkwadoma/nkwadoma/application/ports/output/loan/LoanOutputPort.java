@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import org.springframework.data.domain.*;
 
 public interface LoanOutputPort {
     Loan save(Loan loan) throws MeedlException;
@@ -10,4 +10,5 @@ public interface LoanOutputPort {
     void deleteById(String savedLoanId) throws MeedlException;
 
     Loan findLoanById(String id) throws MeedlException;
+    Page<Loan> findAllByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 }
