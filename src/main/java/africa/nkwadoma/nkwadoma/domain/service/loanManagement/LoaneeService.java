@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -26,10 +26,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +59,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    private final LoanMetricsUseCase loanMetricsUseCase;
 
 
     @Override
@@ -162,12 +160,16 @@ public class LoaneeService implements LoaneeUseCase {
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
-        getOrganizationEmployeeIdentity(loanee);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
         notifyAllPortfolioManager();
         loaneeOutputPort.save(loanee);
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
         LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
+        LoanMetrics loanMetrics = loanMetricsUseCase.save(LoanMetrics.builder().
+                organizationId(organizationEmployeeIdentity.getOrganization()).
+                loanReferralCount(1).build());
+        log.info("Loan metrics saved: {}", loanMetrics);
         refer(loanee,loanReferral.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         return  loanReferral;

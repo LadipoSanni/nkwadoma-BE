@@ -35,7 +35,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanOfferUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
-    private final LoanMetricsOutputPort loanMetricsOutputPort;
+    private final LoanMetricsUseCase loanMetricsUseCase;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
@@ -49,7 +49,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private final IdentityVerificationUseCase verificationUseCase;
-    private final LoanMetricsUseCase loanMetricsUseCase;
 
 
     @Override
@@ -207,19 +206,20 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanRequest.setCreatedDate(LocalDateTime.now());
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request: {}", request);
-        updateLoanMetrics(loanRequest);
+        updateLoanMetricsLoanRequestCount(loanRequest);
         return request;
     }
 
-    private LoanMetrics updateLoanMetrics(LoanRequest loanRequest) throws MeedlException {
-        Optional<OrganizationIdentity> organization = organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
+    private LoanMetrics updateLoanMetricsLoanRequestCount(LoanRequest loanRequest) throws MeedlException {
+        Optional<OrganizationIdentity> organization =
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organization.isEmpty()) {
             throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         LoanMetrics loanMetrics = new LoanMetrics();
         loanMetrics.setOrganizationId(organization.get().getId());
         loanMetrics.setLoanRequestCount(BigInteger.ONE.intValue());
-        return loanMetricsUseCase.saveOrUpdateLoanMetrics(loanMetrics);
+        return loanMetricsUseCase.save(loanMetrics);
     }
 
     @Override
@@ -233,6 +233,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
+
         return loanOffer;
     }
 

@@ -66,8 +66,10 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         LoanReferralEntity loanReferralEntity =
                 loanReferralMapper.toLoanReferralEntity(loanReferral);
         loanReferralEntity = loanReferralRepository.save(loanReferralEntity);
-
-        return loanReferralMapper.toLoanReferral(loanReferralEntity);
+        log.info("Created loan referral entity: {}", loanReferralEntity);
+        loanReferral = loanReferralMapper.toLoanReferral(loanReferralEntity);
+        log.info("Mapped loan referral: {}", loanReferral);
+        return loanReferral;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -48,7 +49,6 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class LoaneeServiceTest {
-
     @InjectMocks
     private LoaneeService loaneeService;
     @Mock
@@ -75,6 +75,8 @@ class LoaneeServiceTest {
     private ProgramCohort programCohort;
     @Mock
     private ProgramOutputPort programOutputPort;
+    @Mock
+    private LoanMetricsUseCase loanMetricsUseCase;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private int pageSize = 2;
@@ -254,6 +256,9 @@ class LoaneeServiceTest {
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());
             when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
+            when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
+                    organizationId(organizationEmployeeIdentity.getOrganization()).
+                    loanReferralCount(1).build());
             LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee.getId());
             assertEquals(loanReferral.getLoanee().getUserIdentity().getFirstName()
                     , firstLoanee.getUserIdentity().getFirstName());
