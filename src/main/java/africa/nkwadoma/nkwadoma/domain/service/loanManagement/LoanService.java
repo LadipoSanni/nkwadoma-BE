@@ -49,6 +49,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private final IdentityVerificationUseCase verificationUseCase;
+    private final LoanMetricsUseCase loanMetricsUseCase;
 
 
     @Override
@@ -203,21 +204,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (organization.isEmpty()) {
             throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
-        Optional<LoanMetrics> foundLoanMetrics =
-                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
-        LoanMetrics loanMetrics;
-        if (foundLoanMetrics.isPresent()) {
-            int loanRequestCount = foundLoanMetrics.get().getLoanRequestCount() + BigInteger.ONE.intValue();
-            foundLoanMetrics.get().setLoanRequestCount(loanRequestCount);
-            loanMetrics = loanMetricsOutputPort.save(foundLoanMetrics.get());
-        } else {
-            loanMetrics = loanMetricsOutputPort.save(LoanMetrics.builder().
-                    organizationId(organization.get().getId()).
-                    loanRequestCount(BigInteger.ONE.intValue()).build()
-            );
-        }
-        log.info("Loan metrics saved: {}", loanMetrics);
-        return loanMetrics;
+        LoanMetrics loanMetrics = new LoanMetrics();
+        loanMetrics.setOrganizationId(organization.get().getId());
+        loanMetrics.setLoanRequestCount(BigInteger.ONE.intValue());
+        return loanMetricsUseCase.saveOrUpdateLoanMetrics(loanMetrics);
     }
 
     @Override

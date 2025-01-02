@@ -9,4 +9,5 @@ public interface LoanMetricsMapper {
     LoanMetricsEntity toLoanMetricsEntity(LoanMetrics loanMetrics);
     @InheritInverseConfiguration
     LoanMetrics toLoanMetrics(LoanMetricsEntity loanMetricsEntity);
+    LoanMetrics updateLoanMetrics(LoanMetrics loanMetrics, @MappingTarget LoanMetrics updatedLoanMetrics);
 }

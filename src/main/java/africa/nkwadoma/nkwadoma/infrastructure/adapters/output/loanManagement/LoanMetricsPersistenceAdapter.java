@@ -24,7 +24,7 @@ public class LoanMetricsPersistenceAdapter implements LoanMetricsOutputPort {
 
     @Override
     public LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanMetrics, LoanMessages.LOAN_METRICS_ENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanMetrics, LoanMessages.LOAN_METRICS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanMetrics.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         LoanMetricsEntity loanMetricsEntity = loanMetricsMapper.toLoanMetricsEntity(loanMetrics);
         return loanMetricsMapper.toLoanMetrics(loanMetricsRepository.save(loanMetricsEntity));
