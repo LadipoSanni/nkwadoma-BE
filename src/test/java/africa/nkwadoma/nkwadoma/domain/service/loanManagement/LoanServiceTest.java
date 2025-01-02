@@ -23,6 +23,7 @@ import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
+import org.springframework.data.domain.*;
 
 import java.time.*;
 import java.util.*;
@@ -98,6 +99,9 @@ class LoanServiceTest {
                 .build();
 
         loan = TestData.createTestLoan(loanee);
+        loan.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
+        loan.setPageNumber(0);
+        loan.setPageSize(10);
     }
 
     @Test
@@ -262,6 +266,28 @@ class LoanServiceTest {
             log.error("",e);
         }
         assertThrows(LoanException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+    }
+
+    @Test
+    void viewAllLoanInOrganization() {
+        Page<Loan> loans = Page.empty();
+        try {
+            when(loanOutputPort.findAllByOrganizationId(anyString(), anyInt(), anyInt()))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.viewAllLoansByOrganizationId(loan);
+        } catch (MeedlException e) {
+            log.error("Error viewing all loans: ", e);
+        }
+
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
+        try {
+            verify(loanOutputPort, times(1))
+                    .findAllByOrganizationId(loan.getOrganizationId(), 10, 0);
+        } catch (MeedlException e) {
+            log.error("Error viewing all loans: ", e);
+        }
     }
 
 }
