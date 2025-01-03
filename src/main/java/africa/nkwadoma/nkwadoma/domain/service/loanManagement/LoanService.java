@@ -225,7 +225,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
         LoanOffer loanOffer = new LoanOffer();
-        if (loanRequest.getStatus() != LoanRequestStatus.APPROVED){
+        if (loanRequest.getStatus() != LoanRequestStatus.APPROVED) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
         }
         loanOffer.setLoanRequest(loanRequest);
@@ -233,7 +233,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer = loanOfferOutputPort.save(loanOffer);
-
+        Optional<OrganizationIdentity> organizationByName =
+                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getReferredBy());
+        if (organizationByName.isEmpty()) {
+            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        LoanMetrics loanMetrics = loanMetricsUseCase.save(
+                LoanMetrics.builder().organizationId(organizationByName.get().getId()).build());
+        log.info("Saved loan metrics: {}", loanMetrics);
         return loanOffer;
     }
 

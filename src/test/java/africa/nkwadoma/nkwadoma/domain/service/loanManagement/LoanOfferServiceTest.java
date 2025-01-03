@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -15,7 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
@@ -38,6 +38,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -70,6 +71,10 @@ public class LoanOfferServiceTest {
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private LoanMetricsUseCase loanMetricsUseCase;
 
 
     @BeforeEach
@@ -86,10 +91,15 @@ public class LoanOfferServiceTest {
 
     @Test
     void createLoanOfferWithValidLoanRequestId() {
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().id(mockId2).build();
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
+            when(organizationIdentityOutputPort.findOrganizationByName(anyString())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
+                    organizationId(mockId2).loanOfferCount(1).build());
             cretedLoanOffer = loanService.createLoanOffer(loanRequest);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
