@@ -36,6 +36,9 @@ public class OrganizationIdentity {
     private String createdBy;
     private String updatedBy;
     private int loanRequestCount;
+    private int loanDisbursalCount;
+    private int loanOfferCount;
+    private int loanReferralCount;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;

@@ -102,7 +102,7 @@ public class OrganizationController {
     }
 
     @GetMapping("organizations")
-    @Operation(summary = "View all organizations with their loan requests")
+    @Operation(summary = "View all organizations with their loan metrics")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Found all organizations",
                     content = { @Content(mediaType = "application/json",
@@ -110,7 +110,7 @@ public class OrganizationController {
             })
     })
     public ResponseEntity<ApiResponse<?>> viewAllOrganizationWithLoanRequest() throws MeedlException {
-        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsWithLoanRequest();
+        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsLoanMetrics();
         log.info("Organizations retrieved: {}", organizationIdentities);
         List<OrganizationResponse> organizationResponses =
                 organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
@@ -139,7 +139,7 @@ public class OrganizationController {
     @GetMapping("organization")
     @Operation(summary = "View top organization with the highest number of loan requests")
     public ResponseEntity<ApiResponse<?>> viewTopOrganizationByLoanRequest() throws MeedlException {
-        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewTopOrganizationByLoanRequest();
+        OrganizationIdentity organizationIdentity = viewOrganizationUseCase.viewTopOrganizationByLoanRequestCount();
         log.info("Organization identity details: ===> {}", organizationIdentity);
         OrganizationResponse organizationResponse = organizationRestMapper.toOrganizationResponse(organizationIdentity);
         log.info("Organization response: ===> {}", organizationResponse);

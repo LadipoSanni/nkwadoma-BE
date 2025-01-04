@@ -31,6 +31,9 @@ public class OrganizationResponse {
     private int numberOfLoanees;
     private int numberOfCohort;
     private int loanRequestCount;
+    private int loanDisbursalCount;
+    private int loanOfferCount;
+    private int loanReferralCount;
     private BigDecimal totalDebtRepaid;
     private BigDecimal totalCurrentDebt;
     private BigDecimal totalHistoricalDebt;

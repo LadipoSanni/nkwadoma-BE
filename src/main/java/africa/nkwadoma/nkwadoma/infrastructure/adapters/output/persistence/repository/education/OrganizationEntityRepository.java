@@ -21,10 +21,13 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
       select o.id as organizationId,
       o.name as name,
       o.logoImage as logoImage,
-      lm.loanRequestCount as loanRequestCount
+      lm.loanRequestCount as loanRequestCount,
+      lm.loanDisbursalCount as loanDisbursalCount,
+      lm.loanOfferCount as loanOfferCount,
+      lm.loanReferralCount as loanReferralCount
       from OrganizationEntity o
       join LoanMetricsEntity lm on lm.organizationId = o.id
-""")
-    List<OrganizationProjection> findAllWithLoanRequests();
+    """)
+    List<OrganizationProjection> findAllWithLoanMetrics();
 
 }

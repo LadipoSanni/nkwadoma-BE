@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -21,7 +22,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -48,7 +48,6 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class LoaneeServiceTest {
-
     @InjectMocks
     private LoaneeService loaneeService;
     @Mock
@@ -75,6 +74,8 @@ class LoaneeServiceTest {
     private ProgramCohort programCohort;
     @Mock
     private ProgramOutputPort programOutputPort;
+    @Mock
+    private LoanMetricsUseCase loanMetricsUseCase;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private int pageSize = 2;
@@ -222,19 +223,19 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void viewAllLoaneeInCohortWithNullId() throws MeedlException {
+    void viewAllLoaneeInCohortWithNullId() {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
-    void viewAllLoaneeInCohortWithEmptyId(String cohortId) throws MeedlException {
+    void viewAllLoaneeInCohortWithEmptyId(String cohortId) {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
-    void viewAllLoaneeInCohortWithInvalidId(String cohortId) throws MeedlException {
+    void viewAllLoaneeInCohortWithInvalidId(String cohortId) {
         assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber));
     }
     @Test
@@ -254,6 +255,9 @@ class LoaneeServiceTest {
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());
             when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
+            when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
+                    organizationId(organizationEmployeeIdentity.getOrganization()).
+                    loanReferralCount(1).build());
             LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee.getId());
             assertEquals(loanReferral.getLoanee().getUserIdentity().getFirstName()
                     , firstLoanee.getUserIdentity().getFirstName());

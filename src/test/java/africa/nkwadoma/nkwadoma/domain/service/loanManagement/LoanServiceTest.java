@@ -39,8 +39,6 @@ class LoanServiceTest {
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
-    private LoanMetricsOutputPort loanMetricsOutputPort;
-    @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
@@ -54,6 +52,8 @@ class LoanServiceTest {
     private IdentityVerificationUseCase verificationUseCase;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private LoanMetricsService loanMetricsUseCase;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -110,7 +110,7 @@ class LoanServiceTest {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
-            when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
+            when(loanMetricsUseCase.save(any())).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
@@ -191,7 +191,6 @@ class LoanServiceTest {
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
-            when(loanMetricsOutputPort.save(any())).thenReturn(loanMetrics);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {

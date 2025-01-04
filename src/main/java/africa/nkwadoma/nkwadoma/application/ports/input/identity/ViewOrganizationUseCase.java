@@ -10,8 +10,8 @@ public interface ViewOrganizationUseCase {
     List<OrganizationIdentity> search(String organizationName) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException;
-    OrganizationIdentity viewTopOrganizationByLoanRequest() throws MeedlException;
-    List<OrganizationIdentity> viewAllOrganizationsWithLoanRequest() throws MeedlException;
+    OrganizationIdentity viewTopOrganizationByLoanRequestCount() throws MeedlException;
+    List<OrganizationIdentity> viewAllOrganizationsLoanMetrics() throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetailsByOrganizationAdmin(String adminId) throws MeedlException;

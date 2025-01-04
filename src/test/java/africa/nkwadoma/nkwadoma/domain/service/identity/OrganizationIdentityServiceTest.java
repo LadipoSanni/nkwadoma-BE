@@ -5,12 +5,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -30,8 +27,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @Slf4j
@@ -116,11 +112,12 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void viewAllOrganizationsWithLoanRequests() {
-        List<OrganizationIdentity> organizationIdentities;
-        when(organizationIdentityOutputPort.findAllWithLoanRequests()).thenReturn(List.of(roseCouture));
-        organizationIdentities = organizationIdentityService.viewAllOrganizationsWithLoanRequest();
+    void viewAllOrganizationsLoanRequests() {
+        when(organizationIdentityOutputPort.findAllWithLoanMetrics()).thenReturn(List.of(roseCouture));
+        List<OrganizationIdentity> organizationIdentities = organizationIdentityService.viewAllOrganizationsLoanMetrics();
+        verify(organizationIdentityOutputPort, times(1)).findAllWithLoanMetrics();
         assertNotNull(organizationIdentities);
+        assertEquals(organizationIdentities.get(0).getId(), roseCouture.getId());
         assertEquals(organizationIdentities.get(0).getName(), roseCouture.getName());
         assertEquals(organizationIdentities.get(0).getLogoImage(), roseCouture.getLogoImage());
     }
