@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.*;
 import java.util.*;
 
 public interface OrganizationServiceOfferingRepository extends JpaRepository<OrganizationServiceOfferingEntity, String> {
-    List<OrganizationServiceOfferingEntity> findByOrganizationId(String id);
+    List<OrganizationServiceOfferingEntity> findAllByOrganizationId(String id);
 }

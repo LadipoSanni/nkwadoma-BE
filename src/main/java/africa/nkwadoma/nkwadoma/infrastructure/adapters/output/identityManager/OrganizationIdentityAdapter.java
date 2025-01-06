@@ -144,7 +144,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_SERVICE_OFFERING_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
-                organizationServiceOfferingRepository.findByOrganizationId(id);
+                organizationServiceOfferingRepository.findAllByOrganizationId(id);
         if (organizationServiceOfferings.isEmpty()){
             log.info("No service offerings found for organization with id: {}", id);
             throw new IdentityException("Service offering not found");
@@ -168,7 +168,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     public List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
-                organizationServiceOfferingRepository.findByOrganizationId(organizationId);
+                organizationServiceOfferingRepository.findAllByOrganizationId(organizationId);
 //        log.info("Found org service offerings in DB: {}", organizationServiceOfferings);
         return organizationIdentityMapper.toOrganizationServiceOfferings(organizationServiceOfferings);
     }
