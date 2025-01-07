@@ -181,6 +181,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
+            loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
@@ -206,7 +207,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanRequest.setCreatedDate(LocalDateTime.now());
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request: {}", request);
-        updateLoanMetricsLoanRequestCount(loanRequest);
+        updateLoanMetricsLoanRequestCount(request);
         return request;
     }
 
