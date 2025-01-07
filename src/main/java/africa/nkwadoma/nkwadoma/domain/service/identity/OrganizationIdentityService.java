@@ -52,7 +52,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
@@ -229,7 +229,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
     public OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         return organizationIdentity;
     }
@@ -258,7 +258,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
                 organizationEmployeeIdentityOutputPort.findByCreatedBy(adminId);
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity);
+        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         log.info("Total number loanees {}",organizationIdentity.getNumberOfLoanees());
         log.info("Total number Programs {}",organizationIdentity.getNumberOfPrograms());
         organizationIdentity.setServiceOfferings(serviceOfferings);
