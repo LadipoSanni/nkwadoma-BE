@@ -15,7 +15,6 @@ public class ServiceOffering {
     private String id;
     private String name;
     private Industry industry;
-    //    private ServiceOfferingType serviceOfferingType;
     private BigDecimal transactionLowerBound;
     private BigDecimal transactionUpperBound;
 }
