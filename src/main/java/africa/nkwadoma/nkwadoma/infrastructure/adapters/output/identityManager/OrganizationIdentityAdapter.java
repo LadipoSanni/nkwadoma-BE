@@ -135,12 +135,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public boolean existsById(String organizationId) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        return organizationEntityRepository.existsById(organizationId);
-    }
-
-    @Override
     public List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_SERVICE_OFFERING_ID.getMessage());
         List<OrganizationServiceOfferingEntity> organizationServiceOfferings =
