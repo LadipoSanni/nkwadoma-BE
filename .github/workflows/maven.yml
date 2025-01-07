@@ -93,6 +93,9 @@ jobs:
         with:
           java-version: 17
           
+      - name: Build and Test
+        run: |
+          mvn clean test
 
       - name: Run Maven Tests with Surefire Report
         env:
