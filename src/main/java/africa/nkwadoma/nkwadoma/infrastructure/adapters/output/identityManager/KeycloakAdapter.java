@@ -60,10 +60,11 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         UserRepresentation userRepresentation = mapper.map(userIdentity);
         try{
             UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
-            Response response = users.create(userRepresentation);
-            if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
-                log.error("{} - {} --- Error occurred on attempting to create user on keycloak", Response.Status.CONFLICT, USER_IDENTITY_ALREADY_EXISTS.getMessage());
-                throw new IdentityException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+            try (Response response = users.create(userRepresentation)) {
+                if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                    log.error("{} - {} --- Error occurred on attempting to create user on keycloak", Response.Status.CONFLICT, USER_IDENTITY_ALREADY_EXISTS.getMessage());
+                    throw new IdentityException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+                }
             }
             UserRepresentation createdUserRepresentation = getUserRepresentation(userIdentity, Boolean.TRUE);
             userIdentity.setId(createdUserRepresentation.getId());
@@ -111,14 +112,15 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         organizationIdentity.validate();
         log.info("Keycloak service validated organization ... {}", organizationIdentity);
         ClientRepresentation clientRepresentation = createClientRepresentation(organizationIdentity);
-        Response response = getClients(keycloak).create(clientRepresentation);
-        if (response.getStatusInfo().equals(Response.Status.CREATED)) {
-            clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
-            organizationIdentity.setId(clientRepresentation.getId());
-            log.info("Client created successfully. Name: {}", organizationIdentity.getName());
-        }else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
-            log.error("{} - Client already exists.",response.getStatusInfo());
-            throw new MeedlException(CLIENT_EXIST.getMessage());
+        try (Response response = getClients(keycloak).create(clientRepresentation)) {
+            if (response.getStatusInfo().equals(Response.Status.CREATED)) {
+                clientRepresentation = getClientRepresentationByName(organizationIdentity.getName());
+                organizationIdentity.setId(clientRepresentation.getId());
+                log.info("Client created successfully. Name: {}", organizationIdentity.getName());
+            } else if (response.getStatusInfo().equals(Response.Status.CONFLICT)) {
+                log.error("{} - Client already exists.", response.getStatusInfo());
+                throw new MeedlException(CLIENT_EXIST.getMessage());
+            }
         }
         return organizationIdentity;
     }

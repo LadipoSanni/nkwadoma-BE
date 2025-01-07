@@ -16,9 +16,8 @@ public interface OrganizationIdentityOutputPort {
     OrganizationIdentity findByEmail(String email) throws MeedlException;
     void delete(String organizationId) throws MeedlException;
     OrganizationIdentity findById(String id) throws MeedlException;
-    List<ServiceOffering> getServiceOfferings(OrganizationIdentity organizationIdentity) throws MeedlException;
+    List<ServiceOffering> getServiceOfferings(String organizationId) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
-    boolean existsById(String organizationId) throws MeedlException;
     List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException;
     Optional<OrganizationIdentity> findByOrganizationId(String organizationId) throws MeedlException;
     List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException;

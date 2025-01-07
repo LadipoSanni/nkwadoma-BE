@@ -36,6 +36,8 @@ class LoanReferralAdapterTest {
     @Autowired
     private LoaneeOutputPort loaneeOutputPort;
     @Autowired
+    private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
@@ -232,7 +234,10 @@ class LoanReferralAdapterTest {
             );
             cohortOutputPort.deleteCohort(cohortId);
             programOutputPort.deleteProgram(programId);
-
+            Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findByOrganizationId(amazingGrace.getId());
+            if (loanMetrics.isPresent()) {
+                loanMetricsOutputPort.delete(loanMetrics.get().getId());
+            }
             List<OrganizationServiceOffering> organizationServiceOfferings = organizationIdentityOutputPort.
                     findOrganizationServiceOfferingsByOrganizationId(amazingGrace.getId());
             String serviceOfferingId = null;
