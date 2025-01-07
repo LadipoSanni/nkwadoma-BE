@@ -91,6 +91,7 @@ class LoanServiceTest {
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
         loanRequest.setLoanReferralId(loanReferral.getId());
+        loanRequest.setReferredBy(organizationIdentity.getName());
         loanRequest.setCreatedDate(LocalDateTime.now());
 
         loanMetrics = LoanMetrics.builder()
@@ -192,6 +193,7 @@ class LoanServiceTest {
             when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
