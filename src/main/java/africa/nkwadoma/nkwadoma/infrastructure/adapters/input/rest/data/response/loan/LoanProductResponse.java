@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +32,7 @@ LoanProductResponse {
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
-    private String fundProductID;
+    private String investmentVehicleId;
+    private String investmentVehicleName;
     private int numberOfLoanees;
 }

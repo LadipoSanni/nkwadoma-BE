@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -48,7 +49,7 @@ public class LoanProductEntity {
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
-    private String fundProductId;
+    private String investmentVehicleName;
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
     private int totalNumberOfLoanees;
     private int totalNumberOfLoanProduct;

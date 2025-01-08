@@ -140,6 +140,7 @@ public class TestData {
     public static LoanProduct buildTestLoanProduct(String name, Vendor vendor) {
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanProduct.setInvestmentVehicleId(testId);
         loanProduct.setName(name);
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
