@@ -15,7 +15,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @Setter
 public class LoanProductRequest {
     private String id;
-    private String fundProductId;
+    private String investmentVehicleId;
     private BigDecimal totalAmountAvailable;
     private BigDecimal totalAmountEarned;
     private BigDecimal totalAmountDisbursed;

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import jakarta.validation.constraints.Size;
@@ -47,19 +48,21 @@ public class LoanProduct {
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
-    private String fundProductId;
+    private String investmentVehicleId;
     private int totalNumberOfLoanees;
     private int totalNumberOfLoanProduct;
     private List<Vendor> vendors;
+    private String investmentVehicleName;
 
     private int pageSize;
     private int pageNumber;
 
     public void validateLoanProductDetails() throws MeedlException {
         log.info("Started loan product validation");
-        MeedlValidator.validateObjectName(name,"Name cannot be empty|");
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
         MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
         MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
+        MeedlValidator.validateUUID(investmentVehicleId,"Investment vehicle ID cannot be empty");
         validateLoanProductSize();
         validateObligorLimit();
         log.info("ended loan product validation successfully... ");

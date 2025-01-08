@@ -2,10 +2,12 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
@@ -43,6 +45,8 @@ class LoanProductServiceTest {
     private IdentityManagerOutputPort identityManagerOutPutPort;
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
+    @Mock
+    private InvestmentVehicleOutputPort investmentVehicleOutputPort;
 
     @InjectMocks
     private LoanService loanService;
@@ -54,6 +58,7 @@ class LoanProductServiceTest {
         Vendor vendor = new Vendor();
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
+        loanProduct.setInvestmentVehicleId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setName("Test Loan Product - unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsors(List.of("Mark", "Jack"));
@@ -72,7 +77,8 @@ class LoanProductServiceTest {
             when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
-
+            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
+                    .thenReturn(new InvestmentVehicle());
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());

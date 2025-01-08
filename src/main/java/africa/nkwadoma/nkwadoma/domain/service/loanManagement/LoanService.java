@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -49,6 +51,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private final IdentityVerificationUseCase verificationUseCase;
+    private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
 
 
     @Override
@@ -58,6 +61,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("Loan product {} created successfully", loanProduct.getName());
+        InvestmentVehicle investmentVehicle =
+                investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
+        loanProduct.setInvestmentVehicleName(investmentVehicle.getName());
         return loanProductOutputPort.save(loanProduct);
     }
 
