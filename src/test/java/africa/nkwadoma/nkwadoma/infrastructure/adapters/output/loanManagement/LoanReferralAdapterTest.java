@@ -109,6 +109,7 @@ class LoanReferralAdapterTest {
             organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
             organizationEmployeeIdentity.setOrganization(organizationId);
             organizationEmployeeIdentity.setMeedlUser(joel);
+            organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
             organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
 

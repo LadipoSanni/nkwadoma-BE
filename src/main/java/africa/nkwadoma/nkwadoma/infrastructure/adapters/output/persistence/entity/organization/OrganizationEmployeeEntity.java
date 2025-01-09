@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization;
 
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +20,7 @@ public class OrganizationEmployeeEntity {
     private String id;
     @ManyToOne
     private UserEntity meedlUser;
+    @Enumerated(EnumType.STRING)
+    private ActivationStatus status;
     private String organization;
-
-
 }
