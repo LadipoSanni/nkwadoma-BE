@@ -12,6 +12,7 @@ import lombok.ToString;
 
 import java.math.*;
 import java.time.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,6 +37,7 @@ public class LoanReferral {
     private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferralStatus);

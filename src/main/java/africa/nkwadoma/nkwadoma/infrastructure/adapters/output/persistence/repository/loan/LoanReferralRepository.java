@@ -28,4 +28,6 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
     """)
     Optional<LoanReferralProjection> findLoanReferralById(@Param("id") String id);
     List<LoanReferralEntity> findAllByLoaneeEntityUserIdentityId(String userId);
+
+    LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(String id, String cohortId);
 }

@@ -16,7 +16,8 @@ public enum LoaneeMessages {
     LOANEE_MUST_BE_ADDED_TO_COHORT("Loanee Must Be Added To Cohort Before Referral"),
     LOANEE_CANNOT_BE_EMPTY("Loanee cannot be empty"),
     LOANEE_LOAN_DETAIL_CANNOT_BE_EMPTY("Loanee loan details must not be empty"),
-    LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY("Loan request status must not be empty");
+    LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY("Loan request status must not be empty"),
+    LOANEE_HAS_BEEN_REFERRED_BEFORE("Loanee Has Been Referred Before"),;
 
     private final String message;
 

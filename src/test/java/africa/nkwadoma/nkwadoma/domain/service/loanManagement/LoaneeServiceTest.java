@@ -243,6 +243,8 @@ class LoaneeServiceTest {
         try{
             firstLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
             when(loaneeOutputPort.findLoaneeById(firstLoanee.getId())).thenReturn(firstLoanee);
+            when(loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(firstLoanee.getId(),firstLoanee.getCohortId()))
+                    .thenReturn(null);
             when(cohortOutputPort.findCohort(firstLoanee.getCohortId())).thenReturn(elites);
             when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(firstLoanee.getId())).thenReturn(List.of(loanBreakdown));
             when(loaneeOutputPort.findAllLoaneesByCohortId(elites.getId())).thenReturn(List.of(firstLoanee));
@@ -265,6 +267,19 @@ class LoaneeServiceTest {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
+    }
+
+    @Test
+    void cannotReferALoaneeThatHasBeenReferredInACohortBefore(){
+        try {
+            firstLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
+            when(loaneeOutputPort.findLoaneeById(firstLoanee.getId())).thenReturn(firstLoanee);
+            when(loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(firstLoanee.getId(), firstLoanee.getCohortId()))
+                    .thenReturn(new LoanReferral());
+        }catch (MeedlException exception){
+            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertThrows(MeedlException.class, () -> loaneeService.referLoanee(firstLoanee.getId()));
     }
 
     @Test
