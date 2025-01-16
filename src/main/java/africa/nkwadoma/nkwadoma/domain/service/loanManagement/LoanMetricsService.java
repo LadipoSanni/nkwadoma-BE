@@ -41,7 +41,7 @@ public class LoanMetricsService implements LoanMetricsUseCase {
 
         LoanMetrics savedMetrics = loanMetricsOutputPort.save(metrics);
 
-        log.info("Loan metrics saved: {}", savedMetrics);
+        log.info("Loan metrics saved successfully: {}", savedMetrics);
         return savedMetrics;
     }
 }

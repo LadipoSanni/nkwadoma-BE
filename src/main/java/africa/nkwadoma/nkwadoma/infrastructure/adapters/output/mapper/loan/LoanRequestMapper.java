@@ -28,6 +28,7 @@ public interface LoanRequestMapper {
     @Mapping(target = "userIdentity.stateOfOrigin", source = "stateOfOrigin")
     @Mapping(target = "userIdentity.maritalStatus", source = "maritalStatus")
     @Mapping(target = "userIdentity.residentialAddress", source = "residentialAddress")
+    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
     LoanRequest mapProjectionToLoanRequest(LoanRequestProjection loanRequestProjection);
 
     @Mapping(target = "loanAmountRequested", source = "loanee.loaneeLoanDetail.amountRequested")

@@ -221,6 +221,7 @@ class LoanRequestAdapterTest {
             loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(loanee);
+            loanRequest.setLoaneeId(loaneeId);
             loanRequest.setLoanReferralId(loanReferralId);
             loanRequest.setCohortId(eliteCohortId);
             loanRequest.setCreatedDate(LocalDateTime.now());
