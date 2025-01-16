@@ -33,7 +33,7 @@ public class InvestmentVehicle {
     private String custodian;
     private String bankPartner;
     private String fundManager;
-    private String sponsor;
+    private String sponsors;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
 
@@ -45,7 +45,7 @@ public class InvestmentVehicle {
         MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty");
         MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
         MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
-        MeedlValidator.validateObjectName(sponsor,"Sponsor cannot be empty");
+        MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less that 1");
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be null");

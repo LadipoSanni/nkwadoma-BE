@@ -214,7 +214,7 @@ public class TestData {
         investmentVehicle.setFundManager("Gt Manager");
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
-        investmentVehicle.setSponsor("sponsors");
+        investmentVehicle.setSponsors("sponsors");
         return investmentVehicle;
     }
 
