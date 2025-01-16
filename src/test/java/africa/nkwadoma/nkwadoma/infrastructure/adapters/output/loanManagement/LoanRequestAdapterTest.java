@@ -259,13 +259,13 @@ class LoanRequestAdapterTest {
 
     @Test
     void saveLoanRequestWithNullLoaneeId() {
-        loanRequest.setLoanee(null);
+        loanRequest.setLoaneeId(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 
     @Test
     void saveLoanRequestWithNullLoaneeLoanDetailAmountRequested() {
-        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
+        loanRequest.setLoanAmountRequested(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 
