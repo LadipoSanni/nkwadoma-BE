@@ -86,5 +86,14 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
                 .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
         return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
+
+    @Override
+    public LoanReferral findLoanReferralByLoaneeIdAndCohortId(String id, String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loanee id cannot be null or empty");
+        MeedlValidator.validateUUID(cohortId,"Cohort id cannot be null or empty");
+        LoanReferralEntity loanReferral =
+                loanReferralRepository.findByLoaneeEntityIdAndLoaneeEntityCohortId(id,cohortId);
+        return loanReferralMapper.toLoanReferral(loanReferral);
+    }
 }
 

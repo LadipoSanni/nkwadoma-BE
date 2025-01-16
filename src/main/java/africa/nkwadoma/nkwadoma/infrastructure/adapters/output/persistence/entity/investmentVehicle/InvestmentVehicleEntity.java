@@ -50,7 +50,6 @@ public class InvestmentVehicleEntity {
     private String custodian;
     private String bankPartner;
     private String fundManager;
-    private String sponsor;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
 

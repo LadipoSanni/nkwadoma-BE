@@ -52,7 +52,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
-
+    private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -169,6 +169,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Verification status: {}", identityVerified);
         loanReferral.setIdentityVerified(identityVerified);
         log.info("Found Loan referral by it's ID: {}", loanReferral);
+        loanReferral.setLoaneeLoanBreakdowns
+                (loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanReferral.getLoanee().getId()));
         return loanReferral;
     }
 

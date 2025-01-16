@@ -54,6 +54,8 @@ class LoanServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private LoanMetricsService loanMetricsUseCase;
+    @Mock
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -136,7 +138,7 @@ class LoanServiceTest {
                     findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
             when(verificationUseCase.verifyIdentity(loanReferral.getId())).
                     thenReturn(IdentityMessages.IDENTITY_VERIFIED.getMessage());
-
+            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
 
             verify(loanReferralOutputPort, times(1)).

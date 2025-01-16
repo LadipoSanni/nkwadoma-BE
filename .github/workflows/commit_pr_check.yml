@@ -23,7 +23,7 @@ jobs:
 
       # Download the build-tracker artifact created in the previous workflow
       - name: Retrieve Build Tracker Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-tracker
           path: ./build_tracker.json

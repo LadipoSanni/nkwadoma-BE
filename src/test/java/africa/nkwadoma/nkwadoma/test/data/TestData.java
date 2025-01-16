@@ -52,6 +52,7 @@ public class TestData {
         organizationIdentity.setEmail("testorganizationdata@gmail.com");
         organizationIdentity.setTin("7682-5627");
         organizationIdentity.setRcNumber(rcNumber);
+        organizationIdentity.setStatus(ActivationStatus.INVITED);
         organizationIdentity.setServiceOfferings(List.of(new ServiceOffering()));
         organizationIdentity.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
         organizationIdentity.getServiceOfferings().get(0).setTransactionLowerBound(new BigDecimal("0.00"));
@@ -213,7 +214,7 @@ public class TestData {
         investmentVehicle.setFundManager("Gt Manager");
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
-        investmentVehicle.setSponsor("sponsors");
+        investmentVehicle.setSponsors("sponsors");
         return investmentVehicle;
     }
 

@@ -151,6 +151,7 @@ public class LoaneeService implements LoaneeUseCase {
     public LoanReferral referLoanee(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         List<LoaneeLoanBreakdown> loanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
@@ -170,6 +171,14 @@ public class LoaneeService implements LoaneeUseCase {
         refer(loanee,loanReferral.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         return  loanReferral;
+    }
+
+    private void checkIfLoaneeHasBeenReferredInTheSameCohort(Loanee loanee) throws MeedlException {
+        LoanReferral loanReferral =
+                loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(),loanee.getCohortId());
+        if (ObjectUtils.isNotEmpty(loanReferral)) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
+        }
     }
 
     private void notifyAllPortfolioManager() throws MeedlException {
