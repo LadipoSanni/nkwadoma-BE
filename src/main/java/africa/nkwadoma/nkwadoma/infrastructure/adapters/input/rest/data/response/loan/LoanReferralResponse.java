@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import lombok.*;
 
 import java.math.*;
 import java.time.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,4 +28,5 @@ public class LoanReferralResponse {
     private String programName;
     private String identityVerified;
     private LoanReferralStatus loanReferralStatus;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
 }
