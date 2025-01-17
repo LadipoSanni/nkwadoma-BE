@@ -198,7 +198,7 @@ public class OrganizationIdentityService implements CreateOrganizationUseCase, V
 
         identityManagerOutPutPort.enableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.TRUE);
-        foundOrganization.setStatus(ActivationStatus.ACTIVATED);
+        foundOrganization.setStatus(ActivationStatus.ACTIVE);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
         organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(foundOrganization));
         log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
