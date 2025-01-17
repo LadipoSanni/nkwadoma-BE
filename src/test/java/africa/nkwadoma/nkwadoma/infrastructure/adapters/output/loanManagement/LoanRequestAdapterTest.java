@@ -221,6 +221,7 @@ class LoanRequestAdapterTest {
             loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(loanee);
+            loanRequest.setLoaneeId(loaneeId);
             loanRequest.setLoanReferralId(loanReferralId);
             loanRequest.setCohortId(eliteCohortId);
             loanRequest.setCreatedDate(LocalDateTime.now());
@@ -258,13 +259,13 @@ class LoanRequestAdapterTest {
 
     @Test
     void saveLoanRequestWithNullLoaneeId() {
-        loanRequest.setLoanee(null);
+        loanRequest.setLoaneeId(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 
     @Test
     void saveLoanRequestWithNullLoaneeLoanDetailAmountRequested() {
-        loanRequest.getLoanee().getLoaneeLoanDetail().setAmountRequested(null);
+        loanRequest.setLoanAmountRequested(null);
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.save(loanRequest));
     }
 

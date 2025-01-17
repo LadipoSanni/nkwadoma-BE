@@ -248,7 +248,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
         LoanMetrics loanMetrics = loanMetricsUseCase.save(
-                LoanMetrics.builder().organizationId(organizationByName.get().getId()).build());
+                LoanMetrics.builder().loanOfferCount(1).
+                        organizationId(organizationByName.get().getId()).build());
         log.info("Saved loan metrics: {}", loanMetrics);
         return loanOffer;
     }

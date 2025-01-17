@@ -195,7 +195,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         foundUserIdentity.setEmail(email);
         AccessTokenResponse response = login(foundUserIdentity);
         foundUserIdentity.setAccessToken(response.getToken());
-
         return foundUserIdentity;
     }
 
