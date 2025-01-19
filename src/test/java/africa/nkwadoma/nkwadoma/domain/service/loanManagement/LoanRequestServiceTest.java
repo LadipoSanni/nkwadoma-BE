@@ -156,6 +156,10 @@ class LoanRequestServiceTest {
 
             assertNotNull(loanRequestDto);
             assertEquals(LoanRequestStatus.APPROVED, loanRequestDto.getStatus());
+            assertEquals("Adeshina", loanRequestDto.getLoanee().getUserIdentity().getFirstName());
+            assertEquals("Qudus", loanRequestDto.getLoanee().getUserIdentity().getLastName());
+            assertEquals(new BigDecimal("500000"), loanRequestDto.getLoanAmountApproved());
+            assertNotNull(loanRequestDto.getDateTimeOffered());
             assertEquals(loanRequestDto.getLoanAmountApproved(), BigDecimal.valueOf(500000));
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);

@@ -106,6 +106,7 @@ public class LoanOfferServiceTest {
         }
         assertEquals(LoanRequestStatus.APPROVED, cretedLoanOffer.getLoanRequest().getStatus());
         assertEquals(LoanOfferStatus.OFFERED, cretedLoanOffer.getLoanOfferStatus());
+        assertNotNull(cretedLoanOffer.getDateTimeOffered());
     }
 
     @Test

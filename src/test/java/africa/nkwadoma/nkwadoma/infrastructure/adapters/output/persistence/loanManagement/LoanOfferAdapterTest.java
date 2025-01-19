@@ -117,6 +117,7 @@ public class LoanOfferAdapterTest {
             log.error(exception.getMessage());
         }
         assertEquals(savedLoanOffer.getLoanRequest().getId(), loanRequest.getId());
+        assertNotNull(savedLoanOffer.getDateTimeOffered());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanAmountRequested(), loanRequest.getLoanAmountRequested());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }
