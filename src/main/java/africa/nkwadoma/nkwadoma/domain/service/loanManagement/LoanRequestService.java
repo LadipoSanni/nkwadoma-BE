@@ -73,18 +73,14 @@ public class LoanRequestService implements LoanRequestUseCase {
     @Override
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
-        Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        if (foundLoanRequest.isEmpty()) {
-            log.info("Loan request not found");
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-        }
-        log.info("Found loan request: {}", foundLoanRequest.get());
-//        MeedlValidator.validateLoanRequest(foundLoanRequest.get());
-        if (ObjectUtils.isNotEmpty(foundLoanRequest.get().getStatus())
-                && foundLoanRequest.get().getStatus().equals(LoanRequestStatus.APPROVED)) {
+        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId()).
+                orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+        log.info("Loan request retrieved: {}", foundLoanRequest);
+        if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
+                && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
-        return respondToLoanRequest(loanRequest, foundLoanRequest.get());
+        return respondToLoanRequest(loanRequest, foundLoanRequest);
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
