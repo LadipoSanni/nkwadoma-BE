@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
@@ -241,6 +242,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId());
+        loanOffer.setLoanee(loanee);
+
         loanOffer = loanOfferOutputPort.save(loanOffer);
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getReferredBy());
@@ -317,6 +321,11 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOfferId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanOffer.getLoanee().getId());
+        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoanee().getId(),
+                loaneeLoanBreakdowns);
+        loanOffer.getLoanee().setLoanBreakdowns(loaneeLoanBreakdowns);
         if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
                 ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
                 throw new LoanOfferException(
