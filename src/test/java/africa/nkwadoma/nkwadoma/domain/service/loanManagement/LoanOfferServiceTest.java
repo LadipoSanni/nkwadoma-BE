@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
@@ -71,7 +72,8 @@ public class LoanOfferServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private LoanMetricsUseCase loanMetricsUseCase;
-
+    @Mock
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @BeforeEach
     void setUpLoanOffer() {
@@ -202,6 +204,8 @@ public class LoanOfferServiceTest {
             userIdentity.setRole(IdentityRole.LOANEE);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
+            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString()))
+                     .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
             loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
