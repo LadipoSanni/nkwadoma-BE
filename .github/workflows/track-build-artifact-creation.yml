@@ -17,13 +17,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+          echo "Trivy installed successfully."
+
       - name: Detect Secret Changes
         run: |
           # Path to the previous scan result
           BASELINE_FILE=trivy-baseline-results.txt
       
           # Run Trivy for secrets scanning
-          trivy fs --scanners secret --format table > current-secrets-scan.txt
+          ./trivy fs --scanners secret --format table > current-secrets-scan.txt
       
           # Compare current scan results with the baseline
           if [ -f "$BASELINE_FILE" ]; then
