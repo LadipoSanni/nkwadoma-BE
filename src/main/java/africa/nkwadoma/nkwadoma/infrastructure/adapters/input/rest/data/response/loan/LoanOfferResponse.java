@@ -25,7 +25,7 @@ public class LoanOfferResponse {
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
-    private List<LoaneeLoanBreakdown> loaneeBreakdown;
+    private List<LoaneeLoanBreakDownResponse> loaneeBreakdown;
     private LocalDateTime dateTimeOffered;
     private LoanDecision loaneeResponse;
     private String gender;
