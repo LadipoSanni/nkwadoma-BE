@@ -125,7 +125,9 @@ public class LoanRequestController {
             throws MeedlException {
         LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
         loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
+        log.info("Loan request from service: {}", loanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
+        log.info("Mapped Loan request response: {}", loanRequestResponse);
         ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
                 <LoanRequestResponse>builder()
                 .data(loanRequestResponse)

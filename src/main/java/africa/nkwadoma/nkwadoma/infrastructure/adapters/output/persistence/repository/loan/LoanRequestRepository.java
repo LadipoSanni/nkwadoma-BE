@@ -10,7 +10,7 @@ import java.util.*;
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, String> {
 
     @Query("""
-          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
+          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, c.name as cohortName,
                  o.name as referredBy, lr.loanAmountRequested as loanAmountRequested, lr.createdDate as createdDate,
                  l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, p.name as programName
           from LoanRequestEntity lr
@@ -44,7 +44,7 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
     Optional<LoanRequestProjection> findLoanRequestById(@Param("id") String id);
 
     @Query("""
-          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName,
+          select lr.id as id, l.userIdentity.firstName as firstName, l.userIdentity.lastName as lastName, c.name as cohortName,
                  o.name as referredBy, lr.loanAmountRequested as loanAmountRequested, lr.createdDate as createdDate,
                  l.loaneeLoanDetail.initialDeposit as initialDeposit, c.startDate as cohortStartDate, p.name as programName
           from LoanRequestEntity lr

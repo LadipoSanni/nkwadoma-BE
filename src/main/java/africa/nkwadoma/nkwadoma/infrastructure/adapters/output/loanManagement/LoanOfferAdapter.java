@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferEntityRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     private final LoanOfferMapper loanOfferMapper;
@@ -64,6 +66,9 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferEntitiy> loanOfferEntities =
                 loanOfferEntityRepository.findAll(pageRequest);
-        return loanOfferEntities.map(loanOfferMapper::toLoanOffer);
+        log.info("Loan offers found: {}", loanOfferEntities);
+        Page<LoanOffer> mappedloanOffers = loanOfferEntities.map(loanOfferMapper::toLoanOffer);
+        log.info("Mapped loans offers: {}", mappedloanOffers);
+        return mappedloanOffers;
     }
 }

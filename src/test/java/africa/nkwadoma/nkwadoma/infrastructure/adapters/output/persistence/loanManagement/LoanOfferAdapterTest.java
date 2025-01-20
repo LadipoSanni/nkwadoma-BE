@@ -152,6 +152,7 @@ public class LoanOfferAdapterTest {
         }catch (MeedlException exception){
             log.info(exception.getMessage());
         }
+        assertNotNull(loanOffers);
         assertEquals(1,loanOffers.getSize());
     }
 

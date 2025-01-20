@@ -53,6 +53,7 @@ class LoanRequestServiceTest {
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        loanee.setCohortName("Elite");
         LoaneeLoanBreakdown loaneeLoanBreakdown =
                 TestData.createTestLoaneeLoanBreakdown("1886df42-1f75-4d17-bdef-e0b016707885");
         loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
@@ -124,18 +125,22 @@ class LoanRequestServiceTest {
 
     @Test
     void viewAllLoanRequestsByOrganizationId() {
+        Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequest.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
             when(loanRequestOutputPort.viewAll(loanRequest.getOrganizationId(), 0, 10)).
                     thenReturn(new PageImpl<>(List.of(loanRequest)));
-            Page<LoanRequest> loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
+            loanRequests = loanRequestService.viewAllLoanRequests(loanRequest);
 
-            verify(loanRequestOutputPort, times(1)).
-                    viewAll(loanRequest.getOrganizationId(),0, 10);
-            assertNotNull(loanRequests.getContent());
+        verify(loanRequestOutputPort, times(1)).
+                viewAll(loanRequest.getOrganizationId(),0, 10);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }
+
+        assertNotNull(loanRequests.getContent());
+        assertTrue(loanRequests.getContent().stream().map(LoanRequest::getLoanee).findFirst().isPresent());
+        assertEquals("Elite", loanRequests.getContent().stream().map(LoanRequest::getLoanee).findFirst().get().getCohortName());
     }
 
     @Test
