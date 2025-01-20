@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPor
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -117,6 +115,7 @@ public class LoanOfferAdapterTest {
             log.error(exception.getMessage());
         }
         assertEquals(savedLoanOffer.getLoanRequest().getId(), loanRequest.getId());
+        assertNotNull(savedLoanOffer.getDateTimeOffered());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanAmountRequested(), loanRequest.getLoanAmountRequested());
         assertEquals(savedLoanOffer.getLoanRequest().getLoanReferralStatus(), loanRequest.getLoanReferralStatus());
     }

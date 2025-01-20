@@ -219,7 +219,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return request;
     }
 
-    private LoanMetrics updateLoanMetricsLoanRequestCount(LoanRequest loanRequest) throws MeedlException {
+    private void updateLoanMetricsLoanRequestCount(LoanRequest loanRequest) throws MeedlException {
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
         if (organization.isEmpty()) {
@@ -228,7 +228,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanMetrics loanMetrics = new LoanMetrics();
         loanMetrics.setOrganizationId(organization.get().getId());
         loanMetrics.setLoanRequestCount(BigInteger.ONE.intValue());
-        return loanMetricsUseCase.save(loanMetrics);
+        loanMetricsUseCase.save(loanMetrics);
     }
 
     @Override

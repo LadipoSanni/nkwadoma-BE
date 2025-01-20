@@ -73,17 +73,14 @@ public class LoanRequestService implements LoanRequestUseCase {
     @Override
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
-        Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-        log.info("Found loan request: {}", foundLoanRequest);
-        if (foundLoanRequest.isEmpty()) {
-            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-        }
-        MeedlValidator.validateLoanRequest(foundLoanRequest.get());
-        if (ObjectUtils.isNotEmpty(foundLoanRequest.get().getStatus())
-                && foundLoanRequest.get().getStatus().equals(LoanRequestStatus.APPROVED)) {
+        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId()).
+                orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+        log.info("Loan request retrieved: {}", foundLoanRequest);
+        if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
+                && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
-        return respondToLoanRequest(loanRequest, foundLoanRequest.get());
+        return respondToLoanRequest(loanRequest, foundLoanRequest);
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
@@ -115,7 +112,8 @@ public class LoanRequestService implements LoanRequestUseCase {
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-        loanOfferUseCase.createLoanOffer(foundLoanRequest);
+        LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(foundLoanRequest);
+        foundLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
         return foundLoanRequest;
     }
 }

@@ -1,18 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @Setter
+@ToString
 public class LoanOffer {
     private String id;
     private LoanRequest loanRequest;

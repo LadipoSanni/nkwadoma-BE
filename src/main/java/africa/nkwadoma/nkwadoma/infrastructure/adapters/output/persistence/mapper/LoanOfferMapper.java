@@ -3,12 +3,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapp
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntitiy;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferMapper {
+    @Mapping(target = "dateTimeOffered", expression = "java(java.time.LocalDateTime.now())")
     LoanOfferEntitiy toLoanOfferEntity(LoanOffer loanOffer);
 
     LoanOffer toLoanOffer(LoanOfferEntitiy loanOfferEntitiy);
