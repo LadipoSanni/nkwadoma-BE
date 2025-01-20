@@ -262,37 +262,37 @@ class LoanProductAdapterTest {
         }
         assertEquals(2,loanProducts.size());
     }
-//    @Test
-//    @Order(8)
-//    void deleteLoanProduct() {
-//        try {
-//            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
-//            assertNotNull(foundLoanProduct);
-//            assertNotNull(foundLoanProduct.getId());
-//            assertEquals(gemsLoanProduct.getName(), foundLoanProduct.getName());
-//            loanProductOutputPort.deleteById(foundLoanProduct.getId());
-//
-//            assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(foundLoanProduct.getId()));
-//        } catch (MeedlException e) {
-//            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
-//        }
-//    }
-//
-//    @AfterAll
-//    void cleanUp() {
-//        try {
-//            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
-//            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldVendor.getVendorName());
-//            loanProductVendorRepository.deleteAllByVendorEntity(foundGemsVendorEntity);
-////            loanProductVendorRepository.deleteAllByVendorEntity(foundGoldVendorEntity);
-//            vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
-////            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
-//            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
-//            LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(goldLoanProduct.getName());
-//            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
-//            loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
-//        } catch (MeedlException e) {
-//            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
-//        }
-//    }
+    @Test
+    @Order(8)
+    void deleteLoanProduct() {
+        try {
+            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            assertNotNull(foundLoanProduct);
+            assertNotNull(foundLoanProduct.getId());
+            assertEquals(gemsLoanProduct.getName(), foundLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundLoanProduct.getId());
+
+            assertThrows(MeedlException.class, ()->loanProductOutputPort.findById(foundLoanProduct.getId()));
+        } catch (MeedlException e) {
+            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
+        }
+    }
+
+    @AfterAll
+    void cleanUp() {
+        try {
+            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
+            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldVendor.getVendorName());
+            loanProductVendorRepository.deleteAllByVendorEntity(foundGemsVendorEntity);
+//            loanProductVendorRepository.deleteAllByVendorEntity(foundGoldVendorEntity);
+            vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());
+//            vendorEntityRepository.deleteById(foundGoldVendorEntity.getId());
+            LoanProduct foundGemsLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+            LoanProduct foundGoldLoanProduct = loanProductOutputPort.findByName(goldLoanProduct.getName());
+            loanProductOutputPort.deleteById(foundGemsLoanProduct.getId());
+            loanProductOutputPort.deleteById(foundGoldLoanProduct.getId());
+        } catch (MeedlException e) {
+            log.error("Failed to delete loan product {}", gemsLoanProduct.getName());
+        }
+    }
 }
