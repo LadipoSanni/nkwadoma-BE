@@ -20,7 +20,7 @@ jobs:
     steps:
       # Checkout the repository code
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Download the build-tracker artifact created in the previous workflow
       - name: Retrieve Build Tracker Artifact
