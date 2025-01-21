@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.AllLoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanOfferAcceptRequest;
 import jakarta.validation.Valid;
@@ -50,5 +51,5 @@ public interface LoanOfferRestMapper {
     @Mapping(target = "id", source = "loanOfferId")
     LoanOffer toLoanOffer(@Valid LoanOfferAcceptRequest loanOfferRequest);
 
-    List<LoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);
+    List<AllLoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);
 }

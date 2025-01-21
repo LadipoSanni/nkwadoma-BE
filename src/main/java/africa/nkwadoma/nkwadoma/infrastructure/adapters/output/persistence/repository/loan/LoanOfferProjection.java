@@ -16,6 +16,7 @@ public interface LoanOfferProjection {
 
     String getId();
     String getLoaneeId();
+    String getLoanProductName();
     LocalDate getStartDate();
     LoanOfferStatus getLoanOfferStatus();
     BigDecimal getTuitionAmount();

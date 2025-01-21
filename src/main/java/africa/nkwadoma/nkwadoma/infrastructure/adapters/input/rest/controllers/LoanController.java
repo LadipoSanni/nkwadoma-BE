@@ -222,11 +222,11 @@ public class LoanController {
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
-        List<LoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
-        PaginatedResponse<LoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
+        List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
+        PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
                 loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
         );
-        ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
+        ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
                 .data(paginatedResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
                 .statusCode(HttpStatus.OK.toString())
