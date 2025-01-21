@@ -45,13 +45,18 @@ jobs:
           name: build-tracker
           path: ./build_tracker.json
 
-      # Step 3: Install Trivy Using apt (No download or tar extraction)
+      # Step 3: Install Trivy Using the Correct `.deb` File
       - name: Install Trivy
         run: |
+          # Update package list
           sudo apt-get update
-          sudo apt-get install -y apt-transport-https
-          curl -fsSL https://github.com/aquasecurity/trivy/releases/latest/download/trivy_ubuntu.deb -o trivy.deb
-          sudo dpkg -i trivy.deb
+          sudo apt-get install -y apt-transport-https curl
+
+          # Download the latest Trivy .deb package
+          curl -LO https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+
+          # Install Trivy
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
           sudo apt-get install -f  # Fix missing dependencies if any
 
       # Step 4: Run Trivy File System Vulnerability Scan
