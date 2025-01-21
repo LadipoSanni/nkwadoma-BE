@@ -65,7 +65,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferEntity> loanOfferEntities =
-                loanOfferEntityRepository.findAll(pageRequest);
+                loanOfferEntityRepository.findAllLoanOffer(pageRequest);
         log.info("Loan offers found: {}", loanOfferEntities);
         Page<LoanOffer> mappedloanOffers = loanOfferEntities.map(loanOfferMapper::toLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);

@@ -43,4 +43,6 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
           where lo.id = :id
     """)
     LoanOfferProjection findLoanOfferById(@Param("id") String loanOfferId);
+
+    Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 }
