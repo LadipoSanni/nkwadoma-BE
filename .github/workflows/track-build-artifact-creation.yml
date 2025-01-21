@@ -40,29 +40,39 @@ jobs:
 
       # Step 2: Upload Build Tracker Artifact
       - name: Upload Build Tracker Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-tracker
           path: ./build_tracker.json
 
-      # Step 3: Download and Set Up Trivy
-      - name: Download Trivy
+      # Step 3: Download and Set Up Trivy with Retry Logic
+      - name: Download and Set Up Trivy
         run: |
-          wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz | tar xz
+          # Retry logic for downloading Trivy
+          for i in {1..3}; do
+            echo "Attempt $i: Downloading Trivy..."
+            wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz | tar xz && break
+            echo "Download failed, retrying in 10 seconds..."
+            sleep 10
+          done
+          if [ ! -f ./trivy ]; then
+            echo "Failed to download and extract Trivy after 3 attempts."
+            exit 1
+          fi
           chmod +x trivy
 
-      # Step 4: Run Trivy File System Scan
+      # Step 4: Run Trivy File System Vulnerability Scan
       - name: Run Trivy File System Vulnerability Scan
         run: |
           ./trivy fs --exit-code 1 --severity HIGH,CRITICAL . || true
 
-      # Step 5: Run Trivy Repository Configuration Scan
+      # Step 5: Run Trivy Config Scan (pom.xml, .properties, .env)
       - name: Run Trivy Config Scan (pom.xml, .properties, .env)
         run: |
           # Scan configuration files like pom.xml, .env, etc.
           ./trivy config --exit-code 1 --severity HIGH,CRITICAL . || true
 
-      # Step 6: Run Trivy Dependency Scan
+      # Step 6: Run Trivy Dependency Vulnerability Scan
       - name: Run Trivy Dependency Vulnerability Scan
         run: |
           # Scan dependencies based on pom.xml or similar manifest files
@@ -70,7 +80,7 @@ jobs:
 
       # Step 7: Upload Trivy Scan Report
       - name: Upload Scan Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-report
           path: trivy-report.json
