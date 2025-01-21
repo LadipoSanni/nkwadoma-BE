@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
@@ -178,34 +179,36 @@ public class LoanOfferServiceTest {
     }
 
     @Test
-    void loaneeCannotViewLoanOfferThatNotAssignedToLoanee() {
+    void loaneeCannotViewLoanOfferThatNotAssignedToLoanee() throws MeedlException {
         userIdentity.setRole(IdentityRole.LOANEE);
-        try {
-            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            LoanOffer mockLoanOffer = new LoanOffer();
-            Loanee mockLoanee = new Loanee();
-            UserIdentity mockLoaneeIdentity = new UserIdentity();
-            mockLoaneeIdentity.setId(loaneeId);
-            mockLoanee.setUserIdentity(mockLoaneeIdentity);
-            mockLoanOffer.setLoanee(mockLoanee);
-            when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
-            assertThrows(
-                    LoanOfferException.class,
-                    () -> loanService.viewLoanOfferDetails(mockId, mockId)
-            );
-        }catch (MeedlException exception){
-            log.error(exception.getMessage());
-        }
+        LoanOffer mockLoanOffer = new LoanOffer();
+        mockLoanOffer.setLoaneeId(mockId);
+        Loanee mockLoanee = new Loanee();
+        UserIdentity mockLoaneeIdentity = new UserIdentity();
+        mockLoaneeIdentity.setId(loaneeId);
+        mockLoanee.setUserIdentity(mockLoaneeIdentity);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
+        when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(mockId))
+                .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(mockLoanee);
+        assertThrows(
+                LoanOfferException.class,
+                () -> loanService.viewLoanOfferDetails(mockId, mockId)
+        );
     }
+
 
     @Test
     void viewLoanOfferDetails(){
         try {
+            loanOffer.setLoaneeId(mockId);
             userIdentity.setRole(IdentityRole.LOANEE);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString()))
                      .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(loanee);
             loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());

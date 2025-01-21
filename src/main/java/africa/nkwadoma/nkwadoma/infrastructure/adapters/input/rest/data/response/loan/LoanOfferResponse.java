@@ -28,6 +28,8 @@ public class LoanOfferResponse {
     private List<LoaneeLoanBreakDownResponse> loaneeBreakdown;
     private LocalDateTime dateTimeOffered;
     private LoanDecision loaneeResponse;
+    private String firstName;
+    private String lastName;
     private String gender;
     private String email;
     private String phoneNumber;
@@ -43,4 +45,8 @@ public class LoanOfferResponse {
     private String nextOfKinEmail;
     private String nextOfKinPhoneNumber;
     private String nextOfKinRelationship;
+    private String nextOfKinFirstName;
+    private String nextOfKinLastName;
+    private String nextOfKinContactAddress;
+    private String image;
 }

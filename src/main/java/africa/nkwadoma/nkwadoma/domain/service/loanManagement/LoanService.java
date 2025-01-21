@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -320,14 +321,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
         MeedlValidator.validateUUID(loanOfferId);
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
-        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loanOfferId);
+        LoanOffer loanOffer =
+                 loanOfferOutputPort.findLoanOfferById(loanOfferId);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanOffer.getLoanee().getId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoanee().getId(),
+                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanOffer.getLoaneeId());
+        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoaneeId(),
                 loaneeLoanBreakdowns);
-        loanOffer.getLoanee().setLoanBreakdowns(loaneeLoanBreakdowns);
+        loanOffer.setLoaneeBreakdown(loaneeLoanBreakdowns);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loanOffer.getLoaneeId());
         if (userIdentity.getRole().equals(IdentityRole.LOANEE) &&
-                ! loanOffer.getLoanee().getUserIdentity().getId().equals(userIdentity.getId())){
+                ! loanee.getUserIdentity().getId().equals(userIdentity.getId())){
                 throw new LoanOfferException(
                         LoanOfferMessages.LOAN_OFFER_IS_NOT_ASSIGNED_TO_LOANEE.getMessage());
             }
