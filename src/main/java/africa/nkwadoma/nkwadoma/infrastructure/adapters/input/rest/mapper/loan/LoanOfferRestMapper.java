@@ -18,48 +18,37 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferRestMapper {
 
-    @Mapping(target = "phoneNumber", source = "loanee.userIdentity.phoneNumber")
-    @Mapping(target = "dateOfBirth", source = "loanee.userIdentity.dateOfBirth")
-    @Mapping(target = "stateOfOrigin", source = "loanee.userIdentity.stateOfOrigin")
-    @Mapping(target = "maritalStatus", source = "loanee.userIdentity.maritalStatus")
-    @Mapping(target = "stateOfResidence", source = "loanee.userIdentity.stateOfResidence")
-    @Mapping(target = "nationality", source = "loanee.userIdentity.nationality")
-    @Mapping(target = "residentialAddress", source = "loanee.userIdentity.residentialAddress")
-    @Mapping(target = "alternatePhoneNumber", source = "loanee.userIdentity.alternatePhoneNumber")
-    @Mapping(target = "alternateEmail", source = "loanee.userIdentity.alternateEmail")
-    @Mapping(target = "alternateContactAddress", source = "loanRequest.nextOfKin.contactAddress")
-    @Mapping(target = "gender", source = "loanee.userIdentity.gender")
-    @Mapping(target = "nextOfKinEmail", source = "loanRequest.nextOfKin.email")
-    @Mapping(target = "nextOfKinPhoneNumber", source = "loanRequest.nextOfKin.phoneNumber")
-    @Mapping(target = "nextOfKinRelationship", source = "loanRequest.nextOfKin.nextOfKinRelationship")
-    @Mapping(target = "loaneeBreakdown", source = "loanee.loanBreakdowns")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "startDate", source = "startDate")
+    @Mapping(target = "loanOfferStatus", source = "loanOfferStatus")
+    @Mapping(target = "tuitionAmount", source = "loaneeLoanDetail.tuitionAmount")
+    @Mapping(target = "initialDeposit", source = "loaneeLoanDetail.initialDeposit")
+    @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
+    @Mapping(target = "loaneeBreakdown", source = "loaneeBreakdown")
+    @Mapping(target = "gender", source = "userIdentity.gender")
+    @Mapping(target = "email", source = "userIdentity.email")
+    @Mapping(target = "phoneNumber", source = "userIdentity.phoneNumber")
+    @Mapping(target = "dateOfBirth", source = "userIdentity.dateOfBirth")
+    @Mapping(target = "stateOfOrigin", source = "userIdentity.stateOfOrigin")
+    @Mapping(target = "maritalStatus", source = "userIdentity.maritalStatus")
+    @Mapping(target = "stateOfResidence", source = "userIdentity.stateOfResidence")
+    @Mapping(target = "nationality", source = "userIdentity.nationality")
+    @Mapping(target = "residentialAddress", source = "userIdentity.residentialAddress")
+    @Mapping(target = "alternateEmail", source = "userIdentity.alternateEmail")
+    @Mapping(target = "alternatePhoneNumber", source = "userIdentity.alternatePhoneNumber")
+    @Mapping(target = "alternateContactAddress", source = "userIdentity.alternateContactAddress")
+    @Mapping(target = "nextOfKinFirstName", source = "nextOfKin.firstName")
+    @Mapping(target = "nextOfKinLastName", source = "nextOfKin.lastName")
+    @Mapping(target = "nextOfKinEmail", source = "nextOfKin.email")
+    @Mapping(target = "nextOfKinPhoneNumber", source = "nextOfKin.phoneNumber")
+    @Mapping(target = "nextOfKinRelationship", source = "nextOfKin.nextOfKinRelationship")
+    @Mapping(target = "nextOfKinContactAddress", source = "nextOfKin.contactAddress")
+    @Mapping(target = "image", source = "userIdentity.image")
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
     LoanOfferResponse toLoanOfferResponse(LoanOffer loanOffer);
     @Mapping(target = "id", source = "loanOfferId")
     LoanOffer toLoanOffer(@Valid LoanOfferAcceptRequest loanOfferRequest);
 
-    default List<LoaneeLoanBreakdown> mapBreakdowns(List<LoaneeLoanBreakdown> breakdowns) {
-        if (breakdowns == null || breakdowns.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return breakdowns.stream()
-                .map(this::mapBreakdownWithoutLoanee)
-                .collect(Collectors.toList());
-    }
-
-
-    default LoaneeLoanBreakdown mapBreakdownWithoutLoanee(LoaneeLoanBreakdown breakdown) {
-        if (breakdown == null) {
-            return null;
-        }
-
-        LoaneeLoanBreakdown newBreakdown = new LoaneeLoanBreakdown();
-        newBreakdown.setLoaneeLoanBreakdownId(breakdown.getLoaneeLoanBreakdownId());
-        newBreakdown.setItemName(breakdown.getItemName());
-        newBreakdown.setItemAmount(breakdown.getItemAmount());
-        newBreakdown.setCurrency(breakdown.getCurrency());
-        newBreakdown.setLoanee(null);
-        return newBreakdown;
-    }
     List<LoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);
 }

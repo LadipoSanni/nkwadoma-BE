@@ -20,7 +20,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           from LoanEntity le
           join LoaneeEntity l on le.loaneeEntity.id = l.id
           join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
-          join LoanOfferEntitiy loe on l.id = loe.loanee.id
+          join LoanOfferEntity loe on l.id = loe.loanee.id
           join CohortEntity c on l.cohortId = c.id
           join ProgramEntity p on c.programId = p.id
           join OrganizationEntity o on p.organizationIdentity.id = o.id

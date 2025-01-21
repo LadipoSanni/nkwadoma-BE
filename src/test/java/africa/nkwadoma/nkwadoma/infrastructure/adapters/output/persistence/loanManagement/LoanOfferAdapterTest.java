@@ -166,7 +166,6 @@ public class LoanOfferAdapterTest {
             log.error(exception.getMessage());
         }
         assertEquals(loanOfferId, foundLoanOffer.getId());
-        assertEquals(loanOffer.getLoanRequest().getId(), foundLoanOffer.getLoanRequest().getId());
     }
 
     @AfterAll

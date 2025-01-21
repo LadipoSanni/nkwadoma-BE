@@ -1,13 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanOfferEntitiy {
+public class LoanOfferEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
