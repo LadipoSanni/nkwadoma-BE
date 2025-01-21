@@ -1,0 +1,91 @@
+name: Commit and PR Tracker
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+    - cron: "0 11 * * *"
+    - cron: "0 13 * * *"
+    - cron: "0 17 * * *"
+  workflow_run:
+    workflows:
+      - Artifact Creation # Ensure this matches the name of the previous workflow
+    types:
+      - completed
+
+jobs:
+  track-build:
+    runs-on: ubuntu-latest
+    if: always() # Ensures this job runs even if the previous workflow fails
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Download the build-tracker artifact created in the previous workflow
+      - name: Retrieve Build Tracker Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-tracker # Matches the artifact name in the previous workflow
+          path: ./ # Downloads the artifact to the root of the workspace
+        continue-on-error: true # Continue even if the artifact is not found
+
+      # Initialize or update the build tracker file
+      - name: Initialize or Increment Build Count
+        id: build_count
+        run: |
+          # Define function to initialize tracker
+          initialize_tracker() {
+              echo '{"count": 1, "builds": []}' > build_tracker.json
+              echo "count=1" >> $GITHUB_ENV
+          }
+
+          # Check if the artifact was downloaded
+          if [ ! -f "./build_tracker.json" ]; then
+              echo "Artifact not found. Initializing a new build tracker."
+              initialize_tracker
+          else
+              echo "Artifact found. Updating build tracker."
+              count=$(jq '.count' build_tracker.json)
+              builds=$(jq '.builds' build_tracker.json)
+              new_count=$((count + 1))
+              BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+              AUTHOR=$(git log -1 --pretty=format:'%an')
+              COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
+              new_build="{\"timestamp\": \"$BUILD_TIMESTAMP\", \"author\": \"$AUTHOR\", \"message\": \"$COMMIT_MESSAGE\"}"
+              updated_builds=$(echo "$builds" | jq ". += [$new_build]")
+              echo "{\"count\": $new_count, \"builds\": $updated_builds}" > build_tracker.json
+              echo "count=$new_count" >> $GITHUB_ENV
+          fi
+
+      # Send Inactivity Email if no builds were processed
+      - name: Send Inactivity Email
+        if: ${{ env.count == 0 }}
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa'
+        run: |
+          chmod +x .github/workflows/scripts/inactivity_email.sh
+          .github/workflows/scripts/inactivity_email.sh \
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}"
+
+      # Send Activity Summary Email if builds were processed
+      - name: Send Activity Summary Email
+        if: ${{ env.count > 0 }}
+        env:
+          SMTP_SERVER: semicolon.africa
+          SMTP_PORT: 465
+          SMTP_USERNAME: builds@semicolon.africa
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa'
+          BUILDS: ${{ steps.build_count.outputs.builds }}
+        run: |
+          chmod +x .github/workflows/scripts/activity_email.sh
+          .github/workflows/scripts/activity_email.sh \
+            "${{ env.SMTP_SERVER }}" "${{ env.SMTP_PORT }}" "${{ env.SMTP_USERNAME }}" \
+            "${{ env.SMTP_PASSWORD }}" "${{ env.EMAILS }}" \
+            "${{ env.BUILDS }}"
