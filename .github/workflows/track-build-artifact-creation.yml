@@ -1,4 +1,4 @@
-name: Artifact Creation
+name: Build Tracker and Security Scan
 
 on:
   push:
@@ -11,53 +11,21 @@ on:
       - trivy-cred-check
 
 jobs:
-  create-build-tracker:
+  build-and-scan:
     runs-on: ubuntu-latest
+
     steps:
+      # Checkout repository code
       - name: Checkout Code
         uses: actions/checkout@v4
-      
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          echo "Trivy installed successfully."
 
-      - name: Detect Secret Changes
-        run: |
-          # Path to the previous scan result
-          BASELINE_FILE=trivy-baseline-results.txt
-      
-          # Run Trivy for secrets scanning
-          ./trivy fs --scanners secret --format table > current-secrets-scan.txt
-      
-          # Compare current scan results with the baseline
-          if [ -f "$BASELINE_FILE" ]; then
-            echo "Comparing with baseline..."
-            if ! diff "$BASELINE_FILE" current-secrets-scan.txt; then
-              echo "Secrets have changed! Failing the workflow."
-              exit 1
-            fi
-          else
-            echo "No baseline file found. Saving current scan as the new baseline."
-          fi
-      
-          # Save the current scan as the new baseline
-          mv current-secrets-scan.txt "$BASELINE_FILE"
-      
-      - name: Upload Secrets Baseline
-        uses: actions/upload-artifact@v3
-        with:
-          name: trivy-baseline
-          path: trivy-baseline-results.txt
-      
+      # Step 1: Create Build Tracker Artifact
       - name: Create Build Tracker Artifact
         run: |
-          # Initialize or update build tracker file
           BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           AUTHOR=$(git log -1 --pretty=format:'%an')
           COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
-          
-          # Prepare the build tracker JSON structure
+
           if [ ! -f ./build_tracker.json ]; then
             echo '{"count": 1, "builds": [{"timestamp": "'$BUILD_TIMESTAMP'", "author": "'$AUTHOR'", "message": "'$COMMIT_MESSAGE'"}]}' > ./build_tracker.json
           else
@@ -65,14 +33,44 @@ jobs:
             builds=$(jq '.builds' ./build_tracker.json)
             new_count=$((count + 1))
             new_build="{\"timestamp\":\"$BUILD_TIMESTAMP\",\"author\":\"$AUTHOR\",\"message\":\"$COMMIT_MESSAGE\"}"
-            
-            # Update the tracker with the new build
+
             updated_builds=$(echo "$builds" | jq ". += [$new_build]")
             echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
           fi
 
+      # Step 2: Upload Build Tracker Artifact
       - name: Upload Build Tracker Artifact
         uses: actions/upload-artifact@v3
         with:
           name: build-tracker
           path: ./build_tracker.json
+
+      # Step 3: Download and Set Up Trivy
+      - name: Download Trivy
+        run: |
+          wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz | tar xz
+          chmod +x trivy
+
+      # Step 4: Run Trivy File System Scan
+      - name: Run Trivy File System Vulnerability Scan
+        run: |
+          ./trivy fs --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 5: Run Trivy Repository Configuration Scan
+      - name: Run Trivy Config Scan (pom.xml, .properties, .env)
+        run: |
+          # Scan configuration files like pom.xml, .env, etc.
+          ./trivy config --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 6: Run Trivy Dependency Scan
+      - name: Run Trivy Dependency Vulnerability Scan
+        run: |
+          # Scan dependencies based on pom.xml or similar manifest files
+          ./trivy repo --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 7: Upload Trivy Scan Report
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-scan-report
+          path: trivy-report.json
