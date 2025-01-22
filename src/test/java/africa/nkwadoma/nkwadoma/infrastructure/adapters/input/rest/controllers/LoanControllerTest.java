@@ -47,7 +47,6 @@ class LoanControllerTest {
         loanProductRequest = new LoanProductRequest();
         loanProductRequest.setName("Test Loan Product: unit testing within application");
         loanProductRequest.setMandate("Test: A new mandate for test");
-        loanProductRequest.setSponsors(List.of("Mark", "Jack"));
         loanProductRequest.setObligorLoanLimit(new BigDecimal("100"));
         loanProductRequest.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProductRequest.setLoanProductSize(new BigDecimal("1000"));
@@ -55,7 +54,7 @@ class LoanControllerTest {
         loanProduct = new LoanProduct();
         loanProduct.setName("Test Loan Product: unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
-        loanProduct.setSponsors(List.of("Mark", "Jack"));
+        loanProduct.setSponsor( "Jack");
         loanProduct.setObligorLoanLimit(new BigDecimal("100"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000"));
@@ -63,7 +62,7 @@ class LoanControllerTest {
         loanProductResponse = new LoanProductResponse();
         loanProductResponse.setName("Test Loan Product: unit testing within application");
         loanProductResponse.setMandate("Test: A new mandate for test");
-        loanProductResponse.setSponsors(List.of("Mark", "Jack"));
+        loanProductResponse.setSponsor("Mark");
         loanProductResponse.setObligorLoanLimit(new BigDecimal("100"));
         loanProductResponse.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProductResponse.setLoanProductSize(new BigDecimal("1000"));

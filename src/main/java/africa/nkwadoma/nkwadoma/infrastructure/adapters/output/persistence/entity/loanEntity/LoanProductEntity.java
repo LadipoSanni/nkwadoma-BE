@@ -44,8 +44,7 @@ public class LoanProductEntity {
 
     @Size(max=5500)
     private String mandate;
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> sponsors;
+    private String sponsor;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;

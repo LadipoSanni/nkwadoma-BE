@@ -144,7 +144,7 @@ public class TestData {
         loanProduct.setInvestmentVehicleId(testId);
         loanProduct.setName(name);
         loanProduct.setMandate("Test: A new mandate for test");
-        loanProduct.setSponsors(List.of("Mark", "Jack"));
+        loanProduct.setSponsor("Mark");
         loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000000"));

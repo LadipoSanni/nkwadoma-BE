@@ -28,7 +28,7 @@ LoanProductResponse {
     private BigDecimal totalAmountRepaid ;
     private String mandate;
     private String costOfFund;
-    private List<String> sponsors;
+    private String sponsor;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;

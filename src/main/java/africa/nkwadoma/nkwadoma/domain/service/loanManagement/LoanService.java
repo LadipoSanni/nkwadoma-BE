@@ -65,7 +65,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Loan product {} created successfully", loanProduct.getName());
         InvestmentVehicle investmentVehicle =
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
-        loanProduct.setInvestmentVehicleName(investmentVehicle.getName());
+        loanProduct.addInvestmentVehicleValues(investmentVehicle);
         return loanProductOutputPort.save(loanProduct);
     }
 
