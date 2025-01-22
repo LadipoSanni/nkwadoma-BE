@@ -44,7 +44,7 @@ public class LoanProduct {
     @Size(max=5500)
     private String mandate;
 
-    private List<String> sponsors;
+    private String sponsor;
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
@@ -112,5 +112,10 @@ public class LoanProduct {
         }else {
             this.interestRate = interestRate;
         }
+    }
+
+    public void addInvestmentVehicleValues(InvestmentVehicle investmentVehicle){
+        setInvestmentVehicleName(investmentVehicle.getName());
+        setSponsor(investmentVehicle.getSponsors());
     }
 }

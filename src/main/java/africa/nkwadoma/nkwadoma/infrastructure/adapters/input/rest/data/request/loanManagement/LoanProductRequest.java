@@ -32,7 +32,7 @@ public class LoanProductRequest {
     @NotBlank(message = LOAN_PRODUCT_MANDATE_REQUIRED)
     private String mandate;
 
-    private List<String> sponsors;
+
     private BigDecimal loanProductSize;
     private BigDecimal obligorLoanLimit;
 
