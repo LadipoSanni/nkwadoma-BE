@@ -140,6 +140,21 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+    @GetMapping("/loan-disbursals/{loanId}")
+    public ResponseEntity<ApiResponse<?>> viewLoanDetailsById (
+            @PathVariable @NotBlank(message = "Provide a valid loan product identifier")
+            String loanId) throws MeedlException {
+        log.info("View loan details by id was called.... {}", loanId);
+        Loan loan = createLoanProductUseCase.viewLoanDetails(loanId);
+        LoanQueryResponse loanResponse = loanRestMapper.toLoanQueryResponse(loan);
+        ApiResponse<LoanQueryResponse> apiResponse = ApiResponse.<LoanQueryResponse>builder()
+                .data(loanResponse)
+                .message(LOAN_DISBURSALS_RETURNED_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
     @PostMapping("start")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
