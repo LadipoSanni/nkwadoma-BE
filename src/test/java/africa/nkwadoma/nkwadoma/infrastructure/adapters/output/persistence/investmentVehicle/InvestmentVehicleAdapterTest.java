@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -141,6 +142,10 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById("Fake-id"));
     }
 
+    @Test
+    void searchInvestmentVehicleDetailsWithNullId()  {
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.searchInvestmentVehicle(null));
+    }
 
     @Order(2)
     @Test
@@ -162,6 +167,19 @@ class InvestmentVehicleAdapterTest {
                 pageSize, pageNumber);
         List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
         assertEquals(1, investmentVehiclesList.size());
+    }
+
+    @Order(4)
+    @Test
+    void searchInvestmentVehicle(){
+        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+            try{
+                investmentVehicles  = investmentVehicleOutputPort.searchInvestmentVehicle("g");
+            }catch (MeedlException exception){
+                log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            }
+            assertNotNull(investmentVehicles);
+            assertEquals(1,investmentVehicles.size());
     }
 
     @AfterAll

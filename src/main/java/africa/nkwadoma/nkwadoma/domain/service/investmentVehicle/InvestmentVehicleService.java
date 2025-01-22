@@ -2,19 +2,20 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleResponse;
 import lombok.*;
 import org.springframework.data.domain.*;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.INVESTMENT_VEHICLE_NAME_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
 
 @RequiredArgsConstructor
 
@@ -53,6 +54,13 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     @Override
     public Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber) {
         return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize, pageNumber);
+    }
+
+    @Override
+    public List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException {
+        MeedlValidator.validateDataElement(investmentVehicleName,
+                InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
+        return investmentVehicleOutputPort.searchInvestmentVehicle(investmentVehicleName);
     }
 
 
