@@ -91,11 +91,13 @@ public class LoanRequestService implements LoanRequestUseCase {
         else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
         }
-        return loanRequestOutputPort.save(updatedLoanRequest);
+        LoanRequest savedLoanRequest = loanRequestOutputPort.save(updatedLoanRequest);
+        log.info("Loan request saved: {}", savedLoanRequest);
+        return savedLoanRequest;
     }
 
     private static LoanRequest declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateDataElement(loanRequest.getDeclineReason(), "Reason for declining is required");
+        MeedlValidator.validateDataElement(loanRequest.getDeclineReason(), LoanMessages.REASON_FOR_DECLINING_IS_REQUIRED.getMessage());
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
         foundLoanRequest.setStatus(LoanRequestStatus.DECLINED);
@@ -103,7 +105,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private LoanRequest approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved(), LoanMessages.LOAN_AMOUNT_APPROVED_MUST_NOT_BE_EMPTY.getMessage());
         if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
             throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
         }

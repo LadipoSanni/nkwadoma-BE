@@ -15,9 +15,8 @@ public class LoanRequestDto {
     private String loanRequestId;
     @NotBlank(message = "Loan product ID is required")
     private String loanProductId;
-    @NotNull(message = "Status is required, ACCEPTED or DECLINED")
-    private LoanRequestStatus status;
     private BigDecimal amountApproved;
-    private String loanRequestDecision;
+    @NotNull(message = "Loan decision is required, ACCEPTED or DECLINED")
+    private LoanDecision loanRequestDecision;
     private String declineReason;
 }

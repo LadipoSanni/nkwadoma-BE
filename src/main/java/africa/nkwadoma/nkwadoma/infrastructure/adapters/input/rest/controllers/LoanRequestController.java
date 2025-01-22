@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -128,12 +129,13 @@ public class LoanRequestController {
         log.info("Loan request from service: {}", loanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
         log.info("Mapped Loan request response: {}", loanRequestResponse);
-        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
-                <LoanRequestResponse>builder()
+        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.<LoanRequestResponse>builder()
                 .data(loanRequestResponse)
-                .message(SuccessMessages.SUCCESSFUL_RESPONSE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
+                .message(loanRequestResponse.getStatus().equals(LoanRequestStatus.APPROVED) ?
+                        SuccessMessages.LOAN_REQUEST_APPROVED_SUCCESSFULLY :
+                        SuccessMessages.LOAN_REQUEST_DECLINED_SUCCESSFULLY
+                )
+                .statusCode(HttpStatus.OK.toString()).build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

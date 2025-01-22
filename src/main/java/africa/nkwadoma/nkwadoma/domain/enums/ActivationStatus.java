@@ -4,5 +4,5 @@ public enum ActivationStatus {
     ACTIVE,
     INACTIVE,
     INVITED,
-    DEACTIVATED,
+    DEACTIVATED
 }

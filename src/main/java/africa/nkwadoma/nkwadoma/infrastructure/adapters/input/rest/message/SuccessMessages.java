@@ -15,4 +15,6 @@ public class SuccessMessages {
     public static final String ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY = "Organization Admins returned successfully";
     public static final String LOAN_REFERRAL_UPDATED_SUCCESSFULLY = "Loan Referral updated successfully";
     public static final String LOAN_DISBURSALS_RETURNED_SUCCESSFULLY = "Loan disbursals returned successfully";
+    public static final String LOAN_REQUEST_APPROVED_SUCCESSFULLY = "Loan request approved successfully";
+    public static final String LOAN_REQUEST_DECLINED_SUCCESSFULLY = "Loan request declined successfully";
 }
