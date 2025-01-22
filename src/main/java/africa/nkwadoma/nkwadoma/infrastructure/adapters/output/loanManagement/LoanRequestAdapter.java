@@ -25,7 +25,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
 
     @Override
     public LoanRequest save(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanRequest.getStatus(), LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
         loanRequest.validate();
         LoanRequestEntity loanRequestEntity = loanRequestMapper.toLoanRequestEntity(loanRequest);

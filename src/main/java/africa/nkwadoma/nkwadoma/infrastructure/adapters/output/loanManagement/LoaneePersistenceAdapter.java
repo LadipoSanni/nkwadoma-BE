@@ -76,7 +76,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateDataElement(name, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateDataElement(name, LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
         List<LoaneeEntity> loaneeEntities =
                 loaneeRepository.findByCohortIdAndNameFragment(cohortId,name);
         if (loaneeEntities.isEmpty()){
