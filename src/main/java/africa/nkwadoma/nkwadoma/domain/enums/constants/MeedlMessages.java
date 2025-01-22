@@ -26,7 +26,7 @@ public enum MeedlMessages {
     FORGOT_PASSWORD_TEMPLATE("forget-password"),
     LOANEE_REFERRAL_SUBJECT("Loan referral"),
     LOANEE_REFERRAL("loan-referral"),
-    LOANEE_HAS_REFERRED("Loanee Has Been Referred"),
+    LOANEE_HAS_REFERRED("Loanee has been referred"),
     LOANEE_REFERRAL_INVITATION_SENT("loanee-referral-invitation-sent"),
     INVALID_TIN("Tax identity number must contain 9 - 15 characters and can only have a hyphen special character."),
     TIN_CANNOT_BE_EMPTY("Tax identity number cannot be empty");

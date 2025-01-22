@@ -41,7 +41,7 @@ public enum LoanMessages {
     MULTIPLE_LOAN_REFERRALS_IS_CURRENTLY_NOT_ALLOWED("Multiple loan referrals is currently not allowed"),
     LOAN_REFERRAL_CANNOT_BE_EMPTY("Loan referral cannot be empty"),
     LOAN_REQUEST_CANNOT_BE_EMPTY("Loan request cannot be empty"),
-    LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY("Loan amount rquested must not be empty"),
+    LOAN_AMOUNT_REQUESTED_MUST_NOT_BE_EMPTY("Loan amount requested must not be empty"),
     LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY("Loan referral status must not be empty"),
     LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY("Loan referral ID must not be empty"),
     ACCEPTANCE_TIME_FRAME_PASSED("Acceptance Time Frame Passed"),
