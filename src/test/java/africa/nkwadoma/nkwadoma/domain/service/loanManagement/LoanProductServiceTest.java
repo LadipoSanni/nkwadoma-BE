@@ -26,9 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -238,12 +236,12 @@ class LoanProductServiceTest {
         loan = new Loan();
         loan.setId("4dced61b-acff-4487-87f7-587977fd146a");
         try {
-            when(loanOutputPort.findLoanById(loan.getId())).thenReturn(loan);
+            when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.ofNullable(loan));
             Loan foundLoan = loanService.viewLoanDetails(loan.getId());
 
             assertNotNull(foundLoan.getId());
 
-            verify(loanOutputPort, times(1)).findLoanById(loan.getId());
+            verify(loanOutputPort, times(1)).viewLoanById(loan.getId());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
