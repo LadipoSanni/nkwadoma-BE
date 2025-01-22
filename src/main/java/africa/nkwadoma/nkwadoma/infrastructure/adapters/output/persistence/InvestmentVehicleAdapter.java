@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -14,9 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
 
 
 @Slf4j
@@ -28,7 +30,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
-        MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
+        MeedlValidator.validateObjectInstance(investmentVehicle, INVESTMENT_VEHICLE_CANNOT_BE_NULL.getMessage());
         investmentVehicle.validate();
         InvestmentVehicleEntity investmentEntity =
                 investmentVehicleMapper.toInvestmentVehicleEntity(investmentVehicle);
@@ -46,10 +48,18 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public InvestmentVehicle findByName(String name) throws MeedlException {
-        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
         InvestmentVehicleEntity investmentVehicleEntity =
                 investmentVehicleRepository.findByName(name);
         return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
+    }
+
+    @Override
+    public List<InvestmentVehicle> searchInvestmentVehicle(String name) throws MeedlException {
+        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
+        List<InvestmentVehicleEntity> investmentVehicles =
+                investmentVehicleRepository.findAllByNameContainingIgnoreCase(name);
+        return investmentVehicles.stream().map(investmentVehicleMapper::toInvestmentVehicle).collect(Collectors.toList());
     }
 
     @Override
