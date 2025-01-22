@@ -33,6 +33,10 @@ public class LoanOffer {
     private LoanDecision loaneeResponse;
     private UserIdentity userIdentity;
     private NextOfKin nextOfKin;
+    private String cohortName;
+    private String programName;
+    private int creditScore;
+    private String termsAndCondition;
 
 
 

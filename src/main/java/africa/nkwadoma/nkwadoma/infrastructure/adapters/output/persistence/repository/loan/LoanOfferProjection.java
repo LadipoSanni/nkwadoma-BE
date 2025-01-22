@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -24,6 +25,9 @@ public interface LoanOfferProjection {
     BigDecimal getInitialDeposit();
     BigDecimal getAmountRequested();
     BigDecimal getAmountApproved();
+    Integer getCreditScore();
+    String getCohortName();
+    String getTermsAndCondition();
     List<LoaneeLoanBreakdown> getLoaneeBreakdowns();
     LocalDateTime getDateTimeOffered();
     LoanDecision getLoaneeResponse();

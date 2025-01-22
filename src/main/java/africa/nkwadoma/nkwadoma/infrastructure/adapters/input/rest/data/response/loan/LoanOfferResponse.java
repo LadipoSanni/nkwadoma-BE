@@ -50,4 +50,9 @@ public class LoanOfferResponse {
     private String nextOfKinContactAddress;
     private String image;
     private String loanProductName;
+    private String cohortName;
+    private String programName;
+    private int creditScore;
+    private String termsAndCondition;
+    private String loaneeId;
 }

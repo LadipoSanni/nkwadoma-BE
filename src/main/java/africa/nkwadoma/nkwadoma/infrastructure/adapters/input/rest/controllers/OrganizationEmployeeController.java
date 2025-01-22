@@ -71,7 +71,7 @@ public class OrganizationEmployeeController {
 
 
     @GetMapping("view-all/admin")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> viewAllAdminInOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
