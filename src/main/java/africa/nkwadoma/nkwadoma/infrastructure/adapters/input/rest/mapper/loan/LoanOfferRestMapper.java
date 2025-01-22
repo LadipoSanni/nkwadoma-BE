@@ -12,6 +12,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,8 +50,21 @@ public interface LoanOfferRestMapper {
     @Mapping(target = "firstName", source = "userIdentity.firstName")
     @Mapping(target = "lastName", source = "userIdentity.lastName")
     LoanOfferResponse toLoanOfferResponse(LoanOffer loanOffer);
+
     @Mapping(target = "id", source = "loanOfferId")
     LoanOffer toLoanOffer(@Valid LoanOfferAcceptRequest loanOfferRequest);
+
+
+
+
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
+    @Mapping(target = "amountApproved", source = "loaneeLoanDetail.amountApproved")
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "dateOffered", source = "dateTimeOffered")
+    @Mapping(target = "loanProductName", source = "loanProduct.name")
+    AllLoanOfferResponse toAllLoanOfferResponse(LoanOffer loanOffer);
 
     List<AllLoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);
 }

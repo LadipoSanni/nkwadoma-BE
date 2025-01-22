@@ -56,7 +56,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.findAllLoanOfferInOrganization(organization,pageRequest);
-        return loanOfferMapper.toLoanOffers(loanOfferProjections);
+        return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.findAllLoanOffer(pageRequest);
         log.info("Loan offers found: {}", loanOfferProjections);
-        Page<LoanOffer> mappedloanOffers = loanOfferMapper.toLoanOffers(loanOfferProjections);
+        Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);
         return mappedloanOffers;
     }

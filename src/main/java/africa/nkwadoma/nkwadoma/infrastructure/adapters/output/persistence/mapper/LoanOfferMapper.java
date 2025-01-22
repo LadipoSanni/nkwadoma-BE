@@ -40,16 +40,11 @@ public interface LoanOfferMapper {
     @Mapping(target = "loaneeLoanDetail.amountRequested", source = "amountRequested")
     @Mapping(target = "loaneeLoanDetail.initialDeposit", source = "initialDeposit")
     @Mapping(target = "loaneeLoanDetail.tuitionAmount", source = "tuitionAmount")
+    @Mapping(target = "loaneeLoanDetail.amountApproved", source = "amountApproved")
     @Mapping(target = "loaneeId", source = "loaneeId")
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "loanProduct.name", source = "loanProductName")
+    @Mapping(target = "dateTimeOffered", source = "dateTimeOffered")
     LoanOffer mapProjectionToLoanOffer(LoanOfferProjection loanOfferProjection);
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "loaneeLoanDetail.amountRequested", source = "amountRequested")
-    @Mapping(target = "loaneeLoanDetail.initialDeposit", source = "initialDeposit")
-    @Mapping(target = "loaneeLoanDetail.amountApproved", source = "amountApproved")
-    @Mapping(target = "userIdentity.firstName", source = "firstName")
-    @Mapping(target = "userIdentity.lastName", source = "lastName")
-    @Mapping(target = "loanProduct.name", source = "loanProductName")
-    Page<LoanOffer> toLoanOffers(Page<LoanOfferProjection> loanOfferProjections);
 }

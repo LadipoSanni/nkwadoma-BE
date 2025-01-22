@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import lombok.Getter;
+import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ public interface LoanOfferProjection {
     BigDecimal getTuitionAmount();
     BigDecimal getInitialDeposit();
     BigDecimal getAmountRequested();
+    BigDecimal getAmountApproved();
     List<LoaneeLoanBreakdown> getLoaneeBreakdowns();
     LocalDateTime getDateTimeOffered();
     LoanDecision getLoaneeResponse();
