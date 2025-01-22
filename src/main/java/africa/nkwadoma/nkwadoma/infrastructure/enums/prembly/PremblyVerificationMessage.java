@@ -7,9 +7,9 @@ public enum PremblyVerificationMessage {
 
         SERVICE_UNAVAILABLE("This Service is Unavailable. Please try again in a few minutes."),
         NIN_NOT_FOUND("This NIN cannot be found. Please provide a correct NIN."),
-        VERIFICATION_SUCCESSFUL("Verification Successful"),
+        VERIFICATION_SUCCESSFUL("Verification successful"),
         NIN_VERIFIED("Verified"),
-        VERIFICATION_UNSUCCESSFUL("Verification Unsuccessful"),
+        VERIFICATION_UNSUCCESSFUL("Verification unsuccessful"),
         PREMBLY_UNAVAILABLE("Prembly server error."),
         INSUFFICIENT_WALLET_BALANCE("Insufficient wallet balance"),
         PREMBLY_FACE_CONFIRMATION("Liveliness check failed: Face Occluded.... kindly try better positioning"),
