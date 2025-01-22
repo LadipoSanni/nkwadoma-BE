@@ -13,15 +13,23 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
 
 
     @Query("""
-        SELECT lo 
+        SELECT lo.id as id,
+              l.userIdentity.firstName as firstName,
+              l.userIdentity.lastName as lastName,
+              lo.dateTimeOffered as dateTimeOffered,
+              l.loaneeLoanDetail.amountRequested as amountRequested,
+              lo.amountApproved as amountApproved,
+              lp.name as loanProductName
+
         FROM LoanOfferEntity lo
         JOIN lo.loanee l
+        JOIN LoanProductEntity lp on lo.loanProduct.id = lp.id
         JOIN CohortEntity c ON l.cohortId = c.id
         JOIN ProgramEntity p ON c.programId = p.id
         JOIN p.organizationIdentity o
         WHERE o.id = :organizationId
     """)
-    Page<LoanOfferEntity> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
+    Page<LoanOfferProjection> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
 
     @Query("""
           select
@@ -43,4 +51,22 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
           where lo.id = :id
     """)
     LoanOfferProjection findLoanOfferById(@Param("id") String loanOfferId);
+
+
+    @Query("""
+       select lo.id as id,
+              l.userIdentity.firstName as firstName,
+              l.userIdentity.lastName as lastName,
+              lo.dateTimeOffered as dateTimeOffered,
+              l.loaneeLoanDetail.amountRequested as amountRequested,
+              lo.amountApproved as amountApproved,
+              lp.name as loanProductName
+       from LoanOfferEntity lo
+       left join LoaneeEntity l on lo.loanee.id = l.id
+       left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+       """)
+    Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
+
+
+
 }

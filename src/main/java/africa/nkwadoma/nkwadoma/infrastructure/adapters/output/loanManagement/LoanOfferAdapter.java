@@ -54,9 +54,9 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     public Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organization);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
-        Page<LoanOfferEntity> loanOfferEntities =
+        Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.findAllLoanOfferInOrganization(organization,pageRequest);
-        return loanOfferEntities.map(loanOfferMapper::toLoanOffer);
+        return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
 
     @Override
@@ -64,10 +64,10 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
-        Page<LoanOfferEntity> loanOfferEntities =
-                loanOfferEntityRepository.findAll(pageRequest);
-        log.info("Loan offers found: {}", loanOfferEntities);
-        Page<LoanOffer> mappedloanOffers = loanOfferEntities.map(loanOfferMapper::toLoanOffer);
+        Page<LoanOfferProjection> loanOfferProjections =
+                loanOfferEntityRepository.findAllLoanOffer(pageRequest);
+        log.info("Loan offers found: {}", loanOfferProjections);
+        Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);
         return mappedloanOffers;
     }

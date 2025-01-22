@@ -34,8 +34,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.LOAN;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.CREATE_LOAN_PRODUCT_SUCCESS;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_RETRIEVED;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.ACCEPT_LOAN_OFFER;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOAN_OFFER_FOUND;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.*;
 
 
 @RequestMapping(BASE_URL + LOAN)
@@ -222,13 +221,13 @@ public class LoanController {
                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         Page<LoanOffer> loanOffers = loanOfferUseCase.viewAllLoanOffers(meedlUser.getClaimAsString("sub"),pageSize,pageNumber);
-        List<LoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
-        PaginatedResponse<LoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
+        List<AllLoanOfferResponse> loanOfferResponses =  loanOfferRestMapper.toLoanOfferResponses(loanOffers);
+        PaginatedResponse<AllLoanOfferResponse> paginatedResponse = new PaginatedResponse<>(
                 loanOfferResponses,loanOffers.hasNext(),loanOffers.getTotalPages(),pageNumber,pageSize
         );
-        ApiResponse<PaginatedResponse<LoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanOfferResponse>>builder()
+        ApiResponse<PaginatedResponse<AllLoanOfferResponse>> apiResponse = ApiResponse.<PaginatedResponse<AllLoanOfferResponse>>builder()
                 .data(paginatedResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL)
+                .message(ALL_LOAN_OFFERS)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,5 +29,6 @@ public class LoanOfferEntity {
     private LoaneeEntity loanee;
     private LocalDateTime dateTimeOffered;
     private LocalDateTime dateTimeAccepted;
+    private BigDecimal amountApproved;
     private LoanDecision loaneeResponse;
 }

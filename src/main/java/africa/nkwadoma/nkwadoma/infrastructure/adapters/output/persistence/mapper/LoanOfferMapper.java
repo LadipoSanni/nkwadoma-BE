@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferProjection;
 import org.mapstruct.*;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferMapper {
@@ -39,7 +40,11 @@ public interface LoanOfferMapper {
     @Mapping(target = "loaneeLoanDetail.amountRequested", source = "amountRequested")
     @Mapping(target = "loaneeLoanDetail.initialDeposit", source = "initialDeposit")
     @Mapping(target = "loaneeLoanDetail.tuitionAmount", source = "tuitionAmount")
+    @Mapping(target = "loaneeLoanDetail.amountApproved", source = "amountApproved")
     @Mapping(target = "loaneeId", source = "loaneeId")
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "loanProduct.name", source = "loanProductName")
+    @Mapping(target = "dateTimeOffered", source = "dateTimeOffered")
     LoanOffer mapProjectionToLoanOffer(LoanOfferProjection loanOfferProjection);
+
 }
