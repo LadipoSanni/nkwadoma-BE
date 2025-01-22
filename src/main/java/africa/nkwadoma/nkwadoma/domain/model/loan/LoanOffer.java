@@ -20,6 +20,7 @@ public class LoanOffer {
     private String loanRequestId;
     private LocalDate startDate;
     private LoanOfferStatus loanOfferStatus;
+    private BigDecimal amountApproved;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private Loanee loanee;

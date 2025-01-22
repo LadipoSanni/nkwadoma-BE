@@ -243,6 +243,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
+        loanOffer.setAmountApproved(loanRequest.getLoanAmountApproved());
         Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId());
         loanOffer.setLoanee(loanee);
 
