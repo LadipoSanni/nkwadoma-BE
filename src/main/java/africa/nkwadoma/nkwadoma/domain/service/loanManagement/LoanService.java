@@ -131,6 +131,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loans;
     }
 
+    @Override
+    public Loan viewLoanDetails(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        Loan foundLoan = loanOutputPort.findLoanById(loanId);
+        log.info("Found loan {}", foundLoan);
+        return foundLoan;
+    }
+
     private String getLoanAccountId(Loanee foundLoanee) throws MeedlException {
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(foundLoanee.getId());
         log.info("Found loanee account: {}", loaneeLoanAccount);

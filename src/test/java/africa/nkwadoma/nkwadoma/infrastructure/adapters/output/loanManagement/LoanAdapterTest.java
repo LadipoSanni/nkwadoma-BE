@@ -56,6 +56,8 @@ class LoanAdapterTest {
     private String loanRequestId;
     @Autowired
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
+    @Autowired
+    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     private Loan loan;
     private LoaneeLoanAccount loaneeLoanAccount;
     private String savedLoanId;
@@ -79,6 +81,8 @@ class LoanAdapterTest {
     private String organizationEmployeeIdentityId;
     private Cohort cohort;
     private Program program;
+    private NextOfKin nextOfKin;
+    private String nextOfKinId;
 
     @BeforeAll
     public void setUp(){
@@ -148,6 +152,12 @@ class LoanAdapterTest {
             loanee = loaneeOutputPort.save(loanee);
             assertNotNull(loanee);
             loaneeId = loanee.getId();
+
+
+            nextOfKin = TestData.createNextOfKinData(loanee);
+            NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            assertNotNull(savedNextOfKin);
+            nextOfKinId = savedNextOfKin.getId();
 
             loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW, loanee.getId());
             LoaneeLoanAccount foundLoaneeAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId());
@@ -250,6 +260,22 @@ class LoanAdapterTest {
 
     @Test
     @Order(3)
+    void viewLoanById() {
+        Optional<Loan> loan = Optional.empty();
+        try {
+            loan = loanOutputPort.viewLoanById(loanId);
+        } catch (MeedlException e) {
+            log.error("Error finding loan details {}", e.getMessage());
+        }
+
+        assertNotNull(loan);
+        assertTrue(loan.isPresent());
+        assertNotNull(loan.get().getId());
+        assertEquals(loan.get().getId(), loanId);
+    }
+
+    @Test
+    @Order(4)
     void findAllLoanByOrganizationId() {
         Page<Loan> loans = Page.empty();
         try {
@@ -301,6 +327,12 @@ class LoanAdapterTest {
     }
 
     private void deleteLoan() {
+        try {
+            nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
+        } catch (MeedlException e) {
+            log.error("Error deleting next of kin", e);
+        }
+
         if (StringUtils.isNotEmpty(loaneeLoanAccountId)) {
             try {
                 loaneeLoanAccountOutputPort.deleteLoaneeLoanAccount(loaneeLoanAccountId);

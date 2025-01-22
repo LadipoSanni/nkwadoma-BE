@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,6 +38,18 @@ public class LoanAdapter implements LoanOutputPort {
         MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
         loanRepository.deleteById(loanId);
         log.info("Loan with id {} deleted successfully",loanId);
+    }
+
+    @Override
+    public Optional<Loan> viewLoanById(String loanId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        Optional<LoanProjection> loanById = loanRepository.findLoanById(loanId);
+        if (loanById.isEmpty()) {
+            return Optional.empty();
+        }
+        Loan loan = loanMapper.mapProjectionToLoan(loanById.get());
+        log.info("Loan details returned: {}", loan);
+        return Optional.ofNullable(loan);
     }
 
     @Override

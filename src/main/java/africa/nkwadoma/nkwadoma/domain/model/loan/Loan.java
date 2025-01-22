@@ -15,6 +15,7 @@ import java.time.*;
 @Getter
 @Setter
 @Builder
+@ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class Loan {

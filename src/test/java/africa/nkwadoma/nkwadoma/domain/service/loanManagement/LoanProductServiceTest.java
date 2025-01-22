@@ -3,13 +3,12 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,11 +45,12 @@ class LoanProductServiceTest {
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
+    private LoanOutputPort loanOutputPort;
+    @Mock
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
-
     @InjectMocks
     private LoanService loanService;
-
+    private Loan loan;
     private LoanProduct loanProduct;
 
     @BeforeEach
@@ -231,5 +231,27 @@ class LoanProductServiceTest {
         } catch (MeedlException e) {
             log.error("Error deleting loan product {}", e.getMessage());
         }
+    }
+
+    @Test
+    void viewLoanDetailsWithValidId(){
+        loan = new Loan();
+        loan.setId("4dced61b-acff-4487-87f7-587977fd146a");
+        try {
+            when(loanOutputPort.findLoanById(loan.getId())).thenReturn(loan);
+            Loan foundLoan = loanService.viewLoanDetails(loan.getId());
+
+            assertNotNull(foundLoan.getId());
+
+            verify(loanOutputPort, times(1)).findLoanById(loan.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.EMPTY})
+    void viewLoanDetailsWithInvalidId(String loanId){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanDetails(loanId));
     }
 }
