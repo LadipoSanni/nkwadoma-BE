@@ -53,7 +53,9 @@ public enum LoanMessages {
     LOAN_CANNOT_BE_EMPTY("Loan cannot be empty"),
     LOANEE_ACCOUNT_NOT_FOUND("Loan account not found"),
     LOAN_METRICS_MUST_NOT_BE_EMPTY("Loan metrics object must not be empty"),
-    LOAN_START_DATE_MUST_NOT_BE_EMPTY("Loan start date must not be empty");
+    LOAN_START_DATE_MUST_NOT_BE_EMPTY("Loan start date must not be empty"),
+    LOAN_REQUEST_MUST_NOT_BE_EMPTY("Loan request must not be empty"), REASON_FOR_DECLINING_IS_REQUIRED("Reason for declining is required"),
+    LOAN_AMOUNT_APPROVED_MUST_NOT_BE_EMPTY("Loan amount approved must not be empty");
     private final String message;
 
     LoanMessages(String message) {

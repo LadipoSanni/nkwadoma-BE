@@ -59,7 +59,7 @@ public class LoanRequest {
 
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan request identification");
         MeedlValidator.validateUUID(loanRequest.getLoanProductId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());

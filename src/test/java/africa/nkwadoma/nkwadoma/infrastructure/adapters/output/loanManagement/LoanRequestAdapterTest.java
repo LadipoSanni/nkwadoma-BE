@@ -217,7 +217,7 @@ class LoanRequestAdapterTest {
     void init() {
         if (ObjectUtils.isNotEmpty(loanee) && StringUtils.isNotEmpty(loanee.getId())) {
             loanRequest = new LoanRequest();
-            loanRequest.setStatus(LoanRequestStatus.APPROVED);
+            loanRequest.setStatus(LoanRequestStatus.NEW);
             loanRequest.setReferredBy("Brown Hills Institute");
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(loanee);

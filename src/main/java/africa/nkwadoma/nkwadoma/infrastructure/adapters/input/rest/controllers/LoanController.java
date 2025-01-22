@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -10,7 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
@@ -159,7 +161,7 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/loan-disbursals")
+    @GetMapping("/loan-disbursals")
     @Operation(summary = "View all loan disbursals by organization ID")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
@@ -173,13 +175,11 @@ public class LoanController {
                     description = "Invalid organization ID provided")
     })
     public ResponseEntity<ApiResponse<PaginatedResponse<LoanQueryResponse>>>
-    viewAllLoansByOrganizationId(@Valid @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Input to view all loans disbursed", required = true,
-            content = @Content(mediaType = "application/json", examples = @ExampleObject(value =
-                    "{\"organizationId\": \"b95805d1-2e2d-47f8-a037-7bcd264914fc\", \"pageSize\": 10, \"pageNumber\": 0}"),
-                    schema = @Schema(implementation = PaginatedResponse.class)
-            )) LoanQueryRequest loanQueryRequest) throws MeedlException {
-        Loan loan = loanRestMapper.toLoan(loanQueryRequest);
+    viewAllLoansByOrganizationId(@Valid @RequestParam(name = "organizationId") @Parameter(description = "id of organization to be searched")
+                                 @NotBlank(message = "Organization ID is required") String organizationId,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                 @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Loan loan = Loan.builder().organizationId(organizationId).pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Loan> loans = createLoanProductUseCase.viewAllLoansByOrganizationId(loan);
         log.info("Mapped Loan responses: {}", loans.getContent().toArray());
         Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
@@ -187,8 +187,8 @@ public class LoanController {
         PaginatedResponse<LoanQueryResponse> paginatedResponse =
                 PaginatedResponse.<LoanQueryResponse>builder()
                         .body(loanResponses.getContent())
-                        .pageSize(loanQueryRequest.getPageSize())
-                        .pageNumber(loanQueryRequest.getPageNumber())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
                         .totalPages(loanResponses.getTotalPages())
                         .hasNextPage(loanResponses.hasNext())
                         .build();
