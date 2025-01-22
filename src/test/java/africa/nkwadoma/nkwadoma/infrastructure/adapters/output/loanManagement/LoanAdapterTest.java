@@ -271,6 +271,7 @@ class LoanAdapterTest {
         assertNotNull(loan);
         assertTrue(loan.isPresent());
         assertNotNull(loan.get().getId());
+        assertNotNull(loan.get().getLoaneeId());
         assertEquals(loan.get().getId(), loanId);
     }
 

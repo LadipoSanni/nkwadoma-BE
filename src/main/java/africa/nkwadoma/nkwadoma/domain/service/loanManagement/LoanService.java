@@ -137,6 +137,10 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Loan foundLoan = loanOutputPort.viewLoanById(loanId).
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_NOT_FOUND.getMessage()));
         log.info("Found loan {}", foundLoan);
+        List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(foundLoan.getLoaneeId());
+        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", foundLoan.getLoaneeId(), loaneeLoanBreakdowns);
+        foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
     }
 

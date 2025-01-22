@@ -5,6 +5,7 @@ import java.time.*;
 
 public interface LoanProjection {
     String getId();
+    String getLoaneeId();
     String getFirstName();
     String getLastName();
     String getCohortName();
