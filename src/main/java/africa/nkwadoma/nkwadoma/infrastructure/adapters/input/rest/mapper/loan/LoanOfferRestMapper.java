@@ -49,6 +49,12 @@ public interface LoanOfferRestMapper {
     @Mapping(target = "image", source = "userIdentity.image")
     @Mapping(target = "firstName", source = "userIdentity.firstName")
     @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "creditScore", source = "creditScore")
+    @Mapping(target = "termsAndCondition", source = "termsAndCondition")
+    @Mapping(target = "loaneeId", source = "loaneeId")
+    @Mapping(target = "loanProductName", source = "loanProduct.name")
     LoanOfferResponse toLoanOfferResponse(LoanOffer loanOffer);
 
     @Mapping(target = "id", source = "loanOfferId")
