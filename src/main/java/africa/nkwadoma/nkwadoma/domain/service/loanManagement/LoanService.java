@@ -106,8 +106,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     public Loan startLoan(Loan loan) throws MeedlException {
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), "Please provide a valid loanee identification");
-        Loanee foundLoanee = loaneeOutputPort.findByUserId(loan.getLoaneeId())
-                            .orElseThrow(() -> new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage()));
+        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
         loan.setLoanee(foundLoanee);
         loan.setLoanAccountId(getLoanAccountId(foundLoanee));
         loan.setStartDate(LocalDateTime.now());
