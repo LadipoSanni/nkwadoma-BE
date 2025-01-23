@@ -107,7 +107,7 @@ public class LoaneeService implements LoaneeUseCase {
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
-        log.info("loanee found successfully. Loanee with id {}", loanee.getId());
+        log.info("loanee found successfully. Loanee with id {}", id);
         try {
             return updateLoaneeCreditScore(loanee);
         }catch (MeedlException exception){
