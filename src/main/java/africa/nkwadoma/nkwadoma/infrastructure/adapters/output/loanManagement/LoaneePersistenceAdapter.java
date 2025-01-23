@@ -111,6 +111,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         LoaneeEntity loaneeEntity = loaneeRepository.findById(loaneeId)
                  .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage()));
+        log.info("Loanee entity found successfully {}", loaneeEntity);
         return loaneeMapper.toLoanee(loaneeEntity);
     }
 
