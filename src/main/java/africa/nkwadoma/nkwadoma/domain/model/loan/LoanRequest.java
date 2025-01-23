@@ -55,6 +55,7 @@ public class LoanRequest {
     private int pageNumber;
     private int pageSize;
     private String loaneeId;
+    private String loanOfferId;
     private int creditScore;
 
 

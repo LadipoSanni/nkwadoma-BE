@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
@@ -70,6 +71,16 @@ public class EmailAdapter implements EmailOutputPort {
         context.setVariable(CONTEXT_TOKEN.getMessage(), link);
         context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
         context.setVariable(CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
+        return context;
+    }
+
+    @Override
+    public Context getNameAndLinkContextAndLoanOfferId(String link, String firstName, String organizationName, String loanOfferId) {
+        Context context = new Context();
+        context.setVariable(CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(CONTEXT_ORGANIZATION_NAME.getMessage(), organizationName);
+        context.setVariable(IdentityMessages.LOAN_0FFER_ID.getMessage(), loanOfferId);
         return context;
     }
 }

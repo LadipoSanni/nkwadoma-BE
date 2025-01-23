@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -26,6 +27,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoaneeUseCase loaneeUseCase;
+    private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
 
     @Override
@@ -80,7 +82,9 @@ public class LoanRequestService implements LoanRequestUseCase {
                 && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
-        return respondToLoanRequest(loanRequest, foundLoanRequest);
+        LoanRequest updatedLoanRequest = respondToLoanRequest(loanRequest, foundLoanRequest);
+        sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
+        return updatedLoanRequest;
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
@@ -115,6 +119,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
         foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
         LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(foundLoanRequest);
+        foundLoanRequest.setLoanOfferId(loanOffer.getId());
         foundLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
         return foundLoanRequest;
     }

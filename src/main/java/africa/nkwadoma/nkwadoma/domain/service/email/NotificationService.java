@@ -8,12 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.email.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -125,5 +120,19 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity,email);
+    }
+
+    @Override
+    public void sendLoanRequestApprovalEmail(LoanRequest loanRequest) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferId(getLink(loanRequest.getLoanee().getUserIdentity()),
+                loanRequest.getLoanee().getUserIdentity().getFirstName(), loanRequest.getReferredBy(), loanRequest.getLoanOfferId());
+        Email email = Email.builder()
+                .context(context)
+                .subject(LoaneeMessages.LOANEE_HAS_REFERRED.getMessage())
+                .to(loanRequest.getUserIdentity().getEmail())
+                .template(LoaneeMessages.LOAN_REQUEST_APPROVAL_SENT.getMessage())
+                .firstName(loanRequest.getUserIdentity().getFirstName())
+                .build();
+        sendMail(loanRequest.getUserIdentity(), email);
     }
 }

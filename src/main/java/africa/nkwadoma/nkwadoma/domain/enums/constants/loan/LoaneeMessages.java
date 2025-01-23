@@ -19,7 +19,8 @@ public enum LoaneeMessages {
     LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY("Loan request status must not be empty"),
     LOANEE_HAS_BEEN_REFERRED_BEFORE("Loanee Has Been Referred Before"),
     LOANEE_MUST_EXIST("A loanee must exist for the loan request"),
-    LOANEE_NAME_CANNOT_BE_EMPTY("Loanee name must not be empty"),;
+    LOANEE_NAME_CANNOT_BE_EMPTY("Loanee name must not be empty"),
+    LOAN_REQUEST_APPROVAL_SENT("Loan request approval mail sent");
 
     private final String message;
 

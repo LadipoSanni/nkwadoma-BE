@@ -9,6 +9,7 @@ public interface EmailOutputPort {
     void sendEmail(Email email) throws MeedlException;
 
     Context getNameAndLinkContext(String link, String firstName);
-    Context getNameAndLinkContextAndIndustryName(String link, String firstName,String industryName);
+    Context getNameAndLinkContextAndIndustryName(String link, String firstName, String industryName);
+    Context getNameAndLinkContextAndLoanOfferId(String link, String firstName, String organizationName, String loanOfferId);
 
 }
