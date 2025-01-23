@@ -8,6 +8,7 @@ public interface LoanRequestProjection {
     String getLoaneeId();
     String getFirstName();
     String getLastName();
+    String getEmail();
     String getCohortName();
     String getLoaneeImage();
     String getReferredBy();

@@ -41,7 +41,9 @@ public enum IdentityMessages {
     IDENTITY_NOT_VERIFIED("Identity not verified"),
     NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
     LOANEE_NOT_FOUND("Loanee not found"),
-    ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists");
+    ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists"),
+    LOAN_0FFER_ID("Loan offer ID"),
+    CONTEXT_LINK("loanOfferId");
 
     public String format(Object... args) {
         return String.format(message, args);
