@@ -96,7 +96,7 @@ public class LoanRequestService implements LoanRequestUseCase {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
         }
         LoanRequest savedLoanRequest = loanRequestOutputPort.save(updatedLoanRequest);
-        log.info("Loan request saved: {}", savedLoanRequest);
+        log.info("Loan request saved: {}", updatedLoanRequest);
         return savedLoanRequest;
     }
 
