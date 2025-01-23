@@ -84,7 +84,7 @@ jobs:
                  -verbose migrate | tee logs/flyway-output.log
   
       - name: Upload Flyway Logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flyway-logs
           path: logs/
