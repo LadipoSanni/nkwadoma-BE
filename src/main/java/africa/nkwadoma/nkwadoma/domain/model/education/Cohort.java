@@ -55,7 +55,7 @@ public class Cohort {
         MeedlValidator.validateObjectName(name,"Name cannot be empty");
         MeedlValidator.validateUUID(createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         MeedlValidator.validateObjectInstance(startDate,"Start date cannot be empty");
-        MeedlValidator.validateNegativeAmount(tuitionAmount);
+        MeedlValidator.validateNegativeAmount(tuitionAmount,"Tuition");
     }
 
     public void updateValidation() throws MeedlException {
