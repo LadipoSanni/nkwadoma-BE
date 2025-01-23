@@ -236,7 +236,7 @@ class LoanServiceTest {
     void startLoan() {
         Loan startedLoan = null;
         try {
-            when(loaneeOutputPort.findByUserId(loan.getLoaneeId())).thenReturn(Optional.ofNullable(loanee));
+            when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
             when(loanOutputPort.save(loan)).thenReturn(loan);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId())).thenReturn(loaneeLoanAccount);
             startedLoan = loanService.startLoan(loan);

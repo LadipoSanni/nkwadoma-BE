@@ -140,7 +140,7 @@ public class LoanController {
 
     @GetMapping("/loan-disbursals/{loanId}")
     public ResponseEntity<ApiResponse<?>> viewLoanDetailsById (
-            @PathVariable @NotBlank(message = "Provide a valid loan product identifier")
+            @PathVariable @NotBlank(message = "Provide a valid loan ID")
             String loanId) throws MeedlException {
         log.info("View loan details by id was called.... {}", loanId);
         Loan loan = createLoanProductUseCase.viewLoanDetails(loanId);
@@ -171,7 +171,7 @@ public class LoanController {
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
                .data(startLoanResponse)
                .message(SuccessMessages.LOAN_START_SUCCESS)
-               .statusCode(HttpStatus.OK.toString())
+               .statusCode(HttpStatus.OK.name())
                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
