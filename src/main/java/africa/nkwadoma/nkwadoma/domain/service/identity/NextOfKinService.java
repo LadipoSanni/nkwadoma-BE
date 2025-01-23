@@ -24,11 +24,13 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
         MeedlValidator.validateObjectInstance(nextOfKin);
         nextOfKin.validate();
         trimSpaceForUserIdentity(nextOfKin.getLoanee());
-        Optional<Loanee> foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId());
-        if (foundLoanee.isEmpty()) {
-            throw new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage());
+        Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId()).
+                orElseThrow(()-> new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage()));
+        Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(foundLoanee.getId());
+        if (foundNextOfKin.isPresent()) {
+            throw new MeedlException(IdentityMessages.LOANEE_HAS_NEXT_OF_KIN.getMessage());
         }
-        nextOfKin.setLoanee(foundLoanee.get());
+        nextOfKin.setLoanee(foundLoanee);
         return nextOfKinIdentityOutputPort.save(nextOfKin);
     }
 
