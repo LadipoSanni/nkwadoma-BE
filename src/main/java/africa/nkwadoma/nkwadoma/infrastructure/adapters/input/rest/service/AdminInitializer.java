@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -99,7 +100,12 @@ public class AdminInitializer {
         employeeIdentity.setOrganization(organizationIdentity.getId());
         employeeIdentity.setStatus(ActivationStatus.ACTIVE);
 
+        try{
+
         employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+        } catch(DataIntegrityViolationException dataIntegrityViolationException){
+            log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
+        }
         savedOrganizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
 
         log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
