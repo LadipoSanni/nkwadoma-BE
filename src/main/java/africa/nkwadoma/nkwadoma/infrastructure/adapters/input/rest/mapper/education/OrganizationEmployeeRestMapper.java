@@ -11,6 +11,7 @@ public interface OrganizationEmployeeRestMapper {
                     " organizationEmployeeIdentity.getMeedlUser().getLastName()))"
     )
     @Mapping(target = "email", source = "meedlUser.email")
+    @Mapping(target = "role", source = "meedlUser.role")
     OrganizationEmployeeResponse toOrganizationEmployeeResponse(OrganizationEmployeeIdentity organizationEmployeeIdentity);
 
     default String concatenateNames(String firstName, String lastName) {

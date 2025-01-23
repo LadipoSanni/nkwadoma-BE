@@ -14,4 +14,5 @@ public class OrganizationEmployeeResponse {
     private String fullName;
     private String email;
     private ActivationStatus status;
+    private IdentityRole role;
 }
