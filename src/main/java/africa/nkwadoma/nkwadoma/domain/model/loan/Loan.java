@@ -10,11 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Slf4j
 @Getter
 @Setter
 @Builder
+@ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class Loan {
@@ -29,6 +31,7 @@ public class Loan {
     private LocalDate cohortStartDate;
     private LocalDateTime offerDate;
     private LocalDateTime lastUpdatedDate;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private LoanOffer loanOffer;
     private LoanStatus loanStatus;
     private BigDecimal initialDeposit;
