@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -29,7 +28,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
@@ -146,13 +144,15 @@ public class LoanController {
             String loanId) throws MeedlException {
         log.info("View loan details by id was called.... {}", loanId);
         Loan loan = createLoanProductUseCase.viewLoanDetails(loanId);
+        log.info("Loan details: {}", loan);
         LoanQueryResponse loanResponse = loanRestMapper.toLoanQueryResponse(loan);
+        log.info("Loan details response: {}", loanResponse);
         ApiResponse<LoanQueryResponse> apiResponse = ApiResponse.<LoanQueryResponse>builder()
                 .data(loanResponse)
                 .message(LOAN_DISBURSALS_RETURNED_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.name())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PostMapping("start")

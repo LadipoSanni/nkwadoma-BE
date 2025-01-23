@@ -306,7 +306,7 @@ class LoanAdapterTest {
         assertThrows(MeedlException.class,()->loanOutputPort.deleteById(id));
     }
 
-    @AfterAll
+//    @AfterAll
     void tearDown() {
         deleteLoan();
 
