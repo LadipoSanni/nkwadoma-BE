@@ -33,7 +33,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class OrganizationIdentityService implements CreateOrganizationUseCase, ViewOrganizationUseCase {
+public class OrganizationIdentityService implements OrganizationUseCase, ViewOrganizationUseCase {
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;

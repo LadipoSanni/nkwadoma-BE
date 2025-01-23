@@ -28,7 +28,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
-    private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final OrganizationUseCase createOrganizationUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")

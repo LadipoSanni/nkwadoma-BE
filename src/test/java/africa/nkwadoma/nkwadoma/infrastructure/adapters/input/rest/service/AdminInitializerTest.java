@@ -1,12 +1,14 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -23,10 +25,13 @@ class AdminInitializerTest {
     @Autowired
     private AdminInitializer adminInitializer;
     @Autowired
-    private IdentityManagerOutputPort identityManagerOutPutPort;
+    private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private UserIdentity userIdentity;
+    private OrganizationIdentity organizationIdentity;
     @BeforeEach
     void setUp() {
        userIdentity = UserIdentity.builder()
@@ -36,7 +41,6 @@ class AdminInitializerTest {
                .role(PORTFOLIO_MANAGER)
                .createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c")
                .build();
-
     }
 
     @Test
@@ -57,7 +61,7 @@ class AdminInitializerTest {
     void findCreatedFirstUserOnKeycloak(){
         Optional<UserIdentity> foundUserIdentity = Optional.empty();
         try {
-            foundUserIdentity = identityManagerOutPutPort.getUserByEmail(userIdentity.getEmail());
+            foundUserIdentity = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             log.error("First user on keycloak not found in test {}", e.getMessage());
         }
@@ -75,9 +79,38 @@ class AdminInitializerTest {
         }
         assertNotNull(foundUserIdentity);
     }
-
     @Test
     @Order(4)
+    void findCreatedFirstOrganizationOnDB(){
+        OrganizationIdentity foundOrganizationIdentity = null;
+        try {
+            foundOrganizationIdentity = organizationIdentityOutputPort.findByEmail("meedl@meedl.com");
+        } catch (MeedlException e) {
+            log.error("First organization on data base not found in test {}", e.getMessage());
+        }
+        assertNotNull(foundOrganizationIdentity);
+        assertNotNull(foundOrganizationIdentity.getOrganizationEmployees());
+        assertFalse(foundOrganizationIdentity.getOrganizationEmployees().isEmpty());
+        assertNotNull(foundOrganizationIdentity.getOrganizationEmployees().get(0));
+        assertNotNull(foundOrganizationIdentity.getOrganizationEmployees().get(0).getMeedlUser());
+        assertEquals(foundOrganizationIdentity.getOrganizationEmployees().get(0).getOrganization(), foundOrganizationIdentity   .getId());
+    }
+    @Test
+    @Order(5)
+    void findCreatedFirstOrganizationOnKeycloak(){
+        ClientRepresentation clientRepresentation = null;
+        try {
+            clientRepresentation = identityManagerOutputPort.getClientRepresentationByClientId("Meedl");
+        } catch (MeedlException e) {
+            log.error("Error getting client representation in test: {}", e.getMessage());
+        }
+        assertNotNull(clientRepresentation);
+        assertNotNull(clientRepresentation.getName());
+        log.info("Client representation {}", clientRepresentation.getName());
+    }
+
+    @Test
+    @Order(6)
     void initializeAlreadyExistingUser(){
         UserIdentity existingUserIdentity = null;
         try {
@@ -89,7 +122,7 @@ class AdminInitializerTest {
             assertNotNull(existingUserIdentity);
             assertNotNull(existingUserIdentity.getId());
             try {
-                identityManagerOutPutPort.deleteUser(existingUserIdentity);
+                identityManagerOutputPort.deleteUser(existingUserIdentity);
                 userIdentityOutputPort.deleteUserById(existingUserIdentity.getId());
             } catch (MeedlException ex) {
                 log.error(ex.getMessage());
