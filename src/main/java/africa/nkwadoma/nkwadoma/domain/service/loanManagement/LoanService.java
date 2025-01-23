@@ -280,8 +280,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanee.isEmpty()) {
             throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
         }
-        loanOffer.setLoaneeId(loanee.get().getId());
-        if (!offer.getLoanee().getId().equals(loanOffer.getLoaneeId())){
+        if (!offer.getLoanee().getId().equals(loanee.get().getId())) {
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
@@ -289,11 +288,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             //Loanee Wallet would be Created
             loanOfferMapper.updateLoanOffer(offer,loanOffer);
             offer.setDateTimeAccepted(LocalDateTime.now());
+            LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());
+            offer.setLoanProduct(loanProduct);
             loanOfferOutputPort.save(offer);
             notifyPortfolioManager(portfolioManagers,loanOffer);
-            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(loanOffer.getLoaneeId());
+            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
             if (ObjectUtils.isEmpty(loaneeLoanAccount)){
-                loaneeLoanAccount = createLoaneeLoanAccount(loanOffer.getLoaneeId());
+                loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
             }
             return loaneeLoanAccount;
         }
