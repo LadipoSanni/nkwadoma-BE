@@ -20,7 +20,7 @@ public class LoanBreakdown {
     private Cohort cohort;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateNegativeAmount(itemAmount);
+        MeedlValidator.validateNegativeAmount(itemAmount,"Item");
         MeedlValidator.validateObjectName(itemName,"Item name cannot be empty");
     }
 }

@@ -50,6 +50,11 @@ public class InvestmentVehicle {
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be null");
         MeedlValidator.validateBigDecimalDataElement(size);
-        MeedlValidator.validateBigDecimalDataElement(minimumInvestmentAmount);
+        MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment");
+    }
+
+    public void setValues() {
+        setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
+        setStartDate(LocalDate.now());
     }
 }

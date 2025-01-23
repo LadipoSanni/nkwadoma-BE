@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.CreateOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -43,7 +43,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 @Slf4j
 public class OrganizationController {
-    private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final OrganizationUseCase createOrganizationUseCase;
     private final ViewOrganizationUseCase viewOrganizationUseCase;
     private final OrganizationRestMapper organizationRestMapper;
 

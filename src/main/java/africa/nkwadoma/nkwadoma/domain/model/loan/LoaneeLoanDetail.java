@@ -22,6 +22,6 @@ public class LoaneeLoanDetail {
     private BigDecimal amountApproved;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateNegativeAmount(initialDeposit);
+        MeedlValidator.validateNegativeAmount(initialDeposit,"Initial deposit");
     }
 }

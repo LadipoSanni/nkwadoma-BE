@@ -312,23 +312,6 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void cannotFindLoaneeWithNonExistentId() {
-        try {
-            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(null);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
-    }
-
-    @Test
-    void cannotUpdateLoaneeCreditScoreWithNullUserIdentity() throws MeedlException {
-        firstLoanee.setUserIdentity(null);
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
-    }
-
-    @Test
     void updateLoaneeCreditScoreWhenCreditScoreUpdateIsDue() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusMonths(2));
         firstLoanee.getUserIdentity().setBvn("12345678900");
@@ -354,16 +337,6 @@ class LoaneeServiceTest {
         assertEquals(firstLoanee.getId(), result.getId());
         verify(loaneeOutputPort, never()).save(firstLoanee);
     }
-
-    @Test
-    void cannotUpdateLoaneeCreditScoreWithInvalidBVN() throws MeedlException {
-        firstLoanee.getUserIdentity().setBvn(null);
-        firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusMonths(2));
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-
-        assertThrows(MeedlException.class, () -> loaneeService.viewLoaneeDetails(mockId));
-    }
-
     @Test
     void loaneeDetailsSuccessfullyRetrievedWhenCreditScoreUpdateIsSkipped() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(10));

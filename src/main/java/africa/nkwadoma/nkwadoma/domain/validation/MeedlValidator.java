@@ -89,14 +89,14 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateFloatDataElement(Float dataElement , String message) throws MeedlException {
+    public static void validateFloatDataElement(Float dataElement, String message) throws MeedlException {
         if (dataElement == null) {
             throw new MeedlException(message);
         }
     }
 
     public static void validateIntegerDataElement(int dataElement , String message) throws MeedlException {
-        if (dataElement == 0) {
+        if (dataElement < BigInteger.ONE.intValue()) {
             throw new MeedlException(message);
         }
     }
@@ -193,11 +193,11 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateNegativeAmount(BigDecimal itemAmount) throws MeedlException {
+    public static void validateNegativeAmount(BigDecimal itemAmount,String message) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(itemAmount);
         if (itemAmount.compareTo(BigDecimal.ZERO) < 0) {
             log.info("{} --- {}",LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage(),itemAmount);
-            throw new LoaneeLoanBreakdownException(LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
+            throw new LoaneeLoanBreakdownException(message+" "+LoaneeLoanBreakdownMessages.AMOUNT_CANNOT_BE_LESS_THAN_ZERO.getMessage());
         }
     }
 
