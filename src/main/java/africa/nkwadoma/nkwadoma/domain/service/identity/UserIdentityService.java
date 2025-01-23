@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -61,6 +62,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
         OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
         organizationEmployeeIdentity.setOrganization(foundEmployee.getOrganization());
+        organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
         organizationEmployeeIdentity.setMeedlUser(userIdentity);
         organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
 
