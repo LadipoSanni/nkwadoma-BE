@@ -21,6 +21,7 @@ public interface LoanRequestMapper {
     @Mapping(target = "nextOfKin.contactAddress", source = "nextOfKinContactAddress")
     @Mapping(target = "nextOfKin.nextOfKinRelationship", source = "nextOfKinRelationship")
     @Mapping(target = "userIdentity.image", source = "loaneeImage")
+    @Mapping(target = "userIdentity.email", source = "email")
     @Mapping(target = "userIdentity.gender", source = "gender")
     @Mapping(target = "userIdentity.dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "userIdentity.nationality", source = "nationality")
@@ -40,4 +41,6 @@ public interface LoanRequestMapper {
     @Mapping(target = "referredBy", source = "updatedLoanReferral.loanee.referredBy")
     @Mapping(target = "loaneeId", source = "loanee.id")
     LoanRequest mapLoanReferralToLoanRequest(LoanReferral updatedLoanReferral);
+
+    LoanRequest updateLoanRequest(LoanRequest updatedLoanRequest, @MappingTarget LoanRequest foundLoanRequest);
 }

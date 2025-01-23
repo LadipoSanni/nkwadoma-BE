@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
+import java.time.*;
 import java.util.*;
 
 @Service
@@ -29,6 +31,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoaneeUseCase loaneeUseCase;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
+    private final LoanRequestMapper loanRequestMapper;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -82,22 +85,23 @@ public class LoanRequestService implements LoanRequestUseCase {
                 && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
         }
-        LoanRequest updatedLoanRequest = respondToLoanRequest(loanRequest, foundLoanRequest);
-        sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
-        return updatedLoanRequest;
+        return respondToLoanRequest(loanRequest, foundLoanRequest);
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest = null;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
+            updatedLoanRequest.setDateTimeOffered(LocalDateTime.now());
+            updatedLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+            updatedLoanRequest = loanRequestMapper.updateLoanRequest(updatedLoanRequest, foundLoanRequest);
+            log.info("Loan request updated: {}", updatedLoanRequest);
+            sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
         }
         else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
         }
-        LoanRequest savedLoanRequest = loanRequestOutputPort.save(updatedLoanRequest);
-        log.info("Loan request saved: {}", updatedLoanRequest);
-        return savedLoanRequest;
+        return loanRequestOutputPort.save(updatedLoanRequest);
     }
 
     private static LoanRequest declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
