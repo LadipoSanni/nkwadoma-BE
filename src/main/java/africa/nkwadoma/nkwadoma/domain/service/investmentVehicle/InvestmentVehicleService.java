@@ -28,8 +28,7 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
-        investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
-        investmentVehicle.setStartDate(LocalDate.now());
+        investmentVehicle.setValues();
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
