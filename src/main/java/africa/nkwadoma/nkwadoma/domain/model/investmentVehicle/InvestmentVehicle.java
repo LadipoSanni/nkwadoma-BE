@@ -48,7 +48,8 @@ public class InvestmentVehicle {
         MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less that 1");
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
-        MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be null");
+        MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be null or less than zero");
+        MeedlValidator.validateObjectName(mandate,"Mandate cannot be empty or null");
         MeedlValidator.validateBigDecimalDataElement(size);
         MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment");
     }

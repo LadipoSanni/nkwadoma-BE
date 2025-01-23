@@ -90,7 +90,7 @@ public class MeedlValidator {
     }
 
     public static void validateFloatDataElement(Float dataElement, String message) throws MeedlException {
-        if (dataElement == null) {
+        if (dataElement == null || dataElement < 0) {
             throw new MeedlException(message);
         }
     }
