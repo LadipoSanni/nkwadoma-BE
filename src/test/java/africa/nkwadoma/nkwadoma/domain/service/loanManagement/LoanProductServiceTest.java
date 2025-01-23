@@ -3,14 +3,14 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanProductOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanProductMapper;
+import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +27,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -46,15 +44,27 @@ class LoanProductServiceTest {
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
+    private LoanOutputPort loanOutputPort;
+    @Mock
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
-
     @InjectMocks
     private LoanService loanService;
-
+    private Loan loan;
     private LoanProduct loanProduct;
+    private Loanee loanee;
+    private LoaneeLoanBreakdown loaneeLoanBreakdown;
+    @Mock
+    private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @BeforeEach
     void setUp() {
+        loanee = new Loanee();
+        loanee.setId("9a4e3b70-3bdb-4676-bcf0-017cd83f6a07");
+        loanee.setCohortId("e4fda779-3c21-4dd6-b66a-3a8742f6ecb1");
+        loanee.setCohortName("Elite");
+        loaneeLoanBreakdown = TestData.createTestLoaneeLoanBreakdown
+                ("1886df42-1f75-4d17-bdef-e0b016707885");
+
         Vendor vendor = new Vendor();
         loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
@@ -231,5 +241,28 @@ class LoanProductServiceTest {
         } catch (MeedlException e) {
             log.error("Error deleting loan product {}", e.getMessage());
         }
+    }
+
+    @Test
+    void viewLoanDetailsWithValidId(){
+        loan = new Loan();
+        loan.setId("4dced61b-acff-4487-87f7-587977fd146a");
+
+        loan.setLoanee(loanee);
+        try {
+            when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.ofNullable(loan));
+            Loan foundLoan = loanService.viewLoanDetails(loan.getId());
+
+            assertNotNull(foundLoan.getId());
+            verify(loanOutputPort, times(1)).viewLoanById(loan.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.EMPTY})
+    void viewLoanDetailsWithInvalidId(String loanId){
+        assertThrows(MeedlException.class,()-> loanService.viewLoanDetails(loanId));
     }
 }
