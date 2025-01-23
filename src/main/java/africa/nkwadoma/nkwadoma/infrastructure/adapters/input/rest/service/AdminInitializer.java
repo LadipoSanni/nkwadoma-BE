@@ -3,18 +3,28 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
@@ -25,6 +35,8 @@ public class AdminInitializer {
     private final SendColleagueEmailUseCase sendEmail;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final IdentityManagerOutputPort identityManagerOutPutPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -45,6 +57,59 @@ public class AdminInitializer {
                 .role(PORTFOLIO_MANAGER)
                 .createdBy(CREATED_BY)
                 .build();
+    }
+    private OrganizationIdentity getOrganizationIdentity(UserIdentity userIdentity) {
+        return OrganizationIdentity.builder()
+                .name("Meedl")
+                .email("meedl@meedl.com")
+                .tin("kwadoma2189")
+                .rcNumber("RC2892832")
+                .phoneNumber("0908965321")
+                .status(ActivationStatus.ACTIVE)
+                .organizationEmployees(List.of(OrganizationEmployeeIdentity
+                        .builder()
+                        .meedlUser(userIdentity)
+                        .build()))
+                .serviceOfferings(List.of(ServiceOffering
+                        .builder()
+                        .industry(Industry.EDUCATION)
+                        .name("TRAINING")
+                        .build()))
+                .build();
+    }
+    private OrganizationIdentity createFirstOrganizationIdentity(OrganizationIdentity organizationIdentity) throws MeedlException {
+        organizationIdentity.setEnabled(Boolean.TRUE);
+        organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
+        organizationIdentity.setStatus(ActivationStatus.ACTIVE);
+
+        try {
+            organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        } catch (MeedlException exception) {
+            log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
+            ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
+            organizationIdentity.setId(foundClient.getId());
+        }
+        OrganizationIdentity savedOrganizationIdentity = null;
+        try {
+            savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+        } catch (MeedlException exception) {
+            log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
+            savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+        }
+        OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
+        employeeIdentity.setOrganization(organizationIdentity.getId());
+        employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+
+        try{
+
+        employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+        } catch(DataIntegrityViolationException dataIntegrityViolationException){
+            log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
+        }
+        savedOrganizationIdentity.setOrganizationEmployees(List.of(employeeIdentity));
+
+        log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
+        return savedOrganizationIdentity;
     }
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
@@ -93,7 +158,8 @@ public class AdminInitializer {
 
     @PostConstruct
     public void init() throws MeedlException {
-        inviteFirstUser(getUserIdentity());
+        UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
+        OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
 
     }
 }

@@ -91,7 +91,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateEmail(email);
         OrganizationEntity organizationEntity = organizationEntityRepository.findByEmail(email).
                 orElseThrow(()-> new IdentityException(EMAIL_NOT_FOUND.getMessage()));
-        return organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
+        return updateFoundOrganizationIdentityDetails(organizationEntity);
     }
 
     @Override
@@ -116,9 +116,12 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         OrganizationEntity organizationEntity = organizationEntityRepository.findById(organizationId)
                 .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+        return updateFoundOrganizationIdentityDetails(organizationEntity);
+    }
+    private OrganizationIdentity updateFoundOrganizationIdentityDetails(OrganizationEntity organizationEntity) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         organizationIdentity.setServiceOfferings(getServiceOfferings(organizationIdentity.getId()));
-        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationId));
+        organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationEntity.getId()));
         return organizationIdentity;
     }
     @Override
