@@ -96,7 +96,7 @@ public class MeedlValidator {
     }
 
     public static void validateIntegerDataElement(int dataElement , String message) throws MeedlException {
-        if (dataElement < 1) {
+        if (dataElement < BigInteger.ONE.intValue()) {
             throw new MeedlException(message);
         }
     }
