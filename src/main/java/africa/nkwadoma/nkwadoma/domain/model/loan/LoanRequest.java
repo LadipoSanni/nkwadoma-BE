@@ -25,6 +25,7 @@ public class LoanRequest {
     private String referredBy;
     private String firstName;
     private String lastName;
+    private String email;
     private LoanDecision loanRequestDecision;
     private String declineReason;
     private String cohortId;
@@ -55,6 +56,7 @@ public class LoanRequest {
     private int pageNumber;
     private int pageSize;
     private String loaneeId;
+    private String loanOfferId;
     private int creditScore;
 
 

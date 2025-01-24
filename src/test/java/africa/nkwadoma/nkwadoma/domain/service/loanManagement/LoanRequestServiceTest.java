@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
@@ -7,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
@@ -43,6 +45,10 @@ class LoanRequestServiceTest {
     private LoanOffer loanOffer;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private LoanProduct loanProduct;
+    @Mock
+    private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    @Mock
+    private LoanRequestMapper loanRequestMapper;
 
     @BeforeEach
     void setUp() {
@@ -66,6 +72,7 @@ class LoanRequestServiceTest {
 
 
         loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+        loanOffer.setId("9284b721-fd60-4cd9-b6dc-5ef416d70093");
     }
 
     @Test
@@ -156,6 +163,8 @@ class LoanRequestServiceTest {
             when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequest);
+            doNothing().when(sendLoaneeEmailUsecase).sendLoanRequestApprovalEmail(loanRequest);
             loanRequestDto = loanRequestService.respondToLoanRequest(loanRequestDto);
 
             assertNotNull(loanRequestDto);

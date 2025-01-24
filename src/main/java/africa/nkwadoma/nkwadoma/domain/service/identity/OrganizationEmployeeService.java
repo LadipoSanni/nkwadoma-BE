@@ -41,12 +41,12 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     }
 
     @Override
-    public List<OrganizationEmployeeIdentity> searchOrganizationAdmin(String userId, String name) throws MeedlException {
+    public List<OrganizationEmployeeIdentity>  searchOrganizationAdmin(String userId, String name) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         OrganizationEmployeeIdentity organizationEmployeeIdentity
                 = organizationEmployeeOutputPort.findByCreatedBy(userId);
         return organizationEmployeeOutputPort.findEmployeesByNameAndRole(organizationEmployeeIdentity.getOrganization(),
-                name, IdentityRole.ORGANIZATION_ADMIN);
+                name, organizationEmployeeIdentity.getMeedlUser().getRole());
     }
 
     @Override

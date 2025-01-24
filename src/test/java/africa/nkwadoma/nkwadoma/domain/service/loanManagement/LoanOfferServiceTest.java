@@ -4,11 +4,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
@@ -56,6 +53,8 @@ public class LoanOfferServiceTest {
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private Loanee loanee;
+    private LoanProduct loanProduct;
+    private Vendor vendor;
     private UserIdentity userIdentity;
     private UserIdentity userIdentityLoanee;
     private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
@@ -75,6 +74,8 @@ public class LoanOfferServiceTest {
     private LoanMetricsUseCase loanMetricsUseCase;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private  LoanProductOutputPort loanProductOutputPort;
 
     @BeforeEach
     void setUpLoanOffer() {
@@ -85,6 +86,8 @@ public class LoanOfferServiceTest {
                  loanee.setId(userIdentity.getId());
         loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
         loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
+        vendor = TestData.createTestVendor("vendor");
+        loanProduct = TestData.buildTestLoanProduct("loanProduct",vendor);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
     }
 
@@ -118,6 +121,7 @@ public class LoanOfferServiceTest {
     @Test
     void loaneeCannotAcceptLoanOfferThatNotAssignedToLoanee() throws MeedlException {
         loanOffer.setLoanee(Loanee.builder().id(mockId2).build());
+        loanOffer.setLoanProduct(loanProduct);
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
         when(loaneeOutputPort.findByUserId(any())).thenReturn(Optional.ofNullable(loanee));
         assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer));
@@ -125,13 +129,16 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsCreatedIfLoanOfferIsAccepted(){
+        loanOffer.setLoanee(Loanee.builder().id("ead0f7cb-5483-4bb8-b271-813970a9c368").build());
         loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer.setLoanProduct(loanProduct);
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
+            when(loanProductOutputPort.findById(loanOffer.getLoanProduct().getId())).thenReturn(loanProduct);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
-            when(loaneeLoanAccountOutputPort.findByLoaneeId(userIdentity.getId())).thenReturn(null);
+            when(loaneeLoanAccountOutputPort.findByLoaneeId(any())).thenReturn(null);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer);
         }catch (MeedlException exception){
             log.error(exception.getMessage());

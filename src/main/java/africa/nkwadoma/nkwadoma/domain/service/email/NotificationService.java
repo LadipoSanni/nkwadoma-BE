@@ -8,12 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.*;
-import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.email.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -84,6 +80,11 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         return baseUrl + CREATE_PASSWORD_URL + token;
     }
 
+    private String getLoanOfferLink(String loanOfferId) {
+        log.info("Loan offer ID: {}", loanOfferId);
+        return baseUrl + UrlConstant.VIEW_LOAN_OFFER_URL + loanOfferId;
+    }
+
     private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
         return baseUrl + LOANEE_OVERVIEW + token ;
@@ -125,5 +126,22 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity,email);
+    }
+
+    @Override
+    public void sendLoanRequestApprovalEmail(LoanRequest loanRequest) {
+        Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferId
+                (loanRequest.getFirstName(),
+                        getLoanOfferLink(loanRequest.getLoanOfferId()));
+
+        Email email = Email.builder()
+                .context(context)
+                .subject(LoaneeMessages.LOAN_REQUEST_APPROVED.getMessage())
+                .to(loanRequest.getUserIdentity().getEmail())
+                .template(LoaneeMessages.LOAN_REQUEST_APPROVAL.getMessage())
+                .firstName(loanRequest.getFirstName())
+                .build();
+
+        sendMail(loanRequest.getUserIdentity(), email);
     }
 }

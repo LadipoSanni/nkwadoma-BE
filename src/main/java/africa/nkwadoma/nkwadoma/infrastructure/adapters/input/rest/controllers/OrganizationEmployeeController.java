@@ -54,7 +54,7 @@ public class OrganizationEmployeeController {
     }
 
     @GetMapping("search/admin")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<?> searchOrganizationEmployees(@AuthenticationPrincipal Jwt meedlUser, @RequestParam("name") String name) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         List<OrganizationEmployeeIdentity> organizationEmployeeIdentities =

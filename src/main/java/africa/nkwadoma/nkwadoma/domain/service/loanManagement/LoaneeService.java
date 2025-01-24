@@ -107,7 +107,13 @@ public class LoaneeService implements LoaneeUseCase {
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
-        return updateLoaneeCreditScore(loanee);
+        log.info("loanee found successfully. Loanee with id {}", id);
+        try {
+            return updateLoaneeCreditScore(loanee);
+        }catch (MeedlException exception){
+            log.error("Exception occurred while trying to update credit score, before viewing loanee details. {}", exception.getMessage());
+            return loanee;
+        }
     }
 
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
