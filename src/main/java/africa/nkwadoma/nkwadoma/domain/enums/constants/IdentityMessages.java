@@ -43,7 +43,8 @@ public enum IdentityMessages {
     LOANEE_NOT_FOUND("Loanee not found"),
     ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists"),
     LOAN_0FFER_ID("Loan offer ID"),
-    CONTEXT_LINK("loanOfferId"), LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee");
+    CONTEXT_LINK("loanOfferId"),
+    LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee");
 
     public String format(Object... args) {
         return String.format(message, args);

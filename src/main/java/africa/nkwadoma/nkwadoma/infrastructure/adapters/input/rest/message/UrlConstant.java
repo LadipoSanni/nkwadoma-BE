@@ -8,5 +8,5 @@ public class UrlConstant {
     public static final String LOANEE_OVERVIEW = "/overview?token=";
     public static final String LOAN = "loan";
     public static final String IDENTITY_VERIFICATION = "identity/verification";
-    public static final String VIEW_LOAN_OFFER_URL = "/loan/view-loan-offer/";
+    public static final String VIEW_LOAN_OFFER_URL = "/accept-loan-offer/";
 }
