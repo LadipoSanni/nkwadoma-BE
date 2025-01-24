@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -65,7 +66,18 @@ public class LoanProduct {
         MeedlValidator.validateUUID(investmentVehicleId,"Investment vehicle ID cannot be empty");
         validateLoanProductSize();
         validateObligorLimit();
+        validateTenor();
         log.info("ended loan product validation successfully... ");
+    }
+
+    private void validateTenor() throws InvalidInputException {
+        if (tenor < BigInteger.ONE.intValue()) {
+            throw new InvalidInputException("Tenor can not be less than 1.");
+        }
+
+        if (tenor > BigInteger.valueOf(999).intValue()) {
+            throw new InvalidInputException("Tenor can not be more than three digits.");
+        }
     }
 
     private void validateObligorLimit() throws MeedlException {
