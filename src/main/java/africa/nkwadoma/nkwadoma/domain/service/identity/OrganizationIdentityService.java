@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -21,6 +22,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.*;
 
@@ -49,6 +51,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
         validateUniqueValues(organizationIdentity);
+        checkIfOrganizationAndAdminExist(organizationIdentity);
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -59,6 +62,22 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("sent email");
         log.info("organization identity saved is : {}", organizationIdentity);
         return organizationIdentity;
+    }
+
+    private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) {
+        identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+        Optional<UserIdentity> optionalUserIdentity = identityManagerOutPutPort.getUserByEmail(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getEmail());
+        if (optionalUserIdentity.isEmpty()) {
+            throw new ResourceAlreadyExistsException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+        }
+
+    }
+
+    @Override
+    public void cleanUpFailedInvite(OrganizationIdentity organizationIdentity) throws MeedlException {
+        ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+        identityManagerOutPutPort.deleteClient(clientRepresentation.getId());
+        organizationIdentityOutputPort.delete(clientRepresentation.getId());
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {

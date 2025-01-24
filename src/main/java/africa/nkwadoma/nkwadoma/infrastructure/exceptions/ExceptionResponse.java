@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ExceptionResponse {
     private String message;
-    private boolean status;
+//    private boolean status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timeStamp;
+    private String statusCode;
 }

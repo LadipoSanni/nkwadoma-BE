@@ -13,4 +13,6 @@ public interface OrganizationUseCase {
     OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException;
 
     void updateOrganizationStatus(OrganizationIdentity organizationIdentity) throws MeedlException;
+
+    void cleanUpFailedInvite(OrganizationIdentity organizationIdentity) throws MeedlException;
 }
