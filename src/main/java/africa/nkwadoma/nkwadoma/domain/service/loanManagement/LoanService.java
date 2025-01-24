@@ -257,7 +257,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
