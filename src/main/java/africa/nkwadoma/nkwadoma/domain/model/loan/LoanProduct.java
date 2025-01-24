@@ -63,7 +63,7 @@ public class LoanProduct {
         MeedlValidator.validateObjectName(name,"Name cannot be empty");
         MeedlValidator.validateDataElement(termsAndCondition, "Loan product terms and conditions required.");
         MeedlValidator.validateDataElement(mandate, "Mandate terms required.");
-        MeedlValidator.validateUUID(investmentVehicleId,"Investment vehicle ID cannot be empty");
+        MeedlValidator.validateUUID(investmentVehicleId,"Investment vehicle ID must be valid and cannot also be empty");
         validateLoanProductSize();
         validateObligorLimit();
         validateTenor();

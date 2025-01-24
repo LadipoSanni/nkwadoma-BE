@@ -50,6 +50,11 @@ public class GlobalExceptionHandler {
     public  ResponseEntity<ExceptionResponse> handleMeedlException(MeedlException exception){
         return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InvestmentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public  ResponseEntity<ExceptionResponse> handleInvestmentException(InvestmentException exception){
+        return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 
     private static ExceptionResponse errorResponseBuilder(String message) {
         return ExceptionResponse.builder()
