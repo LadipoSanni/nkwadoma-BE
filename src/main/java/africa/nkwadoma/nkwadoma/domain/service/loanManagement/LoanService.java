@@ -179,10 +179,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
                 .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
-        String identityVerified = verificationUseCase.verifyIdentity(loanReferral.getId());
-        log.info("Verification status: {}", identityVerified);
-        loanReferral.setIdentityVerified(identityVerified);
-        log.info("Found Loan referral by it's ID: {}", loanReferral);
+        loanReferral.setIdentityVerified(loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
+        log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.isIdentityVerified());
         loanReferral.setLoaneeLoanBreakdowns
                 (loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanReferral.getLoanee().getId()));
         return loanReferral;
