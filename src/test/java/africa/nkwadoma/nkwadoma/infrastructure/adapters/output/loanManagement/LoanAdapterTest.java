@@ -135,6 +135,7 @@ class LoanAdapterTest {
             cohortId = cohort.getId();
 
             LoanBreakdown loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdown.setCohort(cohort);
             loanBreakdowns = List.of(loanBreakdown);
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown
                     (loanBreakdowns);

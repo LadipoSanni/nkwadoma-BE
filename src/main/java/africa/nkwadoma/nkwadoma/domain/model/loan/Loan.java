@@ -2,8 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +28,10 @@ public class Loan {
     private String loaneeId;
     private String loanOfferId;
     private String loanAccountId;
+    private LoanRequestStatus status;
     private LocalDateTime startDate;
     private LocalDate cohortStartDate;
+    private BigDecimal loanAmountRequested;
     private LocalDateTime offerDate;
     private LocalDateTime lastUpdatedDate;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
@@ -36,6 +39,8 @@ public class Loan {
     private LoanStatus loanStatus;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private NextOfKin nextOfKin;
+    private UserIdentity userIdentity;
     private String cohortName;
     private String programName;
     private String organizationId;

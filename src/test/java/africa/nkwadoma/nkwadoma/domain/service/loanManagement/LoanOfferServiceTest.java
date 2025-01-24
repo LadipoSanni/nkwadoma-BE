@@ -97,9 +97,10 @@ public class LoanOfferServiceTest {
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
         LoanOffer cretedLoanOffer = new LoanOffer();
         try {
+            when(loaneeOutputPort.findLoaneeById(loanRequest.getLoanee().getId())).thenReturn(loanRequest.getLoanee());
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
-            when(organizationIdentityOutputPort.findOrganizationByName(anyString())).
-                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(organizationIdentityOutputPort.findOrganizationByName(
+                    loanOffer.getLoanRequest().getLoanee().getReferredBy())).thenReturn(Optional.of(organizationIdentity));
             when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
                     organizationId(mockId2).loanOfferCount(1).build());
             cretedLoanOffer = loanService.createLoanOffer(loanRequest);
