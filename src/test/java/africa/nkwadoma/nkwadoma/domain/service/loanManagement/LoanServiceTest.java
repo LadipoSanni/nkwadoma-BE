@@ -146,7 +146,7 @@ class LoanServiceTest {
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
             verify(verificationUseCase, times(1)).verifyIdentity(foundLoanReferral.getId());
             assertNotNull(foundLoanReferral);
-            assertEquals(foundLoanReferral.getIdentityVerified(), IdentityMessages.IDENTITY_VERIFIED.getMessage());
+            assertTrue(foundLoanReferral.isIdentityVerified());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }
