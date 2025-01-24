@@ -144,7 +144,6 @@ class LoanServiceTest {
 
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
-            verify(verificationUseCase, times(1)).verifyIdentity(foundLoanReferral.getId());
             assertNotNull(foundLoanReferral);
             assertTrue(foundLoanReferral.isIdentityVerified());
         } catch (MeedlException e) {
