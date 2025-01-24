@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
+
 import java.math.*;
 import java.time.*;
 
@@ -11,6 +13,7 @@ public interface LoanRequestProjection {
     String getEmail();
     String getCohortName();
     String getLoaneeImage();
+    LoanRequestStatus getStatus();
     String getReferredBy();
     BigDecimal getLoanAmountRequested();
     LocalDateTime getCreatedDate();
