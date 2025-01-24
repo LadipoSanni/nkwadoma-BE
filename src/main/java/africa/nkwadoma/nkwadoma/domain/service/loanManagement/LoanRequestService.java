@@ -17,7 +17,6 @@ import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
-import java.time.*;
 import java.util.*;
 
 @Service
@@ -78,7 +77,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     @Override
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
         LoanRequest.validate(loanRequest);
-        LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequest.getId()).
+        LoanRequest foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequest.getId()).
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Loan request retrieved: {}", foundLoanRequest);
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
@@ -89,19 +88,20 @@ public class LoanRequestService implements LoanRequestUseCase {
     }
 
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
-        LoanRequest updatedLoanRequest = null;
+        LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
-            updatedLoanRequest.setDateTimeOffered(LocalDateTime.now());
-            updatedLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
-            updatedLoanRequest = loanRequestMapper.updateLoanRequest(updatedLoanRequest, foundLoanRequest);
+
+            updatedLoanRequest = loanRequestOutputPort.save(updatedLoanRequest);
             log.info("Loan request updated: {}", updatedLoanRequest);
+
             sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
+            return updatedLoanRequest;
         }
-        else if (loanRequest.getLoanRequestDecision() == LoanDecision.DECLINED) {
+        else {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
+            return loanRequestOutputPort.save(updatedLoanRequest);
         }
-        return loanRequestOutputPort.save(updatedLoanRequest);
     }
 
     private static LoanRequest declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
@@ -120,9 +120,11 @@ public class LoanRequestService implements LoanRequestUseCase {
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
-        foundLoanRequest.setLoanRequestDecision(loanRequest.getLoanRequestDecision());
-        foundLoanRequest.setLoanAmountApproved(loanRequest.getLoanAmountApproved());
+        foundLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
+        foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
+
         LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(foundLoanRequest);
+
         foundLoanRequest.setLoanOfferId(loanOffer.getId());
         foundLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
         return foundLoanRequest;

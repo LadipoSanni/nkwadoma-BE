@@ -131,15 +131,15 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     @Override
     public void sendLoanRequestApprovalEmail(LoanRequest loanRequest) {
         Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferId
-                (loanRequest.getFirstName(),
+                (loanRequest.getLoanee().getUserIdentity().getFirstName(),
                         getLoanOfferLink(loanRequest.getLoanOfferId()));
 
         Email email = Email.builder()
                 .context(context)
                 .subject(LoaneeMessages.LOAN_REQUEST_APPROVED.getMessage())
-                .to(loanRequest.getUserIdentity().getEmail())
+                .to(loanRequest.getLoanee().getUserIdentity().getEmail())
                 .template(LoaneeMessages.LOAN_REQUEST_APPROVAL.getMessage())
-                .firstName(loanRequest.getFirstName())
+                .firstName(loanRequest.getLoanee().getUserIdentity().getFirstName())
                 .build();
 
         sendMail(loanRequest.getUserIdentity(), email);
