@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.*;
 import africa.nkwadoma.nkwadoma.test.data.*;
 import lombok.extern.slf4j.*;
 import org.junit.jupiter.api.*;
@@ -159,7 +158,7 @@ class LoanRequestServiceTest {
             loanRequestDto.setLoanRequestDecision(LoanDecision.ACCEPTED);
             loanRequestDto.setLoanAmountApproved(new BigDecimal("500000"));
 
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(Optional.of(loanRequest));
+            when(loanRequestOutputPort.findLoanRequestById(anyString())).thenReturn(Optional.of(loanRequest));
             when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
@@ -177,7 +176,6 @@ class LoanRequestServiceTest {
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);
         }
-
     }
 
     @Test
@@ -214,12 +212,6 @@ class LoanRequestServiceTest {
         loanRequest.setLoanProductId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanRequest.setId(loanRequest.getId());
         loanRequest.setLoanAmountApproved(new BigDecimal("9000"));
-        try {
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(Optional.ofNullable(loanRequest));
-            when(loanProductOutputPort.findById(anyString())).thenThrow(LoanException.class);
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
         assertThrows(MeedlException.class, () -> loanRequestService.respondToLoanRequest(loanRequest));
     }
 
@@ -229,11 +221,6 @@ class LoanRequestServiceTest {
         loanRequest.setId(loanRequest.getId());
         loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000000));
-        try {
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(Optional.ofNullable(loanRequest));
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
         assertThrows(MeedlException.class, ()-> loanRequestService.respondToLoanRequest(loanRequest));
     }
 
@@ -244,11 +231,6 @@ class LoanRequestServiceTest {
         loanRequest.setStatus(LoanRequestStatus.APPROVED);
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
         loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
-        try {
-            when(loanRequestOutputPort.findById(anyString())).thenReturn(Optional.ofNullable(loanRequest));
-        } catch (MeedlException e) {
-            log.error("", e);
-        }
         assertThrows(MeedlException.class, () -> loanRequestService.respondToLoanRequest(loanRequest));
     }
 
@@ -262,7 +244,7 @@ class LoanRequestServiceTest {
 
         LoanRequest approvedLoanRequest = new LoanRequest();
         try {
-            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(Optional.ofNullable(loanRequest));
+            when(loanRequestOutputPort.findLoanRequestById(loanRequest.getId())).thenReturn(Optional.ofNullable(loanRequest));
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             approvedLoanRequest = loanRequestService.respondToLoanRequest(loanRequest);
         } catch (MeedlException e) {
