@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import lombok.*;
 
 import java.math.*;
@@ -33,5 +34,6 @@ public class LoanQueryResponse {
     private LocalDateTime createdDate;
     private LocalDateTime dateTimeOffered;
     private BigDecimal tuitionAmount;
-    private LoaneeLoanBreakDownResponse loaneeLoanBreakDownResponse;
+    private NextOfKinResponse nextOfKin;
+    private LoaneeLoanBreakDownResponse loaneeLoanBreakDowns;
 }

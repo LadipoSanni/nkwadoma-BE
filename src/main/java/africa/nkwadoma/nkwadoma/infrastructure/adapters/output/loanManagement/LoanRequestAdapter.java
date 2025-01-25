@@ -29,6 +29,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         MeedlValidator.validateObjectInstance(loanRequest.getStatus(), LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
         loanRequest.validate();
         LoanRequestEntity loanRequestEntity = loanRequestMapper.toLoanRequestEntity(loanRequest);
+        log.info("Mapped loanRequest to be saved: {}", loanRequestEntity);
         LoanRequestEntity savedLoanRequestEntity = loanRequestRepository.save(loanRequestEntity);
         return loanRequestMapper.toLoanRequest(savedLoanRequestEntity);
     }
@@ -45,6 +46,14 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection.get());
         log.info("Mapped Loan request: {}", loanRequest);
         return Optional.of(loanRequest);
+    }
+
+    @Override
+    public Optional<LoanRequest> findLoanRequestById(String loanRequestId) throws MeedlException {
+        LoanRequestEntity loanRequestEntity = loanRequestRepository.findById(loanRequestId).
+                orElseThrow(()-> new MeedlException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
+        log.info("Found Loan request: {}", loanRequestEntity);
+        return Optional.of(loanRequestMapper.toLoanRequest(loanRequestEntity));
     }
 
     @Override

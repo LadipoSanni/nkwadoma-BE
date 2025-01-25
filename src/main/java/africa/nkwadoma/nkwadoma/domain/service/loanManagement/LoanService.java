@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
@@ -20,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoanOfferMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanOfferProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -179,10 +177,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
         loanReferral = loanReferralOutputPort.findLoanReferralById(loanReferral.getId())
                 .orElseThrow(()->  new LoanException(LoanMessages.LOAN_REFERRAL_NOT_FOUND.getMessage()));
-        String identityVerified = verificationUseCase.verifyIdentity(loanReferral.getId());
-        log.info("Verification status: {}", identityVerified);
-        loanReferral.setIdentityVerified(identityVerified);
-        log.info("Found Loan referral by it's ID: {}", loanReferral);
+        loanReferral.setIdentityVerified(loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
+        log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.isIdentityVerified());
         loanReferral.setLoaneeLoanBreakdowns
                 (loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanReferral.getLoanee().getId()));
         return loanReferral;
@@ -256,12 +252,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setDateTimeOffered(LocalDateTime.now());
         loanOffer.setLoanProduct(loanRequest.getLoanProduct());
         loanOffer.setAmountApproved(loanRequest.getLoanAmountApproved());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoaneeId());
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loanRequest.getLoanee().getId());
         loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }

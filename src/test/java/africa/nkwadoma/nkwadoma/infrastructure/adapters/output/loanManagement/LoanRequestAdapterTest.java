@@ -366,6 +366,28 @@ class LoanRequestAdapterTest {
     }
 
     @Test
+    void findLoanRequestById() {
+        LoanRequest savedLoanRequest = null;
+        try {
+            savedLoanRequest = loanRequestOutputPort.save(loanRequest);
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+        assertNotNull(savedLoanRequest);
+        log.info("Loan request saved: {}", savedLoanRequest);
+        assertNotNull(savedLoanRequest.getId());
+        loanRequestId = savedLoanRequest.getId();
+
+        try {
+            Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequestId);
+            assertFalse(foundLoanRequest.isEmpty());
+            assertNotNull(foundLoanRequest.get().getId());
+        } catch (MeedlException e) {
+            log.error("", e);
+        }
+    }
+
+    @Test
     void viewLoanRequestByIdWithNullId() {
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(null));
     }

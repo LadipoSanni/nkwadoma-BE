@@ -137,16 +137,12 @@ class LoanServiceTest {
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.
                     findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
-            when(verificationUseCase.verifyIdentity(loanReferral.getId())).
-                    thenReturn(IdentityMessages.IDENTITY_VERIFIED.getMessage());
             when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
 
             verify(loanReferralOutputPort, times(1)).
                     findLoanReferralByUserId(foundLoanReferral.getLoanee().getUserIdentity().getId());
-            verify(verificationUseCase, times(1)).verifyIdentity(foundLoanReferral.getId());
             assertNotNull(foundLoanReferral);
-            assertEquals(foundLoanReferral.getIdentityVerified(), IdentityMessages.IDENTITY_VERIFIED.getMessage());
         } catch (MeedlException e) {
             log.error("Error getting loan referral", e);
         }

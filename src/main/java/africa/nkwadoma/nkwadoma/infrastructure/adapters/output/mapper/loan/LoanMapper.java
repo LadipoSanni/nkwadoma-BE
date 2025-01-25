@@ -20,5 +20,23 @@ public interface LoanMapper {
 
     @Mapping(target = "amountRequested", source = "loanAmountRequested")
     @Mapping(target = "loaneeId", source = "loaneeId")
+    @Mapping(target = "nextOfKin.id", source = "nextOfKinId")
+    @Mapping(target = "nextOfKin.firstName", source = "nextOfKinFirstName")
+    @Mapping(target = "nextOfKin.lastName", source = "nextOfKinLastName")
+    @Mapping(target = "nextOfKin.email", source = "nextOfKinEmail")
+    @Mapping(target = "nextOfKin.phoneNumber", source = "nextOfKinPhoneNumber")
+    @Mapping(target = "nextOfKin.contactAddress", source = "nextOfKinContactAddress")
+    @Mapping(target = "nextOfKin.nextOfKinRelationship", source = "nextOfKinRelationship")
+    @Mapping(target = "userIdentity.image", source = "loaneeImage")
+    @Mapping(target = "userIdentity.email", source = "email")
+    @Mapping(target = "userIdentity.gender", source = "gender")
+    @Mapping(target = "userIdentity.dateOfBirth", source = "dateOfBirth")
+    @Mapping(target = "userIdentity.nationality", source = "nationality")
+    @Mapping(target = "userIdentity.stateOfResidence", source = "stateOfResidence")
+    @Mapping(target = "userIdentity.stateOfOrigin", source = "stateOfOrigin")
+    @Mapping(target = "userIdentity.maritalStatus", source = "maritalStatus")
+    @Mapping(target = "userIdentity.residentialAddress", source = "residentialAddress")
+    @Mapping(target = "loanAmountRequested", source = "loanAmountRequested")
+    @Mapping(target = "status", source = "status")
     Loan mapProjectionToLoan(LoanProjection loanProjection);
 }
