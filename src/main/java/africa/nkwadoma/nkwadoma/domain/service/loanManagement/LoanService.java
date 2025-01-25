@@ -136,7 +136,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllByLoaneeId(foundLoan.getLoaneeId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", foundLoan.getLoaneeId(), loaneeLoanBreakdowns);
+        log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
     }

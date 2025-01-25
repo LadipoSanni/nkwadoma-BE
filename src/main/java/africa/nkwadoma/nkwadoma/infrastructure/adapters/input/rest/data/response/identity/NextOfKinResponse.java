@@ -17,5 +17,4 @@ public class NextOfKinResponse {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
-    private Loanee loanee;
 }
