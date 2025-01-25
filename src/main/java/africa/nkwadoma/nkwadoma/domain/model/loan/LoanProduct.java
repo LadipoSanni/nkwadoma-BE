@@ -67,7 +67,18 @@ public class LoanProduct {
         validateLoanProductSize();
         validateObligorLimit();
         validateTenor();
+        validateMoratorium();
         log.info("ended loan product validation successfully... ");
+    }
+
+    private void validateMoratorium() throws InvalidInputException {
+        if (moratorium < BigInteger.ONE.intValue()) {
+            throw new InvalidInputException("Moratorium can not be less than 1.");
+        }
+
+        if (moratorium > BigInteger.valueOf(999).intValue()) {
+            throw new InvalidInputException("Moratorium can not be more than three digits.");
+        }
     }
 
     private void validateTenor() throws InvalidInputException {

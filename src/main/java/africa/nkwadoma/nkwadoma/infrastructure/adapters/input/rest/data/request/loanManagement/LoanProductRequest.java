@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.LoanRestValidationMessages.*;
@@ -24,7 +25,7 @@ public class LoanProductRequest {
 //    private ActivationStatus loanProductStatus;
     private String bankPartner;
     private String disbursementTerms;
-    @PositiveOrZero(message = "Interest rate must be zero or positive")
+    @PositiveOrZero(message = "Cost of fund must be zero or positive")
     private double costOfFund;
     @NotBlank(message = LOAN_PRODUCT_NAME_REQUIRED)
     private String name;
@@ -38,8 +39,12 @@ public class LoanProductRequest {
 
     @PositiveOrZero(message = "Interest rate must be zero or positive")
     private double interestRate;
-    private int moratorium;
-    private int tenor;
+    @Positive(message = "Moratorium must be a positive number")
+    @Max(value = 999, message = "Moratorium cannot exceed three digits.")
+    private BigInteger moratorium;
+    @Positive(message = "Tenor must be a positive number")
+    @Max(value = 999, message = "Tenor cannot exceed three digits.")
+    private BigInteger tenor;
     private BigDecimal minRepaymentAmount;
 
     @NotBlank(message = LOAN_PRODUCT_TERMS_AND_CONDITIONS_REQUIRED)
