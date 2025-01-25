@@ -23,7 +23,7 @@ public class ProgramCreateRequest {
     private ActivationStatus programStatus;
     @Positive(message = "Program duration must be a positive number")
     @Max(value = 48, message = "Program duration must not exceed 48 months.")
-    private int programDuration;
+    private BigInteger programDuration;
     private DeliveryType deliveryType;
     private ProgramMode programMode;
     private DurationType durationStatus;
