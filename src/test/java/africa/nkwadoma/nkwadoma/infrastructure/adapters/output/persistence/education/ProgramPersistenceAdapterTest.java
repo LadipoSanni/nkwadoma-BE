@@ -269,8 +269,8 @@ class ProgramPersistenceAdapterTest {
     @Test
     void findProgramByName() {
         try {
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName(), organizationId));
             dataScience.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             dataScienceProgramId = savedProgram.getId();
@@ -278,7 +278,7 @@ class ProgramPersistenceAdapterTest {
             Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
             dataAnalyticsProgramId = dataAnalyticsProgram.getId();
 
-            List<Program> foundProgram = programOutputPort.findProgramByName("data");
+            List<Program> foundProgram = programOutputPort.findProgramByName("data", organizationId);
 
             assertNotNull(foundProgram);
             assertEquals(2, foundProgram.size());
@@ -292,8 +292,8 @@ class ProgramPersistenceAdapterTest {
     @Test
     void findProgramByNameThatMatchesOneResult() {
         try {
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
-            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName(), organizationId));
             dataScience.setCreatedBy(userId);
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             dataScienceProgramId = savedProgram.getId();
@@ -301,7 +301,7 @@ class ProgramPersistenceAdapterTest {
             Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
             dataAnalyticsProgramId = dataAnalyticsProgram.getId();
 
-            List<Program> foundProgram = programOutputPort.findProgramByName("ysis");
+            List<Program> foundProgram = programOutputPort.findProgramByName("ysis", organizationId);
 
             assertNotNull(foundProgram);
             assertEquals(1, foundProgram.size());
@@ -314,7 +314,7 @@ class ProgramPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findProgramByNullOrEmptyName(String name) {
-        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name));
+        assertThrows(MeedlException.class, () -> programOutputPort.findProgramByName(name, organizationId));
     }
 
     @ParameterizedTest
@@ -327,7 +327,7 @@ class ProgramPersistenceAdapterTest {
             dataAnalyticsProgramId = savedProgram.getId();
 
             assertNotNull(savedProgram);
-            List<Program> foundProgramByName = programOutputPort.findProgramByName(name);
+            List<Program> foundProgramByName = programOutputPort.findProgramByName(name, organizationId);
             assertNotNull(foundProgramByName);
             assertEquals(foundProgramByName.get(0).getName(), dataAnalytics.getName());
         } catch (MeedlException e) {
@@ -415,7 +415,7 @@ class ProgramPersistenceAdapterTest {
 
             programOutputPort.deleteProgram(savedProgram.getId());
 
-            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName());
+            List<Program> programByName = programOutputPort.findProgramByName(dataScience.getName(), organizationId);
             assertTrue(programByName.isEmpty());
         } catch (MeedlException e) {
             log.error("Error while deleting program", e);

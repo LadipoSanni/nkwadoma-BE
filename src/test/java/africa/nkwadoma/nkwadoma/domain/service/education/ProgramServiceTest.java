@@ -40,7 +40,8 @@ class ProgramServiceTest {
 
     @BeforeEach
     void setUp() {
-        program = Program.builder().id(testId).name("Ben's-Mat").durationType(DurationType.YEARS).
+        program = Program.builder().id(testId).name("Ben's-Mat").durationType(DurationType.YEARS)
+                .organizationId("66d4f7e4-7f60-46d5-b55d-0383630a1fc2").
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
@@ -180,11 +181,11 @@ class ProgramServiceTest {
     @Test
     void viewProgramByName() {
         try {
-            when(programOutputPort.findProgramByName(program.getName())).thenReturn(List.of(program));
+            when(programOutputPort.findProgramByName(program.getName(), program.getOrganizationId())).thenReturn(List.of(program));
             List<Program> foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
             assertEquals(foundProgram, List.of(program));
-            verify(programOutputPort, times(1)).findProgramByName(program.getName());
+            verify(programOutputPort, times(1)).findProgramByName(program.getName(), program.getOrganizationId());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
@@ -195,10 +196,10 @@ class ProgramServiceTest {
     void viewProgramByNameWithSpaces(String programWithSpace) {
         try {
             program.setName(programWithSpace);
-            when(programOutputPort.findProgramByName(program.getName())).thenReturn(List.of(program));
+            when(programOutputPort.findProgramByName(program.getName(), program.getOrganizationId())).thenReturn(List.of(program));
             List<Program> foundProgram = programService.viewProgramByName(program);
             assertNotNull(foundProgram);
-            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim());
+            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim(), program.getOrganizationId());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
@@ -273,7 +274,7 @@ class ProgramServiceTest {
     void viewProgramWithNonUUIDId(String programId) {
         program.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programService.viewProgramById(program));
-        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
+        assertEquals("Please provide a valid program identification.", meedlException.getMessage());
     }
 
     @Test

@@ -78,16 +78,15 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
-    public ResponseEntity<ApiResponse<?>> searchProgramByName(@Valid @RequestParam(name = "name")
-                                                                  @NotBlank(message = "Program name is required") String name)
-            throws MeedlException {
-        Program program = new Program();
-        program.setName(name.trim());
+    public ResponseEntity<ApiResponse<?>> searchProgramByName
+            (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
+             @RequestParam(name = "organizationId") @NotBlank(message = "Organization ID is required") String organizationId) throws MeedlException {
+        Program program = Program.builder().name(name.trim()).organizationId(organizationId).build();
         List<Program> programs = addProgramUseCase.viewProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
         return new ResponseEntity<>(ApiResponse.builder().
-                statusCode(HttpStatus.OK.toString()).
+                statusCode(HttpStatus.OK.name()).
                 data(programResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
