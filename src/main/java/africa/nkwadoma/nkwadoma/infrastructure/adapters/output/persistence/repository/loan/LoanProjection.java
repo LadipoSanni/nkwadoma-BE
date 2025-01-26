@@ -10,6 +10,7 @@ public interface LoanProjection {
     String getLoaneeId();
     String getFirstName();
     String getEmail();
+    String getPhoneNumber();
     LoanRequestStatus getStatus();
     String getLastName();
     String getCohortName();

@@ -15,6 +15,7 @@ public interface LoanRequestProjection {
     String getLoaneeImage();
     LoanRequestStatus getStatus();
     String getReferredBy();
+    String getPhoneNumber();
     String getCohortId();
     BigDecimal getLoanAmountRequested();
     LocalDateTime getCreatedDate();

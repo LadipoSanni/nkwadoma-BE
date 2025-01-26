@@ -6,11 +6,13 @@ import lombok.*;
 
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class LoanQueryResponse {
     private String id;
     private String firstName;
@@ -21,6 +23,7 @@ public class LoanQueryResponse {
     private LocalDateTime offerDate;
     private LocalDateTime startDate;
     private BigDecimal initialDeposit;
+    private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String referredBy;
     private LoanRequestStatus status;
@@ -28,12 +31,9 @@ public class LoanQueryResponse {
     private int creditScore;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
-    private String alternateEmail;
-    private String alternateContactAddress;
-    private String alternatePhoneNumber;
     private LocalDateTime createdDate;
     private LocalDateTime dateTimeOffered;
-    private BigDecimal tuitionAmount;
+    private UserIdentityResponse userIdentity;
     private NextOfKinResponse nextOfKin;
-    private LoaneeLoanBreakDownResponse loaneeLoanBreakDowns;
+    private List<LoaneeLoanBreakDownResponse> loaneeLoanBreakDowns;
 }
