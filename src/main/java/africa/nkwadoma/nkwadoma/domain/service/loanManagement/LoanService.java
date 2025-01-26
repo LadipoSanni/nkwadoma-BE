@@ -243,6 +243,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
+        log.info("Loan request input: {}", loanRequest);
         LoanOffer loanOffer = new LoanOffer();
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
@@ -257,7 +258,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
