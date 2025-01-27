@@ -122,12 +122,11 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
 
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
-        foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         foundLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
         foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
-
+        foundLoanRequest.setLoanProduct(loanProduct);
         return foundLoanRequest;
     }
 }
