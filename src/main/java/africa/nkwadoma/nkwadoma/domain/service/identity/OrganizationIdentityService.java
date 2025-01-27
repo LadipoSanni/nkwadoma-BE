@@ -67,11 +67,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
         try {
-            ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
-            if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
-                log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
-                throw new MeedlException("Organization already exists");
-            }
+            checkOrganizationExist(organizationIdentity);
         }catch (MeedlException e){
             if (e.getMessage().equals(ORGANIZATION_NOT_FOUND.getMessage())) {
                 log.info("The organization is not previously existing with message: {} orgamization name {}", e.getMessage(), organizationIdentity.getName());
@@ -80,6 +76,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 throw new MeedlException(e.getMessage());
             }
         }
+        checkIfUserAlreadyExist(organizationIdentity);
+
+    }
+
+    private void checkIfUserAlreadyExist(OrganizationIdentity organizationIdentity) throws MeedlException {
         Optional<UserIdentity> optionalUserIdentity = identityManagerOutPutPort.getUserByEmail(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getEmail());
         if (optionalUserIdentity.isPresent()) {
             log.error("Before creating organization : {}, for user with id {} ", USER_IDENTITY_ALREADY_EXISTS.getMessage(), optionalUserIdentity.get().getId()  );
@@ -87,7 +88,14 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         }else {
             log.info("User has not been previously saved. The application can proceed to creating user and making user the first admin for {} organization. ", organizationIdentity.getName());
         }
+    }
 
+    private void checkOrganizationExist(OrganizationIdentity organizationIdentity) throws MeedlException {
+        ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+        if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
+            log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
+            throw new MeedlException("Organization already exists");
+        }
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
