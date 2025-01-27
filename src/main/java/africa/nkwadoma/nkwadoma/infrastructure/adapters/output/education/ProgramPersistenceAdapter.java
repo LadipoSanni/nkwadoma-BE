@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.*;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 @RequiredArgsConstructor
 @Component
@@ -62,15 +63,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
-
+        ProgramPersistenceAdapter.validateServiceOfferings(program.getOrganizationIdentity().getServiceOfferings());
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());
-        log.info("The organization identity found when saving program is: {}", organizationIdentity);
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
-        ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
-
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-
+        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(program.getOrganizationIdentity());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
         programEntity.setOrganizationIdentity(organizationEntity);
         programEntity.setProgramStatus(ActivationStatus.ACTIVE);
@@ -88,7 +83,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
             organizationEntityRepository.save(organizationEntity);
         }
     }
-
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
@@ -109,9 +103,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public boolean programExists(String programName) throws MeedlException {
-        MeedlValidator.validateDataElement(programName,ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        return programRepository.existsByName(programName);
+    public boolean programExistsInOrganization(Program program) throws MeedlException {
+        MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+        log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());
+        return programRepository.existsByNameAndOrganizationIdentity_Id(program.getName(), program.getOrganizationId() );
     }
 
     @Override

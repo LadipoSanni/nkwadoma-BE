@@ -140,6 +140,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setMode(ProgramMode.FULL_TIME);
         dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
         dataAnalytics.setDuration(2);
+        dataAnalytics.setOrganizationIdentity(organizationIdentity);
         dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
         dataAnalytics.setDurationType(DurationType.MONTHS);
 
@@ -148,6 +149,7 @@ class ProgramPersistenceAdapterTest {
         dataScience.setProgramDescription("The art of putting thought into solving problems");
         dataScience.setMode(ProgramMode.FULL_TIME);
         dataScience.setProgramStatus(ActivationStatus.ACTIVE);
+        dataScience.setOrganizationIdentity(organizationIdentity);
         dataScience.setDuration(1);
         dataScience.setDeliveryType(DeliveryType.ONSITE);
         dataScience.setDurationType(DurationType.YEARS);
@@ -261,12 +263,6 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    void createProgramWithNonExistingCreatedBy() {
-        dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
-        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-    }
-
-    @Test
     void findProgramByName() {
         try {
             assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
@@ -376,6 +372,8 @@ class ProgramPersistenceAdapterTest {
     @Test
     void findAllPrograms() {
         try {
+            Page<Program> firstFoundPrograms = programOutputPort.findAllPrograms(
+                    userId, pageSize, pageNumber);
             dataScience.setCreatedBy(organizationIdentity.getCreatedBy());
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             dataScienceProgramId = savedProgram.getId();
@@ -384,13 +382,14 @@ class ProgramPersistenceAdapterTest {
                     userId, pageSize, pageNumber);
             List<Program> programsList = foundPrograms.toList();
 
-            assertEquals(1, foundPrograms.getTotalElements());
+            log.info("Found " + firstFoundPrograms.getTotalElements() + " programs");
+            assertEquals(firstFoundPrograms.getTotalElements() + 1, foundPrograms.getTotalElements());
             assertEquals(1, foundPrograms.getTotalPages());
             assertTrue(foundPrograms.isFirst());
             assertTrue(foundPrograms.isLast());
 
             assertNotNull(programsList);
-            assertEquals(1, programsList.size());
+            assertEquals(firstFoundPrograms.stream().toList().size() + 1, programsList.size());
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());

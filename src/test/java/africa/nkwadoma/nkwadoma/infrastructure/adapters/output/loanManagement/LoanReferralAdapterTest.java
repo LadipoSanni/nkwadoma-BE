@@ -116,8 +116,19 @@ class LoanReferralAdapterTest {
             assertNotNull(organizationEmployeeIdentity);
             organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
 
-            dataAnalytics = TestData.createProgramTestData("Data Analytics");
+            dataAnalytics = TestData.createProgramTestData("Data Analytics test");
             dataAnalytics.setCreatedBy(organizationAdminId);
+            List<Program> foundPrograms = programOutputPort.findProgramByName(dataAnalytics.getName(), amazingGrace.getId());
+            log.info("Found programs is:: {}",foundPrograms.isEmpty());
+            if (!foundPrograms.isEmpty()){
+                Optional<Program> optionalProgram = foundPrograms.stream()
+                        .filter(program -> program.getName().equals(dataAnalytics.getName()))
+                        .findFirst();
+                if (optionalProgram.isPresent()){
+                    Program foundProgram = optionalProgram.get();
+                    programOutputPort.deleteProgram(foundProgram.getId());
+                }
+            }
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             programId = savedProgram.getId();
 

@@ -26,7 +26,6 @@ public class ProgramEntity {
     @Column(length = 2500)
     @Size(max = 2500, message = "Program description must not exceed 2500 characters")
     private String programDescription;
-    @Column(unique = true)
     private String name;
     @Lob
     private String objectives;

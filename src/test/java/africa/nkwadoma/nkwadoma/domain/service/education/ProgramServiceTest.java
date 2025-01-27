@@ -51,7 +51,6 @@ class ProgramServiceTest {
     void addProgram() {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
-            when(programOutputPort.programExists(program.getName())).thenReturn(Boolean.FALSE);
             Program addedProgram = programService.createProgram(program);
             verify(programOutputPort, times(1)).saveProgram(program);
 
@@ -88,9 +87,7 @@ class ProgramServiceTest {
             Program createdProgram = programService.createProgram(program);
             assertNotNull(createdProgram);
             verify(programOutputPort, times(1)).saveProgram(program);
-
-            when(programOutputPort.programExists(program.getName())).thenThrow(ResourceAlreadyExistsException.class);
-            verify(programOutputPort, times(1)).programExists(program.getName());
+            when(programOutputPort.saveProgram(program)).thenThrow(ResourceAlreadyExistsException.class);
             assertThrows(ResourceAlreadyExistsException.class, ()-> programService.createProgram(program));
         } catch (MeedlException e) {
             log.error("Error creating program", e);
@@ -149,6 +146,16 @@ class ProgramServiceTest {
     void updateProgramWithNullProgram() {
         MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((null)));
         assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
+    }
+    @Test
+    void createProgramWithNonExistingCreatedBy() {
+        program.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
+        try {
+            when( programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, () -> programService.createProgram(program));
     }
     @Test
     void viewAllPrograms() {

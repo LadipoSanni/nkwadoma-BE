@@ -7,7 +7,7 @@ public enum ProgramMessages {
     PROGRAM_NOT_FOUND("Program not found"),
     PROGRAM_NAME_REQUIRED("Program name is required"),
     INVALID_PROGRAM_ID("Please provide a valid program identification."),
-    PROGRAM_ALREADY_EXISTS("Program already exists"),
+    PROGRAM_ALREADY_EXISTS("A program with this name already exists"),
     WRONG_INDUSTRY("Organization's industry must be education"),
     COHORT_EXISTS("Program with cohort cannot be deleted"),
     INVALID_SERVICE_OFFERING("Service Offering must be TRAINING");
