@@ -1,7 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -70,5 +73,21 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);
         return mappedloanOffers;
+    }
+
+    @Override
+    public Page<LoanOffer> searchLoanOffer(String programId, String organizationId, String name, int pageSize,
+                                           int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectName(name, LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<LoanOfferProjection> loanOfferProjections =
+                loanOfferEntityRepository.
+                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,pageRequest);
+
+        return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
 }

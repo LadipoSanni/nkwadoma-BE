@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanMetricsStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -52,6 +53,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanMetricsUseCase loanMetricsUseCase;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -281,6 +283,19 @@ public class LoanController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @GetMapping("/search-loan")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchLoan(@RequestParam @NotBlank(message = "Program id is required") String programId,
+                                                     @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
+                                                     @RequestParam @NotBlank(message = "Loan Metrics status is required") LoanMetricsStatus status,
+                                                     @RequestParam @NotBlank(message = "Loanee name is required") String name,
+                                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                     @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<LoanLifeCycle> loanLifeCycles = loanMetricsUseCase.searchLoan(programId,organizationId,status,name,pageSize,pageNumber);
+        return null;
     }
 
 }

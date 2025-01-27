@@ -86,6 +86,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
+    public Page<Loan> searchForLoan(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return loanOutputPort.searchLoan(programId,organizationId,name,pageSize,pageNumber);
+    }
+
+    @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanProduct);
         MeedlValidator.validateUUID(loanProduct.getId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
@@ -308,6 +317,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         return loanOfferOutputPort.findLoanOfferInOrganization(organizationId, pageSize, pageNumber);
+    }
+
+    @Override
+    public Page<LoanOffer> searchForLoanOffer(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return loanOfferOutputPort.searchLoanOffer(programId,organizationId,name,pageSize,pageNumber);
     }
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {

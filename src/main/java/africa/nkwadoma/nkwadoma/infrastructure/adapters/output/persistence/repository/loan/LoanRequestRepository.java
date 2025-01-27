@@ -56,4 +56,33 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
           where lr.status = 'NEW' AND o.id = :organizationId
     """)
     Page<LoanRequestProjection> findAllLoanRequestsByOrganizationId(Pageable pageable, @Param("organizationId") String organizationId);
+
+
+    @Query("""
+    SELECT lr.id AS id,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           lr.createdDate AS createdDate ,
+           lr.dateTimeApproved AS dateTimeApproved,
+           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           l.loaneeLoanDetail.initialDeposit AS initialDeposit,
+           c.name AS cohortName,
+           p.name AS programName
+               
+    FROM LoanRequestEntity lr 
+    JOIN lr.loaneeEntity l
+    JOIN l.userIdentity u
+    JOIN CohortEntity c ON c.id = l.cohortId
+    JOIN ProgramEntity p ON p.id = c.programId
+    WHERE 
+        (LOWER(u.firstName) LIKE LOWER(CONCAT(:name, '%')) 
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT(:name, '%')))
+        AND c.programId = :programId
+        AND p.organizationIdentity.id = :organizationId
+        AND lr.status <> 'APPROVED'
+    """)
+    Page<LoanRequestProjection> findAllLoanRequestByLoaneeNameInOrganizationAndProgram(@Param("programId") String programId,
+                                                                                       @Param("organizationId") String organizationId,
+                                                                                       @Param("name") String name,
+                                                                                       Pageable pageRequest);
 }
