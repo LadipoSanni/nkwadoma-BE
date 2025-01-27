@@ -29,7 +29,6 @@ public class NextOfKin {
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
         MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
-//        MeedlValidator.validateDataElement(contactAddress, nextOfKin.concat("contact address is required"));
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), nextOfKin.concat("alternate contact address is required"));
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), nextOfKin.concat("alternate phone number is required"));
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());

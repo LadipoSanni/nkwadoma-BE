@@ -21,8 +21,7 @@ public class NextOfKinRequest {
     private String phoneNumber;
     @NotNull(message = "Relationship with next of kin is required")
     private String nextOfKinRelationship;
-//    @NotNull(message = "Contact address is required")
-//    private String contactAddress;
+    private String contactAddress;
     @Email(message = "Please provide a valid alternate email address")
     @NotBlank(message = "Alternate email address is required")
     private String alternateEmail;
