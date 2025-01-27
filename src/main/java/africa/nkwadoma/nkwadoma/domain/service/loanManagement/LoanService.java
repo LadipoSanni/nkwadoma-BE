@@ -136,7 +136,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllByLoaneeId(foundLoan.getLoaneeId());
-        log.info("Loanee loan breakdowns by loanee with ID: {}: {}", foundLoan.getLoaneeId(), loaneeLoanBreakdowns);
+        log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
     }
@@ -243,6 +243,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanOffer createLoanOffer(LoanRequest loanRequest) throws MeedlException {
+        log.info("Loan request input: {}", loanRequest);
         LoanOffer loanOffer = new LoanOffer();
         if (loanRequest.getStatus() != LoanRequestStatus.APPROVED) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_MUST_HAVE_BEEN_APPROVED.getMessage());
@@ -256,8 +257,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
+        log.info("Loan offer ID: {}", loanOffer.getId());
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequest().getLoanee().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }

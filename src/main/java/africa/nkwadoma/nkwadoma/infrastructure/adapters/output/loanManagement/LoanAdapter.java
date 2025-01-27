@@ -44,11 +44,8 @@ public class LoanAdapter implements LoanOutputPort {
     @Override
     public Optional<Loan> viewLoanById(String loanId) throws MeedlException {
         MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
-        Optional<LoanProjection> loanById = loanRepository.findLoanById(loanId);
-        if (loanById.isEmpty()) {
-            return Optional.empty();
-        }
-        Loan loan = loanMapper.mapProjectionToLoan(loanById.get());
+        LoanProjection loanById = loanRepository.findLoanById(loanId).orElse(null);
+        Loan loan = loanMapper.mapProjectionToLoan(loanById);
         log.info("Loan details returned: {}", loan);
         return Optional.ofNullable(loan);
     }

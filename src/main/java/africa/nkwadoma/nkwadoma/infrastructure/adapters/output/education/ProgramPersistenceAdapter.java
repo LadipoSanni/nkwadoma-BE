@@ -46,9 +46,11 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     private final ProgramCohortRepository programCohortRepository;
 
     @Override
-    public List<Program> findProgramByName(String programName) throws MeedlException {
+    public List<Program> findProgramByName(String programName, String organizationId) throws MeedlException {
         MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        List<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName.trim());
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        List<ProgramEntity> programEntities = programRepository.
+                findByNameContainingIgnoreCaseAndOrganizationIdentityId(programName.trim(), organizationId);
         log.info("Program entities: {}", programEntities);
         if (programEntities.isEmpty()) {
             return new ArrayList<>();

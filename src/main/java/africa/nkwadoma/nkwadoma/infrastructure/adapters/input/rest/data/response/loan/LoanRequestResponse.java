@@ -25,17 +25,17 @@ public class LoanRequestResponse {
     private int creditScore;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
+    private BigDecimal tuitionAmount;
     private String alternateEmail;
     private String alternateContactAddress;
     private String alternatePhoneNumber;
     private LocalDateTime createdDate;
     private LocalDateTime dateTimeOffered;
     private BigDecimal initialDeposit;
-    private BigDecimal tuitionAmount;
     private LocalDate cohortStartDate;
     private String programName;
     private String cohortName;
-    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
+    private List<LoaneeLoanBreakDownResponse> loaneeLoanBreakdowns;
     private UserIdentityResponse userIdentity;
     private NextOfKinResponse nextOfKin;
 }

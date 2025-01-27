@@ -10,8 +10,10 @@ public interface LoanRequestRestMapper {
 
     @Mapping(target = "firstName", source = "firstName")
     @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "userIdentity", source = "userIdentity")
     @Mapping(target = "cohortName", source = "cohortName")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "loaneeLoanBreakdowns", source = "loaneeLoanBreakdowns")
     LoanRequestResponse toLoanRequestResponse(LoanRequest loanRequest);
 
     @Mapping(target = "id", source = "loanRequestId")

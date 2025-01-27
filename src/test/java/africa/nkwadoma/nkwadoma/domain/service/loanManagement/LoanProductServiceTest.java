@@ -72,6 +72,8 @@ class LoanProductServiceTest {
         loanProduct.setName("Test Loan Product - unit testing within application");
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsor("Mark");
+        loanProduct.setTenor(2);
+        loanProduct.setMoratorium(2);
         loanProduct.setObligorLoanLimit(new BigDecimal("100"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000"));

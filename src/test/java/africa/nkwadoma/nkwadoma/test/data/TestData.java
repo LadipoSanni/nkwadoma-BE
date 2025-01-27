@@ -142,6 +142,8 @@ public class TestData {
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setInvestmentVehicleId(testId);
+        loanProduct.setTenor(2);
+        loanProduct.setMoratorium(2);
         loanProduct.setName(name);
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsor("Mark");

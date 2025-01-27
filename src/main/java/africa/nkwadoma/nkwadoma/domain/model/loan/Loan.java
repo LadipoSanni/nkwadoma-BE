@@ -25,6 +25,7 @@ public class Loan {
     private Loanee loanee;
     private String firstName;
     private String lastName;
+    private String phoneNumber;
     private String loaneeId;
     private String loanOfferId;
     private String loanAccountId;
@@ -39,10 +40,12 @@ public class Loan {
     private LoanStatus loanStatus;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private BigDecimal tuitionAmount;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
     private String cohortName;
     private String programName;
+    private String referredBy;
     private String organizationId;
     private int pageNumber;
     private int pageSize;
