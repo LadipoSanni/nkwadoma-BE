@@ -17,6 +17,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -99,6 +100,8 @@ class OrganizationIdentityServiceTest {
             when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
             when(userIdentityOutputPort.save(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
+            when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
+            when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);

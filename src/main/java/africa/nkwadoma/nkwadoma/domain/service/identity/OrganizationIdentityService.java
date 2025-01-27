@@ -68,7 +68,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
         try {
             ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
-            if (clientRepresentation.getName().equals(organizationIdentity.getName())) {
+            if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
                 log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
                 throw new MeedlException("Organization already exists");
             }
