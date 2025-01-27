@@ -155,7 +155,7 @@ public class MeedlValidator {
         boolean isValid = pattern.matcher(name).matches();
         if (!isValid){
             log.error("Invalid name pattern: {}", name);
-            throw new MeedlException("Invalid name: "+ name +". Name should not contain only numbers or special characters. Letters, numbers, _' - are allowed " );
+            throw new MeedlException("Name should not contain only numbers or special characters. Letters, numbers, _' - are allowed " );
         }
     }
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {
