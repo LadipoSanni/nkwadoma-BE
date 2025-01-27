@@ -12,6 +12,7 @@ public interface LoanOfferMapper {
     @Mapping(target = "dateTimeOffered", expression = "java(java.time.LocalDateTime.now())")
     LoanOfferEntity toLoanOfferEntity(LoanOffer loanOffer);
 
+    @InheritInverseConfiguration
     LoanOffer toLoanOffer(LoanOfferEntity loanOfferEntity);
 
     void updateLoanOffer(@MappingTarget LoanOffer offer, LoanOffer loanOffer);
