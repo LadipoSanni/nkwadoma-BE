@@ -92,7 +92,10 @@ public class LoanRequestService implements LoanRequestUseCase {
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
 
-            updatedLoanRequest = loanRequestOutputPort.save(updatedLoanRequest);
+            LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
+
+            updatedLoanRequest.setLoanOfferId(loanOffer.getId());
+            updatedLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
             log.info("Loan request updated: {}", updatedLoanRequest);
 
             sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
@@ -117,16 +120,14 @@ public class LoanRequestService implements LoanRequestUseCase {
         if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
             throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
         }
+
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
         foundLoanRequest.setLoanProduct(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);
         foundLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
         foundLoanRequest = loanRequestMapper.updateLoanRequest(loanRequest, foundLoanRequest);
+        foundLoanRequest = loanRequestOutputPort.save(foundLoanRequest);
 
-        LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(foundLoanRequest);
-
-        foundLoanRequest.setLoanOfferId(loanOffer.getId());
-        foundLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
         return foundLoanRequest;
     }
 }

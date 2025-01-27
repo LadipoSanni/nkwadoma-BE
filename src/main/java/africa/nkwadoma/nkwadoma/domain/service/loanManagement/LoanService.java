@@ -257,6 +257,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanOffer.setLoanee(loanee);
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
+        log.info("Loan offer ID: {}", loanOffer.getId());
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
