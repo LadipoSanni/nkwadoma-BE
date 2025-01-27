@@ -180,7 +180,7 @@ class InvestmentVehicleAdapterTest {
             assertEquals(1,investmentVehicles.size());
     }
 
-//    @AfterAll
+    @AfterAll
     void cleanUp() throws MeedlException {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
     }
