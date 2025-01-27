@@ -150,12 +150,12 @@ public class MeedlValidator {
     }
     public static void validateObjectName(String name,  String message) throws MeedlException {
         MeedlValidator.validateDataElement(name, message);
-        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' -]+$";
+        String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' _-]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
         if (!isValid){
             log.error("Invalid name pattern: {}", name);
-            throw new MeedlException("Invalid name: {}. Name should not contain only numbers or special characters. Letters, numbers, ' - are allowed " + name);
+            throw new MeedlException("Name must include letters and can only contain letters, numbers, spaces - _ '");
         }
     }
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {
