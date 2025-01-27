@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -21,6 +22,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repos
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.*;
 
@@ -49,6 +51,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     public OrganizationIdentity inviteOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         validateOrganizationIdentityDetails(organizationIdentity);
         validateUniqueValues(organizationIdentity);
+        checkIfOrganizationAndAdminExist(organizationIdentity);
+        log.info("After success full validation and check that user or organization doesn't exists");
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -59,6 +63,39 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("sent email");
         log.info("organization identity saved is : {}", organizationIdentity);
         return organizationIdentity;
+    }
+
+    private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
+        try {
+            checkOrganizationExist(organizationIdentity);
+        }catch (MeedlException e){
+            if (e.getMessage().equals(ORGANIZATION_NOT_FOUND.getMessage())) {
+                log.info("The organization is not previously existing with message: {} orgamization name {}", e.getMessage(), organizationIdentity.getName());
+            }else {
+                log.error("An exception occurred while trying to check if it is a new organisation");
+                throw new MeedlException(e.getMessage());
+            }
+        }
+        checkIfUserAlreadyExist(organizationIdentity);
+
+    }
+
+    private void checkIfUserAlreadyExist(OrganizationIdentity organizationIdentity) throws MeedlException {
+        Optional<UserIdentity> optionalUserIdentity = identityManagerOutPutPort.getUserByEmail(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getEmail());
+        if (optionalUserIdentity.isPresent()) {
+            log.error("Before creating organization : {}, for user with id {} ", USER_IDENTITY_ALREADY_EXISTS.getMessage(), optionalUserIdentity.get().getId()  );
+            throw new ResourceAlreadyExistsException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+        }else {
+            log.info("User has not been previously saved. The application can proceed to creating user and making user the first admin for {} organization. ", organizationIdentity.getName());
+        }
+    }
+
+    private void checkOrganizationExist(OrganizationIdentity organizationIdentity) throws MeedlException {
+        ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+        if (organizationIdentity.getName().equals(clientRepresentation.getName())) {
+            log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
+            throw new MeedlException("Organization already exists");
+        }
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -116,6 +153,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMeedlUser());
+        log.info("User identity created for this organization. User id: {}. User is new admin", newUser.getId());
         employeeIdentity.setMeedlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         return organizationIdentity;

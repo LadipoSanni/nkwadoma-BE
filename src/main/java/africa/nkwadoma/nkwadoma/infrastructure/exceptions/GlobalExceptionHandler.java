@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
         return ExceptionResponse.builder()
                 .message(message)
                 .timeStamp(LocalDateTime.now())
-                .status(Boolean.FALSE)
+                .statusCode(HttpStatus.BAD_REQUEST.name())
                 .build();
     }
 }

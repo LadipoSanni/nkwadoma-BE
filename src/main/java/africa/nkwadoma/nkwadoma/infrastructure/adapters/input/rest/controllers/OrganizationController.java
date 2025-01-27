@@ -51,25 +51,20 @@ public class OrganizationController {
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
-            UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
-            userIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
-            OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
-            List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
-            OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
-            organizationIdentity.setOrganizationEmployees(orgEmployee);
-            organizationIdentity.setCreatedBy(meedlUser.getClaimAsString("sub"));
-            organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
-            log.info("Organization identity from service level: {}", organizationIdentity);
-            InviteOrganizationResponse inviteOrganizationResponse = organizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
-            log.info("Mapped Organization identity from service level: {}", organizationIdentity);
-            ApiResponse<Object> apiResponse = ApiResponse.builder()
-                    .data(inviteOrganizationResponse)
-                    .message(INVITE_ORGANIZATION_SUCCESS)
-                    .statusCode(HttpStatus.CREATED.name())
-                    .build();
-            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-
+        String createdBy = meedlUser.getClaimAsString("sub");
+        OrganizationIdentity organizationIdentity = setOrganizationEmployeesInOrganization(inviteOrganizationRequest, createdBy);
+        organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
+        log.info("Organization identity from service level: {}", organizationIdentity);
+        InviteOrganizationResponse inviteOrganizationResponse = organizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
+        log.info("Mapped Organization identity from service level: {}", organizationIdentity);
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .data(inviteOrganizationResponse)
+                .message(INVITE_ORGANIZATION_SUCCESS)
+                .statusCode(HttpStatus.CREATED.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
     @PatchMapping("organization/update")
     @Operation(summary = "Update an existing organization")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') and hasRole('PORTFOLIO_MANAGER')")
@@ -79,12 +74,9 @@ public class OrganizationController {
         organizationIdentity.setUpdatedBy(meedlUser.getClaim("sub"));
         log.info("Program at controller level: ========>{}", organizationIdentity);
          organizationIdentity = createOrganizationUseCase.updateOrganization(organizationIdentity);
-
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
-                .data(organizationRestMapper.toOrganizationResponse(organizationIdentity))
-                .message(UPDATE_ORGANIZATION_SUCCESS)
-                .statusCode(HttpStatus.CREATED.name())
-                .build();
+        ApiResponse<Object> apiResponse = ApiResponse.buildApiResponse(organizationRestMapper.toOrganizationResponse(organizationIdentity),
+                UPDATE_ORGANIZATION_SUCCESS,
+                HttpStatus.CREATED.name());
         return new  ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
@@ -219,6 +211,17 @@ public class OrganizationController {
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
+    }
+
+    private OrganizationIdentity setOrganizationEmployeesInOrganization(OrganizationRequest inviteOrganizationRequest, String createdBy) {
+        UserIdentity userIdentity = getUserIdentity(inviteOrganizationRequest);
+        userIdentity.setCreatedBy(createdBy);
+        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(userIdentity);
+        List<OrganizationEmployeeIdentity> orgEmployee = getOrganizationEmployeeIdentities(organizationEmployeeIdentity);
+        OrganizationIdentity organizationIdentity = organizationRestMapper.toOrganizationIdentity(inviteOrganizationRequest);
+        organizationIdentity.setOrganizationEmployees(orgEmployee);
+        organizationIdentity.setCreatedBy(createdBy);
+        return organizationIdentity;
     }
 
     private static List<OrganizationEmployeeIdentity> getOrganizationEmployeeIdentities(OrganizationEmployeeIdentity organizationEmployeeIdentity) {
