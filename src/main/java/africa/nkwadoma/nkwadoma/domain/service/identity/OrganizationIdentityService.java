@@ -52,6 +52,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         validateOrganizationIdentityDetails(organizationIdentity);
         validateUniqueValues(organizationIdentity);
         checkIfOrganizationAndAdminExist(organizationIdentity);
+        log.info("After success full validation and check that user or organization doesn't exists");
         organizationIdentity = createOrganizationIdentityOnKeycloak(organizationIdentity);
         log.info("OrganizationIdentity created on keycloak {}", organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = saveOrganisationIdentityToDatabase(organizationIdentity);
@@ -64,20 +65,29 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         return organizationIdentity;
     }
 
-    private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) {
-        identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+    private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {
+        try {
+            ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
+            if (clientRepresentation.getName().equals(organizationIdentity.getName())) {
+                log.error("OrganizationIdentity already exists, before trying to create organization with name {} ", organizationIdentity.getName());
+                throw new MeedlException("Organization already exists");
+            }
+        }catch (MeedlException e){
+            if (e.getMessage().equals(ORGANIZATION_NOT_FOUND.getMessage())) {
+                log.info("The organization is not previously existing with message: {} orgamization name {}", e.getMessage(), organizationIdentity.getName());
+            }else {
+                log.error("An exception occurred while trying to check if it is a new organisation");
+                throw new MeedlException(e.getMessage());
+            }
+        }
         Optional<UserIdentity> optionalUserIdentity = identityManagerOutPutPort.getUserByEmail(organizationIdentity.getOrganizationEmployees().get(0).getMeedlUser().getEmail());
-        if (optionalUserIdentity.isEmpty()) {
+        if (optionalUserIdentity.isPresent()) {
+            log.error("Before creating organization : {}, for user with id {} ", USER_IDENTITY_ALREADY_EXISTS.getMessage(), optionalUserIdentity.get().getId()  );
             throw new ResourceAlreadyExistsException(USER_IDENTITY_ALREADY_EXISTS.getMessage());
+        }else {
+            log.info("User has not been previously saved. The application can proceed to creating user and making user the first admin for {} organization. ", organizationIdentity.getName());
         }
 
-    }
-
-    @Override
-    public void cleanUpFailedInvite(OrganizationIdentity organizationIdentity) throws MeedlException {
-        ClientRepresentation clientRepresentation = identityManagerOutPutPort.getClientRepresentationByName(organizationIdentity.getName());
-        identityManagerOutPutPort.deleteClient(clientRepresentation.getId());
-        organizationIdentityOutputPort.delete(clientRepresentation.getId());
     }
 
     private void validateUniqueValues(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -135,6 +145,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMeedlUser());
+        log.info("User identity created for this organization. User id: {}. User is new admin", newUser.getId());
         employeeIdentity.setMeedlUser(newUser);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         return organizationIdentity;

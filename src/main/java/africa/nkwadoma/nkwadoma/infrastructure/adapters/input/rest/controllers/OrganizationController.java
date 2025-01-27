@@ -51,20 +51,7 @@ public class OrganizationController {
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
-        try {
-            return inviteOrganization(meedlUser.getClaimAsString("sub"), inviteOrganizationRequest);
-        }catch (MeedlException exception){
-            log.error(exception.getMessage());
-            createOrganizationUseCase.cleanUpFailedInvite(setOrganizationEmployeesInOrganization(inviteOrganizationRequest, meedlUser.getClaimAsString("sub") ));
-            return new ResponseEntity<>(ApiResponse.buildApiResponse(null,
-                    exception.getMessage(),
-                    HttpStatus.BAD_REQUEST.name()),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-    }
-
-    private ResponseEntity<ApiResponse<?>> inviteOrganization(String createdBy, OrganizationRequest inviteOrganizationRequest) throws MeedlException {
+        String createdBy = meedlUser.getClaimAsString("sub");
         OrganizationIdentity organizationIdentity = setOrganizationEmployeesInOrganization(inviteOrganizationRequest, createdBy);
         organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
         log.info("Organization identity from service level: {}", organizationIdentity);
