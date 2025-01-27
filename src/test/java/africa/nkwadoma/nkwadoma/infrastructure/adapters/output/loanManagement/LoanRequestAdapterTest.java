@@ -289,6 +289,26 @@ class LoanRequestAdapterTest {
     }
 
     @Test
+    void viewAllLoanRequestsThatHaveBeenApproved() {
+        try {
+            loanRequest.setStatus(LoanRequestStatus.APPROVED);
+            LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
+            assertNotNull(savedLoanRequest);
+            loanRequestId = savedLoanRequest.getId();
+        } catch (MeedlException e) {
+            log.error("Error saving loan request: ", e);
+        }
+        Page<LoanRequest> loanRequests = Page.empty();
+        try {
+            loanRequests = loanRequestOutputPort.viewAll(0, 10);
+        } catch (MeedlException e) {
+            log.error("Error viewing all loan requests ", e);
+        }
+
+        assertEquals(0, loanRequests.getTotalElements());
+    }
+
+    @Test
     void viewAllLoanRequestsByOrganizationId() {
         try {
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
