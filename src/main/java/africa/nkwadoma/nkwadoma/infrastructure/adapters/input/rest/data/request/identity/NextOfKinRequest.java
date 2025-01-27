@@ -21,8 +21,8 @@ public class NextOfKinRequest {
     private String phoneNumber;
     @NotNull(message = "Relationship with next of kin is required")
     private String nextOfKinRelationship;
-    @NotNull(message = "Contact address is required")
-    private String contactAddress;
+//    @NotNull(message = "Contact address is required")
+//    private String contactAddress;
     @Email(message = "Please provide a valid alternate email address")
     @NotBlank(message = "Alternate email address is required")
     private String alternateEmail;
@@ -51,9 +51,9 @@ public class NextOfKinRequest {
         this.nextOfKinRelationship = nextOfKinRelationship.trim();
     }
 
-    public void setContactAddress(String contactAddress) {
-        this.contactAddress = contactAddress.trim();
-    }
+//    public void setContactAddress(String contactAddress) {
+//        this.contactAddress = contactAddress.trim();
+//    }
 
     public void setAlternateEmail(String alternateEmail) {
         this.alternateEmail = alternateEmail.trim();
