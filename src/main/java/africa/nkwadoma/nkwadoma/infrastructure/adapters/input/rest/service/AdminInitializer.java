@@ -140,6 +140,7 @@ public class AdminInitializer {
             if (ObjectUtils.isEmpty(foundUserIdentity)) {
                 userIdentity = saveUserToDB(userIdentity);
             }else {
+                userIdentity = foundUserIdentity;
                 log.info("First user already exists");
             }
         }
