@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;
@@ -30,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.core.parameters.P;
 
 import java.util.*;
 
@@ -239,24 +237,28 @@ public class LoanOfferServiceTest {
     @Test
     void searchLoanOffers() {
         try {
-            when(programOutputPort.findProgramById(mockId)).thenReturn(program); // Ensure this is invoked in the actual flow
-            when(loanOfferOutputPort.searchLoanOffer(mockId,mockId, "j", 10, 0))
-                    .thenReturn(new PageImpl<>(List.of(loanOffer))); // Ensure this is used for LOAN_OFFER
-
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<LoanOffer> loanOffers = new PageImpl<>(List.of(loanOffer));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
+                    .thenReturn(loanOffers);
             Page<LoanLifeCycle> loanLifeCycles = loanService.searchLoan(
                     program.getId(),
                     mockId,
-                    LoanMetricsStatus.LOAN_OFFER,
+                    LoanType.LOAN_OFFER,
                     "j",
                     10,
                     0
             );
-
-            assertEquals(1, loanLifeCycles.getSize());
         } catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }
+        assertEquals(1, loanLifeCycles.getSize());
     }
+
 
 
     @Test
@@ -267,7 +269,7 @@ public class LoanOfferServiceTest {
             when(programOutputPort.findCreatorOrganization(mockId)).thenReturn(new OrganizationIdentity());
             when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
                     .thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanLifeCycles = loanService.searchLoan(program.getId(),mockId,LoanMetricsStatus.LOAN_OFFER,"j",10,0);
+            loanLifeCycles = loanService.searchLoan(program.getId(),mockId, LoanType.LOAN_OFFER,"j",10,0);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
@@ -282,7 +284,7 @@ public class LoanOfferServiceTest {
             when(programOutputPort.findCreatorOrganization(mockId)).thenReturn(new OrganizationIdentity());
             when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
                     .thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanLifeCycles = loanService.searchLoan(program.getId(),mockId,LoanMetricsStatus.LOAN_OFFER,"j",10,0);
+            loanLifeCycles = loanService.searchLoan(program.getId(),mockId, LoanType.LOAN_OFFER,"j",10,0);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }

@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.enums.loanEnums;
 
-public enum LoanMetricsStatus {
+public enum LoanType {
 
     LOAN_OFFER,
     LOAN_REQUEST,

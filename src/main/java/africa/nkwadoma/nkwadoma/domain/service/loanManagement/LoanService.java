@@ -365,7 +365,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     @Override
-    public Page<LoanLifeCycle> searchLoan(String programId,String organizationId, LoanMetricsStatus status,String name,
+    public Page<LoanLifeCycle> searchLoan(String programId, String organizationId, LoanType status, String name,
                                           int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectName(name,LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
@@ -383,19 +383,19 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return searchResult(programId, organizationId, status, name, pageSize, pageNumber);
     }
 
-    private Page<LoanLifeCycle> searchResult(String programId, String organizationId, LoanMetricsStatus status, String name, int pageSize, int pageNumber) throws MeedlException {
+    private Page<LoanLifeCycle> searchResult(String programId, String organizationId, LoanType status, String name, int pageSize, int pageNumber) throws MeedlException {
         Page<LoanLifeCycle> loanLifeCycles = Page.empty();
-        if (status.equals(LoanMetricsStatus.LOAN_OFFER)){
+        if (status.equals(LoanType.LOAN_OFFER)){
             Page<LoanOffer> loanOffers = loanOfferOutputPort.searchLoanOffer(programId, organizationId, name, pageSize, pageNumber);
             loanLifeCycles = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
             return loanLifeCycles;
         }
-        else if (status.equals(LoanMetricsStatus.LOAN_REQUEST)){
+        else if (status.equals(LoanType.LOAN_REQUEST)){
             Page<LoanRequest> loanRequests = loanRequestOutputPort.searchLoanRequest(programId, organizationId, name, pageSize, pageNumber);
             loanLifeCycles = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
             return loanLifeCycles;
         }
-        else if (status.equals(LoanMetricsStatus.LOAN_DISBURSAL)){
+        else if (status.equals(LoanType.LOAN_DISBURSAL)){
             Page<Loan> loans = loanOutputPort.searchLoan(programId, organizationId, name, pageSize, pageNumber);
             loanLifeCycles = loans.map(loanMetricsMapper::mapToLoans);
             return loanLifeCycles;
