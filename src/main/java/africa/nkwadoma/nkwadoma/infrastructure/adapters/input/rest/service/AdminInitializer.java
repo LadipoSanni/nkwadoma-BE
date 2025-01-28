@@ -9,10 +9,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
@@ -83,7 +85,11 @@ public class AdminInitializer {
         organizationIdentity.setStatus(ActivationStatus.ACTIVE);
 
         try {
-            organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+            Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+            if (foundOrganization.isEmpty()) {
+                log.info("Creating first organization identity");
+                organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+            }
         } catch (MeedlException exception) {
             log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
             ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
