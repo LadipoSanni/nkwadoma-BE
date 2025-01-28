@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -50,6 +51,8 @@ class ProgramServiceTest {
     @Test
     void addProgram() {
         try {
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
+            when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program addedProgram = programService.createProgram(program);
             verify(programOutputPort, times(1)).saveProgram(program);
@@ -83,6 +86,8 @@ class ProgramServiceTest {
     @Test
     void addProgramWithExistingName() {
         try {
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
+            when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
             when(programOutputPort.saveProgram(program)).thenReturn(program);
             Program createdProgram = programService.createProgram(program);
             assertNotNull(createdProgram);
@@ -99,6 +104,8 @@ class ProgramServiceTest {
     void updateProgram() {
         try {
             when(programOutputPort.saveProgram(program)).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy())).thenReturn(OrganizationIdentity.builder().build());
+            when(programOutputPort.programExistsInOrganization(program)).thenReturn(false);
             Program addedProgram = programService.createProgram(program);
 
             log.info("Program: {}", addedProgram);
