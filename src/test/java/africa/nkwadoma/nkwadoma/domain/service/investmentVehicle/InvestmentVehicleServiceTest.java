@@ -24,13 +24,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class InvestmentVehicleServiceTest {
-
-
     @Autowired
     private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
     private InvestmentVehicle fundGrowth;
     private String investmentId;
-
     @Autowired
     private InvestmentVehicleOutputPort outputPort;
     private int pageSize = 1;
@@ -52,6 +49,14 @@ class InvestmentVehicleServiceTest {
        }catch (MeedlException exception){
            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
        }
+    }
+
+    @Test
+    void createInvestmentVehicleWithTenureGreaterThanThreeDigits() {
+        fundGrowth.setTenure(9999);
+        MeedlException meedlException =
+                assertThrows(MeedlException.class, () -> investmentVehicleUseCase.createInvestmentVehicle(fundGrowth));
+        log.info("Exception occurred: {} {}",meedlException.getClass().getName(), meedlException.getMessage());
     }
 
 

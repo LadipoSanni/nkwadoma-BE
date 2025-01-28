@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ProgramCreateRequest {
     @NotBlank(message = "Program name is required")
+    @Size( max = 200, message = "Program name must not exceed 200 characters")
     private String programName;
     private String objectives;
     @Size(max = 2500, message = "Program description must not exceed 2500 characters")

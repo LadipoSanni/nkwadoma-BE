@@ -28,6 +28,7 @@ public class LoanProductRequest {
     @PositiveOrZero(message = "Cost of fund must be zero or positive")
     private double costOfFund;
     @NotBlank(message = LOAN_PRODUCT_NAME_REQUIRED)
+    @Size( max = 200, message = "Loan product name must not exceed 200 characters")
     private String name;
 
     @NotBlank(message = LOAN_PRODUCT_MANDATE_REQUIRED)
