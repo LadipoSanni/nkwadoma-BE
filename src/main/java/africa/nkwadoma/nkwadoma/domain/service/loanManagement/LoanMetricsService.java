@@ -30,9 +30,7 @@ public class LoanMetricsService implements LoanMetricsUseCase {
     private final LoanMetricsMapper loanMetricsMapper;
     private final ProgramOutputPort programOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
-    private final LoanRequestOutputPort loanRequestOutputPort;
     private final LoanRequestUseCase loanRequestUseCase;
-    private final LoanService loanService;
     private final ViewLoanProductUseCase viewLoanProductUseCase;
 
     @Override
@@ -65,6 +63,8 @@ public class LoanMetricsService implements LoanMetricsUseCase {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
+        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+
         Program program = programOutputPort.findProgramById(programId);
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(program.getCreatedBy());
         if(!organizationIdentity.getId().equals(organizationId)) {
@@ -73,13 +73,19 @@ public class LoanMetricsService implements LoanMetricsUseCase {
 
         if (status.equals(LoanMetricsStatus.LOAN_OFFER)){
            Page<LoanOffer> loanOffers = loanOfferUseCase.searchForLoanOffer(programId,organizationId,name,pageSize,pageNumber);
+           loanLifeCycles = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
+           return loanLifeCycles;
         }
-        if (status.equals(LoanMetricsStatus.LOAN_REQUEST)){
+        else if (status.equals(LoanMetricsStatus.LOAN_REQUEST)){
             Page<LoanRequest> loanRequests = loanRequestUseCase.searchForLoanRequest(programId,organizationId,name,pageSize,pageNumber);
+            loanLifeCycles = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
+            return loanLifeCycles;
         }
-        if (status.equals(LoanMetricsStatus.LOAN_DISBURSAL)){
+        else if (status.equals(LoanMetricsStatus.LOAN_DISBURSAL)){
             Page<Loan> loans = viewLoanProductUseCase.searchForLoan(programId,organizationId,name,pageSize,pageNumber);
+            loanLifeCycles = loans.map(loanMetricsMapper::mapToLoans);
+            return loanLifeCycles;
         }
-        return null;
+        return loanLifeCycles;
     }
 }

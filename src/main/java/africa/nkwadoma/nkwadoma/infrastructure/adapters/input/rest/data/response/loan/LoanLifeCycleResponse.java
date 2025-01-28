@@ -1,5 +1,7 @@
-package africa.nkwadoma.nkwadoma.domain.model.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
+
+import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,10 +9,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
-public class LoanLifeCycle {
-
+@Getter
+public class LoanLifeCycleResponse {
 
     private String firstName;
     private String lastName;

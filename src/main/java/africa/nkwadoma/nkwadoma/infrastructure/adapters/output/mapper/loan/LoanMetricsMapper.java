@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import org.mapstruct.*;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanMetricsMapper {
@@ -19,4 +20,35 @@ public interface LoanMetricsMapper {
     @Mapping(target = "id", source = "existingLoanMetrics.id")
     LoanMetrics updateLoanMetrics(LoanMetrics existingLoanMetrics, LoanMetrics updatedLoanMetrics);
 
+
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "deposit", source = "loaneeLoanDetail.initialDeposit")
+    @Mapping(target = "offerDate", source = "dateTimeOffered")
+    @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
+    LoanLifeCycle mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
+
+
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "amountRequested", source = "loanAmountRequested")
+    @Mapping(target = "deposit", source = "initialDeposit")
+    @Mapping(target = "createdDate", source = "createdDate")
+    @Mapping(target = "startDate", source = "cohortStartDate")
+    LoanLifeCycle mapLoanRequestToLoanLifeCycles(LoanRequest loanRequest);
+
+
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "amountRequested", source = "amountRequested")
+    @Mapping(target = "offerDate", source = "offerDate")
+    @Mapping(target = "deposit", source = "initialDeposit")
+    @Mapping(target = "startDate", source = "startDate")
+    LoanLifeCycle mapToLoans(Loan loan);
 }

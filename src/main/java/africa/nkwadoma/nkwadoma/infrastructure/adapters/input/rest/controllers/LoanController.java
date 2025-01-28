@@ -54,6 +54,7 @@ public class LoanController {
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
     private final LoanMetricsUseCase loanMetricsUseCase;
+    private final LoanMetricsRestMapper loanMetricsRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -295,7 +296,16 @@ public class LoanController {
                                                      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
         Page<LoanLifeCycle> loanLifeCycles = loanMetricsUseCase.searchLoan(programId,organizationId,status,name,pageSize,pageNumber);
-        return null;
+        List<LoanLifeCycleResponse> loanLifeCycleResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanLifeCycles);
+        PaginatedResponse<LoanLifeCycleResponse> paginatedResponse = new PaginatedResponse<>(
+                loanLifeCycleResponses,loanLifeCycles.hasNext(),loanLifeCycles.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanLifeCycleResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanLifeCycleResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
 }
