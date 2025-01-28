@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +29,21 @@ class UserIdentityAdapterTest {
 
     @BeforeEach
     void setUp(){
+//        List<UserIdentity> users = new ArrayList<>();
+//        try {
+//            users = userIdentityOutputPort.findAllByRole(LOANEE);
+//        } catch (MeedlException e) {
+//            log.error(e.getMessage());
+//        }
+//        if (CollectionUtils.isNotEmpty(users)) {
+//            users.forEach(userIdentity -> {
+//                try {
+//                    userIdentityOutputPort.deleteUserById(userIdentity.getId());
+//                } catch (MeedlException e) {
+//                    log.error(e.getMessage());
+//                }
+//            });
+//        }
         john = new UserIdentity();
         john = TestData.createTestUserIdentity("john@johnson.com");
 
