@@ -157,7 +157,9 @@ jobs:
           echo "Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+              357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma@sha256:975298f8f8571450b7b52dca08b0eb6ca9545f10af1dd6d3601a07ecf8d51950
+          
+         
           echo "Container started successfully!"
           # Clean up unused Docker resources without affecting running containers
           echo "Performing safe Docker cleanup..."
