@@ -95,7 +95,7 @@ class OrganizationIdentityServiceTest {
     void inviteOrganization() {
         OrganizationIdentity invitedOrganisation;
         try {
-            when(identityManagerOutPutPort.createOrganization(roseCouture)).thenReturn(roseCouture);
+            when(identityManagerOutPutPort.createKeycloakClient(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
             when(organizationIdentityOutputPort.save(roseCouture)).thenReturn(roseCouture);
             when(userIdentityOutputPort.save(sarah)).thenReturn(sarah);

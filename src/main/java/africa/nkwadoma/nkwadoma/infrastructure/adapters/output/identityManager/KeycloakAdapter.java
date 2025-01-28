@@ -107,7 +107,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
 
     @Override
-    public OrganizationIdentity createOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
+    public OrganizationIdentity createKeycloakClient(OrganizationIdentity organizationIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationIdentity);
         organizationIdentity.validate();
         log.info("Keycloak service validated organization ... {}", organizationIdentity);

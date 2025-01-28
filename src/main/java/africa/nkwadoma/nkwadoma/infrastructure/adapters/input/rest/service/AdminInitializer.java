@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -83,21 +82,15 @@ public class AdminInitializer {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setStatus(ActivationStatus.ACTIVE);
-
+        Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
+        OrganizationIdentity savedOrganizationIdentity;
         try {
-            Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
-            if (foundOrganization.isEmpty()) {
-                log.info("Creating first organization identity");
-                organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
-            }
-        } catch (MeedlException exception) {
-            log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
-            ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
-            organizationIdentity.setId(foundClient.getId());
-        }
-        OrganizationIdentity savedOrganizationIdentity = null;
-        try {
-            savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            log.info("Creating first organization identity {}", organizationIdentity);
+            if(foundOrganization.isEmpty()) {
+                savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            }else savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+            log.info("Saving organization identity {}", organizationIdentity);
         } catch (MeedlException exception) {
             log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
             savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -117,6 +110,21 @@ public class AdminInitializer {
         log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
         return savedOrganizationIdentity;
     }
+
+    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationEntity> foundOrganization) throws MeedlException {
+        try {
+            if (foundOrganization.isEmpty()) {
+                log.info("Creating first organization identity");
+                organizationIdentity = identityManagerOutPutPort.createKeycloakClient(organizationIdentity);
+            }
+        } catch (MeedlException exception) {
+            log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
+            ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
+            organizationIdentity.setId(foundClient.getId());
+        }
+        return organizationIdentity;
+    }
+
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = saveUserToKeycloak(userIdentity);
