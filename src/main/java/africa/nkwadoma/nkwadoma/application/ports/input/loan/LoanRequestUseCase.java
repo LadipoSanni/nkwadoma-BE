@@ -10,5 +10,5 @@ public interface LoanRequestUseCase {
     LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException;
     LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException;
 
-    Page<LoanRequest> searchForLoanRequest(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException;
+
 }

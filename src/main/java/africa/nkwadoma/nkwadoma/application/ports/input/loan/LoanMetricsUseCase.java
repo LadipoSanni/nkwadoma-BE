@@ -9,7 +9,5 @@ import org.springframework.data.domain.Page;
 public interface LoanMetricsUseCase {
     LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException;
 
-    Page<LoanLifeCycle> searchLoan( String programId,String organizationId,LoanMetricsStatus status,String name,
-                                    int pageSize, int pageNumber) throws MeedlException;
 }
 

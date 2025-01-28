@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -93,12 +94,13 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
          OR LOWER(u.lastName) LIKE LOWER(CONCAT(:name, '%')))
         AND c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
-        AND lo.loaneeResponse <> 'ACCEPTED'
+        AND lo.loaneeResponse <> :response
     """)
     Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
             @Param("programId") String programId,
             @Param("organizationId") String organizationId,
             @Param("name") String name,
+            @Param("response")LoanDecision loanDecision,
             Pageable pageRequest
     );
 

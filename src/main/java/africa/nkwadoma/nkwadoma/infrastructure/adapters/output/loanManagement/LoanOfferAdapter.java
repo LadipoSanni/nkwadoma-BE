@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -86,7 +87,8 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.
-                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,pageRequest);
+                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,
+                                LoanDecision.ACCEPTED,pageRequest);
 
         return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }

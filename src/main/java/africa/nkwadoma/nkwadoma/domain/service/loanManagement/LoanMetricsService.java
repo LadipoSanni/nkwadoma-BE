@@ -28,10 +28,6 @@ public class LoanMetricsService implements LoanMetricsUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
-    private final ProgramOutputPort programOutputPort;
-    private final LoanOfferUseCase loanOfferUseCase;
-    private final LoanRequestUseCase loanRequestUseCase;
-    private final ViewLoanProductUseCase viewLoanProductUseCase;
 
     @Override
     public LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException {
@@ -54,38 +50,4 @@ public class LoanMetricsService implements LoanMetricsUseCase {
         return savedMetrics;
     }
 
-    @Override
-    public Page<LoanLifeCycle> searchLoan(String programId,String organizationId, LoanMetricsStatus status,String name, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(name,LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateObjectInstance(status,"Status cannot be empty");
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-
-        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
-
-        Program program = programOutputPort.findProgramById(programId);
-        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(program.getCreatedBy());
-        if(!organizationIdentity.getId().equals(organizationId)) {
-            throw new LoanException("Program not in organization");
-        }
-
-        if (status.equals(LoanMetricsStatus.LOAN_OFFER)){
-           Page<LoanOffer> loanOffers = loanOfferUseCase.searchForLoanOffer(programId,organizationId,name,pageSize,pageNumber);
-           loanLifeCycles = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
-           return loanLifeCycles;
-        }
-        else if (status.equals(LoanMetricsStatus.LOAN_REQUEST)){
-            Page<LoanRequest> loanRequests = loanRequestUseCase.searchForLoanRequest(programId,organizationId,name,pageSize,pageNumber);
-            loanLifeCycles = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
-            return loanLifeCycles;
-        }
-        else if (status.equals(LoanMetricsStatus.LOAN_DISBURSAL)){
-            Page<Loan> loans = viewLoanProductUseCase.searchForLoan(programId,organizationId,name,pageSize,pageNumber);
-            loanLifeCycles = loans.map(loanMetricsMapper::mapToLoans);
-            return loanLifeCycles;
-        }
-        return loanLifeCycles;
-    }
 }

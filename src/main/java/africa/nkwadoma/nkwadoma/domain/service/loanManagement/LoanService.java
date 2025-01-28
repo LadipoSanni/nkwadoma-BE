@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -11,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoanOfferException;
@@ -53,6 +55,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    private final ProgramOutputPort programOutputPort;
+    private final LoanMetricsMapper loanMetricsMapper;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -85,14 +89,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanProductOutputPort.search(loanProductName);
     }
 
-    @Override
-    public Page<Loan> searchForLoan(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        return loanOutputPort.searchLoan(programId,organizationId,name,pageSize,pageNumber);
-    }
+
 
     @Override
     public LoanProduct updateLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -319,14 +316,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return loanOfferOutputPort.findLoanOfferInOrganization(organizationId, pageSize, pageNumber);
     }
 
-    @Override
-    public Page<LoanOffer> searchForLoanOffer(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        return loanOfferOutputPort.searchLoanOffer(programId,organizationId,name,pageSize,pageNumber);
-    }
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
         //this and the template would be done on another branch
@@ -374,4 +363,42 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             }
         return loanOffer;
     }
+
+    @Override
+    public Page<LoanLifeCycle> searchLoan(String programId,String organizationId, LoanMetricsStatus status,String name,
+                                          int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectName(name,LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(programId,ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateObjectInstance(status,"Status cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+
+        Program program = programOutputPort.findProgramById(programId);
+        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(program.getCreatedBy());
+        if(!organizationIdentity.getId().equals(organizationId)) {
+            throw new LoanException("Program not in organization");
+        }
+
+        if (status.equals(LoanMetricsStatus.LOAN_OFFER)){
+            Page<LoanOffer> loanOffers = loanOfferOutputPort.searchLoanOffer(programId,organizationId,name,pageSize,pageNumber);
+            loanLifeCycles = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
+            return loanLifeCycles;
+        }
+        else if (status.equals(LoanMetricsStatus.LOAN_REQUEST)){
+            Page<LoanRequest> loanRequests = loanRequestOutputPort.searchLoanRequest(programId,organizationId,name,pageSize,pageNumber);
+            loanLifeCycles = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
+            return loanLifeCycles;
+        }
+        else if (status.equals(LoanMetricsStatus.LOAN_DISBURSAL)){
+            Page<Loan> loans = loanOutputPort.searchLoan(programId,organizationId,name,pageSize,pageNumber);
+            loanLifeCycles = loans.map(loanMetricsMapper::mapToLoans);
+            return loanLifeCycles;
+        }
+        return loanLifeCycles;
+    }
+
+
 }

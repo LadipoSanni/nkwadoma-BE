@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanMetricsStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import jakarta.validation.constraints.NotBlank;
@@ -13,5 +14,6 @@ public interface LoanOfferUseCase {
 
     Page<LoanOffer> viewAllLoanOffersInOrganization(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
-    Page<LoanOffer> searchForLoanOffer(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException;
+    Page<LoanLifeCycle> searchLoan(String programId,  String organizationId,
+                                   LoanMetricsStatus status,  String name, int pageSize, int pageNumber) throws MeedlException;
 }
