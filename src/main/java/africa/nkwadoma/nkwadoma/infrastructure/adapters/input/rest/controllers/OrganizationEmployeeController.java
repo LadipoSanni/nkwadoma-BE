@@ -48,9 +48,10 @@ public class OrganizationEmployeeController {
                         .pageSize(pageSize)
                         .totalPages(employeeIdentities.getTotalPages())
                         .pageNumber(pageNumber).build();
-        return ResponseEntity.ok(new ApiResponse<>(SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
-                paginatedResponse, HttpStatus.OK.toString())
-        );
+        return ResponseEntity.ok(ApiResponse
+                .buildApiResponse(paginatedResponse,
+                SuccessMessages.ORGANIZATION_ADMINS_RETURNED_SUCCESSFULLY,
+                HttpStatus.OK.toString()));
     }
 
     @GetMapping("search/admin")

@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ExceptionResponse> handleEnumValidationExceptions(HttpMessageNotReadableException ex) {
         log.error("Error validating input: {}", ex.getMessage());
-        return new ResponseEntity<>(errorResponseBuilder(ErrorMessages.INVALID_INPUT_PROVIDED), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponseBuilder(ErrorMessages.INVALID_INPUT_PROVIDED + ": " + ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MeedlException.class)
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
         return ExceptionResponse.builder()
                 .message(message)
                 .timeStamp(LocalDateTime.now())
-                .status(Boolean.FALSE)
+                .statusCode(HttpStatus.BAD_REQUEST.name())
                 .build();
     }
 }

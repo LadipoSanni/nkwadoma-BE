@@ -3,12 +3,13 @@ package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.*;
 import java.time.LocalDate;
+import java.util.regex.Pattern;
 
 @Setter
 @Getter
@@ -46,7 +47,8 @@ public class InvestmentVehicle {
         MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
         MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
         MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
-        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less that 1");
+        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
+        validateTenure(tenure);
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be empty or less than zero");
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
@@ -57,5 +59,12 @@ public class InvestmentVehicle {
     public void setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setStartDate(LocalDate.now());
+    }
+
+    public void validateTenure(int tenure) throws MeedlException {
+        boolean patternMatches = Pattern.matches("^-?\\d{1,3}$", String.valueOf(tenure));
+        if (!patternMatches) {
+            throw new MeedlException("Tenure must not be greater than 3 digits");
+        }
     }
 }

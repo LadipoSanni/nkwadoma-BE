@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loan;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 
 public interface LoanOfferUseCase {
@@ -9,4 +10,6 @@ public interface LoanOfferUseCase {
     Page<LoanOffer> viewAllLoanOffers(String userId,int pageSize , int pageNumber) throws MeedlException;
     LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException;
     LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException;
+
+    Page<LoanOffer> viewAllLoanOffersInOrganization(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 }

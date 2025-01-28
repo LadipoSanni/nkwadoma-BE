@@ -302,6 +302,14 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         return null;
     }
 
+    @Override
+    public Page<LoanOffer> viewAllLoanOffersInOrganization(String organizationId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return loanOfferOutputPort.findLoanOfferInOrganization(organizationId, pageSize, pageNumber);
+    }
+
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
         //this and the template would be done on another branch
     }
