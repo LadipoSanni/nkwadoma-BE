@@ -23,11 +23,10 @@ public interface LoanMetricsMapper {
 
     @Mapping(target = "firstName", source = "userIdentity.firstName")
     @Mapping(target = "lastName", source = "userIdentity.lastName")
-    @Mapping(target = "cohortName", source = "cohortName")
-    @Mapping(target = "programName", source = "programName")
     @Mapping(target = "deposit", source = "loaneeLoanDetail.initialDeposit")
     @Mapping(target = "offerDate", source = "dateTimeOffered")
     @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
+    @Mapping(target = "loanProductName", source = "loanProduct.name")
     LoanLifeCycle mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
 
 
@@ -37,7 +36,7 @@ public interface LoanMetricsMapper {
     @Mapping(target = "programName", source = "programName")
     @Mapping(target = "amountRequested", source = "loanAmountRequested")
     @Mapping(target = "deposit", source = "initialDeposit")
-    @Mapping(target = "createdDate", source = "createdDate")
+    @Mapping(target = "requestedDate", source = "createdDate")
     @Mapping(target = "startDate", source = "cohortStartDate")
     LoanLifeCycle mapLoanRequestToLoanLifeCycles(LoanRequest loanRequest);
 
@@ -46,7 +45,7 @@ public interface LoanMetricsMapper {
     @Mapping(target = "lastName", source = "lastName")
     @Mapping(target = "cohortName", source = "cohortName")
     @Mapping(target = "programName", source = "programName")
-    @Mapping(target = "amountRequested", source = "amountRequested")
+    @Mapping(target = "amountRequested", source = "loanAmountRequested")
     @Mapping(target = "offerDate", source = "offerDate")
     @Mapping(target = "deposit", source = "initialDeposit")
     @Mapping(target = "startDate", source = "startDate")

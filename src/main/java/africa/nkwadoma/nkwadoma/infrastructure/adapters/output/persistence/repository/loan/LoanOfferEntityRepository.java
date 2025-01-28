@@ -83,6 +83,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            l.loaneeLoanDetail.amountRequested AS amountRequested,
            lo.amountApproved AS amountApproved,
            lp.name AS loanProductName
+               
     FROM LoanOfferEntity lo 
     JOIN lo.loanee l
     JOIN l.userIdentity u
@@ -90,17 +91,16 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     JOIN ProgramEntity p ON p.id = c.programId
     JOIN lo.loanProduct lp
     WHERE 
-        (LOWER(u.firstName) LIKE LOWER(CONCAT(:name, '%')) 
-         OR LOWER(u.lastName) LIKE LOWER(CONCAT(:name, '%')))
+        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
         AND c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
-        AND lo.loaneeResponse <> :response
+        AND lo.loaneeResponse is null 
     """)
     Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
             @Param("programId") String programId,
             @Param("organizationId") String organizationId,
             @Param("name") String name,
-            @Param("response")LoanDecision loanDecision,
             Pageable pageRequest
     );
 

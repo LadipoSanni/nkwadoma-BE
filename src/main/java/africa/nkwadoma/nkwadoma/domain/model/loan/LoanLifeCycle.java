@@ -16,10 +16,12 @@ public class LoanLifeCycle {
     private String lastName;
     private String programName;
     private String cohortName;
+    private String loanProductName;
     private LocalDate startDate;
     private LocalDate offerDate;
     private BigDecimal deposit;
     private BigDecimal amountRequested;
     private LocalDateTime requestedDate;
     private LocalDateTime createdDate;
+    private BigDecimal amountApproved;
 }

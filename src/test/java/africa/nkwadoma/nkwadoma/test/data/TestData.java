@@ -250,4 +250,17 @@ public class TestData {
         nextOfKin.setLoanee(loanee);
         return nextOfKin;
     }
+
+    public static LoanLifeCycle createLoanLifeCycle() {
+        LoanLifeCycle loanLifeCycle = new LoanLifeCycle();
+        loanLifeCycle.setCohortName("Cohort");
+        loanLifeCycle.setDeposit(BigDecimal.valueOf(5000));
+        loanLifeCycle.setAmountRequested(BigDecimal.valueOf(5000));
+        loanLifeCycle.setProgramName("Program");
+        loanLifeCycle.setOfferDate(LocalDate.now());
+        loanLifeCycle.setFirstName("Ahmad");
+        loanLifeCycle.setLastName("Awwal");
+        loanLifeCycle.setStartDate(LocalDate.now());
+        return loanLifeCycle;
+    }
 }

@@ -60,10 +60,11 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
 
     @Query("""
     SELECT lo.id AS id,
+           lo.startDate as startDate,
            u.firstName AS firstName,
            u.lastName AS lastName,
-           lof.dateTimeOffered AS dateTimeOffered,
-           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           lof.dateTimeOffered AS offerDate,
+           l.loaneeLoanDetail.amountRequested AS loanAmountRequested,
            l.loaneeLoanDetail.initialDeposit AS initialDeposit,
            c.name AS cohortName,
            p.name AS programName
@@ -75,8 +76,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
     JOIN ProgramEntity p ON p.id = c.programId
         JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
     WHERE 
-        (LOWER(u.firstName) LIKE LOWER(CONCAT(:name, '%')) 
-         OR LOWER(u.lastName) LIKE LOWER(CONCAT(:name, '%')))
+        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
         AND c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
     """)

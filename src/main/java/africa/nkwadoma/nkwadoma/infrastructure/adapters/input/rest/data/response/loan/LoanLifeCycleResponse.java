@@ -21,6 +21,8 @@ public class LoanLifeCycleResponse {
     private LocalDate offerDate;
     private BigDecimal deposit;
     private BigDecimal amountRequested;
+    private BigDecimal amountApproved;
     private LocalDateTime requestedDate;
     private LocalDateTime createdDate;
+    private String loanProductName;
 }

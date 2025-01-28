@@ -87,8 +87,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.
-                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,
-                                LoanDecision.ACCEPTED,pageRequest);
+                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,pageRequest);
 
         return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }

@@ -60,12 +60,13 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
 
     @Query("""
     SELECT lr.id AS id,
+           lr.createdDate AS createdDate,
            u.firstName AS firstName,
            u.lastName AS lastName,
-           lr.createdDate AS createdDate,
-           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           l.loaneeLoanDetail.amountRequested AS loanAmountRequested,
            l.loaneeLoanDetail.initialDeposit AS initialDeposit,
            c.name AS cohortName,
+           c.startDate AS cohortStartDate,
            p.name AS programName
                
     FROM LoanRequestEntity lr 
@@ -74,8 +75,8 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
     JOIN CohortEntity c ON c.id = l.cohortId
     JOIN ProgramEntity p ON p.id = c.programId
     WHERE 
-        (LOWER(u.firstName) LIKE LOWER(CONCAT(:name, '%')) 
-         OR LOWER(u.lastName) LIKE LOWER(CONCAT(:name, '%')))
+        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
         AND c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
         AND lr.status <> 'APPROVED'
