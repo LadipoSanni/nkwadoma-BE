@@ -89,8 +89,9 @@ public class AdminInitializer {
             log.info("Creating first organization identity {}", organizationIdentity);
             if(foundOrganization.isEmpty()) {
                 savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
-            }else savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
-            log.info("Saving organization identity {}", organizationIdentity);
+            }
+            else savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+            log.info("Saving organization identity {}", savedOrganizationIdentity);
         } catch (MeedlException exception) {
             log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
             savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -98,10 +99,10 @@ public class AdminInitializer {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        log.info("Organization employee identity {}", employeeIdentity.getMeedlUser());
 
         try{
-
-        employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
         } catch(DataIntegrityViolationException dataIntegrityViolationException){
             log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
         }
@@ -137,7 +138,7 @@ public class AdminInitializer {
         } finally {
             log.info("First user after finding, before saving to db: {}", foundUserIdentity);
             if (ObjectUtils.isEmpty(foundUserIdentity)) {
-                saveUserToDB(userIdentity);
+                userIdentity = saveUserToDB(userIdentity);
             }else {
                 log.info("First user already exists");
             }
@@ -145,10 +146,9 @@ public class AdminInitializer {
         return userIdentity;
     }
 
-    private void saveUserToDB(UserIdentity userIdentity) throws MeedlException {
+    private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
             try {
-                userIdentityOutputPort.save(userIdentity);
-                log.info("First user created successfully");
+                return userIdentityOutputPort.save(userIdentity);
             } catch (MeedlException e) {
                 log.error("Unable to save user to identity manager, error : {}", e.getMessage());
                 throw new MeedlException("Unable to save user to data base, error : " + e.getMessage());
