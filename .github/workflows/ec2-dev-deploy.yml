@@ -140,7 +140,7 @@ jobs:
       
           # Pull the latest Docker image
           echo "Pulling the latest image..."
-          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma@sha256:975298f8f8571450b7b52dca08b0eb6ca9545f10af1dd6d3601a07ecf8d51950
           # Free port 8768 if it's in use
           echo "Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
