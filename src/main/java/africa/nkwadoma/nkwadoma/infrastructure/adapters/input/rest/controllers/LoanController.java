@@ -296,7 +296,7 @@ public class LoanController {
         LoanOffer loanOffer = new LoanOffer();
         loanOffer.setProgramId(programId);
         loanOffer.setOrganizationId(organizationId);
-        loanOffer.setStatus(status);
+        loanOffer.setType(status);
         loanOffer.setName(name);
         loanOffer.setPageSize(pageSize);
         loanOffer.setPageNumber(pageNumber);
@@ -312,5 +312,33 @@ public class LoanController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @GetMapping("/filter-by-program")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> filterLoanByProgram(@RequestParam @NotBlank(message = "Program id is required") String programId,
+                                                              @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
+                                                              @RequestParam LoanType type,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setProgramId(programId);
+        loanOffer.setOrganizationId(organizationId);
+        loanOffer.setType(type);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setPageNumber(pageNumber);
+        Page<LoanDetail> loanDetails = loanOfferUseCase.filterLoanByProgram(loanOffer);
+        List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
+        PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
+                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
 }
