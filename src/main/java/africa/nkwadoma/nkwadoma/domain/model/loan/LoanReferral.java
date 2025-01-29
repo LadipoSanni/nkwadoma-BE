@@ -39,6 +39,11 @@ public class LoanReferral {
     private String programName;
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
 
+    public void validateLoanReferralStatus() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanReferralStatus, LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateLoanDecision(loanReferralStatus.name());
+    }
+
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferralStatus);
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), "Alternate Contact Address is required");
