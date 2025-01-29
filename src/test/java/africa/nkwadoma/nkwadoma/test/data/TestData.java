@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
@@ -126,8 +127,8 @@ public class TestData {
                 createdAt(LocalDateTime.now()).programStartDate(LocalDate.now()).build();
     }
 
-    public static LoanDetail createLoanDetail(){
-      return LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
+    public static africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail createLoanDetail(){
+      return africa.nkwadoma.nkwadoma.domain.model.education.LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
                 .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
                 .lastMonthActual(BigDecimal.valueOf(200)).totalAmountDisbursed(BigDecimal.valueOf(50000))
                 .totalOutstanding(BigDecimal.valueOf(450)).build();
@@ -228,6 +229,12 @@ public class TestData {
         loanOffer.setLoanee(loanee);
         loanOffer.setUserId(id);
         loanOffer.setId(id);
+        loanOffer.setProgramId(id);
+        loanOffer.setOrganizationId(id);
+        loanOffer.setStatus(LoanType.LOAN_OFFER);
+        loanOffer.setName("ojo");
+        loanOffer.setPageSize(10);
+        loanOffer.setPageNumber(0);
         return loanOffer;
     }
 
@@ -251,16 +258,16 @@ public class TestData {
         return nextOfKin;
     }
 
-    public static LoanDetails createLoanLifeCycle() {
-        LoanDetails loanDetails = new LoanDetails();
-        loanDetails.setCohortName("Cohort");
-        loanDetails.setDeposit(BigDecimal.valueOf(5000));
-        loanDetails.setAmountRequested(BigDecimal.valueOf(5000));
-        loanDetails.setProgramName("Program");
-        loanDetails.setOfferDate(LocalDate.now());
-        loanDetails.setFirstName("Ahmad");
-        loanDetails.setLastName("Awwal");
-        loanDetails.setStartDate(LocalDate.now());
-        return loanDetails;
+    public static LoanDetail createLoanLifeCycle() {
+        LoanDetail loanDetail = new LoanDetail();
+        loanDetail.setCohortName("Cohort");
+        loanDetail.setDeposit(BigDecimal.valueOf(5000));
+        loanDetail.setAmountRequested(BigDecimal.valueOf(5000));
+        loanDetail.setProgramName("Program");
+        loanDetail.setOfferDate(LocalDate.now());
+        loanDetail.setFirstName("Ahmad");
+        loanDetail.setLastName("Awwal");
+        loanDetail.setStartDate(LocalDate.now());
+        return loanDetail;
     }
 }

@@ -293,8 +293,14 @@ public class LoanController {
                                                      @RequestParam @NotBlank(message = "Loanee name is required") String name,
                                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-
-        Page<LoanDetails> loanDetails = loanOfferUseCase.searchLoan(programId,organizationId,status,name,pageSize,pageNumber);
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setProgramId(programId);
+        loanOffer.setOrganizationId(organizationId);
+        loanOffer.setStatus(status);
+        loanOffer.setName(name);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setPageNumber(pageNumber);
+        Page<LoanDetail> loanDetails = loanOfferUseCase.searchLoan(loanOffer);
         List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
         PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
                 loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize

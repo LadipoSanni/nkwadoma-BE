@@ -77,17 +77,17 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> searchLoanOffer(String programId, String organizationId, String name, int pageSize,
-                                           int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(name, LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+    public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectName(loanOffer.getName(), LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(loanOffer.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loanOffer.getPageNumber(), loanOffer.getPageSize());
         Page<LoanOfferProjection> loanOfferProjections =
                 loanOfferEntityRepository.
-                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(programId,organizationId,name,pageRequest);
+                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(loanOffer.getProgramId(),
+                                loanOffer.getOrganizationId(), loanOffer.getName(), pageRequest);
 
         return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }

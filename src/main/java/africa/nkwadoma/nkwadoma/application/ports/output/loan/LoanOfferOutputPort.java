@@ -17,5 +17,5 @@ public interface LoanOfferOutputPort {
 
     Page<LoanOffer> findAllLoanOffers(int pageSize, int pageNumber) throws MeedlException;
 
-    Page<LoanOffer> searchLoanOffer(String programId, String organizationId, String name, int pageSize, int pageNumber) throws MeedlException;
+    Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException;
 }

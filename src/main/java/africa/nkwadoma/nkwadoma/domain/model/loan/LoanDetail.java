@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class LoanDetails {
+public class LoanDetail {
 
 
     private String firstName;
