@@ -44,6 +44,7 @@ public enum IdentityMessages {
     ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists"),
     LOAN_0FFER_ID("Loan offer ID"),
     CONTEXT_LINK("loanOfferId"),
+    CONTEXT_LOANEE_ID("loaneeId"),
     LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee");
 
     public String format(Object... args) {

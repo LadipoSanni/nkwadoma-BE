@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -57,6 +58,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
+    private final SendColleagueEmailUseCase sendColleagueEmailUseCase;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -318,6 +320,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
+        portfolioManagers.forEach(portfolioManager -> {
+            sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer);
+        });
         //this and the template would be done on another branch
     }
 
