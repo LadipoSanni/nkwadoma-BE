@@ -128,6 +128,8 @@ class CohortPersistenceAdapterTest {
             meedleUserId = meedleUser.getId();
             program.setCreatedBy(meedleUserId);
             program2.setCreatedBy(meedleUserId);
+            program.setOrganizationIdentity(organizationIdentity);
+            program2.setOrganizationIdentity(organizationIdentity);
             program = programOutputPort.saveProgram(program);
             program2 = programOutputPort.saveProgram(program2);
             log.info("Program saved {}",program);

@@ -196,7 +196,7 @@ class LoanReferralAdapterTest {
                     referral.get().getLoanee().getUserIdentity().getAlternateContactAddress());
             assertEquals("Elite", referral.get().getCohortName());
             assertEquals(cohort.getStartDate(), referral.get().getCohortStartDate());
-            assertEquals("Data Analytics", referral.get().getProgramName());
+            assertEquals("Data Analytics test", referral.get().getProgramName());
             assertEquals("loanee-img.png", referral.get().getLoaneeImage());
             assertNotNull(referral.get().getTuitionAmount());
             assertNotNull(referral.get().getInitialDeposit());
@@ -209,6 +209,7 @@ class LoanReferralAdapterTest {
 
     @Test
     void viewLoanReferralWithTrailingAndLeadingSpaces() {
+        log.info("Loan referral id : {}", loanReferralId);
         assertThrows(MeedlException.class, ()->
                 loanReferralOutputPort.findLoanReferralById(loanReferralId.concat(StringUtils.SPACE)));
     }

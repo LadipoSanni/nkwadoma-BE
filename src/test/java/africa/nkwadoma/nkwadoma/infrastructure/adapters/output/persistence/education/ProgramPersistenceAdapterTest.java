@@ -229,7 +229,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedOrganization);
 
             dataScience.setCreatedBy(foundUserIdentity.getCreatedBy());
-
+            dataScience.setOrganizationIdentity(savedOrganization);
             assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataScience));
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
@@ -454,14 +454,19 @@ class ProgramPersistenceAdapterTest {
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
             dataAnalyticsProgramId = savedProgram.getId();
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            Cohort cohort = TestData.createCohortData("Cohort test", dataScienceProgramId, organizationId,
+                    loanBreakdowns, userId);
 
-            elites.setProgramId(dataAnalyticsProgramId);
-            savedCohort = cohortOutputPort.save(elites);
+            cohort.setProgramId(dataAnalyticsProgramId);
+            savedCohort = cohortOutputPort.save(cohort);
             assertNotNull(savedCohort);
 
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
             savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
             assertNull(savedCohort);
+            cohortOutputPort.deleteCohort(cohort.getProgramId());
         } catch (MeedlException e) {
             log.error("Error while creating program {}", e.getMessage());
         }

@@ -63,6 +63,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
+        log.info("Saving program with name: {}", program.getName());
         ProgramPersistenceAdapter.validateServiceOfferings(program.getOrganizationIdentity().getServiceOfferings());
         log.info("Program at persistence layer: ========>{}", program);
         OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(program.getOrganizationIdentity());
@@ -141,6 +142,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         Program program = programMapper.toProgram(programEntity);
         program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
+        program.setOrganizationIdentity(
+                organizationIdentityMapper.toOrganizationIdentity(programEntity.getOrganizationIdentity()));
+        log.info("Program found id: {}, for organization with id : {} :: {}", program.getId(), program.getOrganizationIdentity().getId(), program.getOrganizationIdentity().getServiceOfferings());
         return program;
     }
 
@@ -153,8 +157,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
         log.info("Validating service offerings: {}", serviceOfferings);
-        if(CollectionUtils.isEmpty(serviceOfferings) ||
-                !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+        if (CollectionUtils.isEmpty(serviceOfferings)) {
+            log.error("No service offerings found");
+            throw new EducationException("No service offerings found");
+        }
+        if(!serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+            log.error("Service offering was not valid for saving program");
             throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());
         }
     }
