@@ -129,6 +129,7 @@ class LoanReferralAdapterTest {
                     programOutputPort.deleteProgram(foundProgram.getId());
                 }
             }
+            dataAnalytics.setOrganizationIdentity(amazingGrace);
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             programId = savedProgram.getId();
 
