@@ -9,4 +9,6 @@ public interface LoanRequestUseCase {
 //    Page<LoanRequest> viewAllLoanRequestsByOrganizationId(LoanRequest loanRequest) throws MeedlException;
     LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException;
     LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException;
+
+
 }
