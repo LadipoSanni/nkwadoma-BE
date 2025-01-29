@@ -508,6 +508,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(loanee);
             assertNotNull(loanee.getUserIdentity());
             assertNotNull(loanee.getLoaneeLoanDetail());
+            assertNotNull(loanee.getLoanBreakdowns());
             loaneeId = loanee.getId();
             loaneeUserId = loanee.getUserIdentity().getId();
             loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
@@ -520,12 +521,10 @@ class ProgramPersistenceAdapterTest {
     @AfterAll
     void tearDown() {
         try {
-            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
-            loaneeBreakdowns.forEach(loaneeBreakdown -> {
-                if (StringUtils.isNotEmpty(loaneeBreakdown.getLoaneeLoanBreakdownId())) {
-                    loaneeLoanBreakDownRepository.deleteById(loaneeBreakdown.getLoaneeLoanBreakdownId());
-                }
-            });
+            if (StringUtils.isNotEmpty(loaneeId)) {
+                loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+            }
+
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(loaneeUserId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());

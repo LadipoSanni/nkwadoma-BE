@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
 
@@ -81,17 +82,16 @@ public class AdminInitializer {
         organizationIdentity.setEnabled(Boolean.TRUE);
         organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
         organizationIdentity.setStatus(ActivationStatus.ACTIVE);
-
+        Optional<OrganizationEntity> foundOrganization = organizationIdentityOutputPort.findByRcNumber(organizationIdentity.getRcNumber());
+        organizationIdentity = getKeycloakOrganizationIdentity(organizationIdentity, foundOrganization);
+        OrganizationIdentity savedOrganizationIdentity;
         try {
-            organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
-        } catch (MeedlException exception) {
-            log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
-            ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
-            organizationIdentity.setId(foundClient.getId());
-        }
-        OrganizationIdentity savedOrganizationIdentity = null;
-        try {
-            savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            log.info("Creating first organization identity {}", organizationIdentity);
+            if(foundOrganization.isEmpty()) {
+                savedOrganizationIdentity = organizationIdentityOutputPort.save(organizationIdentity);
+            }
+            else savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
+            log.info("Saving organization identity {}", savedOrganizationIdentity);
         } catch (MeedlException exception) {
             log.warn("Failed to create organization identity on db for first organization {}", exception.getMessage());
             savedOrganizationIdentity = organizationIdentityOutputPort.findByEmail(organizationIdentity.getEmail());
@@ -99,10 +99,10 @@ public class AdminInitializer {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         employeeIdentity.setOrganization(organizationIdentity.getId());
         employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        log.info("Organization employee identity {}", employeeIdentity.getMeedlUser());
 
         try{
-
-        employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
         } catch(DataIntegrityViolationException dataIntegrityViolationException){
             log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
         }
@@ -111,6 +111,21 @@ public class AdminInitializer {
         log.info("Created organization identity: {} , employee is : {}", organizationIdentity, savedOrganizationIdentity.getOrganizationEmployees().get(0));
         return savedOrganizationIdentity;
     }
+
+    private OrganizationIdentity getKeycloakOrganizationIdentity(OrganizationIdentity organizationIdentity, Optional<OrganizationEntity> foundOrganization) throws MeedlException {
+        try {
+            if (foundOrganization.isEmpty()) {
+                log.info("Creating first organization identity");
+                organizationIdentity = identityManagerOutPutPort.createKeycloakClient(organizationIdentity);
+            }
+        } catch (MeedlException exception) {
+            log.warn("Failed to create organization identity's client representation for first organization {}", exception.getMessage());
+            ClientRepresentation foundClient = identityManagerOutPutPort.getClientRepresentationByClientId(organizationIdentity.getName());
+            organizationIdentity.setId(foundClient.getId());
+        }
+        return organizationIdentity;
+    }
+
     public UserIdentity inviteFirstUser(UserIdentity userIdentity) throws MeedlException {
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = saveUserToKeycloak(userIdentity);
@@ -123,18 +138,18 @@ public class AdminInitializer {
         } finally {
             log.info("First user after finding, before saving to db: {}", foundUserIdentity);
             if (ObjectUtils.isEmpty(foundUserIdentity)) {
-                saveUserToDB(userIdentity);
+                userIdentity = saveUserToDB(userIdentity);
             }else {
+                userIdentity = foundUserIdentity;
                 log.info("First user already exists");
             }
         }
         return userIdentity;
     }
 
-    private void saveUserToDB(UserIdentity userIdentity) throws MeedlException {
+    private UserIdentity saveUserToDB(UserIdentity userIdentity) throws MeedlException {
             try {
-                userIdentityOutputPort.save(userIdentity);
-                log.info("First user created successfully");
+                return userIdentityOutputPort.save(userIdentity);
             } catch (MeedlException e) {
                 log.error("Unable to save user to identity manager, error : {}", e.getMessage());
                 throw new MeedlException("Unable to save user to data base, error : " + e.getMessage());

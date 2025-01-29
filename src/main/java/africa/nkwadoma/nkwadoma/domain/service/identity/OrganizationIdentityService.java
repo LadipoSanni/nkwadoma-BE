@@ -150,7 +150,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private OrganizationIdentity createOrganizationIdentityOnKeycloak(OrganizationIdentity organizationIdentity) throws MeedlException {
         OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
-        organizationIdentity = identityManagerOutPutPort.createOrganization(organizationIdentity);
+        organizationIdentity = identityManagerOutPutPort.createKeycloakClient(organizationIdentity);
         log.info("OrganizationEmployeeIdentity created on keycloak ---------- {}", employeeIdentity);
         UserIdentity newUser = identityManagerOutPutPort.createUser(employeeIdentity.getMeedlUser());
         log.info("User identity created for this organization. User id: {}. User is new admin", newUser.getId());
