@@ -26,7 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.PORTFOLIO_MANAGER;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.EMPTY_INPUT_FIELD_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -145,7 +144,7 @@ class KeycloakAdapterTest {
     @Order(3)
     void createClient(){
         try {
-            OrganizationIdentity organizationIdentity = identityManagementOutputPort.createOrganization(rizzGallery);
+            OrganizationIdentity organizationIdentity = identityManagementOutputPort.createKeycloakClient(rizzGallery);
             assertNotNull(organizationIdentity);
             assertNotNull(organizationIdentity.getId());
             log.info(organizationIdentity.getId());
@@ -157,7 +156,7 @@ class KeycloakAdapterTest {
     }
     @Test
     void createClientWithNullOrganizationIdentity(){
-        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createOrganization(null));
+        assertThrows(MeedlException.class,()-> identityManagementOutputPort.createKeycloakClient(null));
     }
     @Test
     @Order(4)
