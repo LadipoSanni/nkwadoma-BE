@@ -53,6 +53,7 @@ public class LoanOfferServiceTest {
     private LoanOffer loanOffer;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
+    private Loan loan;
     private Loanee loanee;
     private LoanProduct loanProduct;
     private LoanLifeCycle loanLifeCycle;
@@ -83,6 +84,8 @@ public class LoanOfferServiceTest {
     private  ProgramOutputPort programOutputPort;
     @Mock
     private LoanMetricsMapper loanMetricsMapper;
+    @Mock
+    private LoanOutputPort loanOutputPort;
 
     @BeforeEach
     void setUpLoanOffer() {
@@ -98,6 +101,7 @@ public class LoanOfferServiceTest {
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
         program = TestData.createProgramTestData("program name");
         loanLifeCycle = TestData.createLoanLifeCycle();
+        loan = TestData.createTestLoan(loanee);
     }
 
     @Test
@@ -236,6 +240,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanOffers() {
+        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
         try {
             program.setId(mockId);
             program.setCreatedBy(loaneeId);
@@ -245,7 +250,7 @@ public class LoanOfferServiceTest {
             )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
             when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
                     .thenReturn(loanOffers);
-            Page<LoanLifeCycle> loanLifeCycles = loanService.searchLoan(
+            loanLifeCycles = loanService.searchLoan(
                     program.getId(),
                     mockId,
                     LoanType.LOAN_OFFER,
@@ -263,14 +268,25 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanRequest(){
-        Page<LoanLifeCycle> loanLifeCycles = new PageImpl<>(List.of(TestData.createLoanLifeCycle()));
+        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
         try {
-            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
-            when(programOutputPort.findCreatorOrganization(mockId)).thenReturn(new OrganizationIdentity());
-            when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
-                    .thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanLifeCycles = loanService.searchLoan(program.getId(),mockId, LoanType.LOAN_OFFER,"j",10,0);
-        }catch (MeedlException meedlException){
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<LoanRequest> loanRequests = new PageImpl<>(List.of(loanRequest));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanRequestOutputPort.searchLoanRequest(program.getId(),mockId,"j",10,0))
+                    .thenReturn(loanRequests);
+            loanLifeCycles = loanService.searchLoan(
+                    program.getId(),
+                    mockId,
+                    LoanType.LOAN_REQUEST,
+                    "j",
+                    10,
+                    0
+            );
+        } catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }
         assertEquals(1, loanLifeCycles.getSize());
@@ -278,14 +294,25 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanDisbursal(){
-        Page<LoanLifeCycle> loanLifeCycles = new PageImpl<>(List.of(TestData.createLoanLifeCycle()));
+        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
         try {
-            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
-            when(programOutputPort.findCreatorOrganization(mockId)).thenReturn(new OrganizationIdentity());
-            when(loanOfferOutputPort.searchLoanOffer(program.getId(),mockId,"j",10,0))
-                    .thenReturn(new PageImpl<>(List.of(loanOffer)));
-            loanLifeCycles = loanService.searchLoan(program.getId(),mockId, LoanType.LOAN_OFFER,"j",10,0);
-        }catch (MeedlException meedlException){
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<Loan> loans = new PageImpl<>(List.of(loan));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanOutputPort.searchLoan(program.getId(),mockId,"j",10,0))
+                    .thenReturn(loans);
+            loanLifeCycles = loanService.searchLoan(
+                    program.getId(),
+                    mockId,
+                    LoanType.LOAN_DISBURSAL,
+                    "j",
+                    10,
+                    0
+            );
+        } catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }
         assertEquals(1, loanLifeCycles.getSize());

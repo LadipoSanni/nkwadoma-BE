@@ -384,7 +384,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private Page<LoanLifeCycle> searchResult(String programId, String organizationId, LoanType status, String name, int pageSize, int pageNumber) throws MeedlException {
-        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+        Page<LoanLifeCycle> loanLifeCycles;
         if (status.equals(LoanType.LOAN_OFFER)){
             Page<LoanOffer> loanOffers = loanOfferOutputPort.searchLoanOffer(programId, organizationId, name, pageSize, pageNumber);
             loanLifeCycles = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
@@ -400,7 +400,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             loanLifeCycles = loans.map(loanMetricsMapper::mapToLoans);
             return loanLifeCycles;
         }
-        return loanLifeCycles;
+        throw new LoanException(status.name()+" is not a loan type");
     }
 
 
