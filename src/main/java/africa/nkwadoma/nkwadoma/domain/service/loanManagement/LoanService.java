@@ -200,13 +200,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus(),
-                LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
+        MeedlValidator.validateUUID(loanReferral.getId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
+
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
         log.info("Found Loan Referral: {}", foundLoanReferral);
-        foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
-        return foundLoanReferral;
+        checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
+        loanReferral.validateLoanReferralStatus();
+
+        return updateLoanReferral(loanReferral, foundLoanReferral);
+    }
+
+    private void checkLoanReferralHasBeenAcceptedOrDeclined(LoanReferral foundLoanReferral) throws MeedlException {
+        if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.AUTHORIZED)) {
+            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_ACCEPTED.getMessage());
+        }
+        else if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.UNAUTHORIZED)) {
+            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_DECLINED.getMessage());
+        }
     }
 
     private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
