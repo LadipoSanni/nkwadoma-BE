@@ -294,12 +294,12 @@ public class LoanController {
                                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Page<LoanLifeCycle> loanLifeCycles = loanOfferUseCase.searchLoan(programId,organizationId,status,name,pageSize,pageNumber);
-        List<LoanLifeCycleResponse> loanLifeCycleResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanLifeCycles);
-        PaginatedResponse<LoanLifeCycleResponse> paginatedResponse = new PaginatedResponse<>(
-                loanLifeCycleResponses,loanLifeCycles.hasNext(),loanLifeCycles.getTotalPages(),pageNumber,pageSize
+        Page<LoanDetails> loanDetails = loanOfferUseCase.searchLoan(programId,organizationId,status,name,pageSize,pageNumber);
+        List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
+        PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
+                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize
         );
-        ApiResponse<PaginatedResponse<LoanLifeCycleResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanLifeCycleResponse>>builder()
+        ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
                 .data(paginatedResponse)
                 .message(ALL_LOAN)
                 .statusCode(HttpStatus.OK.toString())

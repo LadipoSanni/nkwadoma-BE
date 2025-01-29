@@ -1,7 +1,5 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
+package africa.nkwadoma.nkwadoma.domain.model.loan;
 
-
-import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,20 +7,21 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
-public class LoanLifeCycleResponse {
+@Setter
+public class LoanDetails {
+
 
     private String firstName;
     private String lastName;
     private String programName;
     private String cohortName;
+    private String loanProductName;
     private LocalDate startDate;
     private LocalDate offerDate;
     private BigDecimal deposit;
     private BigDecimal amountRequested;
-    private BigDecimal amountApproved;
     private LocalDateTime requestedDate;
     private LocalDateTime createdDate;
-    private String loanProductName;
+    private BigDecimal amountApproved;
 }

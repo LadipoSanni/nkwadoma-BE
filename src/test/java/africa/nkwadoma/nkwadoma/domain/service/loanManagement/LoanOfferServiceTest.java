@@ -56,7 +56,7 @@ public class LoanOfferServiceTest {
     private Loan loan;
     private Loanee loanee;
     private LoanProduct loanProduct;
-    private LoanLifeCycle loanLifeCycle;
+    private LoanDetails loanDetails;
     private Program program;
     private Vendor vendor;
     private UserIdentity userIdentity;
@@ -100,7 +100,7 @@ public class LoanOfferServiceTest {
         loanProduct = TestData.buildTestLoanProduct("loanProduct",vendor);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
         program = TestData.createProgramTestData("program name");
-        loanLifeCycle = TestData.createLoanLifeCycle();
+        loanDetails = TestData.createLoanLifeCycle();
         loan = TestData.createTestLoan(loanee);
     }
 
@@ -240,7 +240,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanOffers() {
-        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+        Page<LoanDetails> loanLifeCycles = Page.empty();
         try {
             program.setId(mockId);
             program.setCreatedBy(loaneeId);
@@ -268,7 +268,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanRequest(){
-        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+        Page<LoanDetails> loanLifeCycles = Page.empty();
         try {
             program.setId(mockId);
             program.setCreatedBy(loaneeId);
@@ -294,7 +294,7 @@ public class LoanOfferServiceTest {
 
     @Test
     void searchLoanDisbursal(){
-        Page<LoanLifeCycle> loanLifeCycles = Page.empty();
+        Page<LoanDetails> loanLifeCycles = Page.empty();
         try {
             program.setId(mockId);
             program.setCreatedBy(loaneeId);

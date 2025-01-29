@@ -13,6 +13,6 @@ public interface LoanOfferUseCase {
 
     Page<LoanOffer> viewAllLoanOffersInOrganization(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
-    Page<LoanLifeCycle> searchLoan(String programId, String organizationId,
-                                   LoanType status, String name, int pageSize, int pageNumber) throws MeedlException;
+    Page<LoanDetails> searchLoan(String programId, String organizationId,
+                                 LoanType status, String name, int pageSize, int pageNumber) throws MeedlException;
 }

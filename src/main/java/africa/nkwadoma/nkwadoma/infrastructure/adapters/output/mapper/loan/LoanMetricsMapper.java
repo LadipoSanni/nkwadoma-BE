@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import org.mapstruct.*;
-import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanMetricsMapper {
@@ -27,7 +26,7 @@ public interface LoanMetricsMapper {
     @Mapping(target = "offerDate", source = "dateTimeOffered")
     @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
     @Mapping(target = "loanProductName", source = "loanProduct.name")
-    LoanLifeCycle mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
+    LoanDetails mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
 
 
     @Mapping(target = "firstName", source = "firstName")
@@ -38,7 +37,7 @@ public interface LoanMetricsMapper {
     @Mapping(target = "deposit", source = "initialDeposit")
     @Mapping(target = "requestedDate", source = "createdDate")
     @Mapping(target = "startDate", source = "cohortStartDate")
-    LoanLifeCycle mapLoanRequestToLoanLifeCycles(LoanRequest loanRequest);
+    LoanDetails mapLoanRequestToLoanLifeCycles(LoanRequest loanRequest);
 
 
     @Mapping(target = "firstName", source = "firstName")
@@ -49,5 +48,5 @@ public interface LoanMetricsMapper {
     @Mapping(target = "offerDate", source = "offerDate")
     @Mapping(target = "deposit", source = "initialDeposit")
     @Mapping(target = "startDate", source = "startDate")
-    LoanLifeCycle mapToLoans(Loan loan);
+    LoanDetails mapToLoans(Loan loan);
 }

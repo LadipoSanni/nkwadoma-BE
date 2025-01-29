@@ -251,16 +251,16 @@ public class TestData {
         return nextOfKin;
     }
 
-    public static LoanLifeCycle createLoanLifeCycle() {
-        LoanLifeCycle loanLifeCycle = new LoanLifeCycle();
-        loanLifeCycle.setCohortName("Cohort");
-        loanLifeCycle.setDeposit(BigDecimal.valueOf(5000));
-        loanLifeCycle.setAmountRequested(BigDecimal.valueOf(5000));
-        loanLifeCycle.setProgramName("Program");
-        loanLifeCycle.setOfferDate(LocalDate.now());
-        loanLifeCycle.setFirstName("Ahmad");
-        loanLifeCycle.setLastName("Awwal");
-        loanLifeCycle.setStartDate(LocalDate.now());
-        return loanLifeCycle;
+    public static LoanDetails createLoanLifeCycle() {
+        LoanDetails loanDetails = new LoanDetails();
+        loanDetails.setCohortName("Cohort");
+        loanDetails.setDeposit(BigDecimal.valueOf(5000));
+        loanDetails.setAmountRequested(BigDecimal.valueOf(5000));
+        loanDetails.setProgramName("Program");
+        loanDetails.setOfferDate(LocalDate.now());
+        loanDetails.setFirstName("Ahmad");
+        loanDetails.setLastName("Awwal");
+        loanDetails.setStartDate(LocalDate.now());
+        return loanDetails;
     }
 }
