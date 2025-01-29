@@ -65,6 +65,8 @@ class LoanServiceTest {
     private LoaneeLoanAccount loaneeLoanAccount;
     private LoanMetrics loanMetrics;
     private OrganizationIdentity organizationIdentity;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
 
     @BeforeEach
@@ -288,6 +290,21 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error("Error viewing all loans: ", e);
         }
+    }
+
+    @Test
+    void viewAllLoan(){
+        Page<Loan> loans = Page.empty();
+        try{
+            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.viewAllLoans(pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
     }
 
 }
