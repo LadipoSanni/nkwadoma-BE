@@ -19,4 +19,34 @@ public interface LoanMetricsMapper {
     @Mapping(target = "id", source = "existingLoanMetrics.id")
     LoanMetrics updateLoanMetrics(LoanMetrics existingLoanMetrics, LoanMetrics updatedLoanMetrics);
 
+
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "deposit", source = "loaneeLoanDetail.initialDeposit")
+    @Mapping(target = "offerDate", source = "dateTimeOffered")
+    @Mapping(target = "amountRequested", source = "loaneeLoanDetail.amountRequested")
+    @Mapping(target = "loanProductName", source = "loanProduct.name")
+    LoanDetail mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
+
+
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "amountRequested", source = "loanAmountRequested")
+    @Mapping(target = "deposit", source = "initialDeposit")
+    @Mapping(target = "requestedDate", source = "createdDate")
+    @Mapping(target = "startDate", source = "cohortStartDate")
+    LoanDetail mapLoanRequestToLoanLifeCycles(LoanRequest loanRequest);
+
+
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "cohortName", source = "cohortName")
+    @Mapping(target = "programName", source = "programName")
+    @Mapping(target = "amountRequested", source = "loanAmountRequested")
+    @Mapping(target = "offerDate", source = "offerDate")
+    @Mapping(target = "deposit", source = "initialDeposit")
+    @Mapping(target = "startDate", source = "startDate")
+    LoanDetail mapToLoans(Loan loan);
 }

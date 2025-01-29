@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlPatterns;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Vendor;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ErrorMessages;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +30,7 @@ public class LoanProductRequest {
     @PositiveOrZero(message = "Cost of fund must be zero or positive")
     private double costOfFund;
     @NotBlank(message = LOAN_PRODUCT_NAME_REQUIRED)
+    @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.NAME_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
     @Size( max = 200, message = "Loan product name must not exceed 200 characters")
     private String name;
 

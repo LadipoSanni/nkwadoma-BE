@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -37,6 +38,12 @@ public class LoanOffer {
     private String programName;
     private int creditScore;
     private String termsAndCondition;
+    private String programId;
+    private String organizationId;
+    private LoanType status;
+    private String name;
+    private int pageSize;
+    private int pageNumber;
 
 
 

@@ -5,5 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 public interface LoanMetricsUseCase {
     LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException;
+
 }
 

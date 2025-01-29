@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
@@ -52,6 +53,7 @@ public class LoanController {
     private final LoanProductRestMapper loanProductMapper;
     private final LoaneeLoanAccountRestMapper loaneeLoanAccountRestMapper;
     private final LoanReferralRestMapper loanReferralRestMapper;
+    private final LoanMetricsRestMapper loanMetricsRestMapper;
 
     @PostMapping("/loan-product/create")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -281,6 +283,55 @@ public class LoanController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @GetMapping("/search-loan")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchLoan(@RequestParam @NotBlank(message = "Program id is required") String programId,
+                                                     @RequestParam @NotBlank(message = "Organization id is required") String organizationId,
+                                                     @RequestParam LoanType status,
+                                                     @RequestParam @NotBlank(message = "Loanee name is required") String name,
+                                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                     @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setProgramId(programId);
+        loanOffer.setOrganizationId(organizationId);
+        loanOffer.setStatus(status);
+        loanOffer.setName(name);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setPageNumber(pageNumber);
+        Page<LoanDetail> loanDetails = loanOfferUseCase.searchLoan(loanOffer);
+        List<LoanDetailsResponse> loanDetailsResponses = loanMetricsRestMapper.toLoanLifeCycleResponses(loanDetails);
+        PaginatedResponse<LoanDetailsResponse> paginatedResponse = new PaginatedResponse<>(
+                loanDetailsResponses,loanDetails.hasNext(),loanDetails.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanDetailsResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanDetailsResponse>>builder()
+                .data(paginatedResponse)
+                .message(ALL_LOAN)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
+    @GetMapping("/view-all-disbursal")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(pageSize,pageNumber);
+        log.info("Mapped Loan responses: {}", loans.getContent().toArray());
+        Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
+        log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
+        PaginatedResponse<LoanQueryResponse> paginatedResponse =
+                PaginatedResponse.<LoanQueryResponse>builder()
+                        .body(loanResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(loanResponses.getTotalPages())
+                        .hasNextPage(loanResponses.hasNext())
+                        .build();
+        return ResponseEntity.ok(new ApiResponse<>
+                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now()));
     }
 
 }

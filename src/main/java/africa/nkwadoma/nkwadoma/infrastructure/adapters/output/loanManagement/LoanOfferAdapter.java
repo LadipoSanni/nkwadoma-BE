@@ -1,7 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -70,5 +74,21 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
         Page<LoanOffer> mappedloanOffers = loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
         log.info("Mapped loans offers: {}", mappedloanOffers);
         return mappedloanOffers;
+    }
+
+    @Override
+    public Page<LoanOffer> searchLoanOffer(LoanOffer loanOffer) throws MeedlException {
+        MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectName(loanOffer.getName(), LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(loanOffer.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+        Pageable pageRequest = PageRequest.of(loanOffer.getPageNumber(), loanOffer.getPageSize());
+        Page<LoanOfferProjection> loanOfferProjections =
+                loanOfferEntityRepository.
+                        findAllLoanOfferByLoaneeNameInOrganizationAndProgram(loanOffer.getProgramId(),
+                                loanOffer.getOrganizationId(), loanOffer.getName(), pageRequest);
+
+        return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
 }

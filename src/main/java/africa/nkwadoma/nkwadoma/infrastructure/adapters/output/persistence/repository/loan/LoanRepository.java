@@ -55,4 +55,54 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
           where o.id = :organizationId
     """)
     Page<LoanProjection> findAllByOrganizationId(@Param("organizationId") String organizationId, Pageable pageable);
+
+
+
+    @Query("""
+    SELECT lo.id AS id,
+           lo.startDate as startDate,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           lof.dateTimeOffered AS offerDate,
+           l.loaneeLoanDetail.amountRequested AS loanAmountRequested,
+           l.loaneeLoanDetail.initialDeposit AS initialDeposit,
+           c.name AS cohortName,
+           p.name AS programName
+    
+    FROM LoanEntity lo
+    JOIN lo.loaneeEntity l
+    JOIN l.userIdentity u
+    JOIN CohortEntity c ON c.id = l.cohortId
+    JOIN ProgramEntity p ON p.id = c.programId
+        JOIN LoanOfferEntity lof ON lof.loanee.id = l.id
+    WHERE 
+        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+        AND c.programId = :programId
+        AND p.organizationIdentity.id = :organizationId
+    """)
+    Page<LoanProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram( @Param("programId") String programId,
+                                                                               @Param("organizationId") String organizationId,
+                                                                               @Param("name") String name, Pageable pageRequest);
+
+    @Query("""
+          select
+          le.id as id,
+          le.startDate as startDate,
+          l.userIdentity.firstName as firstName,
+          l.userIdentity.lastName as lastName,
+          l.loaneeLoanDetail.initialDeposit as initialDeposit,
+          lr.createdDate as createdDate, lr.loanAmountRequested as loanAmountRequested,
+          c.name as cohortName, c.startDate as cohortStartDate, loe.dateTimeOffered as offerDate,
+          p.name as programName
+    
+          from LoanEntity le
+          join LoaneeEntity l on le.loaneeEntity.id = l.id
+          join LoanRequestEntity lr on lr.loaneeEntity.id = l.id
+          join LoanOfferEntity loe on l.id = loe.loanee.id
+          join CohortEntity c on l.cohortId = c.id
+          join ProgramEntity p on c.programId = p.id
+          join OrganizationEntity o on p.organizationIdentity.id = o.id
+    """)
+    Page<LoanProjection> findAllLoan(Pageable pageRequest);
 }

@@ -44,4 +44,5 @@ public class LoanMetricsService implements LoanMetricsUseCase {
         log.info("Loan metrics saved successfully: {}", savedMetrics);
         return savedMetrics;
     }
+
 }

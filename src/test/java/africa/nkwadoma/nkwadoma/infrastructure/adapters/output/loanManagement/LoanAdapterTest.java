@@ -83,6 +83,8 @@ class LoanAdapterTest {
     private Program program;
     private NextOfKin nextOfKin;
     private String nextOfKinId;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeAll
     public void setUp(){
@@ -299,6 +301,19 @@ class LoanAdapterTest {
         assertEquals(loans.getContent().get(0).getCohortStartDate(), cohort.getStartDate());
         assertEquals(loans.getContent().get(0).getCohortName(), cohort.getName());
         assertEquals(loans.getContent().get(0).getProgramName(), program.getName());
+    }
+    @Test
+    @Order(5)
+    void findAllLoan(){
+        Page<Loan> loans = Page.empty();
+        try{
+            loans = loanOutputPort.findAllLoan(pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error finding loans : {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
     }
 
     @ParameterizedTest
