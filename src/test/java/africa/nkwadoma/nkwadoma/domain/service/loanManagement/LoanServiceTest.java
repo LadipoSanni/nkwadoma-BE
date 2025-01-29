@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -13,7 +12,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -65,6 +63,8 @@ class LoanServiceTest {
     private LoaneeLoanAccount loaneeLoanAccount;
     private LoanMetrics loanMetrics;
     private OrganizationIdentity organizationIdentity;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
 
     @BeforeEach
@@ -200,6 +200,19 @@ class LoanServiceTest {
         assertNotNull(referral);
         assertEquals(LoanReferralStatus.AUTHORIZED, referral.getLoanReferralStatus());
     }
+
+    @Test
+    void acceptLoanReferralThatHasAlreadyBeenAccepted() {
+        loanReferral.setLoanReferralStatus(LoanReferralStatus.AUTHORIZED);
+        try {
+            when(loanReferralOutputPort.findById(anyString())).thenReturn(loanReferral);
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
+        log.info("Exception message: {}", meedlException.getMessage());
+    }
+
     @Test
     void acceptNullLoanReferral() {
         assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(null));
@@ -208,6 +221,11 @@ class LoanServiceTest {
     @Test
     void respondToLoanReferralWithInvalidLoanReferralStatus() {
         loanReferral.setLoanReferralStatus(LoanReferralStatus.REJECTED);
+        try {
+            when(loanReferralOutputPort.findById(anyString())).thenReturn(loanReferral);
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
         assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
     }
 
@@ -260,12 +278,7 @@ class LoanServiceTest {
     @Test
     void acceptLoanReferralWithNullLoanReferralId() {
         loanReferral.setId(null);
-        try {
-            doThrow(LoanException.class).when(loanReferralOutputPort).findById(loanReferral.getId());
-        } catch (MeedlException e) {
-            log.error("",e);
-        }
-        assertThrows(LoanException.class, ()-> loanService.respondToLoanReferral(loanReferral));
+        assertThrows(MeedlException.class, ()-> loanService.respondToLoanReferral(loanReferral));
     }
 
     @Test
@@ -288,6 +301,21 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error("Error viewing all loans: ", e);
         }
+    }
+
+    @Test
+    void viewAllLoan(){
+        Page<Loan> loans = Page.empty();
+        try{
+            when(loanOutputPort.findAllLoan(pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(List.of(loan)));
+            loans = loanService.viewAllLoans(pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.error("Error viewing all loans: {}", e.getMessage());
+        }
+        assertNotNull(loans);
+        assertNotNull(loans.getContent());
+        assertEquals(1, loans.getTotalElements());
     }
 
 }
