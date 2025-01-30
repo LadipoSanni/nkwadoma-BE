@@ -54,7 +54,7 @@ public class ProgramService implements AddProgramUseCase {
                     programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
             for (Program p : programs) {
                 if (!p.getId().equals(program.getId())){
-                  throw new MeedlException("Program name Exist");
+                  throw new MeedlException("Program name exist");
                 }
             }
         }
