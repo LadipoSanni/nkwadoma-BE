@@ -225,8 +225,6 @@ class OrganizationIdentityServiceTest {
         try {
             roseCouture.setEnabled(Boolean.TRUE);
             doNothing().when(identityManagerOutPutPort).enableClient(roseCouture);
-            when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
-                    .thenReturn(orgEmployee);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.enableUserAccount(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
@@ -255,8 +253,6 @@ class OrganizationIdentityServiceTest {
         try {
             roseCouture.setEnabled(Boolean.FALSE);
             doNothing().when(identityManagerOutPutPort).disableClient(roseCouture);
-            when(organizationEmployeeIdentityOutputPort.findAllByOrganization(roseCouture.getId()))
-                    .thenReturn(orgEmployee);
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);

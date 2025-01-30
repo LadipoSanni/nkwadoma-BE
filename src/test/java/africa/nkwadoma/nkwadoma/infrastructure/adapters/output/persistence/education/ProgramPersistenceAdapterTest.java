@@ -100,6 +100,7 @@ class ProgramPersistenceAdapterTest {
 
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
             organizationId = savedOrganization.getId();
+            userIdentity.setId("c533121e-565a-45ce-829b-6d24c7eeef14");
             userId = userIdentityOutputPort.save(userIdentity).getId();
             OrganizationEmployeeIdentity employeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
             employeeIdentity.setOrganization(organizationId);
