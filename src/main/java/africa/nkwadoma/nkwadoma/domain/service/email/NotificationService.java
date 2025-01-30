@@ -86,11 +86,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         log.info("Loan offer ID: {}", loanOfferId);
         return baseUrl + UrlConstant.VIEW_LOAN_OFFER_URL + loanOfferId;
     }
-
-    private String getLoaneeLink(String loaneeId) {
-        log.info("Loanee ID: {}", loaneeId);
-        return "&loaneeId="+loaneeId;
-    }
+    
 
     private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
@@ -154,19 +150,18 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     @Override
     public void sendPortforlioManagerEmail(UserIdentity portfolioManager, LoanOffer loanOffer) {
-        Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferIdAndLoaneeId
-                (portfolioManager.getFirstName(),getLoanOfferLink(loanOffer.getId()),
-                        getLoaneeLink(loanOffer.getLoaneeId()));
+        Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferIdAndLoaneeId(portfolioManager.getFirstName(),
+                getLoanOfferAndLoaneeLink(loanOffer.getId(),loanOffer.getLoaneeId()));
 
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             Email email =  Email.builder()
                     .context(context)
                     .subject(LoaneeMessages.LOAN_OFFER_ACCEPTED.getMessage())
-                    .to(loanOffer.getUserIdentity().getEmail())
+                    .to(portfolioManager.getEmail())
                     .template(LoaneeMessages.LOAN_OFFER_ACCEPTED_TEMPLATE.getMessage())
                     .firstName(portfolioManager.getFirstName())
                     .build();
-            sendMail(loanOffer.getUserIdentity(), email);
+            sendMail(portfolioManager, email);
         }else {
             Email email =  Email.builder()
                     .context(context)
@@ -181,7 +176,9 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     }
 
-
+    private String getLoanOfferAndLoaneeLink(String id, String loaneeId) {
+        return getLoanOfferLink(id)+"&loaneeId="+loaneeId;
+    }
 
 
 }

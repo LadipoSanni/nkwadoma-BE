@@ -23,8 +23,8 @@ public enum LoaneeMessages {
     LOAN_REQUEST_APPROVAL("loan-request-approval"),
     LOAN_OFFER_ACCEPTED("Loan offer accepted"),
     LOAN_OFFER_DECLINED("Loan offer declined"),
-    LOAN_OFFER_ACCEPTED_TEMPLATE("Loan-offer-accepted-template"),
-    LOAN_OFFER_DECLINED_TEMPLATE("Loan-offer-declined-template"),
+    LOAN_OFFER_ACCEPTED_TEMPLATE("Loan-offer-accepted"),
+    LOAN_OFFER_DECLINED_TEMPLATE("Loan-offer-declined"),
     LOAN_REQUEST_APPROVED("loan request approved");
 
     private final String message;
