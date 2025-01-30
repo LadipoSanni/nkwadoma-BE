@@ -202,23 +202,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoanReferral respondToLoanReferral(LoanReferral loanReferral) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanReferral, LoanMessages.LOAN_REFERRAL_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loanReferral.getId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());
-
+        MeedlValidator.validateObjectInstance(loanReferral.getLoanReferralStatus(),
+                LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateLoanDecision(loanReferral.getLoanReferralStatus().name());
         LoanReferral foundLoanReferral = loanReferralOutputPort.findById(loanReferral.getId());
         log.info("Found Loan Referral: {}", foundLoanReferral);
-        checkLoanReferralHasBeenAcceptedOrDeclined(foundLoanReferral);
-        loanReferral.validateLoanReferralStatus();
-
-        return updateLoanReferral(loanReferral, foundLoanReferral);
-    }
-
-    private void checkLoanReferralHasBeenAcceptedOrDeclined(LoanReferral foundLoanReferral) throws MeedlException {
-        if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.AUTHORIZED)) {
-            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_ACCEPTED.getMessage());
-        }
-        else if (foundLoanReferral.getLoanReferralStatus().equals(LoanReferralStatus.UNAUTHORIZED)) {
-            throw new EducationException(LoanMessages.LOAN_REFERRAL_HAS_ALREADY_BEEN_DECLINED.getMessage());
-        }
+        foundLoanReferral = updateLoanReferral(loanReferral, foundLoanReferral);
+        return foundLoanReferral;
     }
 
     private LoanReferral updateLoanReferral(LoanReferral loanReferral, LoanReferral foundLoanReferral) throws MeedlException {
@@ -311,7 +301,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
-            //Loanee Wallet would be Created
             return acceptLoanOffer(loanOffer, offer, portfolioManagers);
         }
         declineLoanOffer(loanOffer, offer, portfolioManagers);
@@ -325,6 +314,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+        //Loanee Wallet would be Created
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
         offer.setDateTimeAccepted(LocalDateTime.now());
         LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());

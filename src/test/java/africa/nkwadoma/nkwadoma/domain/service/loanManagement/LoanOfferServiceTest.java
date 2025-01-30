@@ -51,6 +51,7 @@ public class LoanOfferServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private LoanOffer loanOffer;
+    private LoanOffer loanOffer2;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -96,6 +97,7 @@ public class LoanOfferServiceTest {
                  loanee.setId(userIdentity.getId());
         loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
         loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
+        loanOffer2 = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         vendor = TestData.createTestVendor("vendor");
         loanProduct = TestData.buildTestLoanProduct("loanProduct",vendor);
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
@@ -144,7 +146,7 @@ public class LoanOfferServiceTest {
     @Test
     void loaneeLoanAccountIsCreatedIfLoanOfferIsAccepted(){
         loanOffer.setLoanee(Loanee.builder().id("ead0f7cb-5483-4bb8-b271-813970a9c368").build());
-        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer2.setLoaneeResponse(LoanDecision.ACCEPTED);
         loanOffer.setLoanProduct(loanProduct);
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
@@ -153,7 +155,7 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.save(any())).thenReturn(loaneeLoanAccount);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(any())).thenReturn(null);
-            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer);
+            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
@@ -163,17 +165,27 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsNotCreatedIfLoanOfferIsDeclined(){
-        loanOffer.setLoaneeResponse(LoanDecision.DECLINED);
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
+            loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
-            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer);
+            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
         assertNull(loaneeLoanAccount);
     }
+
+
+    @Test
+    void loaneeCannotMakeDecisionOnAnOfferThatAsBeenAccessed() throws MeedlException {
+        when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
+        when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
+        loanOffer.setLoaneeResponse(LoanDecision.DECLINED);
+        assertThrows(MeedlException.class, () -> loanService.acceptLoanOffer(loanOffer));
+    }
+
     @Test
     void viewAllLoanOffer(){
         Page<LoanOffer> loanOffers = null;
