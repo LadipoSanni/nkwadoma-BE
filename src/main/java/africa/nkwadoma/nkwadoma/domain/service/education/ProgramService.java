@@ -49,7 +49,14 @@ public class ProgramService implements AddProgramUseCase {
             foundProgram = programMapper.updateProgram(program, foundProgram);
             OrganizationIdentity organizationIdentity = findProgramOrganization(program);
             program.setOrganizationIdentity(organizationIdentity);
-            checkIfProgramExistByNameInOrganization(foundProgram);
+//            checkIfProgramExistByNameInOrganization(foundProgram);
+            List<Program> programs =
+                    programOutputPort.findProgramByName(program.getName(),foundProgram.getOrganizationId());
+            for (Program p : programs) {
+                if (!p.getId().equals(program.getId())){
+                  throw new MeedlException("Program name exist");
+                }
+            }
         }
         return programOutputPort.saveProgram(foundProgram);
     }
