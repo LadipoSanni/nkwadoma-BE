@@ -62,6 +62,7 @@ public class CohortService implements CohortUseCase {
         cohort.validate();
         String cohortName = cohort.getName();
         cohort.validateLoanBreakDowns();
+        log.info("Creating cohort with name {} at service level", cohortName);
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
@@ -82,7 +83,9 @@ public class CohortService implements CohortUseCase {
     }
 
     private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {
+        log.info("Linking cohort to program {}", program.getName());
         program.setNumberOfCohort(program.getNumberOfCohort() + 1);
+        log.info("Service offering of organization is : {} ", program.getOrganizationIdentity().getServiceOfferings());
         programOutputPort.saveProgram(program);
         programCohort.setCohort(savedCohort);
         programCohort.setProgramId(program.getId());

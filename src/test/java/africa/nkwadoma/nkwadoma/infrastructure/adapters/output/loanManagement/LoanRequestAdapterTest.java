@@ -108,7 +108,7 @@ class LoanRequestAdapterTest {
     @BeforeAll
     void setUp() {
         try {
-            joel = TestData.createTestUserIdentity("joel54@johnson.com");
+            joel = TestData.createTestUserIdentity("joel54@johnson.com","1d681dd3-b25f-471a-9072-b2c26c474478");
             List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
                     .builder().meedlUser(joel).build());
 
@@ -119,6 +119,7 @@ class LoanRequestAdapterTest {
             );
             Optional<OrganizationEntity> organization = organizationEntityRepository.findById(amazingGrace.getId());
             if (organization.isPresent()) {
+                log.info("Organization found before saving in test. id : {}. WIll be deleted now",organization.get().getId());
                 organizationIdentityOutputPort.delete(organization.get().getId());
             }
             amazingGrace.setServiceOfferings(List.of(ServiceOffering.builder().
@@ -126,10 +127,12 @@ class LoanRequestAdapterTest {
                     industry(Industry.EDUCATION).build()));
 
             amazingGrace = organizationIdentityOutputPort.save(amazingGrace);
+            log.info("{} saved in test.", amazingGrace.getName());
             assertNotNull(amazingGrace);
             organizationId = amazingGrace.getId();
 
             joel = userIdentityOutputPort.save(joel);
+            log.info("User {} saved in test.", joel.getEmail());
             assertNotNull(joel);
             joelUserId = joel.getId();
 
@@ -138,14 +141,17 @@ class LoanRequestAdapterTest {
             organizationEmployeeIdentity.setMeedlUser(joel);
             organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.
                     save(organizationEmployeeIdentity);
+            log.info("Organization employee {} saved in test.", organizationEmployeeIdentity.getMeedlUser().getEmail());
 
             assertNotNull(organizationEmployeeIdentity);
             organizationEmployeeIdentityId = organizationEmployeeIdentity.getId();
 
             dataAnalytics = TestData.createProgramTestData("Data Analytics");
             dataAnalytics.setCreatedBy(joelUserId);
+            dataAnalytics.setOrganizationIdentity(amazingGrace);
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             dataAnalyticsProgramId = savedProgram.getId();
+            log.info("Program {} saved in test. Program name {}", dataAnalyticsProgramId, savedProgram.getName());
 
             loanDetail = LoanDetail.builder().debtPercentage(0.34).repaymentPercentage(0.67).monthlyExpected(BigDecimal.valueOf(450))
                     .totalAmountRepaid(BigDecimal.valueOf(500)).totalInterestIncurred(BigDecimal.valueOf(600))
@@ -154,6 +160,7 @@ class LoanRequestAdapterTest {
 
             loanDetail = loanDetailsOutputPort.saveLoanDetails(loanDetail);
             loanDetailId = loanDetail.getId();
+            log.info("Loan details saved in test. {}", loanDetail.getId());
 
             LoanBreakdown accommodation = TestData.createLoanBreakDown();
             LoanBreakdown feeding = LoanBreakdown.builder()
@@ -163,6 +170,7 @@ class LoanRequestAdapterTest {
             cohort = TestData.createCohortData("Elite", dataAnalyticsProgramId, organizationId, loanBreakdowns, joelUserId);
             cohort = cohortUseCase.createCohort(cohort);
             eliteCohortId = cohort.getId();
+            log.info("Cohort with name {} saved in test. For program {}",cohort.getName(), cohort.getProgramId());
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
 
             UserIdentity userIdentity = TestData.createTestUserIdentity("loxeha1691@fundapk.com");
@@ -179,10 +187,12 @@ class LoanRequestAdapterTest {
 
             Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
             if (foundUser.isPresent()) {
+                log.info("Deleting user {} found in test before saving", foundUser.get().getEmail());
                 identityManagerOutputPort.deleteUser(foundUser.get());
             }
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
             userId = savedUserIdentity.getId();
+            log.info("Saved user {} in test, with id {}", savedUserIdentity.getEmail(), userId);
 
             loanee = new Loanee();
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -193,6 +203,7 @@ class LoanRequestAdapterTest {
             loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            log.info("Loanee {} added to cohort with id {}", loanee.getUserIdentity().getEmail(), loanee.getCohortId());
             assertNotNull(loanee);
             loaneeId = loanee.getId();
             loaneeUserId = loanee.getUserIdentity().getId();
@@ -202,15 +213,16 @@ class LoanRequestAdapterTest {
             NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();
-
+            log.info("Next of kin with id {} saved in test, with email {}", nextOfKinId, savedNextOfKin.getEmail());
             loanReferral = new LoanReferral();
             loanReferral.setLoanee(loanee);
             loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
             loanReferral = loanReferralOutputPort.save(loanReferral);
             assertNotNull(loanReferral);
             loanReferralId = loanReferral.getId();
+            log.info("loan referral saved with id {}", loanReferral.getId());
         } catch (MeedlException e) {
-            log.error("Error saving set up test data", e);
+            log.error("Error saving set up test data {}", e.getMessage());
         }
     }
 

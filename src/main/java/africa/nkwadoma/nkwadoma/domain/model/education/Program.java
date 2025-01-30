@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.education;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -41,6 +42,7 @@ public class Program {
     private int pageNumber;
     private int pageSize;
     private String organizationId;
+    private OrganizationIdentity organizationIdentity;
 
     public int getPageSize() {
         int defaultPageSize = BigInteger.TEN.intValue();

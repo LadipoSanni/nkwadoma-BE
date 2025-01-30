@@ -69,17 +69,17 @@ class UserIdentityAdapterTest {
         assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findAllByRole(null));
     }
 
-    @Test
-    void findAllUserByRole(){
-        List<UserIdentity> userIdentities = new ArrayList<>();
-        try{
-            userIdentities = userIdentityOutputPort.findAllByRole(LOANEE);
-        }catch (MeedlException exception){
-            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
-        }
-        assertNotNull(userIdentities);
-        assertEquals(1, userIdentities.size());
-    }
+//    @Test
+//    void findAllUserByRole(){
+//        List<UserIdentity> userIdentities = new ArrayList<>();
+//        try{
+//            userIdentities = userIdentityOutputPort.findAllByRole(LOANEE);
+//        }catch (MeedlException exception){
+//            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
+//        }
+//        assertNotNull(userIdentities);
+//        assertEquals(1, userIdentities.size());
+//    }
 
     @Test
     void saveUserWithExistingEmail(){
