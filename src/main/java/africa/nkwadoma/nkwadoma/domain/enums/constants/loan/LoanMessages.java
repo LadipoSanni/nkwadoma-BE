@@ -56,6 +56,7 @@ public enum LoanMessages {
     LOAN_START_DATE_MUST_NOT_BE_EMPTY("Loan start date must not be empty"),
     LOAN_REQUEST_MUST_NOT_BE_EMPTY("Loan request must not be empty"), REASON_FOR_DECLINING_IS_REQUIRED("Reason for declining is required"),
     LOAN_AMOUNT_APPROVED_MUST_NOT_BE_EMPTY("Loan amount approved must not be empty"),
+    LOAN_OFFER_DECISION_MADE("Loan offer decision made previously"),
     LOAN_NOT_FOUND("Loan not found"),
     LOAN_REFERRAL_HAS_ALREADY_BEEN_ACCEPTED("Loan referral has already been accepted"),
     LOAN_REFERRAL_HAS_ALREADY_BEEN_DECLINED("Loan referral has already been declined"),

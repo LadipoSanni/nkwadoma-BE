@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
@@ -57,6 +58,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
+    private final SendColleagueEmailUseCase sendColleagueEmailUseCase;
 
     @Override
     public LoanProduct createLoanProduct(LoanProduct loanProduct) throws MeedlException {
@@ -236,7 +238,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         log.info("Updated loan referral: {}", foundLoanReferral);
         return foundLoanReferral;
     }
-
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
         loanRequest.validate();
@@ -304,25 +305,36 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (!offer.getLoanee().getId().equals(loanee.get().getId())) {
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
+        if (ObjectUtils.isNotEmpty(offer.getLoaneeResponse())) {
+            throw new LoanException(LoanMessages.LOAN_OFFER_DECISION_MADE.getMessage());
+        }
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
-            //Loanee Wallet would be Created
-            loanOfferMapper.updateLoanOffer(offer,loanOffer);
-            offer.setDateTimeAccepted(LocalDateTime.now());
-            LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());
-            offer.setLoanProduct(loanProduct);
-            loanOfferOutputPort.save(offer);
-            notifyPortfolioManager(portfolioManagers,loanOffer);
-            LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
-            if (ObjectUtils.isEmpty(loaneeLoanAccount)){
-                loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
-            }
-            return loaneeLoanAccount;
+            return acceptLoanOffer(loanOffer, offer, portfolioManagers);
         }
-        loanOfferMapper.updateLoanOffer(offer,loanOffer);
-        loanOfferOutputPort.save(offer);
-        notifyPortfolioManager(portfolioManagers,loanOffer);
+        declineLoanOffer(loanOffer, offer, portfolioManagers);
         return null;
+    }
+
+    private void declineLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+        loanOfferMapper.updateLoanOffer(offer, loanOffer);
+        loanOfferOutputPort.save(offer);
+        notifyPortfolioManager(portfolioManagers, offer);
+    }
+
+    private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+        //Loanee Wallet would be Created
+        loanOfferMapper.updateLoanOffer(offer, loanOffer);
+        offer.setDateTimeAccepted(LocalDateTime.now());
+        LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());
+        offer.setLoanProduct(loanProduct);
+        loanOfferOutputPort.save(offer);
+        notifyPortfolioManager(portfolioManagers, offer);
+        LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
+        if (ObjectUtils.isEmpty(loaneeLoanAccount)){
+            loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
+        }
+        return loaneeLoanAccount;
     }
 
     @Override
@@ -335,7 +347,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
-        //this and the template would be done on another branch
+        portfolioManagers.forEach(portfolioManager -> {
+            sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer);
+        });
     }
 
 

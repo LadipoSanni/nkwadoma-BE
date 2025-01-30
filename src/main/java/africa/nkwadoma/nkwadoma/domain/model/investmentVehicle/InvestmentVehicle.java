@@ -53,7 +53,7 @@ public class InvestmentVehicle {
         MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be empty or less than zero");
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
         MeedlValidator.validateBigDecimalDataElement(size);
-        MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment");
+        MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
     }
 
     public void setValues() {

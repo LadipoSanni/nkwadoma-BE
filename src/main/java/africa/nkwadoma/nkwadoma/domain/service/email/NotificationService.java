@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUse
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -68,6 +69,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
                 .build();
         sendMail(userIdentity, email);
     }
+
     private String getForgotPasswordLink(UserIdentity userIdentity) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token {}", token);
@@ -84,6 +86,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         log.info("Loan offer ID: {}", loanOfferId);
         return baseUrl + UrlConstant.VIEW_LOAN_OFFER_URL + loanOfferId;
     }
+    
 
     private String getLinkForLoanReferral(UserIdentity userIdentity, String loaneeReferralId) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail(),loaneeReferralId);
@@ -144,4 +147,38 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
         sendMail(loanRequest.getUserIdentity(), email);
     }
+
+    @Override
+    public void sendPortforlioManagerEmail(UserIdentity portfolioManager, LoanOffer loanOffer) {
+        Context context = emailOutputPort.getNameAndLinkContextAndLoanOfferIdAndLoaneeId(portfolioManager.getFirstName(),
+                getLoanOfferAndLoaneeLink(loanOffer.getId(),loanOffer.getLoaneeId()));
+
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
+            Email email =  Email.builder()
+                    .context(context)
+                    .subject(LoaneeMessages.LOAN_OFFER_ACCEPTED.getMessage())
+                    .to(portfolioManager.getEmail())
+                    .template(LoaneeMessages.LOAN_OFFER_ACCEPTED_TEMPLATE.getMessage())
+                    .firstName(portfolioManager.getFirstName())
+                    .build();
+            sendMail(portfolioManager, email);
+        }else {
+            Email email =  Email.builder()
+                    .context(context)
+                    .subject(LoaneeMessages.LOAN_OFFER_DECLINED.getMessage())
+                    .to(loanOffer.getUserIdentity().getEmail())
+                    .template(LoaneeMessages.LOAN_OFFER_DECLINED_TEMPLATE.getMessage())
+                    .firstName(portfolioManager.getFirstName())
+                    .build();
+            sendMail(loanOffer.getUserIdentity(), email);
+        }
+
+
+    }
+
+    private String getLoanOfferAndLoaneeLink(String id, String loaneeId) {
+        return getLoanOfferLink(id)+"&loaneeId="+loaneeId;
+    }
+
+
 }

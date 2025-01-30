@@ -46,7 +46,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            cohortName, l.userIdentity.image as loaneeImage,p.name as programName,lp.termsAndCondition as termsAndCondition,
            n.id as nextOfKinId, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
            n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship,
-           lp.name as loanProductName,lo.loanRequest.id as loanRequestId,lp.id as loanProductId
+           lp.name as loanProductName,lo.loanRequest.id as loanRequestId,lp.id as loanProductId,lo.loaneeResponse as loaneeResponse
     
     
     from LoanOfferEntity lo
@@ -71,6 +71,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
        from LoanOfferEntity lo
        left join LoaneeEntity l on lo.loanee.id = l.id
        left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+       where lo.loaneeResponse is null
        """)
     Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 
