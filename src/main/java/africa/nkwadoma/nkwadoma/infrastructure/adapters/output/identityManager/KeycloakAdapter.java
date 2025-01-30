@@ -270,6 +270,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         MeedlValidator.validateObjectInstance(userIdentity);
         log.info("validate user email  {}", userIdentity.getEmail());
         MeedlValidator.validateEmail(userIdentity.getEmail());
+        log.info("Validating deactivation reason {}", userIdentity.getDeactivationReason());
         MeedlValidator.validateDataElement(userIdentity.getDeactivationReason(), "Deactivation reason required");
 
         UserIdentity foundUser = getUserByEmail(userIdentity.getEmail().trim())
