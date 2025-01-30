@@ -236,7 +236,7 @@ public class TestData {
         loanOffer.setId(id);
         loanOffer.setProgramId(id);
         loanOffer.setOrganizationId(id);
-        loanOffer.setStatus(LoanType.LOAN_OFFER);
+        loanOffer.setType(LoanType.LOAN_OFFER);
         loanOffer.setName("ojo");
         loanOffer.setPageSize(10);
         loanOffer.setPageNumber(0);

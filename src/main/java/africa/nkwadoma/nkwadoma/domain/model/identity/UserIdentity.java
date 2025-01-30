@@ -60,6 +60,8 @@ public class UserIdentity {
         MeedlValidator.validateDataElement(this.firstName, "User first name is required");
         MeedlValidator.validateDataElement(this.lastName, "User last name is required");
         MeedlValidator.validateUUID(this.createdBy, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
+        log.info("Creator ID: {}", this.createdBy);
+        log.info("Finished validating for user identity in validation");
     }
 
 }

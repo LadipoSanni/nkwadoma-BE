@@ -241,7 +241,7 @@ class ProgramPersistenceAdapterTest {
     }
 
     @Test
-    void findProgramByName() {
+    void findProgramByNameWithOrganizationId() {
         try {
             assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName(), organizationId));
             assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName(), organizationId));
@@ -253,6 +253,30 @@ class ProgramPersistenceAdapterTest {
             dataAnalyticsProgramId = dataAnalyticsProgram.getId();
 
             List<Program> foundProgram = programOutputPort.findProgramByName("data", organizationId);
+
+            assertNotNull(foundProgram);
+            assertEquals(2, foundProgram.size());
+            assertEquals("Data sciences", foundProgram.get(0).getName());
+            assertEquals("Data analysis", foundProgram.get(1).getName());
+        } catch (MeedlException e) {
+            log.error("Error finding program by name", e);
+        }
+    }
+
+    @Test
+    void findProgramByName() {
+        try {
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataScience.getName()));
+            assertEquals(new ArrayList<>(), programOutputPort.findProgramByName(dataAnalytics.getName()));
+            dataScience.setCreatedBy(userId);
+            Program savedProgram = programOutputPort.saveProgram(dataScience);
+            dataScienceProgramId = savedProgram.getId();
+
+            dataAnalytics.setCreatedBy(userId);
+            Program dataAnalyticsProgram = programOutputPort.saveProgram(dataAnalytics);
+            dataAnalyticsProgramId = dataAnalyticsProgram.getId();
+
+            List<Program> foundProgram = programOutputPort.findProgramByName("data");
 
             assertNotNull(foundProgram);
             assertEquals(2, foundProgram.size());
@@ -344,7 +368,7 @@ class ProgramPersistenceAdapterTest {
     void viewProgramWithNonUUIDId(String programId) {
         dataAnalytics.setId(programId);
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
-        assertEquals(meedlException.getMessage(), "Please provide a valid program identification.");
+        assertEquals("Please provide a valid program identification.", meedlException.getMessage());
     }
 
     @Test
@@ -489,6 +513,7 @@ class ProgramPersistenceAdapterTest {
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+
             assertNotNull(loanee);
             assertNotNull(loanee.getUserIdentity());
             assertNotNull(loanee.getLoaneeLoanDetail());
@@ -505,10 +530,12 @@ class ProgramPersistenceAdapterTest {
     @AfterAll
     void tearDown() {
         try {
-            if (StringUtils.isNotEmpty(loaneeId)) {
-                loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
-            }
-
+            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+            loaneeBreakdowns.forEach(loaneeBreakdown -> {
+                if (StringUtils.isNotEmpty(loaneeBreakdown.getLoaneeLoanBreakdownId())) {
+                    loaneeLoanBreakDownRepository.deleteById(loaneeBreakdown.getLoaneeLoanBreakdownId());
+                }
+            });
             loaneeOutputPort.deleteLoanee(loaneeId);
             userIdentityOutputPort.deleteUserById(loaneeUserId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());

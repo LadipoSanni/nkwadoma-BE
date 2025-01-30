@@ -10,6 +10,7 @@ import java.util.*;
 
 public interface ProgramOutputPort {
     List<Program> findProgramByName(String programName, String organizationId) throws MeedlException;
+    List<Program> findProgramByName(String programName) throws MeedlException;
     Program saveProgram(Program program) throws MeedlException;
     boolean programExistsInOrganization(Program program) throws MeedlException;
     void deleteProgram(String programId) throws MeedlException;
