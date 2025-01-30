@@ -84,8 +84,10 @@ public class ProgramController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchProgramByName
             (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
-             @RequestParam(name = "organizationId") @NotBlank(message = "Organization ID is required") String organizationId) throws MeedlException {
-        Program program = Program.builder().name(name.trim()).organizationId(organizationId).build();
+             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Program program = Program.builder().name(name.trim()).createdBy(meedlUser.getClaimAsString("sub")).build();
+        log.info("Program search parameters: {}", program);
+
         List<Program> programs = addProgramUseCase.viewProgramByName(program);
         List<ProgramResponse> programResponses = programs.stream().
                 map(programRestMapper::toProgramResponse).toList();
