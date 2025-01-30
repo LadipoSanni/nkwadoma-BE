@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.education;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.Size;
@@ -56,6 +56,11 @@ public class Program {
         if (this.programDescription.length() > 2500) {
             throw new MeedlException("Program duration must not exceed 2500 characters");
         }
+    }
+
+    public void validateViewProgramByNameInput() throws MeedlException {
+        MeedlValidator.validateDataElement(name, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+        MeedlValidator.validateUUID(createdBy, UserMessages.INVALID_USER_ID.getMessage());
     }
 
     public void setName(String name) {

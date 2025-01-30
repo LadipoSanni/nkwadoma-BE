@@ -29,6 +29,7 @@ import java.math.*;
 import java.util.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
+
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -52,6 +53,17 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
         List<ProgramEntity> programEntities = programRepository.
                 findByNameContainingIgnoreCaseAndOrganizationIdentityId(programName.trim(), organizationId);
         log.info("Program entities: {}", programEntities);
+        if (programEntities.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return programEntities.stream().map(programMapper::toProgram).toList();
+    }
+
+    @Override
+    public List<Program> findProgramByName(String programName) throws MeedlException {
+        MeedlValidator.validateDataElement(programName, ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+        List<ProgramEntity> programEntities = programRepository.findByNameContainingIgnoreCase(programName);
+        log.info("Program entities found: {}", programEntities);
         if (programEntities.isEmpty()) {
             return new ArrayList<>();
         }

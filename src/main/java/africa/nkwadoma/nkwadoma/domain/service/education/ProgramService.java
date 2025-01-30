@@ -2,9 +2,12 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.AddProgramUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
 import lombok.*;
@@ -22,6 +25,8 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PR
 @Slf4j
 public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final ProgramMapper programMapper;
 
     @Override
@@ -54,10 +59,20 @@ public class ProgramService implements AddProgramUseCase {
 
     @Override
     public List<Program> viewProgramByName(Program program) throws MeedlException {
-        MeedlValidator.validateObjectInstance(program);
-        MeedlValidator.validateDataElement(program.getName(), ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(program.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        return programOutputPort.findProgramByName(program.getName().trim(), program.getOrganizationId());
+        MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
+        program.validateViewProgramByNameInput();
+        return getPrograms(program);
+    }
+
+    private List<Program> getPrograms(Program program) throws MeedlException {
+        UserIdentity foundCreator = userIdentityOutputPort.findById(program.getCreatedBy());
+        log.info("Found User identity: {}", foundCreator);
+        if (ObjectUtils.isNotEmpty(foundCreator) && foundCreator.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+            OrganizationEmployeeIdentity employeeIdentity = employeeIdentityOutputPort.findByCreatedBy(foundCreator.getId());
+            log.info("Found Organization Employee: {}", employeeIdentity);
+            return programOutputPort.findProgramByName(program.getName().trim(), employeeIdentity.getOrganization());
+        }
+        return programOutputPort.findProgramByName(program.getName().trim());
     }
 
     @Override
