@@ -284,7 +284,7 @@ public class LoanOfferServiceTest {
             when(loanRequestOutputPort.searchLoanRequest(loanOffer.getProgramId(),loanOffer.getOrganizationId(),
                     loanOffer.getName(),loanOffer.getPageSize(),loanOffer.getPageNumber()))
                     .thenReturn(loanRequests);
-            loanOffer.setStatus(LoanType.LOAN_REQUEST);
+            loanOffer.setType(LoanType.LOAN_REQUEST);
             loanLifeCycles = loanService.searchLoan(
                   loanOffer
             );
@@ -307,8 +307,74 @@ public class LoanOfferServiceTest {
             when(loanOutputPort.searchLoan(loanOffer.getProgramId(),loanOffer.getOrganizationId(),
                             loanOffer.getName(),loanOffer.getPageSize(),loanOffer.getPageNumber()))
                     .thenReturn(loans);
-            loanOffer.setStatus(LoanType.LOAN_DISBURSAL);
+            loanOffer.setType(LoanType.LOAN_DISBURSAL);
             loanLifeCycles = loanService.searchLoan(loanOffer);
+        } catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(1, loanLifeCycles.getSize());
+    }
+
+
+    @Test
+    void filterLoanOffers() {
+        Page<LoanDetail> loanLifeCycles = Page.empty();
+        try {
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<LoanOffer> loanOffers = new PageImpl<>(List.of(loanOffer));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanOfferOutputPort.filterLoanOfferByProgram(loanOffer))
+                    .thenReturn(loanOffers);
+            loanLifeCycles = loanService.filterLoanByProgram(loanOffer);
+        } catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(1, loanLifeCycles.getSize());
+    }
+
+
+
+    @Test
+    void filterLoanRequest(){
+        Page<LoanDetail> loanLifeCycles = Page.empty();
+        try {
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<LoanRequest> loanRequests = new PageImpl<>(List.of(loanRequest));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanRequestOutputPort.filterLoanRequestByProgram(loanOffer.getProgramId(),loanOffer.getOrganizationId(),
+                    loanOffer.getPageSize(),loanOffer.getPageNumber()))
+                    .thenReturn(loanRequests);
+            loanOffer.setType(LoanType.LOAN_REQUEST);
+            loanLifeCycles = loanService.filterLoanByProgram(
+                  loanOffer
+            );
+        } catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(1, loanLifeCycles.getSize());
+    }
+
+    @Test
+    void filterLoanDisbursal(){
+        Page<LoanDetail> loanLifeCycles = Page.empty();
+        try {
+            program.setId(mockId);
+            program.setCreatedBy(loaneeId);
+            Page<Loan> loans = new PageImpl<>(List.of(loan));
+            when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
+            when(programOutputPort.findCreatorOrganization(program.getCreatedBy()
+            )).thenReturn(OrganizationIdentity.builder().id(mockId).build());
+            when(loanOutputPort.filterLoanByProgram(loanOffer.getProgramId(),loanOffer.getOrganizationId(),
+                           loanOffer.getPageSize(),loanOffer.getPageNumber()))
+                    .thenReturn(loans);
+            loanOffer.setType(LoanType.LOAN_DISBURSAL);
+            loanLifeCycles = loanService.filterLoanByProgram(loanOffer);
         } catch (MeedlException meedlException) {
             log.error(meedlException.getMessage());
         }

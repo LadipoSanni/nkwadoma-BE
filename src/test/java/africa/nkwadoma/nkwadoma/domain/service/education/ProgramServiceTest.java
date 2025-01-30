@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -33,13 +35,23 @@ class ProgramServiceTest {
     private ProgramOutputPort programOutputPort;
     @Mock
     private ProgramMapper programMapper;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private Program program;
     private int pageSize = 10;
     private int pageNumber = 0;
     private String testId = "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa";
+    UserIdentity userIdentity;
+    OrganizationEmployeeIdentity employeeIdentity;
 
     @BeforeEach
     void setUp() {
+        userIdentity = UserIdentity.builder().role(IdentityRole.ORGANIZATION_ADMIN).
+                id(testId).createdBy(testId).build();
+        employeeIdentity = OrganizationEmployeeIdentity.builder().meedlUser(userIdentity).
+                organization("29a416b3-ab47-47d3-8ea0-007437b700f1").build();
         program = Program.builder().id(testId).name("Ben's-Mat").durationType(DurationType.YEARS)
                 .organizationId("66d4f7e4-7f60-46d5-b55d-0383630a1fc2").
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
@@ -179,13 +191,16 @@ class ProgramServiceTest {
     }
 
     @Test
-    void viewProgramByName() {
+     void viewProgramByName() {
         try {
-            when(programOutputPort.findProgramByName(program.getName(), program.getOrganizationId())).thenReturn(List.of(program));
+            when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
+            when(employeeIdentityOutputPort.findByCreatedBy(program.getId())).thenReturn(employeeIdentity);
+            when(programOutputPort.findProgramByName(program.getName(), employeeIdentity.getOrganization())).thenReturn(List.of(program));
             List<Program> foundProgram = programService.viewProgramByName(program);
+
             assertNotNull(foundProgram);
             assertEquals(foundProgram, List.of(program));
-            verify(programOutputPort, times(1)).findProgramByName(program.getName(), program.getOrganizationId());
+            verify(programOutputPort, times(1)).findProgramByName(program.getName(), employeeIdentity.getOrganization());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }
@@ -196,10 +211,14 @@ class ProgramServiceTest {
     void viewProgramByNameWithSpaces(String programWithSpace) {
         try {
             program.setName(programWithSpace);
-            when(programOutputPort.findProgramByName(program.getName(), program.getOrganizationId())).thenReturn(List.of(program));
+
+            when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
+            when(employeeIdentityOutputPort.findByCreatedBy(program.getId())).thenReturn(employeeIdentity);
+            when(programOutputPort.findProgramByName(program.getName(), employeeIdentity.getOrganization())).thenReturn(List.of(program));
             List<Program> foundProgram = programService.viewProgramByName(program);
+
             assertNotNull(foundProgram);
-            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim(), program.getOrganizationId());
+            verify(programOutputPort, times(1)).findProgramByName(program.getName().trim(), employeeIdentity.getOrganization());
         } catch (MeedlException e) {
             log.error("Error viewing program by name", e);
         }

@@ -391,7 +391,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateObjectName(loanOffer.getName(),LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanOffer.getProgramId(),ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateObjectInstance(loanOffer.getStatus(),"Status cannot be empty");
+        MeedlValidator.validateObjectInstance(loanOffer.getType(),"Status cannot be empty");
         MeedlValidator.validatePageSize(loanOffer.getPageSize());
         MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
 
@@ -406,24 +406,64 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private Page<LoanDetail> searchResult(LoanOffer loanOffer) throws MeedlException {
         Page<LoanDetail> loanDetails;
-        if (loanOffer.getStatus().equals(LoanType.LOAN_OFFER)){
+        if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
             Page<LoanOffer> loanOffers = loanOfferOutputPort.searchLoanOffer(loanOffer);
             loanDetails = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
             return loanDetails;
         }
-        else if (loanOffer.getStatus().equals(LoanType.LOAN_REQUEST)){
+        else if (loanOffer.getType().equals(LoanType.LOAN_REQUEST)){
             Page<LoanRequest> loanRequests = loanRequestOutputPort.searchLoanRequest(loanOffer.getProgramId(),
                     loanOffer.getOrganizationId(), loanOffer.getName(), loanOffer.getPageSize(), loanOffer.getPageNumber());
             loanDetails = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
             return loanDetails;
         }
-        else if (loanOffer.getStatus().equals(LoanType.LOAN_DISBURSAL)){
+        else if (loanOffer.getType().equals(LoanType.LOAN_DISBURSAL)){
             Page<Loan> loans = loanOutputPort.searchLoan(loanOffer.getProgramId(),
                     loanOffer.getOrganizationId(), loanOffer.getName(), loanOffer.getPageSize(), loanOffer.getPageNumber());
             loanDetails = loans.map(loanMetricsMapper::mapToLoans);
             return loanDetails;
         }
-        throw new LoanException(loanOffer.getStatus().name()+" is not a loan type");
+        throw new LoanException(loanOffer.getType().name()+" is not a loan type");
+    }
+
+
+    @Override
+    public Page<LoanDetail> filterLoanByProgram(LoanOffer loanOffer) throws MeedlException {
+        MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateUUID(loanOffer.getProgramId(),ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateObjectInstance(loanOffer.getType(),"Status cannot be empty");
+        MeedlValidator.validatePageSize(loanOffer.getPageSize());
+        MeedlValidator.validatePageNumber(loanOffer.getPageNumber());
+
+        Program program = programOutputPort.findProgramById(loanOffer.getProgramId());
+        OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(program.getCreatedBy());
+        if(!organizationIdentity.getId().equals(loanOffer.getOrganizationId())) {
+            throw new LoanException("Program not in organization");
+        }
+
+        return filterResult(loanOffer);
+    }
+
+    private Page<LoanDetail> filterResult(LoanOffer loanOffer) throws MeedlException {
+        Page<LoanDetail> loanDetails;
+        if (loanOffer.getType().equals(LoanType.LOAN_OFFER)){
+            Page<LoanOffer> loanOffers = loanOfferOutputPort.filterLoanOfferByProgram(loanOffer);
+            loanDetails = loanOffers.map(loanMetricsMapper::mapLoanOfferToLoanLifeCycles);
+            return loanDetails;
+        }
+        else if (loanOffer.getType().equals(LoanType.LOAN_REQUEST)){
+            Page<LoanRequest> loanRequests = loanRequestOutputPort.filterLoanRequestByProgram(loanOffer.getProgramId(),
+                    loanOffer.getOrganizationId(),loanOffer.getPageSize(), loanOffer.getPageNumber());
+            loanDetails = loanRequests.map(loanMetricsMapper::mapLoanRequestToLoanLifeCycles);
+            return loanDetails;
+        }
+        else if (loanOffer.getType().equals(LoanType.LOAN_DISBURSAL)){
+            Page<Loan> loans = loanOutputPort.filterLoanByProgram(loanOffer.getProgramId(),
+                    loanOffer.getOrganizationId(), loanOffer.getPageSize(), loanOffer.getPageNumber());
+            loanDetails = loans.map(loanMetricsMapper::mapToLoans);
+            return loanDetails;
+        }
+        throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
 
 
