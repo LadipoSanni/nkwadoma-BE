@@ -90,35 +90,13 @@ class ProgramPersistenceAdapterTest {
 
     @BeforeAll
     void init() {
-        userIdentity = new UserIdentity();
-        userIdentity.setFirstName("Joel");
-        userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel0949@johnson.com");
-        userIdentity.setPhoneNumber("098647748393");
-        userIdentity.setId(testId);
-        userIdentity.setCreatedBy(testId);
-        userIdentity.setEmailVerified(true);
-        userIdentity.setEnabled(true);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
-        userIdentity.setRole(PORTFOLIO_MANAGER);
+        userIdentity = TestData.createTestUserIdentity("worktest@email.com", "8c5b64dc-e2c6-4b12-868b-344faeeec45d");
+
         try {
-            organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setName("Brown Hill institute");
-            organizationIdentity.setEmail("rachel423@gmail.com");
-            organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC3499987");
-            organizationIdentity.setId(testId);
-            organizationIdentity.setPhoneNumber("0907658483");
-            organizationIdentity.setTin("Tin8675678");
-            organizationIdentity.setNumberOfPrograms(0);
-            organizationIdentity.setCreatedBy(testId);
-            ServiceOffering serviceOffering = new ServiceOffering();
-            serviceOffering.setName(ServiceOfferingType.TRAINING.name());
-            serviceOffering.setIndustry(Industry.EDUCATION);
-            organizationIdentity.setServiceOfferings(List.of(serviceOffering));
-            organizationIdentity.setWebsiteAddress("webaddress.org");
-            organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    meedlUser(userIdentity).build()));
+            organizationIdentity = TestData.createOrganizationTestData(
+                    "Brown Hill institute", "RC3499987",
+                    List.of(OrganizationEmployeeIdentity.builder().
+                            meedlUser(userIdentity).build()));
 
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
             organizationId = savedOrganization.getId();
@@ -506,6 +484,7 @@ class ProgramPersistenceAdapterTest {
                     itemName(loanBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
 
+            userIdentity.setEmail("testloanee@email.com");
             loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();

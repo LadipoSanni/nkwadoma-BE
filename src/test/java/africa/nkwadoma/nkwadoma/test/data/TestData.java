@@ -23,6 +23,11 @@ import java.util.List;
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
 
+    public static UserIdentity createTestUserIdentity(String email, String testId) {
+        UserIdentity userIdentity = createTestUserIdentity(email);
+        userIdentity.setId(testId);
+        return userIdentity;
+    }
     public static UserIdentity createTestUserIdentity(String email){
         return UserIdentity.builder()
                 .id(testId)

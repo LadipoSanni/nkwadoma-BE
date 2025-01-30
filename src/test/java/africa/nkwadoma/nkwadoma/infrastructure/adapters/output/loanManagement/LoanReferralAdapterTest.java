@@ -85,7 +85,7 @@ class LoanReferralAdapterTest {
     @BeforeAll
     void setUp() {
         try {
-            joel = TestData.createTestUserIdentity("joel54@johnson.com");
+            joel = TestData.createTestUserIdentity("joel54@johnson.com", "fdc7f3ff-b115-42e3-a361-d93a791df2db");
             List<OrganizationEmployeeIdentity> employees = List.of(OrganizationEmployeeIdentity
                     .builder().meedlUser(joel).build());
 
