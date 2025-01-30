@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loan;
 
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import org.springframework.data.domain.Page;
@@ -14,4 +13,6 @@ public interface LoanOfferUseCase {
     Page<LoanOffer> viewAllLoanOffersInOrganization(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoanDetail> searchLoan(LoanOffer loanOffer) throws MeedlException;
+
+    Page<LoanDetail> filterLoanByProgram(LoanOffer loanOffer) throws MeedlException;
 }

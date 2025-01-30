@@ -104,4 +104,27 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
             Pageable pageRequest
     );
 
+    @Query("""
+    SELECT lo.id AS id,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           lo.dateTimeOffered AS dateTimeOffered,
+           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           lo.amountApproved AS amountApproved,
+           lp.name AS loanProductName
+               
+    FROM LoanOfferEntity lo 
+    JOIN lo.loanee l
+    JOIN l.userIdentity u
+    JOIN CohortEntity c ON c.id = l.cohortId
+    JOIN ProgramEntity p ON p.id = c.programId
+    JOIN lo.loanProduct lp
+    WHERE 
+        c.programId = :programId
+        AND p.organizationIdentity.id = :organizationId
+        AND lo.loaneeResponse is null 
+    """)
+    Page<LoanOfferProjection> filterLoanOfferByProgramIdAndOrganization(@Param("programId") String programId,
+                                                                        @Param("organizationId") String organizationId,
+                                                                        Pageable pageRequest);
 }
