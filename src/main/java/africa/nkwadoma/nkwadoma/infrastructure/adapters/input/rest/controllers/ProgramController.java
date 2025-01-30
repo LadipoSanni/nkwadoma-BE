@@ -16,6 +16,7 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ public class ProgramController {
 
     @PostMapping("")
     @Operation(summary = "Add a program to an Institute")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> createProgram(@RequestBody @Valid ProgramCreateRequest programCreateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         log.info("Creating program is Meedl User with ID: {}", meedlUser.getClaimAsString("sub"));
@@ -50,6 +52,7 @@ public class ProgramController {
     }
 
     @GetMapping("/programs/all")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
@@ -78,6 +81,7 @@ public class ProgramController {
 
     @GetMapping("/search")
     @Operation(summary = "Search a program by name")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchProgramByName
             (@Valid @RequestParam(name = "name") @NotBlank(message = "Program name is required") String name,
              @RequestParam(name = "organizationId") @NotBlank(message = "Organization ID is required") String organizationId) throws MeedlException {
@@ -95,6 +99,7 @@ public class ProgramController {
 
     @GetMapping("/{id}")
     @Operation(summary = "View a program by ID")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> viewProgramByID(@PathVariable @Valid @NotBlank(message = "Program ID is required") String id)
             throws MeedlException {
         Program program = new Program();
@@ -110,6 +115,7 @@ public class ProgramController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update an existing program")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateProgram(@RequestBody @Valid ProgramUpdateRequest programUpdateRequest,
                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         Program program = programRestMapper.toUpdatedProgram(programUpdateRequest);
@@ -126,6 +132,7 @@ public class ProgramController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete a program by it's ID")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> deleteProgram(@PathVariable @Valid @NotBlank(message = "Program id is required") String id)
             throws MeedlException {
         Program program = new Program();
