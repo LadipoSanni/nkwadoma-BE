@@ -313,4 +313,25 @@ public class LoanController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+    @GetMapping("/view-all-disbursal")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllDisbursedLoan(@RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Page<Loan> loans = createLoanProductUseCase.viewAllLoans(pageSize,pageNumber);
+        log.info("Mapped Loan responses: {}", loans.getContent().toArray());
+        Page<LoanQueryResponse> loanResponses = loans.map(loanRestMapper::toLoanQueryResponse);
+        log.info("Mapped Loan responses: {}", loanResponses.getContent().toArray());
+        PaginatedResponse<LoanQueryResponse> paginatedResponse =
+                PaginatedResponse.<LoanQueryResponse>builder()
+                        .body(loanResponses.getContent())
+                        .pageSize(pageSize)
+                        .pageNumber(pageNumber)
+                        .totalPages(loanResponses.getTotalPages())
+                        .hasNextPage(loanResponses.hasNext())
+                        .build();
+        return ResponseEntity.ok(new ApiResponse<>
+                (SuccessMessages.LOAN_DISBURSALS_RETURNED_SUCCESSFULLY, paginatedResponse, HttpStatus.OK.name(), LocalDateTime.now()));
+    }
+
 }

@@ -52,22 +52,26 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
+        log.info("Inviting colleague");
         MeedlValidator.validateObjectInstance(userIdentity);
         userIdentity.validate();
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
-//        MeedlValidator.validateEmailDomain(userIdentity.getEmail().trim(), foundEmployee.getMeedlUser().getEmail().trim());
+        log.info("Found employee: {}", foundEmployee);
         userIdentity.setCreatedAt(LocalDateTime.now().toString());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
-        userIdentityOutputPort.save(userIdentity);
+        UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
+        log.info("Employee user identity saved to DB: {}", savedUserIdentity);
 
         OrganizationEmployeeIdentity organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
         organizationEmployeeIdentity.setOrganization(foundEmployee.getOrganization());
         organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
         organizationEmployeeIdentity.setMeedlUser(userIdentity);
-        organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        OrganizationEmployeeIdentity savedEmployee = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
+        log.info("Saved organization employee identity: {}", savedEmployee);
 
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(foundEmployee.getOrganization());
+        log.info("Found organization identity: {}", organizationIdentity);
         sendEmail.sendColleagueEmail(organizationIdentity.getName(),userIdentity);
 
         return userIdentity;

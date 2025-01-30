@@ -3,8 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -53,12 +52,15 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     @Override
     public OrganizationEmployeeIdentity  findByEmployeeId(String employeeId) throws MeedlException {
       if(!StringUtils.isEmpty(employeeId)){
-          OrganizationEmployeeEntity organization = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
-          if (organization == null){
-              log.error("{} : ---- while search for organization by employee id : {}",ORGANIZATION_NOT_FOUND.getMessage(), employeeId);
-              throw new IdentityException(ORGANIZATION_NOT_FOUND.getMessage());
+          OrganizationEmployeeEntity organizationEmployee = employeeAdminEntityRepository.findByMeedlUserId(employeeId);
+          if (organizationEmployee == null){
+              log.error("{} : ---- while search for employee by employee id : {}", ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage(), employeeId);
+              throw new IdentityException(ORGANIZATION_EMPLOYEE_NOT_FOUND.getMessage());
           }
-          return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organization);
+          OrganizationEmployeeIdentity organizationEmployeeIdentity =
+                  organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(organizationEmployee);
+          log.info("OrganizationEmployeeIdentity mapped from organization employee: {}", organizationEmployeeIdentity);
+          return organizationEmployeeIdentity;
       }
       throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
     }
