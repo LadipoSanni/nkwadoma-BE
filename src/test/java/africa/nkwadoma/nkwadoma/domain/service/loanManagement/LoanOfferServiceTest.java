@@ -35,6 +35,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -50,6 +51,8 @@ public class LoanOfferServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    @Mock
+    private LoanMetricsOutputPort loanMetricsOutputPort;
     private LoanOffer loanOffer;
     private LoanOffer loanOffer2;
     private LoaneeLoanDetail loaneeLoanDetail;
@@ -64,6 +67,7 @@ public class LoanOfferServiceTest {
     private UserIdentity userIdentityLoanee;
     private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
     private String loaneeId = "1f732a03-00ad-4187-825d-94969153c3d1";
+    private LoanMetrics loanMetrics;
 
     private String mockId2 = "96f2eb2b-1a78-4838-b5d8-76e95cc9ae9f";
     private LoaneeLoanAccount loaneeLoanAccount;
@@ -104,6 +108,7 @@ public class LoanOfferServiceTest {
         program = TestData.createProgramTestData("program name");
         loanDetail = TestData.createLoanLifeCycle();
         loan = TestData.createTestLoan(loanee);
+        loanMetrics = TestData.createTestLoanMetrics(mockId);
     }
 
     @Test
@@ -116,8 +121,9 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.save(any(LoanOffer.class))).thenReturn(loanOffer);
             when(organizationIdentityOutputPort.findOrganizationByName(
                     loanOffer.getLoanRequest().getLoanee().getReferredBy())).thenReturn(Optional.of(organizationIdentity));
-            when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
-                    organizationId(mockId2).loanOfferCount(1).build());
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.of(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             cretedLoanOffer = loanService.createLoanOffer(loanRequest);
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
@@ -169,6 +175,9 @@ public class LoanOfferServiceTest {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
+            when(loanMetricsOutputPort.findByOrganizationId(mockId))
+                    .thenReturn(Optional.of(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
             loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
         }catch (MeedlException exception){

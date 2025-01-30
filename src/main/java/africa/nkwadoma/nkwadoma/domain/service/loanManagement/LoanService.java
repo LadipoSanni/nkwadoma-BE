@@ -260,7 +260,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
         Optional<OrganizationIdentity> organization =
-                organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getLoanee().getReferredBy());
         if (organization.isEmpty()) {
             throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
@@ -363,6 +363,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             return acceptLoanOffer(loanOffer, offer, portfolioManagers);
         }
+        decreaseLoanOfferOnLoanMetrics(offer);
         declineLoanOffer(loanOffer, offer, portfolioManagers);
         return null;
     }
@@ -385,12 +386,13 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loaneeLoanAccount)){
             loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
         }
+        decreaseLoanOfferOnLoanMetrics(offer);
         return loaneeLoanAccount;
     }
 
     private void decreaseLoanOfferOnLoanMetrics(LoanOffer offer) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
-                organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequest().getReferredBy());
+                organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequestReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }

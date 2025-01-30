@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -9,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,8 @@ class OrganizationIdentityServiceTest {
     private OrganizationEntityRepository organizationEntityRepository;
     @Mock
     private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    @Mock
+    private LoanMetricsUseCase loanMetricsUseCase;
     private UserIdentity sarah;
     private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
@@ -93,7 +97,7 @@ class OrganizationIdentityServiceTest {
 
     @Test
     void inviteOrganization() {
-        OrganizationIdentity invitedOrganisation;
+        OrganizationIdentity invitedOrganisation = new OrganizationIdentity();
         try {
             when(identityManagerOutPutPort.createKeycloakClient(roseCouture)).thenReturn(roseCouture);
             when(identityManagerOutPutPort.createUser(sarah)).thenReturn(sarah);
@@ -103,6 +107,7 @@ class OrganizationIdentityServiceTest {
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
             doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
+            when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
             assertNotNull(invitedOrganisation);
