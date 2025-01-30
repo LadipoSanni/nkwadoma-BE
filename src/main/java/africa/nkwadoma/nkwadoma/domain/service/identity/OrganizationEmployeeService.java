@@ -20,6 +20,7 @@ import java.util.List;
 @Service
 public class OrganizationEmployeeService implements ViewOrganizationEmployeesUseCase {
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeOutputPort;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
@@ -64,5 +65,16 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
 
         return organizationEmployeeOutputPort.findAllAdminInOrganization(organizationEmployeeIdentity.getOrganization(),
                 organizationEmployeeIdentity.getMeedlUser().getRole(),pageSize,pageNumber);
+    }
+
+    @Override
+    public Page<OrganizationEmployeeIdentity> searchAdminInOrganization(String organizationId,String name,int pageSize,int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
+        if (ObjectUtils.isEmpty(organizationIdentity)) {
+            throw new IdentityException(IdentityMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        return organizationEmployeeOutputPort.findAllEmployeesInOrganization(organizationId,name,pageSize,pageNumber);
     }
 }

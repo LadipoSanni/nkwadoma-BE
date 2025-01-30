@@ -26,8 +26,11 @@ class OrganizationEmployeeServiceTest {
     @Mock
     private OrganizationEmployeeIdentityOutputPort organizationEmployeeOutputPort;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private int pageNumber = 0;
     private int pageSize = 10;
+    private String mockId = "5756faf2-f3c8-40c4-9af5-5946adcfebd9";
 
     @BeforeEach
     void setUp() {
@@ -117,5 +120,21 @@ class OrganizationEmployeeServiceTest {
         }
         assertThrows(MeedlException.class, ()->organizationEmployeeService.
                 viewOrganizationEmployees(organizationEmployeeIdentity));
+    }
+
+    @Test
+    void searchOrganizationEmployees() {
+        Page<OrganizationEmployeeIdentity> employeeIdentities = new
+                PageImpl<>(List.of(new OrganizationEmployeeIdentity()));
+        try {
+            when(organizationIdentityOutputPort.findById(mockId))
+                    .thenReturn(new OrganizationIdentity());
+            when(organizationEmployeeOutputPort.findAllEmployeesInOrganization(mockId,"j",pageSize,pageNumber))
+                    .thenReturn(employeeIdentities);
+            employeeIdentities = organizationEmployeeService.searchAdminInOrganization(mockId,"j",pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(employeeIdentities.getContent().size(),1);
     }
 }
