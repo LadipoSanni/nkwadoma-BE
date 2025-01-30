@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.*;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_ALREADY_EXISTS;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -74,15 +75,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     public Program saveProgram(Program program) throws MeedlException {
         MeedlValidator.validateObjectInstance(program);
         program.validate();
-
+        log.info("Saving program with name: {}", program.getName());
+        ProgramPersistenceAdapter.validateServiceOfferings(program.getOrganizationIdentity().getServiceOfferings());
         log.info("Program at persistence layer: ========>{}", program);
-        OrganizationIdentity organizationIdentity = findCreatorOrganization(program.getCreatedBy());
-        log.info("The organization identity found when saving program is: {}", organizationIdentity);
-        List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.findServiceOfferingById(organizationIdentity.getId());
-        ProgramPersistenceAdapter.validateServiceOfferings(serviceOfferings);
-
-        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(organizationIdentity);
-
+        OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(program.getOrganizationIdentity());
         ProgramEntity programEntity = programMapper.toProgramEntity(program);
         programEntity.setOrganizationIdentity(organizationEntity);
         programEntity.setProgramStatus(ActivationStatus.ACTIVE);
@@ -100,7 +96,6 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
             organizationEntityRepository.save(organizationEntity);
         }
     }
-
     @Override
     public  OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
@@ -121,9 +116,10 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
-    public boolean programExists(String programName) throws MeedlException {
-        MeedlValidator.validateDataElement(programName,ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
-        return programRepository.existsByName(programName);
+    public boolean programExistsInOrganization(Program program) throws MeedlException {
+        MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
+        log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());
+        return programRepository.existsByNameAndOrganizationIdentity_Id(program.getName(), program.getOrganizationId() );
     }
 
     @Override
@@ -158,6 +154,9 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
                 orElseThrow(() -> new ResourceNotFoundException(PROGRAM_NOT_FOUND.getMessage()));
         Program program = programMapper.toProgram(programEntity);
         program.setOrganizationId(programEntity.getOrganizationIdentity().getId());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(programEntity.getOrganizationIdentity().getId());
+        program.setOrganizationIdentity(organizationIdentity);
+        log.info("Program found id: {}, for organization with id : {} :: {}", program.getId(), organizationIdentity.getId(), organizationIdentity.getServiceOfferings());
         return program;
     }
 
@@ -170,8 +169,12 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
     private static void validateServiceOfferings(List<ServiceOffering> serviceOfferings) throws EducationException {
         log.info("Validating service offerings: {}", serviceOfferings);
-        if(CollectionUtils.isEmpty(serviceOfferings) ||
-                !serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+        if (CollectionUtils.isEmpty(serviceOfferings)) {
+            log.error("No service offerings found");
+            throw new EducationException("No service offerings found");
+        }
+        if(!serviceOfferings.stream().map(ServiceOffering::getName).toList().contains(ServiceOfferingType.TRAINING.name())) {
+            log.error("Service offering was not valid for saving program");
             throw new EducationException(ProgramMessages.INVALID_SERVICE_OFFERING.getMessage());
         }
     }

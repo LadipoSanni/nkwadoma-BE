@@ -10,7 +10,7 @@ public interface ProgramRepository extends JpaRepository<ProgramEntity, String> 
     List<ProgramEntity> findByNameContainingIgnoreCase(String programName);
     List<ProgramEntity> findByNameContainingIgnoreCaseAndOrganizationIdentityId(String programName, String organizationId);
     List<ProgramEntity> findProgramEntitiesByOrganizationIdentityId(String organizationIdentityId);
-    boolean existsByName(String programName);
+    boolean existsByNameAndOrganizationIdentity_Id(String programName, String organizationId);
 
     Page<ProgramEntity> findAllByOrganizationIdentityId(String organizationId, Pageable pageable);
 }

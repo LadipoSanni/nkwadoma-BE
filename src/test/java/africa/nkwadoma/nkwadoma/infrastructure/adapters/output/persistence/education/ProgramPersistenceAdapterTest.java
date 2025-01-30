@@ -90,35 +90,13 @@ class ProgramPersistenceAdapterTest {
 
     @BeforeAll
     void init() {
-        userIdentity = new UserIdentity();
-        userIdentity.setFirstName("Joel");
-        userIdentity.setLastName("Jacobs");
-        userIdentity.setEmail("joel0949@johnson.com");
-        userIdentity.setPhoneNumber("098647748393");
-        userIdentity.setId(testId);
-        userIdentity.setCreatedBy(testId);
-        userIdentity.setEmailVerified(true);
-        userIdentity.setEnabled(true);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
-        userIdentity.setRole(PORTFOLIO_MANAGER);
+        userIdentity = TestData.createTestUserIdentity("worktest@email.com", "8c5b64dc-e2c6-4b12-868b-344faeeec45d");
+
         try {
-            organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setName("Brown Hill institute");
-            organizationIdentity.setEmail("rachel423@gmail.com");
-            organizationIdentity.setInvitedDate(LocalDateTime.now().toString());
-            organizationIdentity.setRcNumber("RC3499987");
-            organizationIdentity.setId(testId);
-            organizationIdentity.setPhoneNumber("0907658483");
-            organizationIdentity.setTin("Tin8675678");
-            organizationIdentity.setNumberOfPrograms(0);
-            organizationIdentity.setCreatedBy(testId);
-            ServiceOffering serviceOffering = new ServiceOffering();
-            serviceOffering.setName(ServiceOfferingType.TRAINING.name());
-            serviceOffering.setIndustry(Industry.EDUCATION);
-            organizationIdentity.setServiceOfferings(List.of(serviceOffering));
-            organizationIdentity.setWebsiteAddress("webaddress.org");
-            organizationIdentity.setOrganizationEmployees(List.of(OrganizationEmployeeIdentity.builder().
-                    meedlUser(userIdentity).build()));
+            organizationIdentity = TestData.createOrganizationTestData(
+                    "Brown Hill institute", "RC3499987",
+                    List.of(OrganizationEmployeeIdentity.builder().
+                            meedlUser(userIdentity).build()));
 
             OrganizationIdentity savedOrganization = organizationOutputPort.save(organizationIdentity);
             organizationId = savedOrganization.getId();
@@ -141,6 +119,7 @@ class ProgramPersistenceAdapterTest {
         dataAnalytics.setMode(ProgramMode.FULL_TIME);
         dataAnalytics.setProgramStatus(ActivationStatus.ACTIVE);
         dataAnalytics.setDuration(2);
+        dataAnalytics.setOrganizationIdentity(organizationIdentity);
         dataAnalytics.setDeliveryType(DeliveryType.ONSITE);
         dataAnalytics.setDurationType(DurationType.MONTHS);
 
@@ -149,6 +128,7 @@ class ProgramPersistenceAdapterTest {
         dataScience.setProgramDescription("The art of putting thought into solving problems");
         dataScience.setMode(ProgramMode.FULL_TIME);
         dataScience.setProgramStatus(ActivationStatus.ACTIVE);
+        dataScience.setOrganizationIdentity(organizationIdentity);
         dataScience.setDuration(1);
         dataScience.setDeliveryType(DeliveryType.ONSITE);
         dataScience.setDurationType(DurationType.YEARS);
@@ -228,7 +208,7 @@ class ProgramPersistenceAdapterTest {
             assertNotNull(savedOrganization);
 
             dataScience.setCreatedBy(foundUserIdentity.getCreatedBy());
-
+            dataScience.setOrganizationIdentity(savedOrganization);
             assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataScience));
         } catch (MeedlException e) {
             log.error("Error while saving program", e);
@@ -258,12 +238,6 @@ class ProgramPersistenceAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void createProgramWithInvalidCreatedBy(String createdBy) {
         dataAnalytics.setCreatedBy(createdBy);
-        assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
-    }
-
-    @Test
-    void createProgramWithNonExistingCreatedBy() {
-        dataAnalytics.setCreatedBy("f2a25ed8-a594-4cb4-a2fb-8e0dcca72f71");
         assertThrows(MeedlException.class, () -> programOutputPort.saveProgram(dataAnalytics));
     }
 
@@ -401,6 +375,8 @@ class ProgramPersistenceAdapterTest {
     @Test
     void findAllPrograms() {
         try {
+            Page<Program> firstFoundPrograms = programOutputPort.findAllPrograms(
+                    userId, pageSize, pageNumber);
             dataScience.setCreatedBy(organizationIdentity.getCreatedBy());
             Program savedProgram = programOutputPort.saveProgram(dataScience);
             dataScienceProgramId = savedProgram.getId();
@@ -409,13 +385,14 @@ class ProgramPersistenceAdapterTest {
                     userId, pageSize, pageNumber);
             List<Program> programsList = foundPrograms.toList();
 
-            assertEquals(1, foundPrograms.getTotalElements());
+            log.info("Found " + firstFoundPrograms.getTotalElements() + " programs");
+            assertEquals(firstFoundPrograms.getTotalElements() + 1, foundPrograms.getTotalElements());
             assertEquals(1, foundPrograms.getTotalPages());
             assertTrue(foundPrograms.isFirst());
             assertTrue(foundPrograms.isLast());
 
             assertNotNull(programsList);
-            assertEquals(1, programsList.size());
+            assertEquals(firstFoundPrograms.stream().toList().size() + 1, programsList.size());
             assertEquals(programsList.get(0).getName(), dataScience.getName());
             assertEquals(programsList.get(0).getDuration(), dataScience.getDuration());
             assertEquals(programsList.get(0).getNumberOfCohort(), dataScience.getNumberOfCohort());
@@ -480,14 +457,19 @@ class ProgramPersistenceAdapterTest {
             Program savedProgram = programOutputPort.saveProgram(dataAnalytics);
             assertNotNull(savedProgram);
             dataAnalyticsProgramId = savedProgram.getId();
+            loanBreakdown = TestData.createLoanBreakDown();
+            loanBreakdowns = List.of(loanBreakdown);
+            Cohort cohort = TestData.createCohortData("Cohort test", dataScienceProgramId, organizationId,
+                    loanBreakdowns, userId);
 
-            elites.setProgramId(dataAnalyticsProgramId);
-            savedCohort = cohortOutputPort.save(elites);
+            cohort.setProgramId(dataAnalyticsProgramId);
+            savedCohort = cohortOutputPort.save(cohort);
             assertNotNull(savedCohort);
 
             programOutputPort.deleteProgram(dataAnalyticsProgramId);
             savedCohort = cohortOutputPort.findCohort(savedCohort.getId());
             assertNull(savedCohort);
+            cohortOutputPort.deleteCohort(cohort.getProgramId());
         } catch (MeedlException e) {
             log.error("Error while creating program {}", e.getMessage());
         }
@@ -527,6 +509,7 @@ class ProgramPersistenceAdapterTest {
                     itemName(loanBreakdown.getItemName()).build();
             loaneeBreakdowns = List.of(loaneeLoanBreakdown);
 
+            userIdentity.setEmail("testloanee@email.com");
             loanee = Loanee.builder().userIdentity(userIdentity).
                     loanBreakdowns(loaneeBreakdowns).
                     cohortId(cohortId).loaneeLoanDetail(loaneeLoanDetail).build();

@@ -71,9 +71,14 @@ class CohortServiceTest {
 
     @BeforeEach
     void setUp() {
+        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
+        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
+        organizationIdentity =
+                TestData.createOrganizationTestData("testOrg1","rc34rhchjdg",List.of(organizationEmployeeIdentity));
+
         program = Program.builder().id(mockId).name("My program").durationType(DurationType.YEARS).
-                programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
-                createdBy("875565").deliveryType(DeliveryType.ONSITE).
+                programDescription("A great program").programStatus(ActivationStatus.ACTIVE).organizationId(organizationIdentity.getId()).
+                createdBy("875565").deliveryType(DeliveryType.ONSITE).organizationIdentity(organizationIdentity).
                 mode(ProgramMode.FULL_TIME).duration(7).build();
 
         elites = new Cohort();
@@ -102,11 +107,6 @@ class CohortServiceTest {
         loanBreakdown.setItemName("juno");
         loanBreakdown.setItemAmount(BigDecimal.valueOf(3000));
         loanBreakdown.setCurrency("usd");
-
-        userIdentity = TestData.createTestUserIdentity("qudusa55@gmail.com");
-        organizationEmployeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(userIdentity);
-        organizationIdentity =
-                TestData.createOrganizationTestData("testOrg1","rc34rhchjdg",List.of(organizationEmployeeIdentity));
 
     }
 

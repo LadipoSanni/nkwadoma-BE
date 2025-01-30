@@ -123,6 +123,7 @@ class LoanAdapterTest {
 
             program = TestData.createProgramTestData("Data Analytics");
             program.setCreatedBy(userId);
+            program.setOrganizationIdentity(savedOrganization);
             program = programOutputPort.saveProgram(program);
             assertNotNull(program);
             assertNotNull(program.getId());
