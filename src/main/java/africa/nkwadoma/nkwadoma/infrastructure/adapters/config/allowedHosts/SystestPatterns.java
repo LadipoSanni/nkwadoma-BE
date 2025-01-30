@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class SystestPatterns implements AllowedHost{
     @Value("${systest}")
     private String allowedHost;
-    @Value("${systest}")
+    @Value("${systest2}")
     private String allowedHost2;
     @Override
     public String[] getPatterns() {
