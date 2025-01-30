@@ -274,7 +274,7 @@ class LoanServiceTest {
         loan.setLoanStatus(LoanStatus.PERFORMING);
         try {
             when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
-            when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.of(loan));
+            when(loanOutputPort.viewLoanByLoaneeId(anyString())).thenReturn(Optional.of(loan));
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }

@@ -12,6 +12,7 @@ public interface LoanOutputPort {
     void deleteById(String savedLoanId) throws MeedlException;
 
     Optional<Loan> viewLoanById(String loanId) throws MeedlException;
+    Optional<Loan> viewLoanByLoaneeId(String loaneeId) throws MeedlException;
     Loan findLoanById(String id) throws MeedlException;
     Page<Loan> findAllByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 

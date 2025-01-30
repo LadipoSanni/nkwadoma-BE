@@ -53,7 +53,6 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
-    private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
@@ -113,15 +112,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        Optional<Loan> foundLoan = loanOutputPort.viewLoanById(foundLoanee.getId());
-        if (foundLoan.isPresent() && foundLoan.get().getLoanStatus().equals(LoanStatus.PERFORMING)) {
+        Optional<Loan> foundLoan = loanOutputPort.viewLoanByLoaneeId(foundLoanee.getId());
+        if (foundLoan.isPresent()) {
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
         loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee));
-
-        return loanOutputPort.save(loan);
+        Loan savedLoan = loanOutputPort.save(loan);
+        log.info("Saved loan: {}", savedLoan);
+        return savedLoan;
     }
-
 
     @Override
     public Page<Loan> viewAllLoansByOrganizationId(Loan loan) throws MeedlException {
@@ -346,9 +345,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
-        portfolioManagers.forEach(portfolioManager -> {
-            sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer);
-        });
+        portfolioManagers.forEach(portfolioManager -> sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer));
     }
 
 
