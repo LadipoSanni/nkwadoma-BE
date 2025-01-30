@@ -71,6 +71,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
        from LoanOfferEntity lo
        left join LoaneeEntity l on lo.loanee.id = l.id
        left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+       where lo.loaneeResponse is null
        """)
     Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 
