@@ -111,18 +111,17 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loan.getLoaneeId(), "Please provide a valid loanee identification");
+        MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        loan.setLoanee(foundLoanee);
-        loan.setLoanAccountId(getLoanAccountId(foundLoanee));
-        loan.setStartDate(LocalDateTime.now());
-        if (loan.getStartDate().isAfter(LocalDateTime.now())) {
-            throw new MeedlException("Start date cannot be in the future.");
+        Optional<Loan> foundLoan = loanOutputPort.viewLoanById(foundLoanee.getId());
+        if (foundLoan.isPresent() && foundLoan.get().getLoanStatus().equals(LoanStatus.PERFORMING)) {
+            throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
-        loan.setLoanStatus(LoanStatus.PERFORMING);
-        loan = loanOutputPort.save(loan);
-        return loan;
+        loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee));
+
+        return loanOutputPort.save(loan);
     }
+
 
     @Override
     public Page<Loan> viewAllLoansByOrganizationId(Loan loan) throws MeedlException {

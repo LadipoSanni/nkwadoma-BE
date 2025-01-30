@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -46,8 +45,6 @@ class LoanServiceTest {
     private LoaneeLoanAccountPersistenceAdapter loaneeLoanAccountOutputPort;
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
-    @Mock
-    private IdentityVerificationUseCase verificationUseCase;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
@@ -209,8 +206,7 @@ class LoanServiceTest {
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
         }
-        MeedlException meedlException = assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
-        log.info("Exception message: {}", meedlException.getMessage());
+        assertThrows(MeedlException.class, () -> loanService.respondToLoanReferral(loanReferral));
     }
 
     @Test
@@ -248,15 +244,20 @@ class LoanServiceTest {
 
     @Test
     void startLoan() {
-        Loan startedLoan = null;
+        Loan startedLoan = Loan.builder().
+                loanStatus(LoanStatus.PERFORMING).
+                loanAccountId(loaneeLoanAccount.getId()).
+                loaneeId(loanee.getId()).build();
+
         try {
-            when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
-            when(loanOutputPort.save(loan)).thenReturn(loan);
-            when(loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId())).thenReturn(loaneeLoanAccount);
+            when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
+            when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
+            when(loanOutputPort.save(any())).thenReturn(startedLoan);
             startedLoan = loanService.startLoan(loan);
         } catch (MeedlException e) {
             log.error("Failed to start loan", e);
         }
+
         assertNotNull(startedLoan);
         assertEquals(LoanStatus.PERFORMING, startedLoan.getLoanStatus());
         assertEquals(loaneeLoanAccount.getId(), startedLoan.getLoanAccountId());
@@ -266,6 +267,18 @@ class LoanServiceTest {
     @Test
     void startLoanWithNull() {
         assertThrows(MeedlException.class, ()-> loanService.startLoan(null));
+    }
+
+    @Test
+    void startLoanThatHasAlreadyBeenStarted() {
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+        try {
+            when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
+            when(loanOutputPort.viewLoanById(anyString())).thenReturn(Optional.of(loan));
+        } catch (MeedlException e) {
+            log.error(e.getMessage(), e);
+        }
+        assertThrows(MeedlException.class, ()-> loanService.startLoan(loan));
     }
 
     @ParameterizedTest

@@ -162,9 +162,9 @@ public class LoanController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = START_LOAN, description = START_LOAN_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> startLoan(@RequestParam @NotBlank(message = "Loanee ID is required")
-                                                                String loaneeId,
-                                                    @RequestParam @NotBlank(message = "LoanOffer ID is required")
-                                                                String loanOfferId) throws MeedlException {
+                                                    String loaneeId,
+                                                    @RequestParam @NotBlank(message = "Loan offer ID is required")
+                                                    String loanOfferId) throws MeedlException {
         log.info("Start loan called.... loan offer id : {}", loanOfferId);
         Loan loan = new Loan();
         loan.setLoaneeId(loaneeId);
@@ -172,10 +172,10 @@ public class LoanController {
         loan = createLoanProductUseCase.startLoan(loan);
         StartLoanResponse startLoanResponse = loanProductMapper.toStartLoanResponse(loan);
         ApiResponse<StartLoanResponse> apiResponse = ApiResponse.<StartLoanResponse>builder()
-               .data(startLoanResponse)
-               .message(SuccessMessages.LOAN_START_SUCCESS)
-               .statusCode(HttpStatus.OK.name())
-               .build();
+                .data(startLoanResponse)
+                .message(SuccessMessages.LOAN_START_SUCCESS)
+                .statusCode(HttpStatus.OK.name())
+                .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
