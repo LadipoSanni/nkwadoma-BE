@@ -28,10 +28,8 @@ public class UserIdentityResponse {
     private String alternateEmail;
     private String alternatePhoneNumber;
     private String alternateContactAddress;
-    private String password;
     private String accessToken;
     private String refreshToken;
-    private String newPassword;
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
