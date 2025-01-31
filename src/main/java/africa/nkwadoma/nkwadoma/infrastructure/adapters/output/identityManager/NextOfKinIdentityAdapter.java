@@ -24,9 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
     private final NextOfKinRepository nextOfKinRepository;
-    private final UserIdentityOutputPort userIdentityOutputPort;
     private final NextOfKinMapper nextOfKinMapper;
-    private final UserIdentityMapper userIdentityMapper;
 
     @Override
     public NextOfKin save(NextOfKin nextOfKin) throws MeedlException {
@@ -34,21 +32,12 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
             throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         }
         MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity());
-        updateUserEntity(nextOfKin);
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
         return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
     }
 
-    private void updateUserEntity(NextOfKin nextOfKin) throws MeedlException {
-        UserIdentity userIdentity = userIdentityOutputPort.findById(nextOfKin.getLoanee().getUserIdentity().getId());
-        if (ObjectUtils.isNotEmpty(userIdentity)) {
-            UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
-            UserEntity updateUserEntity = userIdentityMapper.updateUserEntity(userEntity, nextOfKin.getLoanee().getUserIdentity());
-            userIdentity = userIdentityMapper.toUserIdentity(updateUserEntity);
-            userIdentityOutputPort.save(userIdentity);
-        }
-    }
+
 
     @Override
     public void deleteNextOfKin(String nextOfKinId) throws MeedlException {

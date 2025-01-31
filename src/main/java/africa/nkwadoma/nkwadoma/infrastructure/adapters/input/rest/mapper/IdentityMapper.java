@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
 
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -18,4 +19,6 @@ public interface IdentityMapper {
     UserIdentity toPasswordCreateRequest(PasswordCreateRequest passwordCreateRequest);
 
     UserIdentity toLoginUserIdentity(LoginRequest loginRequest);
+
+    UserIdentityResponse toUserIdentityResponse(UserIdentity userIdentityFound);
 }

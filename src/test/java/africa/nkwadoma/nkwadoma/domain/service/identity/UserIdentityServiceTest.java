@@ -169,6 +169,19 @@ class UserIdentityServiceTest {
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
     }
+    @Test
+    @Order(2)
+    void viewUserDetail(){
+        try {
+            favour.setId("c508e3bb-1193-4fc7-aa75-e1335c78ef1e");
+            when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+            UserIdentity userIdentity = userIdentityService.viewUserDetail(favour);
+            assertNotNull(userIdentity);
+            assertEquals(userIdentity.getFirstName(), favour.getFirstName());
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(),exception.getMessage());
+        }
+    }
 
     @Test
     void login(){
@@ -399,6 +412,17 @@ class UserIdentityServiceTest {
             log.error(e.getMessage());
         }
         assertThrows(MeedlException.class,()-> userIdentityService.deactivateUserAccount(favour));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewUserDetailWithInvalidId(String userId) {
+        favour.setId(userId);
+        try {
+            when(userIdentityService.viewUserDetail(favour)).thenThrow(MeedlException.class);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
+        assertThrows(MeedlException.class,()-> userIdentityService.viewUserDetail(favour));
     }
     @Test
     void deactivateUserAccountWithNull(){
