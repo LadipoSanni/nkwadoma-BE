@@ -54,6 +54,8 @@ public interface LoanOfferMapper {
     @Mapping(target = "loanee.id", source = "loaneeId")
     @Mapping(target = "loanOfferStatus", source = "loanOfferStatus")
     @Mapping(target = "loaneeResponse", source = "loaneeResponse")
+    @Mapping(target = "organizationId", source = "organizationId")
+    @Mapping(target = "loanRequestReferredBy", source = "loanRequestReferredBy")
     LoanOffer mapProjectionToLoanOffer(LoanOfferProjection loanOfferProjection);
 
 }

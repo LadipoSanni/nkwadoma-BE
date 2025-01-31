@@ -51,7 +51,7 @@ class LoanServiceTest {
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
-    private LoanMetricsService loanMetricsUseCase;
+    private LoanMetricsOutputPort loanMetricsOutputPort;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private LoanReferral loanReferral;
@@ -112,9 +112,12 @@ class LoanServiceTest {
     void createLoanRequest() {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
-            when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
+            loanRequest.setReferredBy(organizationIdentity.getName());
+            when(organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
-            when(loanMetricsUseCase.save(any())).thenReturn(loanMetrics);
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
@@ -193,6 +196,12 @@ class LoanServiceTest {
                     thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            loanReferral.getLoanee().setReferredBy("RefferedBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -237,6 +246,12 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            loanReferral.getLoanee().setReferredBy("RefferedBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -253,6 +268,12 @@ class LoanServiceTest {
             when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
             when(loanOutputPort.save(loan)).thenReturn(loan);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(loanee.getId())).thenReturn(loaneeLoanAccount);
+            loanee.setReferredBy("RefferedBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanee.getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             startedLoan = loanService.startLoan(loan);
         } catch (MeedlException e) {
             log.error("Failed to start loan", e);

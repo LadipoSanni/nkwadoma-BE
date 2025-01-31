@@ -37,4 +37,14 @@ public interface EmployeeAdminEntityRepository extends JpaRepository<Organizatio
     Page<OrganizationEmployeeEntity> findAllByOrganizationAndMeedlUserRole(String organizationId, IdentityRole identityRole, Pageable pageRequest);
 
     List<OrganizationEmployeeEntity> findByOrganization(String organizationId);
+
+    @Query("""
+            select o from OrganizationEmployeeEntity o
+            where o.organization = :organizationId
+            and upper(concat(o.meedlUser.firstName, ' ', o.meedlUser.lastName)) like upper(concat('%', :nameFragment, '%'))
+            """)
+    Page<OrganizationEmployeeEntity> findEmployeeInOrganizationbByIdAndName(@Param("organizationId")
+                                                                            String organizationId,
+                                                                            @Param("nameFragment") String nameFragment,
+                                                                            Pageable pageRequest);
 }

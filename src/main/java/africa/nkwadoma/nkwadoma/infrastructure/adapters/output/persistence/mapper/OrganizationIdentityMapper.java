@@ -36,7 +36,15 @@ public interface OrganizationIdentityMapper {
 
     OrganizationIdentity updateOrganizationIdentity(@MappingTarget OrganizationIdentity organizationIdentityMapTo, OrganizationIdentity organizationIdentityMapFrom);
 
+
     List<OrganizationIdentity> projectionToOrganizationIdentity(List<OrganizationProjection> organizations);
     @Mapping(target = "id", source = "organizationId")
+    @Mapping(target = "loanRequestCount", source = "loanRequestCount")
+    @Mapping(target = "loanDisbursalCount", source = "loanDisbursalCount")
+    @Mapping(target = "loanOfferCount", source = "loanOfferCount")
+    @Mapping(target = "loanReferralCount", source = "loanReferralCount")
+    @Mapping(target = "numberOfLoanees", source = "numberOfLoanees")
+    @Mapping(target = "numberOfCohort", source = "numberOfCohort")
+    @Mapping(target = "numberOfPrograms", source = "numberOfPrograms")
     OrganizationIdentity projectionToOrganizationIdentity(OrganizationProjection organization);
 }

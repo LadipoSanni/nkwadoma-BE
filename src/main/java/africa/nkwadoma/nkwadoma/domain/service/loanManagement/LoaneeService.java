@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
@@ -28,6 +29,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -56,7 +58,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
-    private final LoanMetricsUseCase loanMetricsUseCase;
+    private final LoanMetricsOutputPort loanMetricsOutputPort;
 
 
     @Override
@@ -172,13 +174,24 @@ public class LoaneeService implements LoaneeUseCase {
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
         LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
-        LoanMetrics loanMetrics = loanMetricsUseCase.save(LoanMetrics.builder().
-                organizationId(organizationEmployeeIdentity.getOrganization()).
-                loanReferralCount(1).build());
+        Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationEmployeeIdentity);
         log.info("Loan metrics saved: {}", loanMetrics);
         refer(loanee,loanReferral.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         return  loanReferral;
+    }
+
+    private Optional<LoanMetrics> updateLoanMetrics(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("No loan metrics found for organization");
+        }
+        loanMetrics.get().setLoanReferralCount(
+                loanMetrics.get().getLoanReferralCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
+        return loanMetrics;
     }
 
     private void checkIfLoaneeHasBeenReferredInTheSameCohort(Loanee loanee) throws MeedlException {

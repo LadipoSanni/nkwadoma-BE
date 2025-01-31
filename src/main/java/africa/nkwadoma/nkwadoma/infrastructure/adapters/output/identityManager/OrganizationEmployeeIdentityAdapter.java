@@ -159,6 +159,17 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
     }
 
     @Override
+    public Page<OrganizationEmployeeIdentity> findAllEmployeesInOrganization(String organizationId,String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findEmployeeInOrganizationbByIdAndName(organizationId,name,pageRequest);
+        return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
+    }
+
+    @Override
     public Optional<OrganizationEmployeeIdentity> findByMeedlUserId(String meedlUserId) throws MeedlException {
         MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(meedlUserId);

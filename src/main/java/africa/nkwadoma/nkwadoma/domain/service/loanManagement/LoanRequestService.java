@@ -3,12 +3,15 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -33,6 +36,8 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoanRequestMapper loanRequestMapper;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final LoanMetricsOutputPort loanMetricsOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -94,6 +99,8 @@ public class LoanRequestService implements LoanRequestUseCase {
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
 
+            updateLoanRequestOnMetrics(foundLoanRequest);
+
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
 
             updatedLoanRequest.setLoanOfferId(loanOffer.getId());
@@ -107,6 +114,23 @@ public class LoanRequestService implements LoanRequestUseCase {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void updateLoanRequestOnMetrics(LoanRequest loanRequest) throws MeedlException {
+        Optional<OrganizationIdentity> organization =
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
+        if (organization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanRequestCount(
+                loanMetrics.get().getLoanRequestCount() - 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     private static LoanRequest declineLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
