@@ -48,7 +48,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     log.warn("Disabled user forcefully logged out");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(Map.of("Error", "Action not permitted. Contact admin.")));
+                    response.getWriter().write(objectMapper.writeValueAsString(Map.of("Error", "Action not permitted.")));
                     return;
                 }
             }catch (Exception e) {
