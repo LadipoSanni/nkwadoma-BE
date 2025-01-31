@@ -230,12 +230,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
-                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN)
+                foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
+                foundUserIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER)
         {
             OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
                     id(foundUserIdentity.getId()).build();
             employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
-            log.info("Found Employee identity: {}", employeeIdentity);
+            log.info("Found Employee identity to update status: {}", employeeIdentity);
             OrganizationIdentity foundOrganizationIdentity =
                     viewOrganizationDetails(employeeIdentity.getOrganization());
             log.info("Found organization: {}", foundOrganizationIdentity);

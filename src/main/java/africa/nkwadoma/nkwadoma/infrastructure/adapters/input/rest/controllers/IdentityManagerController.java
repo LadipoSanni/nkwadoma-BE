@@ -73,6 +73,7 @@ public class IdentityManagerController {
                 userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {
+            log.info("Started updating employee status");
             OrganizationIdentity organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setUserIdentity(userIdentity);
             createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
