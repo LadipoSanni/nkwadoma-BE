@@ -94,7 +94,7 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
                 throw new IdentityException("Please register on our platform or contact your admin.");
             }
             log.error("User found on keycloak. User id {} user email {}", foundUser.getId(), foundUser.getEmail());
-            throw new IdentityException("User with email "+foundUser.getEmail()+" can no longer perform this action. Please contact your admin");
+            throw new IdentityException("User with email "+foundUser.getEmail()+" can not perform this action. Please contact your admin");
         }
         log.info("The employee found using the created by:  {}", employeeEntity.getId());
         return organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity);
