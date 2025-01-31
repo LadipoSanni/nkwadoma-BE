@@ -169,5 +169,16 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return organizationEmployeeEntities.map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity);
     }
 
+    @Override
+    public Optional<OrganizationEmployeeIdentity> findByMeedlUserId(String meedlUserId) throws MeedlException {
+        MeedlValidator.validateUUID(meedlUserId, MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
+        OrganizationEmployeeEntity employeeEntity = employeeAdminEntityRepository.findByMeedlUserId(meedlUserId);
+        if(!ObjectUtils.isEmpty(employeeEntity)){
+            log.info("The employee found using the meedl user id:  {}", employeeEntity.getId());
+            return Optional.of(organizationEmployeeIdentityMapper.toOrganizationEmployeeIdentity(employeeEntity));
+        }
+        return Optional.empty();
+    }
+
 
 }
