@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -45,6 +46,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final OrganizationEntityRepository organizationEntityRepository;
+    private final LoanMetricsUseCase  loanMetricsUseCase;
 
 
     @Override
@@ -62,6 +64,9 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}", organizationIdentity);
+        log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
+        LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
+        log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
         return organizationIdentity;
     }
 

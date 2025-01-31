@@ -51,6 +51,11 @@ public class TestData {
                 .build();
     }
 
+    public static LoanMetrics createTestLoanMetrics(String organizationId) {
+        return LoanMetrics.builder().id(organizationId).build();
+
+    }
+
     public static OrganizationIdentity createOrganizationTestData(String name, String rcNumber , List<OrganizationEmployeeIdentity> employeePeter) {
         OrganizationIdentity organizationIdentity = new OrganizationIdentity();
         organizationIdentity.setName(name);

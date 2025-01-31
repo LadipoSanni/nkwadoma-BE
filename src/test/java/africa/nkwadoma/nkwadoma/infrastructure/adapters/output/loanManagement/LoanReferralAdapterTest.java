@@ -81,6 +81,9 @@ class LoanReferralAdapterTest {
     private List<LoaneeLoanBreakdown> loaneeBreakdowns;
     private String cohortId;
     private String organizationAdminId;
+    private LoanMetrics loanMetrics;
+    @Autowired
+    private LoanMetricsUseCase loanMetricsUseCase;
 
     @BeforeAll
     void setUp() {
@@ -167,6 +170,7 @@ class LoanReferralAdapterTest {
             loaneeUserId = loanee.getUserIdentity().getId();
             loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
+            loanMetricsUseCase.createLoanMetrics(organizationId);
 
             loanReferral = loaneeUseCase.referLoanee(loaneeId);
             assertNotNull(loanReferral);

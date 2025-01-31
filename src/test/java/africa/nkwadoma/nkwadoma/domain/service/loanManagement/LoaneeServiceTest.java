@@ -78,6 +78,8 @@ class LoaneeServiceTest {
     private LoanMetricsUseCase loanMetricsUseCase;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private LoanMetricsOutputPort loanMetricsOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -257,9 +259,9 @@ class LoaneeServiceTest {
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());
             when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
-            when(loanMetricsUseCase.save(any())).thenReturn(LoanMetrics.builder().
-                    organizationId(organizationEmployeeIdentity.getOrganization()).
-                    loanReferralCount(1).build());
+            when(loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization()))
+                    .thenReturn(Optional.of(new LoanMetrics()));
+            when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
             LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee.getId());
             assertEquals(loanReferral.getLoanee().getUserIdentity().getFirstName()
                     , firstLoanee.getUserIdentity().getFirstName());
