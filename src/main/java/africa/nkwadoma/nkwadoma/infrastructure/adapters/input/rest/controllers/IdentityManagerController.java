@@ -96,7 +96,16 @@ public class IdentityManagerController {
                 message(ControllerConstant.PASSWORD_RESET_SUCCESSFUL.getMessage()).
                 statusCode(HttpStatus.OK.name()).build());
     }
+    @GetMapping("auth/userDetail")
+    public ResponseEntity<ApiResponse<UserIdentity>> viewUserDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
+        UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
+        UserIdentity userIdentityFound = createUserUseCase.viewUserDetail(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
+                .data(userIdentityFound)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.name()).build());
+    }
     @PostMapping("auth/user/reactivate")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> reactivateUser(@AuthenticationPrincipal Jwt meedlUser,

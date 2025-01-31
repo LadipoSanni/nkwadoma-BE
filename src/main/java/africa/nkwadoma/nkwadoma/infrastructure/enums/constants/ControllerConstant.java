@@ -11,7 +11,7 @@ public enum ControllerConstant {
     DELETED_SUCCESSFULLY("Deleted successfully"),
     UPDATED_SUCCESSFULLY("updated successfully"),
     PASSWORD_RESET_SUCCESSFUL("Password reset successful"),
-    RETURNED_SUCCESSFULLY("returned successfulLy");
+    RETURNED_SUCCESSFULLY("Returned successfulLy");
     private final String message;
 
     ControllerConstant(String message) {

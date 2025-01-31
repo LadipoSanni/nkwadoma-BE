@@ -217,5 +217,10 @@ public class UserIdentityService implements CreateUserUseCase {
         return false;
     }
 
+    @Override
+    public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
+        return userIdentityOutputPort.findById(userIdentity.getId());
+    }
+
 }
 
