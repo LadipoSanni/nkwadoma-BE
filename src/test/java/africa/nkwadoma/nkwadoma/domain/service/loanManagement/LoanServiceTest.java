@@ -271,6 +271,11 @@ class LoanServiceTest {
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
+            when(organizationIdentityOutputPort.findOrganizationByName(loanee.getReferredBy()))
+                    .thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.of(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             startedLoan = loanService.startLoan(loan);
         } catch (MeedlException e) {
             log.error("Failed to start loan", e);

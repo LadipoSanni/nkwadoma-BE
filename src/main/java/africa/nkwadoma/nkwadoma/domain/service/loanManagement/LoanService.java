@@ -121,6 +121,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee));
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
+        updateLoanDisbursalOnLoamMatrics(foundLoanee);
         return savedLoan;
     }
 
