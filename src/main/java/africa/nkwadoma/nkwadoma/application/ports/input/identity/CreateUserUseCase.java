@@ -25,4 +25,6 @@ public interface CreateUserUseCase {
     UserIdentity deactivateUserAccount(UserIdentity userIdentity) throws MeedlException;
 
     boolean checkNewPasswordMatchLastFive(UserIdentity userIdentity) throws MeedlException;
+
+    UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException;
 }
