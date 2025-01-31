@@ -347,19 +347,27 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer) throws MeedlException {
         loanOffer.validateForAcceptOffer();
+        log.info("Loan offer identity validated : {}", loanOffer);
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
+        log.info("found Loan offer : {}", loanOffer);
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
+        log.info("Loan  : {}", loanOffer);
         if (loanee.isEmpty()) {
+            log.info("Loanee is empty : {}", loanOffer);
             throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());
         }
         if (!offer.getLoanee().getId().equals(loanee.get().getId())) {
+            log.info("offer not assigned to loanee: {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_ASSIGNED_TO_LOANEE.getMessage());
         }
         if (ObjectUtils.isNotEmpty(offer.getLoaneeResponse())) {
+            log.info("decision made previously : {}", loanOffer);
             throw new LoanException(LoanMessages.LOAN_OFFER_DECISION_MADE.getMessage());
         }
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        log.info("found all pm : {}", portfolioManagers);
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
+            log.info("accept offer abt to start : {}", loanOffer);
             return acceptLoanOffer(loanOffer, offer, portfolioManagers);
         }
         decreaseLoanOfferOnLoanMetrics(offer);
@@ -374,18 +382,26 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private LoaneeLoanAccount acceptLoanOffer(LoanOffer loanOffer, LoanOffer offer, List<UserIdentity> portfolioManagers) throws MeedlException {
+        log.info("got into accept method: {}", loanOffer);
         //Loanee Wallet would be Created
         loanOfferMapper.updateLoanOffer(offer, loanOffer);
         offer.setDateTimeAccepted(LocalDateTime.now());
         LoanProduct loanProduct = loanProductOutputPort.findById(offer.getLoanProduct().getId());
+        log.info("loanProduct found : {}", loanProduct);
         offer.setLoanProduct(loanProduct);
         loanOfferOutputPort.save(offer);
+        log.info("after saving offer : {}", offer);
         notifyPortfolioManager(portfolioManagers, offer);
+        log.info("Loanee account abt to create : {}", loanOffer);
         LoaneeLoanAccount loaneeLoanAccount = loaneeLoanAccountOutputPort.findByLoaneeId(offer.getLoaneeId());
+        log.info("Loanee account is found : {}", loaneeLoanAccount);
         if (ObjectUtils.isEmpty(loaneeLoanAccount)){
+            log.info("Loanee account is abt to be created : {}", loaneeLoanAccount);
             loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
+            log.info("Loanee account is created : {}", loaneeLoanAccount);
         }
         decreaseLoanOfferOnLoanMetrics(offer);
+        log.info("done decreasing  : {}", offer);
         return loaneeLoanAccount;
     }
 

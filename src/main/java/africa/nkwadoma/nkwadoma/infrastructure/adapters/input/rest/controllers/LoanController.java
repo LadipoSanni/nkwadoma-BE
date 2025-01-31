@@ -218,8 +218,10 @@ public class LoanController {
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> acceptLoanOffer(@AuthenticationPrincipal Jwt meedlUser,
                                                           @Valid @RequestBody LoanOfferAcceptRequest loanOfferRequest) throws MeedlException {
+        log.info("process of accept loan offer request started: {}", loanOfferRequest);
         LoanOffer loanOffer = loanOfferRestMapper.toLoanOffer(loanOfferRequest);
         loanOffer.setUserId(meedlUser.getClaimAsString("sub"));
+        log.info("about to get into the loan offer service : {}", loanOfferRequest);
         LoaneeLoanAccount loaneeLoanAccount  = loanOfferUseCase.acceptLoanOffer(loanOffer);
         LoaneeLoanAccountResponse loaneeLoanAccountResponse = loaneeLoanAccountRestMapper.
                 toLoaneeLoanAccountResponse(loaneeLoanAccount);
