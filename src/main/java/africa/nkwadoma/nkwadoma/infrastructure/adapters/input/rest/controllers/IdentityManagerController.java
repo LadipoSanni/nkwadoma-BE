@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,12 +98,11 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build());
     }
     @GetMapping("auth/userDetail")
-    public ResponseEntity<ApiResponse<UserIdentity>> viewUserDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-
+    public ResponseEntity<ApiResponse<UserIdentityResponse>> viewUserDetail(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder().id(meedlUser.getClaimAsString("sub")).build();
         UserIdentity userIdentityFound = createUserUseCase.viewUserDetail(userIdentity);
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder()
-                .data(userIdentityFound)
+        return ResponseEntity.ok(ApiResponse.<UserIdentityResponse>builder()
+                .data(identityMapper.toUserIdentityResponse(userIdentityFound))
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.name()).build());
     }

@@ -35,6 +35,4 @@ public class UserIdentityResponse {
     private String organizationDomain;
     private String deactivationReason;
     private String reactivationReason;
-    private String bvn;
-    private String nin;
 }
