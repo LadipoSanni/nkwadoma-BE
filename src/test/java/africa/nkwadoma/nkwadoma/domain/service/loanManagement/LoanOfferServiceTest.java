@@ -171,19 +171,25 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsNotCreatedIfLoanOfferIsDeclined(){
+        LoaneeLoanAccount loaneeLoanAccount1 = null;
+        Optional<OrganizationIdentity> organizationIdentity =
+                Optional.ofNullable(OrganizationIdentity.builder().id(mockId2).build());
         try {
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
             when(loaneeOutputPort.findByUserId(mockId)).thenReturn(Optional.ofNullable(loanee));
             loanOffer2.setLoaneeResponse(LoanDecision.DECLINED);
-            when(loanMetricsOutputPort.findByOrganizationId(mockId))
+            loanOffer.setLoanRequestReferredBy("referredBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanOffer.getLoanRequestReferredBy()))
+                    .thenReturn(organizationIdentity);
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.get().getId()))
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             when(loanOfferOutputPort.save(loanOffer)).thenReturn(loanOffer);
-            loaneeLoanAccount = loanService.acceptLoanOffer(loanOffer2);
+             loaneeLoanAccount1 = loanService.acceptLoanOffer(loanOffer2);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertNull(loaneeLoanAccount);
+        assertNull(loaneeLoanAccount1);
     }
 
 
