@@ -29,6 +29,7 @@ public interface IdentityManagerOutputPort {
     ClientRepresentation getClientRepresentationByClientId(String id) throws MeedlException;
 
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
+    AccessTokenResponse refreshToken(UserIdentity userIdentity) throws MeedlException;
 
     void resetPassword(UserIdentity userIdentity) throws MeedlException;
 

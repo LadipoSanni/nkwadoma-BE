@@ -38,7 +38,6 @@ class KeycloakAdapterTest {
     private UserIdentity john;
     private UserIdentity peter;
     private String johnId;
-    private OrganizationIdentity organizationIdentity;
     private boolean enabled;
     private final String password = "P@ssw0rd-4-Test";
     private final String newPassword = "neWpasswordJ@345";
@@ -300,7 +299,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserById(id));
     }
     @Test
-    void getUserIdentityByValidNoneExistingId() throws MeedlException {
+    void getUserIdentityByValidNoneExistingId() {
         assertThrows(MeedlException.class, ()-> identityManagementOutputPort.getUserById("123e4567-e89b-12d3-a456-426614174000\""));
     }
     @ParameterizedTest
@@ -339,6 +338,66 @@ class KeycloakAdapterTest {
             log.error("Error logging in user {}", meedlException.getMessage());
         }
     }
+
+    @Test
+    @Order(11)
+    void refreshToken(){
+        try {
+            john.setEmail(john.getEmail());
+            john.setPassword(password);
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+
+            john.setRefreshToken(accessTokenResponse.getRefreshToken());
+            AccessTokenResponse refreshTokenResponse = identityManagementOutputPort.refreshToken(john);
+
+            assertNotNull(refreshTokenResponse);
+            assertNotNull(refreshTokenResponse.getToken());
+            assertNotNull(refreshTokenResponse.getRefreshToken());
+            assertNotEquals(refreshTokenResponse, accessTokenResponse);
+            assertNotEquals(refreshTokenResponse.getToken(), accessTokenResponse.getToken());
+        } catch (MeedlException meedlException){
+            log.error("Error authenticating in user {}", meedlException.getMessage());
+        }
+    }
+
+    @Test
+    void refreshTokenWithInvalidRefreshToken(){
+        try {
+            john.setEmail(john.getEmail());
+            john.setPassword(password);
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+        }
+        catch (MeedlException meedlException){
+            log.error("Error authenticating user {}", meedlException.getMessage());
+        }
+        john.setRefreshToken("invalid-refresh-token");
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.refreshToken(john));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", StringUtils.EMPTY, StringUtils.SPACE})
+    void refreshTokenWithEmptyRefreshToken(String refreshToken){
+        try {
+            john.setEmail(john.getEmail());
+            john.setPassword(password);
+            AccessTokenResponse accessTokenResponse = identityManagementOutputPort.login(john);
+            assertNotNull(accessTokenResponse);
+            assertNotNull(accessTokenResponse.getToken());
+            assertNotNull(accessTokenResponse.getRefreshToken());
+        }
+        catch (MeedlException meedlException){
+            log.error("Error authenticating user {}", meedlException.getMessage());
+        }
+        john.setRefreshToken(refreshToken);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.refreshToken(john));
+    }
+
     @Test
     void loginWithValidEmailAddressAndInvalidPassword() {
         john.setPassword("invalid-password");
@@ -457,7 +516,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void changePasswordWithValidPassword() {
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(password);
@@ -504,7 +563,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void resetPasswordWithValidPassword() {
         AccessTokenResponse accessTokenResponse = null;
         john.setPassword(newPassword);
@@ -547,7 +606,7 @@ class KeycloakAdapterTest {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     void enableAccountThatHasBeenEnabled() {
             john.setId(johnId);
             assertThrows(MeedlException.class, () -> identityManagementOutputPort.enableUserAccount(john));
@@ -580,7 +639,7 @@ class KeycloakAdapterTest {
         assertThrows(MeedlException.class,()->identityManagementOutputPort.enableUserAccount(john));
     }
     @Test
-    @Order(14)
+    @Order(15)
     void disAbleAccount() {
         UserIdentity userIdentity = null;
         try{
@@ -594,7 +653,7 @@ class KeycloakAdapterTest {
         }
     }
     @Test
-    @Order(15)
+    @Order(16)
     void disAbleAccountAlreadyDisabled() {
           assertThrows(MeedlException.class, ()-> identityManagementOutputPort.disableUserAccount(john));
 
