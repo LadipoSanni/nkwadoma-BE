@@ -16,4 +16,6 @@ public interface LoaneeMapper {
     Loanee toLoanee(LoaneeEntity loaneeEntity);
 
     List<Loanee> toListOfLoanee(List<LoaneeEntity> loaneeEntities);
+
+    Loanee updateLoanee(Loanee loanee, @MappingTarget Loanee foundLoanee);
 }

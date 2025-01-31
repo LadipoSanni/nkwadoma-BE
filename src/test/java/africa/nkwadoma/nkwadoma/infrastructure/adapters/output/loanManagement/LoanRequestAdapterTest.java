@@ -431,7 +431,7 @@ class LoanRequestAdapterTest {
         assertThrows(MeedlException.class, () -> loanRequestOutputPort.findById(id));
     }
 
-    @AfterAll
+//    @AfterAll
     void cleanUp() {
         try {
             nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);

@@ -16,4 +16,5 @@ public interface UserIdentityMapper {
 
     UserEntity updateUserEntity(@MappingTarget UserEntity userEntity, UserIdentity userIdentity);
 
+    UserIdentity updateUser(UserIdentity userIdentity, @MappingTarget UserIdentity existingUserIdentity);
 }
