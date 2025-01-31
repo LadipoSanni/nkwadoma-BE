@@ -40,6 +40,7 @@ public class LoanOffer {
     private String termsAndCondition;
     private String programId;
     private String organizationId;
+    private String loanRequestReferredBy;
     private LoanType type;
     private String name;
     private int pageSize;

@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.*;
 
 import java.util.*;
@@ -43,6 +44,15 @@ public class LoanMetricsService implements LoanMetricsUseCase {
 
         log.info("Loan metrics saved successfully: {}", savedMetrics);
         return savedMetrics;
+    }
+
+    @Override
+    public LoanMetrics createLoanMetrics(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        LoanMetrics loanMetrics = new LoanMetrics();
+        log.info("Create loan metrics: {}", id);
+        loanMetrics.setOrganizationId(id);
+        return loanMetricsOutputPort.save(loanMetrics);
     }
 
 }

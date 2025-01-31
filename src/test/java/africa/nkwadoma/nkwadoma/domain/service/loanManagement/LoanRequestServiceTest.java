@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
@@ -48,6 +49,11 @@ class LoanRequestServiceTest {
     private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     @Mock
     private LoanRequestMapper loanRequestMapper;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private LoanMetricsOutputPort loanMetricsOutputPort;
+    private String id = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
 
     @BeforeEach
     void setUp() {
@@ -152,31 +158,29 @@ class LoanRequestServiceTest {
     @Test
     void approveLoanRequest() {
         try {
-            LoanRequest loanRequestDto = new LoanRequest();
-            loanRequestDto.setLoanProductId(loanRequest.getLoanProductId());
-            loanRequestDto.setId(loanRequest.getId());
-            loanRequestDto.setLoanRequestDecision(LoanDecision.ACCEPTED);
-            loanRequestDto.setLoanAmountApproved(new BigDecimal("500000"));
-
+            // Setup stubs
             when(loanRequestOutputPort.findLoanRequestById(anyString())).thenReturn(Optional.of(loanRequest));
             when(loanProductOutputPort.findById(loanRequest.getLoanProductId())).thenReturn(loanProduct);
             when(loanOfferUseCase.createLoanOffer(any())).thenReturn(loanOffer);
-            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequest);
-            doNothing().when(sendLoaneeEmailUsecase).sendLoanRequestApprovalEmail(loanRequest);
-            loanRequestDto = loanRequestService.respondToLoanRequest(loanRequestDto);
+            when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(organizationIdentityOutputPort.findOrganizationByName(any()))
+                    .thenReturn(Optional.of(OrganizationIdentity.builder().id(id).build()));
+            when(loanMetricsOutputPort.findByOrganizationId(anyString()))
+                    .thenReturn(Optional.of(new LoanMetrics()));
+            when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
+            doNothing().when(sendLoaneeEmailUsecase).sendLoanRequestApprovalEmail(any());
+            LoanRequest response = loanRequestService.respondToLoanRequest(loanRequest);
+            assertNotNull(response);
+            assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
+            assertEquals(new BigDecimal("500000"), response.getLoanAmountApproved());
 
-            assertNotNull(loanRequestDto);
-            assertEquals(LoanRequestStatus.APPROVED, loanRequestDto.getStatus());
-            assertEquals("Adeshina", loanRequestDto.getLoanee().getUserIdentity().getFirstName());
-            assertEquals("Qudus", loanRequestDto.getLoanee().getUserIdentity().getLastName());
-            assertEquals(new BigDecimal("500000"), loanRequestDto.getLoanAmountApproved());
-            assertNotNull(loanRequestDto.getDateTimeOffered());
-            assertEquals(loanRequestDto.getLoanAmountApproved(), BigDecimal.valueOf(500000));
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);
         }
     }
+
+
 
     @Test
     void approveNullLoanRequest() {

@@ -91,4 +91,27 @@ public class OrganizationEmployeeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+
+    @GetMapping("search-admin")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<?> searchAllAdminInOrganization(@RequestParam @NotBlank(message = "Organization id is required") String organizationId,
+                                                          @RequestParam @NotBlank(message = "name") String name,
+                                                          @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                          @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)throws MeedlException {
+        Page<OrganizationEmployeeIdentity> organizationEmployeeIdentities =
+                viewOrganizationEmployeesUseCase.searchAdminInOrganization(organizationId,name,pageSize,pageNumber);
+        List<OrganizationEmployeeResponse> organizationEmployeeResponses =
+                organizationEmployeeIdentities.stream().map(organizationEmployeeRestMapper::toOrganizationEmployeeResponse).toList();
+        PaginatedResponse<OrganizationEmployeeResponse> paginatedResponse =new PaginatedResponse<>(
+                organizationEmployeeResponses,organizationEmployeeIdentities.hasNext(),organizationEmployeeIdentities.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<OrganizationEmployeeResponse>> apiResponse = ApiResponse.<PaginatedResponse
+                        <OrganizationEmployeeResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }

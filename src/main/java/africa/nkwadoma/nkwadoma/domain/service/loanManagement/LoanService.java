@@ -53,10 +53,12 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
     private final LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
+    private final IdentityVerificationUseCase verificationUseCase;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final ProgramOutputPort programOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
+    private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final SendColleagueEmailUseCase sendColleagueEmailUseCase;
 
     @Override
@@ -120,6 +122,23 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
         return savedLoan;
+    }
+
+    private void updateLoanDisbursalOnLoamMatrics(Loanee foundLoanee) throws MeedlException {
+        Optional<OrganizationIdentity> organizationByName =
+                organizationIdentityOutputPort.findOrganizationByName(foundLoanee.getReferredBy());
+        if (organizationByName.isEmpty()) {
+            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanDisbursalCount(
+                loanMetrics.get().getLoanDisbursalCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override
@@ -234,8 +253,27 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         foundLoanReferral = loanReferralOutputPort.save(foundLoanReferral);
         log.info("Updated loan referral: {}", foundLoanReferral);
+        updateLoanReferralOnMetrics(foundLoanReferral);
         return foundLoanReferral;
     }
+
+    private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
+        Optional<OrganizationIdentity> organization =
+                organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getLoanee().getReferredBy());
+        if (organization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanReferralCount(
+                loanMetrics.get().getLoanReferralCount() - 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
+    }
+
     public LoanRequest createLoanRequest(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
         loanRequest.validate();
@@ -257,10 +295,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (organization.isEmpty()) {
             throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
-        LoanMetrics loanMetrics = new LoanMetrics();
-        loanMetrics.setOrganizationId(organization.get().getId());
-        loanMetrics.setLoanRequestCount(BigInteger.ONE.intValue());
-        loanMetricsUseCase.save(loanMetrics);
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanRequestCount(
+                loanMetrics.get().getLoanRequestCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override
@@ -280,16 +323,25 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
         loanOffer = loanOfferOutputPort.save(loanOffer);
         log.info("Loan offer ID: {}", loanOffer.getId());
+        increaseLoanOfferOnLoanMetrics(loanRequest);
+        return loanOffer;
+    }
+
+    private void increaseLoanOfferOnLoanMetrics(LoanRequest loanRequest) throws MeedlException {
         Optional<OrganizationIdentity> organizationByName =
                 organizationIdentityOutputPort.findOrganizationByName(loanRequest.getLoanee().getReferredBy());
         if (organizationByName.isEmpty()) {
             throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
         }
-        LoanMetrics loanMetrics = loanMetricsUseCase.save(
-                LoanMetrics.builder().loanOfferCount(1).
-                        organizationId(organizationByName.get().getId()).build());
-        log.info("Saved loan metrics: {}", loanMetrics);
-        return loanOffer;
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanOfferCount(
+                loanMetrics.get().getLoanOfferCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override
@@ -310,6 +362,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanOffer.getLoaneeResponse().equals(LoanDecision.ACCEPTED)){
             return acceptLoanOffer(loanOffer, offer, portfolioManagers);
         }
+        decreaseLoanOfferOnLoanMetrics(offer);
         declineLoanOffer(loanOffer, offer, portfolioManagers);
         return null;
     }
@@ -332,7 +385,25 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (ObjectUtils.isEmpty(loaneeLoanAccount)){
             loaneeLoanAccount = createLoaneeLoanAccount(offer.getLoaneeId());
         }
+        decreaseLoanOfferOnLoanMetrics(offer);
         return loaneeLoanAccount;
+    }
+
+    private void decreaseLoanOfferOnLoanMetrics(LoanOffer offer) throws MeedlException {
+        Optional<OrganizationIdentity> organizationByName =
+                organizationIdentityOutputPort.findOrganizationByName(offer.getLoanRequestReferredBy());
+        if (organizationByName.isEmpty()) {
+            throw new MeedlException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organizationByName.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanOfferCount(
+                loanMetrics.get().getLoanOfferCount() - 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override

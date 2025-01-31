@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -46,9 +47,11 @@ class LoanServiceTest {
     @Mock
     private LoanRequestOutputPort loanRequestOutputPort;
     @Mock
+    private IdentityVerificationUseCase verificationUseCase;
+    @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
-    private LoanMetricsService loanMetricsUseCase;
+    private LoanMetricsOutputPort loanMetricsOutputPort;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private LoanReferral loanReferral;
@@ -109,9 +112,12 @@ class LoanServiceTest {
     void createLoanRequest() {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
-            when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
+            loanRequest.setReferredBy(organizationIdentity.getName());
+            when(organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy())).
                     thenReturn(Optional.ofNullable(organizationIdentity));
-            when(loanMetricsUseCase.save(any())).thenReturn(loanMetrics);
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
@@ -190,6 +196,12 @@ class LoanServiceTest {
                     thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
+            loanReferral.getLoanee().setReferredBy("RefferedBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);
@@ -233,6 +245,12 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
+            loanReferral.getLoanee().setReferredBy("RefferedBy");
+            when(organizationIdentityOutputPort.findOrganizationByName(loanReferral.getLoanee().getReferredBy())).
+                    thenReturn(Optional.ofNullable(organizationIdentity));
+            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
+                    .thenReturn(Optional.ofNullable(loanMetrics));
+            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             referral = loanService.respondToLoanReferral(loanReferral);
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);

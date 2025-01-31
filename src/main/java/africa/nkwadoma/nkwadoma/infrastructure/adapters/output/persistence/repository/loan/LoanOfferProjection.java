@@ -56,5 +56,7 @@ public interface LoanOfferProjection {
     String getNextOfKinContactAddress();
     String getNextOfKinRelationship();
     String getNextOfKinPhoneNumber();
+    String getOrganizationId();
+    String getLoanRequestReferredBy();
 
 }
