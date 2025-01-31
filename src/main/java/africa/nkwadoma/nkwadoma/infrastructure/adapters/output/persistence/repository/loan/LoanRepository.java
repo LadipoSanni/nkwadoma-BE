@@ -128,6 +128,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, String> {
         AND p.organizationIdentity.id = :organizationId
     """)
     Page<LoanProjection> filterLoanByProgramIdAndOrganization(@Param("programId") String programId,
-                                                              @Param("organizationId") String organizationId,
-                                                              Pageable pageRequest);
+                                                              @Param("organizationId") String organizationId, Pageable pageRequest);
+
+    Optional<LoanEntity> findByLoaneeEntityId(String loaneeId);
 }

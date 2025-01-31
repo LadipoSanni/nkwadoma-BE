@@ -40,6 +40,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         RespondToLoanReferralUseCase, LoanOfferUseCase {
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
+    private final LoanMetricsUseCase loanMetricsUseCase;
     private final LoanProductMapper loanProductMapper;
     private final LoanRequestMapper loanRequestMapper;
     private final LoanRequestOutputPort loanRequestOutputPort;
@@ -111,18 +112,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public Loan startLoan(Loan loan) throws MeedlException {
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loan.getLoaneeId(), "Please provide a valid loanee identification");
+        MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        loan.setLoanee(foundLoanee);
-        loan.setLoanAccountId(getLoanAccountId(foundLoanee));
-        loan.setStartDate(LocalDateTime.now());
-        if (loan.getStartDate().isAfter(LocalDateTime.now())) {
-            throw new MeedlException("Start date cannot be in the future.");
+        Optional<Loan> foundLoan = loanOutputPort.viewLoanByLoaneeId(foundLoanee.getId());
+        if (foundLoan.isPresent()) {
+            throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
-        loan.setLoanStatus(LoanStatus.PERFORMING);
-        loan = loanOutputPort.save(loan);
-        updateLoanDisbursalOnLoamMatrics(foundLoanee);
-        return loan;
+        loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee));
+        Loan savedLoan = loanOutputPort.save(loan);
+        log.info("Saved loan: {}", savedLoan);
+        return savedLoan;
     }
 
     private void updateLoanDisbursalOnLoamMatrics(Loanee foundLoanee) throws MeedlException {
@@ -417,9 +416,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
 
     private void notifyPortfolioManager(List<UserIdentity> portfolioManagers, LoanOffer loanOffer) {
-        portfolioManagers.forEach(portfolioManager -> {
-            sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer);
-        });
+        portfolioManagers.forEach(portfolioManager -> sendColleagueEmailUseCase.sendPortforlioManagerEmail(portfolioManager,loanOffer));
     }
 
 

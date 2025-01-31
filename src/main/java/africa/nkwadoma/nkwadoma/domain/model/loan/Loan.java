@@ -58,4 +58,8 @@ public class Loan {
         MeedlValidator.validateObjectInstance(startDate, LoanMessages.LOAN_START_DATE_MUST_NOT_BE_EMPTY.getMessage());
     }
 
+    public Loan buildLoan(Loanee foundLoanee, String loanAccountId) {
+        return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).
+                startDate(LocalDateTime.now()).loanStatus(LoanStatus.PERFORMING).build();
+    }
 }
