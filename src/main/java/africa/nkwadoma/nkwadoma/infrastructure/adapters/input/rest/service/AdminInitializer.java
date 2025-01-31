@@ -102,7 +102,14 @@ public class AdminInitializer {
         log.info("Organization employee identity {}", employeeIdentity.getMeedlUser());
 
         try{
-            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            Optional<OrganizationEmployeeIdentity> foundOptionalOrganizationEmployee = organizationEmployeeIdentityOutputPort.findByMeedlUserId(employeeIdentity.getMeedlUser().getId());
+            if (foundOptionalOrganizationEmployee.isEmpty()){
+                log.info("Saving first employee to db with id: {}, email {} ", employeeIdentity.getMeedlUser().getId(),  employeeIdentity.getMeedlUser().getEmail());
+                employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+            }else {
+                employeeIdentity = foundOptionalOrganizationEmployee.get();
+                log.info("First employee was previously created and exist with id {}", employeeIdentity.getId());
+            }
         } catch(DataIntegrityViolationException dataIntegrityViolationException){
             log.warn("Employee for first organization {} already exists wth error message: {}", organizationIdentity.getId(), dataIntegrityViolationException.getMessage() );
         }
