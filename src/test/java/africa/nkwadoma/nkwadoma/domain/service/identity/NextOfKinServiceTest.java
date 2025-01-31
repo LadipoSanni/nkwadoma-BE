@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import lombok.extern.slf4j.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.*;
@@ -29,9 +30,13 @@ class NextOfKinServiceTest {
     NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
+    @Mock
+    private UserIdentityMapper userIdentityMapper;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
     private Loanee loanee;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
 
     @BeforeEach
     void setUp() {
@@ -91,6 +96,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setFirstName(firstName);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+            when(userIdentityOutputPort.save(any())).thenReturn(userIdentity);
             when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {

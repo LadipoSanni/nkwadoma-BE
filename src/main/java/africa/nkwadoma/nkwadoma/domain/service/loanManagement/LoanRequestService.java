@@ -78,6 +78,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         log.info("Credit score returned: {}", loanee.getCreditScore());
         loanRequest.setCreditScore(loanee.getCreditScore());
         loanRequest.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
+        log.info("Loan request details: {}", loanRequest);
         return loanRequest;
     }
 
