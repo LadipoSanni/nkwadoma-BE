@@ -41,6 +41,17 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
+
+    @PostMapping("auth/refresh-token")
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder().refreshToken(refreshTokenRequest.getRefreshToken()).build();
+        AccessTokenResponse refreshedTokenResponse = createUserUseCase.refreshToken(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
+                data(refreshedTokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build()
+        );
+    }
+
     @PostMapping("auth/logout")
     public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
         String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
