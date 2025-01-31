@@ -70,7 +70,8 @@ public class IdentityManagerController {
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
         if(ObjectUtils.isNotEmpty(userIdentity) &&
-                userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN
+                userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
+                userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {
             OrganizationIdentity organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setUserIdentity(userIdentity);
