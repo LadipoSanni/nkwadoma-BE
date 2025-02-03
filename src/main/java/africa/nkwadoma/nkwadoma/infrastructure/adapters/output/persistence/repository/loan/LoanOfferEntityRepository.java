@@ -29,6 +29,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
         JOIN ProgramEntity p ON c.programId = p.id
         JOIN p.organizationIdentity o
         WHERE o.id = :organizationId
+            and lo.loaneeResponse is null
     """)
     Page<LoanOfferProjection> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
 
