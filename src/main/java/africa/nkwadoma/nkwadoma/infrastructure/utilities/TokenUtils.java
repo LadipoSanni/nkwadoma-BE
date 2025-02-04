@@ -27,9 +27,10 @@ public class TokenUtils {
     private String ivAESKey;
     @Value("${aes_secret_key}")
     private String AESSecretKey;
-
     @Value("${expiration}")
     private Long expiration;
+
+    private static final String AES_TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
     public String generateToken(String email) throws MeedlException {
         MeedlValidator.validateEmail(email);
@@ -121,5 +122,27 @@ public class TokenUtils {
             throw new MeedlException("Error processing identity verification");
         }
         return new String(decryptedValue);
+    }
+
+
+    public String encryptAES(String plainText) throws MeedlException {
+        try {
+            MeedlValidator.validateDataElement(plainText);
+
+            String key = String.format("%-16s", AESSecretKey).substring(0, 16);
+
+            SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(ivAESKey.getBytes(StandardCharsets.UTF_8));
+
+            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+
+            byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+
+            return Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            log.error("Error encrypting data. Root cause: {}", e.getMessage());
+            throw new MeedlException("Error encrypting data");
+        }
     }
 }
