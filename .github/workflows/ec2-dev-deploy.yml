@@ -142,8 +142,8 @@ jobs:
           echo "Pulling the latest image..."
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
           # Free port 8768 if it's in use
-          echo "Freeing port 443 if in use..."
-          sudo fuser -k 443/tcp || true
+          echo "Freeing port 8768 if in use..."
+          sudo fuser -k 8768/tcp || true
               
           # Check if the container exists
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
@@ -155,7 +155,7 @@ jobs:
               
           # Run the new container
           echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 443:443 \
+          docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
           
