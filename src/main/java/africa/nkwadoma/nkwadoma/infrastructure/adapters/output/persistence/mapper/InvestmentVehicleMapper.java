@@ -8,8 +8,9 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring"  , uses = InvestmentVehicleFinancierMapper.class,nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface InvestmentVehicleMapper {
 
-
+    @Mapping(target = "totalAvailableAmount", expression = "java(java.time.LocalDate.now())")
     InvestmentVehicleEntity toInvestmentVehicleEntity(InvestmentVehicle investmentVehicle);
+    @InheritInverseConfiguration
     InvestmentVehicle toInvestmentVehicle(InvestmentVehicleEntity investmentEntity);
 
 
