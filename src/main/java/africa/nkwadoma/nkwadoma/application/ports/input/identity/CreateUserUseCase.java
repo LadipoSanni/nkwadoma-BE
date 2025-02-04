@@ -10,7 +10,8 @@ public interface CreateUserUseCase {
     UserIdentity createPassword(String token, String password) throws MeedlException;
 
     AccessTokenResponse login(UserIdentity userIdentity) throws MeedlException;
-//    void logout(UserIdentity userIdentity) throws MeedlException;
+
+    AccessTokenResponse refreshToken(UserIdentity userIdentity) throws MeedlException;
 
     void resetPassword(String token, String password) throws MeedlException;
 
