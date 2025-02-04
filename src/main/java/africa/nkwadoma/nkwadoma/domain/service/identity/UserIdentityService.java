@@ -85,6 +85,13 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
+    public AccessTokenResponse refreshToken(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getRefreshToken(), UserMessages.REFRESH_TOKEN_CANNOT_BE_EMPTY.getMessage());
+        return identityManagerOutPutPort.refreshToken(userIdentity);
+    }
+
+    @Override
     public void logout(UserIdentity userIdentity) throws MeedlException {
         identityManagerOutPutPort.logout(userIdentity);
         blackListedTokenAdapter.blackListToken(createBlackList(userIdentity.getAccessToken()));

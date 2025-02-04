@@ -11,7 +11,8 @@ public enum UserMessages {
     NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME("New password and current password cannot be the same"),
     USER_IDENTITY_CANNOT_BE_EMPTY("User identity cannot be empty"),
     USER_IDENTITY_MUST_NOT_BE_EMPTY("User identity must not be empty"),
-    BVN_CANNOT_BE_EMPTY("Bvn cannot be empty");
+    BVN_CANNOT_BE_EMPTY("Bvn cannot be empty"),
+    REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token");
     private final String message;
 
     UserMessages(String message) {

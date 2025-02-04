@@ -27,6 +27,10 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.*;
+import org.springframework.web.client.*;
 
 
 import java.util.List;
@@ -51,6 +55,8 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     @Value("${keycloak.client.secret}")
     private String CLIENT_SECRET;
 
+    @Value("${keycloak.refresh-token.url}")
+    private String refreshTokenUrl;
 
 
     @Override
@@ -173,6 +179,35 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         } catch (NotAuthorizedException | BadRequestException exception ) {
             log.info("Error logging in user: {}", exception.getMessage());
             throw new IdentityException(IdentityMessages.INVALID_EMAIL_OR_PASSWORD.getMessage());
+        }
+    }
+
+    @Override
+    public AccessTokenResponse refreshToken(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getRefreshToken(), UserMessages.REFRESH_TOKEN_CANNOT_BE_EMPTY.getMessage());
+
+        try {
+//            String url = SERVER_URL + "/realms/" + KEYCLOAK_REALM + "/protocol/openid-connect/token";
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("client_id", CLIENT_ID);
+            body.add("client_secret", CLIENT_SECRET);
+            body.add("grant_type", OAuth2Constants.REFRESH_TOKEN);
+            body.add("refresh_token", userIdentity.getRefreshToken());
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(refreshTokenUrl, HttpMethod.POST, request, AccessTokenResponse.class);
+
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            log.error("Error refreshing token: {}", e.getMessage());
+            throw new MeedlException(UserMessages.INVALID_REFRESH_TOKEN.getMessage());
         }
     }
 
