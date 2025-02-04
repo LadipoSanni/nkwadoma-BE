@@ -114,11 +114,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         MeedlValidator.validateObjectInstance(loan, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loan.getLoaneeId(), LoaneeMessages.PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION.getMessage());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        LoanOffer loanOffer = loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId());
+        if (loanOffer.getLoaneeResponse().equals(LoanDecision.DECLINED)){
+            throw new LoanException(LoanMessages.CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED.getMessage());
+        }
         Optional<Loan> foundLoan = loanOutputPort.viewLoanByLoaneeId(foundLoanee.getId());
         if (foundLoan.isPresent()) {
             throw new LoanException(LoanMessages.LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE.getMessage());
         }
-        loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee));
+        loan = loan.buildLoan(foundLoanee, getLoanAccountId(foundLoanee),loan.getLoanOfferId());
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
         updateLoanDisbursalOnLoamMatrics(foundLoanee);
