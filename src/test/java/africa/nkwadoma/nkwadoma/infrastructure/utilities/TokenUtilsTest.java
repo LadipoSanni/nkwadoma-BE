@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Slf4j
 class TokenUtilsTest {
+    public static final String ENCRYPTED_DATA = "etlGGJ4BSGNxBkqfv3rPqw==";
+    public static final String DECRYPTED_DATA = "93289238223";
     @Autowired
     private TokenUtils tokenUtils;
 
@@ -40,8 +42,8 @@ class TokenUtilsTest {
     }
     @Test
     void testValidDecryption() throws Exception {
-        String encryptedData = "etlGGJ4BSGNxBkqfv3rPqw==";
-        String expectedOutput = "93289238223";
+        String encryptedData = ENCRYPTED_DATA;
+        String expectedOutput = DECRYPTED_DATA;
         String result = tokenUtils.decryptAES(encryptedData);
         assertEquals(expectedOutput, result, "Decrypted output does not match expected value.");
     }
@@ -53,6 +55,17 @@ class TokenUtilsTest {
     @Test
     void testNullEncryptedData() {
         assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(null), "Should throw an exception for null encrypted data.");
+    }
+
+    @Test
+    void testEncryptData() {
+        try {
+            String encryptedAES = tokenUtils.encryptAES(DECRYPTED_DATA);
+            assertNotNull(encryptedAES);
+            assertEquals(ENCRYPTED_DATA, encryptedAES);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
     }
 
 }
