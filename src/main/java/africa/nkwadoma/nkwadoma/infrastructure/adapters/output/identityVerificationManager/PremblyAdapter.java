@@ -158,25 +158,48 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     @Override
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
+        validateIdentity(identityVerification);
+        HttpHeaders httpHeaders = getHttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put(PremblyParameter.BVN_NUMBER.getValue(), identityVerification.getDecryptedBvn());
+
+        HttpEntity<Map<String, String>> requestHttpEntity = new HttpEntity<>(requestBody, httpHeaders);
+        String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());
+
+        return sendVerificationRequest(URL, requestHttpEntity);
+    }
+
+    private void validateIdentity(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         log.info("Verification started. Likeness check.");
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());
-        HttpHeaders httpHeaders = getHttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put(PremblyParameter.BVN_NUMBER.getValue(), identityVerification.getDecryptedBvn());
-        HttpEntity<Map<String, String>> requestHttpEntity = new HttpEntity<>(requestBody, httpHeaders);
-        ResponseEntity<PremblyBvnResponse> responseEntity = restTemplate.exchange(
-                URL,
-                HttpMethod.POST,
-                requestHttpEntity,
-                PremblyBvnResponse.class
-        );
-        log.info("bvn Response : {}", responseEntity.getBody());
-        updateBvnVerificationStatus(responseEntity.getBody());
-        return responseEntity.getBody();
+    }
+
+    private PremblyResponse sendVerificationRequest(String URL, HttpEntity<Map<String, String>> requestHttpEntity) throws MeedlException {
+        try {
+            ResponseEntity<PremblyBvnResponse> responseEntity = restTemplate.exchange(
+                    URL,
+                    HttpMethod.POST,
+                    requestHttpEntity,
+                    PremblyBvnResponse.class
+            );
+            log.info("BVN Response: {}", responseEntity.getBody());
+            updateBvnVerificationStatus(responseEntity.getBody());
+            return responseEntity.getBody();
+
+        }  catch (HttpServerErrorException.InternalServerError ex) {
+            log.error("Internal Server Error: {} . Response Body: {}",ex.getStatusCode(), ex.getResponseBodyAsString(),ex);
+            throw new MeedlException("Verification server down", ex);
+        } catch (HttpServerErrorException ex) {
+            log.error("Server Error: {}", ex.getStatusCode(), ex);
+            throw new MeedlException("Verification server down", ex);
+        } catch (Exception ex) {
+            log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+            throw new MeedlException("Verification server down", ex);
+        }
     }
 
     @Override
