@@ -19,6 +19,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +79,8 @@ class LoaneeServiceTest {
     private LoanMetricsUseCase loanMetricsUseCase;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private TokenUtils tokenUtils;
     @Mock
     private LoanMetricsOutputPort loanMetricsOutputPort;
     private int pageSize = 2;
@@ -304,6 +307,7 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
             when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
             when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+            when(tokenUtils.decryptAES(anyString())).thenReturn(anyString());
             loanee = loaneeService.viewLoaneeDetails(mockId);
             verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
         } catch (MeedlException exception) {
@@ -320,6 +324,7 @@ class LoaneeServiceTest {
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
         when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
         when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+        when(tokenUtils.decryptAES(anyString())).thenReturn(anyString());
 
         Loanee result = loaneeService.viewLoaneeDetails(mockId);
 
