@@ -33,6 +33,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
             and not exists (
                       select 1 from LoanEntity loan where loan.loanOfferId = lo.id
                   )
+        order by lo.dateTimeOffered desc
+
     """)
     Page<LoanOfferProjection> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
 
@@ -80,6 +82,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
        where not exists (
                  select 1 from LoanEntity loan where loan.loanOfferId = lo.id
              )
+       order by lo.dateTimeOffered desc
        """)
     Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 
@@ -109,6 +112,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
         AND not exists (
                       select 1 from LoanEntity loan where loan.loanOfferId = lo.id
                   )
+    order by lo.dateTimeOffered desc
     """)
     Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
             @Param("programId") String programId,
@@ -139,6 +143,7 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
         AND not exists (
                       select 1 from LoanEntity loan where loan.loanOfferId = lo.id
                   )
+    order by lo.dateTimeOffered desc
     """)
     Page<LoanOfferProjection> filterLoanOfferByProgramIdAndOrganization(@Param("programId") String programId,
                                                                         @Param("organizationId") String organizationId,
