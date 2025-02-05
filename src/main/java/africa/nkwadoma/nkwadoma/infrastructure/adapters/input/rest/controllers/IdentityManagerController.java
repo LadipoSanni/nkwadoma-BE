@@ -43,7 +43,7 @@ public class IdentityManagerController {
     }
 
     @PostMapping("auth/refresh-token")
-    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> refreshToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws MeedlException {
         UserIdentity userIdentity = UserIdentity.builder().refreshToken(refreshTokenRequest.getRefreshToken()).build();
         AccessTokenResponse refreshedTokenResponse = createUserUseCase.refreshToken(userIdentity);
         return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
@@ -77,10 +77,10 @@ public class IdentityManagerController {
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
-        log.info("got the request {}",passwordCreateRequest.getPassword());
+        log.info("got the request {}", passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        if(ObjectUtils.isNotEmpty(userIdentity) &&
+        if (ObjectUtils.isNotEmpty(userIdentity) &&
                 userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {

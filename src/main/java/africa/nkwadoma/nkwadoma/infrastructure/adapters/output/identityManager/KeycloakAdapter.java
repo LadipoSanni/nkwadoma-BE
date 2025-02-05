@@ -188,8 +188,6 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         MeedlValidator.validateDataElement(userIdentity.getRefreshToken(), UserMessages.REFRESH_TOKEN_CANNOT_BE_EMPTY.getMessage());
 
         try {
-//            String url = SERVER_URL + "/realms/" + KEYCLOAK_REALM + "/protocol/openid-connect/token";
-
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -230,6 +228,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         foundUserIdentity.setEmail(email);
         AccessTokenResponse response = login(foundUserIdentity);
         foundUserIdentity.setAccessToken(response.getToken());
+        foundUserIdentity.setRefreshToken(response.getRefreshToken());
         return foundUserIdentity;
     }
 
