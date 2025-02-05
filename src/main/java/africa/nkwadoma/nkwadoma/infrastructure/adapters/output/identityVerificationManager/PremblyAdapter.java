@@ -190,12 +190,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
             updateBvnVerificationStatus(responseEntity.getBody());
             return responseEntity.getBody();
 
-        }  catch (HttpServerErrorException.InternalServerError ex) {
-            log.error("Internal Server Error: {} . Response Body: {}",ex.getStatusCode(), ex.getResponseBodyAsString(),ex);
-            throw new MeedlException("Verification server down", ex);
-        } catch (HttpServerErrorException ex) {
-            log.error("Server Error: {}", ex.getStatusCode(), ex);
-            throw new MeedlException("Verification server down", ex);
         } catch (Exception ex) {
             log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
             throw new MeedlException("Verification server down", ex);
