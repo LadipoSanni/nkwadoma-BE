@@ -6,14 +6,16 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.IdentityVerificationRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.IdentityVerificationResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
 public interface IdentityVerificationRestMapper {
 
+    @Mapping(source ="bvn", target = "encryptedBvn" )
+    @Mapping(source ="nin", target = "encryptedNin" )
     IdentityVerification toIdentityVerification(IdentityVerificationRequest identityVerificationRequest);
 
     IdentityVerificationFailureRecord toIdentityVerificationFailureRecord(IdentityVerificationFailureRecordRequest identityVerificationFailureRecordRequest);
 
-    IdentityVerificationResponse toIdentityVerificationResponse(IdentityVerification identityVerification);
 }

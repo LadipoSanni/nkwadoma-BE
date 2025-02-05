@@ -81,7 +81,7 @@ public class TestData {
     }
     public static IdentityVerification createTestIdentityVerification(String bvn, String nin){
         return IdentityVerification.builder()
-                .bvn(bvn).nin(nin)
+                .decryptedBvn(bvn).decryptedNin(nin)
                 .imageUrl("https://res.cloudinary.com/drhrd1xkn/image/upload/v1732027769/.jpg")
                 .build();
     }

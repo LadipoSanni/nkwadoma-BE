@@ -72,6 +72,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     @Override
     public UserIdentity findByBvn(String bvn) throws MeedlException {
         MeedlValidator.validateDataElement(bvn, "Bvn is required");
+        log.info("Finding user by encrypted bvn");
         UserEntity userEntity = userEntityRepository.findByBvn(bvn);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
