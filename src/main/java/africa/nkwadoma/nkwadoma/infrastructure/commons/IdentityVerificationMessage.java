@@ -8,7 +8,11 @@ public enum IdentityVerificationMessage {
     VERIFICATION_UNSUCCESSFUL("Verification Unsuccessful"),
     PREMBLY_UNAVAILABLE("Prembly server error."),
     SMILEID_UNAVAILABLE("SmileId server error."),
-    INSUFFICIENT_WALLET_BALANCE("Insufficient wallet balance");
+    INVALID_BVN("Bvn is required {}"),
+    INVALID_NIN("Nin is required"),
+    INSUFFICIENT_WALLET_BALANCE("Insufficient wallet balance"),
+    PROVIDE_VALID_BVN("Please provide a valid Bvn"),
+    PROVIDE_VALID_NIN("Please provide a valid Nin");
 
 
     private final String message;

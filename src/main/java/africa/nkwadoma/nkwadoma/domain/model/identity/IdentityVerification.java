@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvalidInputException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,8 +20,10 @@ import java.util.regex.*;
 public class IdentityVerification {
 
     private String identityId;
-    private String bvn;
-    private String nin;
+    private String encryptedBvn;
+    private String encryptedNin;
+    private String decryptedBvn;
+    private String decryptedNin;
     private String loanReferralId;
     private String imageUrl;
     private String email;
@@ -28,18 +31,18 @@ public class IdentityVerification {
     private IdentityVerificationEnum typeOfIdentity;
 
     public void validate() throws MeedlException {
-        log.info("Validation started. Bvn and nin check");
+        log.info("Validation started. Bvn {} and nin {} check", this.decryptedBvn, decryptedNin);
 
         String BVN_NIN_REGEX = "^\\d{11}$";
         Pattern pattern = Pattern.compile(BVN_NIN_REGEX);
-        MeedlValidator.validateDataElement(this.bvn, "Bvn is required");
-    MeedlValidator.validateDataElement(this.nin, "Nin is required");
+        MeedlValidator.validateDataElement( this.decryptedBvn, IdentityVerificationMessage.INVALID_BVN.getValue());
+        MeedlValidator.validateDataElement(this.decryptedNin, IdentityVerificationMessage.INVALID_NIN.getValue());
 
-        if (!pattern.matcher(this.bvn).matches()) {
-            throw new InvalidInputException("Please provide a valid bvn");
+        if (!pattern.matcher(this.decryptedBvn).matches()) {
+            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_BVN.getValue());
         }
-        if (!pattern.matcher(this.nin).matches()) {
-            throw new InvalidInputException("Please provide a valid nin");
+        if (!pattern.matcher(this.decryptedNin).matches()) {
+            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_NIN.getValue());
         }
     }
     public void validateImageUrl() throws MeedlException {

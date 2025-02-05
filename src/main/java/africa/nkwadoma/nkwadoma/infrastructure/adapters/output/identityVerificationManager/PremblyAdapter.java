@@ -46,14 +46,14 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         identityVerification.validateImageUrl();
-        if (identityVerification.getNin() != null) {
+        if (identityVerification.getDecryptedNin() != null) {
             if (identityVerification.getImageUrl() != null) {
                 return verifyNinLikeness(identityVerification);
             } else {
                 return verifyNin(identityVerification);
             }
 
-        } else if (identityVerification.getBvn() != null) {
+        } else if (identityVerification.getDecryptedBvn() != null) {
             if (identityVerification.getImageUrl() != null) {
                 return verifyBvnLikeness(identityVerification);
             } else {
@@ -104,7 +104,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put(PremblyParameter.NIN.getValue(), identityVerification.getNin());
+        requestBody.put(PremblyParameter.NIN.getValue(), identityVerification.getDecryptedNin());
         HttpEntity<Map<String, String>> requestHttpEntity = new HttpEntity<>(requestBody, httpHeaders);
         ResponseEntity<PremblyNinResponse> responseEntity = restTemplate.exchange(
                 URL,
@@ -159,14 +159,14 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     @Override
     public PremblyResponse verifyBvn(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
-        log.info("Verification started. BVN Likeness check.");
+        log.info("Verification started. Likeness check.");
         identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.BVN_URL.getValue());
         HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put(PremblyParameter.BVN_NUMBER.getValue(), identityVerification.getBvn());
+        requestBody.put(PremblyParameter.BVN_NUMBER.getValue(), identityVerification.getDecryptedBvn());
         HttpEntity<Map<String, String>> requestHttpEntity = new HttpEntity<>(requestBody, httpHeaders);
         ResponseEntity<PremblyBvnResponse> responseEntity = restTemplate.exchange(
                 URL,
@@ -196,7 +196,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     private HttpEntity<MultiValueMap<String, String>> createRequestEntity(IdentityVerification verificationRequest) {
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getBvn());
+        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getDecryptedBvn());
         formData.add(PremblyParameter.IMAGE.getValue(), verificationRequest.getImageUrl());
         log.debug("Prepared form data: {}", formData);
         return new HttpEntity<>(formData, headers);
