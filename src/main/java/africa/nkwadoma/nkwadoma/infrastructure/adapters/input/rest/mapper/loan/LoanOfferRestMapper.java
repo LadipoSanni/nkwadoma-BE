@@ -70,6 +70,7 @@ public interface LoanOfferRestMapper {
     @Mapping(target = "lastName", source = "userIdentity.lastName")
     @Mapping(target = "dateOffered", source = "dateTimeOffered")
     @Mapping(target = "loanProductName", source = "loanProduct.name")
+    @Mapping(target = "loanOfferResponse", source = "loaneeResponse")
     AllLoanOfferResponse toAllLoanOfferResponse(LoanOffer loanOffer);
 
     List<AllLoanOfferResponse> toLoanOfferResponses(Page<LoanOffer> loanOffers);

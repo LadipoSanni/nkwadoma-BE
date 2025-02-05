@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.keycloak.representations.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -85,7 +86,6 @@ class UserIdentityServiceTest {
             employeeIdentity.setId(favour.getId());
             when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(employeeIdentity);
             when(organizationIdentityOutputPort.findById(any())).thenReturn(new OrganizationIdentity());
-//            doNothing().when(sendColleagueEmailUseCase).sendColleagueEmail("",favour);
 
             UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
             log.info("invited colleague {}", invitedColleague.getId());
@@ -213,6 +213,22 @@ class UserIdentityServiceTest {
     void loginWithEmptyPassword(){
         favour.setPassword(StringUtils.EMPTY);
         assertThrows(MeedlException.class,()-> userIdentityService.login(favour));
+    }
+
+    @Test
+    void refreshToken(){
+        try {
+            AccessTokenResponse accessTokenResponse = userIdentityService.refreshToken(favour);
+            assertNotNull(accessTokenResponse);
+        }catch (MeedlException meedlException){
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
+        }
+    }
+
+    @Test
+    void refreshTokenWithInvalidRefreshToken(){
+        favour.setPassword("InvalidRefreshToken");
+        assertThrows(MeedlException.class,()-> userIdentityService.refreshToken(favour));
     }
 
     @Test
