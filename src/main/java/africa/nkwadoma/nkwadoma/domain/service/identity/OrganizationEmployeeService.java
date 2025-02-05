@@ -70,7 +70,6 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     @Override
     public Page<OrganizationEmployeeIdentity> searchAdminInOrganization(String organizationId,String name,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId,OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(name,"Name cannot be empty");
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationId);
         if (ObjectUtils.isEmpty(organizationIdentity)) {
             throw new IdentityException(IdentityMessages.ORGANIZATION_NOT_FOUND.getMessage());

@@ -86,7 +86,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
     @Override
     public Page<LoanRequest> searchLoanRequest(String programId, String organizationId, String name, int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(name, LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);

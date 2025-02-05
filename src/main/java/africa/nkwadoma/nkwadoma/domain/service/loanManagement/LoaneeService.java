@@ -210,7 +210,6 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
-        MeedlValidator.validateDataElement(name, "Loanee name is required.");
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
