@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,4 +19,5 @@ public class AllLoanOfferResponse {
     private String loanProductName;
     private String firstName;
     private String lastName;
+    private LoanDecision loanOfferResponse;
 }

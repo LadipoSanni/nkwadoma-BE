@@ -54,6 +54,8 @@ class LoanServiceTest {
     private LoanMetricsOutputPort loanMetricsOutputPort;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
+    @Mock
+    private LoanOfferOutputPort loanOfferOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -265,10 +267,16 @@ class LoanServiceTest {
         Loan startedLoan = Loan.builder().
                 loanStatus(LoanStatus.PERFORMING).
                 loanAccountId(loaneeLoanAccount.getId()).
+                loanOfferId(testId).
                 loaneeId(loanee.getId()).build();
 
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setId(testId);
+        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
         try {
             when(loaneeOutputPort.findLoaneeById(anyString())).thenReturn(loanee);
+            when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
+                    thenReturn(loanOffer);
             when(loaneeLoanAccountOutputPort.findByLoaneeId(anyString())).thenReturn(loaneeLoanAccount);
             when(loanOutputPort.save(any())).thenReturn(startedLoan);
             when(organizationIdentityOutputPort.findOrganizationByName(loanee.getReferredBy()))
@@ -295,8 +303,13 @@ class LoanServiceTest {
     @Test
     void startLoanThatHasAlreadyBeenStarted() {
         loan.setLoanStatus(LoanStatus.PERFORMING);
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setId(testId);
+        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
         try {
             when(loaneeOutputPort.findLoaneeById(loan.getLoaneeId())).thenReturn(loanee);
+            when(loanOfferOutputPort.findLoanOfferById(loan.getLoanOfferId())).
+                    thenReturn(loanOffer);
             when(loanOutputPort.viewLoanByLoaneeId(anyString())).thenReturn(Optional.of(loan));
         } catch (MeedlException e) {
             log.error(e.getMessage(), e);

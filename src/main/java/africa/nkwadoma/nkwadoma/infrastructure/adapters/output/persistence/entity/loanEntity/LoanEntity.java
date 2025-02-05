@@ -18,6 +18,7 @@ public class LoanEntity {
     @OneToOne
     private LoaneeEntity loaneeEntity;
     private String loanAccountId;
+    private String loanOfferId;
     private LocalDateTime startDate;
     private LocalDateTime lastUpdatedDate;
 }
