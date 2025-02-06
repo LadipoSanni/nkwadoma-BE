@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 public class PremblyBvnResponse extends PremblyResponse{
 

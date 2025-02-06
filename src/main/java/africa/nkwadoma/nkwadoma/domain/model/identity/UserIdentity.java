@@ -37,6 +37,13 @@ public class UserIdentity {
     private String stateOfResidence;
     private String nationality;
     private String residentialAddress;
+    //
+    private String lgaOfOrigin;
+    private String middleName;
+    private String State;
+    private String lgaOfResidence;
+    private String nameOnCard;
+    //
     private IdentityRole role;
     private String createdBy;
     private String alternateEmail;

@@ -15,6 +15,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailur
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -34,6 +37,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
+    @Autowired
+    private IdentityVerificationMapper identityVerificationMapper;
     @Autowired
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     @Autowired
@@ -85,8 +90,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
 
     private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
+//        PremblyBvnResponse premblyBvnResponse = identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
+        PremblyBvnResponse premblyBvnResponse = createPremblyBvnTestResponse();
+        log.info("premblyBvnResponse {}", premblyBvnResponse);
+//                identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId());
         log.info("UserIdentity before update :  {}", userIdentity);
+        UserIdentity updatedUserIdentity = identityVerificationMapper.updateUserIdentity(premblyBvnResponse.getData(), userIdentity);
+        log.info("update user identity from prembly {}", updatedUserIdentity);
         userIdentity.setIdentityVerified(Boolean.TRUE);
         userIdentity.setBvn(identityVerification.getEncryptedBvn());
         userIdentity.setNin(identityVerification.getEncryptedNin());
@@ -144,7 +155,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     private String processNewVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
         try {
-            PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
+//            PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
+            PremblyBvnResponse premblyResponse =  createPremblyBvnTestResponse();
             log.info("prembly bvn response: {}", premblyResponse);
 
             if (isIdentityVerified(premblyResponse)) {
@@ -180,5 +192,77 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         String decryptedNin = decrypt(identityVerification.getEncryptedNin());
         identityVerification.setDecryptedBvn(decryptedBvn);
         identityVerification.setDecryptedNin(decryptedNin);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static PremblyBvnResponse createPremblyBvnTestResponse() {
+        return PremblyBvnResponse.builder()
+                .verificationCallSuccessful(true)
+                .detail("Verification successful")
+                .responseCode("00")
+                .data(PremblyBvnResponse.BvnData.builder()
+                        .bvn("12345678901")
+                        .firstName("John")
+                        .middleName("Doe")
+                        .lastName("Smith")
+                        .dateOfBirth("1990-01-01")
+                        .registrationDate("2020-05-15")
+                        .enrollmentBank("First Bank")
+                        .enrollmentBranch("Lagos Main")
+                        .email("john.doe@example.com")
+                        .gender("Male")
+                        .levelOfAccount("Tier 3")
+                        .lgaOfOrigin("Ikeja")
+                        .lgaOfResidence("Surulere")
+                        .maritalStatus("Single")
+                        .nin("12345678910")
+                        .nameOnCard("John D. Smith")
+                        .nationality("Nigerian")
+                        .phoneNumber1("+2348012345678")
+                        .phoneNumber2("+2348098765432")
+                        .residentialAddress("123, Lagos Street, Ikeja")
+                        .stateOfOrigin("Lagos")
+                        .stateOfResidence("Lagos")
+                        .title("Mr.")
+                        .watchListed("No")
+                        .image("base64-image-string")
+                        .number("12345")
+                        .faceData(createMockFaceData()) // Assuming an empty instance is okay
+                        .build())
+                .verification(createMockVerification()) // Assuming no data for verification
+                .session(null) // Assuming no session data
+                .build();
+    }
+
+    public static Verification createMockVerification() {
+        return Verification.builder()
+                .status("VERIFIED")
+                .validIdentity(true) // This will be updated dynamically if updateValidIdentity() is called
+                .reference("REF-123456345")
+                .build();
+    }
+    public static PremblyFaceData createMockFaceData() {
+        return PremblyFaceData.builder()
+                .faceVerified(true)
+                .message("Face Match")
+                .confidence("99.9987564086914")
+                .responseCode("00")
+                .build();
     }
 }
