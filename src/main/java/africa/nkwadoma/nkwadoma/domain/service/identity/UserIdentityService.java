@@ -133,7 +133,7 @@ public class UserIdentityService implements CreateUserUseCase {
     public UserIdentity createPassword(String token, String password) throws MeedlException {
         log.info("request got into service layer {}",password);
 //        passwordPreviouslyCreated(token);
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, "Please provide a valid token.");
         passwordPreviouslyCreated(token);
         UserIdentity foundUser = getUserIdentityFromToken(password, token);
         UserIdentity userIdentity = identityManagerOutPutPort.createPassword(
@@ -158,7 +158,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         MeedlValidator.validatePassword(password);
-        MeedlValidator.validateDataElement(token);
+        MeedlValidator.validateDataElement(token, "Invalid token provided.");
         String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);

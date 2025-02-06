@@ -21,7 +21,7 @@ public enum IdentityVerificationMessage {
         this.message = message;
     }
 
-    public String getValue() {
+    public String getMessage() {
         return message;
     }
 }
