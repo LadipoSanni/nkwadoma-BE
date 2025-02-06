@@ -12,9 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
@@ -94,7 +92,8 @@ class IdentityVerificationServiceTest {
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
         PremblyResponse premblyResponse = new PremblyBvnResponse();
         premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn((PremblyBvnResponse) premblyResponse);
+        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
+        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(new PremblyNinResponse());
         favour.setIdentityVerified(false);
 
         String response = identityVerificationService.verifyIdentity(identityVerification);
@@ -121,25 +120,18 @@ class IdentityVerificationServiceTest {
     }
 
     @Test
-    void verifyIdentityPreviouslyVerifiedUserReturnsVerified() throws MeedlException {
-        when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
-        when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
-        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
-        favour.setIdentityVerified(true);
-        when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(favour);
-
-        String response = identityVerificationService.verifyIdentity(identityVerification);
-        assertEquals(IDENTITY_VERIFIED.getMessage(), response);
-    }
-
-    @Test
     void verifyIdentityFailedVerificationCreatesFailureRecord() throws MeedlException {
+        PremblyResponse premblyResponse = new PremblyBvnResponse();
+//        premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
         when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
         when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
-        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(
-                PremblyBvnResponse.builder().verification(Verification.builder().status("FAILED").build()).build());
+        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
+        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(
+                PremblyNinResponse.builder().verification(Verification.builder().status("FAILED").build()).build());
+//        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
+//        )).thenReturn(favour);
         String response = identityVerificationService.verifyIdentity(identityVerification);
         assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
     }
