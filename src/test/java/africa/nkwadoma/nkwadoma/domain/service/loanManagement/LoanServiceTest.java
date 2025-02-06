@@ -142,7 +142,7 @@ class LoanServiceTest {
                     loanReferral.getLoanee().getUserIdentity().getId())).thenReturn(List.of(loanReferral));
             when(loanReferralOutputPort.
                     findLoanReferralById(loanReferral.getId())).thenReturn(Optional.ofNullable(loanReferral));
-            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(anyString())).thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(testId)));
             foundLoanReferral = loanService.viewLoanReferral(loanReferral);
 
             verify(loanReferralOutputPort, times(1)).

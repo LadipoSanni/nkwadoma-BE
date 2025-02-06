@@ -84,7 +84,7 @@ class LoanRequestServiceTest {
     void viewLoanRequestById() {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(Optional.of(loanRequest));
-            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
             when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId())).thenReturn(loanRequest.getLoanee());
             LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
 

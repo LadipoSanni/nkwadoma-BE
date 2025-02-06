@@ -35,7 +35,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -237,7 +236,7 @@ public class LoanOfferServiceTest {
         mockLoanee.setUserIdentity(mockLoaneeIdentity);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(mockLoanOffer);
-        when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(mockId))
+        when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(mockId))
                 .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(mockLoanee);
         assertThrows(
@@ -254,7 +253,7 @@ public class LoanOfferServiceTest {
             userIdentity.setRole(IdentityRole.LOANEE);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(loanOfferOutputPort.findLoanOfferById(mockId)).thenReturn(loanOffer);
-            when(loaneeLoanBreakDownOutputPort.findAllByLoaneeId(anyString()))
+            when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(anyString()))
                      .thenReturn(List.of(TestData.createTestLoaneeLoanBreakdown(mockId)));
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(loanee);
             loanOffer = loanService.viewLoanOfferDetails(mockId,mockId);

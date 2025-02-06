@@ -179,7 +179,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_NOT_FOUND.getMessage()));
         log.info("Found loan {}", foundLoan);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(foundLoan.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(foundLoan.getLoaneeId());
         log.info("Loanee loan breakdowns returned: {}", loaneeLoanBreakdowns);
         foundLoan.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         return foundLoan;
@@ -231,7 +231,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanReferral.setIdentityVerified(loanReferral.getLoanee().getUserIdentity().isIdentityVerified());
         log.info("Found Loan referral by it's ID: {}, is verified : {}", loanReferral.getId(), loanReferral.isIdentityVerified());
         loanReferral.setLoaneeLoanBreakdowns
-                (loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanReferral.getLoanee().getId()));
+                (loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanReferral.getLoanee().getId()));
         return loanReferral;
     }
 
@@ -484,7 +484,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer loanOffer =
                  loanOfferOutputPort.findLoanOfferById(loanOfferId);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanOffer.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanOffer.getLoaneeId());
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanOffer.getLoaneeId(),
                 loaneeLoanBreakdowns);
         loanOffer.setLoaneeBreakdown(loaneeLoanBreakdowns);

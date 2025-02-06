@@ -531,7 +531,7 @@ class ProgramPersistenceAdapterTest {
     @AfterAll
     void tearDown() {
         try {
-            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+            loaneeBreakdowns = loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loaneeId);
             loaneeBreakdowns.forEach(loaneeBreakdown -> {
                 if (StringUtils.isNotEmpty(loaneeBreakdown.getLoaneeLoanBreakdownId())) {
                     loaneeLoanBreakDownRepository.deleteById(loaneeBreakdown.getLoaneeLoanBreakdownId());

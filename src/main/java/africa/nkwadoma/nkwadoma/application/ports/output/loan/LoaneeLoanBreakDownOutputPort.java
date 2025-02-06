@@ -12,5 +12,5 @@ public interface LoaneeLoanBreakDownOutputPort {
 
     void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns) throws MeedlException;
 
-    List<LoaneeLoanBreakdown> findAllByLoaneeId(String loaneeId) throws MeedlException;
+    List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByLoaneeId(String loaneeId) throws MeedlException;
 }
