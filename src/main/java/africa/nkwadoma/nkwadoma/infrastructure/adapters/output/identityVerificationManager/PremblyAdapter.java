@@ -117,15 +117,15 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     }
 
     @Override
-    public PremblyResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
+    public PremblyBvnResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         identityVerification.validateImageUrl();
         return getBvnDetails(identityVerification);
     }
 
-    public PremblyResponse getBvnDetails(IdentityVerification identityVerification) {
-        PremblyResponse premblyBvnResponse = getIdentityDetailsByBvn(identityVerification);
+    public PremblyBvnResponse getBvnDetails(IdentityVerification identityVerification) {
+        PremblyBvnResponse premblyBvnResponse = getIdentityDetailsByBvn(identityVerification);
         updateBvnVerificationStatus(premblyBvnResponse);
         return premblyBvnResponse;
     }
@@ -140,7 +140,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         log.info("Verification Result : {}", premblyBvnResponse);
     }
 
-    private PremblyResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
+    private PremblyBvnResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
         HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(verificationRequest);
         log.info("prembly url : {}", premblyUrl);
         String url = premblyUrl.concat(PremblyParameter.BVN_FACE.getValue());
@@ -149,6 +149,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         log.info("Response. from get Identity Details By Bvn..{}",responseEntity.getBody());
         try {
             responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, PremblyBvnResponse.class);
+            log.info("Bvn response on details: {}",responseEntity.getBody());
         } catch (HttpServerErrorException ex) {
             log.info("server error {}", ex.getMessage());
             log.error("Server error {}", ex.getMessage());

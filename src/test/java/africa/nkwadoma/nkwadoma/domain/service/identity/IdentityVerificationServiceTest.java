@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -53,6 +54,8 @@ class IdentityVerificationServiceTest {
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     @Mock
     private TokenUtils tokenUtils;
+    @Mock
+    private IdentityVerificationMapper identityVerificationMapper;
     private UserIdentity favour;
     private LoanReferral loanReferral;
     private final String testId ="9c558b64-c207-4c34-99c7-8d2f04398496";
@@ -91,7 +94,7 @@ class IdentityVerificationServiceTest {
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
         PremblyResponse premblyResponse = new PremblyBvnResponse();
         premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
+        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn((PremblyBvnResponse) premblyResponse);
         favour.setIdentityVerified(false);
 
         String response = identityVerificationService.verifyIdentity(identityVerification);
@@ -135,8 +138,8 @@ class IdentityVerificationServiceTest {
         when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
-        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(new PremblyBvnResponse());
-
+        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(
+                PremblyBvnResponse.builder().verification(Verification.builder().status("FAILED").build()).build());
         String response = identityVerificationService.verifyIdentity(identityVerification);
         assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
     }

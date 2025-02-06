@@ -24,6 +24,10 @@ public class UserEntity {
     private boolean isIdentityVerified;
     private boolean emailVerified;
     private boolean enabled;
+    private String lgaOfOrigin;
+    private String middleName;
+    private String State;
+    private String lgaOfResidence;
     private String createdAt;
     @Enumerated(EnumType.STRING)
     private IdentityRole role;

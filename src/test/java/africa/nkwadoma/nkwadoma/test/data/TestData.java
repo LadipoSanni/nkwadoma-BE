@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 
@@ -279,5 +280,59 @@ public class TestData {
         loanDetail.setLastName("Awwal");
         loanDetail.setStartDate(LocalDate.now());
         return loanDetail;
+    }
+    public static PremblyBvnResponse createPremblyBvnTestResponse() {
+        return PremblyBvnResponse.builder()
+                .verificationCallSuccessful(true)
+                .detail("Verification successful")
+                .responseCode("00")
+                .data(PremblyBvnResponse.BvnData.builder()
+                        .bvn("12345678901")
+                        .firstName("John")
+                        .middleName("Doe")
+                        .lastName("Smith")
+                        .dateOfBirth("1990-01-01")
+                        .registrationDate("2020-05-15")
+                        .enrollmentBank("First Bank")
+                        .enrollmentBranch("Lagos Main")
+                        .email("john.doe@example.com")
+                        .gender("Male")
+                        .levelOfAccount("Tier 3")
+                        .lgaOfOrigin("Ikeja")
+                        .lgaOfResidence("Surulere")
+                        .maritalStatus("Single")
+                        .nin("12345678910")
+                        .nameOnCard("John D. Smith")
+                        .nationality("Nigerian")
+                        .phoneNumber1("+2348012345678")
+                        .phoneNumber2("+2348098765432")
+                        .residentialAddress("123, Lagos Street, Ikeja")
+                        .stateOfOrigin("Lagos")
+                        .stateOfResidence("Lagos")
+                        .title("Mr.")
+                        .watchListed("No")
+                        .image("base64-image-string")
+                        .number("12345")
+                        .faceData(createMockFaceData()) // Assuming an empty instance is okay
+                        .build())
+                .verification(createMockVerification()) // Assuming no data for verification
+                .session(null) // Assuming no session data
+                .build();
+    }
+
+    public static Verification createMockVerification() {
+        return Verification.builder()
+                .status("VERIFIED")
+                .validIdentity(true) // This will be updated dynamically if updateValidIdentity() is called
+                .reference("REF-123456345")
+                .build();
+    }
+    public static PremblyFaceData createMockFaceData() {
+        return PremblyFaceData.builder()
+                .faceVerified(true)
+                .message("Face Match")
+                .confidence("99.9987564086914")
+                .responseCode("00")
+                .build();
     }
 }

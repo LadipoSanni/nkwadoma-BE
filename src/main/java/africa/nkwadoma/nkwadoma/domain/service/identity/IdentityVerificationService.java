@@ -15,6 +15,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailur
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -34,6 +37,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private LoanReferralOutputPort loanReferralOutputPort;
+    @Autowired
+    private IdentityVerificationMapper identityVerificationMapper;
     @Autowired
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
     @Autowired
@@ -84,12 +89,15 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         }
     }
 
-    private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
+    private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyResponse) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId());
         log.info("UserIdentity before update :  {}", userIdentity);
+        UserIdentity updatedUserIdentity = identityVerificationMapper.updateUserIdentity(premblyResponse.getData(), userIdentity);
         userIdentity.setIdentityVerified(Boolean.TRUE);
         userIdentity.setBvn(identityVerification.getEncryptedBvn());
         userIdentity.setNin(identityVerification.getEncryptedNin());
+        userIdentity.setImage(null);
+        log.info("update user identity from prembly {}", updatedUserIdentity);
         userIdentity = userIdentityOutputPort.save(userIdentity);
         log.info("User identity details updated for loanee with user id : {}", userIdentity);
     }
@@ -144,11 +152,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     private String processNewVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
         try {
-            PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
+            PremblyBvnResponse premblyResponse = identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
             log.info("prembly bvn response: {}", premblyResponse);
 
             if (isIdentityVerified(premblyResponse)) {
-                return handleSuccessfulVerification(identityVerification, loanReferral);
+                return handleSuccessfulVerification(identityVerification, loanReferral, premblyResponse);
             } else {
                 return handleFailedVerification(loanReferral, premblyResponse);
             }
@@ -163,8 +171,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 "VERIFIED".equals(premblyResponse.getVerification().getStatus());
     }
 
-    private String handleSuccessfulVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        updateLoaneeDetail(identityVerification, loanReferral);
+    private String handleSuccessfulVerification(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyResponse) throws MeedlException {
+        updateLoaneeDetail(identityVerification, loanReferral, premblyResponse);
         addedToLoaneeLoan(identityVerification.getLoanReferralId());
         log.info("Identity is verified: Loan referral id {}. Verified", identityVerification.getLoanReferralId());
         return IDENTITY_VERIFIED.getMessage();
@@ -181,4 +189,5 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         identityVerification.setDecryptedBvn(decryptedBvn);
         identityVerification.setDecryptedNin(decryptedNin);
     }
+
 }
