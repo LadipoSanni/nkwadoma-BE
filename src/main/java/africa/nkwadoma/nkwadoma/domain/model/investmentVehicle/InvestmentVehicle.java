@@ -5,7 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.*;
 import java.time.LocalDate;
@@ -35,9 +34,9 @@ public class InvestmentVehicle {
     private String bankPartner;
     private String fundManager;
     private String sponsors;
+    private BigDecimal totalAvailableAmount;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
-
 
 
     public void validate() throws MeedlException {
@@ -52,13 +51,14 @@ public class InvestmentVehicle {
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be empty or less than zero");
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
-        MeedlValidator.validateBigDecimalDataElement(size);
+        MeedlValidator.validateBigDecimalDataElement(size, "Investment vehicle size is required");
         MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
     }
 
     public void setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setStartDate(LocalDate.now());
+        setTotalAvailableAmount(size);
     }
 
     public void validateTenure(int tenure) throws MeedlException {

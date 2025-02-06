@@ -32,6 +32,8 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle, INVESTMENT_VEHICLE_CANNOT_BE_NULL.getMessage());
         investmentVehicle.validate();
+        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getSize());
+        log.info("saving vehicle size as available amount {}", investmentVehicle.getTotalAvailableAmount());
         InvestmentVehicleEntity investmentEntity =
                 investmentVehicleMapper.toInvestmentVehicleEntity(investmentVehicle);
         investmentEntity = investmentVehicleRepository.save(investmentEntity);
