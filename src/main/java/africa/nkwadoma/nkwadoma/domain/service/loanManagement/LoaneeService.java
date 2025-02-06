@@ -30,6 +30,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -53,6 +54,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortOutputPort cohortOutputPort;
     private final ProgramOutputPort programOutputPort;
+    private final TokenUtils tokenUtils;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
     private final LoanReferralOutputPort loanReferralOutputPort;
@@ -135,9 +137,14 @@ public class LoaneeService implements LoaneeUseCase {
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
-        loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(loanee.getUserIdentity().getBvn()));
+        log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
+        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
+        log.info("Decrypted Loanee BVN: {}", decryptedBVN);
+        loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(decryptedBVN));
         loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
-        return loaneeOutputPort.save(loanee);
+        Loanee updatedLoanee = loaneeOutputPort.save(loanee);
+        log.info("Updated loanee credit score: {}", updatedLoanee.getCreditScore());
+        return updatedLoanee;
     }
 
     private boolean creditScoreIsAboveOrEqualOneMonth(Loanee loanee) {
@@ -210,7 +217,6 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
-        MeedlValidator.validateDataElement(name, "Loanee name is required.");
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }

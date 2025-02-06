@@ -20,7 +20,8 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               lo.dateTimeOffered as dateTimeOffered,
               l.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
-              lp.name as loanProductName
+              lp.name as loanProductName,
+              lo.loaneeResponse as loaneeResponse
 
         FROM LoanOfferEntity lo
         JOIN lo.loanee l
@@ -29,7 +30,11 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
         JOIN ProgramEntity p ON c.programId = p.id
         JOIN p.organizationIdentity o
         WHERE o.id = :organizationId
-            and lo.loaneeResponse is null
+            and not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+        order by lo.dateTimeOffered desc
+
     """)
     Page<LoanOfferProjection> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
 
@@ -68,11 +73,16 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
               lo.dateTimeOffered as dateTimeOffered,
               l.loaneeLoanDetail.amountRequested as amountRequested,
               lo.amountApproved as amountApproved,
-              lp.name as loanProductName
+              lp.name as loanProductName,
+              lo.loaneeResponse as loaneeResponse
+       
        from LoanOfferEntity lo
        left join LoaneeEntity l on lo.loanee.id = l.id
        left join LoanProductEntity lp on lo.loanProduct.id = lp.id
-       where lo.loaneeResponse is null
+       where not exists (
+                 select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+             )
+       order by lo.dateTimeOffered desc
        """)
     Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
 
@@ -84,7 +94,9 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            lo.dateTimeOffered AS dateTimeOffered,
            l.loaneeLoanDetail.amountRequested AS amountRequested,
            lo.amountApproved AS amountApproved,
-           lp.name AS loanProductName
+           lp.name AS loanProductName,
+           lo.loaneeResponse as loaneeResponse
+
                
     FROM LoanOfferEntity lo 
     JOIN lo.loanee l
@@ -97,7 +109,10 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
         AND c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
-        AND lo.loaneeResponse is null 
+        AND not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+    order by lo.dateTimeOffered desc
     """)
     Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
             @Param("programId") String programId,
@@ -113,8 +128,9 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
            lo.dateTimeOffered AS dateTimeOffered,
            l.loaneeLoanDetail.amountRequested AS amountRequested,
            lo.amountApproved AS amountApproved,
-           lp.name AS loanProductName
-               
+           lp.name AS loanProductName,
+           lo.loaneeResponse as loaneeResponse
+   
     FROM LoanOfferEntity lo 
     JOIN lo.loanee l
     JOIN l.userIdentity u
@@ -124,7 +140,10 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     WHERE 
         c.programId = :programId
         AND p.organizationIdentity.id = :organizationId
-        AND lo.loaneeResponse is null 
+        AND not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+    order by lo.dateTimeOffered desc
     """)
     Page<LoanOfferProjection> filterLoanOfferByProgramIdAndOrganization(@Param("programId") String programId,
                                                                         @Param("organizationId") String organizationId,

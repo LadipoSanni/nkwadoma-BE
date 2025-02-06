@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class TokenUtilsTest {
     @Autowired
     private TokenUtils tokenUtils;
+    public static final String ENCRYPTED_DATA = "etlGGJ4BSGNxBkqfv3rPqw==";
+    public static final String DECRYPTED_DATA = "93289238223";
 
     @Test
     void generateToken(){
@@ -40,10 +42,8 @@ class TokenUtilsTest {
     }
     @Test
     void testValidDecryption() throws Exception {
-        String encryptedData = "etlGGJ4BSGNxBkqfv3rPqw==";
-        String expectedOutput = "93289238223";
-        String result = tokenUtils.decryptAES(encryptedData);
-        assertEquals(expectedOutput, result, "Decrypted output does not match expected value.");
+        String result = tokenUtils.decryptAES(ENCRYPTED_DATA);
+        assertEquals(DECRYPTED_DATA, result, "Decrypted output does not match expected value.");
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE,  "INVALID_BASE64"})
@@ -53,6 +53,17 @@ class TokenUtilsTest {
     @Test
     void testNullEncryptedData() {
         assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(null), "Should throw an exception for null encrypted data.");
+    }
+
+    @Test
+    void testEncryptData() {
+        try {
+            String encryptedAES = tokenUtils.encryptAES(DECRYPTED_DATA);
+            assertNotNull(encryptedAES);
+            assertEquals(ENCRYPTED_DATA, encryptedAES);
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
     }
 
 }

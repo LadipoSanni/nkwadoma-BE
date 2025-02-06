@@ -66,7 +66,7 @@ class PremblyAdapterTest {
         assertEquals(PremblyResponseCode.SUCCESSFUL.getCode(), response.getFaceData().getResponseCode());
         assertTrue(response.getFaceData().isFaceVerified());
         assertTrue(response.getVerification().isValidIdentity());
-        assertEquals(ninIdentityVerification.getNin(), response.getNinData().getNin());
+        assertEquals(ninIdentityVerification.getDecryptedNin(), response.getNinData().getNin());
     }
 //    @Test
     void verifyIdentityWithValidAndImageDoesNotMatch() throws MeedlException {
@@ -81,7 +81,7 @@ class PremblyAdapterTest {
     }
 //    @Test
     void verifyIdentityWithValidBvn() throws MeedlException {
-        bvnIdentityVerification.setBvn("28393497842");
+        bvnIdentityVerification.setDecryptedBvn("28393497842");
         PremblyBvnResponse response = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(bvnIdentityVerification);
         assertNotNull(response);
         assertTrue(response.isVerificationCallSuccessful());
@@ -91,7 +91,7 @@ class PremblyAdapterTest {
 
 //    @Test
     void verifyIdentityWithInvalidNin() throws MeedlException {
-        ninIdentityVerification.setNin("12345678901");
+        ninIdentityVerification.setDecryptedNin("12345678901");
         PremblyNinResponse response = (PremblyNinResponse) identityVerificationOutputPort.verifyIdentity(ninIdentityVerification);
         log.info("......{}", response);
         assertNotNull(response);
@@ -146,7 +146,7 @@ class PremblyAdapterTest {
 //    @NullSource
 //    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void verifyIdentityWithEmptyIdentityId(String nin)  {
-        ninIdentityVerification.setNin(nin);
+        ninIdentityVerification.setDecryptedNin(nin);
         MeedlException exception =
                 assertThrows(MeedlException.class, () -> identityVerificationOutputPort.verifyIdentity(ninIdentityVerification));
         assertEquals(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage(),exception.getMessage());
@@ -166,8 +166,8 @@ class PremblyAdapterTest {
     void verifyIdentityWithValidBvnAndValidImage() throws MeedlException {
         log.info("{}", bvnIdentityVerification);
         bvnIdentityVerification.setImageUrl("https://res/dhhhqruoy/image/upload/v1732776176/meedl/mn.jpg");
-        bvnIdentityVerification.setBvn("12345678909");
-        bvnIdentityVerification.setNin(null);
+        bvnIdentityVerification.setDecryptedBvn("12345678909");
+        bvnIdentityVerification.setDecryptedNin(null);
 
         PremblyBvnResponse response = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvnLikeness(bvnIdentityVerification);
         log.info("Prembly bvn test : {}",response);
@@ -177,7 +177,7 @@ class PremblyAdapterTest {
         assertEquals(PremblyResponseCode.SUCCESSFUL.getCode(), response.getData().getFaceData().getResponseCode());
         assertTrue(response.getData().getFaceData().isFaceVerified());
         assertTrue(response.getVerification().isValidIdentity());
-        assertEquals(bvnIdentityVerification.getBvn(), response.getData().getBvn());
+        assertEquals(bvnIdentityVerification.getDecryptedBvn(), response.getData().getBvn());
     }
 //    @Test
     void verifyIdentityWithValidBvnAndImageThatDoesNotMatch() throws MeedlException {
@@ -192,7 +192,7 @@ class PremblyAdapterTest {
     }
 //    @Test
     void verifyIdentityWithNonExistingBvn() throws MeedlException {
-        bvnIdentityVerification.setBvn("12345678908");
+        bvnIdentityVerification.setDecryptedBvn("12345678908");
         PremblyResponse response = identityVerificationOutputPort.verifyBvn(bvnIdentityVerification);
         log.info("{}", response);
         assertNotNull(response);
@@ -213,7 +213,7 @@ class PremblyAdapterTest {
 //    @NullSource
 //    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void verifyIdentityWithEmptyIdentityNumber(String bvn) {
-        bvnIdentityVerification.setBvn(bvn);
+        bvnIdentityVerification.setDecryptedBvn(bvn);
         MeedlException  exception =
                 assertThrows(MeedlException.class, () -> identityVerificationOutputPort.verifyBvn(bvnIdentityVerification));
         assertEquals(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage(),exception.getMessage());

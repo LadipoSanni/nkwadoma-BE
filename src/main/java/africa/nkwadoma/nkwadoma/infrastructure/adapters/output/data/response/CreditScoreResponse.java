@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jdk.jfr.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,13 +9,12 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 public class CreditScoreResponse {
     @JsonProperty("SMARTScores")
     private List<SMARTScore> smartScores;
 
     @JsonProperty("ScoreFactors")
-    private List<String> scoreFactors;
+    private List<ScoreFactors> scoreFactors;
 
     @JsonProperty("Success")
     private boolean success;
@@ -29,6 +27,9 @@ public class CreditScoreResponse {
 
     @JsonProperty("TransactionID")
     private String transactionID;
+
+    @JsonProperty("SearchResult")
+    private List<SearchResults> searchResults;
 
     @Getter
     @Setter

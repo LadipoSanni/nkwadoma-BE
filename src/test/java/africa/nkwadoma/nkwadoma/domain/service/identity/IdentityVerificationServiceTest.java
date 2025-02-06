@@ -50,8 +50,8 @@ class IdentityVerificationServiceTest {
     private UserIdentity favour;
     private LoanReferral loanReferral;
     private final String testId ="9c558b64-c207-4c34-99c7-8d2f04398496";
-    private final String testBvn = "12345678956";
-    private final String testNin = "21345678908";
+    private final String testBvn = "etlGGJ4BSGNxBkqfv3rPqw==";
+    private final String testNin = "etlGGJ4BSGNxBkqfv3rPqw==";
     private IdentityVerification identityVerification;
     private IdentityVerificationEntity identityVerificationEntity;
     private IdentityVerificationFailureRecord identityVerificationFailureRecord;
@@ -69,8 +69,8 @@ class IdentityVerificationServiceTest {
         identityVerificationEntity.setNin(testNin);
 
         identityVerification = new IdentityVerification();
-        identityVerification.setBvn(testBvn);
-        identityVerification.setNin(testNin);
+        identityVerification.setEncryptedBvn(testBvn);
+        identityVerification.setEncryptedNin(testNin);
 
         identityVerificationFailureRecord = IdentityVerificationFailureRecord.builder()
                 .email("test@example.com")

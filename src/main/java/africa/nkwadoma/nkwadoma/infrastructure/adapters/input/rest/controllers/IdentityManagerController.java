@@ -41,6 +41,17 @@ public class IdentityManagerController {
                 statusCode(HttpStatus.OK.name()).build()
         );
     }
+
+    @PostMapping("auth/refresh-token")
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> refreshToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws MeedlException {
+        UserIdentity userIdentity = UserIdentity.builder().refreshToken(refreshTokenRequest.getRefreshToken()).build();
+        AccessTokenResponse refreshedTokenResponse = createUserUseCase.refreshToken(userIdentity);
+        return ResponseEntity.ok(ApiResponse.<AccessTokenResponse>builder().
+                data(refreshedTokenResponse).message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                statusCode(HttpStatus.OK.name()).build()
+        );
+    }
+
     @PostMapping("auth/logout")
     public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal Jwt meedlUser, HttpServletRequest httpServletRequest) throws MeedlException {
         String accessToken = httpServletRequest.getHeader("Authorization").substring(7);
@@ -66,10 +77,10 @@ public class IdentityManagerController {
 
     @PostMapping("auth/password/create")
     public ResponseEntity<ApiResponse<?>> createPassword(@RequestBody @Valid PasswordCreateRequest passwordCreateRequest) throws MeedlException {
-        log.info("got the request {}",passwordCreateRequest.getPassword());
+        log.info("got the request {}", passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        if(ObjectUtils.isNotEmpty(userIdentity) &&
+        if (ObjectUtils.isNotEmpty(userIdentity) &&
                 userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {

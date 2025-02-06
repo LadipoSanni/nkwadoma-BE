@@ -46,6 +46,14 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
     }
 
     @Override
+    public LoanReferral findById(String loanReferralId) throws MeedlException {
+        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
+        LoanReferralEntity loanReferralEntity = loanReferralRepository
+                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
+        return loanReferralMapper.toLoanReferral(loanReferralEntity);
+    }
+
+    @Override
     public void deleteLoanReferral(String loanReferralId) throws MeedlException {
         MeedlValidator.validateUUID(loanReferralId, "Please provide a valid loan referral identification.");
         Optional<LoanReferralEntity> loanReferralEntity = loanReferralRepository.findById(loanReferralId);
@@ -77,14 +85,6 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         List<LoanReferralEntity> loanReferralEntities = loanReferralRepository.findAllByLoaneeEntityUserIdentityId(userId);
         return loanReferralMapper.toLoanReferrals(loanReferralEntities);
-    }
-
-    @Override
-    public LoanReferral findById(String loanReferralId) throws MeedlException {
-        MeedlValidator.validateUUID(loanReferralId, LoanMessages.LOAN_REFERRAL_ID_MUST_NOT_BE_EMPTY.getMessage());
-        LoanReferralEntity loanReferralEntity = loanReferralRepository
-                .findById(loanReferralId).orElseThrow(()-> new LoanException("Loan referral not found"));
-        return loanReferralMapper.toLoanReferral(loanReferralEntity);
     }
 
     @Override

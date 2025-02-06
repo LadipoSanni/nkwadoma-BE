@@ -13,6 +13,7 @@ public class LoaneeResponse {
     private String id;
     private String cohortId;
     private String createdBy;
+    private int creditScore;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserIdentityResponse userIdentity;
