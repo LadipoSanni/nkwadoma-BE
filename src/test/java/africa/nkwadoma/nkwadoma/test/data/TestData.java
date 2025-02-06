@@ -11,10 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -333,6 +330,58 @@ public class TestData {
                 .message("Face Match")
                 .confidence("99.9987564086914")
                 .responseCode("00")
+                .build();
+    }
+
+    public static PremblyNinResponse createPremblyNinTestResponse() {
+        return PremblyNinResponse.builder()
+                .verificationCallSuccessful(true)
+                .detail("Verification successful")
+                .responseCode("00")
+                .ninData(PremblyNinResponse.NinData.builder()
+                        .nin("12345678901")
+                        .firstname("John")
+                        .middleName("Doe")
+                        .lastname("Smith")
+                        .birthDate("1990-01-01")
+                        .birthCountry("Nigeria")
+                        .birthState("Lagos")
+                        .birthLGA("Ikeja")
+                        .gender("Male")
+                        .email("john.doe@example.com")
+                        .telephoneNo("+2348012345678")
+                        .residenceAddress("123, Lagos Street, Ikeja")
+                        .residenceState("Lagos")
+                        .residenceLGA("Ikeja")
+                        .residenceTown("Ikeja")
+                        .maritalStatus("Single")
+                        .employmentStatus("Employed")
+                        .educationalLevel("Bachelor's Degree")
+                        .profession("Software Engineer")
+                        .selfOriginState("Lagos")
+                        .selfOriginLGA("Ikeja")
+                        .selfOriginPlace("Mainland")
+                        .signature("base64-signature-string")
+                        .photo("base64-photo-string")
+                        .trackingId("TRACK-123456")
+                        .userId("USR-987654")
+                        .vnin("VNIN-54321")
+                        .nokFirstName("Jane")
+                        .nokSurname("Doe")
+                        .nokMiddleName("Ann")
+                        .nokAddress1("456, Abuja Street, FCT")
+                        .nokAddress2("Suite 202")
+                        .nokState("Abuja")
+                        .nokLGA("Municipal")
+                        .nokPostalCode("900001")
+                        .nokTown("Central Area")
+                        .spokenLanguage("English")
+                        .build())
+                .faceData(createMockFaceData())
+                .verification(createMockVerification())
+                .session(null)
+                .endpointName("NIN Verification")
+                .userId("USR-987654")
                 .build();
     }
 }

@@ -65,21 +65,22 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     }
 
     @Override
-    public PremblyResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
+    public PremblyNinResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
         MeedlValidator.validateObjectInstance(identityVerification);
         identityVerification.validate();
         identityVerification.validateImageUrl();
         return getNinDetails(identityVerification);
     }
 
-    public PremblyResponse getNinDetails(IdentityVerification identityVerification) {
-        PremblyResponse premblyResponse = getIdentityDetailsByNin(identityVerification);
-        premblyResponse.getVerification().updateValidIdentity();
-        log.info("Response: {}", premblyResponse);
-        return premblyResponse;
+    public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
+        PremblyNinResponse premblyNinResponse = getIdentityDetailsByNin(identityVerification);
+        log.info("PremblyNinResponse: {}", premblyNinResponse);
+        premblyNinResponse.getVerification().updateValidIdentity();
+        log.info("Response: {}", premblyNinResponse);
+        return premblyNinResponse;
     }
 
-    private PremblyResponse getIdentityDetailsByNin(IdentityVerification identityVerification) {
+    private PremblyNinResponse getIdentityDetailsByNin(IdentityVerification identityVerification) {
         HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(identityVerification);
         String url = premblyUrl.concat(PremblyParameter.NIN_FACE_URL.getValue());
         log.info(url);

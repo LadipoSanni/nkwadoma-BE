@@ -50,7 +50,7 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     }
 
     @Override
-    public PremblyResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
+    public PremblyNinResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
         return null;
     }
 
