@@ -68,6 +68,15 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
+        InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
+        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
+        loanProduct.addInvestmentVehicleValues(investmentVehicle);
+        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
+        investmentVehicleOutputPort.save(investmentVehicle);
+        return loanProductOutputPort.save(loanProduct);
+    }
+
+    private InvestmentVehicle checkProductSizeNotMoreThanAvailableInvestmentAmount(LoanProduct loanProduct) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleOutputPort.findById(loanProduct.getInvestmentVehicleId());
         log.info("Loan product size is : {}", loanProduct.getLoanProductSize());
@@ -76,11 +85,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
             log.warn("Attempt to create loan product that exceeds the investment vehicle available amount.");
             throw new MeedlException("Loan product size can not greater than investment vehicle available amount.");
         }
-        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));
-        loanProduct.addInvestmentVehicleValues(investmentVehicle);
-        loanProduct.setTotalAmountAvailable(loanProduct.getLoanProductSize());
-        investmentVehicleOutputPort.save(investmentVehicle);
-        return loanProductOutputPort.save(loanProduct);
+        return investmentVehicle;
     }
 
     @Override
