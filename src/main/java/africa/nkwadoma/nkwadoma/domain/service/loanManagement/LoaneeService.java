@@ -109,17 +109,13 @@ public class LoaneeService implements LoaneeUseCase {
         program = programOutputPort.saveProgram(program);
         log.info("Total number of loanees in a program has been increased to : {}, in program with id : {}", program.getNumberOfLoanees(), program.getId());
     }
+
     @Override
     public Loanee viewLoaneeDetails(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
         log.info("loanee found successfully. Loanee with id {}", id);
-        try {
-            return updateLoaneeCreditScore(loanee);
-        }catch (MeedlException exception){
-            log.error("Exception occurred while trying to update credit score, before viewing loanee details. {}", exception.getMessage());
-            return loanee;
-        }
+        return updateLoaneeCreditScore(loanee);
     }
 
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
@@ -127,7 +123,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
         if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
-                creditScoreIsAboveOrEqualOneMonth(loanee)){
+                creditScoreIsAboveOrEqualOneMonth(loanee)) {
             return updateCreditScore(loanee);
         }
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
@@ -140,10 +136,16 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
         String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
-        loanee.setCreditScore(creditRegistryOutputPort.getCreditScoreWithBvn(decryptedBVN));
-        loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
-        Loanee updatedLoanee = loaneeOutputPort.save(loanee);
-        log.info("Updated loanee credit score: {}", updatedLoanee.getCreditScore());
+        Loanee updatedLoanee = null;
+        try {
+            int creditScoreWithBvn = creditRegistryOutputPort.getCreditScoreWithBvn(decryptedBVN);
+            loanee.setCreditScore(creditScoreWithBvn);
+            loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
+            updatedLoanee = loaneeOutputPort.save(loanee);
+            log.info("Updated loanee credit score: {}", updatedLoanee.getCreditScore());
+        } catch (MeedlException e) {
+            log.error("Exception occurred while trying to update credit score, before viewing loanee details. {}", e.getMessage());
+        }
         return updatedLoanee;
     }
 
