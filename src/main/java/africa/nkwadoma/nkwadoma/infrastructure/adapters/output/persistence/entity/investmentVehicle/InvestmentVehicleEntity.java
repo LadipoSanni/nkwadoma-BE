@@ -2,18 +2,15 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -39,6 +36,7 @@ public class InvestmentVehicleEntity {
     private String sponsors;
     private int tenure;
     private BigDecimal size;
+    private BigDecimal totalAvailableAmount;
     private Float rate;
     @Enumerated(EnumType.STRING)
     private FundRaisingStatus fundRaisingStatus;

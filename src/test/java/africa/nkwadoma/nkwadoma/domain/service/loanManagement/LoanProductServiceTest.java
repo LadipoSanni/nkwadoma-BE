@@ -52,12 +52,17 @@ class LoanProductServiceTest {
     private Loan loan;
     private LoanProduct loanProduct;
     private Loanee loanee;
+    private InvestmentVehicle investmentVehicle;
     private LoaneeLoanBreakdown loaneeLoanBreakdown;
     @Mock
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
 
     @BeforeEach
     void setUp() {
+        investmentVehicle = InvestmentVehicle.builder()
+                .size(new BigDecimal(2000))
+                .totalAvailableAmount(new BigDecimal(2000))
+                .build();
         loanee = new Loanee();
         loanee.setId("9a4e3b70-3bdb-4676-bcf0-017cd83f6a07");
         loanee.setCohortId("e4fda779-3c21-4dd6-b66a-3a8742f6ecb1");
@@ -81,16 +86,15 @@ class LoanProductServiceTest {
         loanProduct.setPageNumber(0);
         loanProduct.setVendors(List.of(vendor));
 
-
     }
     @Test
     void createLoanProduct() {
         try {
-            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
             when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
+            when(loanProductOutputPort.save(loanProduct)).thenReturn(loanProduct);
             when(investmentVehicleOutputPort.findById(loanProduct.getId()))
-                    .thenReturn(new InvestmentVehicle());
+                    .thenReturn(investmentVehicle);
             LoanProduct createdLoanProduct = loanService.createLoanProduct(loanProduct);
             assertNotNull(createdLoanProduct);
             assertNotNull(createdLoanProduct.getId());
@@ -99,6 +103,19 @@ class LoanProductServiceTest {
         } catch (MeedlException exception) {
             log.error(exception.getMessage());
             throw new RuntimeException(exception);
+        }
+    }
+    @Test
+    public void createLoanProductWithSizeGreaterThanVechicleAvailableAount() {
+        try {
+            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
+            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
+            investmentVehicle.setTotalAvailableAmount(new BigDecimal(200));
+            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
+                    .thenReturn(investmentVehicle);
+            assertThrows(MeedlException.class , ()-> loanService.createLoanProduct(loanProduct));
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
         }
     }
     @Test

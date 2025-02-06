@@ -124,8 +124,9 @@ public class LoaneeService implements LoaneeUseCase {
 
         if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
                 creditScoreIsAboveOrEqualOneMonth(loanee)) {
-            return updateCreditScore(loanee);
+            loanee = updateCreditScore(loanee);
         }
+
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
         return loanee;
     }
@@ -136,17 +137,16 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
         String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
-        Loanee updatedLoanee = null;
+
         try {
             int creditScoreWithBvn = creditRegistryOutputPort.getCreditScoreWithBvn(decryptedBVN);
             loanee.setCreditScore(creditScoreWithBvn);
             loanee.setCreditScoreUpdatedAt(LocalDateTime.now());
-            updatedLoanee = loaneeOutputPort.save(loanee);
-            log.info("Updated loanee credit score: {}", updatedLoanee.getCreditScore());
+            return loaneeOutputPort.save(loanee);
         } catch (MeedlException e) {
             log.error("Exception occurred while trying to update credit score, before viewing loanee details. {}", e.getMessage());
+            return loanee;
         }
-        return updatedLoanee;
     }
 
     private boolean creditScoreIsAboveOrEqualOneMonth(Loanee loanee) {
