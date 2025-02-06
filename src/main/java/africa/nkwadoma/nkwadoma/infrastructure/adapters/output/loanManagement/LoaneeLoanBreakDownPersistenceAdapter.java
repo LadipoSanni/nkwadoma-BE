@@ -50,7 +50,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     }
 
     @Override
-    public List<LoaneeLoanBreakdown> findAllByLoaneeId(String loaneeId) throws MeedlException {
+    public List<LoaneeLoanBreakdown> findAllLoaneeLoanBreakDownByLoaneeId(String loaneeId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOAN_ID.getMessage());
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownRepository.findAllByLoaneeId(loaneeId);
