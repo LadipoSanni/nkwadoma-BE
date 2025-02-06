@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
@@ -11,6 +12,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
@@ -42,6 +46,8 @@ class IdentityVerificationServiceTest {
     @Mock
     private LoanReferralOutputPort loanReferralOutputPort;
     @Mock
+    private IdentityVerificationOutputPort identityVerificationOutputPort;
+    @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private IdentityVerificationFailureRecordOutputPort identityVerificationFailureRecordOutputPort;
@@ -53,7 +59,6 @@ class IdentityVerificationServiceTest {
     private final String testBvn = "etlGGJ4BSGNxBkqfv3rPqw==";
     private final String testNin = "etlGGJ4BSGNxBkqfv3rPqw==";
     private IdentityVerification identityVerification;
-    private IdentityVerificationEntity identityVerificationEntity;
     private IdentityVerificationFailureRecord identityVerificationFailureRecord;
 
     @BeforeEach
@@ -63,14 +68,10 @@ class IdentityVerificationServiceTest {
         loanee.setUserIdentity(favour);
         loanReferral = LoanReferral.builder().loanee(loanee).build();
 
-        identityVerificationEntity = new IdentityVerificationEntity();
-        identityVerificationEntity.setId(testId);
-        identityVerificationEntity.setBvn(testBvn);
-        identityVerificationEntity.setNin(testNin);
-
         identityVerification = new IdentityVerification();
         identityVerification.setEncryptedBvn(testBvn);
         identityVerification.setEncryptedNin(testNin);
+        identityVerification.setLoanReferralId(testId);
 
         identityVerificationFailureRecord = IdentityVerificationFailureRecord.builder()
                 .email("test@example.com")
@@ -79,6 +80,74 @@ class IdentityVerificationServiceTest {
                 .serviceProvider(ServiceProvider.SMILEID)
                 .build();
     }
+
+    @Test
+    void verifyIdentitySuccessfulVerification() throws MeedlException {
+        when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
+        when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
+        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        favour.setIdentityVerified(Boolean.TRUE);
+        when(userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn())).thenReturn(favour);
+        when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
+        PremblyResponse premblyResponse = new PremblyBvnResponse();
+        premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
+        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
+        favour.setIdentityVerified(false);
+
+        String response = identityVerificationService.verifyIdentity(identityVerification);
+        assertEquals(IDENTITY_VERIFIED.getMessage(), response);
+    }
+
+    @Test
+    void verifyIdentityWithInvalidBvn() {
+        identityVerification.setEncryptedBvn(StringUtils.EMPTY);
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+    }
+
+    @Test
+    void verifyIdentityWithInvalidNin() {
+        identityVerification.setEncryptedNin(StringUtils.SPACE);
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+    }
+
+    @Test
+    void verifyIdentityOfBlacklistedReferral() throws MeedlException {
+        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        when(identityVerificationFailureRecordOutputPort.countByReferralId(loanReferral.getId())).thenReturn(5L);
+        assertThrows(IdentityVerificationException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+    }
+
+    @Test
+    void verifyIdentityPreviouslyVerifiedUserReturnsVerified() throws MeedlException {
+        when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
+        when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
+        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        favour.setIdentityVerified(true);
+        when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(favour);
+
+        String response = identityVerificationService.verifyIdentity(identityVerification);
+        assertEquals(IDENTITY_VERIFIED.getMessage(), response);
+    }
+
+    @Test
+    void verifyIdentityFailedVerificationCreatesFailureRecord() throws MeedlException {
+        when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
+        when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
+        when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
+        when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
+        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(new PremblyBvnResponse());
+
+        String response = identityVerificationService.verifyIdentity(identityVerification);
+        assertEquals(IDENTITY_NOT_VERIFIED.getMessage(), response);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-uuid"})
+    void verifyIdentityWithInvalidLoanReferralId(String invalidId) {
+        identityVerification.setLoanReferralId(invalidId);
+        assertThrows(MeedlException.class, () -> identityVerificationService.verifyIdentity(identityVerification));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "iurei"})
     void verifyUserIdentityVerifiedByInvalidLoanReferralId(String id) {

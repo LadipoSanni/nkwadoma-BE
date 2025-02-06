@@ -61,10 +61,11 @@ public class LoaneeController {
         Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
+        log.info("Loanee response: {}", loaneeResponse);
         ApiResponse<LoaneeResponse> apiResponse = ApiResponse.<LoaneeResponse>builder()
                 .data(loaneeResponse)
                 .message(LOANEE_VIEWED)
-                .statusCode(HttpStatus.OK.toString())
+                .statusCode(HttpStatus.OK.name())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }

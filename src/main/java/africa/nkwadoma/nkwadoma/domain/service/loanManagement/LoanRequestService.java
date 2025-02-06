@@ -88,6 +88,10 @@ public class LoanRequestService implements LoanRequestUseCase {
         LoanRequest foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequest.getId()).
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Loan request retrieved: {}", foundLoanRequest);
+
+        if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
+            throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+        }
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
                 && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());

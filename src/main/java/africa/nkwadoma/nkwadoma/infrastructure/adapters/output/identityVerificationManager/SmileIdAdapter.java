@@ -82,20 +82,20 @@ public class SmileIdAdapter implements IdentityVerificationOutputPort {
     private String getNinVerificationResponse(PremblyNinResponse response) throws IdentityVerificationException {
         String responseMessage = StringUtils.EMPTY;
         if (response == null || response.getNinData() == null) {
-            throw new IdentityVerificationException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getValue());
+            throw new IdentityVerificationException(IdentityVerificationMessage.SMILEID_UNAVAILABLE.getMessage());
         }
         switch (response.getResponseCode()) {
             case "00" -> {
-                responseMessage = IdentityVerificationMessage.NIN_VERIFIED.getValue();
+                responseMessage = IdentityVerificationMessage.NIN_VERIFIED.getMessage();
             }
-            case "01" -> responseMessage = IdentityVerificationMessage.NIN_NOT_FOUND.getValue();
+            case "01" -> responseMessage = IdentityVerificationMessage.NIN_NOT_FOUND.getMessage();
             case "02" -> {
-                log.warn("{} : {}", SmileIdAdapter.class.getName(), IdentityVerificationMessage.SERVICE_UNAVAILABLE.getValue());
-                responseMessage = IdentityVerificationMessage.SERVICE_UNAVAILABLE.getValue();
+                log.warn("{} : {}", SmileIdAdapter.class.getName(), IdentityVerificationMessage.SERVICE_UNAVAILABLE.getMessage());
+                responseMessage = IdentityVerificationMessage.SERVICE_UNAVAILABLE.getMessage();
             }
             case "03" -> {
-                log.warn("{} : {}", SmileIdAdapter.class.getName(), IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue());
-                responseMessage = IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getValue();
+                log.warn("{} : {}", SmileIdAdapter.class.getName(), IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getMessage());
+                responseMessage = IdentityVerificationMessage.INSUFFICIENT_WALLET_BALANCE.getMessage();
             }
         }
         return responseMessage;
