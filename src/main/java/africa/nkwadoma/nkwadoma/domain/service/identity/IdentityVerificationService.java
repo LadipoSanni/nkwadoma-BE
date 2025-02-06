@@ -89,18 +89,15 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         }
     }
 
-    private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-//        PremblyBvnResponse premblyBvnResponse = identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
-        PremblyBvnResponse premblyBvnResponse = createPremblyBvnTestResponse();
-        log.info("premblyBvnResponse {}", premblyBvnResponse);
-//                identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
+    private void updateLoaneeDetail(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyResponse) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId());
         log.info("UserIdentity before update :  {}", userIdentity);
-        UserIdentity updatedUserIdentity = identityVerificationMapper.updateUserIdentity(premblyBvnResponse.getData(), userIdentity);
-        log.info("update user identity from prembly {}", updatedUserIdentity);
+        UserIdentity updatedUserIdentity = identityVerificationMapper.updateUserIdentity(premblyResponse.getData(), userIdentity);
         userIdentity.setIdentityVerified(Boolean.TRUE);
         userIdentity.setBvn(identityVerification.getEncryptedBvn());
         userIdentity.setNin(identityVerification.getEncryptedNin());
+        userIdentity.setImage(null);
+        log.info("update user identity from prembly {}", updatedUserIdentity);
         userIdentity = userIdentityOutputPort.save(userIdentity);
         log.info("User identity details updated for loanee with user id : {}", userIdentity);
     }
@@ -155,12 +152,11 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     private String processNewVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
         try {
-//            PremblyBvnResponse premblyResponse = (PremblyBvnResponse) identityVerificationOutputPort.verifyBvn(identityVerification);
-            PremblyBvnResponse premblyResponse =  createPremblyBvnTestResponse();
+            PremblyBvnResponse premblyResponse = identityVerificationOutputPort.verifyBvnLikeness(identityVerification);
             log.info("prembly bvn response: {}", premblyResponse);
 
             if (isIdentityVerified(premblyResponse)) {
-                return handleSuccessfulVerification(identityVerification, loanReferral);
+                return handleSuccessfulVerification(identityVerification, loanReferral, premblyResponse);
             } else {
                 return handleFailedVerification(loanReferral, premblyResponse);
             }
@@ -175,8 +171,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 "VERIFIED".equals(premblyResponse.getVerification().getStatus());
     }
 
-    private String handleSuccessfulVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        updateLoaneeDetail(identityVerification, loanReferral);
+    private String handleSuccessfulVerification(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyResponse) throws MeedlException {
+        updateLoaneeDetail(identityVerification, loanReferral, premblyResponse);
         addedToLoaneeLoan(identityVerification.getLoanReferralId());
         log.info("Identity is verified: Loan referral id {}. Verified", identityVerification.getLoanReferralId());
         return IDENTITY_VERIFIED.getMessage();
@@ -194,75 +190,4 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         identityVerification.setDecryptedNin(decryptedNin);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public static PremblyBvnResponse createPremblyBvnTestResponse() {
-        return PremblyBvnResponse.builder()
-                .verificationCallSuccessful(true)
-                .detail("Verification successful")
-                .responseCode("00")
-                .data(PremblyBvnResponse.BvnData.builder()
-                        .bvn("12345678901")
-                        .firstName("John")
-                        .middleName("Doe")
-                        .lastName("Smith")
-                        .dateOfBirth("1990-01-01")
-                        .registrationDate("2020-05-15")
-                        .enrollmentBank("First Bank")
-                        .enrollmentBranch("Lagos Main")
-                        .email("john.doe@example.com")
-                        .gender("Male")
-                        .levelOfAccount("Tier 3")
-                        .lgaOfOrigin("Ikeja")
-                        .lgaOfResidence("Surulere")
-                        .maritalStatus("Single")
-                        .nin("12345678910")
-                        .nameOnCard("John D. Smith")
-                        .nationality("Nigerian")
-                        .phoneNumber1("+2348012345678")
-                        .phoneNumber2("+2348098765432")
-                        .residentialAddress("123, Lagos Street, Ikeja")
-                        .stateOfOrigin("Lagos")
-                        .stateOfResidence("Lagos")
-                        .title("Mr.")
-                        .watchListed("No")
-                        .image("base64-image-string")
-                        .number("12345")
-                        .faceData(createMockFaceData()) // Assuming an empty instance is okay
-                        .build())
-                .verification(createMockVerification()) // Assuming no data for verification
-                .session(null) // Assuming no session data
-                .build();
-    }
-
-    public static Verification createMockVerification() {
-        return Verification.builder()
-                .status("VERIFIED")
-                .validIdentity(true) // This will be updated dynamically if updateValidIdentity() is called
-                .reference("REF-123456345")
-                .build();
-    }
-    public static PremblyFaceData createMockFaceData() {
-        return PremblyFaceData.builder()
-                .faceVerified(true)
-                .message("Face Match")
-                .confidence("99.9987564086914")
-                .responseCode("00")
-                .build();
-    }
 }
