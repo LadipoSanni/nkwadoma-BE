@@ -120,7 +120,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     @Override
     public OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException {
         MeedlValidator.validateUUID(organizationId);
-        MeedlValidator.validateDataElement(reason);
+        MeedlValidator.validateDataElement(reason, "Please provide a reason for reactivating organization.");
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
         log.info("found organization employees to reactivate: {}",organizationEmployees.size());

@@ -60,12 +60,7 @@ public class MeedlValidator {
             throw new MeedlException(message);
         }
     }
-    public static void validateDataElement(String dataElement) throws MeedlException {
-        if (isEmptyString(dataElement)) {
-            log.error("Empty input field");
-            throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());
-        }
-    }
+
     public static void validateDataElement(String dataElement, String message) throws MeedlException {
         if (isEmptyString(dataElement)) {
             log.error(message);

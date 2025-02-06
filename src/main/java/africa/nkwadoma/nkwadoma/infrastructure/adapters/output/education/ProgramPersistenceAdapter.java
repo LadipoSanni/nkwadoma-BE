@@ -147,7 +147,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program findProgramById(String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(programId);
+        MeedlValidator.validateDataElement(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         programId = programId.trim();
         ProgramEntity programEntity = programRepository.findById(programId).

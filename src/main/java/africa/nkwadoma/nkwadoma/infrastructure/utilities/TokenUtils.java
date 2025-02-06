@@ -105,7 +105,7 @@ public class TokenUtils {
         return claims;
     }
     public String decryptAES(String encryptedData) throws MeedlException {
-        MeedlValidator.validateDataElement(encryptedData);
+        MeedlValidator.validateDataElement(encryptedData, "Please provide a valid data.");
         String key = String.format("%-16s", AESSecretKey).substring(0, 16);
 
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
@@ -127,7 +127,7 @@ public class TokenUtils {
 
     public String encryptAES(String plainText) throws MeedlException {
         try {
-            MeedlValidator.validateDataElement(plainText);
+            MeedlValidator.validateDataElement(plainText, "Please provide a valid data.");
 
             String key = String.format("%-16s", AESSecretKey).substring(0, 16);
 

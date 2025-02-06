@@ -35,14 +35,14 @@ public class IdentityVerification {
 
         String BVN_NIN_REGEX = "^\\d{11}$";
         Pattern pattern = Pattern.compile(BVN_NIN_REGEX);
-        MeedlValidator.validateDataElement( this.decryptedBvn, IdentityVerificationMessage.INVALID_BVN.getValue());
-        MeedlValidator.validateDataElement(this.decryptedNin, IdentityVerificationMessage.INVALID_NIN.getValue());
+        MeedlValidator.validateDataElement( this.decryptedBvn, IdentityVerificationMessage.INVALID_BVN.getMessage());
+        MeedlValidator.validateDataElement(this.decryptedNin, IdentityVerificationMessage.INVALID_NIN.getMessage());
 
         if (!pattern.matcher(this.decryptedBvn).matches()) {
-            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_BVN.getValue());
+            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_BVN.getMessage());
         }
         if (!pattern.matcher(this.decryptedNin).matches()) {
-            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_NIN.getValue());
+            throw new InvalidInputException(IdentityVerificationMessage.PROVIDE_VALID_NIN.getMessage());
         }
     }
     public void validateImageUrl() throws MeedlException {
