@@ -14,6 +14,7 @@ public interface LoanRequestRestMapper {
     @Mapping(target = "cohortName", source = "cohortName")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "loaneeLoanBreakdowns", source = "loaneeLoanBreakdowns")
+    @Mapping(target = "creditScore", source = "creditScore")
     LoanRequestResponse toLoanRequestResponse(LoanRequest loanRequest);
 
     @Mapping(target = "id", source = "loanRequestId")
