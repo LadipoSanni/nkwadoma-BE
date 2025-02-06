@@ -72,10 +72,10 @@ public class LoanRequestService implements LoanRequestUseCase {
         Loanee loanee = new Loanee();
         try {
             loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId());
+            log.info("Credit score returned: {}", loanee.getCreditScore());
         } catch (MeedlException e) {
             log.error("Error retrieving loanee credit score {}", e.getMessage());
         }
-        log.info("Credit score returned: {}", loanee.getCreditScore());
         loanRequest.setCreditScore(loanee.getCreditScore());
         loanRequest.setLoaneeLoanBreakdowns(loaneeLoanBreakdowns);
         log.info("Loan request details: {}", loanRequest);
