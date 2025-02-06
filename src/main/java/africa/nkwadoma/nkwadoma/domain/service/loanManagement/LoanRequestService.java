@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -67,7 +66,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         loanRequest = foundLoanRequest.get();
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loanRequest.getLoaneeId());
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId());
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
         Loanee loanee = new Loanee();
         try {

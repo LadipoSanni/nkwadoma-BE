@@ -173,7 +173,7 @@ public class LoaneeService implements LoaneeUseCase {
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         List<LoaneeLoanBreakdown> loanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllByLoaneeId(loaneeId);
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loaneeId);
         loanee = getLoaneeFromCohort(cohort, loaneeId);
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
