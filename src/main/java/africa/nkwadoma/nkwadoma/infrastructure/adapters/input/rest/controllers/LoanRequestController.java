@@ -121,6 +121,7 @@ public class LoanRequestController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @PostMapping("/loan-request/response")
     public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
             throws MeedlException {

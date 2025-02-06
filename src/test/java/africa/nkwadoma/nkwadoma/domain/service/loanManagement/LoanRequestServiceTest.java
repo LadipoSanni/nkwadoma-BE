@@ -60,7 +60,7 @@ class LoanRequestServiceTest {
         UserIdentity userIdentity = UserIdentity.builder().id("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").firstName("Adeshina").
                 lastName("Qudus").email("test@example.com").role(IdentityRole.LOANEE).alternateEmail("alt276@example.com").
                 alternatePhoneNumber("0986564534").alternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State").
-                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").bvn("587907453").build();
+                createdBy("96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f").bvn("587907453").isIdentityVerified(true).build();
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
@@ -236,6 +236,20 @@ class LoanRequestServiceTest {
         loanRequest.setLoanAmountApproved(BigDecimal.valueOf(700000));
         loanRequest.setLoanRequestDecision(LoanDecision.ACCEPTED);
         assertThrows(MeedlException.class, () -> loanRequestService.respondToLoanRequest(loanRequest));
+    }
+
+    @Test
+    void cannotApproveALoanRequestOfALoaneeThatIsNotVerified(){
+//        loanRequest.getLoanee().getUse
+        UserIdentity userIdentity =  UserIdentity.builder().isIdentityVerified(false).build();
+        loanRequest.getLoanee().setUserIdentity(userIdentity);
+        try {
+            when(loanRequestOutputPort.findLoanRequestById(loanRequest.getId()))
+                    .thenReturn(Optional.ofNullable(loanRequest));
+            assertThrows(MeedlException.class, () -> loanRequestService.respondToLoanRequest(loanRequest));
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
     }
 
     @Test
