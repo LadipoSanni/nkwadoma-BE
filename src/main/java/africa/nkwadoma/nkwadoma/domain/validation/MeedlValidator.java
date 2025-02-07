@@ -218,4 +218,10 @@ public class MeedlValidator {
             throw new MeedlException(MeedlMessages.INVALID_TIN.getMessage());
         }
     }
+
+    public static void validateRate(Float rate, String message) throws MeedlException {
+        if (rate == null) {
+            throw new MeedlException(message);
+        }
+    }
 }

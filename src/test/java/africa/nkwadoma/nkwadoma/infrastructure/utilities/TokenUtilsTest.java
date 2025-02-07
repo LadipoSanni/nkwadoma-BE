@@ -58,7 +58,10 @@ class TokenUtilsTest {
     @Test
     void testEncryptData() {
         try {
-            String encryptedAES = tokenUtils.encryptAES(DECRYPTED_DATA);
+            String encryptedAES = tokenUtils.encryptAES("22167379603");
+            log.info("nin {}",encryptedAES);
+            String encryptedAES1 = tokenUtils.encryptAES("50576263862");
+            log.info("bvn {}",encryptedAES1);
             assertNotNull(encryptedAES);
             assertEquals(ENCRYPTED_DATA, encryptedAES);
         } catch (MeedlException e) {

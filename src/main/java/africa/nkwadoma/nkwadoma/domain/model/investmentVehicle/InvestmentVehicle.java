@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import javax.print.attribute.standard.Media;
 import java.math.*;
 import java.time.LocalDate;
 import java.util.regex.Pattern;
@@ -49,7 +50,11 @@ public class InvestmentVehicle {
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
         validateTenure(tenure);
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
-        MeedlValidator.validateFloatDataElement(rate,"Investment Vehicle Rate Cannot be empty or less than zero");
+        if (investmentVehicleType.equals(InvestmentVehicleType.COMMERCIAL)) {
+            MeedlValidator.validateFloatDataElement(rate, "Investment Vehicle Rate Cannot be empty or less than zero");
+        }else {
+            MeedlValidator.validateRate(rate,"Investment Vehicle Rate Cannot be empty");
+        }
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
         MeedlValidator.validateBigDecimalDataElement(size, "Investment vehicle size is required");
         MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
