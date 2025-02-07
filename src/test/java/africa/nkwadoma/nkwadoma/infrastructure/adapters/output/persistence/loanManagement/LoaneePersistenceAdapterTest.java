@@ -223,6 +223,8 @@ class LoaneePersistenceAdapterTest {
         try {
             Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber);
             assertEquals(2,loanees.toList().size());
+            assertEquals(loanees.getContent().get(0), firstLoanee);
+            assertEquals(loanees.getContent().get(1), anotherLoanee);
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
