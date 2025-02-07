@@ -12,9 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import lombok.extern.slf4j.*;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +59,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     @Override
     public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId,pageRequest);
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }
