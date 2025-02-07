@@ -63,7 +63,7 @@ public enum LoanMessages {
     INVALID_LOAN_REFERRAL_ID("Loan referral ID must not be empty"),
     LOAN_ALREADY_EXISTS_FOR_THIS_LOANEE("Loan already exists for this loanee"),
     CANNOT_START_LOAN_FOR_LOAN_OFFER_THAT_AS_BEEN_DECLINED("Can not start loan for loan offer that as been declined"),
-    LOAN_REQUEST_CANNOT_BE_APPROVED("Loan request of loanee that identity is not verified cannot be approved");
+    LOAN_REQUEST_CANNOT_BE_APPROVED("Loanee identity not verified, loane request cannot be approved "),;
     private final String message;
 
     LoanMessages(String message) {
