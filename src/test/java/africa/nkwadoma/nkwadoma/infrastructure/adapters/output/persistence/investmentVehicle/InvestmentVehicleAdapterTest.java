@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -143,6 +144,13 @@ class InvestmentVehicleAdapterTest {
     @Test
     void searchInvestmentVehicleDetailsWithNullId()  {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.searchInvestmentVehicle(null));
+    }
+
+    @Test
+    void cannotCreateEndowmentInvestmentVehicleWithNullRate(){
+        capitalGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
+        capitalGrowth.setRate(null);
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Order(2)
