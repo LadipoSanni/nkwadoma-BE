@@ -156,9 +156,9 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Page<Loanee> viewAllLoaneeInCohort(String cohortId, int pageSize, int pageNumber) throws MeedlException {
+    public Page<Loanee> viewAllLoaneeInCohort(String cohortId, int pageSize, int pageNumber, String sortBy) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        return loaneeOutputPort.findAllLoaneeByCohortId(cohortId, pageSize, pageNumber);
+        return loaneeOutputPort.findAllLoaneeByCohortId(cohortId, pageSize, pageNumber, sortBy);
     }
 
     private LoaneeLoanDetail saveLoaneeLoanDetails(LoaneeLoanDetail loaneeLoanDetail) throws MeedlException {

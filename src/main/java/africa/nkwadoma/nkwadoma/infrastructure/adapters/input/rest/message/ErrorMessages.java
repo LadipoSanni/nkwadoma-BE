@@ -10,4 +10,5 @@ public class ErrorMessages {
     public static final String TENURE_CANNOT_EXCEED_THREE_DIGITS = "Tenure cannot exceed three digits.";
     public static final String SPONSOR_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN = "Sponsor must not start or end with apostrophe or hyphen";
     public static final String FUND_MANAGER_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN = "Fund manager must not start or end with apostrophe or hyphen";
+    public static final String INVALID_SORT_PARAMETER = "Invalid sort parameter provided";
 }
