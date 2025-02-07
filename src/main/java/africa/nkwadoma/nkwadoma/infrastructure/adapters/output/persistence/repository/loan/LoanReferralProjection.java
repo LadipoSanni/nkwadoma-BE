@@ -21,5 +21,6 @@ public interface LoanReferralProjection {
     BigDecimal getTuitionAmount();
     LocalDate getCohortStartDate();
     String getProgramName();
+    boolean getIdentityVerified();
     LoanReferralStatus getStatus();
 }

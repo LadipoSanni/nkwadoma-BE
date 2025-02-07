@@ -48,7 +48,7 @@ public class LoanReferralController {
     public ResponseEntity<ApiResponse<?>> viewLoanReferral(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         LoanReferral loanReferral = loanReferralRestMapper.toLoanReferral(meedlUser.getClaimAsString("sub"));
         LoanReferral foundLoanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
-        log.info("Found loan referral: {}", foundLoanReferral);
+        log.info("Found loan referral at controller level: {}", foundLoanReferral);
         LoanReferralResponse loanReferralResponse = loanReferralRestMapper.toLoanReferralResponse(foundLoanReferral);
         log.info("Mapped Loan referral response: {}", loanReferralResponse);
         ApiResponse<LoanReferralResponse> apiResponse = ApiResponse.<LoanReferralResponse>builder()
