@@ -92,8 +92,10 @@ class IdentityVerificationServiceTest {
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
         PremblyResponse premblyResponse = new PremblyBvnResponse();
         premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
+        PremblyNinResponse premblyNinResponse = new PremblyNinResponse();
+        premblyNinResponse.setVerification(Verification.builder().status("VERIFIED").build());
         when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
-        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(new PremblyNinResponse());
+        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(premblyNinResponse);
         favour.setIdentityVerified(false);
 
         String response = identityVerificationService.verifyIdentity(identityVerification);
