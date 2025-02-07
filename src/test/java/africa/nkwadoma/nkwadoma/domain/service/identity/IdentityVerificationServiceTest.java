@@ -92,10 +92,10 @@ class IdentityVerificationServiceTest {
         when(userIdentityOutputPort.findById(favour.getId())).thenReturn(favour);
         PremblyResponse premblyResponse = new PremblyBvnResponse();
         premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        PremblyNinResponse premblyNinResponse = new PremblyNinResponse();
-        premblyNinResponse.setVerification(Verification.builder().status("VERIFIED").build());
+        PremblyBvnResponse premblyBvnResponse = new PremblyBvnResponse();
+        premblyBvnResponse.setVerification(Verification.builder().status("VERIFIED").build());
         when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
-        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(premblyNinResponse);
+        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(premblyBvnResponse);
         favour.setIdentityVerified(false);
 
         String response = identityVerificationService.verifyIdentity(identityVerification);
@@ -130,8 +130,10 @@ class IdentityVerificationServiceTest {
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
         when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
-        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(
-                PremblyNinResponse.builder().verification(Verification.builder().status("FAILED").build()).build());
+        PremblyBvnResponse premblyBvnResponse = new PremblyBvnResponse();
+        premblyBvnResponse.setVerification(Verification.builder().status("NOT-VERIFIED").build());
+        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(
+                premblyBvnResponse);
 //        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
 //        )).thenReturn(favour);
         String response = identityVerificationService.verifyIdentity(identityVerification);
