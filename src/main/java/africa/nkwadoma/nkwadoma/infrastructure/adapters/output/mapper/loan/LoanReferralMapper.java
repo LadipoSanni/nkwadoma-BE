@@ -28,6 +28,8 @@ public interface LoanReferralMapper {
     @Mapping(target = "loanee.userIdentity.alternateEmail", source = "alternateEmail")
     @Mapping(target = "loanee.userIdentity.alternatePhoneNumber", source = "alternatePhoneNumber")
     @Mapping(target = "loanReferralStatus", source = "status")
+    @Mapping(target = "identityVerified", source = "identityVerified")
+    @Mapping(target = "loanee.userIdentity.isIdentityVerified", source = "identityVerified")
     LoanReferral mapProjectionToLoanReferralEntity(LoanReferralProjection loanReferralProjection);
 
     List<LoanReferral> toLoanReferrals(List<LoanReferralEntity> loanReferralEntities);
