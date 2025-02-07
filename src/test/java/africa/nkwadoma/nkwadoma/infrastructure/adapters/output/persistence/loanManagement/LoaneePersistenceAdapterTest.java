@@ -261,7 +261,7 @@ class LoaneePersistenceAdapterTest {
         assertEquals(2,loanees.size());
     }
 
-    @AfterAll
+//    @AfterAll
     void cleanUp() throws MeedlException {
         identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);

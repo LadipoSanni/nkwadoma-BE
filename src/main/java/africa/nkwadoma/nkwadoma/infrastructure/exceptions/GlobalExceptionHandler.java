@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import com.fasterxml.jackson.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mapping.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.*;
@@ -54,6 +55,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public  ResponseEntity<ExceptionResponse> handleInvestmentException(InvestmentException exception){
         return new ResponseEntity<>(errorResponseBuilder(exception.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public  ResponseEntity<ExceptionResponse> handleSortInputException(PropertyReferenceException exception){
+        log.info("Invalid sort by parameter: {}", exception.getMessage());
+        return new ResponseEntity<>(errorResponseBuilder(ErrorMessages.INVALID_SORT_PARAMETER), HttpStatus.BAD_REQUEST);
     }
 
     private static ExceptionResponse errorResponseBuilder(String message) {
