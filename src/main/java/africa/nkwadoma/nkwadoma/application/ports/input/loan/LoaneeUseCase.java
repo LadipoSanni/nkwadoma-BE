@@ -13,7 +13,7 @@ public interface LoaneeUseCase {
 
     Loanee viewLoaneeDetails(String loaneeId) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber) throws MeedlException;
+    Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber, String sortBy) throws MeedlException;
     LoanReferral referLoanee(String loaneeId) throws MeedlException;
 
     List<Loanee> searchForLoaneeInCohort(String name,String cohortId) throws MeedlException;

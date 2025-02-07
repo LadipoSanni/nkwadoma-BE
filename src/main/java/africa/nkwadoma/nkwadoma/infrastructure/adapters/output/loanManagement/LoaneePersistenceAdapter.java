@@ -1,8 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
@@ -57,9 +56,9 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize,int pageNumber) throws MeedlException {
+    public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize, int pageNumber, String sortBy) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, sortBy == null ? MeedlMessages.CREATED_AT.getMessage() : sortBy));
         Page<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId,pageRequest);
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }

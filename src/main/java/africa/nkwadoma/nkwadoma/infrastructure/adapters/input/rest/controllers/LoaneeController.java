@@ -74,24 +74,22 @@ public class LoaneeController {
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy
     ) throws MeedlException {
-        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId,
-                pageSize,
-                pageNumber);
+        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId, pageSize, pageNumber, sortBy);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();
         PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
-                loaneeResponses,loanees.hasNext(),
-                loanees.getTotalPages(),pageNumber,pageSize
+                loaneeResponses, loanees.hasNext(),
+                loanees.getTotalPages(), pageNumber, pageSize
         );
         ApiResponse<PaginatedResponse<LoaneeResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeResponse>>builder()
                 .data(paginatedResponse)
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PostMapping("referLoanee/{loaneeId}")

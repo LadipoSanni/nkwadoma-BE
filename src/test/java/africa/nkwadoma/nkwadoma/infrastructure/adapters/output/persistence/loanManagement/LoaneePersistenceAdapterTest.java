@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -221,7 +222,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void findAllLoanee(){
         try {
-            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber);
+            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber, MeedlMessages.CREATED_AT.getMessage());
             assertEquals(2,loanees.toList().size());
         }catch (MeedlException exception){
             log.error(exception.getMessage());
