@@ -21,5 +21,13 @@ public interface IdentityVerificationMapper {
     UserIdentity updateUserIdentity(PremblyNinResponse.NinData premblyBvnResponse, @MappingTarget UserIdentity userIdentity);
 
 
-
+    @Mapping(target = "email", ignore = true)
+//    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
+    @Mapping(target = "lgaOfOrigin", source = "lgaOfOrigin")
+    @Mapping(target = "nationality", source = "nationality")
+    @Mapping(target = "stateOfOrigin", source = "stateOfOrigin")
+    @Mapping(target = "residentialAddress", source = "residentialAddress")
+    @Mapping(target = "stateOfResidence", source = "stateOfResidence")
+    UserIdentity updateUserIdentityForBvn(PremblyBvnResponse.BvnData data,@MappingTarget UserIdentity userIdentity);
 }
