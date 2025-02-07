@@ -194,7 +194,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
         } catch (Exception ex) {
             log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-            throw new MeedlException("Verification server down "+ ex.getMessage());
+            throw new MeedlException("Verification server down ");
         }
     }
 

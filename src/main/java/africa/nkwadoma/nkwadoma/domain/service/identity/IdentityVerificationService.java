@@ -158,12 +158,16 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             //save data got frm nin to user
             PremblyResponse premblyResponse =
                     identityVerificationOutputPort.verifyBvn(identityVerification);
+            log.info("prembly bvn response: {}", premblyResponse);
 
             PremblyNinResponse premblyNinResponse =
                     identityVerificationOutputPort.verifyNinLikeness(identityVerification);
-            log.info("prembly bvn response: {}", premblyResponse);
+            log.info("prembly nin response: {}", premblyNinResponse);
 
-            if (isIdentityVerified(premblyResponse)) {
+            log.info("Identity verification process ongoing. {}", premblyNinResponse);
+            if (isIdentityVerified(premblyResponse) &&
+                    !premblyNinResponse.getVerification().getStatus().equals("NOT-VERIFIED")) {
+                log.info("Identity verified successfully. {}", premblyNinResponse.getNinData());
                 return handleSuccessfulVerification(identityVerification, loanReferral, premblyNinResponse);
             } else {
                 return handleFailedVerification(loanReferral, premblyNinResponse);
@@ -183,7 +187,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                             identityVerificationOutputPort.verifyNinLikeness(identityVerification);
             log.info("prembly bvn response: {}", premblyNinResponse);
 
-            if (premblyNinResponse.getFaceData().getMessage().equals("Fatch Match") ||
+            if (!premblyNinResponse.getVerification().getStatus().equals("NOT-VERIFIED") ||
                     !premblyResponse.getVerification().isValidIdentity()){
                 return handleSuccessfulVerification(identityVerification,loanReferral,premblyNinResponse);
             }else {
