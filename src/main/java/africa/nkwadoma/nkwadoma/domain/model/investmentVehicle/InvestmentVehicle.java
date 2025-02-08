@@ -1,0 +1,75 @@
+package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+import javax.print.attribute.standard.Media;
+import java.math.*;
+import java.time.LocalDate;
+import java.util.regex.Pattern;
+
+@Setter
+@Getter
+@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class InvestmentVehicle {
+
+    private String id;
+    private String name;
+    private InvestmentVehicleType investmentVehicleType;
+    @Size( max = 2500, message = "Investment vehicle mandate must not exceed 2500 characters")
+    private String mandate;
+    private int tenure;
+    private BigDecimal size;
+    private Float rate;
+    private FundRaisingStatus fundRaisingStatus;
+    private InvestmentVehicleFinancier leads;
+    private InvestmentVehicleFinancier contributors;
+    private String trustee;
+    private String custodian;
+    private String bankPartner;
+    private String fundManager;
+    private String sponsors;
+    private BigDecimal totalAvailableAmount;
+    private BigDecimal minimumInvestmentAmount;
+    private LocalDate startDate;
+
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty");
+        MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty");
+        MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
+        MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
+        MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
+        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
+        validateTenure(tenure);
+        MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
+        if (investmentVehicleType.equals(InvestmentVehicleType.COMMERCIAL)) {
+            MeedlValidator.validateFloatDataElement(rate, "Investment Vehicle Rate Cannot be empty or less than zero");
+        }else {
+            MeedlValidator.validateRate(rate,"Investment Vehicle Rate Cannot be empty");
+        }
+        MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
+        MeedlValidator.validateBigDecimalDataElement(size, "Investment vehicle size is required");
+        MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
+    }
+
+    public void setValues() {
+        setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
+        setStartDate(LocalDate.now());
+        setTotalAvailableAmount(size);
+    }
+
+    public void validateTenure(int tenure) throws MeedlException {
+        boolean patternMatches = Pattern.matches("^-?\\d{1,3}$", String.valueOf(tenure));
+        if (!patternMatches) {
+            throw new MeedlException("Tenure must not be greater than 3 digits");
+        }
+    }
+}

@@ -1,0 +1,151 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
+
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanOfferEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+
+
+public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity,String> {
+
+
+    @Query("""
+        SELECT lo.id as id,
+              l.userIdentity.firstName as firstName,
+              l.userIdentity.lastName as lastName,
+              lo.dateTimeOffered as dateTimeOffered,
+              l.loaneeLoanDetail.amountRequested as amountRequested,
+              lo.amountApproved as amountApproved,
+              lp.name as loanProductName,
+              lo.loaneeResponse as loaneeResponse
+
+        FROM LoanOfferEntity lo
+        JOIN lo.loanee l
+        JOIN LoanProductEntity lp on lo.loanProduct.id = lp.id
+        JOIN CohortEntity c ON l.cohortId = c.id
+        JOIN ProgramEntity p ON c.programId = p.id
+        JOIN p.organizationIdentity o
+        WHERE o.id = :organizationId
+            and not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+        order by lo.dateTimeOffered desc
+
+    """)
+    Page<LoanOfferProjection> findAllLoanOfferInOrganization(@Param("organizationId")String organization, Pageable pageRequest);
+
+    @Query("""
+    select lo.id as id,lo.loanOfferStatus as loanOfferStatus,lo.dateTimeOffered as dateTimeOffered,
+           l.userIdentity.firstName as firstName,l.userIdentity.lastName as lastName,
+           l.creditScore as creditScore,l.userIdentity.gender as gender,l.userIdentity.phoneNumber as phoneNumber,
+           l.userIdentity.dateOfBirth as dateOfBirth ,l.userIdentity.alternateContactAddress as alternateContactAddress,
+           l.userIdentity.alternateEmail as alternateEmail, l.userIdentity.alternatePhoneNumber as alternatePhoneNumber,
+           l.id as loaneeId,l.loaneeLoanDetail.initialDeposit as initialDeposit,l.userIdentity.maritalStatus as
+           maritalStatus,l.userIdentity.residentialAddress as residentialAddress, l.userIdentity.nationality as nationality,
+           l.userIdentity.stateOfOrigin as stateOfOrigin, l.userIdentity.stateOfResidence
+           as stateOfResidence,l.userIdentity.email as email,l.loaneeLoanDetail.amountRequested as amountRequested,
+           lo.amountApproved as amountApproved, c.startDate as startDate, c.tuitionAmount as tuitionAmount, c.name as
+           cohortName, l.userIdentity.image as loaneeImage,p.name as programName,lp.termsAndCondition as termsAndCondition,
+           n.id as nextOfKinId, n.firstName as nextOfKinFirstName, n.lastName as nextOfKinLastName, n.contactAddress as nextOfKinContactAddress,
+           n.email as nextOfKinEmail, n.phoneNumber as nextOfKinPhoneNumber, n.nextOfKinRelationship as nextOfKinRelationship,
+           lp.name as loanProductName,lo.loanRequest.id as loanRequestId,lp.id as loanProductId,lo.loaneeResponse as loaneeResponse,
+           lo.loanRequest.referredBy as loanRequestReferredBy
+    
+    from LoanOfferEntity lo
+    join LoaneeEntity l on lo.loanee.id = l.id
+    left join CohortEntity c on l.cohortId = c.id
+    left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+    left join NextOfKinEntity n on l.id = n.loaneeEntity.id
+    left join ProgramEntity p on c.programId = p.id
+    where lo.id = :id
+""")
+    LoanOfferProjection findLoanOfferById(@Param("id") String loanOfferId);
+
+
+    @Query("""
+       select lo.id as id,
+              l.userIdentity.firstName as firstName,
+              l.userIdentity.lastName as lastName,
+              lo.dateTimeOffered as dateTimeOffered,
+              l.loaneeLoanDetail.amountRequested as amountRequested,
+              lo.amountApproved as amountApproved,
+              lp.name as loanProductName,
+              lo.loaneeResponse as loaneeResponse
+       
+       from LoanOfferEntity lo
+       left join LoaneeEntity l on lo.loanee.id = l.id
+       left join LoanProductEntity lp on lo.loanProduct.id = lp.id
+       where not exists (
+                 select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+             )
+       order by lo.dateTimeOffered desc
+       """)
+    Page<LoanOfferProjection> findAllLoanOffer(Pageable pageRequest);
+
+
+    @Query("""
+    SELECT lo.id AS id,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           lo.dateTimeOffered AS dateTimeOffered,
+           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           lo.amountApproved AS amountApproved,
+           lp.name AS loanProductName,
+           lo.loaneeResponse as loaneeResponse
+
+               
+    FROM LoanOfferEntity lo 
+    JOIN lo.loanee l
+    JOIN l.userIdentity u
+    JOIN CohortEntity c ON c.id = l.cohortId
+    JOIN ProgramEntity p ON p.id = c.programId
+    JOIN lo.loanProduct lp
+    WHERE 
+        (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
+        AND c.programId = :programId
+        AND p.organizationIdentity.id = :organizationId
+        AND not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+    order by lo.dateTimeOffered desc
+    """)
+    Page<LoanOfferProjection> findAllLoanOfferByLoaneeNameInOrganizationAndProgram(
+            @Param("programId") String programId,
+            @Param("organizationId") String organizationId,
+            @Param("name") String name,
+            Pageable pageRequest
+    );
+
+    @Query("""
+    SELECT lo.id AS id,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           lo.dateTimeOffered AS dateTimeOffered,
+           l.loaneeLoanDetail.amountRequested AS amountRequested,
+           lo.amountApproved AS amountApproved,
+           lp.name AS loanProductName,
+           lo.loaneeResponse as loaneeResponse
+   
+    FROM LoanOfferEntity lo 
+    JOIN lo.loanee l
+    JOIN l.userIdentity u
+    JOIN CohortEntity c ON c.id = l.cohortId
+    JOIN ProgramEntity p ON p.id = c.programId
+    JOIN lo.loanProduct lp
+    WHERE 
+        c.programId = :programId
+        AND p.organizationIdentity.id = :organizationId
+        AND not exists (
+                      select 1 from LoanEntity loan where loan.loanOfferId = lo.id
+                  )
+    order by lo.dateTimeOffered desc
+    """)
+    Page<LoanOfferProjection> filterLoanOfferByProgramIdAndOrganization(@Param("programId") String programId,
+                                                                        @Param("organizationId") String organizationId,
+                                                                        Pageable pageRequest);
+}

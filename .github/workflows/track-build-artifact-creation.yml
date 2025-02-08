@@ -1,0 +1,84 @@
+name: Build Tracker and Security Scan
+
+on:
+  push:
+    branches:
+      - dev  # Adjust as needed
+      - trivy-cred-check
+  pull_request:
+    branches:
+      - dev  # Adjust as needed
+      - trivy-cred-check
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 1: Create Build Tracker Artifact
+      - name: Create Build Tracker Artifact
+        run: |
+          BUILD_TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
+
+          if [ ! -f ./build_tracker.json ]; then
+            echo '{"count": 1, "builds": [{"timestamp": "'$BUILD_TIMESTAMP'", "author": "'$AUTHOR'", "message": "'$COMMIT_MESSAGE'"}]}' > ./build_tracker.json
+          else
+            count=$(jq '.count' ./build_tracker.json)
+            builds=$(jq '.builds' ./build_tracker.json)
+            new_count=$((count + 1))
+            new_build="{\"timestamp\":\"$BUILD_TIMESTAMP\",\"author\":\"$AUTHOR\",\"message\":\"$COMMIT_MESSAGE\"}"
+
+            updated_builds=$(echo "$builds" | jq ". += [$new_build]")
+            echo "{\"count\": $new_count, \"builds\": $updated_builds}" > ./build_tracker.json
+          fi
+
+      # Step 2: Upload Build Tracker Artifact
+      - name: Upload Build Tracker Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-tracker
+          path: ./build_tracker.json
+
+      # Step 3: Install Trivy Using the Correct `.deb` File
+      - name: Install Trivy
+        run: |
+          # Update package list
+          sudo apt-get update
+          sudo apt-get install -y apt-transport-https curl
+
+          # Download the latest Trivy .deb package
+          curl -LO https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+
+          # Install Trivy
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+          sudo apt-get install -f  # Fix missing dependencies if any
+
+      # Step 4: Run Trivy File System Vulnerability Scan
+      - name: Run Trivy File System Vulnerability Scan
+        run: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 5: Run Trivy Config Scan (pom.xml, .properties, .env)
+      - name: Run Trivy Config Scan (pom.xml, .properties, .env)
+        run: |
+          # Scan configuration files like pom.xml, .env, etc.
+          trivy config --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 6: Run Trivy Dependency Vulnerability Scan
+      - name: Run Trivy Dependency Vulnerability Scan
+        run: |
+          # Scan dependencies based on pom.xml or similar manifest files
+          trivy repo --exit-code 1 --severity HIGH,CRITICAL . || true
+
+      # Step 7: Upload Trivy Scan Report
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-report
+          path: trivy-report.json

@@ -1,0 +1,65 @@
+package africa.nkwadoma.nkwadoma.domain.model.loan;
+
+import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+
+import java.math.*;
+import java.time.*;
+import java.util.*;
+
+@Slf4j
+@Getter
+@Setter
+@Builder
+@ToString
+@RequiredArgsConstructor
+@AllArgsConstructor
+public class Loan {
+    private String id;
+    private Loanee loanee;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private String loaneeId;
+    private String loanOfferId;
+    private String loanAccountId;
+    private LoanRequestStatus status;
+    private LocalDateTime startDate;
+    private LocalDate cohortStartDate;
+    private BigDecimal loanAmountRequested;
+    private LocalDateTime offerDate;
+    private LocalDateTime lastUpdatedDate;
+    private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
+    private LoanOffer loanOffer;
+    private LoanStatus loanStatus;
+    private BigDecimal initialDeposit;
+    private BigDecimal amountRequested;
+    private BigDecimal tuitionAmount;
+    private NextOfKin nextOfKin;
+    private UserIdentity userIdentity;
+    private String cohortName;
+    private String programName;
+    private String referredBy;
+    private String organizationId;
+    private int pageNumber;
+    private int pageSize;
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        loanee.getUserIdentity().validate();
+        MeedlValidator.validateUUID(loanAccountId, "Please provide a valid loan account identification.");
+        MeedlValidator.validateObjectInstance(startDate, LoanMessages.LOAN_START_DATE_MUST_NOT_BE_EMPTY.getMessage());
+    }
+
+    public Loan buildLoan(Loanee foundLoanee, String loanAccountId, String loanOfferId) {
+        return Loan.builder().loanee(foundLoanee).loanAccountId(loanAccountId).loanOfferId(loanOfferId).
+                startDate(LocalDateTime.now()).loanStatus(LoanStatus.PERFORMING).build();
+    }
+}

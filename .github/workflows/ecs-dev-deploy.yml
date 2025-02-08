@@ -1,0 +1,164 @@
+name: Deploy Learnspace Systest to AWS ECS
+
+on:
+  push:
+    branches:
+      - image-tag
+
+env:
+  ECR_REPOSITORY: learnspace-backend-systest
+  CLUSTER: learnspace-africa
+  ECS: learnspace-backend-systest
+  AWS_REGION: us-east-1
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Restore Maven Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/*.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Set environment variables
+        id: vars
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          PROJECT_NAME="Nkwadoma Backend"
+          DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          ALPHA="ALPHA"
+
+          # Escape special characters in commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B | tr -d '\n\r' | sed 's/"/\\"/g; s/'\''/\\'\''/g')
+
+          TAG="${PROJECT_NAME}-${DEFAULT_BRANCH}-${BRANCH_NAME}-${COMMIT_HASH}-${ALPHA}"
+
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=${COMMIT_AUTHOR}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE=${COMMIT_MESSAGE}" >> $GITHUB_ENV
+
+      - name: Debug Environment Variables
+        run: |
+          echo "TAG=${{ env.TAG }}"
+          echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
+          echo "COMMIT_AUTHOR=${{ env.COMMIT_AUTHOR }}"
+          echo "COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}"
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # - name: Build Docker image
+      #   run: docker build -t ${{ env.REPO_URL }}:latest .
+
+      # - name: Push Docker image to ECR
+      #   run: |
+      #     docker push ${{ env.REPO_URL }}:latest
+
+      - name: Retag and push as beta
+        if: success() # Ensure this step runs only if the previous steps succeeded
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: nkwadoma # Replace with your actual repository name
+          SOURCE_TAG: alpha
+          TARGET_TAG: beta
+        run: |
+          # Pull the existing alpha-tagged image
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG
+      
+          # Retag the image as beta
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+      
+          # Push the beta tag to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+      
+          echo "Image successfully retagged from $SOURCE_TAG to $TARGET_TAG and pushed to ECR."
+      
+      
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service --cluster ${{ env.CLUSTER }} --service ${{ env.ECS }} --region eu-west-1 --force-new-deployment
+
+  # send_notification:
+  #   name: Send Email Notification
+  #   needs: [build-and-deploy]
+  #   runs-on: ubuntu-latest
+  #   if: always()
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Send build success email notification
+  #       if: success()
+  #       env:
+  #         SMTP_SERVER: semicolon.africa
+  #         SMTP_PORT: 465
+  #         SMTP_USERNAME: builds@semicolon.africa
+  #         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  #       run: |
+  #         chmod +x .github/workflows/scripts/send_success_email.sh
+  #         .github/workflows/scripts/send_success_email.sh \
+  #           "$SMTP_SERVER" \
+  #           "$SMTP_PORT" \
+  #           "$SMTP_USERNAME" \
+  #           "$SMTP_PASSWORD" \
+  #           "${{ env.EMAILS }}" \
+  #           "${{ env.TAG }}" \
+  #           "${{ env.BRANCH_NAME }}" \
+  #           "${{ env.COMMIT_AUTHOR }}" \
+  #           "${{ env.COMMIT_MESSAGE }}"
+
+  #     - name: Send build failure email notification
+  #       if: failure()
+  #       env:
+  #         SMTP_SERVER: semicolon.africa
+  #         SMTP_PORT: 465
+  #         SMTP_USERNAME: builds@semicolon.africa
+  #         SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  #       run: |
+  #         chmod +x .github/workflows/scripts/send_failure_email.sh
+  #         .github/workflows/scripts/send_failure_email.sh \
+  #           "$SMTP_SERVER" \
+  #           "$SMTP_PORT" \
+  #           "$SMTP_USERNAME" \
+  #           "$SMTP_PASSWORD" \
+  #           "${{ env.EMAILS }}" \
+            # "${{ env.TAG }}" \
+            # "${{ env.BRANCH_NAME }}" \
+            # "${{ env.COMMIT_AUTHOR }}" \
+            # "${{ env.COMMIT_MESSAGE }}"

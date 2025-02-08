@@ -1,0 +1,30 @@
+package africa.nkwadoma.nkwadoma.application.ports.output.education;
+
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import org.springframework.data.domain.Page;
+
+import java.util.*;
+
+public interface CohortOutputPort {
+
+    Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException;
+
+    void deleteCohort(String id) throws MeedlException;
+    Page<Cohort> findAllCohortInAProgram(String id, int pageSize,int pageNumber) throws MeedlException;
+
+    Cohort findCohort(String cohortId) throws MeedlException;
+
+    Cohort save(Cohort cohort) throws MeedlException;
+
+    List<Cohort> findCohortByName(String name) throws MeedlException;
+
+    Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
+    List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException;
+
+    Cohort checkIfCohortExistWithName(String name) throws MeedlException;
+
+    List<Cohort> searchCohortInOrganization(String organizationId, String x) throws MeedlException;
+}
