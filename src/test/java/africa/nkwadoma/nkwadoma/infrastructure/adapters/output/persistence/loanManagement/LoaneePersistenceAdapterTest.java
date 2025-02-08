@@ -22,8 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -61,32 +60,28 @@ class LoaneePersistenceAdapterTest {
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private String userId;
     private String loaneeLoanDetailId;
-
-
-
+    private String secondLoaneeLoanDetailId;
+    private String otherUserId;
 
 
     @BeforeAll
     void setUpUserIdentity(){
         userIdentity = UserIdentity.builder().id(id).email("lekan@gmail.com").firstName("qudus").lastName("lekan")
                 .createdBy(id).role(IdentityRole.LOANEE).build();
-        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("leke").lastName("ayo")
-                .createdBy(secondId).role(IdentityRole.LOANEE).build();
         loaneeLoanDetail = LoaneeLoanDetail.builder()
                 .initialDeposit(BigDecimal.valueOf(200)).build();
-        secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
-                .initialDeposit(BigDecimal.valueOf(200)).build();
+
         try {
+            Optional<UserIdentity> userByEmail = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
+            if (userByEmail.isPresent()) {
+                identityManagerOutputPort.deleteUser(userByEmail.get());
+            }
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = identityOutputPort.save(userIdentity);
-            anotherUser = identityManagerOutputPort.createUser(anotherUser);
-            anotherUser = identityOutputPort.save(anotherUser);
             loaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loaneeLoanDetail);
-            secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
-
     }
 
 
@@ -97,11 +92,22 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
 
+        secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
+                .initialDeposit(BigDecimal.valueOf(200)).build();
+        anotherUser = UserIdentity.builder().email("lekan1@gmail.com").firstName("leke").lastName("ayo")
+                .createdBy(secondId).role(IdentityRole.LOANEE).build();
+        try {
+            Optional<UserIdentity> otherUser = identityManagerOutputPort.getUserByEmail(anotherUser.getEmail());
+            if (otherUser.isPresent()) {
+                identityManagerOutputPort.deleteUser(otherUser.get());
+            }
+        } catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
         anotherLoanee = new Loanee();
         anotherLoanee.setCohortId(id);
         anotherLoanee.setUserIdentity(anotherUser);
         anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
-
     }
 
     @Test
@@ -208,14 +214,22 @@ class LoaneePersistenceAdapterTest {
     void saveAnotherLoanee(){
         Loanee loanee = new Loanee();
         try{
+            secondLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(secondLoaneeLoanDetail);
+            secondLoaneeLoanDetailId = secondLoaneeLoanDetail.getId();
+            anotherUser = identityManagerOutputPort.createUser(anotherUser);
+            anotherUser = identityOutputPort.save(anotherUser);
+
+            anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
+            anotherLoanee.setUserIdentity(anotherUser);
             loanee = loaneeOutputPort.save(anotherLoanee);
             secondLoaneeId = loanee.getId();
+            otherUserId = anotherUser.getId();
             cohortId = loanee.getCohortId();
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-        assertEquals(loanee.getUserIdentity().getFirstName(),anotherLoanee.getUserIdentity().getFirstName());
-        assertEquals(loanee.getCohortId(),anotherLoanee.getCohortId());
+        assertEquals(loanee.getUserIdentity().getFirstName(), anotherLoanee.getUserIdentity().getFirstName());
+        assertEquals(loanee.getCohortId(), anotherLoanee.getCohortId());
     }
 
     @Order(3)
@@ -261,14 +275,19 @@ class LoaneePersistenceAdapterTest {
         assertEquals(2,loanees.size());
     }
 
-//    @AfterAll
+    @AfterAll
     void cleanUp() throws MeedlException {
-        identityManagerOutputPort.deleteUser(userIdentity);
         loaneeRepository.deleteById(loaneeId);
-        loaneeRepository.deleteById(secondLoaneeId);
-        identityOutputPort.deleteUserById(userIdentity.getId());
+        identityManagerOutputPort.deleteUser(userIdentity);
+        identityOutputPort.deleteUserById(userId);
         loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
-        identityOutputPort.deleteUserById(anotherUser.getId());
-        identityManagerOutputPort.deleteUser(anotherUser);
+
+        loaneeRepository.deleteById(secondLoaneeId);
+        loaneeLoanDetailsOutputPort.delete(secondLoaneeLoanDetailId);
+        Optional<UserIdentity> userByEmail = identityManagerOutputPort.getUserByEmail(anotherUser.getEmail());
+        if(userByEmail.isPresent()){
+            identityManagerOutputPort.deleteUser(userByEmail.get());
+        }
+        identityOutputPort.deleteUserById(otherUserId);
     }
 }
