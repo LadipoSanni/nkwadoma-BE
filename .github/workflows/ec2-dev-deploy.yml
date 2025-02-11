@@ -69,7 +69,7 @@ jobs:
                  -user=${{ secrets.DATABASE_USERNAME }} \
                  -password=${{ secrets.DATABASE_PASSWORD }} \
                  -locations=filesystem:./migrations \
-                 -verbose migrate
+                 migrate -X | tee logs/flyway-output.log
 
   deploy:
     runs-on: ubuntu-24.04
