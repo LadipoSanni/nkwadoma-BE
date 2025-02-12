@@ -172,20 +172,39 @@ jobs:
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
           ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
-          
+      
           echo "Starting profiling..."
-          
+      
+          # Capture Java process ID outside the SSH block
+          JAVA_PID="$(pgrep -f 'java')"
+          echo "Detected Java PID: $JAVA_PID"
+      
+          # Start monitoring system resource usage
+          echo "Collecting Docker stats..."
           docker stats --no-stream > docker_stats.txt
+      
+          # Check CPU and Memory Usage for Key Processes
+          echo "Collecting CPU and memory usage..."
           pidstat -rud -h 5 10 > pidstat_output.txt
-          jcmd \$(pgrep -f "java") JFR.start duration=60s filename=profiling.jfr
+      
+          # Capture JVM profiling data
+          echo "Capturing JVM Flight Recorder (JFR) data..."
+          jcmd $JAVA_PID JFR.start duration=60s filename=profiling.jfr
+      
+          # Wait for profiling to complete
           sleep 65
-          jcmd \$(pgrep -f "java") JFR.stop
-
-          mv docker_stats.txt ~/docker_stats.txt
-          mv pidstat_output.txt ~/pidstat_output.txt
-          mv profiling.jfr ~/profiling.jfr
-          
+      
+          # Stop JVM Flight Recorder
+          jcmd $JAVA_PID JFR.stop
+      
+          # Transfer files to local runner
+          echo "Uploading profiling results..."
+          cp docker_stats.txt ~/docker_stats.txt
+          cp pidstat_output.txt ~/pidstat_output.txt
+          cp profiling.jfr ~/profiling.jfr
+      
           EOF
+
 
       - name: Upload Profiling Results
         uses: actions/upload-artifact@v4
