@@ -171,7 +171,7 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
-          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << "EOF"
       
           echo "Starting profiling..."
       
@@ -183,12 +183,12 @@ jobs:
           fi
       
           # Capture Java process ID
-          JAVA_PID=\$(pgrep -f 'java' | head -n 1)
-          if [ -z "\$JAVA_PID" ]; then
+          JAVA_PID=$(pgrep -f 'java' | head -n 1)
+          if [ -z "$JAVA_PID" ]; then
             echo "No running Java process found!"
             exit 1
           fi
-          echo "Detected Java PID: \$JAVA_PID"
+          echo "Detected Java PID: $JAVA_PID"
       
           # Start monitoring system resource usage
           echo "Collecting Docker stats..."
@@ -200,13 +200,13 @@ jobs:
       
           # Capture JVM profiling data
           echo "Capturing JVM Flight Recorder (JFR) data..."
-          jcmd \$JAVA_PID JFR.start duration=60s filename=profiling.jfr
+          jcmd $JAVA_PID JFR.start duration=60s filename=profiling.jfr
       
           # Wait for profiling to complete
           sleep 65
       
           # Stop JVM Flight Recorder
-          jcmd \$JAVA_PID JFR.stop
+          jcmd $JAVA_PID JFR.stop
       
           # Ensure files exist before copying
           if [ ! -f profiling.jfr ]; then
@@ -221,6 +221,7 @@ jobs:
           mv profiling.jfr ~/profiling.jfr
       
           EOF
+
 
 # send_notification:
   #   name: Send Email Notification
