@@ -203,7 +203,7 @@ jobs:
       
           # Capture JVM profiling data using jcmd
           echo "Capturing JVM Flight Recorder (JFR) data..."
-          sudo -u \$(ps -o user= -p \$JAVA_PID) jcmd \$JAVA_PID JFR.start duration=60s filename=profiling.jfr
+          sudo -u \$(ps -o user= -p \$JAVA_PID) jcmd \$JAVA_PID JFR.start duration=60s name=profiling.jfr
           sleep 65
           sudo -u \$(ps -o user= -p \$JAVA_PID) jcmd \$JAVA_PID JFR.stop
       
