@@ -175,9 +175,20 @@ jobs:
       
           echo "Starting profiling..."
       
-          # Capture Java process ID outside the SSH block
-          JAVA_PID="$(pgrep -f 'java')"
-          echo "Detected Java PID: $JAVA_PID"
+          # Ensure Java and jcmd are available
+          if ! command -v jcmd &> /dev/null; then
+            echo "jcmd not found, installing JDK 17..."
+            sudo apt update && sudo apt install -y openjdk-17-jdk
+            export PATH=$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin
+          fi
+      
+          # Capture Java process ID
+          JAVA_PID=\$(pgrep -f 'java' | head -n 1)
+          if [ -z "\$JAVA_PID" ]; then
+            echo "No running Java process found!"
+            exit 1
+          fi
+          echo "Detected Java PID: \$JAVA_PID"
       
           # Start monitoring system resource usage
           echo "Collecting Docker stats..."
@@ -189,31 +200,28 @@ jobs:
       
           # Capture JVM profiling data
           echo "Capturing JVM Flight Recorder (JFR) data..."
-          jcmd $JAVA_PID JFR.start duration=60s filename=profiling.jfr
+          jcmd \$JAVA_PID JFR.start duration=60s filename=profiling.jfr
       
           # Wait for profiling to complete
           sleep 65
       
           # Stop JVM Flight Recorder
-          jcmd $JAVA_PID JFR.stop
+          jcmd \$JAVA_PID JFR.stop
+      
+          # Ensure files exist before copying
+          if [ ! -f profiling.jfr ]; then
+            echo "Error: profiling.jfr was not created!"
+            exit 1
+          fi
       
           # Transfer files to local runner
           echo "Uploading profiling results..."
-          cp docker_stats.txt ~/docker_stats.txt
-          cp pidstat_output.txt ~/pidstat_output.txt
-          cp profiling.jfr ~/profiling.jfr
+          mv docker_stats.txt ~/docker_stats.txt
+          mv pidstat_output.txt ~/pidstat_output.txt
+          mv profiling.jfr ~/profiling.jfr
       
           EOF
 
-
-      - name: Upload Profiling Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: profiling-results
-          path: |
-            ~/docker_stats.txt
-            ~/pidstat_output.txt
-            ~/profiling.jfr
 # send_notification:
   #   name: Send Email Notification
   #   needs: [build-and-push, deploy]
