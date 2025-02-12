@@ -182,13 +182,16 @@ jobs:
             export PATH=$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin
           fi
       
+          # Enable JVM attach permissions
+          echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+      
           # Capture Java process ID
-          JAVA_PID=$(pgrep -f 'java' | head -n 1)
-          if [ -z "$JAVA_PID" ]; then
+          JAVA_PID=\$(pgrep -f 'java' | head -n 1)
+          if [ -z "\$JAVA_PID" ]; then
             echo "No running Java process found!"
             exit 1
           fi
-          echo "Detected Java PID: $JAVA_PID"
+          echo "Detected Java PID: \$JAVA_PID"
       
           # Start monitoring system resource usage
           echo "Collecting Docker stats..."
@@ -198,19 +201,31 @@ jobs:
           echo "Collecting CPU and memory usage..."
           pidstat -rud -h 5 10 > pidstat_output.txt
       
-          # Capture JVM profiling data
+          # Capture JVM profiling data using jcmd
           echo "Capturing JVM Flight Recorder (JFR) data..."
-          jcmd $JAVA_PID JFR.start duration=60s filename=profiling.jfr
-      
-          # Wait for profiling to complete
+          sudo -u \$(ps -o user= -p \$JAVA_PID) jcmd \$JAVA_PID JFR.start duration=60s filename=profiling.jfr
           sleep 65
+          sudo -u \$(ps -o user= -p \$JAVA_PID) jcmd \$JAVA_PID JFR.stop
       
-          # Stop JVM Flight Recorder
-          jcmd $JAVA_PID JFR.stop
+          # Verify if profiling.jfr was created
+          if [ ! -f profiling.jfr ]; then
+            echo "Error: profiling.jfr was not created!"
+            echo "Trying async-profiler as fallback..."
+      
+            # Install async-profiler if not already installed
+            if [ ! -d "async-profiler" ]; then
+              wget https://github.com/jvm-profiling-tools/async-profiler/releases/download/v2.9/async-profiler-2.9-linux-x64.tar.gz
+              tar -xzf async-profiler-2.9-linux-x64.tar.gz
+              mv async-profiler-2.9-linux-x64 async-profiler
+            fi
+      
+            # Run async-profiler as fallback
+            ./async-profiler/profiler.sh -d 60 -f profiling.jfr \$JAVA_PID
+          fi
       
           # Ensure files exist before copying
           if [ ! -f profiling.jfr ]; then
-            echo "Error: profiling.jfr was not created!"
+            echo "Final error: profiling.jfr was not created even after fallback!"
             exit 1
           fi
       
@@ -221,6 +236,7 @@ jobs:
           mv profiling.jfr ~/profiling.jfr
       
           EOF
+
 
 
 # send_notification:
