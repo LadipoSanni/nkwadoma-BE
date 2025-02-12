@@ -171,7 +171,7 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > QA-KP.pem
           chmod 600 QA-KP.pem
-          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << "EOF"
+          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << EOF
       
           echo "Starting profiling..."
       
@@ -179,7 +179,7 @@ jobs:
           if ! command -v jcmd &> /dev/null; then
             echo "jcmd not found, installing JDK 17..."
             sudo apt update && sudo apt install -y openjdk-17-jdk
-            export PATH=$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin
+            export PATH=\$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin
           fi
       
           # Enable JVM attach permissions
@@ -210,22 +210,6 @@ jobs:
           # Verify if profiling.jfr was created
           if [ ! -f profiling.jfr ]; then
             echo "Error: profiling.jfr was not created!"
-            echo "Trying async-profiler as fallback..."
-      
-            # Install async-profiler if not already installed
-            if [ ! -d "async-profiler" ]; then
-              wget https://github.com/jvm-profiling-tools/async-profiler/releases/download/v2.9/async-profiler-2.9-linux-x64.tar.gz
-              tar -xzf async-profiler-2.9-linux-x64.tar.gz
-              mv async-profiler-2.9-linux-x64 async-profiler
-            fi
-      
-            # Run async-profiler as fallback
-            ./async-profiler/profiler.sh -d 60 -f profiling.jfr \$JAVA_PID
-          fi
-      
-          # Ensure files exist before copying
-          if [ ! -f profiling.jfr ]; then
-            echo "Final error: profiling.jfr was not created even after fallback!"
             exit 1
           fi
       
@@ -236,6 +220,7 @@ jobs:
           mv profiling.jfr ~/profiling.jfr
       
           EOF
+
 
 
 
