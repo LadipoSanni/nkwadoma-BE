@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -32,6 +33,7 @@ class InvestmentVehicleAdapterTest {
     private String investmentVehicleId;
     private int pageSize = 1;
     private int pageNumber = 0;
+    private String draftInvestmentVehicleId;
 
 
 
@@ -172,7 +174,7 @@ class InvestmentVehicleAdapterTest {
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicle(
                 pageSize, pageNumber);
         List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-        assertEquals(1, investmentVehiclesList.size());
+            assertEquals(1, investmentVehiclesList.size());
     }
 
     @Order(4)
@@ -188,9 +190,29 @@ class InvestmentVehicleAdapterTest {
             assertEquals(1,investmentVehicles.size());
     }
 
+
+    @Order(5)
+    @Test
+    void investmentVehicleCanBeSavedToDraft(){
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("Save To Draft");
+        investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
+        investmentVehicle.setSize(null);
+        investmentVehicle.setRate(null);
+        try{
+            investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
+            draftInvestmentVehicleId = investmentVehicle.getId();
+        }catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicle);
+        assertEquals(InvestmentVehicleStatus.DRAFT, investmentVehicle.getInvestmentVehicleStatus());
+    }
+
+
     @AfterAll
     void cleanUp() throws MeedlException {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(draftInvestmentVehicleId);
     }
 
 }
