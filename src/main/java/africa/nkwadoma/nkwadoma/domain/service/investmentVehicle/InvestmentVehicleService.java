@@ -69,9 +69,7 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus())&&
         investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.DRAFT)){
             investmentVehicle.validate();
-
         }
-
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
         investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
