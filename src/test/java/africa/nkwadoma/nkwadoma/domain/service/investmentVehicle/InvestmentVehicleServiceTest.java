@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
@@ -12,11 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus.DEPLOYING;
-import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.ENDOWMENT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -84,6 +81,18 @@ class InvestmentVehicleServiceTest {
         assertEquals(1, investmentVehiclesList.size());
     }
 
+    @Order(4)
+    @Test
+    void publishInvestmentVehicle() {
+        InvestmentVehicle investmentVehicle = new InvestmentVehicle();
+        try {
+             investmentVehicle = investmentVehicleUseCase.publishInvestmentVehicle(investmentId);
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(InvestmentVehicleStatus.PUBLISHED,investmentVehicle.getInvestmentVehicleStatus());
+        assertNotNull(investmentVehicle.getInvestmentVehicleLink());
+    }
 
     @AfterAll
     void cleanUp() {

@@ -3,17 +3,19 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
-import org.springframework.util.ObjectUtils;
+
 
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 
 @RequiredArgsConstructor
 
@@ -58,6 +60,26 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         MeedlValidator.validateDataElement(investmentVehicleName,
                 InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
         return investmentVehicleOutputPort.searchInvestmentVehicle(investmentVehicleName);
+    }
+
+    @Override
+    public InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId,"Invalid investment vehicle Id");
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus())&&
+        investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.DRAFT)){
+            investmentVehicle.validate();
+
+        }
+
+        investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
+        String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
+        investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
+        return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    private String generateInvestmentVehicleLink(String id) {
+        return INVESTMENT_VEHICLE_URL+id;
     }
 
 

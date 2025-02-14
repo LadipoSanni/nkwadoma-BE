@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -50,5 +51,8 @@ public class InvestmentVehicleEntity {
     private String fundManager;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
+    private InvestmentVehicleStatus investmentVehicleStatus;
+    private String investmentVehicleLink;
+
 
 }

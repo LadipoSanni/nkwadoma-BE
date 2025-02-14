@@ -100,4 +100,19 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PostMapping("investment/publish/{investmentVehicleId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> publishInvestmentVehicle(@PathVariable String investmentVehicleId) throws MeedlException {
+        InvestmentVehicle investmentVehicle =
+                investmentVehicleUseCase.publishInvestmentVehicle(investmentVehicleId);
+        InvestmentVehicleResponse investmentVehicleResponse =
+                investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
+                .data(investmentVehicleResponse)
+                .message(INVESTMENT_VEHICLE_PUBLISHED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }
