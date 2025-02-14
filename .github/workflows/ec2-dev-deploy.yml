@@ -156,45 +156,75 @@ jobs:
       
           EOF
 
-  profile-application:
-    runs-on: ubuntu-24.04
-    needs: deploy
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # profile-application:
+  #   runs-on: ubuntu-24.04
+  #   needs: deploy
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: SSH to EC2 and Profile Application
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          echo "$EC2_SSH_KEY" > QA-KP.pem
-          chmod 600 QA-KP.pem
-          ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
-          
-          echo "Starting profiling..."
-          
-          docker stats --no-stream > docker_stats.txt
-          pidstat -rud -h 5 10 > pidstat_output.txt
-          jcmd \$(pgrep -f "java") JFR.start duration=60s filename=profiling.jfr
-          sleep 65
-          jcmd \$(pgrep -f "java") JFR.stop
+  #     - name: SSH to EC2 and Profile Application
+  #       env:
+  #         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+  #         EC2_USER: ${{ secrets.EC2_USER }}
+  #         EC2_HOST: ${{ secrets.EC2_HOST }}
+  #       run: |
+  #         echo "$EC2_SSH_KEY" > QA-KP.pem
+  #         chmod 600 QA-KP.pem
+  #         ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << EOF
+      
+  #         echo "Starting profiling..."
+      
+  #         # Ensure Java and jcmd are available
+  #         if ! command -v jcmd &> /dev/null; then
+  #           echo "jcmd not found, installing JDK 17..."
+  #           sudo apt update && sudo apt install -y openjdk-17-jdk
+  #           export PATH=\$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin
+  #         fi
+      
+  #         # Enable JVM attach permissions
+  #         echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+      
+  #         # Capture Java process ID
+  #         JAVA_PID=\$(pgrep -f 'java' | head -n 1)
+  #         if [ -z "\$JAVA_PID" ]; then
+  #           echo "No running Java process found!"
+  #           exit 1
+  #         fi
+  #         echo "Detected Java PID: \$JAVA_PID"
+      
+  #         # Start monitoring system resource usage
+  #         echo "Collecting Docker stats..."
+  #         docker stats --no-stream > docker_stats.txt
+      
+  #         # Check CPU and Memory Usage for Key Processes
+  #         echo "Collecting CPU and memory usage..."
+  #         pidstat -rud -h 5 10 > pidstat_output.txt
+      
+  #         # Capture JVM profiling data using jcmd
+  #         echo "Capturing JVM Flight Recorder (JFR) data..."
+  #         sudo -u "$(ps -o user= -p $JAVA_PID | awk '{print $1}')" jcmd $JAVA_PID JFR.start name=profile duration=60s filename=profiling.jfr
+  #         sleep 65
+  #         sudo -u "$(ps -o user= -p $JAVA_PID | awk '{print $1}')" jcmd $JAVA_PID JFR.stop name=profile
 
-          mv docker_stats.txt ~/docker_stats.txt
-          mv pidstat_output.txt ~/pidstat_output.txt
-          mv profiling.jfr ~/profiling.jfr
-          
-          EOF
+      
+  #         # Verify if profiling.jfr was created
+  #         if [ ! -f profiling.jfr ]; then
+  #           echo "Error: profiling.jfr was not created!"
+  #           exit 1
+  #         fi
+      
+  #         # Transfer files to local runner
+  #         echo "Uploading profiling results..."
+  #         mv docker_stats.txt ~/docker_stats.txt
+  #         mv pidstat_output.txt ~/pidstat_output.txt
+  #         mv profiling.jfr ~/profiling.jfr
+      
+  #         EOF
 
-      - name: Upload Profiling Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: profiling-results
-          path: |
-            ~/docker_stats.txt
-            ~/pidstat_output.txt
-            ~/profiling.jfr
+
+
+
 # send_notification:
   #   name: Send Email Notification
   #   needs: [build-and-push, deploy]
