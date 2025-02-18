@@ -7,12 +7,12 @@ env:
   SERVICE: meedl-prod
   APP: meedl-prod
 
-# on:
-#   release:
-#     types: [published]
 on:
-  push:
-    branches: ['main']
+  release:
+    types: [published]
+# on:
+#   push:
+#     branches: ['main']
       
 jobs:
   build-and-deploy:
@@ -58,15 +58,15 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ env.APP }}:$GITHUB_SHA .
 
-      - name: Tag Docker image with "beta"
+      - name: Tag Docker image with "alpha"
         run: |
-         DOCKER_TAG=${{ env.REPO_URL }}:beta
+         DOCKER_TAG=${{ env.REPO_URL }}:alpha
          docker tag ${{ env.APP }}:$GITHUB_SHA $DOCKER_TAG
          docker tag ${{ env.APP }}:$GITHUB_SHA ${{ env.REPO_URL }}:$GITHUB_SHA
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ env.REPO_URL }}:beta
+          docker push ${{ env.REPO_URL }}:alpha
           docker push ${{ env.REPO_URL }}:$GITHUB_SHA
 
 
