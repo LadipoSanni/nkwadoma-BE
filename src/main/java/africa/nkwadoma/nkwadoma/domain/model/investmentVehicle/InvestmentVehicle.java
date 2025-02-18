@@ -38,6 +38,7 @@ public class InvestmentVehicle {
     private BigDecimal totalAvailableAmount;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
+    private InvestmentVehicleStatus investmentVehicleStatus;
 
 
     public void validate() throws MeedlException {

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -11,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.InvestmentVehicleEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 
 
 @Slf4j
@@ -31,9 +34,17 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle, INVESTMENT_VEHICLE_CANNOT_BE_NULL.getMessage());
+        if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
+                investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
+            return saveAndGetInvestmentVehicle(investmentVehicle);
+        }
         investmentVehicle.validate();
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getSize());
         log.info("saving vehicle size as available amount {}", investmentVehicle.getTotalAvailableAmount());
+        return saveAndGetInvestmentVehicle(investmentVehicle);
+    }
+
+    private InvestmentVehicle saveAndGetInvestmentVehicle(InvestmentVehicle investmentVehicle) {
         InvestmentVehicleEntity investmentEntity =
                 investmentVehicleMapper.toInvestmentVehicleEntity(investmentVehicle);
         investmentEntity = investmentVehicleRepository.save(investmentEntity);
@@ -49,10 +60,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public InvestmentVehicle findByName(String name) throws MeedlException {
+    public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {
         MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
         InvestmentVehicleEntity investmentVehicleEntity =
-                investmentVehicleRepository.findByName(name);
+                investmentVehicleRepository.findByNameAndStatusNotDraft(name,status);
         return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
     }
 

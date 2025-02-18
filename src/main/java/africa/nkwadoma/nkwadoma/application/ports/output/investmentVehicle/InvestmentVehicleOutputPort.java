@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
@@ -15,7 +16,7 @@ public interface InvestmentVehicleOutputPort {
 
     Page<InvestmentVehicle> findAllInvestmentVehicle(int pageSize, int pageNumber);
 
-    InvestmentVehicle findByName(String name) throws MeedlException;
+    InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException;
 
     List<InvestmentVehicle>  searchInvestmentVehicle(String  name) throws MeedlException;
 }
