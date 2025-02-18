@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,7 +34,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
@@ -41,6 +42,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@EnableAsync
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
     private final CohortOutputPort cohortOutputPort;
@@ -246,20 +248,35 @@ public class CohortService implements CohortUseCase {
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
-            return LOANEE_HAS_BEEN_REFERED ;
+            return LOANEE_HAS_BEEN_REFERED;
         }
+        referCohort(cohortLoanees);
+        notifyLoanReferralActors(cohortLoanees);
+        return COHORT_INVITED;
+    }
 
-        for (Loanee loanee : cohortLoanees) {
+    @Async
+    protected void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException {
+        loanees.forEach(loanee -> {
+                try {
+                    loaneeUseCase.notifyLoanReferralActors(loanee);
+                } catch (MeedlException e) {
+                    log.warn("Error sending actor email on loan referral {}", e.getMessage());
+                }
+            });
+    }
+    public void referCohort(List<Loanee> cohortLoanees) {
+        cohortLoanees.forEach(loanee -> {
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
-                log.error("Failed to invite trainee: {}", loanee.getId(), e);
+                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
             }
-        }
-        return COHORT_INVITED;
+        });
     }
+
     private void inviteTrainee (Loanee loanee) throws MeedlException {
-        loaneeUseCase.referLoanee(loanee.getId());
+        loaneeUseCase.referLoanee(loanee);
     }
 
 }

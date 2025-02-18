@@ -266,7 +266,7 @@ class LoaneeServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
-            LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee.getId());
+            LoanReferral loanReferral = loaneeService.referLoanee(firstLoanee);
             assertEquals(loanReferral.getLoanee().getUserIdentity().getFirstName()
                     , firstLoanee.getUserIdentity().getFirstName());
         } catch (MeedlException exception) {
@@ -285,7 +285,7 @@ class LoaneeServiceTest {
         }catch (MeedlException exception){
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertThrows(MeedlException.class, () -> loaneeService.referLoanee(firstLoanee.getId()));
+        assertThrows(MeedlException.class, () -> loaneeService.referLoanee(firstLoanee));
     }
 
     @Test

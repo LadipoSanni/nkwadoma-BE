@@ -35,6 +35,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -167,36 +168,38 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public LoanReferral referLoanee(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+    public LoanReferral referLoanee(Loanee loanee) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(loanee.getId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
+        updateLoaneeReferralDetail(loanee);
+        LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
-        List<LoaneeLoanBreakdown> loanBreakdowns =
-                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loaneeId);
-        loanee = getLoaneeFromCohort(cohort, loaneeId);
-        loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
-        loanee.setReferralDateTime(LocalDateTime.now());
-        OrganizationEmployeeIdentity organizationEmployeeIdentity = getOrganizationEmployeeIdentity(loanee);
-        notifyAllPortfolioManager();
-        loaneeOutputPort.save(loanee);
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
-        LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
-        Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationEmployeeIdentity);
+        OrganizationIdentity organizationIdentity = getLoaneeOrganization(loanee);
+        Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationIdentity);
         log.info("Loan metrics saved: {}", loanMetrics);
-        refer(loanee,loanReferral.getId());
+        List<LoaneeLoanBreakdown> loanBreakdowns =
+                loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanee.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
         return  loanReferral;
     }
 
-    private Optional<LoanMetrics> updateLoanMetrics(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
+    private void updateLoaneeReferralDetail(Loanee loanee) throws MeedlException {
+        loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
+        loanee.setReferralDateTime(LocalDateTime.now());
+        loaneeOutputPort.save(loanee);
+    }
+
+    private Optional<LoanMetrics> updateLoanMetrics(OrganizationIdentity organizationIdentity) throws MeedlException {
         Optional<LoanMetrics> loanMetrics =
-                loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization());
+                loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
         if (loanMetrics.isEmpty()) {
             throw new LoanException("No loan metrics found for organization");
         }
-        loanMetrics.get().setLoanReferralCount(
+        LoanMetrics loanMetric = loanMetrics.get();
+        loanMetric.setLoanReferralCount(
                 loanMetrics.get().getLoanReferralCount() + 1
         );
         loanMetricsOutputPort.save(loanMetrics.get());
@@ -204,17 +207,29 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     private void checkIfLoaneeHasBeenReferredInTheSameCohort(Loanee loanee) throws MeedlException {
+        checkLoaneeStatus(loanee);
         LoanReferral loanReferral =
                 loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(),loanee.getCohortId());
         if (ObjectUtils.isNotEmpty(loanReferral)) {
             throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
         }
     }
-
+    @Override
+    public void notifyLoanReferralActors(Loanee loanee) throws MeedlException {
+        refer(loanee);
+        notifyAllPortfolioManager();
+    }
     private void notifyAllPortfolioManager() throws MeedlException {
         for (UserIdentity userIdentity : identityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             notifyPortfolioManager(userIdentity);
         }
+    }
+    private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
+        sendLoaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
+    }
+
+    private void refer(Loanee loanee) throws MeedlException {
+        sendLoaneeEmailUsecase.referLoaneeEmail(loanee);
     }
 
     @Override
@@ -223,37 +238,26 @@ public class LoaneeService implements LoaneeUseCase {
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
 
-    private Loanee getLoaneeFromCohort(Cohort cohort, String loaneeId) throws MeedlException {
-        Loanee loanee;
-        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
-        loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
-                .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
+    private void checkLoaneeStatus(Loanee loanee) throws MeedlException {
+//        Loanee loanee;
+//        List<Loanee> loanees = loaneeOutputPort.findAllLoaneesByCohortId(cohort.getId());
+//        loanee = loanees.stream().filter(eachLoanee -> eachLoanee.getId().equals(loaneeId)).findFirst()
+//                .orElseThrow(()-> new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage()));
         if (loanee.getLoaneeStatus().equals(LoaneeStatus.REFERRED)){
             throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED.getMessage());
         }else if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ADDED)){
             throw new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
         }
-        return loanee;
     }
 
-    private OrganizationEmployeeIdentity getOrganizationEmployeeIdentity(Loanee loanee) throws MeedlException {
+    private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         loanee.setReferredBy(organizationIdentity.getName());
-        return organizationEmployeeIdentity;
+        return organizationIdentity;
     }
-
-    private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
-        sendLoaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
-    }
-
-
-    private void refer(Loanee loanee,String loanReferralId) throws MeedlException {
-        sendLoaneeEmailUsecase.referLoaneeEmail(loanee,loanReferralId);
-    }
-
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
         if (ObjectUtils.isNotEmpty(existingLoanee)) {
