@@ -215,9 +215,16 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
     @Override
-    public void notifyLoanReferralActors(Loanee loanee) throws MeedlException {
-        refer(loanee);
-        notifyAllPortfolioManager();
+    @Async
+    public void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException {
+        loanees.forEach(loanee -> {
+            try {
+                refer(loanee);
+                notifyAllPortfolioManager();
+            } catch (MeedlException e) {
+                log.warn("Error sending actor email on loan referral {}", e.getMessage());
+            }
+        });
     }
     private void notifyAllPortfolioManager() throws MeedlException {
         for (UserIdentity userIdentity : identityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {

@@ -243,36 +243,30 @@ public class CohortService implements CohortUseCase {
         Cohort foundCohort = viewCohortDetails(userId,cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
         if (cohortLoanees == null || cohortLoanees.isEmpty()){
-            log.info("No loanee in the cohort is assigned to be referred");
-            throw new MeedlException("No loanee in the cohort is assigned to be referred");
+            log.info("Loanee(s) selected is/are not referable.");
+            throw new MeedlException("Loanee(s) selected is/are not referable.");
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
-        notifyLoanReferralActors(cohortLoanees);
+        log.info("Number of referable loanees :{} ", cohortLoanees.size());
+        loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
         return COHORT_INVITED;
     }
 
-    @Async
-    protected void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException {
-        loanees.forEach(loanee -> {
-                try {
-                    loaneeUseCase.notifyLoanReferralActors(loanee);
-                } catch (MeedlException e) {
-                    log.warn("Error sending actor email on loan referral {}", e.getMessage());
-                }
-            });
-    }
     public void referCohort(List<Loanee> cohortLoanees) {
-        cohortLoanees.forEach(loanee -> {
+        Iterator<Loanee> iterator = cohortLoanees.iterator();
+        while (iterator.hasNext()) {
+            Loanee loanee = iterator.next();
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
                 log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                iterator.remove();
             }
-        });
+        }
     }
 
     private void inviteTrainee (Loanee loanee) throws MeedlException {
