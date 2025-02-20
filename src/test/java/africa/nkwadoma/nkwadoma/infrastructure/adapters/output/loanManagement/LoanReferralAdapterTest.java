@@ -172,7 +172,7 @@ class LoanReferralAdapterTest {
 
             loanMetricsUseCase.createLoanMetrics(organizationId);
 
-            loanReferral = loaneeUseCase.referLoanee(loaneeId);
+            loanReferral = loaneeUseCase.referLoanee(loanee);
             assertNotNull(loanReferral);
             log.info("Loan referral ====> {}", loanReferral);
             loanReferralId = loanReferral.getId();
