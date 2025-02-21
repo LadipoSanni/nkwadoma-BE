@@ -92,20 +92,6 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PostMapping("referLoanee/{loaneeId}")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> referLoanee(@PathVariable String loaneeId) throws MeedlException {
-        LoanReferral loanReferral = loaneeUseCase.referLoanee(loaneeId);
-        LoaneeReferralResponse loaneeReferralResponse =
-                loaneeRestMapper.toLoaneeReferralResponse(loanReferral);
-        ApiResponse<LoaneeReferralResponse> apiResponse = ApiResponse.<LoaneeReferralResponse>builder()
-                .data(loaneeReferralResponse)
-                .message(LOANEE_HAS_BEEN_REFERED)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
-    }
-
     @GetMapping("cohort/searchForLoanee")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,

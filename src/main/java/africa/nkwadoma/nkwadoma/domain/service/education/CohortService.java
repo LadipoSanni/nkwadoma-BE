@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,7 +34,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
@@ -41,6 +42,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@EnableAsync
 @RequiredArgsConstructor
 public class CohortService implements CohortUseCase {
     private final CohortOutputPort cohortOutputPort;
@@ -241,25 +243,34 @@ public class CohortService implements CohortUseCase {
         Cohort foundCohort = viewCohortDetails(userId,cohortId);
         List<Loanee> cohortLoanees = loaneeOutputPort.findSelectedLoaneesInCohort(foundCohort.getId(), loaneeIds);
         if (cohortLoanees == null || cohortLoanees.isEmpty()){
-            log.info("No loanee in the cohort is assigned to be referred");
-            throw new MeedlException("No loanee in the cohort is assigned to be referred");
+            log.info("Loanee(s) selected is/are not referable.");
+            throw new MeedlException("Loanee(s) selected is/are not referable.");
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
-            return LOANEE_HAS_BEEN_REFERED ;
+            return LOANEE_HAS_BEEN_REFERED;
         }
+        referCohort(cohortLoanees);
+        log.info("Number of referable loanees :{} ", cohortLoanees.size());
+        loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
+        return COHORT_INVITED;
+    }
 
-        for (Loanee loanee : cohortLoanees) {
+    public void referCohort(List<Loanee> cohortLoanees) {
+        Iterator<Loanee> iterator = cohortLoanees.iterator();
+        while (iterator.hasNext()) {
+            Loanee loanee = iterator.next();
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
-                log.error("Failed to invite trainee: {}", loanee.getId(), e);
+                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                iterator.remove();
             }
         }
-        return COHORT_INVITED;
     }
+
     private void inviteTrainee (Loanee loanee) throws MeedlException {
-        loaneeUseCase.referLoanee(loanee.getId());
+        loaneeUseCase.referLoanee(loanee);
     }
 
 }

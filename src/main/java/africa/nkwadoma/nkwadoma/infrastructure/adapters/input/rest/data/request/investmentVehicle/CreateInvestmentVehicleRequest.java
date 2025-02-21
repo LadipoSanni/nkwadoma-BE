@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import jakarta.validation.constraints.Max;
@@ -34,4 +35,5 @@ public class CreateInvestmentVehicleRequest {
     @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.SPONSOR_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
     private String sponsors;
     private BigDecimal minimumInvestmentAmount;
+    private InvestmentVehicleStatus investmentVehicleStatus;
 }

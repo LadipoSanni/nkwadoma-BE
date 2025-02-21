@@ -15,6 +15,7 @@ import org.springframework.data.domain.*;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 
 @RequiredArgsConstructor
@@ -26,6 +27,10 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     @Override
     public InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
+        if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
+                investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
+             return investmentVehicleOutputPort.save(investmentVehicle);
+        }
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
         investmentVehicle.setValues();
@@ -33,7 +38,7 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     }
 
     private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
-        InvestmentVehicle existingVehicle = investmentVehicleOutputPort.findByName(investmentVehicle.getName());
+        InvestmentVehicle existingVehicle = investmentVehicleOutputPort.findByNameExcludingDraftStatus(investmentVehicle.getName(),DRAFT);
         if (!ObjectUtils.isEmpty(existingVehicle)) {
             throw new InvestmentException(INVESTMENT_VEHICLE_NAME_EXIST.getMessage());
         }

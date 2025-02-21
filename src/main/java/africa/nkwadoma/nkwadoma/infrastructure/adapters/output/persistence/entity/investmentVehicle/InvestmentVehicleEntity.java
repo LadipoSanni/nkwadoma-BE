@@ -51,6 +51,7 @@ public class InvestmentVehicleEntity {
     private String fundManager;
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
+    @Enumerated(EnumType.STRING)
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
 
