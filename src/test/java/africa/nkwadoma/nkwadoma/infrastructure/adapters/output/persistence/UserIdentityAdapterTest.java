@@ -8,6 +8,8 @@ import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -203,7 +205,29 @@ class UserIdentityAdapterTest {
         }
         assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getId()));
     }
-
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
+    public void existByInvalidEmail(String email){
+        john.setEmail(email);
+        assertThrows( MeedlException.class,()-> userIdentityOutputPort.existsByEmail(john.getId()));
+    }
+    @Test
+    public void existsByEmailForNonExistentUser(){
+        john.setEmail("invaliduser@email.com");
+        try {
+            assertFalse(userIdentityOutputPort.existsByEmail(john.getEmail()));
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Test
+    void existsByEmailForExistentUser(){
+        try {
+            assertTrue(userIdentityOutputPort.existsByEmail(john.getEmail()));
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     void deleteUserWithEmptyId(){

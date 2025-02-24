@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -60,6 +59,11 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         UserEntity userEntity =
                 getUserEntityByEmail(email);
         return userIdentityMapper.toUserIdentity(userEntity);
+    }
+    @Override
+    public boolean existsByEmail(String email) throws MeedlException {
+        validateEmail(email);
+        return userEntityRepository.existsByEmail(email);
     }
 
     @Override

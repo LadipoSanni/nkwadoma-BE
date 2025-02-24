@@ -17,7 +17,6 @@ import org.hibernate.annotations.UuidGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@ToString
 @Setter
 @Getter
 @Builder
