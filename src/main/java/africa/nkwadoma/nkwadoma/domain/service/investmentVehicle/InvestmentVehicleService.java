@@ -2,27 +2,32 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.MeedlPortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.MeedlPortfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
 
 
+import java.math.BigInteger;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
 
 @RequiredArgsConstructor
 
 public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
+    private final MeedlPortfolioOutputPort meedlPortfolioOutputPort;
 
     @Override
     public InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -33,8 +38,26 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         }
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
+        setInvestmentVehicleNumbersOnMuddlePortfolio(investmentVehicle);
         investmentVehicle.setValues();
         return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    private void setInvestmentVehicleNumbersOnMuddlePortfolio(InvestmentVehicle investmentVehicle) throws MeedlException {
+        MeedlPortfolio meedlPortfolio = meedlPortfolioOutputPort.findMeedlPortfolio();
+        if (investmentVehicle.getInvestmentVehicleType().equals(COMMERCIAL)){
+            meedlPortfolio.setTotalNumberOfCommercialFundsInvestmentVehicles(
+                    meedlPortfolio.getTotalNumberOfCommercialFundsInvestmentVehicles() + BigInteger.ONE.intValue()
+            );
+        }else {
+            meedlPortfolio.setTotalNumberOfEndowmentFundsInvestmentVehicles(
+                    meedlPortfolio.getTotalNumberOfEndowmentFundsInvestmentVehicles() + BigInteger.ONE.intValue()
+            );
+        }
+        meedlPortfolio.setTotalNumberOfInvestmentVehicles(
+                meedlPortfolio.getTotalNumberOfInvestmentVehicles() + BigInteger.ONE.intValue()
+        );
+        meedlPortfolioOutputPort.save(meedlPortfolio);
     }
 
     private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {
