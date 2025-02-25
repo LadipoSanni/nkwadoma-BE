@@ -87,7 +87,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public void deleteInvestmentVehicle(String investmentVehicleId) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, "Please provide a valid investment vehicle id");
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
         investmentVehicleRepository.deleteById(investmentVehicleId);
     }
 

@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.AccountStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -19,6 +20,6 @@ public class LoaneeLoanAccount {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(accountStatus);
         MeedlValidator.validateObjectInstance(loanStatus);
-        MeedlValidator.validateUUID(loaneeId, "Valid Loanee id is required");
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
     }
 }
