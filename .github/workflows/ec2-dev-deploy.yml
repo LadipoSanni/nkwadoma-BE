@@ -223,8 +223,6 @@ jobs:
   #         EOF
 
 
-
-
 # send_notification:
   #   name: Send Email Notification
   #   needs: [build-and-push, deploy]
