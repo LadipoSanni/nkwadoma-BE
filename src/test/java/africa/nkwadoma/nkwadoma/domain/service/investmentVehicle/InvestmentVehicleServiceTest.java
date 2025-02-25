@@ -37,10 +37,10 @@ class InvestmentVehicleServiceTest {
 
     @Order(1)
     @Test
-    void createInvestmentVehicle() {
+    void setUpInvestmentVehicle() {
        try {
            InvestmentVehicle createdInvestmentVehicle =
-                   investmentVehicleUseCase.createInvestmentVehicle(fundGrowth);
+                   investmentVehicleUseCase.setUpInvestmentVehicle(fundGrowth);
            investmentId = createdInvestmentVehicle.getId();
            assertNotNull(createdInvestmentVehicle);
        }catch (MeedlException exception){
@@ -49,10 +49,10 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
-    void createInvestmentVehicleWithTenureGreaterThanThreeDigits() {
+    void setUpInvestmentVehicleWithTenureGreaterThanThreeDigits() {
         fundGrowth.setTenure(9999);
         MeedlException meedlException =
-                assertThrows(MeedlException.class, () -> investmentVehicleUseCase.createInvestmentVehicle(fundGrowth));
+                assertThrows(MeedlException.class, () -> investmentVehicleUseCase.setUpInvestmentVehicle(fundGrowth));
         log.info("Exception occurred: {} {}",meedlException.getClass().getName(), meedlException.getMessage());
     }
 
