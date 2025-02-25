@@ -18,4 +18,6 @@ public interface CreateInvestmentVehicleUseCase {
     Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber);
 
     List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException;
+
+    InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException;
 }

@@ -27,7 +27,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityVerificationController {
     private final IdentityVerificationUseCase identityVerificationUseCase;
     private final IdentityVerificationRestMapper identityVerificationMapper;
-    @PostMapping("/is-verified")
+//    @PostMapping("/is-verified")
     public ResponseEntity<ApiResponse<?>> isUserIdentityVerified(@RequestParam
                                                                  @NotBlank(message = "Loan referral id is required")
                                                                  String loanReferralId) throws MeedlException {

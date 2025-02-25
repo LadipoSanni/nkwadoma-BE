@@ -6,4 +6,5 @@ public class SuccessMessages {
     public static final String INVESTMENT_VEHICLE_VIEWED = "viewed";
     public static final String VIEW_ALL_INVESTMENT_VEHICLE = "All available investment vehicles";
     public static final String SEARCH_INVESTMENT_VEHICLE = "Investment vehicle search results ready";
+    public static final String INVESTMENT_VEHICLE_PUBLISHED = "Investment vehicle published";
 }
