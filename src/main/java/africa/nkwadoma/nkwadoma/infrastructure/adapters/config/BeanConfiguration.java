@@ -112,8 +112,9 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort){
-        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort);
+    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort,
+                                                             InvestmentVehicleMapper investmentVehicleMapper){
+        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper);
     }
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
