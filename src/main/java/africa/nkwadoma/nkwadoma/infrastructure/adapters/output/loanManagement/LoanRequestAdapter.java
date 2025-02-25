@@ -36,7 +36,7 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
 
     @Override
     public Optional<LoanRequest> findById(String loanRequestId) throws MeedlException {
-        MeedlValidator.validateUUID(loanRequestId);
+        MeedlValidator.validateUUID(loanRequestId, "Please provide a valid loan request id");
         Optional<LoanRequestProjection> loanRequestProjection =
                 loanRequestRepository.findLoanRequestById(loanRequestId);
         if (loanRequestProjection.isEmpty()) {

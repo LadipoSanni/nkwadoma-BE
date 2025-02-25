@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
@@ -49,11 +50,11 @@ public class LoanOffer {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequest.getId(),"LoanRequest Id");
+        MeedlValidator.validateUUID(loanRequest.getId(),"Loan request id is invalid");
     }
 
     public void validateForAcceptOffer() throws MeedlException {
-        MeedlValidator.validateUUID(userId);
-        MeedlValidator.validateUUID(id,"LoanOffer Id");
+        MeedlValidator.validateUUID(userId,  UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(id,"Loan offer id is invalid");
     }
 }

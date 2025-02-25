@@ -33,6 +33,8 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages.INVALID_LOAN_OFFER_ID;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -478,7 +480,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
 
     @Override
     public LoanOffer viewLoanOfferDetails(String actorId, String loanOfferId) throws MeedlException {
-        MeedlValidator.validateUUID(loanOfferId);
+        MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
         LoanOffer loanOffer =
                  loanOfferOutputPort.findLoanOfferById(loanOfferId);

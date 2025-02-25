@@ -19,6 +19,6 @@ public class LoaneeLoanAccount {
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(accountStatus);
         MeedlValidator.validateObjectInstance(loanStatus);
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, "Valid Loanee id is required");
     }
 }
