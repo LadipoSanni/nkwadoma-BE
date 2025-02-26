@@ -41,9 +41,9 @@ public class InvestmentVehicleEntity {
     @Enumerated(EnumType.STRING)
     private FundRaisingStatus fundRaisingStatus;
     @OneToOne
-    private InvestmentVehicleFinancierEntity leads;
+    private FinancierEntity leads;
     @OneToOne
-    private InvestmentVehicleFinancierEntity contributors;
+    private FinancierEntity contributors;
     private String trustee;
     private String custodian;
     private String bankPartner;

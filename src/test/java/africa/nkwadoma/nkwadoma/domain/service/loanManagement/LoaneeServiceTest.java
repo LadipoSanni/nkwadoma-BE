@@ -107,7 +107,7 @@ class LoaneeServiceTest {
                 .lastName("lekan")
                 .createdBy("fd099d9f-8d17-46dd-a04b-32c205e33503")
                 .role(IdentityRole.LOANEE)
-                .createdAt(LocalDateTime.now().toString())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         firstLoanee = new Loanee();

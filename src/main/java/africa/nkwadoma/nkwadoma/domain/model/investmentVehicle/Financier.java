@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -9,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.MailException;
 
 import java.util.*;
 
@@ -17,7 +14,7 @@ import java.util.*;
 @Getter
 @Setter
 @Builder
-public class InvestmentVehicleFinancier {
+public class Financier {
 
     private List<OrganizationIdentity> organizations;
     private List<UserIdentity> individuals;

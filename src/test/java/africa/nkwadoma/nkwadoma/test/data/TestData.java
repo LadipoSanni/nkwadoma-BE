@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -10,7 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
@@ -206,8 +204,8 @@ public class TestData {
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
-    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancierIndividual(UserIdentity userIdentity) {
-        return InvestmentVehicleFinancier.builder()
+    public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
+        return Financier.builder()
                 .individuals(List.of(userIdentity))
                 .build();
     }

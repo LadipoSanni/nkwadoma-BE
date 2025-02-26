@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -9,9 +9,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 public interface InvestmentVehicleFinancierMapper {
 
-    InvestmentVehicleFinancierEntity toInvestmentVehicleFinancialEntity(InvestmentVehicleFinancier investmentVehicleFinancier);
+    FinancierEntity toInvestmentVehicleFinancialEntity(Financier investmentVehicleFinancier);
 
 
-    InvestmentVehicleFinancier toInvestmentVehicleFinancial(InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity);
+    Financier toInvestmentVehicleFinancial(FinancierEntity investmentVehicleFinancierEntity);
 
 }

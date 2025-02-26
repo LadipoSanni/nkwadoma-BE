@@ -10,7 +10,7 @@ import jakarta.persistence.OneToMany;
 import java.util.List;
 
 @Entity
-public class InvestmentVehicleFinancierEntity {
+public class FinancierEntity {
 
     @Id
     private String id;

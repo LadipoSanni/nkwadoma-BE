@@ -57,7 +57,7 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.validate();
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
         log.info("Found employee: {}", foundEmployee);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity.setCreatedAt(LocalDateTime.now());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
         log.info("Employee user identity saved to DB: {}", savedUserIdentity);
@@ -178,7 +178,7 @@ public class UserIdentityService implements CreateUserUseCase {
         }
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity.setCreatedAt(LocalDateTime.now());
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
