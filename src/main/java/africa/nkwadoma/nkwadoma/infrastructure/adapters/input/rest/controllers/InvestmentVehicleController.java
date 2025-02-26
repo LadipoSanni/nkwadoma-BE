@@ -32,11 +32,11 @@ public class InvestmentVehicleController {
 
     @PostMapping("investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> createInvestmentVehicle(@Valid @RequestBody CreateInvestmentVehicleRequest
+    public ResponseEntity<ApiResponse<?>> setUpInvestmentVehicle(@Valid @RequestBody SetUpInvestmentVehicleRequest
                                                                           investmentVehicleRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleRestMapper.toInvestmentVehicle(investmentVehicleRequest);
-        investmentVehicle = investmentVehicleUseCase.createInvestmentVehicle(investmentVehicle);
+        investmentVehicle = investmentVehicleUseCase.setUpInvestmentVehicle(investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<Object> apiResponse = ApiResponse.builder()

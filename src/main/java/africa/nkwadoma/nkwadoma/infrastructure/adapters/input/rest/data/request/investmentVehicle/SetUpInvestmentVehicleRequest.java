@@ -16,7 +16,8 @@ import java.math.BigInteger;
 
 @Setter
 @Getter
-public class CreateInvestmentVehicleRequest {
+public class SetUpInvestmentVehicleRequest {
+    private String id;
     @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.NAME_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
     @Size( max = 200, message = ErrorMessages.INVESTMENT_VEHICLE_NAME_MUST_NOT_EXCEED_200_CHARACTERS)
     private String name;

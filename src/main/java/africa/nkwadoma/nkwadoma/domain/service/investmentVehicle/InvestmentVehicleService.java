@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.MeedlPortfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.InvestmentVehicleMapper;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
@@ -21,21 +22,42 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleM
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
 
 @RequiredArgsConstructor
 
 public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
+    private final InvestmentVehicleMapper investmentVehicleMapper;
     private final MeedlPortfolioOutputPort meedlPortfolioOutputPort;
 
     @Override
-    public InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
+    public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
-             return investmentVehicleOutputPort.save(investmentVehicle);
+            return saveInvestmentVehicleToDraft(investmentVehicle);
         }
+        return createInvestmentVehicle(investmentVehicle);
+    }
+
+    private InvestmentVehicle saveInvestmentVehicleToDraft(InvestmentVehicle investmentVehicle) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(investmentVehicle.getId())){
+            return updateInvestmentVehicleInDraft(investmentVehicle);
+        }
+        return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    private InvestmentVehicle updateInvestmentVehicleInDraft(InvestmentVehicle investmentVehicle) throws MeedlException {
+        InvestmentVehicle foundInvestmentVehicle =
+                investmentVehicleOutputPort.findById(investmentVehicle.getId());
+        investmentVehicleMapper.updateInvestmentVehicle(foundInvestmentVehicle,
+                investmentVehicle);
+        return investmentVehicleOutputPort.save(foundInvestmentVehicle);
+    }
+
+    private InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
         setInvestmentVehicleNumbersOnMuddlePortfolio(investmentVehicle);
