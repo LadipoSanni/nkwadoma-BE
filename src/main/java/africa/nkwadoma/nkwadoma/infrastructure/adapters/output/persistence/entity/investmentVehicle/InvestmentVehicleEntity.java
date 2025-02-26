@@ -52,5 +52,7 @@ public class InvestmentVehicleEntity {
     private LocalDate startDate;
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleStatus investmentVehicleStatus;
+    private String investmentVehicleLink;
+
 
 }
