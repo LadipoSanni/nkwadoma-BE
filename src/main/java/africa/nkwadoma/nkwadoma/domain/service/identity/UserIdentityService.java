@@ -226,7 +226,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Viewing user details");
         return userIdentityOutputPort.findById(userIdentity.getId());
     }

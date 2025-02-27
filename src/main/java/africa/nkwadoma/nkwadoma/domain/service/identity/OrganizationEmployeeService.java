@@ -53,7 +53,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     @Override
     public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
-        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId());
+        MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), "Valid organization employee id is required");
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }
 

@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPor
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanOfferMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -41,7 +42,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     @Override
     public LoanOffer findLoanOfferById(String loanOfferId) throws MeedlException {
-        MeedlValidator.validateUUID(loanOfferId);
+        MeedlValidator.validateUUID(loanOfferId, LoanOfferMessages.INVALID_LOAN_OFFER_ID.getMessage());
         LoanOfferProjection loanOfferProjection = loanOfferEntityRepository.findLoanOfferById(loanOfferId);
         if (ObjectUtils.isEmpty(loanOfferProjection)) {
             throw new LoanException(LoanMessages.LOAN_OFFER_NOT_FOUND.getMessage());
@@ -55,11 +56,11 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
     }
 
     @Override
-    public Page<LoanOffer> findLoanOfferInOrganization(String organization,int pageSize , int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(organization);
+    public Page<LoanOffer> findLoanOfferInOrganization(String organizationId,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
         Page<LoanOfferProjection> loanOfferProjections =
-                loanOfferEntityRepository.findAllLoanOfferInOrganization(organization,pageRequest);
+                loanOfferEntityRepository.findAllLoanOfferInOrganization(organizationId,pageRequest);
         return loanOfferProjections.map(loanOfferMapper::mapProjectionToLoanOffer);
     }
 
