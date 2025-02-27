@@ -50,11 +50,11 @@ public class LoanOffer {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(loanRequest.getId(),"Loan request id is invalid");
+        MeedlValidator.validateUUID(loanRequest.getId(),"Loan request id is invalid.");
     }
 
     public void validateForAcceptOffer() throws MeedlException {
         MeedlValidator.validateUUID(userId,  UserMessages.INVALID_USER_ID.getMessage());
-        MeedlValidator.validateUUID(id,"Loan offer id is invalid");
+        MeedlValidator.validateUUID(id,"Loan offer id is invalid.");
     }
 }
