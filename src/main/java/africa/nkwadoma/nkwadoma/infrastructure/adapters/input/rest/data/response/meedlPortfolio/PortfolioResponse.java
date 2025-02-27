@@ -1,9 +1,8 @@
-package africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlPortfolio;
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.meedlPortfolio.PortfolioRiskLevel;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,18 +11,16 @@ import java.util.List;
 
 @Setter
 @Getter
-@Builder
-public class MeedlPortfolio {
+public class PortfolioResponse {
 
-    private String id;
     private String portfolioName;
-    private int totalNumberOfInvestmentVehicles;
-    private int totalNumberOfCommercialFundsInvestmentVehicles;
-    private int totalNumberOfEndowmentFundsInvestmentVehicles;
-    private int totalNumberOfFinanciers;
-    private int totalNumberOfIndividualFinanciers;
-    private int totalNumberOfInstitutionalFinanciers;
-    private String assertUnderManagement;
+    private int totalNumberOfInvestmentVehicle;
+    private int totalNumberOfCommercialFundsInvestmentVehicle;
+    private int totalNumberOfEndowmentFundsInvestmentVehicle;
+    private int totalNumberOfFinancier;
+    private int totalNumberOfIndividualFinancier;
+    private int totalNumberOfInstitutionalFinancier;
+    private String assetUnderManagement;
     private double aumPercentage;
     private BigDecimal totalAvailable;
     private BigDecimal fundManagerFee;
@@ -33,5 +30,4 @@ public class MeedlPortfolio {
     private PortfolioRiskLevel portfolioRiskLevel;
     private List<InvestmentVehicle> topPerformingInvestmentVehicles;
     private List<InvestmentVehicle> underPerformingInvestmentVehicles;
-
 }

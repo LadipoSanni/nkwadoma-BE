@@ -10,17 +10,17 @@ import org.hibernate.annotations.UuidGenerator;
 @Setter
 @Getter
 @Entity
-public class MeedlPortfolioEntity {
+public class PortfolioEntity {
 
     @Id
     @UuidGenerator
     private String id;
     private String portfolioName;
-    private int totalNumberOfInvestmentVehicles;
-    private int totalNumberOfCommercialFundsInvestmentVehicles;
-    private int totalNumberOfEndowmentFundsInvestmentVehicles;
-    private int totalNumberOfFinanciers;
-    private int totalNumberOfIndividualFinanciers;
-    private int totalNumberOfInstitutionalFinanciers;
+    private int totalNumberOfInvestmentVehicle;
+    private int totalNumberOfCommercialFundsInvestmentVehicle;
+    private int totalNumberOfEndowmentFundsInvestmentVehicle;
+    private int totalNumberOfFinancier;
+    private int totalNumberOfIndividualFinancier;
+    private int totalNumberOfInstitutionalFinancier;
 
 }

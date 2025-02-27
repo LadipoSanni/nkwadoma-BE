@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.MeedlPortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.Industry;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -14,7 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.MeedlPortfolio;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class AdminInitializer {
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final MeedlPortfolioOutputPort meedlPortfolioOutputPort;
+    private final PortfolioOutputPort portfolioOutputPort;
 
     @Value("${superAdmin.email}")
     private String SUPER_ADMIN_EMAIL ;
@@ -180,23 +180,25 @@ public class AdminInitializer {
         return userIdentity;
     }
 
-    private MeedlPortfolio createMeedlPortfolio() throws MeedlException {
-        MeedlPortfolio meedlPortfolio = meedlPortfolioOutputPort.findMeedlPortfolio();
-        log.info("found meedl portfolio -- {}", meedlPortfolio);
-        if (ObjectUtils.isEmpty( meedlPortfolio )) {
-            meedlPortfolio =
-                    MeedlPortfolio.builder().portfolioName("Meedl").build();
-            meedlPortfolioOutputPort.save(meedlPortfolio);
-            log.info("Meedl portfolio created successfully -- {}", meedlPortfolio);
+    private Portfolio getPortfolio(){
+        return Portfolio.builder().portfolioName("Meedl").build();
+    }
+
+    public Portfolio createMeedlPortfolio(Portfolio portfolio) throws MeedlException {
+        Portfolio foundPortfolio = portfolioOutputPort.findPortfolio(portfolio);
+        log.info("found meedl portfolio -- {}", foundPortfolio);
+        if (ObjectUtils.isEmpty(foundPortfolio)) {
+            log.info("Meedl portfolio created successfully -- {}", portfolio);
+            return portfolioOutputPort.save(portfolio);
         }
-        return meedlPortfolio;
+        return foundPortfolio;
     }
 
     @PostConstruct
     public void init() throws MeedlException {
         UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
         OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
-        MeedlPortfolio meedlPortfolio = createMeedlPortfolio();
-        log.info("Meedl portfolio process done-- {}",meedlPortfolio);
+        Portfolio portfolio = createMeedlPortfolio(getPortfolio());
+        log.info("Meedl portfolio process done-- {}", portfolio);
     }
 }

@@ -11,7 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
-import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.MeedlPortfolio;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 
 import java.math.BigDecimal;
@@ -386,15 +386,15 @@ public class TestData {
                 .build();
     }
 
-    public static MeedlPortfolio createMeedlPortfolio() {
-        return MeedlPortfolio.builder()
-                .portfolioName("Meedl")
-                .totalNumberOfCommercialFundsInvestmentVehicles(2)
-                .totalNumberOfFinanciers(2)
-                .totalNumberOfEndowmentFundsInvestmentVehicles(2)
-                .totalNumberOfInvestmentVehicles(2)
-                .totalNumberOfInstitutionalFinanciers(2)
-                .totalNumberOfIndividualFinanciers(2)
+    public static Portfolio createMeedlPortfolio() {
+        return Portfolio.builder()
+                .portfolioName("Portfolio")
+                .totalNumberOfCommercialFundsInvestmentVehicle(2)
+                .totalNumberOfFinancier(2)
+                .totalNumberOfEndowmentFundsInvestmentVehicle(2)
+                .totalNumberOfInvestmentVehicle(2)
+                .totalNumberOfInstitutionalFinancier(2)
+                .totalNumberOfIndividualFinancier(2)
                 .build();
     }
 }
