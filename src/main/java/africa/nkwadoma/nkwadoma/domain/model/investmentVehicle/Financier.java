@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -43,7 +44,7 @@ public class Financier {
 
     public void validate() throws MeedlException {
         validateIndividuals();
-        MeedlValidator.validateUUID(createdBy);
-        MeedlValidator.validateUUID(investmentVehicleId);
+        MeedlValidator.validateUUID(createdBy, "Valid user id performing this action is required");
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 }
