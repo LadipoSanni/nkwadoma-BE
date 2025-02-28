@@ -5,10 +5,14 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MeedlNotificationMapper {
 
     MeedlNotificationEntity toMeedlNotification(MeedlNotification meedlNotification);
 
     MeedlNotification toMeedlNotificationEntity(MeedlNotificationEntity meedlNotificationEntity);
+
+    List<MeedlNotification> toMeedlNotifications(List<MeedlNotificationEntity> allNotification);
 }
