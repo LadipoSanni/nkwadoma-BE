@@ -4,11 +4,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +25,13 @@ public class FinancierAdapter implements FinancierOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
+    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierAdapter;
 
 
     @Override
     public String inviteFinancier(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
-        financier.validateIndividuals();
+        financier.validate();
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         addFinancierToVehicle(financier, investmentVehicle);
         return "Financier invited.";
@@ -46,13 +49,16 @@ public class FinancierAdapter implements FinancierOutputPort {
                 } catch (MeedlException ex) {
                     throw new RuntimeException(ex);
                 }
-                throw new RuntimeException(e);
             }
         });
     }
 
-    private void createInvestmentVehicleFinancier(InvestmentVehicle investmentVehicle, UserIdentity investor) {
-
+    private void createInvestmentVehicleFinancier(InvestmentVehicle investmentVehicle, UserIdentity financial) throws MeedlException {
+        investmentVehicleFinancierAdapter.save(InvestmentVehicleFinancier.builder()
+                        .financier(financial)
+                        .investmentVehicle(investmentVehicle)
+                        .build());
+        log.info("Financier {} added to investment vehicle {}.", financial.getEmail(), investmentVehicle.getName());
     }
 
     private UserIdentity saveFinancier(Financier investmentVehicleFinancier, UserIdentity investor) throws MeedlException {
