@@ -205,29 +205,6 @@ class UserIdentityAdapterTest {
         }
         assertThrows(IdentityException.class,()-> userIdentityOutputPort.findById(john.getId()));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
-    public void existByInvalidEmail(String email){
-        john.setEmail(email);
-        assertThrows( MeedlException.class,()-> userIdentityOutputPort.existsByEmail(john.getId()));
-    }
-    @Test
-    public void existsByEmailForNonExistentUser(){
-        john.setEmail("invaliduser@email.com");
-        try {
-            assertFalse(userIdentityOutputPort.existsByEmail(john.getEmail()));
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    @Test
-    void existsByEmailForExistentUser(){
-        try {
-            assertTrue(userIdentityOutputPort.existsByEmail(john.getEmail()));
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
     void deleteUserWithEmptyId(){

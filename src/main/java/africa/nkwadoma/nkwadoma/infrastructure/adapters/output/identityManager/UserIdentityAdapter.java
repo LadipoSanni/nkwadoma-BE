@@ -60,11 +60,6 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
                 getUserEntityByEmail(email);
         return userIdentityMapper.toUserIdentity(userEntity);
     }
-    @Override
-    public boolean existsByEmail(String email) throws MeedlException {
-        validateEmail(email);
-        return userEntityRepository.existsByEmail(email);
-    }
 
     @Override
     public void deleteUserByEmail(String email) throws MeedlException {
