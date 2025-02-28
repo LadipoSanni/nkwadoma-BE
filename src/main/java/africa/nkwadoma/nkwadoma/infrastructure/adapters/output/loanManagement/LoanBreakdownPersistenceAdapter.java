@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
@@ -20,7 +21,7 @@ public class LoanBreakdownPersistenceAdapter implements LoanBreakdownOutputPort 
 
     @Override
     public List<LoanBreakdown> findAllByCohortId(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
+        MeedlValidator.validateUUID(id, CohortMessages.INVALID_COHORT_ID.getMessage());
         List<LoanBreakdownEntity> loanBreakdownEntities =
                 loanBreakdownRepository.findAllByCohortId(id);
         return loanBreakdownMapper.toLoanBreakdownList(loanBreakdownEntities);

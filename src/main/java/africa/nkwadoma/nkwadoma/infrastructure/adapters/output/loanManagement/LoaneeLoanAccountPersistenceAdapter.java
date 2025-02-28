@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAccount;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -28,13 +29,13 @@ public class LoaneeLoanAccountPersistenceAdapter implements LoaneeLoanAccountOut
 
     @Override
     public void deleteLoaneeLoanAccount(String loaneeLoanAccountId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeLoanAccountId);
+        MeedlValidator.validateUUID(loaneeLoanAccountId, "Please provide a valid loanee loan account id");
         loaneeLoanAccountRepository.deleteById(loaneeLoanAccountId);
     }
 
     @Override
     public LoaneeLoanAccount findByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId);
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         LoaneeLoanAccountEntity loaneeLoanAccountEntity = loaneeLoanAccountRepository.findByLoaneeId(loaneeId);
         return loaneeLoanAccountMapper.toLoaneeLoanAccount(loaneeLoanAccountEntity);
     }

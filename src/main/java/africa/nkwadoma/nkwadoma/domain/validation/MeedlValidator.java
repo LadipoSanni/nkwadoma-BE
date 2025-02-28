@@ -40,16 +40,6 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateUUID(String dataElement) throws MeedlException {
-        log.info("validateUUID {}", dataElement);
-        validateDataElement(dataElement,"An empty id can not be used to perform this operation");
-        try {
-            UUID.fromString(dataElement);
-        } catch (IllegalArgumentException e) {
-            log.info("{}. The invalid UUID {}", e.getMessage(), dataElement);
-            throw new MeedlException(UUID_NOT_VALID.getMessage());
-        }
-    }
     public static void validateUUID(String dataElement, String message) throws MeedlException {
         log.info("validateUUID {}", dataElement);
         validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
@@ -68,7 +58,7 @@ public class MeedlValidator {
         }
     }
 
-    public static boolean isEmptyString(String dataElement) {
+    private static boolean isEmptyString(String dataElement) {
         return StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement);
     }
 
