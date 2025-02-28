@@ -389,7 +389,7 @@ public class TestData {
 
     public static MeedlNotification createNotification(UserIdentity userIdentity) {
         return MeedlNotification.builder()
-                .userIdentity(userIdentity)
+                .user(userIdentity)
                 .isRead(false)
                 .timestamp(LocalDateTime.now())
                 .contentId(testId)

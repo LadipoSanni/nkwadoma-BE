@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification;
 
 
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
-public class MeedNotificationEntity {
+public class MeedlNotificationEntity {
 
     @Id
     @UuidGenerator

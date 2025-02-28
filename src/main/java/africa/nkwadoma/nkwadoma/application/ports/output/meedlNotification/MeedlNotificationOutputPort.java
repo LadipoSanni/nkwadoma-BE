@@ -5,4 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 
 public interface MeedlNotificationOutputPort {
     MeedlNotification save(MeedlNotification meedlNotification) throws MeedlException;
+
+    void deleteNotification(String meedlNotificationId) throws MeedlException;
 }

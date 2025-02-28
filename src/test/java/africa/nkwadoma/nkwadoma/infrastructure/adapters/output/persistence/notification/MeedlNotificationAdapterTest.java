@@ -11,6 +11,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -19,6 +22,7 @@ public class MeedlNotificationAdapterTest {
     private MeedlNotification meedlNotification;
     private UserIdentity userIdentity;
     private String userId;
+    private String meedlNotificationId;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -33,15 +37,21 @@ public class MeedlNotificationAdapterTest {
     }
 
     @Test
-    void saveNotification() throws MeedlException {
-        meedlNotification =
-                meedlNotificationOutputPort.save(meedlNotification);
-
+    void saveNotification() {
+        MeedlNotification saveNotification = null;
+        try {
+            saveNotification = meedlNotificationOutputPort.save(meedlNotification);
+            meedlNotificationId = saveNotification.getId();
+        }catch (MeedlException exception) {
+            assertNotNull(saveNotification);
+            assertEquals(userId, saveNotification.getUser().getId());
+        }
     }
 
 
     @AfterAll
     void cleanUp() throws MeedlException {
+        meedlNotificationOutputPort.deleteNotification(meedlNotificationId);
         userIdentityOutputPort.deleteUserById(userId);
     }
 }
