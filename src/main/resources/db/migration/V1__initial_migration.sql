@@ -451,3 +451,112 @@ CREATE TABLE IF NOT EXISTS vendor_entity
     vendor_name          VARCHAR(255),
     CONSTRAINT vendor_entity_pkey PRIMARY KEY (id)
     );
+CREATE TABLE portfolio_entity
+(
+    id                                                  VARCHAR(255) NOT NULL,
+    portfolio_name                                      VARCHAR(255),
+    total_number_of_investment_vehicle                  INTEGER      NOT NULL,
+    total_number_of_commercial_funds_investment_vehicle INTEGER      NOT NULL,
+    total_number_of_endowment_funds_investment_vehicle  INTEGER      NOT NULL,
+    total_number_of_financier                           INTEGER      NOT NULL,
+    total_number_of_individual_financier                INTEGER      NOT NULL,
+    total_number_of_institutional_financier             INTEGER      NOT NULL,
+    CONSTRAINT pk_portfolioentity PRIMARY KEY (id)
+);
+
+DROP TABLE loan_product_entity_sponsors CASCADE;
+
+DROP TABLE meedl_portfolio_entity CASCADE;
+
+ALTER TABLE loan_offer_entity
+    ALTER COLUMN amount_approved TYPE DECIMAL USING (amount_approved::DECIMAL);
+
+ALTER TABLE loanee_loan_detail_entity
+    ALTER COLUMN amount_requested TYPE DECIMAL USING (amount_requested::DECIMAL);
+
+ALTER TABLE organization
+    ALTER COLUMN email DROP NOT NULL;
+
+ALTER TABLE loanee_loan_detail_entity
+    ALTER COLUMN initial_deposit TYPE DECIMAL USING (initial_deposit::DECIMAL);
+
+ALTER TABLE loan_breakdown_entity
+    ALTER COLUMN item_amount TYPE DECIMAL USING (item_amount::DECIMAL);
+
+ALTER TABLE loanee_loan_breakdown_entity
+    ALTER COLUMN item_amount TYPE DECIMAL USING (item_amount::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN last_month_actual TYPE DECIMAL USING (last_month_actual::DECIMAL);
+
+ALTER TABLE loan_request_entity
+    ALTER COLUMN loan_amount_approved TYPE DECIMAL USING (loan_amount_approved::DECIMAL);
+
+ALTER TABLE loan_request_entity
+    ALTER COLUMN loan_amount_requested TYPE DECIMAL USING (loan_amount_requested::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN loan_product_size TYPE DECIMAL USING (loan_product_size::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN min_repayment_amount TYPE DECIMAL USING (min_repayment_amount::DECIMAL);
+
+ALTER TABLE investment_vehicle_entity
+    ALTER COLUMN minimum_investment_amount TYPE DECIMAL USING (minimum_investment_amount::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN monthly_expected TYPE DECIMAL USING (monthly_expected::DECIMAL);
+
+ALTER TABLE organization
+    ALTER COLUMN name DROP NOT NULL;
+
+ALTER TABLE loan_product
+    ALTER COLUMN obligor_loan_limit TYPE DECIMAL USING (obligor_loan_limit::DECIMAL);
+
+ALTER TABLE investment_vehicle_entity
+    ALTER COLUMN size TYPE DECIMAL USING (size::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN total_amount_available TYPE DECIMAL USING (total_amount_available::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN total_amount_disbursed TYPE DECIMAL USING (total_amount_disbursed::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN total_amount_disbursed TYPE DECIMAL USING (total_amount_disbursed::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN total_amount_earned TYPE DECIMAL USING (total_amount_earned::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN total_amount_repaid TYPE DECIMAL USING (total_amount_repaid::DECIMAL);
+
+ALTER TABLE loan_product
+    ALTER COLUMN total_amount_repaid TYPE DECIMAL USING (total_amount_repaid::DECIMAL);
+
+ALTER TABLE investment_vehicle_entity
+    ALTER COLUMN total_available_amount TYPE DECIMAL USING (total_available_amount::DECIMAL);
+
+ALTER TABLE cohort_entity
+    ALTER COLUMN total_cohort_fee TYPE DECIMAL USING (total_cohort_fee::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN total_interest_incurred TYPE DECIMAL USING (total_interest_incurred::DECIMAL);
+
+ALTER TABLE loan_detail_entity
+    ALTER COLUMN total_outstanding TYPE DECIMAL USING (total_outstanding::DECIMAL);
+
+ALTER TABLE service_offering_entity
+    ALTER COLUMN transaction_lower_bound TYPE DECIMAL USING (transaction_lower_bound::DECIMAL);
+
+ALTER TABLE service_offering_entity
+    ALTER COLUMN transaction_upper_bound TYPE DECIMAL USING (transaction_upper_bound::DECIMAL);
+
+ALTER TABLE cohort_entity
+    ALTER COLUMN tuition_amount TYPE DECIMAL USING (tuition_amount::DECIMAL);
+
+ALTER TABLE loanee_loan_detail_entity
+    ALTER COLUMN tuition_amount TYPE DECIMAL USING (tuition_amount::DECIMAL);
+
+ALTER TABLE organization_employee
+    ADD CONSTRAINT uk_organization_employee UNIQUE (organization);
