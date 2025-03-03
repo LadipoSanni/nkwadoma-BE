@@ -27,7 +27,6 @@ import org.thymeleaf.context.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
