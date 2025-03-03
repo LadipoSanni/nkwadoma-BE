@@ -5,6 +5,7 @@ CREATE TABLE financier_entity (
                                   investment_vehicle_role VARCHAR(255),
                                   created_by VARCHAR(255)
 );
+DROP TABLE IF EXISTS investment_vehicle_financier_entity CASCADE;
 
 -- Recreate the InvestmentVehicleFinancierEntity table
 CREATE TABLE investment_vehicle_financier_entity (
