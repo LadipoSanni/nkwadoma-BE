@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.test.data;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
+import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -382,6 +384,15 @@ public class TestData {
                 .session(null)
                 .endpointName("NIN Verification")
                 .userId("USR-987654")
+                .build();
+    }
+
+    public static MeedlNotification createNotification(UserIdentity userIdentity) {
+        return MeedlNotification.builder()
+                .user(userIdentity)
+                .isRead(false)
+                .timestamp(LocalDateTime.now())
+                .contentId(testId)
                 .build();
     }
 }
