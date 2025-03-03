@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.INVALID_VALID_ROLE;
 
 @Slf4j
@@ -28,7 +30,7 @@ public class UserIdentity {
     private boolean emailVerified;
     private boolean isIdentityVerified;
     private boolean enabled;
-    private String createdAt;
+    private LocalDateTime createdAt;
     private String image;
     private String gender;
     private String dateOfBirth;

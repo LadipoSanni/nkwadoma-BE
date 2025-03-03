@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.test.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -10,6 +11,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
@@ -205,6 +208,12 @@ public class TestData {
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
+    public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
+        return Financier.builder()
+                .individuals(List.of(userIdentity))
+                .createdBy(testId)
+                .build();
+    }
     public static PremblyResponse createTestPremblyResponse(){
         PremblyResponse response = new PremblyBvnResponse();
         Verification verifier = Verification.builder().status("VERIFIED").build();
@@ -228,6 +237,7 @@ public class TestData {
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
         investmentVehicle.setSponsors("sponsors");
+        investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         return investmentVehicle;
     }
 
@@ -393,6 +403,13 @@ public class TestData {
                 .isRead(false)
                 .timestamp(LocalDateTime.now())
                 .contentId(testId)
+                .build();
+    }
+
+    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(UserIdentity userIdentity, InvestmentVehicle investmentVehicleFinancier) {
+        return InvestmentVehicleFinancier.builder()
+                .financier(userIdentity)
+                .investmentVehicle(investmentVehicleFinancier)
                 .build();
     }
 }
