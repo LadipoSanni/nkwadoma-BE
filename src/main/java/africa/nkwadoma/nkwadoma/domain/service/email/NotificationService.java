@@ -5,9 +5,12 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUse
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -16,18 +19,23 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.context.*;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
         SendLoaneeEmailUsecase, MeedlNotificationUsecase {
     private final EmailOutputPort emailOutputPort;
     private final TokenUtils tokenUtils;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final MeedlNotificationOutputPort meedlNotificationOutputPort;
     @Value("${FRONTEND_URL}")
     private String baseUrl;
 
@@ -187,6 +195,10 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     @Override
     public MeedlNotification sendNotification(MeedlNotification meedlNotification) throws MeedlException {
         meedlNotification.validate();
-        return meedlNotification;
+        UserIdentity userIdentity = userIdentityOutputPort.findById(meedlNotification.getUser().getId());
+        if (ObjectUtils.isEmpty(userIdentity)) {
+            throw new MeedlNotificationException("Un-Existing user cannot receive notification");
+        }
+        return meedlNotificationOutputPort.save(meedlNotification);
     }
 }

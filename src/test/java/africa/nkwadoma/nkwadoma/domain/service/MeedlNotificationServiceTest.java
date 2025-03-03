@@ -94,6 +94,4 @@ public class MeedlNotificationServiceTest {
         assertNotNull(meedlNotification);
         assertEquals(meedlNotification.getUser().getId(), userIdentity.getId());
     }
-
-
 }
