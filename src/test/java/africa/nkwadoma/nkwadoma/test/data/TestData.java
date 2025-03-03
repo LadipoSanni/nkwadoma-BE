@@ -393,6 +393,7 @@ public class TestData {
                 .isRead(false)
                 .timestamp(LocalDateTime.now())
                 .contentId(testId)
+                .title("Title")
                 .build();
     }
 }

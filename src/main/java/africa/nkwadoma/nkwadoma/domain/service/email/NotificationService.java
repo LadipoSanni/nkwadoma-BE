@@ -3,10 +3,12 @@ package africa.nkwadoma.nkwadoma.domain.service.email;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -22,7 +24,8 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase , SendLoaneeEmailUsecase {
+public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
+        SendLoaneeEmailUsecase, MeedlNotificationUsecase {
     private final EmailOutputPort emailOutputPort;
     private final TokenUtils tokenUtils;
     @Value("${FRONTEND_URL}")
@@ -181,4 +184,9 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
     }
 
 
+    @Override
+    public MeedlNotification sendNotification(MeedlNotification meedlNotification) throws MeedlException {
+        meedlNotification.validate();
+        return meedlNotification;
+    }
 }

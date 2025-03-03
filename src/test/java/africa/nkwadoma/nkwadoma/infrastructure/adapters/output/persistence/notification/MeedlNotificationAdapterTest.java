@@ -73,6 +73,19 @@ public class MeedlNotificationAdapterTest {
         assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,""})
+    void cannotSaveNotificationWithEmptyTitle(String subject) {
+        meedlNotification.setTitle(subject);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @Test
+    void cannotSaveNotificationWithNullTitle() {
+        meedlNotification.setTitle(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
     @Test
     @Order(1)
     void saveNotification() {
