@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import javax.print.attribute.standard.Media;
 import java.math.*;
 import java.time.LocalDate;
 import java.util.regex.Pattern;
@@ -28,8 +27,8 @@ public class InvestmentVehicle {
     private BigDecimal size;
     private Float rate;
     private FundRaisingStatus fundRaisingStatus;
-    private InvestmentVehicleFinancier leads;
-    private InvestmentVehicleFinancier contributors;
+    private Financier leads;
+    private Financier contributors;
     private String trustee;
     private String custodian;
     private String bankPartner;

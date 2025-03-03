@@ -25,9 +25,9 @@ public class LoaneeLoanDetailPersistenceAdapter implements LoaneeLoanDetailsOutp
     }
 
     @Override
-    public void delete(String id) throws MeedlException {
-        MeedlValidator.validateUUID(id);
-        Optional<LoaneeLoanDetailEntity> loaneeLoanDetailEntity = loaneeLoanDetailRepository.findById(id);
+    public void delete(String LoaneeLoanDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(LoaneeLoanDetailId, "Please provide a valid Loanee LoanDetailId");
+        Optional<LoaneeLoanDetailEntity> loaneeLoanDetailEntity = loaneeLoanDetailRepository.findById(LoaneeLoanDetailId);
         loaneeLoanDetailEntity.ifPresent(loaneeLoanDetailRepository::delete);
     }
 }

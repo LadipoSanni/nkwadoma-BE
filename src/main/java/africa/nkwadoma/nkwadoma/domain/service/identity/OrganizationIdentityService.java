@@ -119,7 +119,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
     @Override
     public OrganizationIdentity reactivateOrganization(String organizationId, String reason) throws MeedlException {
-        MeedlValidator.validateUUID(organizationId);
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
         MeedlValidator.validateDataElement(reason, "Please provide a reason for reactivating organization.");
         OrganizationIdentity foundOrganization = organizationIdentityOutputPort.findById(organizationId);
         List<OrganizationEmployeeIdentity> organizationEmployees = foundOrganization.getOrganizationEmployees();
@@ -204,7 +204,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         organizationIdentityOutputPort.save(organizationIdentity);
         OrganizationEmployeeIdentity organizationEmployeeIdentity = organizationIdentity.getOrganizationEmployees().get(0);
         organizationEmployeeIdentity.setStatus(ActivationStatus.INVITED);
-        organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now().toString());
+        organizationEmployeeIdentity.getMeedlUser().setCreatedAt(LocalDateTime.now());
         userIdentityOutputPort.save(organizationEmployeeIdentity.getMeedlUser());
         organizationEmployeeIdentity = organizationEmployeeIdentityOutputPort.save(organizationEmployeeIdentity);
         organizationIdentity.getOrganizationEmployees().get(0).setId(organizationEmployeeIdentity.getId());

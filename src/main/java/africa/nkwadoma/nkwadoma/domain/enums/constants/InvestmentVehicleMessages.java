@@ -6,6 +6,8 @@ import lombok.*;
 public enum InvestmentVehicleMessages {
 
     INVESTMENT_IDENTITY_CANNOT_BE_NULL("Investment vehicle id cannot be null"),
+    INVALID_INVESTMENT_VEHICLE_ID("Invalid investment vehicle Id provided"),
+    INVESTMENT_CANNOT_BE_EMPTY("Investment vehicle id cannot be empty"),
     INVESTMENT_VEHICLE_NOT_FOUND("Investment vehicle not found"),
     INVESTMENT_VEHICLE_NAME_EXIST("Investment vehicle name exist"),
     INVESTMENT_VEHICLE_CANNOT_BE_NULL("Investment vehicle Object cannot be null"),

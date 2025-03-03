@@ -57,7 +57,7 @@ public class UserIdentityService implements CreateUserUseCase {
         userIdentity.validate();
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
         log.info("Found employee: {}", foundEmployee);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity.setCreatedAt(LocalDateTime.now());
         userIdentity = identityManagerOutPutPort.createUser(userIdentity);
         UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
         log.info("Employee user identity saved to DB: {}", savedUserIdentity);
@@ -178,7 +178,7 @@ public class UserIdentityService implements CreateUserUseCase {
         }
         userIdentity.setEmailVerified(true);
         userIdentity.setEnabled(true);
-        userIdentity.setCreatedAt(LocalDateTime.now().toString());
+        userIdentity.setCreatedAt(LocalDateTime.now());
         identityManagerOutPutPort.setPassword(userIdentity);
         log.info("Password changed successfully for user with id: {}",userIdentity.getId());
     }
@@ -226,7 +226,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity viewUserDetail(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateUUID(userIdentity.getId());
+        MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         log.info("Viewing user details");
         return userIdentityOutputPort.findById(userIdentity.getId());
     }

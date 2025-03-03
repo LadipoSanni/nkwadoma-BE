@@ -1,22 +1,25 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.util.List;
-
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class InvestmentVehicleFinancierEntity {
-
     @Id
+    @UuidGenerator
     private String id;
-    @OneToMany
-    private List<OrganizationEntity> organizations;
-    @OneToMany
-    private List<UserEntity> individuals;
-    private InvestmentVehicleRole investmentVehicleRole;
+    @OneToOne
+    private UserEntity financier;
+    @ManyToOne
+    @JoinColumn(name = "investment_vehicle_id")
+    private InvestmentVehicleEntity investmentVehicle;
 }
