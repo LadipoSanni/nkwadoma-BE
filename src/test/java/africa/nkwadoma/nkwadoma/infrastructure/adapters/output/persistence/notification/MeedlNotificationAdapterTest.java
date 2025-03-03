@@ -74,7 +74,7 @@ public class MeedlNotificationAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,""})
+    @ValueSource(strings = {StringUtils.EMPTY," "})
     void cannotSaveNotificationWithEmptyTitle(String subject) {
         meedlNotification.setTitle(subject);
         assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
