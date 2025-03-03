@@ -6,14 +6,21 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Finan
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -25,16 +32,51 @@ public class FinancierAdapter implements FinancierOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
+    private final FinancierRepository financierRepository;
+    private final FinancierMapper financierMapper;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierAdapter;
 
 
     @Override
-    public String inviteFinancier(Financier financier) throws MeedlException {
+    public Financier saveFinancier(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
         financier.validate();
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         addFinancierToVehicle(financier, investmentVehicle);
-        return "Financier invited.";
+        FinancierEntity financierEntity = financierMapper.map(financier);
+        FinancierEntity savedFinancierEntity = financierRepository.save(financierEntity);
+        log.info("Financier saved to db: {}", savedFinancierEntity);
+
+        return financierMapper.map(savedFinancierEntity);
+    }
+
+    @Override
+    public Page<Financier> findAllFinancier(Financier financier) throws MeedlException {
+        log.info("Searching for all financier on the platform at adapter level.");
+        MeedlValidator.validateObjectInstance(financier, "View all financier request cannot be empty.");
+        MeedlValidator.validatePageSize(financier.getPageSize());
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+        log.info("Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
+        Page<FinancierEntity> financierEntities = financierRepository.findAll(pageRequest);
+        log.info("Found financiers in db: {}", financierEntities);
+        return financierEntities.map(financierMapper::map);
+    }
+
+    @Override
+    public void viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier);
+        MeedlValidator.validatePageSize(financier.getPageSize());
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), "Invalid investment identification provided");
+    }
+
+    @Override
+    public Financier findFinancierById(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID);
+        FinancierEntity financierEntity = financierRepository.findById(financierId)
+                .orElseThrow(()-> new MeedlException("Financier not found"));
+        return financierMapper.map(financierEntity);
     }
 
     private void addFinancierToVehicle(Financier investmentVehicleFinancier, InvestmentVehicle investmentVehicle) {

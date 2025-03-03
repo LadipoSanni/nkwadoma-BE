@@ -23,6 +23,8 @@ public class Financier {
     private String createdBy;
     private String investmentVehicleId;
     private InvestmentVehicleRole investmentVehicleRole;
+    private int pageNumber;
+    private int pageSize;
 
     public void validateIndividuals() throws MeedlException {
         for (UserIdentity userIdentity : individuals) {

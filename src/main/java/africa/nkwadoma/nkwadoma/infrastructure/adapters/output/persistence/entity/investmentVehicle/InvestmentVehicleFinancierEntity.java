@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
@@ -22,4 +23,5 @@ public class InvestmentVehicleFinancierEntity {
     @ManyToOne
     @JoinColumn(name = "investment_vehicle_id")
     private InvestmentVehicleEntity investmentVehicle;
+    private InvestmentVehicleRole investmentVehicleRole;
 }
