@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -93,6 +95,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setOrganizationEmployees(orgEmployee);
         roseCouture.setEnabled(Boolean.TRUE);
 
+
     }
 
     @Test
@@ -128,6 +131,52 @@ class OrganizationIdentityServiceTest {
         assertEquals(organizationIdentities.get(0).getId(), roseCouture.getId());
         assertEquals(organizationIdentities.get(0).getName(), roseCouture.getName());
         assertEquals(organizationIdentities.get(0).getLogoImage(), roseCouture.getLogoImage());
+    }
+
+    @Test
+    void viewAllOrganizationWithStatusTakingNullParameter() {
+        assertThrows(MeedlException.class, ()-> organizationIdentityService.viewAllOrganizationByStatus(roseCouture, null));
+    }
+
+    @Test
+    void viewAllOrganizationWithStatus() throws MeedlException {
+
+        OrganizationIdentity roseCouture2 = new OrganizationIdentity();
+        roseCouture2.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
+        roseCouture2.setName("rose couture6");
+        roseCouture2.setEmail("iamoluchimercy@gmail.com");
+        roseCouture2.setTin("7682-5627");
+        roseCouture2.setRcNumber("RC8789905");
+        roseCouture2.setServiceOfferings(List.of(new ServiceOffering()));
+        roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
+        roseCouture2.setPhoneNumber("09876365714");
+        roseCouture2.setInvitedDate(LocalDateTime.now().toString());
+        roseCouture2.setWebsiteAddress("rosecouture2.org");
+        roseCouture2.setOrganizationEmployees(orgEmployee);
+        roseCouture2.setEnabled(Boolean.TRUE);
+        roseCouture2.setStatus(ActivationStatus.ACTIVE);
+
+        int pageNumber = 0;
+        int pageSize = 10;
+        roseCouture.setPageNumber(pageNumber);
+        roseCouture.setPageSize(pageSize);
+        roseCouture.setStatus(ActivationStatus.ACTIVE);
+
+        List<OrganizationIdentity> organizationIdentities = new ArrayList<>();
+        organizationIdentities.add(roseCouture);
+        organizationIdentities.add(roseCouture2);
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Page<OrganizationIdentity> organizationIdentityPage = new PageImpl<>(organizationIdentities, pageRequest, organizationIdentities.size());
+
+        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE)).thenReturn(organizationIdentityPage);
+        Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getStatus());
+        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
     }
 
     @Test

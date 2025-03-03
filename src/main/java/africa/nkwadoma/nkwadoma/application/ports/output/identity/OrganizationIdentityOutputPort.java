@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -18,6 +19,7 @@ public interface OrganizationIdentityOutputPort {
     OrganizationIdentity findById(String id) throws MeedlException;
     List<ServiceOffering> getServiceOfferings(String organizationId) throws MeedlException;
     Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException;
+    Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException;
     List<ServiceOffering> findServiceOfferingById(String id) throws MeedlException;
     Optional<OrganizationIdentity> findByOrganizationId(String organizationId) throws MeedlException;
     List<OrganizationServiceOffering> findOrganizationServiceOfferingsByOrganizationId(String organizationId) throws MeedlException;

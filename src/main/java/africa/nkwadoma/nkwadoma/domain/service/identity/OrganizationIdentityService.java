@@ -267,6 +267,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
+    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus activationStatus) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(activationStatus);
+        return organizationIdentityOutputPort.viewAllOrganizationByStatus(organizationIdentity, activationStatus);
+    }
+
+    @Override
     public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
         MeedlValidator.validateDataElement(organizationName, "Organization name is required");
         return organizationIdentityOutputPort.findByName(organizationName);

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -199,12 +200,38 @@ public class OrganizationController {
                                                                 .pageNumber(pageNumber)
                                                                 .pageSize(pageSize)
                                                                 .build());
+
         List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
         PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
                 organizationResponses, organizationIdentities.hasNext(),
                 organizationIdentities.getTotalPages(), pageNumber,
                 pageSize
         );
+
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
+
+    @GetMapping("organization/all/status")
+    @Operation(summary = "View all Organizations with status", description = "Fetch all organizations with status")
+    public ResponseEntity<ApiResponse<?>> viewAllOrganizationByStatus(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam ActivationStatus status)
+            throws MeedlException {
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase
+                .viewAllOrganizationByStatus(OrganizationIdentity.builder()
+                        .pageNumber(pageNumber)
+                        .pageSize(pageSize)
+                        .build(), status);
+        List<OrganizationResponse> organizationResponses = organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+        PaginatedResponse<OrganizationResponse> response = new PaginatedResponse<>(
+                organizationResponses, organizationIdentities.hasNext(),
+                organizationIdentities.getTotalPages(), pageNumber,
+                pageSize
+        );
+
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
                 data(response).
