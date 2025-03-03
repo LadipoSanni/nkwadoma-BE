@@ -20,6 +20,7 @@ public class MeedlNotificationEntity {
     @Id
     @UuidGenerator
     public String id;
+    private String title;
     private String contentId;
     private String name;
     @ManyToOne
