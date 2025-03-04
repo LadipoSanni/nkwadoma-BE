@@ -46,10 +46,10 @@ public class InvestmentVehicle {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectName(name,"Name cannot be empty");
-        MeedlValidator.validateObjectInstance(trustee,"Trustee cannot be empty");
-        MeedlValidator.validateObjectInstance(custodian,"Custodian cannot be empty");
-        MeedlValidator.validateObjectInstance(bankPartner,"Bank Partner cannot be empty");
-        MeedlValidator.validateObjectInstance(fundManager,"Fund Manager cannot be empty");
+        MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty");
+        MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty");
+        MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
+        MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
         MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
         validateTenure(tenure);
