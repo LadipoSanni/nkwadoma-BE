@@ -17,7 +17,6 @@ import org.hibernate.annotations.UuidGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@ToString
 @Setter
 @Getter
 @Builder
@@ -42,9 +41,9 @@ public class InvestmentVehicleEntity {
     @Enumerated(EnumType.STRING)
     private FundRaisingStatus fundRaisingStatus;
     @OneToOne
-    private InvestmentVehicleFinancierEntity leads;
+    private FinancierEntity leads;
     @OneToOne
-    private InvestmentVehicleFinancierEntity contributors;
+    private FinancierEntity contributors;
     private String trustee;
     private String custodian;
     private String bankPartner;
@@ -54,6 +53,14 @@ public class InvestmentVehicleEntity {
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
+    @OneToOne
+    private VehicleOperationEntity operation;
+    @OneToOne
+    private VehicleClosureEntity closure;
+    @OneToOne
+    private BankAccountEntity mainAccount;
+    @OneToOne
+    private BankAccountEntity syncingAccount;
 
 
 }

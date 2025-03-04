@@ -297,7 +297,7 @@ public class LoaneeService implements LoaneeUseCase {
             throw new IdentityException(IdentityMessages.USER_IDENTITY_ALREADY_EXISTS.getMessage());
         }
         UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
-        userIdentity.setCreatedAt(String.valueOf(loanee.getCreatedAt()));
+        userIdentity.setCreatedAt(loanee.getCreatedAt());
         userIdentity = identityOutputPort.save(userIdentity);
         log.info("User identity saved successfully with id {}. Now proceeding to save loanee ", userIdentity.getId());
         loanee.setUserIdentity(userIdentity);

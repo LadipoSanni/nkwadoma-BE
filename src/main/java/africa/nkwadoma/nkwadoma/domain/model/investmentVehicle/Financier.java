@@ -1,0 +1,46 @@
+package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Getter
+@Setter
+@Builder
+public class Financier {
+    private String id;
+    private String organizationName;
+    private UserIdentity individual;
+    private String createdBy;
+    private String investmentVehicleId;
+    private InvestmentVehicleDesignation investmentVehicleRole;
+
+    public void validateUserIdentity() throws MeedlException {
+            validateIndividualEmail(individual);
+            MeedlValidator.validateDataElement(individual.getFirstName(), "First name cannot be empty");
+            MeedlValidator.validateDataElement(individual.getLastName(), "Last name cannot be empty");
+    }
+
+
+    private static void validateIndividualEmail(UserIdentity userIdentity) throws MeedlException {
+        try {
+            MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
+            MeedlValidator.validateEmail(userIdentity.getEmail());
+        } catch (MeedlException e) {
+            throw new MeedlException(e.getMessage() + " for : "+ userIdentity.getEmail());
+        }
+    }
+
+    public void validate() throws MeedlException {
+        validateUserIdentity();
+        MeedlValidator.validateUUID(createdBy, "Valid user id performing this action is required");
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+    }
+}
