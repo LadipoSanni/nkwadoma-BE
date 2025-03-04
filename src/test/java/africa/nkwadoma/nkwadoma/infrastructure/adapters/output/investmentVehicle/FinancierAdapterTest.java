@@ -4,13 +4,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,21 +80,21 @@ class FinancierAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidFirstName(String name)  {
         userIdentity.setFirstName(name);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinancierWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @ParameterizedTest
@@ -122,21 +118,21 @@ class FinancierAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidFirstName(String name){
         userIdentity.setFirstName(name);
-        financier.setIndividuals(List.of(userIdentity, userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividuals(List.of(userIdentity, userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinanciersWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividuals(List.of(userIdentity, userIdentity2));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.inviteFinancier(financier));
     }
     @Test

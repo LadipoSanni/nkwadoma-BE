@@ -5,18 +5,19 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.education.*;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
+import africa.nkwadoma.nkwadoma.domain.model.education.Program;
+import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -201,7 +202,7 @@ public class TestData {
         return loanRequest;
     }
 
-    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus ,AccountStatus status,String loaneeId) {
+    public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus , AccountStatus status, String loaneeId) {
         LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
         loaneeLoanAccount.setLoanStatus(loanStatus);
         loaneeLoanAccount.setAccountStatus(status);
@@ -210,7 +211,7 @@ public class TestData {
     }
     public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
         return Financier.builder()
-                .individuals(List.of(userIdentity))
+                .individual(userIdentity)
                 .createdBy(testId)
                 .build();
     }
