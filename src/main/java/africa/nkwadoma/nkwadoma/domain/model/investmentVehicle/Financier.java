@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -20,17 +20,16 @@ public class Financier {
     private String id;
     private List<OrganizationIdentity> organizations;
     private List<UserIdentity> individuals;
-    private String createdBy;
+    private String invitedBy;
     private String investmentVehicleId;
-    private InvestmentVehicleRole investmentVehicleRole;
     private int pageNumber;
     private int pageSize;
 
     public void validateIndividuals() throws MeedlException {
         for (UserIdentity userIdentity : individuals) {
             validateIndividualEmail(userIdentity);
-            MeedlValidator.validateDataElement(userIdentity.getFirstName(), "First Name cannot be empty");
-            MeedlValidator.validateDataElement(userIdentity.getLastName(), "Last Name cannot be empty");
+            MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+            MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
         }
     }
 
@@ -46,7 +45,7 @@ public class Financier {
 
     public void validate() throws MeedlException {
         validateIndividuals();
-        MeedlValidator.validateUUID(createdBy, "Valid user id performing this action is required");
+        MeedlValidator.validateUUID(invitedBy, "Valid user id performing this action is required");
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 }

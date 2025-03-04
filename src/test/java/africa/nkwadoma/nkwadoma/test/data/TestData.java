@@ -16,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -212,7 +211,7 @@ public class TestData {
     public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
         return Financier.builder()
                 .individuals(List.of(userIdentity))
-                .createdBy(testId)
+                .invitedBy(testId)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();

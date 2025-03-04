@@ -21,7 +21,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.
 
 @RequiredArgsConstructor
 
-public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
+public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleMapper investmentVehicleMapper;

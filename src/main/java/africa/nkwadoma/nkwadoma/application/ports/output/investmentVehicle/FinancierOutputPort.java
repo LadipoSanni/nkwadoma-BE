@@ -7,9 +7,10 @@ import org.springframework.data.domain.Page;
 public interface FinancierOutputPort {
     Financier saveFinancier(Financier financier) throws MeedlException;
 
-    Page<Financier> findAllFinancier(Financier financier) throws MeedlException;
+    Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
-    void viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException;
+    Page<Financier> viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException;
 
     Financier findFinancierById(String financierId) throws MeedlException;
+
 }

@@ -21,7 +21,6 @@ public class InvestmentVehicleFinancierEntity {
     @OneToOne
     private UserEntity financier;
     @ManyToOne
-    @JoinColumn(name = "investment_vehicle_id")
     private InvestmentVehicleEntity investmentVehicle;
     private InvestmentVehicleRole investmentVehicleRole;
 }

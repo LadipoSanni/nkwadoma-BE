@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class InvestmentVehicleServiceTest {
     @Autowired
-    private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
+    private InvestmentVehicleUseCase investmentVehicleUseCase;
     private InvestmentVehicle fundGrowth;
     private String investmentId;
     @Autowired

@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import jakarta.persistence.Entity;
@@ -23,6 +22,5 @@ public class FinancierEntity {
     private List<OrganizationEntity> organizations;
     @OneToMany
     private List<UserEntity> individuals;
-    private InvestmentVehicleRole investmentVehicleRole;
-    private String createdBy;
+    private String invitedBy;
 }

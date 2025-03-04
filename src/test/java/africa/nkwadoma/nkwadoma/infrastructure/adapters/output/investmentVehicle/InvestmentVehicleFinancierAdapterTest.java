@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
@@ -16,8 +17,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.*;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @SpringBootTest
@@ -35,6 +40,7 @@ class InvestmentVehicleFinancierAdapterTest {
     private InvestmentVehicle investmentVehicle;
     private UserIdentity userIdentity;
     private String investmentVehicleId;
+    private final Pageable pageRequest = PageRequest.of(0, 10);
     @BeforeEach
     void setUp() {
         try {
@@ -160,6 +166,30 @@ class InvestmentVehicleFinancierAdapterTest {
         assertEquals(foundInvestmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicleId);
         assertEquals(investmentVehicleFinancier.getFinancier().getId(), userIdentity.getId());
         assertEquals(investmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicle.getId());
+    }
+    @Test
+    @Order(3)
+    void viewAllFinancierInVehicle(){
+        Page<Financier> financiersPage = null;
+        try {
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId,pageRequest);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        List<Financier> financiers = financiersPage.toList();
+        assertEquals(1, financiers.size());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
+    void viewAllFinancierInVehicleWithInvalidVehicleId(String invalidId) {
+        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, pageRequest));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
+    void deleteWithInvalidId(String invalidId){
+        assertThrows(MeedlException.class, () -> investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(invalidId));
     }
     @AfterAll
     void tearDown() {

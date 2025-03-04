@@ -28,7 +28,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class InvestmentVehicleController {
 
     private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
-    private final CreateInvestmentVehicleUseCase investmentVehicleUseCase;
+    private final InvestmentVehicleUseCase investmentVehicleUseCase;
 
     @PostMapping("investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")

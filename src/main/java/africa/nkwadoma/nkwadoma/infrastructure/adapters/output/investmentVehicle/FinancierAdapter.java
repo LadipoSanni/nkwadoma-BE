@@ -3,9 +3,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -30,11 +31,11 @@ import java.time.LocalDateTime;
 @Component
 public class FinancierAdapter implements FinancierOutputPort {
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final FinancierRepository financierRepository;
     private final FinancierMapper financierMapper;
-    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierAdapter;
+    private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
+    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
 
 
     @Override
@@ -49,11 +50,18 @@ public class FinancierAdapter implements FinancierOutputPort {
 
         return financierMapper.map(savedFinancierEntity);
     }
+    @Override
+    public Financier findFinancierById(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        FinancierEntity financierEntity = financierRepository.findById(financierId)
+                .orElseThrow(()-> new MeedlException("Financier not found"));
+        return financierMapper.map(financierEntity);
+    }
 
     @Override
-    public Page<Financier> findAllFinancier(Financier financier) throws MeedlException {
+    public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
         log.info("Searching for all financier on the platform at adapter level.");
-        MeedlValidator.validateObjectInstance(financier, "View all financier request cannot be empty.");
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         MeedlValidator.validatePageSize(financier.getPageSize());
         MeedlValidator.validatePageNumber(financier.getPageNumber());
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
@@ -64,19 +72,17 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public void viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException {
+    public Page<Financier> viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier);
         MeedlValidator.validatePageSize(financier.getPageSize());
         MeedlValidator.validatePageNumber(financier.getPageNumber());
-        MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), "Invalid investment identification provided");
-    }
+        MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
-    @Override
-    public Financier findFinancierById(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID);
-        FinancierEntity financierEntity = financierRepository.findById(financierId)
-                .orElseThrow(()-> new MeedlException("Financier not found"));
-        return financierMapper.map(financierEntity);
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+        log.info("View all financiers in a vehicle. Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
+        Page<Financier> foundFinanciers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(financier.getInvestmentVehicleId(), pageRequest);
+        log.info("Found financiers in db: {}", foundFinanciers);
+        return foundFinanciers;
     }
 
     private void addFinancierToVehicle(Financier investmentVehicleFinancier, InvestmentVehicle investmentVehicle) {
@@ -96,17 +102,17 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     private void createInvestmentVehicleFinancier(InvestmentVehicle investmentVehicle, UserIdentity financial) throws MeedlException {
-        investmentVehicleFinancierAdapter.save(InvestmentVehicleFinancier.builder()
+        investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
                         .financier(financial)
                         .investmentVehicle(investmentVehicle)
                         .build());
         log.info("Financier {} added to investment vehicle {}.", financial.getEmail(), investmentVehicle.getName());
     }
 
-    private UserIdentity saveFinancier(Financier investmentVehicleFinancier, UserIdentity investor) throws MeedlException {
+    private UserIdentity saveFinancier(Financier financier, UserIdentity investor) throws MeedlException {
         log.info("User {} does not exist on platform and cannot be added to investment vehicle.", investor.getEmail());
         investor.setRole(IdentityRole.FINANCIER);
-        investor.setCreatedBy(investmentVehicleFinancier.getCreatedBy());
+        investor.setCreatedBy(financier.getInvitedBy());
         UserIdentity userIdentity = identityManagerOutputPort.createUser(investor);
         userIdentity.setCreatedAt(LocalDateTime.now());
         return userIdentityOutputPort.save(userIdentity);
