@@ -1,10 +1,12 @@
 -- Recreate the FinancierEntity table
 CREATE TABLE financier_entity (
                                   id VARCHAR(255) PRIMARY KEY,
+                                  organization_name VARCHAR(255),
+                                  individual_id VARCHAR(255),
                                   investment_vehicle_role VARCHAR(255),
-                                  invited_by VARCHAR(255)
+                                  invited_by VARCHAR(255),
+                                  CONSTRAINT financier_entity_individual_fk FOREIGN KEY (individual_id) REFERENCES meedl_user(id)
 );
-
 -- Drop existing table if it exists
 DROP TABLE IF EXISTS investment_vehicle_financier_entity CASCADE;
 
