@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;

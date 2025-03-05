@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.test.data;
+package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;

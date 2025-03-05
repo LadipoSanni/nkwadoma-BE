@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
-import africa.nkwadoma.nkwadoma.test.data.*;
+import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.*;
