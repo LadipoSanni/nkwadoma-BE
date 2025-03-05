@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.mapstruct.*;
 
 
-@Mapper(componentModel = "spring"  , uses = InvestmentVehicleFinancierMapper.class,nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring"  , uses = InvestmentVehicleFinancierMapper.class ,nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface InvestmentVehicleMapper {
 
     @Mapping(target = "totalAvailableAmount", source = "totalAvailableAmount")

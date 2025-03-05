@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleRole;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -16,7 +16,7 @@ public class InvestmentVehicleFinancier {
     private String id;
     private UserIdentity financier;
     private InvestmentVehicle investmentVehicle;
-    private InvestmentVehicleRole investmentVehicleRole;
+    private InvestmentVehicleDesignation investmentVehicleDesignation;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier being added to investment vehicle can not be empty");

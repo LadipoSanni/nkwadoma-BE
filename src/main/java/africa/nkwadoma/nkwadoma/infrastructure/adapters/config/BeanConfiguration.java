@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
@@ -150,8 +151,10 @@ public class BeanConfiguration {
 
 
     @Bean
-    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenUtils tokenUtils){
-        return new NotificationService(emailOutputPort,tokenUtils);
+    public NotificationService emailService(EmailOutputPort emailOutputPort, TokenUtils tokenUtils,
+                                            UserIdentityOutputPort userIdentityOutputPort,
+                                            MeedlNotificationOutputPort meedlNotificationOutputPort){
+        return new NotificationService(emailOutputPort,tokenUtils,userIdentityOutputPort,meedlNotificationOutputPort);
     }
 
     @Bean

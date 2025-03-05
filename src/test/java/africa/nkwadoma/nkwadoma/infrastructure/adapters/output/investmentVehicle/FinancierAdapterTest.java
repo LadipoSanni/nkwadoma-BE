@@ -43,7 +43,6 @@ class FinancierAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
 
-
     @BeforeEach
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailtest@mail.com","efc9c7ae-9954-408f-9460-fcb6cf5efb3d");
@@ -77,30 +76,30 @@ class FinancierAdapterTest {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
-        assertNotNull(response.getIndividuals().get(0));
+        assertNotNull(response.getIndividual());
         assertNotNull(response.getId());
-        assertEquals(financier.getIndividuals().get(0).getId(), response.getIndividuals().get(0).getId());
+        assertEquals(financier.getIndividual().getId(), response.getIndividual().getId());
         financierId = response.getId();
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidFirstName(String name)  {
         userIdentity.setFirstName(name);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinancierWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividuals(List.of(userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @ParameterizedTest
@@ -124,21 +123,21 @@ class FinancierAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidFirstName(String name){
         userIdentity.setFirstName(name);
-        financier.setIndividuals(List.of(userIdentity, userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividuals(List.of(userIdentity, userIdentity));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinanciersWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividuals(List.of(userIdentity, userIdentity2));
+        financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @Test
@@ -196,6 +195,8 @@ class FinancierAdapterTest {
     void viewAllFinanciersInInvestmentVehicleWithInvalidVehicleId(String invalidId) {
         financier.setInvestmentVehicleId(invalidId);
         assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinanciersInInvestmentVehicle(financier));
+        financier.setIndividual(userIdentity);
+        assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
     @Test
     public void inviteFinancierThatAlreadyExistOnThePlatform() {
