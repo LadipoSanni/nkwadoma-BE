@@ -46,4 +46,6 @@ public class MeedlNotificationController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+
 }
