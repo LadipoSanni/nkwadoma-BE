@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.test.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -141,19 +142,7 @@ class OrganizationIdentityServiceTest {
     @Test
     void viewAllOrganizationWithStatus() throws MeedlException {
 
-        OrganizationIdentity roseCouture2 = new OrganizationIdentity();
-        roseCouture2.setId("83f744df-78a2-4db6-bb04-b81545e78e49");
-        roseCouture2.setName("rose couture6");
-        roseCouture2.setEmail("iamoluchimercy@gmail.com");
-        roseCouture2.setTin("7682-5627");
-        roseCouture2.setRcNumber("RC8789905");
-        roseCouture2.setServiceOfferings(List.of(new ServiceOffering()));
-        roseCouture.getServiceOfferings().get(0).setIndustry(Industry.EDUCATION);
-        roseCouture2.setPhoneNumber("09876365714");
-        roseCouture2.setInvitedDate(LocalDateTime.now().toString());
-        roseCouture2.setWebsiteAddress("rosecouture2.org");
-        roseCouture2.setOrganizationEmployees(orgEmployee);
-        roseCouture2.setEnabled(Boolean.TRUE);
+        OrganizationIdentity roseCouture2 = TestData.createOrganizationTestData("rose couture6", "RC8789905",orgEmployee);
         roseCouture2.setStatus(ActivationStatus.ACTIVE);
 
         int pageNumber = 0;
@@ -172,7 +161,6 @@ class OrganizationIdentityServiceTest {
         when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE)).thenReturn(organizationIdentityPage);
         Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
         assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getStatus());
