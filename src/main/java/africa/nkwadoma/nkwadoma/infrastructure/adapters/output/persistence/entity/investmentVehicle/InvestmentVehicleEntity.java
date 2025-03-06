@@ -53,6 +53,14 @@ public class InvestmentVehicleEntity {
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
+    @OneToOne
+    private VehicleOperationEntity operation;
+    @OneToOne
+    private VehicleClosureEntity closure;
+    @OneToOne
+    private BankAccountEntity mainAccount;
+    @OneToOne
+    private BankAccountEntity syncingAccount;
 
 
 }
