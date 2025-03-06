@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -155,6 +156,18 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
+    @Test
+    void cannotSaveToDraftWithNullName(){
+        capitalGrowth.setName(null);
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
+    }
+
+    @Test
+    void cannotSaveToDraftWithEmptyName(){
+        capitalGrowth.setName(StringUtils.EMPTY);
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
+    }
+
     @Order(2)
     @Test
     void findInvestmentVehicleDetailsById() {
@@ -195,7 +208,7 @@ class InvestmentVehicleAdapterTest {
     @Test
     void investmentVehicleCanBeSavedToDraft(){
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("Save To Draft");
-        investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
+        investmentVehicle.setInvestmentVehicleStatus(DRAFT);
         investmentVehicle.setSize(null);
         investmentVehicle.setRate(null);
         try{
@@ -205,8 +218,9 @@ class InvestmentVehicleAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicle);
-        assertEquals(InvestmentVehicleStatus.DRAFT, investmentVehicle.getInvestmentVehicleStatus());
+        assertEquals(DRAFT, investmentVehicle.getInvestmentVehicleStatus());
     }
+
 
 
     @AfterAll
