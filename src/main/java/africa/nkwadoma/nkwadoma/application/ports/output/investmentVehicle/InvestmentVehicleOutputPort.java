@@ -22,4 +22,6 @@ public interface InvestmentVehicleOutputPort {
     List<InvestmentVehicle>  searchInvestmentVehicle(String  name) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
+
+    List<InvestmentVehicle> findAllInvestmentVehicleByStatus(InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException;
 }

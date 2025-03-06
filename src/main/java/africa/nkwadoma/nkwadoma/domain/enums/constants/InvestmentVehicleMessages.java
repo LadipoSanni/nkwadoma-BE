@@ -10,9 +10,10 @@ public enum InvestmentVehicleMessages {
     INVESTMENT_CANNOT_BE_EMPTY("Investment vehicle id cannot be empty"),
     INVESTMENT_VEHICLE_NOT_FOUND("Investment vehicle not found"),
     INVESTMENT_VEHICLE_NAME_EXIST("Investment vehicle name exist"),
-    INVESTMENT_VEHICLE_CANNOT_BE_NULL("Investment vehicle Object cannot be null"),
+    INVESTMENT_VEHICLE_CANNOT_BE_NULL("Investment vehicle Object cannot be empty"),
     INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY("Investment vehicle name cannot be empty"),
-    INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL("Investment vehicle type cannot be null");
+    INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL("Investment vehicle type cannot be empty"),
+    INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL("Investment vehicle status cannot be empty");
     private final String message;
 
     InvestmentVehicleMessages(String message) {
