@@ -5,8 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlReponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification.MeedlNotificationRestMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.ALL_NOTIFICATION_VIEW_SUCCESSFULLY;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.NOTIFICATION_VIEW_SUCCESSFULLY;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_EDITED_SUCCESSFULLY;
 
 @RestController
 @RequestMapping(BASE_URL)
@@ -37,13 +38,28 @@ public class MeedlNotificationController {
                                                            String notificationId) throws MeedlException {
         MeedlNotification meedlNotification = meedlNotificationUsecase.viewNotification(meedlUser.getClaimAsString("sub"),
                 notificationId);
-        MeedlReponse meedlReponse =
-                meedlNotificationRestMapper.toMeedlResponse(meedlNotification);
-        ApiResponse<MeedlReponse> apiResponse = ApiResponse.<MeedlReponse>builder()
-                .data(meedlReponse)
+        MeedlNotificationReponse meedlNotificationReponse =
+                meedlNotificationRestMapper.toMeedlNotificationResponse(meedlNotification);
+        ApiResponse<MeedlNotificationReponse> apiResponse = ApiResponse.<MeedlNotificationReponse>builder()
+                .data(meedlNotificationReponse)
                 .message(NOTIFICATION_VIEW_SUCCESSFULLY)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("view-all-notification")
+    private ResponseEntity<ApiResponse<?>> viewAllNotification(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        List<MeedlNotification> meedlNotifications =
+                meedlNotificationUsecase.viewAllNotification(meedlUser.getClaimAsString("sub"));
+        List<MeedlNotificationReponse> meedlNotificationReponse =
+                meedlNotificationRestMapper.toMeedlNotificationResponses(meedlNotifications);
+        ApiResponse<List<MeedlNotificationReponse>> apiResponse =
+                ApiResponse.<List<MeedlNotificationReponse>>builder()
+                        .data(meedlNotificationReponse)
+                        .message(ALL_NOTIFICATION_VIEW_SUCCESSFULLY)
+                        .statusCode(HttpStatus.OK.toString())
+                        .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

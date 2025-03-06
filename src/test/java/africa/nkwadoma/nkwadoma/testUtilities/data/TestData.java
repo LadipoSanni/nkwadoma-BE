@@ -409,6 +409,8 @@ public class TestData {
                 .timestamp(LocalDateTime.now())
                 .contentId(testId)
                 .title("Title")
+                .senderMail("qudusa55@gmail.com")
+                .senderFullName("John Doe")
                 .build();
     }
 
