@@ -65,7 +65,8 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     public Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validateDataElement(String.valueOf(type), INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        if (type == null) throw new MeedlException(INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(String.valueOf(type), INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleType(type, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);

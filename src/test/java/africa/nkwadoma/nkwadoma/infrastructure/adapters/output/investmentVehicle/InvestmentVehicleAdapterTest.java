@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -196,7 +197,7 @@ class InvestmentVehicleAdapterTest {
     @Test
     void investmentVehicleCanBeSavedToDraft(){
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("Save To Draft");
-        investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
+        investmentVehicle.setInvestmentVehicleStatus(DRAFT);
         investmentVehicle.setSize(null);
         investmentVehicle.setRate(null);
         try{
@@ -206,7 +207,7 @@ class InvestmentVehicleAdapterTest {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicle);
-        assertEquals(InvestmentVehicleStatus.DRAFT, investmentVehicle.getInvestmentVehicleStatus());
+        assertEquals(DRAFT, investmentVehicle.getInvestmentVehicleStatus());
     }
 
     @Order(6)
@@ -247,25 +248,26 @@ class InvestmentVehicleAdapterTest {
     @Test
     void viewAllInvestmentVehicleByTypeDoesNotReturnDraft() {
         try {
-            investmentVehicleOutputPort.save(fundGrowth);
-            fundGrowth.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
             Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
                     pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
             List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
             assertNotNull(investmentVehiclesList);
-            assertFalse(investmentVehiclesList.isEmpty());
-            log.info("---------------> status -----" + investmentVehiclesList.get(0).getInvestmentVehicleStatus().toString());
             assertEquals(1, investmentVehiclesList.size());
-            assertEquals(InvestmentVehicleType.ENDOWMENT, investmentVehiclesList.get(0).getInvestmentVehicleType());
+            assertEquals(InvestmentVehicleStatus.PUBLISHED, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
         } catch (Exception e) {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
     }
 
+    @Test
+    void viewAllInvestmentVehicleByTypeThrowExceptionForNullParameter() {
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber, null));
+    }
+
 
     @Test
     void viewAllInvestmentVehiclePassingNullParameter(){
-        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(0,1,null));
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber,null));
     }
 
     @AfterAll

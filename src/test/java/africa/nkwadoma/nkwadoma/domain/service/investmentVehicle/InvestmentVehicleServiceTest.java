@@ -34,6 +34,7 @@ class InvestmentVehicleServiceTest {
     @BeforeEach
     void setUp() {
         fundGrowth = TestData.buildInvestmentVehicle("Growth Investment limited");
+//        fundGrowth.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
     }
 
     @Order(1)
