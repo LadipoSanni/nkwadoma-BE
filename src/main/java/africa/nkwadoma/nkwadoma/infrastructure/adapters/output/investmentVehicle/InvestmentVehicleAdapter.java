@@ -36,6 +36,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validateObjectInstance(investmentVehicle, INVESTMENT_VEHICLE_CANNOT_BE_NULL.getMessage());
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
+            investmentVehicle.validateDraft();
             return saveAndGetInvestmentVehicle(investmentVehicle);
         }
         investmentVehicle.validate();

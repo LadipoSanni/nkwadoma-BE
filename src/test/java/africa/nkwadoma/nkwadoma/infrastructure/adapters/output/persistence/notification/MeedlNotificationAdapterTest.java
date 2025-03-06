@@ -87,6 +87,32 @@ public class MeedlNotificationAdapterTest {
     }
 
     @Test
+    void cannotSaveNotificationWithNullSenderMail() {
+        meedlNotification.setSenderMail(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," "})
+    void cannotSaveNotificationWithEmptySenderMail(String senderMail) {
+        meedlNotification.setSenderMail(senderMail);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @Test
+    void cannotSaveNotificationWithNullSenderName() {
+        meedlNotification.setSenderFullName(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," "})
+    void cannotSaveNotificationWithEmptySenderName(String senderName) {
+        meedlNotification.setSenderFullName(senderName);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @Test
     @Order(1)
     void saveNotification() {
         MeedlNotification saveNotification = null;

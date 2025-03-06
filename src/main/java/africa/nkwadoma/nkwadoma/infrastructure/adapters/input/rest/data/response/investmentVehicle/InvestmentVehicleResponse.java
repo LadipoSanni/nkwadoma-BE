@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,4 +32,5 @@ public class InvestmentVehicleResponse {
     private BigDecimal netAssetValue;
     private LocalDate startDate;
     private String investmentVehicleLink;
+    private InvestmentVehicleStatus investmentVehicleStatus;
 }
