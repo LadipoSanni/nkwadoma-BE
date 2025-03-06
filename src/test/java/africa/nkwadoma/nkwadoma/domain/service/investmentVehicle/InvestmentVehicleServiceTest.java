@@ -34,7 +34,6 @@ class InvestmentVehicleServiceTest {
     @BeforeEach
     void setUp() {
         fundGrowth = TestData.buildInvestmentVehicle("Growth Investment limited");
-//        fundGrowth.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
     }
 
     @Order(1)
@@ -108,6 +107,7 @@ class InvestmentVehicleServiceTest {
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
     }
+
 
     @AfterAll
     void cleanUp() {
