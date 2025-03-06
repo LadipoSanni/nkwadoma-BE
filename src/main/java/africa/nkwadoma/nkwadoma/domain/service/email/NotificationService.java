@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.*;
 
+import java.util.List;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
@@ -213,5 +215,12 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         }
         meedlNotification.setRead(true);
         return meedlNotificationOutputPort.save(meedlNotification);
+    }
+
+    @Override
+    public List<MeedlNotification> viewAllNotification(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot empty");
+        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
     }
 }

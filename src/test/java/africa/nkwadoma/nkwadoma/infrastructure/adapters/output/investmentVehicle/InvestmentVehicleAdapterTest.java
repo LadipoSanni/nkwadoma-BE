@@ -157,6 +157,18 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
+    @Test
+    void cannotSaveToDraftWithNullName(){
+        capitalGrowth.setName(null);
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
+    }
+
+    @Test
+    void cannotSaveToDraftWithEmptyName(){
+        capitalGrowth.setName(StringUtils.EMPTY);
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
+    }
+
     @Order(2)
     @Test
     void findInvestmentVehicleDetailsById() {
@@ -269,6 +281,7 @@ class InvestmentVehicleAdapterTest {
     void viewAllInvestmentVehiclePassingNullParameter(){
         assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber,null));
     }
+
 
     @AfterAll
     void cleanUp() throws MeedlException {
