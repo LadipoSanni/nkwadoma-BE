@@ -31,6 +31,7 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
+            investmentVehicle.validateDraft();
             return saveInvestmentVehicleToDraft(investmentVehicle);
         }
         return createInvestmentVehicle(investmentVehicle);
