@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse;
 
 
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class MeedlReponse {
+public class MeedlNotificationReponse {
 
     private String id;
     private String contentId;

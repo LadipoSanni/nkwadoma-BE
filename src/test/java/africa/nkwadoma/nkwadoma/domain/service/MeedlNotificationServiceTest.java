@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -137,4 +138,28 @@ public class MeedlNotificationServiceTest {
         assertThrows(MeedlException.class, ()->
                 notificationService.viewNotification(userIdentity.getId(),id));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," ","jjdjkjdjd"})
+    void cannotViewAllNotificationWithEmptyUserIdAndInvalidUuid(String id) throws MeedlException {
+        assertThrows(MeedlException.class, () ->
+                notificationService.viewAllNotification(id));
+    }
+
+    @Test
+    void cannotViewAllNotificationWithNullUserId() throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewAllNotification(null));
+    }
+
+    @Test
+    void viewAllNotification() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId()))
+                .thenReturn(List.of(meedlNotification));
+        List<MeedlNotification> meedlNotifications = notificationService.viewAllNotification(userIdentity.getId());
+        assertNotNull(meedlNotifications);
+        assertEquals(1,meedlNotifications.size());
+    }
+
 }
