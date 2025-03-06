@@ -243,6 +243,25 @@ class InvestmentVehicleAdapterTest {
         }
     }
 
+    @Order(8)
+    @Test
+    void viewAllInvestmentVehicleByTypeDoesNotReturnDraft() {
+        try {
+            investmentVehicleOutputPort.save(fundGrowth);
+            fundGrowth.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+            assertNotNull(investmentVehiclesList);
+            assertFalse(investmentVehiclesList.isEmpty());
+            log.info("---------------> status -----" + investmentVehiclesList.get(0).getInvestmentVehicleStatus().toString());
+            assertEquals(1, investmentVehiclesList.size());
+            assertEquals(InvestmentVehicleType.ENDOWMENT, investmentVehiclesList.get(0).getInvestmentVehicleType());
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+    }
+
 
     @Test
     void viewAllInvestmentVehiclePassingNullParameter(){
