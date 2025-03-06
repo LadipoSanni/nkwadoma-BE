@@ -230,7 +230,6 @@ class InvestmentVehicleAdapterTest {
                     pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
             List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
             assertNotNull(investmentVehiclesList);
-            assertFalse(investmentVehiclesList.isEmpty());
             assertEquals(1, investmentVehiclesList.size());
             assertEquals(InvestmentVehicleType.ENDOWMENT, investmentVehiclesList.get(0).getInvestmentVehicleType());
         } catch (Exception e) {
