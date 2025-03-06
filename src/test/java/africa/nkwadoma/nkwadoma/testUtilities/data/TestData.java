@@ -412,10 +412,10 @@ public class TestData {
                 .build();
     }
 
-    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(UserIdentity userIdentity, InvestmentVehicle investmentVehicleFinancier) {
+    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(Financier financier, InvestmentVehicle investmentVehicle) {
         return InvestmentVehicleFinancier.builder()
-                .financier(userIdentity)
-                .investmentVehicle(investmentVehicleFinancier)
+                .financier(financier)
+                .investmentVehicle(investmentVehicle)
                 .build();
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,7 +50,7 @@ class InvestmentVehicleFinancierAdapterTest {
         }
         investmentVehicle = saveInvestmentVehicle(TestData.buildInvestmentVehicle("InvestmentVehicleFinancierTest"));
         log.info("Successfully saved the vehicle for investment vehicle financier test");
-        investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(userIdentity, investmentVehicle);
+//        investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(userIdentity, investmentVehicle);
     }
     private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
         try {
@@ -101,8 +102,9 @@ class InvestmentVehicleFinancierAdapterTest {
             throw new RuntimeException(e);
         }
         try {
-            InvestmentVehicleFinancier foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
-            assertNotNull(foundInvestmentVehicleFinancier);
+            Optional<InvestmentVehicleFinancier> foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
+            assertTrue(foundInvestmentVehicleFinancier.isPresent());
+            assertNotNull(foundInvestmentVehicleFinancier.get());
             log.info("Financier investment vehicle found: " + foundInvestmentVehicleFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -151,14 +153,16 @@ class InvestmentVehicleFinancierAdapterTest {
     @Test
     @Order(2)
     void findByInvestmentVehicleIdAndFinancierId(){
-        InvestmentVehicleFinancier foundInvestmentVehicleFinancier = null;
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = null;
         try {
             log.info("finding investment vehicle financier with vehicle id {} and financier id {}",investmentVehicle.getId(), userIdentity.getId());
-            foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
+            optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
         } catch (MeedlException e) {
             log.error("Error while getting investment vehicle financier. {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+        assertTrue(optionalInvestmentVehicleFinancier.isPresent());
+        InvestmentVehicleFinancier foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
         assertNotNull(foundInvestmentVehicleFinancier);
         assertEquals(foundInvestmentVehicleFinancier.getFinancier().getId(), userIdentity.getId());
         assertEquals(foundInvestmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicleId);

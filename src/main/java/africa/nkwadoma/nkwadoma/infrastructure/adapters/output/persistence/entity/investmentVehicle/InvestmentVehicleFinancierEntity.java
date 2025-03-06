@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
+
 @Setter
 @Getter
 @Builder
@@ -17,8 +19,8 @@ public class InvestmentVehicleFinancierEntity {
     @UuidGenerator
     private String id;
     @OneToOne
-    private UserEntity financier;
+    private FinancierEntity financier;
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
-    private InvestmentVehicleDesignation investmentVehicleRole;
+    private List<InvestmentVehicleDesignation> investmentVehicleRole;
 }

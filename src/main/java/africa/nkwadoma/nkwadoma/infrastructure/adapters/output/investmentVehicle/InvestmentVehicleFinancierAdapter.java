@@ -15,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,13 +35,17 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public InvestmentVehicleFinancier findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException {
+    public Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        MeedlValidator.validateUUID(financierId, "Invalid financier Id provided");
-        InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity = investorInvestmentVehicleRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId)
-                .orElseThrow(()-> new MeedlException("Financier may not have been added to investment vehicle"));
-        log.info("Investment vehicle financier found {}", investmentVehicleFinancierEntity.getId());
-        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+        MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investorInvestmentVehicleRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
+//                .orElseThrow(()-> new MeedlException("Financier may not have been added to investment vehicle"));
+
+        if (optionalInvestmentVehicleFinancierEntity.isEmpty()){
+            return Optional.empty();
+        }
+        log.info("Investment vehicle financier found {}", optionalInvestmentVehicleFinancierEntity.get().getId());
+        return Optional.of(investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(optionalInvestmentVehicleFinancierEntity.get()));
     }
 
     @Override

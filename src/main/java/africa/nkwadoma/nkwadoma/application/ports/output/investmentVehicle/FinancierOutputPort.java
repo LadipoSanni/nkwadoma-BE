@@ -9,8 +9,7 @@ public interface FinancierOutputPort {
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
-    Page<Financier> viewAllFinanciersInInvestmentVehicle(Financier financier) throws MeedlException;
+    Financier findFinancierByFinancierId(String financierId) throws MeedlException;
 
-    Financier findFinancierById(String financierId) throws MeedlException;
-
+    Financier findFinancierByUserId(String userId) throws MeedlException;
 }

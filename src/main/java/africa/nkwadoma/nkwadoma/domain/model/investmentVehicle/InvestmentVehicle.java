@@ -64,7 +64,7 @@ public class InvestmentVehicle {
         MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
     }
 
-    public void setValues() {
+    public void     setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setStartDate(LocalDate.now());
         setTotalAvailableAmount(size);

@@ -8,11 +8,15 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 @Getter
 @Setter
+@ToString
 @Builder
 public class Financier {
     private String id;
@@ -20,9 +24,9 @@ public class Financier {
     private UserIdentity individual;
     private String invitedBy;
     private String investmentVehicleId;
+    private List<InvestmentVehicleDesignation> investmentVehicleRole;
     private int pageNumber;
     private int pageSize;
-    private InvestmentVehicleDesignation investmentVehicleRole;
 
     public void validateUserIdentity() throws MeedlException {
             validateIndividualEmail(individual);
@@ -43,6 +47,5 @@ public class Financier {
     public void validate() throws MeedlException {
         validateUserIdentity();
         MeedlValidator.validateUUID(invitedBy, "Valid user id performing this action is required");
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 }

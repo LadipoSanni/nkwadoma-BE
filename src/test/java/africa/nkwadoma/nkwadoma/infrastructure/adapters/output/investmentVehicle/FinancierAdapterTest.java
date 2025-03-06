@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -46,6 +47,12 @@ class FinancierAdapterTest {
     @BeforeEach
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailtest@mail.com","efc9c7ae-9954-408f-9460-fcb6cf5efb3d");
+        userIdentity.setRole(IdentityRole.FINANCIER);
+        try {
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
         financier = TestData.buildFinancierIndividual(userIdentity);
         investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -68,7 +75,7 @@ class FinancierAdapterTest {
 
     @Test
     @Order(1)
-    public void inviteFinancier() {
+    public void saveFinancier() {
         Financier response;
         try {
             response = financierOutputPort.saveFinancier(financier);
@@ -102,12 +109,7 @@ class FinancierAdapterTest {
         financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
-    public void inviteFinancierWithInvalidOrNonExistingInvestmentVehicleId(String investmentVehicleId){
-        financier.setInvestmentVehicleId(investmentVehicleId);
-        assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
-    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void inviteFinancierWithInvalidCreatedBy(String invitedBy){
@@ -142,6 +144,42 @@ class FinancierAdapterTest {
     }
     @Test
     @Order(2)
+    void findFinancierByFinancierId() {
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinancier);
+        assertEquals(financierId, foundFinancier.getId());
+    }
+    @Test
+    @Order(3)
+    void findFinancierByUserId() {
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinancier);
+        assertNotNull(foundFinancier.getIndividual());
+        assertEquals(financierId, foundFinancier.getId());
+        assertEquals(userIdentity.getId(), foundFinancier.getIndividual().getId());
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
+    void findFinancierByInvalidFinancierId(String invalidId) {
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(invalidId));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
+    void findFinancierByInvalidUserId(String invalidId) {
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByUserId(invalidId));
+    }
+    @Test
+    @Order(3)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -153,68 +191,12 @@ class FinancierAdapterTest {
         List<Financier> financiers = financiersPage.toList();
         assertEquals(1, financiers.size());
     }
-    @Test
-    void findFinancierById() {
-        Financier foundFinancier = null;
-        try {
-            foundFinancier = financierOutputPort.findFinancierById(financierId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertNotNull(foundFinancier);
-        assertEquals(financierId, foundFinancier.getId());
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
-    void findFinancierByInvalidId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierById(invalidId));
-    }
+
     @Test
     void viewFinanciersWithNull(){
         assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinancier(null));
     }
-    @Test
-    public void viewAllFinancierInInvestmentVehicle() {
-        Page<Financier> financiersPage = null;
-        try {
-            financiersPage = financierOutputPort.viewAllFinanciersInInvestmentVehicle(financier);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertNotNull(financiersPage);
-        List<Financier> financiers = financiersPage.toList();
-        assertFalse(financiers.isEmpty());
-        assertEquals(financier.getInvestmentVehicleId(), financiers.get(0).getInvestmentVehicleId());
-    }
-    @Test
-    void viewAllFinancierInVehicleWithNull(){
-        assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinanciersInInvestmentVehicle(null));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "hidhfj"})
-    void viewAllFinanciersInInvestmentVehicleWithInvalidVehicleId(String invalidId) {
-        financier.setInvestmentVehicleId(invalidId);
-        assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinanciersInInvestmentVehicle(financier));
-        financier.setIndividual(userIdentity);
-        assertThrows( MeedlException.class,()-> financierOutputPort.saveFinancier(financier));
-    }
-    @Test
-    public void inviteFinancierThatAlreadyExistOnThePlatform() {
 
-//    financierOutputPort.inviteFinancier(financier);
-    }
-    @Test
-    public void inviteFinancierThatDoesNotExistOnThePlatform() {
-
-    }
-    @Test
-    public void inviteFinancierThatHasAlreadyBeenAddedToAnInvestmentVehicle() {
-
-    }
-    @Test
-    public void inviteFinancierToNoneExistentInvestmentVehicle(){
-
-    }
     @Test
     public void inviteLoaneeToBecomeAFinancier(){
 

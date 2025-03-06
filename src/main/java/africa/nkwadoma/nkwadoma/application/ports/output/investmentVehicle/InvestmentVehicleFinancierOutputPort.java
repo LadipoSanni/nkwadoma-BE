@@ -7,10 +7,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface InvestmentVehicleFinancierOutputPort {
     InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException;
 
-    InvestmentVehicleFinancier findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException;
+    Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException;
 
     void deleteInvestmentVehicleFinancier(String id) throws MeedlException;
 
