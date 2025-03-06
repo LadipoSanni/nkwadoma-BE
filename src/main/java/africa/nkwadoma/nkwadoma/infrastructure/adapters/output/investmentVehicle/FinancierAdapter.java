@@ -38,7 +38,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     private void addFinancierToVehicle(Financier investmentVehicleFinancier, InvestmentVehicle investmentVehicle) {
-        investmentVehicleFinancier.getIndividuals().stream().forEach(investor ->{
+        UserIdentity investor = investmentVehicleFinancier.getIndividual();
             try {
                 UserIdentity foundInvestor = userIdentityOutputPort.findByEmail(investor.getEmail());
                 log.info("User {} exists on platform and can be added to investment vehicle.",investor.getEmail());
@@ -50,7 +50,7 @@ public class FinancierAdapter implements FinancierOutputPort {
                     throw new RuntimeException(ex);
                 }
             }
-        });
+
     }
 
     private void createInvestmentVehicleFinancier(InvestmentVehicle investmentVehicle, UserIdentity financial) throws MeedlException {

@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle;
 
-public enum InvestmentVehicleRole {
+public enum InvestmentVehicleDesignation {
     DONOR,
     ENDOWER,
     INVESTOR,
-    SPONSOR
+    SPONSOR,
+    LEAD
 }

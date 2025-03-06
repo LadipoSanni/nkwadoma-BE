@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.*;
@@ -198,6 +199,19 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         if (ObjectUtils.isEmpty(userIdentity)) {
             throw new MeedlNotificationException("Un-Existing user cannot receive notification");
         }
+        return meedlNotificationOutputPort.save(meedlNotification);
+    }
+
+    @Override
+    public MeedlNotification viewNotification(String id, String notificationId) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot be empty");
+        MeedlValidator.validateUUID(notificationId,"Notification id cannot be empty");
+        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        MeedlNotification meedlNotification = meedlNotificationOutputPort.findNotificationById(notificationId);
+        if (!meedlNotification.getUser().getId().equals(userIdentity.getId())) {
+            throw new MeedlNotificationException("this notification is not assigned to this user");
+        }
+        meedlNotification.setRead(true);
         return meedlNotificationOutputPort.save(meedlNotification);
     }
 }

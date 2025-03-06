@@ -21,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,7 @@ public class MeedlNotificationServiceTest {
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
     private MeedlNotification meedlNotification;
     private UserIdentity userIdentity;
+    private String notificationId = UUID.randomUUID().toString();
 
 
 
@@ -84,6 +87,7 @@ public class MeedlNotificationServiceTest {
                .thenReturn(null);
        assertThrows(MeedlException.class, ()-> notificationService.sendNotification(meedlNotification));
     }
+
     @Test
     void sendNotification() throws MeedlException {
         when(userIdentityOutputPort.findById(userIdentity.getId()))
@@ -93,5 +97,44 @@ public class MeedlNotificationServiceTest {
         meedlNotification = notificationService.sendNotification(meedlNotification);
         assertNotNull(meedlNotification);
         assertEquals(meedlNotification.getUser().getId(), userIdentity.getId());
+    }
+
+    @Test
+    void viewNotification() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId()))
+                .thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.findNotificationById(notificationId))
+                .thenReturn(meedlNotification);
+        when(meedlNotificationOutputPort.save(meedlNotification))
+                .thenReturn(meedlNotification);
+        meedlNotification = notificationService.viewNotification(userIdentity.getId(),notificationId);
+        assertNotNull(meedlNotification);
+        assertEquals(meedlNotification.getUser().getId(),userIdentity.getId());
+    }
+
+    @Test
+    void cannotViewNotificationWithNullUserId() throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewNotification(null,notificationId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, " ","jhhjhjdhjd"})
+    void cannotViewNotificationWithEmptyUserIdAndInvalidUuid(String id) throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewNotification(id,notificationId));
+    }
+
+    @Test
+    void cannotViewNotificationWithNullNotificationId() throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewNotification(userIdentity.getId(),null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, " ","jhhjhjdhjd"})
+    void cannotViewNotificationWithEmptyNotificationIdAndInvalidUUid(String id) throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewNotification(userIdentity.getId(),id));
     }
 }
