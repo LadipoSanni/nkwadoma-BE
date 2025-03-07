@@ -20,6 +20,5 @@ public class FinancierEntity {
     private String organizationName;
     @OneToOne
     private UserEntity individual;
-    private InvestmentVehicleDesignation investmentVehicleRole;
     private String invitedBy;
 }

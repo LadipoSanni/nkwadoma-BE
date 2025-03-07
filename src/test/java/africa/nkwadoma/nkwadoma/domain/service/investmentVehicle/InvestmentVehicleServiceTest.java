@@ -1,12 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class InvestmentVehicleServiceTest {
     @Autowired
-    private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
+    private InvestmentVehicleUseCase investmentVehicleUseCase;
     private InvestmentVehicle fundGrowth;
     private String investmentId;
     @Autowired

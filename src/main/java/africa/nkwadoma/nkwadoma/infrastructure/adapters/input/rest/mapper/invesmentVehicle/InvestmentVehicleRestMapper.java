@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;

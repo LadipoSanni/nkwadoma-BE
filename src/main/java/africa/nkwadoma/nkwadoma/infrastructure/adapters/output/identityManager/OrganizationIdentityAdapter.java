@@ -129,7 +129,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Searching for all organizations at adapter level.");
-        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity, "View all organization request can not be empty");
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));

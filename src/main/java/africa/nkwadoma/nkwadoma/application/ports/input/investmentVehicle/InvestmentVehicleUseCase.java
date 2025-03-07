@@ -8,7 +8,7 @@ import org.springframework.data.domain.*;
 
 import java.util.List;
 
-public interface CreateInvestmentVehicleUseCase {
+public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
