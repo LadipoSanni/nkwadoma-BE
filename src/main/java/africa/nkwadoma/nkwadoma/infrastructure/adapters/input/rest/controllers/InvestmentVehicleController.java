@@ -121,6 +121,26 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("view-all-investment-vehicle-by-type-and-status")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleTypeAndStatus(
+            @RequestParam int pageSize,
+            @RequestParam int pageNumber,
+            @RequestParam InvestmentVehicleType type,
+            @RequestParam InvestmentVehicleStatus status) throws MeedlException {
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
+        List<InvestmentVehicleResponse> investmentVehicleResponse =
+                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
+
+        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
+                .data(investmentVehicleResponse)
+                .message(VIEW_ALL_INVESTMENT_VEHICLE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName) throws MeedlException {

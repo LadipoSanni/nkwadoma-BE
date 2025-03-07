@@ -314,8 +314,45 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber,null));
     }
 
+    @Test
+    void viewAllInvestmentVehicleByTypeAndStatus() {
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try {
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT, InvestmentVehicleStatus.PUBLISHED);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
 
+    @Test
+    void viewAllInvestmentVehicleByTypeAndStatusCommercialDraft() {
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try {
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(
+                    pageSize, pageNumber, InvestmentVehicleType.COMMERCIAL, DRAFT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.COMMERCIAL));
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
+    }
 
+    @Test
+    void viewAllInvestmentVehicleByTypeAndStatusNullParameterInType() {
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, null, InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByTypeAndStatusNullParameterInStatus() {
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT, null));
+    }
 
     @AfterAll
     void cleanUp() throws MeedlException {

@@ -25,4 +25,12 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
 
     List<InvestmentVehicleEntity> findByInvestmentVehicleStatus(InvestmentVehicleStatus investmentVehicleStatus);
 
+    @Query("SELECT v FROM InvestmentVehicleEntity v " +
+            "WHERE v.investmentVehicleType = :type " +
+            "AND v.investmentVehicleStatus = :status")
+    Page<InvestmentVehicleEntity> findByInvestmentVehicleTypeAndStatus(
+            @Param("type") InvestmentVehicleType type,
+            @Param("status") InvestmentVehicleStatus status,
+            Pageable pageable
+    );
 }
