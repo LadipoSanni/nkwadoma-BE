@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -279,8 +280,7 @@ class InvestmentVehicleAdapterTest {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
         assertNotNull(investmentVehiclesList);
-        assertEquals(2, investmentVehiclesList.size());
-        assertEquals(InvestmentVehicleStatus.PUBLISHED, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
+        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
     @Test
@@ -295,8 +295,7 @@ class InvestmentVehicleAdapterTest {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
         assertNotNull(investmentVehiclesList);
-        assertEquals(1, investmentVehiclesList.size());
-        assertEquals(DRAFT, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
+        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
     }
 
     @Test

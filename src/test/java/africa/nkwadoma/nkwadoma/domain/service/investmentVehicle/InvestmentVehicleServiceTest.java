@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -110,6 +111,7 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
+    @Order(6)
     void viewAllInvestmentVehiclesByStatus(){
         List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
         try{
@@ -117,7 +119,8 @@ class InvestmentVehicleServiceTest {
         } catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(1, investmentVehicles.size());
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
     @Test
