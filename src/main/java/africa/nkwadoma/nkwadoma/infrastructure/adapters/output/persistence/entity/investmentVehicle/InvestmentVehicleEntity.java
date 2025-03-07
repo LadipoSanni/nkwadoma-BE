@@ -51,7 +51,7 @@ public class InvestmentVehicleEntity {
     private BigDecimal minimumInvestmentAmount;
     private LocalDate startDate;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "DRAFT")
+//    @Column(nullable = false, columnDefinition = "DRAFT")
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
     @OneToOne
