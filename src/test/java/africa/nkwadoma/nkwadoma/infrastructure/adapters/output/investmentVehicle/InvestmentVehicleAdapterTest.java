@@ -281,6 +281,21 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber,null));
     }
 
+    @Test
+    void viewAllInvestmentVehicleByTypeAndStatus() {
+        try {
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+            assertNotNull(investmentVehiclesList);
+            assertEquals(1, investmentVehiclesList.size());
+            assertEquals(InvestmentVehicleType.ENDOWMENT, investmentVehiclesList.get(0).getInvestmentVehicleType());
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+    }
+
+
 
     @AfterAll
     void cleanUp() throws MeedlException {
