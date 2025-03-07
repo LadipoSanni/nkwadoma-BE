@@ -112,6 +112,12 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         return investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize, pageNumber, type);
     }
 
+    @Override
+    public List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException {
+        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(status);
+    }
+
     private String generateInvestmentVehicleLink(String id) {
         return INVESTMENT_VEHICLE_URL+id;
     }
