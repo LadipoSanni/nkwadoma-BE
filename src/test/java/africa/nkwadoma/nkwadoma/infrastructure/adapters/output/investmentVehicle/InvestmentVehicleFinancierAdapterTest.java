@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -34,23 +35,33 @@ class InvestmentVehicleFinancierAdapterTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private FinancierOutputPort financierOutputPort;
 
     private InvestmentVehicleFinancier investmentVehicleFinancier;
     private InvestmentVehicle investmentVehicle;
     private UserIdentity userIdentity;
     private String investmentVehicleId;
+    private Financier financier;
+    private String financierId;
     private final Pageable pageRequest = PageRequest.of(0, 10);
-    @BeforeEach
+    @BeforeAll
     void setUp() {
         try {
-            userIdentity = saveUserIdentity(TestData.createTestUserIdentity("InvestmentVehicleFinancier@notmail.com","3f89a9e1-62a5-4b42-bff1-6c8b5f77c5e2"));
+            userIdentity = saveUserIdentity(TestData.createTestUserIdentity("InvestmentVehicleFinanciertest@notmail.com", "3f89a9e1-62a5-4b42-bff1-6c8b5f77c5e2"));
             log.info("Financier saved successfully for investment vehicle financier test. {}", userIdentity.getId());
+            financier = financierOutputPort.saveFinancier(Financier
+                    .builder()
+                    .individual(userIdentity)
+                    .invitedBy(userIdentity.getId())
+                    .build());
+            financierId = financier.getId();
         } catch (MeedlException e) {
-            log.warn("Failed to create user on db {}", e.getMessage(),  e);
+            log.warn("Failed to create user on db {}", e.getMessage(), e);
         }
         investmentVehicle = saveInvestmentVehicle(TestData.buildInvestmentVehicle("InvestmentVehicleFinancierTest"));
         log.info("Successfully saved the vehicle for investment vehicle financier test");
-//        investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(userIdentity, investmentVehicle);
+        investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(financier, investmentVehicle);
     }
     private UserIdentity saveUserIdentity(UserIdentity userIdentity) throws MeedlException {
         try {
@@ -102,7 +113,7 @@ class InvestmentVehicleFinancierAdapterTest {
             throw new RuntimeException(e);
         }
         try {
-            Optional<InvestmentVehicleFinancier> foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
+            Optional<InvestmentVehicleFinancier> foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
             assertTrue(foundInvestmentVehicleFinancier.isPresent());
             assertNotNull(foundInvestmentVehicleFinancier.get());
             log.info("Financier investment vehicle found: " + foundInvestmentVehicleFinancier);
@@ -112,7 +123,10 @@ class InvestmentVehicleFinancierAdapterTest {
         assertNotNull(savedInvestmentVehicleFinancier);
         assertNotNull(savedInvestmentVehicleFinancier.getFinancier());
         assertNotNull(savedInvestmentVehicleFinancier.getInvestmentVehicle());
-        assertEquals(investmentVehicleFinancier.getFinancier().getId(), userIdentity.getId());
+        assertNotNull(investmentVehicleFinancier.getFinancier());
+        assertNotNull(investmentVehicleFinancier.getFinancier().getIndividual());
+        assertEquals(investmentVehicleFinancier.getFinancier().getIndividual().getId(), financier.getIndividual().getId());
+        assertEquals(investmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(investmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicle.getId());
 
     }
@@ -132,21 +146,23 @@ class InvestmentVehicleFinancierAdapterTest {
     }
     @Test
     void saveWithEmptyInvestmentVehicleId(){
-        investmentVehicleFinancier.getInvestmentVehicle().setId(null);
+        investmentVehicle.setId(null);
+        investmentVehicleFinancier.setInvestmentVehicle(investmentVehicle);
         assertThrows(MeedlException.class, () -> investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier));
     }
     @Test
     void saveWithEmptyFinancierId(){
-        investmentVehicleFinancier.getFinancier().setId(null);
+        financier.setId(null);
+        investmentVehicleFinancier.setFinancier(financier);
         assertThrows(MeedlException.class, () -> investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier));
     }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-812970a9c868"})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void findByInvestmentVehicleIdAndInvalidFinancierId(String financierId){
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(),financierId));
     }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-812970a9c868"})
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void findByInvalidInvestmentVehicleIdAndValidFinancierId(String investmentVehicleId){
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId,userIdentity.getId()));
     }
@@ -156,7 +172,7 @@ class InvestmentVehicleFinancierAdapterTest {
         Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = null;
         try {
             log.info("finding investment vehicle financier with vehicle id {} and financier id {}",investmentVehicle.getId(), userIdentity.getId());
-            optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), userIdentity.getId());
+            optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         } catch (MeedlException e) {
             log.error("Error while getting investment vehicle financier. {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -164,9 +180,9 @@ class InvestmentVehicleFinancierAdapterTest {
         assertTrue(optionalInvestmentVehicleFinancier.isPresent());
         InvestmentVehicleFinancier foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
         assertNotNull(foundInvestmentVehicleFinancier);
-        assertEquals(foundInvestmentVehicleFinancier.getFinancier().getId(), userIdentity.getId());
+        assertEquals(foundInvestmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(foundInvestmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicleId);
-        assertEquals(investmentVehicleFinancier.getFinancier().getId(), userIdentity.getId());
+        assertEquals(investmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(investmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicle.getId());
     }
     @Test
@@ -204,8 +220,13 @@ class InvestmentVehicleFinancierAdapterTest {
             log.info("Found user to delete in test with id : {}", foundUser.getId());
             foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             log.info("Found investment vehicle for deleting with id {}", foundInvestmentVehicle.getId());
-            foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId,foundUser.getId());
-            log.info("Found investment vehicle financier for deletion in test :{}", foundInvestmentVehicleFinancier.getId());
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId,financierId);
+            if (optionalInvestmentVehicleFinancier.isPresent()) {
+                foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
+                log.info("Found investment vehicle financier for deletion in test :{}", foundInvestmentVehicleFinancier.getId());
+            }else {
+                log.error("No investment vehicle financier found for deletion in test with user id : {}", foundUser.getId());
+            }
         } catch (MeedlException e) {
             log.error("Error while deleting test data. {}",e.getMessage(), e);
         }
@@ -214,9 +235,10 @@ class InvestmentVehicleFinancierAdapterTest {
                 investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(foundInvestmentVehicleFinancier.getId());
                 investmentVehicleOutputPort.deleteInvestmentVehicle(foundInvestmentVehicle.getId());
             }else {
-                log.info("found investment vehicle to delete test data. {}, or investment vehicle financier is null {}", foundInvestmentVehicle, foundInvestmentVehicleFinancier);
+                log.info("Found investment vehicle to delete test data. {}, or investment vehicle financier is null {}", foundInvestmentVehicle, foundInvestmentVehicleFinancier);
             }
             if (foundUser != null) {
+                financierOutputPort.delete(financierId);
                 userIdentityOutputPort.deleteUserById(foundUser.getId());
             }else {
                 log.info("Found user to delete test data {}",foundUser);

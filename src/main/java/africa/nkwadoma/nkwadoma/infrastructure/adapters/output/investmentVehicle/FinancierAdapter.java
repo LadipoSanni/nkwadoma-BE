@@ -61,6 +61,12 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
+    public void delete(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        financierRepository.deleteById(financierId);
+    }
+
+    @Override
     public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
         log.info("Searching for all financier on the platform at adapter level.");
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());

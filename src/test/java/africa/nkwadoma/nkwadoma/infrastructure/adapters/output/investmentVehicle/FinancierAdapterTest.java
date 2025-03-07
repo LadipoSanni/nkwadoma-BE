@@ -46,7 +46,7 @@ class FinancierAdapterTest {
 
     @BeforeEach
     void setUp(){
-        userIdentity = TestData.createTestUserIdentity("financieremailtest@mail.com","efc9c7ae-9954-408f-9460-fcb6cf5efb3d");
+        userIdentity = TestData.createTestUserIdentity("financieremailadaptertest@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
@@ -199,6 +199,23 @@ class FinancierAdapterTest {
 
     @Test
     public void inviteLoaneeToBecomeAFinancier(){
+
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "skfnjk"})
+    void deleteFinancierWithInvalidFinancierId(String invalidId){
+        assertThrows(MeedlException.class,()-> financierOutputPort.delete(invalidId));
+    }
+    @Test
+    public void deleteFinancier(){
+        try {
+            Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            assertNotNull(financier);
+            financierOutputPort.delete(financierId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
 
     }
     @AfterAll

@@ -6,7 +6,9 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestorInvestmentVehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -23,9 +26,10 @@ import java.util.Optional;
 public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinancierOutputPort {
     private final InvestorInvestmentVehicleRepository investorInvestmentVehicleRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
+    private final FinancierMapper financierMapper;
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(investmentVehicleFinancier, "Investment vehicle financier not be empty.");
+        MeedlValidator.validateObjectInstance(investmentVehicleFinancier, "Investment vehicle financier can not be empty.");
         investmentVehicleFinancier.validate();
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
                 investmentVehicleFinancierMapper.toInvestmentVehicleFinancierEntity(investmentVehicleFinancier);
@@ -38,8 +42,8 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
+        log.info("Validated id for view InvestmentVehicleFinancier by vehicle id and financier id is {} ----- {}", investmentVehicleId, financierId);
         Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investorInvestmentVehicleRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
-//                .orElseThrow(()-> new MeedlException("Financier may not have been added to investment vehicle"));
 
         if (optionalInvestmentVehicleFinancierEntity.isEmpty()){
             return Optional.empty();
@@ -57,7 +61,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities = investorInvestmentVehicleRepository.findAllByInvestmentVehicleId(investmentVehicleId, pageRequest);
-        return null;
+        Page<FinancierEntity> financiers = investorInvestmentVehicleRepository.findFinanciersByInvestmentVehicleId(investmentVehicleId, pageRequest);
+        return financiers.map(financierMapper::map);
     }
 }

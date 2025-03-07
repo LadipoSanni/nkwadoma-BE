@@ -43,7 +43,6 @@ public class FinancierService implements FinancierUseCase {
     public String inviteFinancier(Financier financier) throws MeedlException {
         inviteFinancierValidation(financier);
         try {
-
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
             financier = saveNonExistingFinancier(financier);
@@ -65,6 +64,7 @@ public class FinancierService implements FinancierUseCase {
         log.warn("Failed to find user on application. Financier not yet onboarded.");
         try {
             existingFinancier = saveFinancier(financier);
+            log.info("Saved non-existing financier {}", existingFinancier.getId());
             financier = updateFinancierDetails(financier, existingFinancier);
         } catch (MeedlException ex) {
             throw new RuntimeException(ex);
@@ -75,11 +75,13 @@ public class FinancierService implements FinancierUseCase {
     private Financier getFinancierByUserIdentity(Financier financier) throws MeedlException {
 
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getIndividual().getEmail());
+        log.info("User identity found by email {} ,when inviting financier ", userIdentity.getEmail());
         if (userIdentity.getRole() != IdentityRole.FINANCIER) {
 //                throw new MeedlException(FinancierMessages.INVALID_USER_ROLE.getMessage());
         }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            log.info("Financier found by user identity id {}", userIdentity.getId());
             return updateFinancierDetails(financier, existingFinancier);
             
         }catch (MeedlException e){
@@ -92,10 +94,14 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void notifyExistingFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        log.info("Started in app notification for invite financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(financier.getIndividual())
                 .timestamp(LocalDateTime.now())
                 .contentId(investmentVehicle.getId())
+                //to update
+                .senderMail(financier.getIndividual().getEmail())
+                .senderFullName(financier.getIndividual().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
@@ -133,13 +139,13 @@ public class FinancierService implements FinancierUseCase {
     }
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier);
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         MeedlValidator.validatePageSize(financier.getPageSize());
         MeedlValidator.validatePageNumber(financier.getPageNumber());
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
-        log.info("View all financiers in a vehicle. Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
+        log.info("View all financiers in a vehicle with id {}. Page number: {}, page size: {}",financier.getInvestmentVehicleId(), financier.getPageNumber(), financier.getPageSize());
         Page<Financier> foundFinanciers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(financier.getInvestmentVehicleId(), pageRequest);
         log.info("Found financiers in db: {}", foundFinanciers);
         return foundFinanciers;
