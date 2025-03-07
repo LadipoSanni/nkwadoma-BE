@@ -25,14 +25,13 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 public class FinancierController {
     private final FinancierUseCase financierUseCase;
-    private final FinancierRestMapper financierMapper;
     private final FinancierRestMapper financierRestMapper;
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
-        Financier financier = financierMapper.map(financierRequest);
+        Financier financier = financierRestMapper.map(financierRequest);
         financier.setIndividual(financierRequest.getIndividual());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
