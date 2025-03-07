@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,6 +109,22 @@ class InvestmentVehicleServiceTest {
         }
     }
 
+    @Order(6)
+    @Test
+    void viewAllInvestmentVehiclesByStatus(){
+        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+        try{
+            investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertEquals(1, investmentVehicles.size());
+    }
+
+    @Test
+    void viewAllInvestmentVehiclesByStatusWithNullParameter(){
+        assertThrows(MeedlException.class, ()->investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(null));
+    }
 
     @AfterAll
     void cleanUp() {

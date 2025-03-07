@@ -273,14 +273,37 @@ class InvestmentVehicleAdapterTest {
     @Order(9)
     @Test
     void viewAllInvestmentVehicleByStatus() {
+        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
         try {
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+            log.info("----------------->" + investmentVehiclesList);
             assertNotNull(investmentVehiclesList);
-            assertEquals(1, investmentVehiclesList.size());
+            assertEquals(2, investmentVehiclesList.size());
             assertEquals(InvestmentVehicleStatus.PUBLISHED, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
         } catch (Exception e) {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
+    }
+
+    @Order(10)
+    @Test
+    void viewAllInvestmentVehicleByStatusReturnDraft() {
+        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
+        try {
+            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(DRAFT);
+
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+
+        assertNotNull(investmentVehiclesList);
+        assertEquals(1, investmentVehiclesList.size());
+        assertEquals(DRAFT, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByStatusThrowExceptionForNullParameter(){
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(null));
     }
 
     @Test

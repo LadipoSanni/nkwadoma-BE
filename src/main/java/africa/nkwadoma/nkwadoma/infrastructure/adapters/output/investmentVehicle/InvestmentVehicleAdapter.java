@@ -75,7 +75,8 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     @Override
     public List<InvestmentVehicle> findAllInvestmentVehicleByStatus(InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicleStatus, INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
-        return investmentVehicleRepository.findByInvestmentVehicleStatus(investmentVehicleStatus);
+        List<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleStatus(investmentVehicleStatus);
+        return investmentVehicleEntities.stream().map(investmentVehicleMapper::toInvestmentVehicle).collect(Collectors.toList());
     }
 
     @Override
