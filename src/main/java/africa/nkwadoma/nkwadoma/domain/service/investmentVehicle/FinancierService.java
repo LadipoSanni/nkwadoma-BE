@@ -8,7 +8,9 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -77,7 +79,7 @@ public class FinancierService implements FinancierUseCase {
         UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getIndividual().getEmail());
         log.info("User identity found by email {} ,when inviting financier ", userIdentity.getEmail());
         if (userIdentity.getRole() != IdentityRole.FINANCIER) {
-//                throw new MeedlException(FinancierMessages.INVALID_USER_ROLE.getMessage());
+            //TODO Add new role to user.
         }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());

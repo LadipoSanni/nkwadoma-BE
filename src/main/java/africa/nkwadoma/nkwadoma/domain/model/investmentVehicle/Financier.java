@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -30,8 +32,9 @@ public class Financier {
 
     public void validateUserIdentity() throws MeedlException {
             validateIndividualEmail(individual);
-            MeedlValidator.validateDataElement(individual.getFirstName(), "First name cannot be empty");
-            MeedlValidator.validateDataElement(individual.getLastName(), "Last name cannot be empty");
+            MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+            MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+            MeedlValidator.validateEmail(individual.getEmail());
     }
 
 
