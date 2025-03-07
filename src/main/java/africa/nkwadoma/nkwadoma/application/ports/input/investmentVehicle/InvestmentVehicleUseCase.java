@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
@@ -19,4 +20,6 @@ public interface InvestmentVehicleUseCase {
     List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException;
 
     InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException;
+
+    Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 }

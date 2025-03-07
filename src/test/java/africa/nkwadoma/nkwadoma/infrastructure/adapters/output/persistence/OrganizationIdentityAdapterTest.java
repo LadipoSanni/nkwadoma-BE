@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -296,6 +297,35 @@ class OrganizationIdentityAdapterTest {
         } catch (MeedlException meedlException) {
             log.info("{}", meedlException.getMessage());
         }
+    }
+
+    @Test
+    @Order(4)
+    void viewAllOrganizationWithStatus() {
+        Page<OrganizationIdentity> foundOrganizationIdentities = null;
+        try {
+            log.info("found organization {}",organizationOutputPort.findByOrganizationId(amazingGrace.getId()));
+            amazingGrace.setPageSize(1);
+            amazingGrace.setPageNumber(0);
+            foundOrganizationIdentities = organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, ActivationStatus.ACTIVE);
+            assertNotNull(foundOrganizationIdentities);
+            List<OrganizationIdentity> organizationIdentityList = foundOrganizationIdentities.toList();
+            int listSize = organizationIdentityList.size();
+            log.info("{}", organizationIdentityList.size());
+            log.info("{}", organizationIdentityList);
+            assertNotNull(organizationIdentityList);
+            assertFalse(organizationIdentityList.isEmpty());
+            assertTrue(listSize > BigInteger.ZERO.intValue());
+        } catch (MeedlException meedlException) {
+            log.info("{}", meedlException.getMessage());
+        }
+        assertEquals(ActivationStatus.ACTIVE, foundOrganizationIdentities.get().toList().get(0).getStatus());
+    }
+
+    @Test
+    @Order(4)
+    void viewAllOrganizationWithStatusThrowsExceptionWithNullValue() {
+        assertThrows(MeedlException.class, () -> organizationOutputPort.viewAllOrganizationByStatus(amazingGrace, null));
     }
 
     @Test

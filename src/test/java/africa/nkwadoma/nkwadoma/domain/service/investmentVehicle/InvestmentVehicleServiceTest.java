@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -93,6 +94,20 @@ class InvestmentVehicleServiceTest {
         assertEquals(InvestmentVehicleStatus.PUBLISHED,investmentVehicle.getInvestmentVehicleStatus());
         assertNotNull(investmentVehicle.getInvestmentVehicleLink());
     }
+
+    @Order(5)
+    @Test
+    void viewAllInvestmentVehiclesByType(){
+        try{
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByType(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+            assertEquals(1, investmentVehiclesList.size());
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
 
     @AfterAll
     void cleanUp() {
