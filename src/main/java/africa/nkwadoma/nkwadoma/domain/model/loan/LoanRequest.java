@@ -58,6 +58,7 @@ public class LoanRequest {
     private String loaneeId;
     private String loanOfferId;
     private int creditScore;
+    private String actorId;
 
 
     public static void validate(LoanRequest loanRequest) throws MeedlException {
