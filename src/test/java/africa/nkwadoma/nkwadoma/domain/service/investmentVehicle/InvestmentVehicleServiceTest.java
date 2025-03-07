@@ -109,7 +109,6 @@ class InvestmentVehicleServiceTest {
         }
     }
 
-    @Order(6)
     @Test
     void viewAllInvestmentVehiclesByStatus(){
         List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
