@@ -11,7 +11,7 @@ public enum IdentityMessages {
     USER_PREVIOUSLY_VERIFIED("User has added password before. Try forgot password"),
     COLLEAGUE_EXIST("Colleague exist!"),
     USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be null"),
-    IDENTITY_CANNOT_BE_NULL("Organization identity cannot be null"),
+    IDENTITY_CANNOT_BE_NULL("Identity cannot be null"),
     RC_NUMBER_NOT_FOUND("Rc number not found!"),
     ORGANIZATION_NOT_FOUND("Organization not found"),
     ORGANIZATION_RC_NUMBER_ALREADY_EXIST("Organization with this rcnumber already exists "),
