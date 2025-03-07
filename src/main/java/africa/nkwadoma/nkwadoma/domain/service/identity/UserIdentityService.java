@@ -54,7 +54,7 @@ public class UserIdentityService implements CreateUserUseCase {
     @Override
     public UserIdentity inviteColleague(UserIdentity userIdentity) throws MeedlException {
         log.info("Inviting colleague");
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         userIdentity.validate();
         OrganizationEmployeeIdentity foundEmployee = organizationEmployeeIdentityOutputPort.findByEmployeeId(userIdentity.getCreatedBy().trim());
         log.info("Found employee: {}", foundEmployee);
@@ -167,7 +167,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public void changePassword(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validatePassword(userIdentity.getNewPassword());
         login(userIdentity);
         if (userIdentity.getNewPassword().equals(userIdentity.getPassword())){
@@ -198,7 +198,7 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public UserIdentity reactivateUserAccount(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getReactivationReason(), "Reason for reactivation is required.");
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(userIdentity.getId());
