@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
@@ -22,4 +23,6 @@ public interface CreateInvestmentVehicleUseCase {
     InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
+
+    List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException;
 }

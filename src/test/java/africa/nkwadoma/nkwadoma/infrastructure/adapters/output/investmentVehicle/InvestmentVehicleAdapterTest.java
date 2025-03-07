@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -271,6 +272,38 @@ class InvestmentVehicleAdapterTest {
     }
 
     @Test
+    void viewAllInvestmentVehicleByStatus() {
+        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
+        try {
+            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehiclesList);
+        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByStatusReturnDraft() {
+        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
+        try {
+            InvestmentVehicle draftVehicle = TestData.buildInvestmentVehicle("Draft Vehicle");
+            investmentVehicleOutputPort.save(draftVehicle);
+
+            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(DRAFT);
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehiclesList);
+        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByStatusThrowExceptionForNullParameter(){
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(null));
+    }
+
+    @Test
     void viewAllInvestmentVehicleByTypeThrowExceptionForNullParameter() {
         assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber, null));
     }
@@ -280,6 +313,8 @@ class InvestmentVehicleAdapterTest {
     void viewAllInvestmentVehiclePassingNullParameter(){
         assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize,pageNumber,null));
     }
+
+
 
 
     @AfterAll

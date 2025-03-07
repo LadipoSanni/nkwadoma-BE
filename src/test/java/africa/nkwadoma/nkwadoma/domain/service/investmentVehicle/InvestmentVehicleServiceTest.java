@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -108,6 +110,23 @@ class InvestmentVehicleServiceTest {
         }
     }
 
+    @Test
+    @Order(6)
+    void viewAllInvestmentVehiclesByStatus(){
+        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+        try{
+            investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Test
+    void viewAllInvestmentVehiclesByStatusWithNullParameter(){
+        assertThrows(MeedlException.class, ()->investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(null));
+    }
 
     @AfterAll
     void cleanUp() {
