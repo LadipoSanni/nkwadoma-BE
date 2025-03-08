@@ -28,7 +28,7 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
 
     @Override
     public NextOfKin saveAdditionalDetails(NextOfKin nextOfKin) throws MeedlException {
-        MeedlValidator.validateObjectInstance(nextOfKin, "Next of kin cannot be empty or null");
+        MeedlValidator.validateObjectInstance(nextOfKin, "Next of kin cannot be empty.");
         nextOfKin.validate();
         trimSpaceForUserIdentity(nextOfKin.getLoanee());
         Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId()).
