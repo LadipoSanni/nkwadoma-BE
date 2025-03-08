@@ -8,13 +8,13 @@ public enum IdentityMessages {
     USER_NOT_FOUND("User not found!"),
     CLIENT_NOT_FOUND("Client not found!"),
     USER_NOT_VERIFIED("User not verified."),
-    USER_PREVIOUSLY_VERIFIED("User has added password before. Try forgot password"),
+    USER_PREVIOUSLY_VERIFIED("User has added password before. Try forgot password."),
     COLLEAGUE_EXIST("Colleague exist!"),
-    USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be null"),
-    IDENTITY_CANNOT_BE_NULL("Identity cannot be null"),
+    USER_IDENTITY_CANNOT_BE_NULL("User identity cannot be empty."),
+    IDENTITY_CANNOT_BE_NULL("Organization Identity cannot be empty."),
     RC_NUMBER_NOT_FOUND("Rc number not found!"),
-    ORGANIZATION_NOT_FOUND("Organization not found"),
-    ORGANIZATION_RC_NUMBER_ALREADY_EXIST("Organization with this rcnumber already exists "),
+    ORGANIZATION_NOT_FOUND("Organization not found."),
+    ORGANIZATION_RC_NUMBER_ALREADY_EXIST("Organization with this rcnumber already exists."),
     CLIENT_EXIST("Client already exists"),
     INVALID_REGISTRATION_DETAILS("Invalid registration details"),
     INVALID_VALID_ROLE("Role is required"),
@@ -39,13 +39,13 @@ public enum IdentityMessages {
     IDENTITY_VERIFICATION_PROCESSING("Identity verification is being processed"),
     IDENTITY_VERIFIED("Identity verified"),
     IDENTITY_NOT_VERIFIED("Identity not verified"),
-    NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be null"),
+    NEXT_OF_KIN_CANNOT_BE_NULL("Next of kin cannot be empty."),
     LOANEE_NOT_FOUND("Loanee not found"),
-    ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists"),
+    ORGANIZATION_TIN_ALREADY_EXIST("Tax identity number already exists."),
     LOAN_0FFER_ID("Loan offer ID"),
     CONTEXT_LINK("loanOfferId"),
     CONTEXT_LOANEE_ID("loaneeId"),
-    LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee");
+    LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee.");
 
     public String format(Object... args) {
         return String.format(message, args);
