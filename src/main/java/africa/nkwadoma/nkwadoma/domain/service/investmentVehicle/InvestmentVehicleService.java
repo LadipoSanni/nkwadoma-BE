@@ -22,7 +22,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.
 
 @RequiredArgsConstructor
 
-public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
+public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleMapper investmentVehicleMapper;
@@ -116,6 +116,15 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
     public List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException {
         MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
         return investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(status);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType type, InvestmentVehicleStatus status) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validateObjectInstance(type, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
     }
 
     private String generateInvestmentVehicleLink(String id) {

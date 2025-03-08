@@ -28,10 +28,10 @@ public class MeedlNotification {
     private String duration;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(contentId,"content id cannot be empty");
-        MeedlValidator.validateObjectInstance(title,"title cannot be empty");
-        MeedlValidator.validateObjectInstance(user,"user identity cannot be empty");
-        MeedlValidator.validateObjectInstance(timestamp,"timestamp cannot be empty");
+        MeedlValidator.validateUUID(contentId,"Content id cannot be empty");
+        MeedlValidator.validateObjectInstance(title,"Title cannot be empty");
+        MeedlValidator.validateObjectInstance(user,"User identity cannot be empty");
+        MeedlValidator.validateObjectInstance(timestamp,"Timestamp cannot be empty");
         MeedlValidator.validateEmail(senderMail);
         callToAction = true;
         MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty");

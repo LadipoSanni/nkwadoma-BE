@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.AccountStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanAccount;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

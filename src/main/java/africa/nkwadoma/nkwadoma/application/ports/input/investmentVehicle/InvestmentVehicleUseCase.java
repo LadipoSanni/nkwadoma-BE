@@ -8,7 +8,7 @@ import org.springframework.data.domain.*;
 
 import java.util.List;
 
-public interface CreateInvestmentVehicleUseCase {
+public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
@@ -25,4 +25,6 @@ public interface CreateInvestmentVehicleUseCase {
     Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 
     List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException;
+
+    Page<InvestmentVehicle> viewAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType type, InvestmentVehicleStatus status) throws MeedlException;
 }

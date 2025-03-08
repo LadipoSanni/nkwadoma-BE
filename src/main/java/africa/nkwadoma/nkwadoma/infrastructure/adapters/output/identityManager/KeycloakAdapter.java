@@ -216,7 +216,7 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
         String email = userIdentity.getEmail().trim();
         String password = userIdentity.getPassword().trim();
         UserIdentity foundUserIdentity = getUserByEmail(email)
-                .orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IdentityException(IdentityMessages.USER_NOT_FOUND.getMessage()));
         foundUserIdentity.setNewPassword(password);
         log.info("User ID for user creating password : {}", foundUserIdentity.getId());
         if (foundUserIdentity.isEmailVerified() && foundUserIdentity.isEnabled()) {

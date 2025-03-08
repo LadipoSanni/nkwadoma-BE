@@ -129,7 +129,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Searching for all organizations at adapter level.");
-        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(organizationIdentity, "View all organization request can not be empty");
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
@@ -141,8 +141,8 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
 
     @Override
     public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
