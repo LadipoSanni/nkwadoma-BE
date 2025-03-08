@@ -269,7 +269,8 @@ public class FinancierServiceTest {
     }
     @Test
     public void inviteFinancierToNoneExistentInvestmentVehicle(){
-
+        financier.setInvestmentVehicleId("61fb3beb-f200-4b16-ac58-c28d737b546c");
+        assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
     public void inviteLoaneeToBecomeAFinancier(){
