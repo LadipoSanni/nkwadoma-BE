@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
@@ -29,7 +30,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     public List<LoaneeLoanBreakdown> saveAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns,Loanee loanee) throws MeedlException {
         for (LoaneeLoanBreakdown loanBreakdown : loaneeLoanBreakdowns){
             loanBreakdown.validate();
-            MeedlValidator.validateObjectInstance(loanBreakdown);
+            MeedlValidator.validateObjectInstance(loanBreakdown, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
             loanBreakdown.setLoanee(loanee);
         }
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
@@ -42,7 +43,7 @@ public class LoaneeLoanBreakDownPersistenceAdapter implements LoaneeLoanBreakDow
     @Override
     public void deleteAll(List<LoaneeLoanBreakdown> loaneeLoanBreakdowns) throws MeedlException {
         for (LoaneeLoanBreakdown loanBreakdown : loaneeLoanBreakdowns){
-            MeedlValidator.validateObjectInstance(loanBreakdown);
+            MeedlValidator.validateObjectInstance(loanBreakdown, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         }
         List<LoaneeLoanBreakdownEntity> loanBreakdownEntities =
                 loaneeLoanBreakDownMapper.toLoaneeLoanBreakdownEntities(loaneeLoanBreakdowns);

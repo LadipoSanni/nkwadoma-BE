@@ -45,7 +45,7 @@ public class LoanReferral {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanReferralStatus);
+        MeedlValidator.validateObjectInstance(loanReferralStatus, LoanMessages.LOAN_REFERRAL_STATUS_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), "Alternate Contact Address is required");
         MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
         MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), "Alternate Phone Number is required");

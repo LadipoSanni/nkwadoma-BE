@@ -72,7 +72,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
     @Override
     public Cohort save(Cohort cohort) throws MeedlException {
-        MeedlValidator.validateObjectInstance(cohort);
+        MeedlValidator.validateObjectInstance(cohort, INPUT_CANNOT_BE_NULL.getMessage());
         cohort.validate();
         CohortEntity cohortEntity = cohortMapper.toCohortEntity(cohort);
         cohortEntity = cohortRepository.save(cohortEntity);

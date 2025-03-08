@@ -87,7 +87,7 @@ public class MeedlValidator {
     }
 
     public static void validateObjectInstance(Object instance) throws MeedlException {
-        if (ObjectUtils.isEmpty(instance)) {
+        if (ObjectUtils.isEmpty(instance)){
             throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
         }
     }
@@ -151,6 +151,7 @@ public class MeedlValidator {
             throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
         }
     }
+
     private static boolean compareEmailDomain(String inviteeEmail, String inviterEmail) {
         String inviteeEmailDomain =
                 inviteeEmail.substring(inviteeEmail.indexOf(EMAIL_INDEX.getMessage()));
@@ -165,7 +166,7 @@ public class MeedlValidator {
             throw new IdentityException(USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         }
         for(OrganizationEmployeeIdentity userIdentity : userIdentities){
-            MeedlValidator.validateObjectInstance(userIdentity);
+            MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
             userIdentity.getMeedlUser().validate();
         }
         log.info("Users identity validation completed... for user {} ", userIdentities);
@@ -187,7 +188,7 @@ public class MeedlValidator {
     }
 
     public static void validateLoanBreakdowns(List<LoanBreakdown> loanBreakdowns) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanBreakdowns);
+        MeedlValidator.validateObjectInstance(loanBreakdowns, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         for(LoanBreakdown loanBreakdown : loanBreakdowns){
             loanBreakdown.validate();
         }

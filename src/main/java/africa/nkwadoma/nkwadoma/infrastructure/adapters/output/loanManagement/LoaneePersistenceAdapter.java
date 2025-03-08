@@ -29,7 +29,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
 
     @Override
     public Loanee save(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         LoaneeEntity loaneeEntity =
                 loaneeMapper.toLoaneeEntity(loanee);
