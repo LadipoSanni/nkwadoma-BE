@@ -27,7 +27,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public LoanReferral save(LoanReferral loanReferral) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanReferral, "Loan referral cannot be empty or null");
+        MeedlValidator.validateObjectInstance(loanReferral, "Loan referral cannot be empty.");
         LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
         LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);
         return loanReferralMapper.toLoanReferral(savedLoanReferralEntity);
