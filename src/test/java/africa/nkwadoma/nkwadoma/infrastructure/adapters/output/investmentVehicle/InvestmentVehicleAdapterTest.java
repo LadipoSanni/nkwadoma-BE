@@ -280,6 +280,7 @@ class InvestmentVehicleAdapterTest {
         } catch (Exception e) {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
+        log.info("----------------------->" + investmentVehiclesList.toString());
         assertNotNull(investmentVehiclesList);
         assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
@@ -336,12 +337,29 @@ class InvestmentVehicleAdapterTest {
         try{
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
                     pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
         } catch (Exception e) {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
         assertNotNull(investmentVehicles);
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.FUND_RAISING));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFundRaisingStatusReturnOnlyClosed(){
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try{
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
+                    pageSize, pageNumber, FundRaisingStatus.CLOSED);
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.CLOSED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFundRaisingStatusWithNullValue(){
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, null));
     }
 
     @Test
