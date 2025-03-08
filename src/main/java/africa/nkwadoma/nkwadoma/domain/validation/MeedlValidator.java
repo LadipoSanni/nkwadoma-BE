@@ -145,6 +145,7 @@ public class MeedlValidator {
             throw new IdentityException(DOMAIN_EMAIL_DOES_NOT_MATCH.getMessage());
         }
     }
+
     private static boolean compareEmailDomain(String inviteeEmail, String inviterEmail) {
         String inviteeEmailDomain =
                 inviteeEmail.substring(inviteeEmail.indexOf(EMAIL_INDEX.getMessage()));
