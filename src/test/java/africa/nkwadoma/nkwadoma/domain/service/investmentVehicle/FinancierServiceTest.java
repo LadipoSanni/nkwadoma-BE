@@ -230,11 +230,6 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    public void inviteFinancierThatAlreadyExistOnThePlatform() {
-
-//    financierOutputPort.inviteFinancier(financier);
-    }
-    @Test
     public void inviteFinancierThatDoesNotExistOnThePlatform() {
 
     }
