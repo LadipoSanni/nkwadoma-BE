@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
@@ -327,6 +328,20 @@ class InvestmentVehicleAdapterTest {
         assertNotNull(investmentVehicles);
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFundRaisingStatus(){
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try{
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
+                    pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.FUND_RAISING));
     }
 
     @Test
