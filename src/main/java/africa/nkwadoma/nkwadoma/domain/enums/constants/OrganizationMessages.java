@@ -11,7 +11,7 @@ public enum OrganizationMessages {
     INVALID_RC_NUMBER("Invalid Registration number"),
     ORGANIZATION_MUST_NOT_BE_EMPTY("Organization identity must not be empty"),
     ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY("Organization status must not be empty"),
-    ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY("Organization status must not be empty"),
+    ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY("Organization type must not be empty"),
     LOAN_METRICS_NOT_FOUND("No loan metrics found"),
     ORGANIZATION_NAME_IS_REQUIRED("Organization name is required"),
     ORGANIZATION_NOT_FOUND("Organization not found"),
