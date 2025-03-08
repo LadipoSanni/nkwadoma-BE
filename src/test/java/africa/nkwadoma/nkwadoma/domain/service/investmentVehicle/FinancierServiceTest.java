@@ -47,6 +47,8 @@ public class FinancierServiceTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
@@ -58,23 +60,12 @@ public class FinancierServiceTest {
 
     @BeforeAll
     void setUp(){
-        userIdentity = createUserOnDb();
+        userIdentity = TestData.createTestUserIdentity("financieremailservicetest@mail.com");
+        userIdentity.setRole(IdentityRole.FINANCIER);
         financier = TestData.buildFinancierIndividual(userIdentity);
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         financier.setInvestmentVehicleId(investmentVehicle.getId());
-    }
-
-    private UserIdentity createUserOnDb() {
-        userIdentity = TestData.createTestUserIdentity("financieremailservicetest@mail.com");
-        userIdentity.setRole(IdentityRole.FINANCIER);
-        try {
-            userIdentity = userIdentityOutputPort.save(userIdentity);
-            userIdentityId = userIdentity.getId();
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        return userIdentity;
     }
 
     private InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) {
@@ -94,10 +85,12 @@ public class FinancierServiceTest {
 
     @Test
     @Order(1)
-    public void inviteFinancier() {
+    public void inviteFinancierThatDoesNotExistOnThePlatform() {
         String response;
         try {
             response = financierUseCase.inviteFinancier(financier);
+            userIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
+            userIdentityId = userIdentity.getId();
             Financier foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
             financierId = foundFinancier.getId();
         } catch (MeedlException e) {
@@ -232,10 +225,6 @@ public class FinancierServiceTest {
 //    financierOutputPort.inviteFinancier(financier);
     }
     @Test
-    public void inviteFinancierThatDoesNotExistOnThePlatform() {
-
-    }
-    @Test
     public void inviteFinancierThatHasAlreadyBeenAddedToAnInvestmentVehicle() {
 
     }
@@ -244,7 +233,30 @@ public class FinancierServiceTest {
 
     }
     @Test
-    public void inviteLoaneeToBecomeAFinancier(){
+    public void inviteLoaneeToBecomeAFinancier() {
+        UserIdentity loanee = TestData.createTestUserIdentity("loaneeemailservicetest@mail.com");
+        try {
+            loanee = userIdentityOutputPort.save(loanee);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(IdentityRole.LOANEE, loanee.getRole());
+        financier.setIndividual(loanee);
+
+        String response;
+        Financier foundFinancier;
+        try {
+            response = financierUseCase.inviteFinancier(financier);
+            foundFinancier = financierOutputPort.findFinancierByUserId(loanee.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(response);
+        assertEquals("Financier added to investment vehicle", response);
+        assertNotNull(foundFinancier);
+        assertNotNull(foundFinancier.getIndividual());
+        assertEquals(loanee.getId(), foundFinancier.getIndividual().getId());
+        assertEquals(IdentityRole.LOANEE, foundFinancier.getIndividual().getRole());
 
     }
     @AfterAll
@@ -264,6 +276,7 @@ public class FinancierServiceTest {
         }
         financierOutputPort.delete(financierId);
         userIdentityOutputPort.deleteUserById(userIdentityId);
+        identityManagerOutputPort.deleteUser(userIdentity);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
     }
