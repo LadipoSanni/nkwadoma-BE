@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -132,6 +133,26 @@ public class InvestmentVehicleController {
                 investmentVehicleUseCase.viewAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
+
+        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
+                .data(investmentVehicleResponse)
+                .message(VIEW_ALL_INVESTMENT_VEHICLE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("view-all-investment-vehicle-by-fund-raising-status")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleByFundRaisingStatus(
+            @RequestParam int pageSize,
+            @RequestParam int pageNumber,
+            @RequestParam FundRaisingStatus fundRaisingStatus) throws MeedlException {
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, fundRaisingStatus);
+
+        List<InvestmentVehicleResponse> investmentVehicleResponse =
+                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.toList());
 
         ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
                 .data(investmentVehicleResponse)
