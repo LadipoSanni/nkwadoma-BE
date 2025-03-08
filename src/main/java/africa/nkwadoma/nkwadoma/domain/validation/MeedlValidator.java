@@ -86,12 +86,6 @@ public class MeedlValidator {
         }
     }
 
-//    public static void validateObjectInstance(Object instance) throws MeedlException {
-//        if (ObjectUtils.isEmpty(instance)) {
-//            throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
-//        }
-//    }
-
     public static void validateObjectInstance(Object instance, String message) throws MeedlException {
         if (ObjectUtils.isEmpty(instance)){
             throw new MeedlException(message);
