@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -26,7 +27,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public LoanReferral save(LoanReferral loanReferral) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanReferral);
+        MeedlValidator.validateObjectInstance(loanReferral, "Loan referral cannot be empty.");
         LoanReferralEntity loanReferralEntity = loanReferralMapper.toLoanReferralEntity(loanReferral);
         LoanReferralEntity savedLoanReferralEntity = loanReferralRepository.save(loanReferralEntity);
         return loanReferralMapper.toLoanReferral(savedLoanReferralEntity);
@@ -66,7 +67,7 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
 
     @Override
     public LoanReferral createLoanReferral(Loanee loanee) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         LoanReferral loanReferral = new LoanReferral();
         loanReferral.setLoanee(loanee);
         loanReferral.setLoanReferralStatus(LoanReferralStatus.PENDING);

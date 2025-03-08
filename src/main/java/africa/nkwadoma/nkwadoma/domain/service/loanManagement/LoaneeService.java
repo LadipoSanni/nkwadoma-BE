@@ -67,7 +67,7 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
         log.info("Validating loanee before adding");
-        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
         checkIfLoaneeWithEmailExist(loanee);

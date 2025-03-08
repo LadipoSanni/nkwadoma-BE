@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -39,14 +41,14 @@ public class Loanee {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateObjectInstance(loaneeLoanDetail);
+        MeedlValidator.validateObjectInstance(loaneeLoanDetail, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         validateLoaneeUserIdentity();
     }
 
     public void validateLoaneeUserIdentity() throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), "User first name is required.");
         MeedlValidator.validateDataElement(userIdentity.getLastName(), "User last name is required.");
         MeedlValidator.validateEmail(userIdentity.getEmail());

@@ -96,14 +96,14 @@ public class LoanProduct {
     }
 
     private void validateObligorLimit() throws MeedlException {
-        MeedlValidator.validateObjectInstance(obligorLoanLimit);
+        MeedlValidator.validateObjectInstance(obligorLoanLimit, LoanMessages.OBLIGOR_LOAN_LIMIT_REQUIRED.getMessage());
         if (obligorLoanLimit.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
             throw new LoanException(LoanMessages.INVALID_OBLIGOR_LIMIT.getMessage());
         }
     }
 
     private void validateLoanProductSize() throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProductSize);
+        MeedlValidator.validateObjectInstance(loanProductSize, LoanMessages.LOAN_PRODUCT_SIZE_REQUIRED.getMessage());
         if (loanProductSize.compareTo(BigDecimal.ZERO) <= BigDecimal.ZERO.intValue()){
             throw new LoanException(LoanMessages.INVALID_LOAN_PRODUCT_SIZE.getMessage());
         }

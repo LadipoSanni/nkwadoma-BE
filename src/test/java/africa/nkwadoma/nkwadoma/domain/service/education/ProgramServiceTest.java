@@ -164,7 +164,7 @@ class ProgramServiceTest {
     @Test
     void updateProgramWithNullProgram() {
         MeedlException exception = assertThrows(MeedlException.class, () -> programService.updateProgram((null)));
-        assertEquals(exception.getMessage(), MeedlMessages.INVALID_OBJECT.getMessage());
+        assertEquals(exception.getMessage(), ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
     }
     @Test
     void createProgramWithNonExistingCreatedBy() {
