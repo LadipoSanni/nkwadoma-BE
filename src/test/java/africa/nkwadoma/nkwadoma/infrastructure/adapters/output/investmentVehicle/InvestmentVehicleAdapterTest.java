@@ -280,7 +280,6 @@ class InvestmentVehicleAdapterTest {
         } catch (Exception e) {
             fail("Test failed due to unexpected exception: " + e.getMessage());
         }
-        log.info("----------------------->" + investmentVehiclesList.toString());
         assertNotNull(investmentVehiclesList);
         assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
