@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -27,7 +28,7 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
 
     @Override
     public NextOfKin saveAdditionalDetails(NextOfKin nextOfKin) throws MeedlException {
-        MeedlValidator.validateObjectInstance(nextOfKin);
+        MeedlValidator.validateObjectInstance(nextOfKin, "Next of kin cannot be empty.");
         nextOfKin.validate();
         trimSpaceForUserIdentity(nextOfKin.getLoanee());
         Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId()).

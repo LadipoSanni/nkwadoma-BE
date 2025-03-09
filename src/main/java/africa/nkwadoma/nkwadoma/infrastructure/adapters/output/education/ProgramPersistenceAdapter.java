@@ -74,7 +74,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
 
     @Override
     public Program saveProgram(Program program) throws MeedlException {
-        MeedlValidator.validateObjectInstance(program);
+        MeedlValidator.validateObjectInstance(program, ProgramMessages.PROGRAM_CANNOT_BE_EMPTY.getMessage());
         program.validate();
         log.info("Saving program with name: {}", program.getName());
         ProgramPersistenceAdapter.validateServiceOfferings(program.getOrganizationIdentity().getServiceOfferings());

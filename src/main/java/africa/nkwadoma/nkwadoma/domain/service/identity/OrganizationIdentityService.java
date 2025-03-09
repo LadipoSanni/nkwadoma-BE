@@ -180,7 +180,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     private void validateOrganizationIdentityDetails(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         organizationIdentity.validate();
         MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
         log.info("Organization service validated is : {}",organizationIdentity);
@@ -213,7 +213,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     @Override
     public OrganizationIdentity updateOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(organizationIdentity.getId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validateUUID(organizationIdentity.getUpdatedBy(), MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         validateNonUpdatableValues(organizationIdentity);
@@ -226,7 +226,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     public void updateOrganizationStatus(OrganizationIdentity organizationIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATIOM_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(organizationIdentity.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         UserIdentity foundUserIdentity = userIdentityOutputPort.findById(organizationIdentity.getUserIdentity().getId());
         if(ObjectUtils.isNotEmpty(foundUserIdentity) &&
@@ -268,8 +268,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     @Override
     public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus activationStatus) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationIdentity);
-        MeedlValidator.validateObjectInstance(activationStatus);
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(activationStatus, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         return organizationIdentityOutputPort.viewAllOrganizationByStatus(organizationIdentity, activationStatus);
     }
 

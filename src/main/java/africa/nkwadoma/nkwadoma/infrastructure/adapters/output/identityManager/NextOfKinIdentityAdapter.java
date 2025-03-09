@@ -31,7 +31,7 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
         if (ObjectUtils.isEmpty(nextOfKin)) {
             throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         }
-        MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity());
+        MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity(), IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
         return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
