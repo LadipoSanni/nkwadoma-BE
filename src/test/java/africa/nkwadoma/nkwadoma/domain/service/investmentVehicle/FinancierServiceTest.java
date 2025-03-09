@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +52,7 @@ public class FinancierServiceTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
+    private final Pageable pageRequest = PageRequest.of(0, 10);
     private Financier financier;
     private UserIdentity userIdentity;
     private String userIdentityId;
@@ -62,7 +65,8 @@ public class FinancierServiceTest {
         financier = TestData.buildFinancierIndividual(userIdentity);
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
-        financier.setInvestmentVehicleId(investmentVehicle.getId());
+        investmentVehicleId = investmentVehicle.getId();
+        financier.setInvestmentVehicleId(investmentVehicleId);
     }
 
     private UserIdentity createUserOnDb() {
@@ -88,7 +92,6 @@ public class FinancierServiceTest {
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
-        investmentVehicleId = investmentVehicle.getId();
         return investmentVehicle;
     }
 
@@ -227,21 +230,42 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    public void inviteFinancierThatAlreadyExistOnThePlatform() {
-
-//    financierOutputPort.inviteFinancier(financier);
-    }
-    @Test
     public void inviteFinancierThatDoesNotExistOnThePlatform() {
 
     }
     @Test
-    public void inviteFinancierThatHasAlreadyBeenAddedToAnInvestmentVehicle() {
+    @Order(5)
+    public void inviteFinancierToNewVehicle() {
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
+        investmentVehicle = createInvestmentVehicle(investmentVehicle);
+        financier.setInvestmentVehicleId(investmentVehicle.getId());
+        String response;
+        try {
+            response = financierUseCase.inviteFinancier(financier);
+        } catch (MeedlException e) {
+            log.error("Failed to invite with error {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+        assertNotNull(response);
+        assertEquals("Financier added to investment vehicle", response);
+        Page<Financier> financiers;
+        try {
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            deleteInvestmentVehicleFinancier(investmentVehicle.getId(), financierId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicle.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiers);
+        assertNotNull(financierId);
+        assertFalse(financiers.isEmpty());
+        assertEquals(financierId, financiers.getContent().get(0).getId());
 
     }
     @Test
     public void inviteFinancierToNoneExistentInvestmentVehicle(){
-
+        financier.setInvestmentVehicleId("61fb3beb-f200-4b16-ac58-c28d737b546c");
+        assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
     public void inviteLoaneeToBecomeAFinancier(){
@@ -250,22 +274,35 @@ public class FinancierServiceTest {
     @AfterAll
     void tearDown() throws MeedlException {
         log.info("Started deleting data in financier service test." );
-        List<MeedlNotification> meedlNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentityId);
-        meedlNotifications.forEach(notification-> {
-            try {
-                meedlNotificationOutputPort.deleteNotification(notification.getId());
-            } catch (MeedlException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
-        if (optionalInvestmentVehicleFinancier.isPresent()) {
-            investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(optionalInvestmentVehicleFinancier.get().getId());
-        }
+        deleteNotification(userIdentityId);
+        deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
+    }
+
+    private void deleteInvestmentVehicleFinancier(String investmentVehicleId, String financierId) throws MeedlException {
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
+        if (optionalInvestmentVehicleFinancier.isPresent()) {
+            log.info("Deleting existing test data investment vehicle financier {}", optionalInvestmentVehicleFinancier.get().getId());
+            investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(optionalInvestmentVehicleFinancier.get().getId());
+        }else {
+            log.warn("Unable to find or delete test data for investment vehicle financier");
+        }
+    }
+
+    private void deleteNotification(String userIdentityId) throws MeedlException {
+        List<MeedlNotification> meedlNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentityId);
+        meedlNotifications.forEach(notification-> {
+            try {
+                meedlNotificationOutputPort.deleteNotification(notification.getId());
+                log.info("Deleting notifications for test user with id {} and notification with id {}", userIdentityId, notification.getId());
+            } catch (MeedlException e) {
+                log.warn("Unable to delete notification for test user with id {}", userIdentityId);
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }
