@@ -1,8 +1,8 @@
 name: Deploy Production
 
 env:
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/meedl-prod
-  AWS_REGION: eu-west-1
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod
+  AWS_REGION: us-east-1
   CLUSTER: meedl
   SERVICE: meedl-prod
   APP: meedl-prod
