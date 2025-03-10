@@ -64,7 +64,7 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
     @GetMapping("financier/all/view")
-    public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber, int pageSize) throws MeedlException {
+    public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber,@RequestParam int pageSize) throws MeedlException {
        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
