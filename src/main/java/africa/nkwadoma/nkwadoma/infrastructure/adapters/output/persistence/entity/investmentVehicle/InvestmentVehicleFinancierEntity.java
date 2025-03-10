@@ -18,7 +18,7 @@ public class InvestmentVehicleFinancierEntity {
     @Id
     @UuidGenerator
     private String id;
-    @OneToOne
+    @ManyToOne
     private FinancierEntity financier;
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
