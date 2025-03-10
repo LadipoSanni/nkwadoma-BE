@@ -49,6 +49,8 @@ public class FinancierServiceTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
+    private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
@@ -61,24 +63,13 @@ public class FinancierServiceTest {
 
     @BeforeAll
     void setUp(){
-        userIdentity = createUserOnDb();
+        userIdentity = TestData.createTestUserIdentity("financierservicetest2@mail.com");
+        userIdentity.setRole(IdentityRole.FINANCIER);
         financier = TestData.buildFinancierIndividual(userIdentity);
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         investmentVehicleId = investmentVehicle.getId();
         financier.setInvestmentVehicleId(investmentVehicleId);
-    }
-
-    private UserIdentity createUserOnDb() {
-        userIdentity = TestData.createTestUserIdentity("financieremailservicetest@mail.com");
-        userIdentity.setRole(IdentityRole.FINANCIER);
-        try {
-            userIdentity = userIdentityOutputPort.save(userIdentity);
-            userIdentityId = userIdentity.getId();
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        return userIdentity;
     }
 
     private InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) {
@@ -97,12 +88,15 @@ public class FinancierServiceTest {
 
     @Test
     @Order(1)
-    public void inviteFinancier() {
+    public void inviteFinancierThatDoesNotExistOnThePlatform() {
         String response;
         try {
             response = financierUseCase.inviteFinancier(financier);
+            userIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
+            userIdentityId = userIdentity.getId();
             Financier foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
             financierId = foundFinancier.getId();
+            log.info("Financier id for test user with id : {} is {}", userIdentityId, financierId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -230,10 +224,6 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    public void inviteFinancierThatDoesNotExistOnThePlatform() {
-
-    }
-    @Test
     @Order(5)
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
@@ -268,7 +258,30 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    public void inviteLoaneeToBecomeAFinancier(){
+    public void inviteLoaneeToBecomeAFinancier() {
+//        UserIdentity loanee = TestData.createTestUserIdentity("loaneeemailservicetest@mail.com");
+//        try {
+//            loanee = userIdentityOutputPort.save(loanee);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertEquals(IdentityRole.LOANEE, loanee.getRole());
+//        financier.setIndividual(loanee);
+//
+//        String response;
+//        Financier foundFinancier;
+//        try {
+//            response = financierUseCase.inviteFinancier(financier);
+//            foundFinancier = financierOutputPort.findFinancierByUserId(loanee.getId());
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertNotNull(response);
+//        assertEquals("Financier added to investment vehicle", response);
+//        assertNotNull(foundFinancier);
+//        assertNotNull(foundFinancier.getIndividual());
+//        assertEquals(loanee.getId(), foundFinancier.getIndividual().getId());
+//        assertEquals(IdentityRole.LOANEE, foundFinancier.getIndividual().getRole());
 
     }
     @ParameterizedTest
@@ -335,6 +348,7 @@ public class FinancierServiceTest {
         deleteNotification(userIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
+        identityManagerOutputPort.deleteUser(userIdentity);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
