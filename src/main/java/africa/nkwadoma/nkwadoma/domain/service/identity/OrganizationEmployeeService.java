@@ -25,7 +25,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
     @Override
     public Page<OrganizationEmployeeIdentity> viewOrganizationEmployees
             (OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(organizationEmployeeIdentity.getOrganization(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
         MeedlValidator.validatePageNumber(organizationEmployeeIdentity.getPageNumber());
         MeedlValidator.validatePageSize(organizationEmployeeIdentity.getPageSize());
@@ -52,7 +52,7 @@ public class OrganizationEmployeeService implements ViewOrganizationEmployeesUse
 
     @Override
     public OrganizationEmployeeIdentity viewEmployeeDetails(OrganizationEmployeeIdentity organizationEmployeeIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity);
+        MeedlValidator.validateObjectInstance(organizationEmployeeIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(organizationEmployeeIdentity.getId(), "Valid organization employee id is required");
         return organizationEmployeeOutputPort.findByEmployeeId(organizationEmployeeIdentity.getId());
     }

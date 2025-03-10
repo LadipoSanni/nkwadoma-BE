@@ -3,70 +3,91 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class FinancierAdapter implements FinancierOutputPort {
-    private final UserIdentityOutputPort userIdentityOutputPort;
-    private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
-    private final IdentityManagerOutputPort identityManagerOutputPort;
-    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierAdapter;
+    private final FinancierRepository financierRepository;
+    private final FinancierMapper financierMapper;
 
 
     @Override
-    public String inviteFinancier(Financier financier) throws MeedlException {
+    public Financier saveFinancier(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
         financier.validate();
-        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
-        addFinancierToVehicle(financier, investmentVehicle);
-        return "Financier invited.";
+        FinancierEntity financierEntity = financierMapper.map(financier);
+        FinancierEntity savedFinancierEntity = financierRepository.save(financierEntity);
+        log.info("Financier saved to db: {}", savedFinancierEntity);
+
+        return financierMapper.map(savedFinancierEntity);
+    }
+    @Override
+    public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        FinancierEntity financierEntity = financierRepository.findById(financierId)
+                .orElseThrow(()-> new MeedlException("Financier not found"));
+        return financierMapper.map(financierEntity);
     }
 
-    private void addFinancierToVehicle(Financier investmentVehicleFinancier, InvestmentVehicle investmentVehicle) {
-        UserIdentity investor = investmentVehicleFinancier.getIndividual();
-            try {
-                UserIdentity foundInvestor = userIdentityOutputPort.findByEmail(investor.getEmail());
-                log.info("User {} exists on platform and can be added to investment vehicle.",investor.getEmail());
-                createInvestmentVehicleFinancier(investmentVehicle, foundInvestor);
-            } catch (MeedlException e) {
-                try {
-                    UserIdentity userIdentity = saveFinancier(investmentVehicleFinancier, investor);
-                } catch (MeedlException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-
+    @Override
+    public Financier findFinancierByUserId(String id) throws MeedlException {
+        FinancierEntity foundFinancier = financierRepository.findByIndividual_Id(id)
+                .orElseThrow(()-> new MeedlException("Financier not found") );
+        return financierMapper.map(foundFinancier);
     }
 
-    private void createInvestmentVehicleFinancier(InvestmentVehicle investmentVehicle, UserIdentity financial) throws MeedlException {
-        investmentVehicleFinancierAdapter.save(InvestmentVehicleFinancier.builder()
-                        .financier(financial)
-                        .investmentVehicle(investmentVehicle)
-                        .build());
-        log.info("Financier {} added to investment vehicle {}.", financial.getEmail(), investmentVehicle.getName());
+    @Override
+    public void delete(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        financierRepository.deleteById(financierId);
     }
 
-    private UserIdentity saveFinancier(Financier investmentVehicleFinancier, UserIdentity investor) throws MeedlException {
-        log.info("User {} does not exist on platform and cannot be added to investment vehicle.", investor.getEmail());
-        investor.setRole(IdentityRole.FINANCIER);
-        investor.setCreatedBy(investmentVehicleFinancier.getCreatedBy());
-        UserIdentity userIdentity = identityManagerOutputPort.createUser(investor);
-        userIdentity.setCreatedAt(LocalDateTime.now());
-        return userIdentityOutputPort.save(userIdentity);
+    @Override
+    public List<Financier> search(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
+        List<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name);
+        log.info("Financiers found with name: {} {}", name, financierEntities );
+        return financierEntities.stream().map
+                (financierMapper::map).toList();
     }
+
+    @Override
+    public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
+        log.info("Searching for all financier on the platform at adapter level.");
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+        log.info("Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
+        Page<FinancierEntity> financierEntities = financierRepository.findAll(pageRequest);
+        log.info("Found financiers in db: {}", financierEntities);
+        return financierEntities.map(financierMapper::map);
+    }
+
+
 }

@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -44,7 +45,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public OrganizationIdentity save(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Organization identity before saving {}", organizationIdentity);
-        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_MUST_NOT_BE_EMPTY.getMessage());
         organizationIdentity.validate();
         MeedlValidator.validateOrganizationUserIdentities(organizationIdentity.getOrganizationEmployees());
 
@@ -128,13 +129,26 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     @Override
     public Page<OrganizationIdentity> viewAllOrganization(OrganizationIdentity organizationIdentity) throws MeedlException {
         log.info("Searching for all organizations at adapter level.");
-        MeedlValidator.validateObjectInstance(organizationIdentity);
+        MeedlValidator.validateObjectInstance(organizationIdentity, "View all organization request can not be empty");
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
         Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
+        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
+    }
+
+    @Override
+    public Page<OrganizationIdentity> viewAllOrganizationByStatus(OrganizationIdentity organizationIdentity, ActivationStatus status) throws MeedlException {
+        MeedlValidator.validateObjectInstance(organizationIdentity, OrganizationMessages.ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
+        MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
+
+        Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
+        log.info("Organization entities {}", organizationEntities.stream().toList());
         return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 

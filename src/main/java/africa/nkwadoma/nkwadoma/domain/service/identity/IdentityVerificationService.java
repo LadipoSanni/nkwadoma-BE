@@ -132,7 +132,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return IDENTITY_VERIFICATION_FAILURE_SAVED.getMessage();
     }
     private void validateIdentityVerification(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityVerificationMessage.IDENTITY_VERIFICATION_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedBvn(), IdentityVerificationMessage.INVALID_BVN.getMessage());
         MeedlValidator.validateDataElement(identityVerification.getEncryptedNin(), IdentityVerificationMessage.INVALID_NIN.getMessage());
         MeedlValidator.validateUUID(identityVerification.getLoanReferralId(), LoanMessages.INVALID_LOAN_REFERRAL_ID.getMessage());

@@ -67,7 +67,7 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
         log.info("Validating loanee before adding");
-        MeedlValidator.validateObjectInstance(loanee);
+        MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         loanee.validate();
         loanee.getLoaneeLoanDetail().validate();
         checkIfLoaneeWithEmailExist(loanee);
@@ -242,6 +242,7 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
         return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
     }
 

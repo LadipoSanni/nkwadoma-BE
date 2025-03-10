@@ -1,17 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service;
 
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -137,4 +136,28 @@ public class MeedlNotificationServiceTest {
         assertThrows(MeedlException.class, ()->
                 notificationService.viewNotification(userIdentity.getId(),id));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," ","jjdjkjdjd"})
+    void cannotViewAllNotificationWithEmptyUserIdAndInvalidUuid(String id) throws MeedlException {
+        assertThrows(MeedlException.class, () ->
+                notificationService.viewAllNotification(id));
+    }
+
+    @Test
+    void cannotViewAllNotificationWithNullUserId() throws MeedlException {
+        assertThrows(MeedlException.class, ()->
+                notificationService.viewAllNotification(null));
+    }
+
+    @Test
+    void viewAllNotification() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId()))
+                .thenReturn(List.of(meedlNotification));
+        List<MeedlNotification> meedlNotifications = notificationService.viewAllNotification(userIdentity.getId());
+        assertNotNull(meedlNotifications);
+        assertEquals(1,meedlNotifications.size());
+    }
+
 }

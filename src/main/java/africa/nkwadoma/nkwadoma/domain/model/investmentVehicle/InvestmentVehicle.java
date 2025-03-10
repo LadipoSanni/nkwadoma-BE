@@ -41,6 +41,7 @@ public class InvestmentVehicle {
     private LocalDate startDate;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
+    private LocalDate lastUpdatedDate;
 
 
 
@@ -67,6 +68,7 @@ public class InvestmentVehicle {
     public void setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setStartDate(LocalDate.now());
+        setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         setTotalAvailableAmount(size);
     }
 
@@ -75,5 +77,10 @@ public class InvestmentVehicle {
         if (!patternMatches) {
             throw new MeedlException("Tenure must not be greater than 3 digits");
         }
+    }
+
+    public void validateDraft() throws MeedlException {
+        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
 }

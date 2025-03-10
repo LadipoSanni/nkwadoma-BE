@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -43,7 +44,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     @Override
     public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
         if (identityVerification.getDecryptedNin() != null) {
@@ -66,7 +67,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     @Override
     public PremblyNinResponse verifyNinLikeness(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
         return getNinDetails(identityVerification);
@@ -98,7 +99,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     @Override
     public PremblyResponse verifyNin(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
         String URL = premblyUrl.concat(PremblyParameter.NIN_URL.getValue());
@@ -119,7 +120,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     @Override
     public PremblyBvnResponse verifyBvnLikeness(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
         return getBvnDetails(identityVerification);
@@ -174,7 +175,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     }
 
     private void validateIdentity(IdentityVerification identityVerification) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityVerification);
+        MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         log.info("Verification started. Likeness check.");
         identityVerification.validate();
         identityVerification.validateImageUrl();

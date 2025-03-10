@@ -7,7 +7,8 @@ public enum UserMessages {
 
     INVALID_EMAIL("Email is invalid"),
     INVALID_USER_ID("Please provide a valid user identification."),
-    INVALID_FIRST_NAME("First name is invalid"),
+    INVALID_FIRST_NAME("User first name is required."),
+    INVALID_LAST_NAME("User last name is required."),
     NEW_PASSWORD_AND_CURRENT_PASSWORD_CANNOT_BE_SAME("New password and current password cannot be the same"),
     USER_IDENTITY_CANNOT_BE_EMPTY("User identity cannot be empty"),
     USER_IDENTITY_MUST_NOT_BE_EMPTY("User identity must not be empty"),

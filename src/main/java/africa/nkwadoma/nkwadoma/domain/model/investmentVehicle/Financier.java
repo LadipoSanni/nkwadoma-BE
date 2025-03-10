@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -8,24 +10,31 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 @Getter
 @Setter
+@ToString
 @Builder
 public class Financier {
     private String id;
     private String organizationName;
     private UserIdentity individual;
-    private String createdBy;
+    private String invitedBy;
     private String investmentVehicleId;
-    private InvestmentVehicleDesignation investmentVehicleRole;
+    private List<InvestmentVehicleDesignation> investmentVehicleRole;
+    private int pageNumber;
+    private int pageSize;
 
     public void validateUserIdentity() throws MeedlException {
             validateIndividualEmail(individual);
-            MeedlValidator.validateDataElement(individual.getFirstName(), "First name cannot be empty");
-            MeedlValidator.validateDataElement(individual.getLastName(), "Last name cannot be empty");
+            MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+            MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+            MeedlValidator.validateEmail(individual.getEmail());
     }
 
 
@@ -40,7 +49,6 @@ public class Financier {
 
     public void validate() throws MeedlException {
         validateUserIdentity();
-        MeedlValidator.validateUUID(createdBy, "Valid user id performing this action is required");
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        MeedlValidator.validateUUID(invitedBy, "Valid user id performing this action is required");
     }
 }

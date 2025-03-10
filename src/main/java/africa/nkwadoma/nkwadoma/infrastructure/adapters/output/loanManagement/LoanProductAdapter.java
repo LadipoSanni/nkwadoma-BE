@@ -40,7 +40,7 @@ public class LoanProductAdapter implements LoanProductOutputPort {
     private final LoanProductMapper loanProductMapper;
     @Override
     public LoanProduct save(LoanProduct loanProduct) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanProduct);
+        MeedlValidator.validateObjectInstance(loanProduct, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
         loanProduct.validateLoanProductDetails();
         if (existsByName(loanProduct.getName())){
             throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");

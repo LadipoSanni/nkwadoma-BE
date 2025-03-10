@@ -18,8 +18,8 @@ public class LoaneeLoanAccount {
     private String loaneeId;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(accountStatus);
-        MeedlValidator.validateObjectInstance(loanStatus);
+        MeedlValidator.validateObjectInstance(accountStatus, LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanStatus, LoaneeMessages.LOAN_REQUEST_STATUS_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
     }
 }

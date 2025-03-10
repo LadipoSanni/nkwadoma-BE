@@ -33,7 +33,7 @@ public class LoanOfferAdapter implements LoanOfferOutputPort {
 
     @Override
     public LoanOffer  save(LoanOffer loanOffer) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanOffer);
+        MeedlValidator.validateObjectInstance(loanOffer, LoanOfferMessages.LOAN_OFFER_CANNOT_BE_EMPTY.getMessage());
         loanOffer.validate();
         LoanOfferEntity loanOfferEntity = loanOfferMapper.toLoanOfferEntity(loanOffer);
         loanOfferEntity = loanOfferEntityRepository.save(loanOfferEntity);

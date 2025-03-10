@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -23,6 +24,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -93,6 +95,7 @@ class OrganizationIdentityServiceTest {
         roseCouture.setOrganizationEmployees(orgEmployee);
         roseCouture.setEnabled(Boolean.TRUE);
 
+
     }
 
     @Test
@@ -128,6 +131,39 @@ class OrganizationIdentityServiceTest {
         assertEquals(organizationIdentities.get(0).getId(), roseCouture.getId());
         assertEquals(organizationIdentities.get(0).getName(), roseCouture.getName());
         assertEquals(organizationIdentities.get(0).getLogoImage(), roseCouture.getLogoImage());
+    }
+
+    @Test
+    void viewAllOrganizationWithStatusTakingNullParameter() {
+        assertThrows(MeedlException.class, ()-> organizationIdentityService.viewAllOrganizationByStatus(roseCouture, null));
+    }
+
+    @Test
+    void viewAllOrganizationWithStatus() throws MeedlException {
+
+        OrganizationIdentity roseCouture2 = TestData.createOrganizationTestData("rose couture6", "RC8789905",orgEmployee);
+        roseCouture2.setStatus(ActivationStatus.ACTIVE);
+
+        int pageNumber = 0;
+        int pageSize = 10;
+        roseCouture.setPageNumber(pageNumber);
+        roseCouture.setPageSize(pageSize);
+        roseCouture.setStatus(ActivationStatus.ACTIVE);
+
+        List<OrganizationIdentity> organizationIdentities = new ArrayList<>();
+        organizationIdentities.add(roseCouture);
+        organizationIdentities.add(roseCouture2);
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Page<OrganizationIdentity> organizationIdentityPage = new PageImpl<>(organizationIdentities, pageRequest, organizationIdentities.size());
+
+        when(organizationIdentityOutputPort.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE)).thenReturn(organizationIdentityPage);
+        Page<OrganizationIdentity> result = organizationIdentityService.viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(ActivationStatus.ACTIVE, result.getContent().get(1).getStatus());
+        verify(organizationIdentityOutputPort, times(1)).viewAllOrganizationByStatus(roseCouture, ActivationStatus.ACTIVE);
     }
 
     @Test

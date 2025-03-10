@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.InfrastructureException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.ImageConverter;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;

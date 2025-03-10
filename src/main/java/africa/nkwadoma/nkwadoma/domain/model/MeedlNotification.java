@@ -18,15 +18,22 @@ public class MeedlNotification {
     private String id;
     private String contentId;
     private String title;
-    private String name;
     private UserIdentity user;
     private boolean isRead;
     private LocalDateTime timestamp;
+    private boolean callToAction;
+    private String senderMail;
+    private String senderFullName;
+    private String contentDetail;
+    private String duration;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateUUID(contentId,"content id cannot be empty");
-        MeedlValidator.validateObjectInstance(title,"title cannot be empty");
-        MeedlValidator.validateObjectInstance(user,"user identity cannot be empty");
-        MeedlValidator.validateObjectInstance(timestamp,"timestamp cannot be empty");
+        MeedlValidator.validateUUID(contentId,"Content id cannot be empty");
+        MeedlValidator.validateObjectInstance(title,"Title cannot be empty");
+        MeedlValidator.validateObjectInstance(user,"User identity cannot be empty");
+        MeedlValidator.validateObjectInstance(timestamp,"Timestamp cannot be empty");
+        MeedlValidator.validateEmail(senderMail);
+        callToAction = true;
+        MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty");
     }
 }

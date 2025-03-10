@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -83,6 +83,32 @@ public class MeedlNotificationAdapterTest {
     @Test
     void cannotSaveNotificationWithNullTitle() {
         meedlNotification.setTitle(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @Test
+    void cannotSaveNotificationWithNullSenderMail() {
+        meedlNotification.setSenderMail(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," "})
+    void cannotSaveNotificationWithEmptySenderMail(String senderMail) {
+        meedlNotification.setSenderMail(senderMail);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @Test
+    void cannotSaveNotificationWithNullSenderName() {
+        meedlNotification.setSenderFullName(null);
+        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY," "})
+    void cannotSaveNotificationWithEmptySenderName(String senderName) {
+        meedlNotification.setSenderFullName(senderName);
         assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.save(meedlNotification));
     }
 

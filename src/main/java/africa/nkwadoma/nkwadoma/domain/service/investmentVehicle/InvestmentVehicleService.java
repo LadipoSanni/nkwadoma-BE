@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
 
 
+import java.time.LocalDate;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -25,7 +27,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.Investment
 
 @RequiredArgsConstructor
 
-public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase {
+public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleMapper investmentVehicleMapper;
@@ -36,6 +38,8 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
+            investmentVehicle.validateDraft();
+            investmentVehicle.setLastUpdatedDate(LocalDate.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
         }
         return createInvestmentVehicle(investmentVehicle);
@@ -123,6 +127,29 @@ public class InvestmentVehicleService implements CreateInvestmentVehicleUseCase 
         String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
         investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
         return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException {
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validateDataElement(String.valueOf(type), InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize, pageNumber, type);
+    }
+
+    @Override
+    public List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException {
+        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(status);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType type, InvestmentVehicleStatus status) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validateObjectInstance(type, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
     }
 
     private String generateInvestmentVehicleLink(String id) {

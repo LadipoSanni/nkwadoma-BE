@@ -22,10 +22,14 @@ public class MeedlNotificationEntity {
     public String id;
     private String title;
     private String contentId;
-    private String name;
     @ManyToOne
     @JoinColumn(name = "meedl_user", nullable = false)
     private UserEntity user;
     private boolean isRead;
     private LocalDateTime timestamp;
+    private boolean callToAction;
+    private String senderMail;
+    private String senderFullName;
+    private String contentDetail;
+
 }
