@@ -1,19 +1,22 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.CreateInvestmentVehicleUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.test.data.TestData;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -22,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class InvestmentVehicleServiceTest {
     @Autowired
-    private CreateInvestmentVehicleUseCase investmentVehicleUseCase;
+    private InvestmentVehicleUseCase investmentVehicleUseCase;
     private InvestmentVehicle fundGrowth;
     private String investmentId;
     @Autowired
@@ -92,6 +95,50 @@ class InvestmentVehicleServiceTest {
         }
         assertEquals(InvestmentVehicleStatus.PUBLISHED,investmentVehicle.getInvestmentVehicleStatus());
         assertNotNull(investmentVehicle.getInvestmentVehicleLink());
+    }
+
+    @Order(5)
+    @Test
+    void viewAllInvestmentVehiclesByType(){
+        try{
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByType(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+            assertEquals(1, investmentVehiclesList.size());
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @Test
+    @Order(6)
+    void viewAllInvestmentVehiclesByStatus(){
+        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+        try{
+            investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Order(7)
+    @Test
+    void viewAllInvestmentVehiclesByTypeAndStatus(){
+        try{
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByType(
+                    pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+            assertEquals(1, investmentVehiclesList.size());
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @Test
+    void viewAllInvestmentVehiclesByStatusWithNullParameter(){
+        assertThrows(MeedlException.class, ()->investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(null));
     }
 
     @AfterAll

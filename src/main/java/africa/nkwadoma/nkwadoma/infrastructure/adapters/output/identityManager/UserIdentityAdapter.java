@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -29,7 +30,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public UserIdentity save(UserIdentity userIdentity) throws MeedlException {
-        MeedlValidator.validateObjectInstance(userIdentity);
+        MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         userIdentity.validate();
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
@@ -78,7 +79,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
 
     @Override
     public List<UserIdentity> findAllByRole(IdentityRole identityRole) throws MeedlException {
-        MeedlValidator.validateObjectInstance(identityRole);
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
         List<UserEntity> userEntities = userEntityRepository.findAllByRole(identityRole);
         log.info("Found {} users by Role ", userEntities.size());
         return userEntities.stream().map(userIdentityMapper::toUserIdentity).toList();

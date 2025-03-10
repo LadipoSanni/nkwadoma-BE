@@ -80,5 +80,6 @@ public class InvestmentVehicle {
 
     public void validateDraft() throws MeedlException {
         MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
 }

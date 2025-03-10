@@ -12,7 +12,9 @@ public enum IdentityVerificationMessage {
     INVALID_NIN("Nin is required"),
     INSUFFICIENT_WALLET_BALANCE("Insufficient wallet balance"),
     PROVIDE_VALID_BVN("Please provide a valid Bvn"),
+    IDENTITY_VERIFICATION_CANNOT_BE_NULL("Identity verification cannot be null"),
     PROVIDE_VALID_NIN("Please provide a valid Nin");
+
 
 
     private final String message;

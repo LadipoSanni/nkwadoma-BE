@@ -49,7 +49,7 @@ public class LoanRequestService implements LoanRequestUseCase {
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest);
+        MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageNumber(loanRequest.getPageNumber());
         MeedlValidator.validatePageSize(loanRequest.getPageSize());
         Page<LoanRequest> loanRequests;

@@ -1,12 +1,14 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
 import java.util.List;
 
-public interface CreateInvestmentVehicleUseCase {
+public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
@@ -19,4 +21,10 @@ public interface CreateInvestmentVehicleUseCase {
     List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException;
 
     InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException;
+
+    Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
+
+    List<InvestmentVehicle> viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus status) throws MeedlException;
+
+    Page<InvestmentVehicle> viewAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType type, InvestmentVehicleStatus status) throws MeedlException;
 }

@@ -64,7 +64,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
-        MeedlValidator.validateObjectInstance(cohort);
+        MeedlValidator.validateObjectInstance(cohort, CohortMessages.INPUT_CANNOT_BE_NULL.getMessage());
         cohort.validate();
         String cohortName = cohort.getName();
         cohort.validateLoanBreakDowns();

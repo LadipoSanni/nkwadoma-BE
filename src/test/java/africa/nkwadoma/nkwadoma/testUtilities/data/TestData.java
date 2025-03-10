@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.test.data;
+package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -26,7 +26,8 @@ import java.util.List;
 
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
-
+    private static final int pageSize = 10;
+    private static final int pageNumber = 0;
     public static UserIdentity createTestUserIdentity(String email, String testId) {
         UserIdentity userIdentity = createTestUserIdentity(email);
         userIdentity.setId(testId);
@@ -78,8 +79,8 @@ public class TestData {
         organizationIdentity.setWebsiteAddress("testdata.org");
         organizationIdentity.setOrganizationEmployees(employeePeter);
         organizationIdentity.setLogoImage("logo-img.png");
-        organizationIdentity.setPageSize(0);
-        organizationIdentity.setPageNumber(10);
+        organizationIdentity.setPageSize(pageSize);
+        organizationIdentity.setPageNumber(pageNumber);
 
         return organizationIdentity;
     }
@@ -165,8 +166,8 @@ public class TestData {
         loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
         loanProduct.setTermsAndCondition("Test: A new loan for test and terms and conditions");
         loanProduct.setLoanProductSize(new BigDecimal("1000000"));
-        loanProduct.setPageSize(10);
-        loanProduct.setPageNumber(0);
+        loanProduct.setPageSize(pageSize);
+        loanProduct.setPageNumber(pageNumber);
         loanProduct.setVendors(List.of(vendor));
         return loanProduct;
     }
@@ -212,7 +213,10 @@ public class TestData {
     public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
         return Financier.builder()
                 .individual(userIdentity)
-                .createdBy(testId)
+                .invitedBy(testId)
+                .invitedBy(testId)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
                 .build();
     }
     public static PremblyResponse createTestPremblyResponse(){
@@ -254,8 +258,8 @@ public class TestData {
         loanOffer.setOrganizationId(id);
         loanOffer.setType(LoanType.LOAN_OFFER);
         loanOffer.setName("ojo");
-        loanOffer.setPageSize(10);
-        loanOffer.setPageNumber(0);
+        loanOffer.setPageSize(pageSize);
+        loanOffer.setPageNumber(pageNumber);
         return loanOffer;
     }
 
@@ -410,10 +414,10 @@ public class TestData {
                 .build();
     }
 
-    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(UserIdentity userIdentity, InvestmentVehicle investmentVehicleFinancier) {
+    public static InvestmentVehicleFinancier buildInvestmentVehicleFinancier(Financier financier, InvestmentVehicle investmentVehicle) {
         return InvestmentVehicleFinancier.builder()
-                .financier(userIdentity)
-                .investmentVehicle(investmentVehicleFinancier)
+                .financier(financier)
+                .investmentVehicle(investmentVehicle)
                 .build();
     }
 }
