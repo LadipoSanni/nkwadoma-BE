@@ -281,7 +281,7 @@ class FinancierAdapterTest {
 
     }
     @AfterAll
-    void teaunDown() throws MeedlException {
+    void tearDown() throws MeedlException {
         Optional <UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
         if (foundUser.isPresent()) {
             identityManagerOutputPort.deleteUser(foundUser.get());
