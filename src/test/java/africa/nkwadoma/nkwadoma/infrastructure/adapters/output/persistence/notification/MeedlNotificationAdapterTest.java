@@ -180,6 +180,18 @@ public class MeedlNotificationAdapterTest {
                 "550e8400-e29b-41d4-a716-446655440000"));
     }
 
+    @Test
+    @Order(4)
+    void numberOfUnreadNotifications(){
+        int numberOfUnreadNotifications = 0;
+        try{
+            numberOfUnreadNotifications = meedlNotificationOutputPort.getNumberOfUnReadNotification(userId);
+        }catch (MeedlException meedlException){
+            log.info(meedlException.getMessage());
+        }
+        assertEquals(1, numberOfUnreadNotifications);
+    }
+
     @AfterAll
     void cleanUp() throws MeedlException {
         meedlNotificationOutputPort.deleteNotification(meedlNotificationId);
