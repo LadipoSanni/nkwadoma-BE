@@ -6,8 +6,8 @@ on:
       - 'dev'
 
 env:
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/enumversev2
-  ECR_REPOSITORY: enumversev2
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
 
 jobs:
@@ -41,8 +41,8 @@ jobs:
       - name: Build and Tag Docker image
         run: |
           IMAGE_TAG=${{ env.REPO_URL }}:alpha
-          docker build -t enumverse:$GITHUB_SHA -f Dockerfile .
-          docker tag enumverse:$GITHUB_SHA $IMAGE_TAG
+          docker build -t nkwadoma:$GITHUB_SHA -f Dockerfile .
+          docker tag nkwadoma:$GITHUB_SHA $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Push Docker image to Amazon ECR
@@ -73,10 +73,10 @@ jobs:
 
           # Fetch latest environment file from S3
           echo "📥 Downloading environment file from S3..."
-          aws s3 cp s3://$S3_BUCKET_NAME/enumverse/backend/systest/enum-dev.env ./ --region $S3_REGION
+          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
 
-          if [ ! -f "enum-dev.env" ]; then
-            echo "❌ ERROR: enum-dev.env file not found!"
+          if [ ! -f "nkwadoma-dev.env" ]; then
+            echo "❌ ERROR: nkwadoma-dev.env file not found!"
             exit 1
           fi
 
@@ -88,7 +88,7 @@ jobs:
           sudo fuser -k 8000/tcp || true
 
           # Remove existing container if exists
-          CONTAINER_NAME="enumversev2-container"
+          CONTAINER_NAME="nkwadoma-container"
           if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
              docker stop ${CONTAINER_NAME} || true
              docker rm ${CONTAINER_NAME} || true
@@ -118,14 +118,14 @@ jobs:
         run: |
           docker pull ${{ env.REPO_URL }}:alpha
 
-      - name: Free port 9020 if in use
+      - name: Free port 8768 if in use
         run: |
-          sudo fuser -k 9020/tcp || true
+          sudo fuser -k 8768/tcp || true
 
       - name: Restart container with auto-restart policy
         run: |
-          CONTAINER_NAME="enumverse_container"
-          ENV_FILE_PATH="/home/cloud-group/enum-systest.env"
+          CONTAINER_NAME="nkwadoma-container"
+          ENV_FILE_PATH="/home/cloud-group/meedl-systest.env"
 
           # Stop and remove existing container if it exists
           if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
@@ -134,17 +134,17 @@ jobs:
           fi
 
           # Ensure Docker network exists
-          docker network inspect enum-network >/dev/null 2>&1 || docker network create enum-network
+          docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
           # Run the container with auto-restart enabled
-          docker run --env-file $ENV_FILE_PATH --network enum-network --name $CONTAINER_NAME -p 9020:9020 \
+          docker run --env-file $ENV_FILE_PATH --network enum-network --name $CONTAINER_NAME -p 8768:8768 \
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
 
       - name: Confirm Deployment Success
         run: |
           sleep 10  # Allow some time for the container to start
-          if docker ps --format '{{.Names}}' | grep -q "enumverse_container"; then
+          if docker ps --format '{{.Names}}' | grep -q "nkwadoma-container"; then
             echo "✅ Deployment to local machine successful!"
             exit 0
           else
