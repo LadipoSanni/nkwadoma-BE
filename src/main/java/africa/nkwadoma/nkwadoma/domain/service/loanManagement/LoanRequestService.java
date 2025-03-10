@@ -2,15 +2,19 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -22,6 +26,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 
 import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +44,8 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoanRequestMapper loanRequestMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public Page<LoanRequest> viewAllLoanRequests(LoanRequest loanRequest) throws MeedlException {
@@ -102,22 +111,34 @@ public class LoanRequestService implements LoanRequestUseCase {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
-
             updateLoanRequestOnMetrics(foundLoanRequest);
-
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
-
             updatedLoanRequest.setLoanOfferId(loanOffer.getId());
             updatedLoanRequest.setDateTimeOffered(loanOffer.getDateTimeOffered());
             log.info("Loan request updated: {}", updatedLoanRequest);
-
-            sendLoaneeEmailUsecase.sendLoanRequestApprovalEmail(updatedLoanRequest);
+            sendNotification(loanRequest, loanOffer, updatedLoanRequest);
             return updatedLoanRequest;
         }
         else {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void sendNotification(LoanRequest loanRequest, LoanOffer loanOffer, LoanRequest updatedLoanRequest) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
+        MeedlNotification meedlNotification = buildUpLoanOfferNotification(loanOffer, updatedLoanRequest, userIdentity);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    private static MeedlNotification buildUpLoanOfferNotification(LoanOffer loanOffer, LoanRequest updatedLoanRequest, UserIdentity userIdentity) {
+        return MeedlNotification.builder()
+                .contentId(loanOffer.getId())
+                .title(LOAN_OFFER.getMessage())
+                .user(updatedLoanRequest.getLoanee().getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .contentDetail(LOAN_OFFER_CONTENT.getMessage()).build();
     }
 
     private void updateLoanRequestOnMetrics(LoanRequest loanRequest) throws MeedlException {
