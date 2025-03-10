@@ -137,7 +137,7 @@ jobs:
           docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
           # Run the container with auto-restart enabled
-          docker run --env-file $ENV_FILE_PATH --network enum-network --name $CONTAINER_NAME -p 8768:8768 \
+          docker run --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
 
