@@ -231,4 +231,11 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
     }
+
+    @Override
+    public int getNumberOfUnReadNotification(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot empty");
+        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        return meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId());
+    }
 }

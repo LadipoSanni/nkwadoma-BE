@@ -13,4 +13,6 @@ public interface MeedlNotificationOutputPort {
     MeedlNotification findNotificationById(String  id) throws MeedlException;
 
     List<MeedlNotification> findAllNotificationBelongingToAUser(String id) throws MeedlException;
+
+    int getNumberOfUnReadNotification(String userId) throws MeedlException;
 }
