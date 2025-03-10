@@ -221,6 +221,7 @@ class InvestmentVehicleAdapterTest {
         try{
             investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
             draftInvestmentVehicleId = investmentVehicle.getId();
+           // delete here
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -247,7 +248,7 @@ class InvestmentVehicleAdapterTest {
     @Test
     void viewAllInvestmentVehicleByTypeCommercial() {
         try {
-            investmentVehicleOutputPort.save(fundGrowth);
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
             capitalGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
             Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
                     pageSize, pageNumber, InvestmentVehicleType.COMMERCIAL);
@@ -256,6 +257,7 @@ class InvestmentVehicleAdapterTest {
             assertNotNull(investmentVehiclesList);
             assertEquals(1, investmentVehiclesList.size());
             assertEquals(InvestmentVehicleType.COMMERCIAL, investmentVehiclesList.get(0).getInvestmentVehicleType());
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
         } catch (Exception exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -293,8 +295,8 @@ class InvestmentVehicleAdapterTest {
         List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
         try {
             InvestmentVehicle draftVehicle = TestData.buildInvestmentVehicle("Draft Vehicle");
-            investmentVehicleOutputPort.save(draftVehicle);
-
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(draftVehicle);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
             investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(DRAFT);
         } catch (Exception exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -338,10 +340,10 @@ class InvestmentVehicleAdapterTest {
     void viewAllInvestmentVehicleByFundRaisingStatus() {
         Page<InvestmentVehicle> investmentVehicles = null;
         try{
-            investmentVehicleOutputPort.save(fundGrowth);
-            log.info("-------------> All investment vehicles ------> " + investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize, pageNumber));
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
                     pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
         } catch (Exception exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -355,9 +357,10 @@ class InvestmentVehicleAdapterTest {
     void viewAllInvestmentVehicleByFundRaisingStatusReturnOnlyClosed(){
         Page<InvestmentVehicle> investmentVehicles = null;
         try{
-            investmentVehicleOutputPort.save(capitalGrowth);
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(capitalGrowth);
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
                     pageSize, pageNumber, FundRaisingStatus.CLOSED);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
         } catch (Exception exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
