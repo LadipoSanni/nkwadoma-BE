@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -153,7 +154,7 @@ public class FinancierService implements FinancierUseCase {
     }
     @Override
     public List<Financier> search(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
         return financierOutputPort.search(name);
     }
     private Financier saveFinancier(Financier financier) throws MeedlException {
