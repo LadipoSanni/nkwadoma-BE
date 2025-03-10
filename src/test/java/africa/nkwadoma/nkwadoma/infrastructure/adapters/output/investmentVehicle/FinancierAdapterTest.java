@@ -47,6 +47,8 @@ class FinancierAdapterTest {
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailadaptertest@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
+        userIdentity.setLastName("financierService");
+        userIdentity.setLastName("test");
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
         } catch (MeedlException e) {
@@ -86,6 +88,7 @@ class FinancierAdapterTest {
         assertNotNull(response.getId());
         assertEquals(financier.getIndividual().getId(), response.getIndividual().getId());
         financierId = response.getId();
+        userIdentity.setId(response.getIndividual().getId());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
@@ -262,6 +265,8 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
         assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.get(0).getIndividual());
+        assertEquals(foundFinanciers.get(0).getIndividual().getId(), userIdentity.getId());
     }
     @Test
     public void deleteFinancier(){
