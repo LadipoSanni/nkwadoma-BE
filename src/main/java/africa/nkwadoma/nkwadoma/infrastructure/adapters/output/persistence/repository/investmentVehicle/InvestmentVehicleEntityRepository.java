@@ -35,7 +35,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             Pageable pageable
     );
 
-    @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.fundRaisingStatus = :fundRaisingStatus AND i.fundRaisingStatus IS NOT NULL AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.startDate DESC")
+    @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.fundRaisingStatus = :fundRaisingStatus AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.startDate DESC")
     Page<InvestmentVehicleEntity> findByInvestmentVehicleByFundRaisingStatus(FundRaisingStatus fundRaisingStatus, Pageable pageRequest);
 
 }

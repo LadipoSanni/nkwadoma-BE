@@ -142,7 +142,7 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("view-all-investment-vehicle-by-fund-raising-status")
+    @GetMapping("investment-vehicle/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleByFundRaisingStatus(
             @RequestParam int pageSize,
