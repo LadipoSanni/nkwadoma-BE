@@ -20,6 +20,8 @@ import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -123,9 +125,11 @@ public class LoanRequestController {
 
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @PostMapping("/loan-request/response")
-    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@Valid @RequestBody LoanRequestDto loanRequestDto)
+    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@AuthenticationPrincipal Jwt meedlUser,
+                                                               @Valid @RequestBody LoanRequestDto loanRequestDto)
             throws MeedlException {
         LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
+        loanRequest.setActorId(meedlUser.getClaimAsString("sub"));
         loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
         log.info("Loan request from service: {}", loanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
