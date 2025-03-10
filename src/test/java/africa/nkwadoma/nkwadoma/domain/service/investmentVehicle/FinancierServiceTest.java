@@ -290,7 +290,6 @@ public class FinancierServiceTest {
         deleteNotification(userIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
-        log.info("Financier user id to delete in test {}", userIdentityId);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
@@ -317,15 +316,6 @@ public class FinancierServiceTest {
                 throw new RuntimeException(e);
             }
         });
-        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
-        if (optionalInvestmentVehicleFinancier.isPresent()) {
-            investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(optionalInvestmentVehicleFinancier.get().getId());
-        }
-        financierOutputPort.delete(financierId);
-        userIdentityOutputPort.deleteUserById(userIdentityId);
-        identityManagerOutputPort.deleteUser(userIdentity);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
-        log.info("Test data deleted after test");
     }
 
 }
