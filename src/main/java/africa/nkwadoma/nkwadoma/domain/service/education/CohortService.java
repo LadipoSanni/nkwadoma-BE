@@ -58,8 +58,7 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final MeedlNotificationUsecase meedlNotificationUsecase;
+
 
 
     @Override
@@ -85,9 +84,6 @@ public class CohortService implements CohortUseCase {
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
         organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
-        MeedlNotification meedlNotification = MeedlNotification.builder().contentId(savedCohort.getId())
-                .title(MeedlNotificationMessages.NEW_COHORT.getMessage()).build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
         return savedCohort;
     }
 
