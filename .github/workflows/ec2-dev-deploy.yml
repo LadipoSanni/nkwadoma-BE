@@ -141,44 +141,44 @@ jobs:
           docker system prune -f
           EOF
 
-  deploy-to-local:
-    runs-on: self-hosted
-    needs: build-and-push
-    steps:
-      - name: Authenticate with Amazon ECR
-        run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
+  # deploy-to-local:
+  #   runs-on: self-hosted
+  #   needs: build-and-push
+  #   steps:
+  #     - name: Authenticate with Amazon ECR
+  #       run: |
+  #         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
 
-      - name: Pull latest Docker image
-        run: |
-          docker pull ${{ env.REPO_URL }}:alpha
+  #     - name: Pull latest Docker image
+  #       run: |
+  #         docker pull ${{ env.REPO_URL }}:alpha
 
-      - name: Free port 8768 if in use
-        run: |
-          sudo fuser -k 8768/tcp || true
+  #     - name: Free port 8768 if in use
+  #       run: |
+  #         sudo fuser -k 8768/tcp || true
 
-      - name: Restart container with auto-restart policy
-        run: |
-          CONTAINER_NAME="nkwadoma-container"
-          ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+  #     - name: Restart container with auto-restart policy
+  #       run: |
+  #         CONTAINER_NAME="nkwadoma-container"
+  #         ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
 
-          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
-          fi
+  #         if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+  #           docker stop $CONTAINER_NAME || true
+  #           docker rm $CONTAINER_NAME || true
+  #         fi
 
-          docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
+  #         docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
-          docker run --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
-            --restart unless-stopped \
-            ${{ env.REPO_URL }}:alpha
+  #         docker run --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
+  #           --restart unless-stopped \
+  #           ${{ env.REPO_URL }}:alpha
 
-      - name: Confirm Deployment Success
-        run: |
-          sleep 10
-          if docker ps --format '{{.Names}}' | grep -q "nkwadoma-container"; then
-            echo "✅ Deployment to local machine successful!"
-            exit 0
-          else
-            echo "❌ Deployment failed!"
-            exit 1
+  #     - name: Confirm Deployment Success
+  #       run: |
+  #         sleep 10
+  #         if docker ps --format '{{.Names}}' | grep -q "nkwadoma-container"; then
+  #           echo "✅ Deployment to local machine successful!"
+  #           exit 0
+  #         else
+  #           echo "❌ Deployment failed!"
+  #           exit 1
