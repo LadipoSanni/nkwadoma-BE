@@ -271,7 +271,64 @@ public class FinancierServiceTest {
     public void inviteLoaneeToBecomeAFinancier(){
 
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void findByInvalidName(String name){
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
+    }
+    @Test
+    @Order(6)
+    void searchFinancierByFirstName()  {
+        List<Financier> foundFinanciers = null;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(7)
+    void searchFinancierByLastName() {
+        List<Financier> foundFinanciers;
+        try {
 
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(8)
+    void searchFinancierWithFirstNameBeforeLastName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(9)
+    void searchFinancierWithLastNameBeforeFirstName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
     @AfterAll
     void tearDown() throws MeedlException {
         log.info("Started deleting data in financier service test." );
