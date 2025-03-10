@@ -59,19 +59,14 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
-    @GetMapping("financier/all/view")
-    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber, int pageSize) throws MeedlException {
-        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Financier> financiers = financierUseCase.search(financier);
-        List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
-        log.info("financiers mapped: {}", financierResponses);
-        PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
-                financierResponses, financiers.hasNext(),
-                financiers.getTotalPages(), pageNumber, pageSize
-        );
+    @GetMapping("financier/search")
+    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,@RequestParam String name) throws MeedlException {
+        List<Financier> financiers = financierUseCase.search(name);
+        log.info("Found financiers: {}", financiers);
+
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                data(response).
+                data(financiers).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );

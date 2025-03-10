@@ -34,7 +34,6 @@ class FinancierAdapterTest {
     private FinancierOutputPort financierOutputPort;
     private Financier financier;
     private UserIdentity userIdentity;
-    private UserIdentity userIdentity2;
     private String financierId;
     private InvestmentVehicle investmentVehicle;
     @Autowired
@@ -276,7 +275,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
 
     }
-    @AfterAll
+//    @AfterAll
     void tearDown() throws MeedlException {
         Optional <UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
         if (foundUser.isPresent()) {
