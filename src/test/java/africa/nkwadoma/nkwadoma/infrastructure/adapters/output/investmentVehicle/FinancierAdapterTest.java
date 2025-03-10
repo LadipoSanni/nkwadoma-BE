@@ -275,8 +275,8 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
 
     }
-//    @AfterAll
-    void tearDown() throws MeedlException {
+    @AfterAll
+    void teaunDown() throws MeedlException {
         Optional <UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
         if (foundUser.isPresent()) {
             identityManagerOutputPort.deleteUser(foundUser.get());
