@@ -100,7 +100,7 @@ jobs:
 
           # Run the container
           echo "🚀 Running the container..."
-          docker run -d --name ${CONTAINER_NAME} -p 8000:8000 \
+          docker run -d --name ${CONTAINER_NAME} -p 8768:8768 \
               --env-file enum-dev.env \
               --restart unless-stopped \
               "${{ env.REPO_URL }}:alpha"
