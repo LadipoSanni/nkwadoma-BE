@@ -63,7 +63,7 @@ public class FinancierServiceTest {
 
     @BeforeAll
     void setUp(){
-        userIdentity = TestData.createTestUserIdentity("financieremailservicetest@mail.com");
+        userIdentity = TestData.createTestUserIdentity("financieremailservicetest2@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
         financier = TestData.buildFinancierIndividual(userIdentity);
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");

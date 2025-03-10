@@ -153,6 +153,7 @@ public class LoanOfferAdapterTest {
             log.info(exception.getMessage());
         }
         assertNotNull(loanOffers);
+        assertFalse(loanOffers.get().toList().isEmpty());
         assertEquals(1,loanOffers.getSize());
     }
 
