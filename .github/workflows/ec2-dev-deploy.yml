@@ -123,8 +123,8 @@ jobs:
           echo "Pulling the latest image..."
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-          echo "Freeing port 443 if in use..."
-          sudo fuser -k 443/tcp || true
+          echo "Freeing port 8768 if in use..."
+          sudo fuser -k 8768/tcp || true
 
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
              echo "Stopping and removing existing container..."
@@ -133,7 +133,7 @@ jobs:
           fi
 
           echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 443:443 \
+          docker run -d --name nkwadoma-container -p 8768:8768 \
               --env-file nkwadoma-dev.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
@@ -153,9 +153,9 @@ jobs:
         run: |
           docker pull ${{ env.REPO_URL }}:alpha
 
-      - name: Free port 443 if in use
+      - name: Free port 8768 if in use
         run: |
-          sudo fuser -k 443/tcp || true
+          sudo fuser -k 8768/tcp || true
 
       - name: Restart container with auto-restart policy
         run: |
@@ -169,7 +169,7 @@ jobs:
 
           docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
 
-          docker run --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 443:443 \
+          docker run --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
             --restart unless-stopped \
             ${{ env.REPO_URL }}:alpha
 
