@@ -136,7 +136,7 @@ public class LoanRequestService implements LoanRequestUseCase {
                 .contentId(loanOffer.getId())
                 .title(LOAN_OFFER.getMessage())
                 .user(updatedLoanRequest.getLoanee().getUserIdentity())
-                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
                 .senderMail(userIdentity.getEmail())
                 .contentDetail(LOAN_OFFER_CONTENT.getMessage()).build();
     }
