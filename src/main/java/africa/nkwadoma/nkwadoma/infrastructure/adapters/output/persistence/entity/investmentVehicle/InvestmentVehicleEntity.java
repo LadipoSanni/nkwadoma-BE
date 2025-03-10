@@ -61,6 +61,5 @@ public class InvestmentVehicleEntity {
     private BankAccountEntity mainAccount;
     @OneToOne
     private BankAccountEntity syncingAccount;
-
-
+    private LocalDate lastUpdatedDate;
 }

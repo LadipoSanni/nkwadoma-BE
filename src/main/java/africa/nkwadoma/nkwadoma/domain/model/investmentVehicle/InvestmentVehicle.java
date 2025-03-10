@@ -41,6 +41,7 @@ public class InvestmentVehicle {
     private LocalDate startDate;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
+    private LocalDate lastUpdatedDate;
 
 
 
