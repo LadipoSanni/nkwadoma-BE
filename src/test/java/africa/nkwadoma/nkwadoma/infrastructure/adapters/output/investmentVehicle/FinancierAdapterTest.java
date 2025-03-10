@@ -206,6 +206,64 @@ class FinancierAdapterTest {
     void deleteFinancierWithInvalidFinancierId(String invalidId){
         assertThrows(MeedlException.class,()-> financierOutputPort.delete(invalidId));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void findByInvalidName(String name){
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
+    }
+    @Test
+    @Order(4)
+    void searchFinancierByFirstName()  {
+        List<Financier> foundFinanciers = null;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(5)
+    void searchFinancierByLastName() {
+        List<Financier> foundFinanciers;
+        try {
+
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(6)
+    void searchFinancierWithFirstNameBeforeLastName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(7)
+    void searchFinancierWithLastNameBeforeFirstName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
     @Test
     public void deleteFinancier(){
         try {
