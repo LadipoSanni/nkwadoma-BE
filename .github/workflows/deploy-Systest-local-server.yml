@@ -73,7 +73,7 @@ jobs:
 
           # Fetch latest environment file from S3
           echo "📥 Downloading environment file from S3..."
-          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
+          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-systest.env --region ${{ env.S3_REGION }}
 
           if [ ! -f "nkwadoma-dev.env" ]; then
             echo "❌ ERROR: nkwadoma-dev.env file not found!"
@@ -85,7 +85,7 @@ jobs:
           docker pull ${{ env.REPO_URL }}:alpha
 
           # Stop any running container on port 8000
-          sudo fuser -k 8000/tcp || true
+          sudo fuser -k 8768/tcp || true
 
           # Remove existing container if exists
           CONTAINER_NAME="nkwadoma-container"
