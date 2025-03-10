@@ -180,6 +180,17 @@ public class MeedlNotificationAdapterTest {
                 "550e8400-e29b-41d4-a716-446655440000"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,"jjdhhdu"})
+    void getCountOfUnreadNotificationWithEmptyAndInvalidId(String userId){
+        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNumberOfUnReadNotification(userId));
+    }
+
+    @Test
+    void getCountOfUnreadNotificationNullId(){
+        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNumberOfUnReadNotification(null));
+    }
+
     @Test
     @Order(4)
     void numberOfUnreadNotifications(){
