@@ -125,7 +125,7 @@ jobs:
       - name: Restart container with auto-restart policy
         run: |
           CONTAINER_NAME="nkwadoma-container"
-          ENV_FILE_PATH="/home/cloud-group/meedl-systest.env"
+          ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
 
           # Stop and remove existing container if it exists
           if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
