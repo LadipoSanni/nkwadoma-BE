@@ -96,6 +96,7 @@ public class FinancierServiceTest {
             userIdentityId = userIdentity.getId();
             Financier foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
             financierId = foundFinancier.getId();
+            log.info("Financier id for test user with id : {} is {}", userIdentityId, financierId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -289,6 +290,7 @@ public class FinancierServiceTest {
         deleteNotification(userIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
+        log.info("Financier user id to delete in test {}", userIdentityId);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
