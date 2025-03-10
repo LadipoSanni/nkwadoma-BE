@@ -85,11 +85,12 @@ public class FinancierController {
     @GetMapping("financier/search")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,@RequestParam String name) throws MeedlException {
         List<Financier> financiers = financierUseCase.search(name);
+        List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers: {}", financiers);
 
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                data(financiers).
+                data(financierResponses).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );
