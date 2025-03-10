@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.ALL_NOTIFICATION_VIEW_SUCCESSFULLY;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.NOTIFICATION_VIEW_SUCCESSFULLY;
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
 @RestController
@@ -58,6 +57,19 @@ public class MeedlNotificationController {
                 ApiResponse.<List<MeedlNotificationReponse>>builder()
                         .data(meedlNotificationReponse)
                         .message(ALL_NOTIFICATION_VIEW_SUCCESSFULLY)
+                        .statusCode(HttpStatus.OK.toString())
+                        .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("unread-notification-count")
+    private ResponseEntity<ApiResponse<?>> unreadNotificationCount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        int numberOfUnReadNotification =
+                meedlNotificationUsecase.getNumberOfUnReadNotification(meedlUser.getClaimAsString("sub"));
+        ApiResponse<Integer> apiResponse =
+                ApiResponse.<Integer>builder()
+                        .data(numberOfUnReadNotification)
+                        .message(COUNT_OF_UNREAD_NOTIFICATION)
                         .statusCode(HttpStatus.OK.toString())
                         .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -64,6 +65,15 @@ public class FinancierAdapter implements FinancierOutputPort {
     public void delete(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         financierRepository.deleteById(financierId);
+    }
+
+    @Override
+    public List<Financier> search(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
+        List<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name);
+        log.info("Financiers found with name: {} {}", name, financierEntities );
+        return financierEntities.stream().map
+                (financierMapper::map).toList();
     }
 
     @Override

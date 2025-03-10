@@ -34,7 +34,6 @@ class FinancierAdapterTest {
     private FinancierOutputPort financierOutputPort;
     private Financier financier;
     private UserIdentity userIdentity;
-    private UserIdentity userIdentity2;
     private String financierId;
     private InvestmentVehicle investmentVehicle;
     @Autowired
@@ -48,6 +47,8 @@ class FinancierAdapterTest {
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailadaptertest@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
+        userIdentity.setLastName("financierService");
+        userIdentity.setLastName("test");
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
         } catch (MeedlException e) {
@@ -87,6 +88,7 @@ class FinancierAdapterTest {
         assertNotNull(response.getId());
         assertEquals(financier.getIndividual().getId(), response.getIndividual().getId());
         financierId = response.getId();
+        userIdentity.setId(response.getIndividual().getId());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
@@ -205,6 +207,66 @@ class FinancierAdapterTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "skfnjk"})
     void deleteFinancierWithInvalidFinancierId(String invalidId){
         assertThrows(MeedlException.class,()-> financierOutputPort.delete(invalidId));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void findByInvalidName(String name){
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
+    }
+    @Test
+    @Order(4)
+    void searchFinancierByFirstName()  {
+        List<Financier> foundFinanciers = null;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(5)
+    void searchFinancierByLastName() {
+        List<Financier> foundFinanciers;
+        try {
+
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(6)
+    void searchFinancierWithFirstNameBeforeLastName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(7)
+    void searchFinancierWithLastNameBeforeFirstName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.get(0).getIndividual());
+        assertEquals(foundFinanciers.get(0).getIndividual().getId(), userIdentity.getId());
     }
     @Test
     public void deleteFinancier(){

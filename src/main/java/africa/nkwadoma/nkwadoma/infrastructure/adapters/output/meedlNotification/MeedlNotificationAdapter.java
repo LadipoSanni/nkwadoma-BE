@@ -57,4 +57,10 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         }
         return meedlNotificationMapper.toMeedlNotifications(allNotification);
     }
+
+    @Override
+    public int getNumberOfUnReadNotification(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId,"User id cannot be empty");
+        return meedlNotificationRepository.countByUserIdAndReadIsFalse(userId);
+    }
 }

@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
@@ -196,6 +198,7 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
 
     @Override
     public MeedlNotification sendNotification(MeedlNotification meedlNotification) throws MeedlException {
+        meedlNotification.setTimestamp(LocalDateTime.now());
         meedlNotification.validate();
         UserIdentity userIdentity = userIdentityOutputPort.findById(meedlNotification.getUser().getId());
         if (ObjectUtils.isEmpty(userIdentity)) {
@@ -214,7 +217,12 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
             throw new MeedlNotificationException("this notification is not assigned to this user");
         }
         meedlNotification.setRead(true);
-        return meedlNotificationOutputPort.save(meedlNotification);
+        meedlNotificationOutputPort.save(meedlNotification);
+        meedlNotification.setDuration(
+                ChronoUnit.DAYS.between(meedlNotification.getTimestamp(), LocalDateTime.now())
+                +" days ago"
+        );
+        return meedlNotification;
     }
 
     @Override
@@ -222,5 +230,12 @@ public class NotificationService implements SendOrganizationEmployeeEmailUseCase
         MeedlValidator.validateUUID(id,"User id cannot empty");
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
+    }
+
+    @Override
+    public int getNumberOfUnReadNotification(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot empty");
+        UserIdentity userIdentity = userIdentityOutputPort.findById(id);
+        return meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId());
     }
 }

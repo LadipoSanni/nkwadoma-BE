@@ -2,11 +2,14 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -53,6 +56,10 @@ class LoanRequestServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private MeedlNotificationUsecase meedlNotificationUsecase;
     private String id = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
 
     @BeforeEach
@@ -169,11 +176,16 @@ class LoanRequestServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
-            doNothing().when(sendLoaneeEmailUsecase).sendLoanRequestApprovalEmail(any());
+            when(userIdentityOutputPort.findById(loanRequest.getActorId()))
+                    .thenReturn(new UserIdentity());
+
+
             LoanRequest response = loanRequestService.respondToLoanRequest(loanRequest);
             assertNotNull(response);
             assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
             assertEquals(new BigDecimal("500000"), response.getLoanAmountApproved());
+            verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
+
 
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan request ", e);
