@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface FinancierUseCase {
     String inviteFinancier(Financier financier) throws MeedlException;
 
@@ -12,4 +14,6 @@ public interface FinancierUseCase {
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
     Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException;
+
+    List<Financier> search(String name) throws MeedlException;
 }
