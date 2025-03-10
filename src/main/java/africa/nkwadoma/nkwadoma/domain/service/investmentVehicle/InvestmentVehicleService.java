@@ -14,6 +14,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
@@ -33,6 +34,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
             investmentVehicle.validateDraft();
+            investmentVehicle.setLastUpdatedDate(LocalDate.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
         }
         return createInvestmentVehicle(investmentVehicle);

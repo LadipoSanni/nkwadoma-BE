@@ -33,4 +33,9 @@ public class InvestmentVehicleResponse {
     private LocalDate startDate;
     private String investmentVehicleLink;
     private InvestmentVehicleStatus investmentVehicleStatus;
+    private BigDecimal minimumInvestmentAmount;
+    private String fundManager;
+    private String trustee;
+    private String custodian;
+    private LocalDate lastUpdatedDate;
 }

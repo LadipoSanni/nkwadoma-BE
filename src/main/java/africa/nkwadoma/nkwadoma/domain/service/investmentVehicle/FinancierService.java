@@ -8,9 +8,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -27,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -152,7 +152,11 @@ public class FinancierService implements FinancierUseCase {
         log.info("Found financiers in db: {}", foundFinanciers);
         return foundFinanciers;
     }
-
+    @Override
+    public List<Financier> search(String name) throws MeedlException {
+        MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
+        return financierOutputPort.search(name);
+    }
     private Financier saveFinancier(Financier financier) throws MeedlException {
         UserIdentity userIdentity = financier.getIndividual();
         log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
