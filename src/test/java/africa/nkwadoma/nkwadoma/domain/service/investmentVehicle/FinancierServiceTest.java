@@ -63,7 +63,7 @@ public class FinancierServiceTest {
 
     @BeforeAll
     void setUp(){
-        userIdentity = TestData.createTestUserIdentity("financieremailservicetest2@mail.com");
+        userIdentity = TestData.createTestUserIdentity("financierservicetest2@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
         financier = TestData.buildFinancierIndividual(userIdentity);
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
@@ -348,6 +348,7 @@ public class FinancierServiceTest {
         deleteNotification(userIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
+        identityManagerOutputPort.deleteUser(userIdentity);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
