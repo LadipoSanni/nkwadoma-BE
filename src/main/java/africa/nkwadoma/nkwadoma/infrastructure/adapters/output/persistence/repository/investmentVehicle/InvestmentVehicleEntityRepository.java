@@ -23,7 +23,8 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.investmentVehicleType = :type AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.startDate DESC")
     Page<InvestmentVehicleEntity> findByInvestmentVehicleType(@Param("type") InvestmentVehicleType type, Pageable pageable);
 
-    List<InvestmentVehicleEntity> findByInvestmentVehicleStatus(InvestmentVehicleStatus investmentVehicleStatus);
+    @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.investmentVehicleStatus = :investmentVehicleStatus ORDER BY i.startDate DESC")
+    Page<InvestmentVehicleEntity> findByInvestmentVehicleStatus(InvestmentVehicleStatus investmentVehicleStatus, Pageable pageable);
 
     @Query("SELECT v FROM InvestmentVehicleEntity v " +
             "WHERE v.investmentVehicleType = :type " +
