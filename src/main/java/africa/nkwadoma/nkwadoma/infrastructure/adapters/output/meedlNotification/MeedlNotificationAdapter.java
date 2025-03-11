@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -62,5 +63,12 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
     public int getNumberOfUnReadNotification(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId,"User id cannot be empty");
         return meedlNotificationRepository.countByUserIdAndReadIsFalse(userId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteNotificationByUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot be empty");
+        meedlNotificationRepository.deleteAllByUserId(id);
     }
 }

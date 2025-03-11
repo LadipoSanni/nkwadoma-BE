@@ -14,4 +14,6 @@ public interface MeedlNotificationRepository extends JpaRepository<MeedlNotifica
 
     @Query(value = "SELECT COUNT(*) FROM meedl_notification_entity WHERE meedl_user = :userId AND is_read = false", nativeQuery = true)
     int countByUserIdAndReadIsFalse(String userId);
+
+    void deleteAllByUserId(String id);
 }

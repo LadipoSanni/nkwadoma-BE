@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -136,6 +137,21 @@ class InvestmentVehicleServiceTest {
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
     }
+
+    @Test
+    void viewAllInvestmentVehiclesByFundRaisingStatus(){
+        List<InvestmentVehicle> investmentVehicleList = new ArrayList<>();
+        try {
+            Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByFundRaisingStatus(
+                    pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
+            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
+        } catch (MeedlException exception) {
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicleList);
+        assertThat(investmentVehicleList).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.FUND_RAISING));
+    }
+
 
     @Test
     void viewAllInvestmentVehiclesByStatusWithNullParameter(){
