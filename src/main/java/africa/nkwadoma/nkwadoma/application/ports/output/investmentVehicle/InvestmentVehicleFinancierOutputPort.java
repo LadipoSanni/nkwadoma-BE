@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
@@ -17,4 +18,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     void deleteInvestmentVehicleFinancier(String id) throws MeedlException;
 
     Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException;
+
+    Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException;
 }

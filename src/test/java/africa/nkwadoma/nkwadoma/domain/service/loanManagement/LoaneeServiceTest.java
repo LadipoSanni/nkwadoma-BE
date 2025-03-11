@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
@@ -55,7 +55,7 @@ class LoaneeServiceTest {
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
-    private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    private LoaneeEmailUsecase sendLoaneeEmailUsecase;
     @Mock
     private CreditRegistryOutputPort creditRegistryOutputPort;
     @Mock
