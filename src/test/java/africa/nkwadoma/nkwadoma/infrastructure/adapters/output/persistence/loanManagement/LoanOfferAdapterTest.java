@@ -57,7 +57,6 @@ public class LoanOfferAdapterTest {
     private int pageSize = 1;
     private int pageNumber = 0;
 
-
     @BeforeAll
     void setUp() {
         userIdentity = TestData.createTestUserIdentity("test@example.com");

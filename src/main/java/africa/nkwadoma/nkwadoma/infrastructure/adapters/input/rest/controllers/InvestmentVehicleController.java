@@ -130,12 +130,14 @@ public class InvestmentVehicleController {
     @GetMapping("view-all-investment-vehicle-by-status")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleType(
+            @RequestParam int pageSize,
+            @RequestParam int pageNumber,
             @RequestParam InvestmentVehicleStatus status) throws MeedlException {
-        List<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(status);
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(pageSize, pageNumber, status);
 
         List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles);
+                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
         ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
                 .data(investmentVehicleResponse)

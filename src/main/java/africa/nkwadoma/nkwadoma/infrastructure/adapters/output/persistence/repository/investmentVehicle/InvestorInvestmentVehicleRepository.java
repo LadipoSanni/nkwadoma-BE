@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
 import org.springframework.data.domain.Page;
@@ -15,5 +16,11 @@ public interface InvestorInvestmentVehicleRepository extends JpaRepository<Inves
     @Query("SELECT ivf.financier FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.investmentVehicle.id = :investmentVehicleId")
     Page<FinancierEntity> findFinanciersByInvestmentVehicleId(@Param("investmentVehicleId") String investmentVehicleId, Pageable pageable);
 
-    Page<InvestmentVehicleFinancierEntity> findAllByInvestmentVehicleId(String investmentVehicleId, Pageable pageRequest);
-}
+    @Query("SELECT ivf.financier FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle.id = :investmentVehicleId " +
+            "AND ivf.financier.activationStatus = :activationStatus")
+    Page<FinancierEntity> findFinanciersByInvestmentVehicleIdAndStatus(
+            @Param("investmentVehicleId") String investmentVehicleId,
+            @Param("activationStatus") ActivationStatus activationStatus,
+            Pageable pageable
+    );}

@@ -39,8 +39,6 @@ public class LoanRequestService implements LoanRequestUseCase {
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanOfferUseCase loanOfferUseCase;
     private final LoaneeUseCase loaneeUseCase;
-    private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
-    private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoanRequestMapper loanRequestMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;

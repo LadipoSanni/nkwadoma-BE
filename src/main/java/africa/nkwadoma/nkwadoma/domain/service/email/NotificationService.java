@@ -1,8 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -22,7 +22,6 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
@@ -34,8 +33,8 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationService implements SendOrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
-        SendLoaneeEmailUsecase, MeedlNotificationUsecase {
+public class NotificationService implements OrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
+        LoaneeEmailUsecase, MeedlNotificationUsecase {
     private final EmailOutputPort emailOutputPort;
     private final TokenUtils tokenUtils;
     private final UserIdentityOutputPort userIdentityOutputPort;
