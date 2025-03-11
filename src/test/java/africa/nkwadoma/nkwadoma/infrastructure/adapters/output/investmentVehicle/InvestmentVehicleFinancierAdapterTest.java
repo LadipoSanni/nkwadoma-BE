@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
@@ -50,9 +51,10 @@ class InvestmentVehicleFinancierAdapterTest {
         try {
             userIdentity = saveUserIdentity(TestData.createTestUserIdentity("InvestmentVehicleFinanciertest@notmail.com", "3f89a9e1-62a5-4b42-bff1-6c8b5f77c5e2"));
             log.info("Financier saved successfully for investment vehicle financier test. {}", userIdentity.getId());
-            financier = financierOutputPort.saveFinancier(Financier
+            financier = financierOutputPort.save(Financier
                     .builder()
                     .individual(userIdentity)
+                    .activationStatus(ActivationStatus.INVITED)
                     .invitedBy(userIdentity.getId())
                     .build());
             financierId = financier.getId();
@@ -199,11 +201,35 @@ class InvestmentVehicleFinancierAdapterTest {
         List<Financier> financiers = financiersPage.toList();
         assertEquals(1, financiers.size());
     }
+    @Test
+    @Order(3)
+    void viewAllFinancierInVehicleWithActivationStatus(){
+        Page<Financier> financiersPage = null;
+        try {
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, ActivationStatus.INVITED, pageRequest);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        List<Financier> financiers = financiersPage.toList();
+        assertEquals(1, financiers.size());
+        assertNotNull(financiers.get(0).getActivationStatus());
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
     void viewAllFinancierInVehicleWithInvalidVehicleId(String invalidId) {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, pageRequest));
     }
+        @ParameterizedTest
+        @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
+        void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
+            assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
+        }
+        @Test
+        void viewAllFinancierInVehicleWithVehicleIdAndInvalidStatus() {
+            assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, null, pageRequest));
+        }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
     void deleteWithInvalidId(String invalidId){

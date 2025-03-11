@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -41,7 +41,7 @@ class UserIdentityServiceTest {
     @Mock
     private SendColleagueEmailUseCase sendColleagueEmailUseCase;
     @Mock
-    private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    private OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     @Mock
     private TokenUtils tokenUtils;
     @Mock

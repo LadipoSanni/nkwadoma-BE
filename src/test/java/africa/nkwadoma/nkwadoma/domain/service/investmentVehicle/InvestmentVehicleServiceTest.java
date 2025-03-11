@@ -113,13 +113,14 @@ class InvestmentVehicleServiceTest {
     @Test
     @Order(6)
     void viewAllInvestmentVehiclesByStatus(){
-        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+        Page<InvestmentVehicle> investmentVehicles = null;
         try{
-            investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
+            investmentVehicles = investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(pageSize, pageNumber, InvestmentVehicleStatus.PUBLISHED);
         } catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
@@ -138,7 +139,7 @@ class InvestmentVehicleServiceTest {
 
     @Test
     void viewAllInvestmentVehiclesByStatusWithNullParameter(){
-        assertThrows(MeedlException.class, ()->investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(null));
+        assertThrows(MeedlException.class, ()->investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(pageSize, pageNumber,null));
     }
 
     @AfterAll

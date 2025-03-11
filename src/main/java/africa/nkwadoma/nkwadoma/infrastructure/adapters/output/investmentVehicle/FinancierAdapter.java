@@ -37,7 +37,7 @@ public class FinancierAdapter implements FinancierOutputPort {
 
 
     @Override
-    public Financier saveFinancier(Financier financier) throws MeedlException {
+    public Financier save(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
         financier.validate();
         FinancierEntity financierEntity = financierMapper.map(financier);
