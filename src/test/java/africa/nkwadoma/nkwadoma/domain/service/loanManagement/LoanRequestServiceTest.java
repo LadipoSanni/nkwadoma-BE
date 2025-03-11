@@ -49,7 +49,7 @@ class LoanRequestServiceTest {
     private List<LoaneeLoanBreakdown> loaneeLoanBreakdowns;
     private LoanProduct loanProduct;
     @Mock
-    private SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    private LoaneeEmailUsecase sendLoaneeEmailUsecase;
     @Mock
     private LoanRequestMapper loanRequestMapper;
     @Mock
