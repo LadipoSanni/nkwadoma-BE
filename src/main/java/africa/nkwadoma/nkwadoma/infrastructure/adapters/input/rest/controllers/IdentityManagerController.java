@@ -1,9 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
@@ -30,6 +32,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class IdentityManagerController {
     private final CreateUserUseCase createUserUseCase;
     private final OrganizationUseCase createOrganizationUseCase;
+    private final FinancierUseCase financierUseCase;
     private final IdentityMapper identityMapper;
 
     @PostMapping("auth/login")
@@ -80,7 +83,17 @@ public class IdentityManagerController {
         log.info("got the request {}", passwordCreateRequest.getPassword());
         UserIdentity userIdentity = identityMapper.toPasswordCreateRequest(passwordCreateRequest);
         userIdentity = createUserUseCase.createPassword(userIdentity.getEmail(), userIdentity.getPassword());
-        if (ObjectUtils.isNotEmpty(userIdentity) &&
+        if (ObjectUtils.isNotEmpty(userIdentity) && ObjectUtils.isNotEmpty(userIdentity.getRole())){
+            activateUser(userIdentity);
+        }
+        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
+                data(userIdentity).
+                message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
+                statusCode(HttpStatus.OK.name()).build());
+    }
+
+    private void activateUser(UserIdentity userIdentity) throws MeedlException {
+        if (
                 userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {
@@ -88,11 +101,11 @@ public class IdentityManagerController {
             OrganizationIdentity organizationIdentity = new OrganizationIdentity();
             organizationIdentity.setUserIdentity(userIdentity);
             createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
+        }else if(userIdentity.getRole() == IdentityRole.FINANCIER){
+            log.info("Started updating financier status");
+            Financier financier = Financier.builder().individual(userIdentity).build();
+            financierUseCase.updateFinancierStatus(financier);
         }
-        return ResponseEntity.ok(ApiResponse.<UserIdentity>builder().
-                data(userIdentity).
-                message(ControllerConstant.PASSWORD_CREATED_SUCCESSFULLY.getMessage()).
-                statusCode(HttpStatus.OK.name()).build());
     }
 
 

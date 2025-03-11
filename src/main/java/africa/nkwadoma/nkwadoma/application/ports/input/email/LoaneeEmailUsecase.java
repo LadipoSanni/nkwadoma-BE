@@ -4,7 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
-public interface SendLoaneeEmailUsecase {
+public interface LoaneeEmailUsecase {
 
     void referLoaneeEmail(Loanee loanee) throws MeedlException;
 

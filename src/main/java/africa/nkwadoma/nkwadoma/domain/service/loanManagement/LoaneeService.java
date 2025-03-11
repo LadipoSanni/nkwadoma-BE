@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.CreditRegistryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
@@ -57,7 +57,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final ProgramOutputPort programOutputPort;
     private final TokenUtils tokenUtils;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
-    private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+    private final LoaneeEmailUsecase loaneeEmailUsecase;
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
@@ -216,7 +216,7 @@ public class LoaneeService implements LoaneeUseCase {
     }
     @Override
     @Async
-    public void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException {
+    public void notifyLoanReferralActors(List<Loanee> loanees){
         loanees.forEach(loanee -> {
             try {
                 refer(loanee);
@@ -232,11 +232,11 @@ public class LoaneeService implements LoaneeUseCase {
         }
     }
     private void notifyPortfolioManager(UserIdentity userIdentity) throws MeedlException {
-        sendLoaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
+        loaneeEmailUsecase.sendLoaneeHasBeenReferEmail(userIdentity);
     }
 
     private void refer(Loanee loanee) throws MeedlException {
-        sendLoaneeEmailUsecase.referLoaneeEmail(loanee);
+        loaneeEmailUsecase.referLoaneeEmail(loanee);
     }
 
     @Override
