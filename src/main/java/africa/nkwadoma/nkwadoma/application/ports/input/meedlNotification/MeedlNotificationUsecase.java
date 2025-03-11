@@ -12,4 +12,6 @@ public interface MeedlNotificationUsecase {
     MeedlNotification viewNotification(String id, String notificationId) throws MeedlException;
 
     List<MeedlNotification> viewAllNotification(String id) throws MeedlException;
+
+    int getNumberOfUnReadNotification(String id) throws MeedlException;
 }

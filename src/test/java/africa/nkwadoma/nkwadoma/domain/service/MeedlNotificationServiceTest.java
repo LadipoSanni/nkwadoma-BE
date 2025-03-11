@@ -160,4 +160,12 @@ public class MeedlNotificationServiceTest {
         assertEquals(1,meedlNotifications.size());
     }
 
+    @Test
+    void countOfUnreadNotifications() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId())).thenReturn(2);
+        int count = notificationService.getNumberOfUnReadNotification(userIdentity.getId());
+        assertEquals(2, count);
+    }
+
 }
