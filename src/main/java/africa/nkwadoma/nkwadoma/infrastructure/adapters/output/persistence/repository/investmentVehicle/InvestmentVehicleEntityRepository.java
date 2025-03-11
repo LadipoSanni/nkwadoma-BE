@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -34,4 +35,10 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             @Param("status") InvestmentVehicleStatus status,
             Pageable pageable
     );
+
+    @Query("SELECT v FROM InvestmentVehicleEntity v WHERE " +
+            "(:investmentVehicleType IS NULL OR v.investmentVehicleType = :investmentVehicleType) AND " +
+            "(:investmentVehicleStatus IS NULL OR v.investmentVehicleStatus = :investmentVehicleStatus) AND" +
+            "(:fundRaisingStatus IS NULL OR v.fundRaisingStatus = :fundRaisingStatus)")
+    Page<InvestmentVehicleEntity> findAlInvestmentVehicleByFilter(InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, Pageable pageRequest);
 }

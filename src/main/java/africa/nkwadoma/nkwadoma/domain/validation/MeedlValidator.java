@@ -98,6 +98,20 @@ public class MeedlValidator {
         }
     }
 
+    public static Integer validateAndSetPaginationForPageSize(Integer pageSize){
+        if (pageSize == null || pageSize < 1) {
+            pageSize = 10;
+        }
+        return pageSize;
+    }
+
+    public static Integer validateAndSetPaginationForPageNumber(Integer pageNumber){
+        if (pageNumber == null || pageNumber < 1) {
+            pageNumber = 0;
+        }
+        return pageNumber;
+    }
+
     public static void validatePageSize(int pageSize) throws MeedlException {
         if (pageSize < BigInteger.ONE.intValue()) {
             throw new MeedlException(MeedlMessages.PAGE_SIZE_CANNOT_BE_LESS_THAN_ONE.getMessage());

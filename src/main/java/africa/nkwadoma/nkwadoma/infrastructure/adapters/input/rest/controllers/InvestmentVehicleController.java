@@ -107,8 +107,8 @@ public class InvestmentVehicleController {
     @GetMapping("investment-vehicle/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleFilter(
-            @RequestParam(required = false) int pageSize,
-            @RequestParam(required = false) int pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Integer pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
             @RequestParam(required = false)FundRaisingStatus fundRaisingStatus) throws MeedlException {

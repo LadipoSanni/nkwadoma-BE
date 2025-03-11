@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -91,6 +92,17 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleTypeAndStatus(type, status, pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(Integer pageSize, Integer pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) {
+        Integer size = MeedlValidator.validateAndSetPaginationForPageSize(pageSize);
+        Integer number = MeedlValidator.validateAndSetPaginationForPageNumber(pageNumber);
+
+        Pageable pageRequest = PageRequest.of(size, number, Sort.by("startDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+                investmentVehicleRepository.findAlInvestmentVehicleByFilter(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
