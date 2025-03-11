@@ -41,6 +41,7 @@ class InvestmentVehicleAdapterTest {
     private String seaGrowthInvestmentVehicleId;
     private String fundRaisingInvestmentId;
     private String commercialInvestmentId;
+    private String seaGrowthDraftInvestmentId;
 
     @BeforeEach
     void setUp(){
@@ -261,7 +262,6 @@ class InvestmentVehicleAdapterTest {
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.COMMERCIAL));
     }
 
-    @Order(8)
     @Test
     void viewAllInvestmentVehicleByTypeDoesNotReturnDraft() {
         Page<InvestmentVehicle> investmentVehicles = null;
@@ -294,13 +294,14 @@ class InvestmentVehicleAdapterTest {
     void viewAllInvestmentVehicleByStatusReturnDraft() {
         Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            InvestmentVehicle draftVehicle = TestData.buildInvestmentVehicle("Draft Vehicle");
-            investmentVehicleOutputPort.save(draftVehicle);
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(pageSize, pageNumber, DRAFT);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
         } catch (Exception exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
     }
 
@@ -335,7 +336,6 @@ class InvestmentVehicleAdapterTest {
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
-    @Order(9)
     @Test
     void viewAllInvestmentVehicleByFundRaisingStatus() {
         Page<InvestmentVehicle> investmentVehicles = null;
