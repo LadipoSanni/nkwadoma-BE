@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -27,8 +25,8 @@ import org.springframework.stereotype.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
 
 @Service
 @RequiredArgsConstructor
