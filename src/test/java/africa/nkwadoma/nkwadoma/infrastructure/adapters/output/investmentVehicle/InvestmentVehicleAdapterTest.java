@@ -341,7 +341,6 @@ class InvestmentVehicleAdapterTest {
         Page<InvestmentVehicle> investmentVehicles = null;
         try{
             InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
-            fundGrowth.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
                     pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
             fundRaisingInvestmentId = savedVehicle.getId();
