@@ -29,7 +29,7 @@ public interface OrganizationIdentityOutputPort {
     List<OrganizationIdentity> findAllWithLoanMetrics();
     List<OrganizationIdentity> findByName(String name) throws MeedlException;
     Optional<OrganizationIdentity> findOrganizationByName(String name) throws MeedlException;
-    void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException;
+    OrganizationIdentity updateNumberOfCohortInOrganization(String organizationId) throws MeedlException;
     Optional<OrganizationIdentity> findByTin(String tin) throws MeedlException;
 }
 
