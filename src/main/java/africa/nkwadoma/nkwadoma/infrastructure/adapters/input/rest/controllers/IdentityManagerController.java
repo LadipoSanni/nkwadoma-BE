@@ -97,15 +97,23 @@ public class IdentityManagerController {
                 userIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER
         ) {
-            log.info("Started updating employee status");
-            OrganizationIdentity organizationIdentity = new OrganizationIdentity();
-            organizationIdentity.setUserIdentity(userIdentity);
-            createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
+            activateOrganizationAndAdmin(userIdentity);
         }else if(userIdentity.getRole() == IdentityRole.FINANCIER){
-            log.info("Started updating financier status");
-            Financier financier = Financier.builder().individual(userIdentity).build();
-            financierUseCase.updateFinancierStatus(financier);
+            activateFinancier(userIdentity);
         }
+    }
+
+    private void activateFinancier(UserIdentity userIdentity) {
+        log.info("Started updating financier status");
+        Financier financier = Financier.builder().individual(userIdentity).build();
+        financierUseCase.updateFinancierStatus(financier);
+    }
+
+    private void activateOrganizationAndAdmin(UserIdentity userIdentity) throws MeedlException {
+        log.info("Started updating employee status");
+        OrganizationIdentity organizationIdentity = new OrganizationIdentity();
+        organizationIdentity.setUserIdentity(userIdentity);
+        createOrganizationUseCase.updateOrganizationStatus(organizationIdentity);
     }
 
 

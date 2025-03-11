@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -64,6 +67,10 @@ class CohortServiceTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private ServiceOffering serviceOffering;
     private UserIdentity userIdentity;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Mock
+    private MeedlNotificationUsecase meedlNotificationUsecase;
 
 
     @BeforeEach
@@ -113,9 +120,16 @@ class CohortServiceTest {
             elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
+            when(organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId()))
+                    .thenReturn(organizationIdentity);
+            when(userIdentityOutputPort.findById(elites.getCreatedBy()))
+                    .thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()))
+                    .thenReturn(List.of(organizationEmployeeIdentity));
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
+            verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -147,9 +161,16 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
+            when(organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId()))
+                    .thenReturn(organizationIdentity);
+            when(userIdentityOutputPort.findById(elites.getCreatedBy()))
+                    .thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()))
+                    .thenReturn(List.of(organizationEmployeeIdentity));
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());
+            verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
