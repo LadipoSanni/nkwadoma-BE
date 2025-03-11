@@ -286,6 +286,7 @@ public class CohortService implements CohortUseCase {
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
+            loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
@@ -308,6 +309,7 @@ public class CohortService implements CohortUseCase {
     }
 
     private void inviteTrainee (Loanee loanee) throws MeedlException {
+        log.info("Single loanee is being sent an email...");
         loaneeUseCase.referLoanee(loanee);
     }
 
