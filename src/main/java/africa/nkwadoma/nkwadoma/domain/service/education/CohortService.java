@@ -309,7 +309,7 @@ public class CohortService implements CohortUseCase {
     }
 
     private void inviteTrainee (Loanee loanee) throws MeedlException {
-        log.info("Single loanee is being sent an email...");
+        log.info("Single loanee is being referred...");
         loaneeUseCase.referLoanee(loanee);
     }
 
