@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -106,12 +107,14 @@ public class InvestmentVehicleController {
     @GetMapping("investment-vehicle/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleFilter(
-            @RequestParam int pageSize,
-            @RequestParam int pageNumber,
+            @RequestParam(required = false) int pageSize,
+            @RequestParam(required = false) int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
-            @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException {
+            @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
+            @RequestParam(required = false)FundRaisingStatus fundRaisingStatus) throws MeedlException {
 
-        Page<InvestmentVehicle> investmentVehicles = null;
+        Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
+                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
 
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());

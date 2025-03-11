@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -127,6 +128,15 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateObjectInstance(type, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
         return investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+//            Pageable pageable = PageRequest.of(
+//                    pageNumber != null ? pageNumber : 0,
+//                    pageSize != null ? pageSize : 10);
+
+            return null;
     }
 
     private String generateInvestmentVehicleLink(String id) {
