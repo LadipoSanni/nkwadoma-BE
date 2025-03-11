@@ -153,7 +153,7 @@ public class FinancierService implements FinancierUseCase {
         return foundFinanciers;
     }
     @Override
-    public Page<Financier> viewAllFinancierInInvestmentVehicleWithActivationStatus(Financier financier) throws MeedlException {
+    public Page<Financier> viewAllFinancierInInvestmentVehicleByActivationStatus(Financier financier) throws MeedlException {
         viewAllFinancierInVehicleValidation(financier);
         MeedlValidator.validateObjectInstance(financier.getActivationStatus(), "Please provide a valid activation status.");
 
