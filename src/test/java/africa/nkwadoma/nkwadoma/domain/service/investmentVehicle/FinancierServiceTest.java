@@ -89,7 +89,7 @@ public class FinancierServiceTest {
 
     @Test
     @Order(1)
-    public void inviteFinancierThatDoesNotExistOnThePlatform() {
+    public void inviteFinancierThatDoesNotExistOnThePlatformToInvestmentVehicle() {
         String response;
         Financier foundFinancier;
         try {
@@ -105,6 +105,14 @@ public class FinancierServiceTest {
         assertNotNull(response);
         assertEquals("Financier added to investment vehicle", response);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
+    }
+    @Test
+    void inviteFinancierToPlatform(){
+
+    }
+    @Test
+    public void inviteFinancierOnPlatformToAnotherInvestmentVehicle() {
+
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
