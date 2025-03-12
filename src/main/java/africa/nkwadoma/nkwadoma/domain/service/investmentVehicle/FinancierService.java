@@ -142,15 +142,14 @@ public class FinancierService implements FinancierUseCase {
     }
     private void addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleFinancier>  optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
-        if (optionalInvestmentVehicleFinancier.isPresent()) {
-            throw new MeedlException("User previously added to this investment vehicle.");
+        if (optionalInvestmentVehicleFinancier.isEmpty()) {
+            investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
+                    .financier(financier)
+                    .investmentVehicle(investmentVehicle)
+                    .build());
+            log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
         }
-        investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
-                .financier(financier)
-                .investmentVehicle(investmentVehicle)
-                .build());
-        log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
-    }
+       }
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
         viewAllFinancierInVehicleValidation(financier);
