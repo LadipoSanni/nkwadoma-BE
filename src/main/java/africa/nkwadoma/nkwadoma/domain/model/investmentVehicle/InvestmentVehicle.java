@@ -42,6 +42,7 @@ public class InvestmentVehicle {
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
     private LocalDate lastUpdatedDate;
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
 
 
 

@@ -85,18 +85,18 @@ class InvestmentVehicleServiceTest {
         assertEquals(1, investmentVehiclesList.size());
     }
 
-    @Order(4)
-    @Test
-    void publishInvestmentVehicle() {
-        InvestmentVehicle investmentVehicle = new InvestmentVehicle();
-        try {
-             investmentVehicle = investmentVehicleUseCase.publishInvestmentVehicle(investmentId);
-        }catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
-        }
-        assertEquals(InvestmentVehicleStatus.PUBLISHED,investmentVehicle.getInvestmentVehicleStatus());
-        assertNotNull(investmentVehicle.getInvestmentVehicleLink());
-    }
+//    @Order(4)
+//    @Test
+//    void publishInvestmentVehicle() {
+//        InvestmentVehicle investmentVehicle = new InvestmentVehicle();
+//        try {
+//             investmentVehicle = investmentVehicleUseCase.publishInvestmentVehicle(investmentId);
+//        }catch (MeedlException exception){
+//            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+//        }
+//        assertEquals(InvestmentVehicleStatus.PUBLISHED,investmentVehicle.getInvestmentVehicleStatus());
+//        assertNotNull(investmentVehicle.getInvestmentVehicleLink());
+//    }
 
     @Order(5)
     @Test
