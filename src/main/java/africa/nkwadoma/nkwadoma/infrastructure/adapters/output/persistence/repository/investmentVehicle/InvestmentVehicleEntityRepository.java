@@ -37,9 +37,9 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     );
 
     @Query("SELECT v FROM InvestmentVehicleEntity v WHERE " +
-            "(:investmentVehicleType IS NULL OR (v.investmentVehicleType = :investmentVehicleType AND v.investmentVehicleStatus = 'PUBLISHED')) AND " +
-            "(:investmentVehicleStatus IS NULL OR v.investmentVehicleStatus = :investmentVehicleStatus) AND" +
-            "(:fundRaisingStatus IS NULL OR (v.fundRaisingStatus = :fundRaisingStatus AND v.investmentVehicleStatus = 'PUBLISHED'))")
+            "(:investmentVehicleType IS NULL OR v.investmentVehicleType = :investmentVehicleType) AND " +
+            "(:investmentVehicleStatus IS NULL OR v.investmentVehicleStatus = :investmentVehicleStatus) AND " +
+            "(:fundRaisingStatus IS NULL OR v.fundRaisingStatus = :fundRaisingStatus)")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleBy(
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
             @Param("investmentVehicleStatus") InvestmentVehicleStatus investmentVehicleStatus,
