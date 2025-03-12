@@ -21,8 +21,6 @@ public interface InvestmentVehicleUseCase {
 
     List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException;
 
-    InvestmentVehicle publishInvestmentVehicle(String investmentVehicleId) throws MeedlException;
-
     Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicleByStatus(int pageSize, int pageNumber, InvestmentVehicleStatus status) throws MeedlException;
