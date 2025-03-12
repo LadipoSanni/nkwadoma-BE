@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
@@ -18,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
-import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class FinancierService implements FinancierUseCase {
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
-    private final NotificationService notificationService;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase FinancierEmailUseCase;
 
 
@@ -122,7 +122,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderFullName(financier.getIndividual().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
                 .build();
-        notificationService.sendNotification(meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
