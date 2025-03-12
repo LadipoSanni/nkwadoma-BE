@@ -98,10 +98,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private InvestmentVehicle publishedInvestmentVehicle(String investmentVehicleId,InvestmentVehicle investmentVehicle) throws MeedlException {
         if (ObjectUtils.isNotEmpty(investmentVehicleId)) {
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            if (investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED)) {
+             InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            if (foundInvestmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED)) {
                 throw new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_ALREADY_PUBLISHED.getMessage());
             }
+            investmentVehicleMapper.updateInvestmentVehicle(foundInvestmentVehicle,investmentVehicle);
         }
         String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
         investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
