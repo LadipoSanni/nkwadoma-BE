@@ -58,8 +58,6 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final MeedlNotificationUsecase meedlNotificationUsecase;
 
 
     @Override
@@ -84,41 +82,8 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
-        OrganizationIdentity organizationIdentity =
-                organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
-
-        UserIdentity userIdentity = fetchSenderIdentity(cohort);
-        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = fetchOrganizationEmployeeIdentities(organizationIdentity);
-
-        sendAllNotifications(organizationEmployeeIdentities, savedCohort, userIdentity, organizationIdentity);
+        organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
         return savedCohort;
-    }
-
-    private void sendAllNotifications(List<OrganizationEmployeeIdentity> organizationEmployeeIdentities,
-                                      Cohort savedCohort, UserIdentity userIdentity, OrganizationIdentity organizationIdentity) throws MeedlException {
-        for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployeeIdentities) {
-            MeedlNotification meedlNotification =
-                    buildMeedlNotificationForOrganizationAdmins(organizationEmployeeIdentity, savedCohort, userIdentity, organizationIdentity);
-            meedlNotificationUsecase.sendNotification(meedlNotification);
-        }
-    }
-
-    private static MeedlNotification buildMeedlNotificationForOrganizationAdmins(OrganizationEmployeeIdentity organizationEmployeeIdentity, Cohort savedCohort, UserIdentity userIdentity, OrganizationIdentity organizationIdentity) {
-        return MeedlNotification.builder()
-                .user(organizationEmployeeIdentity.getMeedlUser())
-                .title(MeedlNotificationMessages.NEW_COHORT.getMessage())
-                .contentId(savedCohort.getId())
-                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
-                .senderMail(userIdentity.getEmail())
-                .contentDetail(organizationIdentity.getName().concat(" "+MeedlNotificationMessages.NEW_COHORT_CONTENT.getMessage())).build();
-    }
-
-    private List<OrganizationEmployeeIdentity> fetchOrganizationEmployeeIdentities(OrganizationIdentity organizationIdentity) {
-        return organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId());
-    }
-
-    private UserIdentity fetchSenderIdentity(Cohort cohort) throws MeedlException {
-        return userIdentityOutputPort.findById(cohort.getCreatedBy());
     }
 
     private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {

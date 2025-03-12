@@ -250,11 +250,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public OrganizationIdentity updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
+    public void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException {
         OrganizationIdentity organizationIdentity = findById(organizationId);
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        return save(organizationIdentity);
     }
 
     @Override
