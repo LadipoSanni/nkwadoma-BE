@@ -50,16 +50,19 @@ public class FinancierService implements FinancierUseCase {
         inviteFinancierValidation(financier);
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         try {
-
             financier = getFinancierByUserIdentity(financier);
-            addFinancierToVehicle(financier, investmentVehicle);
-            notifyExistingFinancier(financier, investmentVehicle);
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = addFinancierToVehicle(financier, investmentVehicle);
+            if (optionalInvestmentVehicleFinancier.isEmpty()) {
+                notifyExistingFinancier(financier, investmentVehicle);
+            }
         } catch (MeedlException e) {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
-            log.info("Inviting a new financier to the platform {} ",e.getMessage(), e);
+            log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
-            addFinancierToVehicle(financier, investmentVehicle);
-            inviteNonExistingFinancierToVehicle(financier, investmentVehicle);
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = addFinancierToVehicle(financier, investmentVehicle);
+            if (optionalInvestmentVehicleFinancier.isEmpty()) {
+                inviteNonExistingFinancierToVehicle(financier, investmentVehicle);
+            }
         }
         return "Financier added to investment vehicle";
     }
@@ -140,8 +143,8 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         return financierOutputPort.viewAllFinancier(financier);
     }
-    private void addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Optional<InvestmentVehicleFinancier>  optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+    private Optional<InvestmentVehicleFinancier> addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
             investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
                     .financier(financier)
@@ -149,6 +152,7 @@ public class FinancierService implements FinancierUseCase {
                     .build());
             log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
         }
+        return optionalInvestmentVehicleFinancier;
        }
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
