@@ -108,7 +108,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {
-        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
         InvestmentVehicleEntity investmentVehicleEntity =
                 investmentVehicleRepository.findByNameAndStatusNotDraft(name,status);
         return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
@@ -116,7 +116,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     @Override
     public List<InvestmentVehicle> searchInvestmentVehicle(String name) throws MeedlException {
-        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
         List<InvestmentVehicleEntity> investmentVehicles =
                 investmentVehicleRepository.findAllByNameContainingIgnoreCase(name);
         return investmentVehicles.stream().map(investmentVehicleMapper::toInvestmentVehicle).collect(Collectors.toList());

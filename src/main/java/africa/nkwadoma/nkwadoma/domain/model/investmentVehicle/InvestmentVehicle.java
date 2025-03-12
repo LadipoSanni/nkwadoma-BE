@@ -46,12 +46,12 @@ public class InvestmentVehicle {
 
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectName(name,"Name cannot be empty");
-        MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty");
-        MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty");
-        MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty");
-        MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty");
-        MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty");
+        MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
+        MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty","Trustee");
+        MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty","Custodian");
+        MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty","Bank Partner");
+        MeedlValidator.validateObjectName(fundManager,"Fund Manager cannot be empty","Fund Manager");
+        MeedlValidator.validateObjectName(sponsors,"Sponsor cannot be empty","Sponsor");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
         validateTenure(tenure);
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
@@ -80,7 +80,7 @@ public class InvestmentVehicle {
     }
 
     public void validateDraft() throws MeedlException {
-        MeedlValidator.validateObjectName(name,"Name cannot be empty");
+        MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
 }
