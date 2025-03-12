@@ -2,7 +2,9 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
@@ -12,8 +14,10 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -33,8 +37,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.NEW_COHORT;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.NEW_COHORT_CONTENT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
@@ -104,11 +106,11 @@ public class CohortService implements CohortUseCase {
     private static MeedlNotification buildMeedlNotificationForOrganizationAdmins(OrganizationEmployeeIdentity organizationEmployeeIdentity, Cohort savedCohort, UserIdentity userIdentity, OrganizationIdentity organizationIdentity) {
         return MeedlNotification.builder()
                 .user(organizationEmployeeIdentity.getMeedlUser())
-                .title(NEW_COHORT.getMessage())
+                .title(MeedlNotificationMessages.NEW_COHORT.getMessage())
                 .contentId(savedCohort.getId())
                 .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
                 .senderMail(userIdentity.getEmail())
-                .contentDetail(organizationIdentity.getName().concat(" "+NEW_COHORT_CONTENT.getMessage())).build();
+                .contentDetail(organizationIdentity.getName().concat(" "+MeedlNotificationMessages.NEW_COHORT_CONTENT.getMessage())).build();
     }
 
     private List<OrganizationEmployeeIdentity> fetchOrganizationEmployeeIdentities(OrganizationIdentity organizationIdentity) {

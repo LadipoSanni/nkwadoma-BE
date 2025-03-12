@@ -243,7 +243,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLink(userIdentity),userIdentity.getFirstName(), investmentVehicle.getName());
+        Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
         Email email = Email.builder()
                 .context(context)
                 .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
@@ -252,5 +252,10 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
                 .firstName(userIdentity.getFirstName())
                 .build();
         sendMail(userIdentity, email);
+    }
+    private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
+        String token = tokenUtils.generateToken(userIdentity.getEmail());
+        log.info("Generated token for inviting financier to vehicle: {}", token);
+        return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
     }
 }
