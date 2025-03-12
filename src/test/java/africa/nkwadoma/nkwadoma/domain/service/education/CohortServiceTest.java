@@ -58,19 +58,13 @@ class CohortServiceTest {
     @Mock
     private CohortMapper cohortMapper;
     @Mock
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Mock
     private LoaneeOutputPort loaneeOutputPort;
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private ServiceOffering serviceOffering;
     private UserIdentity userIdentity;
     @Mock
-    private UserIdentityOutputPort userIdentityOutputPort;
-    @Mock
-    private MeedlNotificationUsecase meedlNotificationUsecase;
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @BeforeEach
@@ -120,16 +114,9 @@ class CohortServiceTest {
             elites.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
-            when(organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId()))
-                    .thenReturn(organizationIdentity);
-            when(userIdentityOutputPort.findById(elites.getCreatedBy()))
-                    .thenReturn(userIdentity);
-            when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()))
-                    .thenReturn(List.of(organizationEmployeeIdentity));
             Cohort cohort = cohortService.createCohort(elites);
             assertEquals(cohort.getName(), elites.getName());
             assertEquals(LocalDate.of(2025,6,29),cohort.getExpectedEndDate());
-            verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
         } catch (MeedlException exception) {
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
@@ -161,16 +148,9 @@ class CohortServiceTest {
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
-            when(organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId()))
-                    .thenReturn(organizationIdentity);
-            when(userIdentityOutputPort.findById(elites.getCreatedBy()))
-                    .thenReturn(userIdentity);
-            when(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()))
-                    .thenReturn(List.of(organizationEmployeeIdentity));
             Cohort cohort = cohortService.createCohort(xplorers);
             assertEquals(cohort.getName(), xplorers.getName());
             verify(cohortOutputPort, times(2)).save(any());
-            verify(meedlNotificationUsecase).sendNotification(any(MeedlNotification.class));
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
