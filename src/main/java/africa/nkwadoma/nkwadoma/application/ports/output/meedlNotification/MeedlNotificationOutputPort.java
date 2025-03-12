@@ -2,8 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface MeedlNotificationOutputPort {
     MeedlNotification save(MeedlNotification meedlNotification) throws MeedlException;
@@ -12,7 +11,7 @@ public interface MeedlNotificationOutputPort {
 
     MeedlNotification findNotificationById(String  id) throws MeedlException;
 
-    List<MeedlNotification> findAllNotificationBelongingToAUser(String id) throws MeedlException;
+    Page<MeedlNotification> findAllNotificationBelongingToAUser(String id, int pageSize, int pageNumber) throws MeedlException;
 
     int getNumberOfUnReadNotification(String userId) throws MeedlException;
 

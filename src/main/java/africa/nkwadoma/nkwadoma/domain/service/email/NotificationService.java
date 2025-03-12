@@ -25,11 +25,11 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -228,10 +228,12 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public List<MeedlNotification> viewAllNotification(String id) throws MeedlException {
+    public Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
-        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
+        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber);
     }
 
     @Override

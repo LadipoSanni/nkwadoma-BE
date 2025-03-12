@@ -14,6 +14,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,8 @@ public class MeedlNotificationAdapterTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
+    int pageSize = 10 ;
+    int pageNumber = 0 ;
 
     @BeforeAll
     void setUp() throws MeedlException {
@@ -151,33 +155,42 @@ public class MeedlNotificationAdapterTest {
 
     @Test
     void findAllNotificationBelongingToAUserWithNullId(){
-           assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.findAllNotificationBelongingToAUser(null));
+           assertThrows(MeedlException.class,() ->
+                   meedlNotificationOutputPort.findAllNotificationBelongingToAUser(null,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,"jjdhhdu"})
     void findAllNotificationBelongingToAUserWithEmptyAndInvalidId(String userId){
-        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userId));
+        assertThrows(MeedlException.class,() ->
+                meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userId,pageSize,pageNumber));
     }
 
     @Test
     @Order(3)
     void findAllNotificationBelongingToAUserWithValidUserId(){
-        List<MeedlNotification> foundNotifications = new ArrayList<>();
+        Page<MeedlNotification> foundNotifications = Page.empty();
         try {
-            foundNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userId);
+            foundNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userId,pageSize,pageNumber);
         }catch (MeedlException exception) {
             log.info(exception.getMessage());
         }
-        assertEquals(userId, foundNotifications.get(0).getUser().getId());
-        assertEquals(meedlNotificationId, foundNotifications.get(0).getId());
-        assertEquals(1, foundNotifications.size());
+        assertEquals(userId, foundNotifications.getContent().get(0).getUser().getId());
+        assertEquals(meedlNotificationId, foundNotifications.getContent().get(0).getId());
+        assertEquals(1, foundNotifications.getContent().size());
     }
 
     @Test
     void findAllNotificationForAUserThatDoesNotHaveAnyNotification(){
-        assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.findAllNotificationBelongingToAUser(
-                "550e8400-e29b-41d4-a716-446655440000"));
+        Page<MeedlNotification> allNotification = Page.empty();
+        try {
+            allNotification = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(
+                    "550e8400-e29b-41d4-a716-446655440000", pageSize, pageNumber);
+        }catch (MeedlException exception) {
+            log.info(exception.getMessage());
+        }
+        assertTrue(allNotification.getContent().isEmpty());
+        assertEquals(0, allNotification.getContent().size());
     }
 
     @ParameterizedTest

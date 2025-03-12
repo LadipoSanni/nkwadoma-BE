@@ -61,6 +61,8 @@ public class FinancierServiceTest {
     private String userIdentityId;
     private String financierId;
     private String investmentVehicleId;
+    int pageSize = 10 ;
+    int pageNumber = 0 ;
 
     @BeforeAll
     void setUp(){
@@ -400,7 +402,7 @@ public class FinancierServiceTest {
     }
 
     private void deleteNotification(String userIdentityId) throws MeedlException {
-        List<MeedlNotification> meedlNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentityId);
+        Page<MeedlNotification> meedlNotifications = meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentityId,pageSize,pageNumber);
         meedlNotifications.forEach(notification-> {
             try {
                 meedlNotificationOutputPort.deleteNotification(notification.getId());
