@@ -96,6 +96,15 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    @Override
     public Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);

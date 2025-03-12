@@ -133,10 +133,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(Integer pageSize, Integer pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
-            Integer size = MeedlValidator.validateAndSetPaginationForPageSize(pageSize);
-            Integer number = MeedlValidator.validateAndSetPaginationForPageNumber(pageNumber);
-        return investmentVehicleOutputPort.findAllInvestmentVehicleBy(size, number, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+            MeedlValidator.validatePageSize(pageSize);
+            MeedlValidator.validatePageNumber(pageNumber);
+        return investmentVehicleOutputPort.findAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
     }
 
     @Override
