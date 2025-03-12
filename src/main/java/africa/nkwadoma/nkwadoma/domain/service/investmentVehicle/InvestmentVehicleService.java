@@ -139,6 +139,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return investmentVehicleOutputPort.findAllInvestmentVehicleBy(size, number, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
     }
 
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+        MeedlValidator.validateObjectInstance(fundRaisingStatus, "FundRaisingStatus cannot be empty or null");
+        return investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, fundRaisingStatus);
+    }
+
     private String generateInvestmentVehicleLink(String id) {
         return INVESTMENT_VEHICLE_URL+id;
     }

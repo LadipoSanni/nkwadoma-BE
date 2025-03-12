@@ -96,13 +96,13 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(Integer pageSize, Integer pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) {
-        Integer size = MeedlValidator.validateAndSetPaginationForPageSize(pageSize);
-        Integer number = MeedlValidator.validateAndSetPaginationForPageNumber(pageNumber);
+    public Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validateObjectInstance(fundRaisingStatus, "Investment vehicle fundRaising Status cannot be empty or null");
 
-        Pageable pageRequest = PageRequest.of(size, number, Sort.by("startDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
-                investmentVehicleRepository.findAlInvestmentVehicleByFilter(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageRequest);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleByFundRaisingStatus(fundRaisingStatus, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
