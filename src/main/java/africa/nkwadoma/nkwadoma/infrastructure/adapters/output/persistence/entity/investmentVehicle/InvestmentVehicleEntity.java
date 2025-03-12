@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -62,4 +63,5 @@ public class InvestmentVehicleEntity {
     @OneToOne
     private BankAccountEntity syncingAccount;
     private LocalDate lastUpdatedDate;
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
 }

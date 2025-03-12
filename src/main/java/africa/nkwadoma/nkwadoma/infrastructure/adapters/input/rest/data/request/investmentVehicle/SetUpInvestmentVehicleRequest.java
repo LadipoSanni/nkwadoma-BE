@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
@@ -37,4 +38,5 @@ public class SetUpInvestmentVehicleRequest {
     private String sponsors;
     private BigDecimal minimumInvestmentAmount;
     private InvestmentVehicleStatus investmentVehicleStatus;
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
 }

@@ -34,6 +34,6 @@ public class MeedlNotification {
         MeedlValidator.validateObjectInstance(timestamp,"Timestamp cannot be empty");
         MeedlValidator.validateEmail(senderMail);
         callToAction = true;
-        MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty");
+        MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty","Sender");
     }
 }
