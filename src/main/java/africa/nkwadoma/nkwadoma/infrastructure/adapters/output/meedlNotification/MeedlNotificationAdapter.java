@@ -10,11 +10,12 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.MeedlNotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlNotificationEntity meedlNotificationEntity =
                 meedlNotificationMapper.toMeedlNotification(meedlNotification);
         meedlNotificationEntity = meedlNotificationRepository.save(meedlNotificationEntity);
-        return meedlNotificationMapper.toMeedlNotificationEntity(meedlNotificationEntity);
+        return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }
 
     @Override
@@ -45,18 +46,19 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateUUID(id,"Notification id cannot be empty");
         MeedlNotificationEntity meedlNotificationEntity = meedlNotificationRepository.findById(id)
                 .orElseThrow(() -> new MeedlNotificationException("Notification not found"));
-        return meedlNotificationMapper.toMeedlNotificationEntity(meedlNotificationEntity);
+        return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }
 
     @Override
-    public List<MeedlNotification> findAllNotificationBelongingToAUser(String userId) throws MeedlException {
+    public Page<MeedlNotification> findAllNotificationBelongingToAUser(String userId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(userId,"User id cannot be empty");
-        List<MeedlNotificationEntity> allNotification =
-                meedlNotificationRepository.findAllByUser_Id(userId, Sort.by("timestamp").ascending());
-        if (allNotification.isEmpty()) {
-            throw new MeedlNotificationException("User dosen't have any notifications");
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize,Sort.by("timestamp").descending());
+        Page<MeedlNotificationEntity> notificationEntities =
+                meedlNotificationRepository.findAllByUser_Id(pageRequest,userId);
+        if (notificationEntities.isEmpty()) {
+            return Page.empty();
         }
-        return meedlNotificationMapper.toMeedlNotifications(allNotification);
+        return notificationEntities.map(meedlNotificationMapper::toMeedlNotification);
     }
 
     @Override

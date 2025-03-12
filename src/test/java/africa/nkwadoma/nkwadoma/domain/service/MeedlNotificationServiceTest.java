@@ -18,6 +18,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +40,8 @@ public class MeedlNotificationServiceTest {
     private MeedlNotification meedlNotification;
     private UserIdentity userIdentity;
     private String notificationId = UUID.randomUUID().toString();
+    int pageSize = 10 ;
+    int pageNumber = 0 ;
 
 
 
@@ -141,23 +145,23 @@ public class MeedlNotificationServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY," ","jjdjkjdjd"})
     void cannotViewAllNotificationWithEmptyUserIdAndInvalidUuid(String id) throws MeedlException {
         assertThrows(MeedlException.class, () ->
-                notificationService.viewAllNotification(id));
+                notificationService.viewAllNotification(id,pageSize,pageNumber));
     }
 
     @Test
     void cannotViewAllNotificationWithNullUserId() throws MeedlException {
         assertThrows(MeedlException.class, ()->
-                notificationService.viewAllNotification(null));
+                notificationService.viewAllNotification(null,pageSize,pageNumber));
     }
 
     @Test
     void viewAllNotification() throws MeedlException {
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
-        when(meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId()))
-                .thenReturn(List.of(meedlNotification));
-        List<MeedlNotification> meedlNotifications = notificationService.viewAllNotification(userIdentity.getId());
+        when(meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber))
+                .thenReturn(new PageImpl<>(List.of(meedlNotification)));
+        Page<MeedlNotification> meedlNotifications = notificationService.viewAllNotification(userIdentity.getId(),pageSize,pageNumber);
         assertNotNull(meedlNotifications);
-        assertEquals(1,meedlNotifications.size());
+        assertEquals(1,meedlNotifications.getTotalElements());
     }
 
     @Test

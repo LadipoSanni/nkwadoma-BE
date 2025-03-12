@@ -12,7 +12,7 @@ public interface MeedlNotificationMapper {
 
     MeedlNotificationEntity toMeedlNotification(MeedlNotification meedlNotification);
 
-    MeedlNotification toMeedlNotificationEntity(MeedlNotificationEntity meedlNotificationEntity);
+    MeedlNotification toMeedlNotification(MeedlNotificationEntity meedlNotificationEntity);
 
     List<MeedlNotification> toMeedlNotifications(List<MeedlNotificationEntity> allNotification);
 }
