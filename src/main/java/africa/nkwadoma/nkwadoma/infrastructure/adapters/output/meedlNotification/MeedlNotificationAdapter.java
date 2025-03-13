@@ -71,4 +71,11 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateUUID(id,"User id cannot be empty");
         meedlNotificationRepository.deleteAllByUserId(id);
     }
+
+    @Transactional
+    @Override
+    public void deleteMultipleNotification(List<String> deleteNotificationList) throws MeedlException {
+        MeedlValidator.validateNotificationList(deleteNotificationList);
+        meedlNotificationRepository.deleteAllById(deleteNotificationList);
+    }
 }

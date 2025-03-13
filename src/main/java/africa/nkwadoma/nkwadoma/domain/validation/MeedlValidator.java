@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -207,6 +208,12 @@ public class MeedlValidator {
     public static void validateRate(Float rate, String message) throws MeedlException {
         if (rate == null) {
             throw new MeedlException(message);
+        }
+    }
+
+    public static void validateNotificationList(List<String> deleteNotificationList) throws MeedlException {
+        if (CollectionUtils.isEmpty(deleteNotificationList)) {
+            throw new MeedlException(MeedlNotificationMessages.NOTIFICATION_LIST_CANNOT_BE_EMPTY.getMessage());
         }
     }
 }

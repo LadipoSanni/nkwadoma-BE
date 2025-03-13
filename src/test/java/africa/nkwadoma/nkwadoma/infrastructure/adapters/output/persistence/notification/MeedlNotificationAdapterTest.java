@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,8 @@ public class MeedlNotificationAdapterTest {
     private UserIdentity userIdentity;
     private String userId;
     private String meedlNotificationId;
+    private String firstNotificationId;
+    private String secondNotificationId;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -201,6 +204,26 @@ public class MeedlNotificationAdapterTest {
             log.info(meedlException.getMessage());
         }
         assertEquals(1, numberOfUnreadNotifications);
+    }
+
+    @Test
+    void deleteMultipleNotification(){
+
+        try{
+            MeedlNotification firstNotification = meedlNotificationOutputPort.save(meedlNotification);
+            MeedlNotification secondNotification = meedlNotificationOutputPort.save(meedlNotification);
+            firstNotificationId = firstNotification.getId();
+            secondNotificationId = secondNotification.getId();
+            List<String> deleteNotificationList = Arrays.asList(firstNotificationId, secondNotificationId);
+            MeedlNotification foundNotification = meedlNotificationOutputPort.findNotificationById(firstNotificationId);
+            assertNotNull(foundNotification);
+            assertNotNull(secondNotification);
+            meedlNotificationOutputPort.deleteMultipleNotification(deleteNotificationList);
+        } catch (MeedlException meedlException) {
+            log.info(meedlException.getMessage());
+        }
+        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(firstNotificationId));
+        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(secondNotificationId));
     }
 
     @AfterAll

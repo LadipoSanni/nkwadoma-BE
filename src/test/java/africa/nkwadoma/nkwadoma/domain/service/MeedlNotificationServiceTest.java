@@ -18,11 +18,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -38,7 +41,7 @@ public class MeedlNotificationServiceTest {
     private MeedlNotification meedlNotification;
     private UserIdentity userIdentity;
     private String notificationId = UUID.randomUUID().toString();
-
+    private List<String> notificationIdList = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
 
     @BeforeEach
@@ -166,6 +169,16 @@ public class MeedlNotificationServiceTest {
         when(meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId())).thenReturn(2);
         int count = notificationService.getNumberOfUnReadNotification(userIdentity.getId());
         assertEquals(2, count);
+    }
+
+    @Test
+    void deleteMultipleNotification() throws MeedlException {
+        doNothing().when(meedlNotificationOutputPort).deleteMultipleNotification(notificationIdList);
+
+        assertDoesNotThrow(() -> notificationService.deleteMultipleNotification(notificationIdList));
+
+        verify(meedlNotificationOutputPort, times(1)).deleteMultipleNotification(notificationIdList);
+
     }
 
 }

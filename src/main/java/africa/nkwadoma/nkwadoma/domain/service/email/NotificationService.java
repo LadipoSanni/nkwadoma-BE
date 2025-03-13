@@ -237,4 +237,10 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId());
     }
+
+    @Override
+    public void deleteMultipleNotification(List<String> notificationIdList) throws MeedlException {
+        MeedlValidator.validateNotificationList(notificationIdList);
+        meedlNotificationOutputPort.deleteMultipleNotification(notificationIdList);
+    }
 }
