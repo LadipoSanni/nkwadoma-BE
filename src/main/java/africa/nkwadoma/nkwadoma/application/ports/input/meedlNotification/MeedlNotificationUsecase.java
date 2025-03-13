@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface MeedlNotificationUsecase {
     MeedlNotification sendNotification(MeedlNotification meedlNotification) throws MeedlException;
 
