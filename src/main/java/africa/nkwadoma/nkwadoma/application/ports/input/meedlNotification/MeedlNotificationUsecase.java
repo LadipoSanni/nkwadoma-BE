@@ -11,5 +11,5 @@ public interface MeedlNotificationUsecase {
 
     Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException;
 
-    int getNumberOfUnReadNotification(String id) throws MeedlException;
+    MeedlNotification getNumberOfUnReadNotification(String id) throws MeedlException;
 }

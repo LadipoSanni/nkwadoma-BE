@@ -15,10 +15,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -196,12 +192,12 @@ public class MeedlNotificationAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,"jjdhhdu"})
     void getCountOfUnreadNotificationWithEmptyAndInvalidId(String userId){
-        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNumberOfUnReadNotification(userId));
+        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNotificationCounts(userId));
     }
 
     @Test
     void getCountOfUnreadNotificationNullId(){
-        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNumberOfUnReadNotification(null));
+        assertThrows(MeedlException.class,() -> meedlNotificationOutputPort.getNotificationCounts(null));
     }
 
     @Test
@@ -209,11 +205,23 @@ public class MeedlNotificationAdapterTest {
     void numberOfUnreadNotifications(){
         int numberOfUnreadNotifications = 0;
         try{
-            numberOfUnreadNotifications = meedlNotificationOutputPort.getNumberOfUnReadNotification(userId);
+            numberOfUnreadNotifications = meedlNotificationOutputPort.getNotificationCounts(userId).getUnreadCount();
         }catch (MeedlException meedlException){
             log.info(meedlException.getMessage());
         }
         assertEquals(1, numberOfUnreadNotifications);
+    }
+
+    @Test
+    @Order(5)
+    void numberOfAllNotifications(){
+        int numberOfAllNotifications = 0;
+        try{
+            numberOfAllNotifications = meedlNotificationOutputPort.getNotificationCounts(userId).getAllNotificationsCount();
+        }catch (MeedlException meedlException){
+            log.info(meedlException.getMessage());
+        }
+        assertEquals(1, numberOfAllNotifications);
     }
 
     @AfterAll

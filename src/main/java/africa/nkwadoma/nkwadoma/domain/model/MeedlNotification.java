@@ -26,6 +26,8 @@ public class MeedlNotification {
     private String senderFullName;
     private String contentDetail;
     private String duration;
+    private int unreadCount;
+    private int allNotificationsCount;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(contentId,"Content id cannot be empty");
