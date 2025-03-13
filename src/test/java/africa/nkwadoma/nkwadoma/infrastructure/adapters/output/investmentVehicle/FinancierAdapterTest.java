@@ -271,6 +271,13 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0).getIndividual());
         assertEquals(foundFinanciers.get(0).getIndividual().getId(), userIdentity.getId());
     }
+
+    @Test
+    @Order(8)
+    void completeKyc(){
+
+    }
+
     @Test
     public void deleteFinancier(){
         try {
