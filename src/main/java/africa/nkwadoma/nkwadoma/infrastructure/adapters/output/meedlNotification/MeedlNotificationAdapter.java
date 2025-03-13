@@ -31,7 +31,7 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateObjectInstance(meedlNotification,"Notification object cannot be empty ");
         meedlNotification.validate();
         MeedlNotificationEntity meedlNotificationEntity =
-                meedlNotificationMapper.toMeedlNotification(meedlNotification);
+                meedlNotificationMapper.toMeedlNotificationEntity(meedlNotification);
         meedlNotificationEntity = meedlNotificationRepository.save(meedlNotificationEntity);
         return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }
@@ -59,6 +59,7 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         if (notificationEntities.isEmpty()) {
             return Page.empty();
         }
+        log.info("notification {}" , notificationEntities.map(meedlNotificationMapper::toMeedlNotification).getContent());
         return notificationEntities.map(meedlNotificationMapper::toMeedlNotification);
     }
 

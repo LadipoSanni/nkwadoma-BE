@@ -168,7 +168,7 @@ public class MeedlNotificationServiceTest {
     void countOfUnreadNotifications() throws MeedlException {
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId())).thenReturn(meedlNotification);
-        MeedlNotification notification = notificationService.getNumberOfUnReadNotification(userIdentity.getId());
+        MeedlNotification notification = notificationService.fetchNotificationCount(userIdentity.getId());
         assertEquals(2, notification.getUnreadCount());
     }
 
@@ -176,7 +176,7 @@ public class MeedlNotificationServiceTest {
     void countOfAllNotifications() throws MeedlException {
         when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
         when(meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId())).thenReturn(meedlNotification);
-        MeedlNotification notification = notificationService.getNumberOfUnReadNotification(userIdentity.getId());
+        MeedlNotification notification = notificationService.fetchNotificationCount(userIdentity.getId());
         assertEquals(4, notification.getAllNotificationsCount());
     }
 

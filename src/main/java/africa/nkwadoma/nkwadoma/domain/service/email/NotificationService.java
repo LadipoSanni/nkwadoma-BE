@@ -237,7 +237,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public MeedlNotification getNumberOfUnReadNotification(String id) throws MeedlException {
+    public MeedlNotification fetchNotificationCount(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId());

@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationCountResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification.MeedlNotificationRestMapper;
@@ -75,15 +74,15 @@ public class MeedlNotificationController {
     }
 
     @GetMapping("notification-count")
-    private ResponseEntity<ApiResponse<?>> unreadNotificationCount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+    private ResponseEntity<ApiResponse<?>> notificationCount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         MeedlNotification numberOfUnReadNotification =
-                meedlNotificationUsecase.getNumberOfUnReadNotification(meedlUser.getClaimAsString("sub"));
+                meedlNotificationUsecase.fetchNotificationCount(meedlUser.getClaimAsString("sub"));
         MeedlNotificationCountResponse meedlNotificationCountResponse =
                 meedlNotificationRestMapper.toMeedlNotificationCountResponse(numberOfUnReadNotification);
         ApiResponse<MeedlNotificationCountResponse> apiResponse =
                 ApiResponse.<MeedlNotificationCountResponse>builder()
                         .data(meedlNotificationCountResponse)
-                        .message(COUNT_OF_UNREAD_NOTIFICATION)
+                        .message(NOTIFICATION_COUNT)
                         .statusCode(HttpStatus.OK.toString())
                         .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
