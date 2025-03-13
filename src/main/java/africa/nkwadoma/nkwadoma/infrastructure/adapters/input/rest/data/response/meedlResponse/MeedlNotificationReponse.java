@@ -22,5 +22,4 @@ public class MeedlNotificationReponse {
     private String senderFullName;
     private String contentDetail;
     private String duration;
-
 }
