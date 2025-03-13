@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -170,6 +171,21 @@ class FinancierAdapterTest {
         assertEquals(financierId, foundFinancier.getId());
         assertEquals(userIdentity.getId(), foundFinancier.getIndividual().getId());
     }
+    @Test
+    @Order(4)
+    void findFinancierProjectionDetailsByFinancierId() {
+        FinancierDetails foundFinancier = null;
+        try {
+            foundFinancier = financierOutputPort.findFinancierDetailsByFinancierId(financierId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("Financier details: " + foundFinancier);
+        assertNotNull(foundFinancier);
+        assertNotNull(foundFinancier.getIndividual());
+        assertEquals(financierId, foundFinancier.getId());
+        assertEquals(userIdentity.getId(), foundFinancier.getIndividual().getId());
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidFinancierId(String invalidId) {
@@ -181,7 +197,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByUserId(invalidId));
     }
     @Test
-    @Order(3)
+    @Order(4)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -214,7 +230,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
     }
     @Test
-    @Order(4)
+    @Order(5)
     void searchFinancierByFirstName()  {
         List<Financier> foundFinanciers = null;
         try {
@@ -227,7 +243,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(5)
+    @Order(6)
     void searchFinancierByLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -241,7 +257,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(6)
+    @Order(7)
     void searchFinancierWithFirstNameBeforeLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -254,7 +270,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(7)
+    @Order(8)
     void searchFinancierWithLastNameBeforeFirstName() {
         List<Financier> foundFinanciers;
         try {
@@ -269,6 +285,7 @@ class FinancierAdapterTest {
         assertEquals(foundFinanciers.get(0).getIndividual().getId(), userIdentity.getId());
     }
     @Test
+    @Order(9)
     public void deleteFinancier(){
         try {
             Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
@@ -280,7 +297,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
 
     }
-    @AfterAll
+//    @AfterAll
     void tearDown() throws MeedlException {
         Optional <UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
         if (foundUser.isPresent()) {

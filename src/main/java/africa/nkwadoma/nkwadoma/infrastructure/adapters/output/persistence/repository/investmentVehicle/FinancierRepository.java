@@ -27,7 +27,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     join UserEntity ue on fe.individual.id = ue.id
     join OrganizationEntity oe on fe.organizationEntity.id = oe.id
     left join NextOfKinEntity n on ue.id = n.userEntity.id
-    where fe.id = :id
+    where fe.id = :financierId
 """)
     Optional<FinancierDetailProjection> findByFinancierId(@Param("financierId") String financierId);
 

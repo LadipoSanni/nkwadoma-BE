@@ -1,7 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.OrganizationProjection;
-
 public interface FinancierDetailProjection {
     String getId();
     String getFinancierType();

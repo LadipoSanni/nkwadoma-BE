@@ -10,6 +10,7 @@ import lombok.Data;
 
 @Data
 public class FinancierDetails {
+    private String id;
     private UserIdentity individual;
     private OrganizationIdentity organizationIdentity;
     private NextOfKin nextOfKin;
