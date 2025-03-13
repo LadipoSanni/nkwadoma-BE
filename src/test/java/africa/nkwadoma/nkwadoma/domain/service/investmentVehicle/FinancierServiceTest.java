@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -29,8 +30,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -121,6 +124,14 @@ public class FinancierServiceTest {
     public void inviteFinancierWithInvalidFirstName(String name)  {
         userIdentity.setFirstName(name);
         financier.setIndividual(userIdentity);
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
+    }
+    @Test
+    public void assignDesignationToFinancierWrongly()  {
+        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.LEAD);
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.DONOR);
+        financier.setInvestmentVehicleDesignation(investmentVehicleDesignations);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @ParameterizedTest
