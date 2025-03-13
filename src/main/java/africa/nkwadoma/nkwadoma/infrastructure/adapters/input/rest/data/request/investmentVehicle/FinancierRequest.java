@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Setter
 public class FinancierRequest {
     private String organizationName;
+    private FinancierType financierType;
     private UserIdentity individual;
     private String investmentVehicleId;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
