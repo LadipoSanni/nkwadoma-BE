@@ -14,7 +14,7 @@ public interface MeedlNotificationRepository extends JpaRepository<MeedlNotifica
     Page<MeedlNotificationEntity> findAllByUser_Id(Pageable pageRequest, String userId);
 
     @Query(value = "SELECT " +
-            "SUM(CASE WHEN read = false THEN 1 ELSE 0 END) AS unread_count, " +
+            "COALESCE(SUM(CASE WHEN read = false THEN 1 ELSE 0 END), 0) AS unread_count, " +
             "COUNT(*) AS all_notifications_count " +
             "FROM meedl_notification_entity " +
             "WHERE meedl_user = :userId",
