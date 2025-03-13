@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -73,6 +75,7 @@ public class FinancierService implements FinancierUseCase {
 
     private String inviteFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
         inviteFinancierValidation(financier);
+        validateFinancierDesignation(financier);
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
@@ -94,12 +97,29 @@ public class FinancierService implements FinancierUseCase {
         return "Financier added to investment vehicle";
     }
 
+    private static void validateFinancierDesignation(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier.getInvestmentVehicleDesignation(), FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
+        if (financier.getInvestmentVehicleDesignation().isEmpty()){
+            throw new MeedlException(FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
+        }
+        if (financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.DONOR) ||
+                financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.ENDOWER) ||
+                financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.INVESTOR) &&
+                financier.getInvestmentVehicleDesignation().size() > BigInteger.ONE.intValue()
+        ){
+            throw new MeedlException("Financier can only be a signed a single role.");
+        }
+
+    }
+
+    private void inviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         FinancierEmailUseCase.inviteFinancierToVehicle(financier.getIndividual(), investmentVehicle);
     }
 
     private static void inviteFinancierValidation(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        //MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         financier.validate();
     }
 
@@ -168,7 +188,7 @@ public class FinancierService implements FinancierUseCase {
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
-        existingFinancier.setInvestmentVehicleRole(financier.getInvestmentVehicleRole());
+        existingFinancier.setInvestmentVehicleDesignation(financier.getInvestmentVehicleDesignation());
         financier = existingFinancier;
         return financier;
     }
@@ -187,14 +207,21 @@ public class FinancierService implements FinancierUseCase {
     private Optional<InvestmentVehicleFinancier> addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
-            investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
-                    .financier(financier)
-                    .investmentVehicle(investmentVehicle)
-                    .build());
+            InvestmentVehicleFinancier investmentVehicleFinancier =  assignDesignation(financier, investmentVehicle);
+            investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
         }
         return optionalInvestmentVehicleFinancier;
        }
+
+    private InvestmentVehicleFinancier assignDesignation(Financier financier, InvestmentVehicle investmentVehicle) {
+       return InvestmentVehicleFinancier.builder()
+                .financier(financier)
+                .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
+                .investmentVehicle(investmentVehicle)
+                .build();
+    }
+
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
         viewAllFinancierInVehicleValidation(financier);

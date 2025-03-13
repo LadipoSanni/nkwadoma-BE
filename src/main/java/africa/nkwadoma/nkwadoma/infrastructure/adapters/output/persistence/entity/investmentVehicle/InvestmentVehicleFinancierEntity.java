@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -22,5 +23,5 @@ public class InvestmentVehicleFinancierEntity {
     private FinancierEntity financier;
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
-    private List<InvestmentVehicleDesignation> investmentVehicleRole;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 }

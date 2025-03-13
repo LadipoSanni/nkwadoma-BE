@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,7 +15,7 @@ public class FinancierRequest {
     private String organizationName;
     private UserIdentity individual;
     private String investmentVehicleId;
-    private List<InvestmentVehicleDesignation> investmentVehicleRole;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;
 }
