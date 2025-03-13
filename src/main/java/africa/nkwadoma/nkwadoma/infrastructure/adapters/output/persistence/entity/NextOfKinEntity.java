@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity;
 
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,8 @@ public class NextOfKinEntity {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
+    @OneToOne
+    private UserEntity userEntity;
     @OneToOne
     private LoaneeEntity loaneeEntity;
 }

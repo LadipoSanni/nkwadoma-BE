@@ -1,8 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierDetailProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -12,4 +14,5 @@ public interface FinancierMapper {
     FinancierEntity map(Financier financier);
 
     Financier map(FinancierEntity financierEntity);
+    FinancierDetails map(FinancierDetailProjection financierDetailProjection);
 }

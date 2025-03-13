@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -26,6 +27,7 @@ public class Financier {
     private String organizationName;
     private UserIdentity individual;
     private String invitedBy;
+    private FinancierType financierType;
     private ActivationStatus activationStatus;
     private String investmentVehicleId;
     private List<InvestmentVehicleDesignation> investmentVehicleRole;
