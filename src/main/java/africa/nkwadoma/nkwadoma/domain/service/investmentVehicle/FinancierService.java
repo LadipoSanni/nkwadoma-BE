@@ -50,6 +50,7 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public String inviteFinancier(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         if (StringUtils.isEmpty(financier.getInvestmentVehicleId())){
             return inviteFinancierToPlatform(financier);
         }
@@ -57,7 +58,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private String inviteFinancierToPlatform(Financier financier) throws MeedlException {
-        inviteFinancierValidation(financier);
+        financier.validate();
         try {
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
@@ -74,7 +75,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private String inviteFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
-        inviteFinancierValidation(financier);
+        financier.validate();
         validateFinancierDesignation(financier);
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
@@ -114,11 +115,6 @@ public class FinancierService implements FinancierUseCase {
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         FinancierEmailUseCase.inviteFinancierToVehicle(financier.getIndividual(), investmentVehicle);
-    }
-
-    private static void inviteFinancierValidation(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        financier.validate();
     }
 
     private Financier saveNonExistingFinancier(Financier financier) {
