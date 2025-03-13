@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
