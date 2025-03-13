@@ -25,7 +25,7 @@ public class MeedlNotificationEntity {
     @ManyToOne
     @JoinColumn(name = "meedl_user", nullable = false)
     private UserEntity user;
-    private boolean isRead;
+    private boolean read;
     private LocalDateTime timestamp;
     private boolean callToAction;
     private String senderMail;
