@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.output.creditRegistry.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
@@ -27,8 +25,8 @@ import org.springframework.stereotype.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
 
 @Service
 @RequiredArgsConstructor
@@ -95,9 +93,6 @@ public class LoanRequestService implements LoanRequestUseCase {
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Loan request retrieved: {}", foundLoanRequest);
 
-        if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
-            throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
-        }
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
                 && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
@@ -108,6 +103,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
+            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
+                throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+            }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
             updateLoanRequestOnMetrics(foundLoanRequest);
             LoanOffer loanOffer = loanOfferUseCase.createLoanOffer(updatedLoanRequest);
@@ -119,6 +117,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
         else {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
+            updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
     }

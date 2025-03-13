@@ -1,7 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification;
 
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,10 +13,15 @@ import java.util.List;
 
 public interface MeedlNotificationRepository extends JpaRepository<MeedlNotificationEntity, String> {
 
-    List<MeedlNotificationEntity> findAllByUser_Id(String userId, Sort sort);
+    Page<MeedlNotificationEntity> findAllByUser_Id(Pageable pageRequest, String userId);
 
-    @Query(value = "SELECT COUNT(*) FROM meedl_notification_entity WHERE meedl_user = :userId AND is_read = false", nativeQuery = true)
-    int countByUserIdAndReadIsFalse(String userId);
+    @Query(value = "SELECT " +
+            "SUM(CASE WHEN is_read = false THEN 1 ELSE 0 END) AS unread_count, " +
+            "COUNT(*) AS all_notifications_count " +
+            "FROM meedl_notification_entity " +
+            "WHERE meedl_user = :userId",
+            nativeQuery = true)
+    NotificationProjection getNotificationCounts(String userId);
 
     void deleteAllByUserId(String id);
 

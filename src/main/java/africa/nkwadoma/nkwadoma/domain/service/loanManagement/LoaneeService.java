@@ -211,8 +211,10 @@ public class LoaneeService implements LoaneeUseCase {
         LoanReferral loanReferral =
                 loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(loanee.getId(),loanee.getCohortId());
         if (ObjectUtils.isNotEmpty(loanReferral)) {
+            log.error("Loanee has been referred to this cohort before with error: {} ", LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
             throw new LoaneeException(LoaneeMessages.LOANEE_HAS_BEEN_REFERRED_BEFORE.getMessage());
         }
+        log.info("Loanee has not been referred to this cohort before.");
     }
     @Override
     @Async

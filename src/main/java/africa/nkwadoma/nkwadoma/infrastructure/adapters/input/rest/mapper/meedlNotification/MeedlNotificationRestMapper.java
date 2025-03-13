@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification;
 
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationCountResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,4 +17,6 @@ public interface MeedlNotificationRestMapper {
     MeedlNotificationReponse toMeedlNotificationResponse(MeedlNotification meedlNotification);
 
     List<MeedlNotificationReponse> toMeedlNotificationResponses(List<MeedlNotification> meedlNotifications);
+
+    MeedlNotificationCountResponse toMeedlNotificationCountResponse(MeedlNotification numberOfUnReadNotification);
 }

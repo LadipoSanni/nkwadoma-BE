@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.email;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
@@ -7,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -14,6 +16,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificati
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
@@ -22,11 +25,11 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -34,7 +37,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService implements OrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
-        LoaneeEmailUsecase, MeedlNotificationUsecase {
+        LoaneeEmailUsecase, MeedlNotificationUsecase, FinancierEmailUseCase {
     private final EmailOutputPort emailOutputPort;
     private final TokenUtils tokenUtils;
     private final UserIdentityOutputPort userIdentityOutputPort;
@@ -225,17 +228,37 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public List<MeedlNotification> viewAllNotification(String id) throws MeedlException {
+    public Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
-        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
+        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber);
     }
 
     @Override
-    public int getNumberOfUnReadNotification(String id) throws MeedlException {
+    public MeedlNotification getNumberOfUnReadNotification(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
-        return meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId());
+        return meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId());
+    }
+
+    @Override
+    public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .to(userIdentity.getEmail())
+                .template(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+    }
+    private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
+        String token = tokenUtils.generateToken(userIdentity.getEmail());
+        log.info("Generated token for inviting financier to vehicle: {}", token);
+        return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
     }
 
     @Override

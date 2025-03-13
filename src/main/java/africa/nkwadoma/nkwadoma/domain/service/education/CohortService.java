@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -36,8 +37,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.NEW_COHORT;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlNotificationMessages.NEW_COHORT_CONTENT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages.PROGRAM_NOT_FOUND;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.loan.SuccessMessages.LOANEE_HAS_BEEN_REFERED;
@@ -59,8 +58,6 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final MeedlNotificationUsecase meedlNotificationUsecase;
 
 
     @Override
@@ -85,41 +82,8 @@ public class CohortService implements CohortUseCase {
         savedCohort = cohortOutputPort.save(savedCohort);
         savedCohort.setLoanBreakdowns(savedLoanBreakdowns);
         savedCohort.setProgramName(program.getName());
-        OrganizationIdentity organizationIdentity =
-                organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
-
-        UserIdentity userIdentity = fetchSenderIdentity(cohort);
-        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = fetchOrganizationEmployeeIdentities(organizationIdentity);
-
-        sendAllNotifications(organizationEmployeeIdentities, savedCohort, userIdentity, organizationIdentity);
+        organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
         return savedCohort;
-    }
-
-    private void sendAllNotifications(List<OrganizationEmployeeIdentity> organizationEmployeeIdentities,
-                                      Cohort savedCohort, UserIdentity userIdentity, OrganizationIdentity organizationIdentity) throws MeedlException {
-        for (OrganizationEmployeeIdentity organizationEmployeeIdentity : organizationEmployeeIdentities) {
-            MeedlNotification meedlNotification =
-                    buildMeedlNotificationForOrganizationAdmins(organizationEmployeeIdentity, savedCohort, userIdentity, organizationIdentity);
-            meedlNotificationUsecase.sendNotification(meedlNotification);
-        }
-    }
-
-    private static MeedlNotification buildMeedlNotificationForOrganizationAdmins(OrganizationEmployeeIdentity organizationEmployeeIdentity, Cohort savedCohort, UserIdentity userIdentity, OrganizationIdentity organizationIdentity) {
-        return MeedlNotification.builder()
-                .user(organizationEmployeeIdentity.getMeedlUser())
-                .title(NEW_COHORT.getMessage())
-                .contentId(savedCohort.getId())
-                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
-                .senderMail(userIdentity.getEmail())
-                .contentDetail(organizationIdentity.getName().concat(" "+NEW_COHORT_CONTENT.getMessage())).build();
-    }
-
-    private List<OrganizationEmployeeIdentity> fetchOrganizationEmployeeIdentities(OrganizationIdentity organizationIdentity) {
-        return organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId());
-    }
-
-    private UserIdentity fetchSenderIdentity(Cohort cohort) throws MeedlException {
-        return userIdentityOutputPort.findById(cohort.getCreatedBy());
     }
 
     private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {
@@ -286,6 +250,7 @@ public class CohortService implements CohortUseCase {
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
+            loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
@@ -308,6 +273,7 @@ public class CohortService implements CohortUseCase {
     }
 
     private void inviteTrainee (Loanee loanee) throws MeedlException {
+        log.info("Single loanee is being referred...");
         loaneeUseCase.referLoanee(loanee);
     }
 

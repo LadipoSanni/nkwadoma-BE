@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNoti
 
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -12,7 +13,10 @@ public interface MeedlNotificationMapper {
 
     MeedlNotificationEntity toMeedlNotification(MeedlNotification meedlNotification);
 
-    MeedlNotification toMeedlNotificationEntity(MeedlNotificationEntity meedlNotificationEntity);
+    MeedlNotification toMeedlNotification(MeedlNotificationEntity meedlNotificationEntity);
 
     List<MeedlNotification> toMeedlNotifications(List<MeedlNotificationEntity> allNotification);
+
+
+    MeedlNotification mapProjectionToNotificaltion(NotificationProjection notificationProjection);
 }

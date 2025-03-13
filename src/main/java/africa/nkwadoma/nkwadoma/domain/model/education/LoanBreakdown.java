@@ -21,6 +21,6 @@ public class LoanBreakdown {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(itemAmount,"Item");
-        MeedlValidator.validateObjectName(itemName,"Item name cannot be empty");
+        MeedlValidator.validateObjectName(itemName,"Item name cannot be empty","Item");
     }
 }

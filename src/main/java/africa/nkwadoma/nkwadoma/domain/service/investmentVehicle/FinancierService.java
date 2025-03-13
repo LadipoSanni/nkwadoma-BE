@@ -1,12 +1,13 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
@@ -18,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
-import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,21 +41,34 @@ public class FinancierService implements FinancierUseCase {
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
-    private final NotificationService notificationService;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
+    private final FinancierEmailUseCase FinancierEmailUseCase;
 
 
     @Override
     public String inviteFinancier(Financier financier) throws MeedlException {
         inviteFinancierValidation(financier);
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         try {
             financier = getFinancierByUserIdentity(financier);
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = addFinancierToVehicle(financier, investmentVehicle);
+            if (optionalInvestmentVehicleFinancier.isEmpty()) {
+                notifyExistingFinancier(financier, investmentVehicle);
+            }
         } catch (MeedlException e) {
+            log.warn("Failed to find user on application. Financier not yet onboarded.");
+            log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
+            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = addFinancierToVehicle(financier, investmentVehicle);
+            if (optionalInvestmentVehicleFinancier.isEmpty()) {
+                inviteNonExistingFinancierToVehicle(financier, investmentVehicle);
+            }
         }
-        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
-        addFinancierToVehicle(financier, investmentVehicle);
-        notifyExistingFinancier(financier, investmentVehicle);
         return "Financier added to investment vehicle";
+    }
+
+    private void inviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        FinancierEmailUseCase.inviteFinancierToVehicle(financier.getIndividual(), investmentVehicle);
     }
 
     private static void inviteFinancierValidation(Financier financier) throws MeedlException {
@@ -65,11 +78,11 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private Financier saveNonExistingFinancier(Financier financier) {
+        log.warn("Started saving non existing financier {}", financier.getIndividual().getEmail());
         Financier savedFinancier;
-        log.warn("Failed to find user on application. Financier not yet onboarded.");
         try {
             savedFinancier = saveFinancier(financier);
-            log.info("Saved non-existing financier {}", savedFinancier.getId());
+            log.info("Saved non-existing financier with email : {}", savedFinancier.getId());
             financier = updateFinancierDetails(financier, savedFinancier);
         } catch (MeedlException ex) {
             throw new RuntimeException(ex);
@@ -88,7 +101,7 @@ public class FinancierService implements FinancierUseCase {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             log.info("Financier found by user identity id {}", userIdentity.getId());
             return updateFinancierDetails(financier, existingFinancier);
-            
+
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
             log.info("Creating a new financier for user with email : {}", userIdentity.getEmail());
@@ -109,7 +122,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderFullName(financier.getIndividual().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
                 .build();
-        notificationService.sendNotification(meedlNotification);
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
@@ -130,18 +143,17 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         return financierOutputPort.viewAllFinancier(financier);
     }
-    private void addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Optional<InvestmentVehicleFinancier>  optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
-        if (optionalInvestmentVehicleFinancier.isPresent()) {
-            throw new MeedlException("User previously added to this investment vehicle.");
+    private Optional<InvestmentVehicleFinancier> addFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+        if (optionalInvestmentVehicleFinancier.isEmpty()) {
+            investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
+                    .financier(financier)
+                    .investmentVehicle(investmentVehicle)
+                    .build());
+            log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
         }
-        investmentVehicleFinancierOutputPort.save(InvestmentVehicleFinancier.builder()
-                .financier(financier)
-                .investmentVehicle(investmentVehicle)
-                .build());
-        log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
-
-    }
+        return optionalInvestmentVehicleFinancier;
+       }
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
         viewAllFinancierInVehicleValidation(financier);
