@@ -242,7 +242,18 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId());
     }
-
+    @Override
+    public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .to(userIdentity.getEmail())
+                .template(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+    }
     @Override
     public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());
