@@ -112,14 +112,12 @@ public class FinancierService implements FinancierUseCase {
 
     }
 
-    private void inviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         FinancierEmailUseCase.inviteFinancierToVehicle(financier.getIndividual(), investmentVehicle);
     }
 
     private static void inviteFinancierValidation(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        //MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         financier.validate();
     }
 
