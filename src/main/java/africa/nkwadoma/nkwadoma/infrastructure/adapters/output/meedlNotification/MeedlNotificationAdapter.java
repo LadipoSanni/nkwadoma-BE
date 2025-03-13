@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNotification.MeedlNotificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.MeedlNotificationRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -62,9 +63,11 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
     }
 
     @Override
-    public int getNumberOfUnReadNotification(String userId) throws MeedlException {
+    public MeedlNotification getNotificationCounts(String userId) throws MeedlException {
         MeedlValidator.validateUUID(userId,"User id cannot be empty");
-        return meedlNotificationRepository.countByUserIdAndReadIsFalse(userId);
+        NotificationProjection notificationProjection =
+                meedlNotificationRepository.getNotificationCounts(userId);
+        return meedlNotificationMapper.mapProjectionToNotificaltion(notificationProjection);
     }
 
     @Transactional
@@ -73,4 +76,5 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateUUID(id,"User id cannot be empty");
         meedlNotificationRepository.deleteAllByUserId(id);
     }
+
 }

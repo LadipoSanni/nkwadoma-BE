@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationCountResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification.MeedlNotificationRestMapper;
 import jakarta.validation.constraints.NotBlank;
@@ -73,13 +74,15 @@ public class MeedlNotificationController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("unread-notification-count")
+    @GetMapping("notification-count")
     private ResponseEntity<ApiResponse<?>> unreadNotificationCount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        int numberOfUnReadNotification =
+        MeedlNotification numberOfUnReadNotification =
                 meedlNotificationUsecase.getNumberOfUnReadNotification(meedlUser.getClaimAsString("sub"));
-        ApiResponse<Integer> apiResponse =
-                ApiResponse.<Integer>builder()
-                        .data(numberOfUnReadNotification)
+        MeedlNotificationCountResponse meedlNotificationCountResponse =
+                meedlNotificationRestMapper.toMeedlNotificationCountResponse(numberOfUnReadNotification);
+        ApiResponse<MeedlNotificationCountResponse> apiResponse =
+                ApiResponse.<MeedlNotificationCountResponse>builder()
+                        .data(meedlNotificationCountResponse)
                         .message(COUNT_OF_UNREAD_NOTIFICATION)
                         .statusCode(HttpStatus.OK.toString())
                         .build();

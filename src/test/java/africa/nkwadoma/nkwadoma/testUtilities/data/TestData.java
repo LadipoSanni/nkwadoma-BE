@@ -413,6 +413,8 @@ public class TestData {
                 .title("Title")
                 .senderMail("qudusa55@gmail.com")
                 .senderFullName("John Doe")
+                .allNotificationsCount(4)
+                .unreadCount(2)
                 .build();
     }
 

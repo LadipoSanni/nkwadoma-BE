@@ -13,8 +13,9 @@ public interface MeedlNotificationOutputPort {
 
     Page<MeedlNotification> findAllNotificationBelongingToAUser(String id, int pageSize, int pageNumber) throws MeedlException;
 
-    int getNumberOfUnReadNotification(String userId) throws MeedlException;
-
+    MeedlNotification getNotificationCounts(String userId) throws MeedlException;
 
     void deleteNotificationByUserId(String id) throws MeedlException;
+
+
 }

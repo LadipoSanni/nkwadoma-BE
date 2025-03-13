@@ -13,8 +13,14 @@ public interface MeedlNotificationRepository extends JpaRepository<MeedlNotifica
 
     Page<MeedlNotificationEntity> findAllByUser_Id(Pageable pageRequest, String userId);
 
-    @Query(value = "SELECT COUNT(*) FROM meedl_notification_entity WHERE meedl_user = :userId AND is_read = false", nativeQuery = true)
-    int countByUserIdAndReadIsFalse(String userId);
+    @Query(value = "SELECT " +
+            "SUM(CASE WHEN is_read = false THEN 1 ELSE 0 END) AS unread_count, " +
+            "COUNT(*) AS all_notifications_count " +
+            "FROM meedl_notification_entity " +
+            "WHERE meedl_user = :userId",
+            nativeQuery = true)
+    NotificationProjection getNotificationCounts(String userId);
 
     void deleteAllByUserId(String id);
+
 }
