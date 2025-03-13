@@ -25,11 +25,11 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -228,19 +228,32 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public List<MeedlNotification> viewAllNotification(String id) throws MeedlException {
+    public Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
-        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId());
+        return meedlNotificationOutputPort.findAllNotificationBelongingToAUser(userIdentity.getId(),pageSize,pageNumber);
     }
 
     @Override
-    public int getNumberOfUnReadNotification(String id) throws MeedlException {
+    public MeedlNotification fetchNotificationCount(String id) throws MeedlException {
         MeedlValidator.validateUUID(id,"User id cannot empty");
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
-        return meedlNotificationOutputPort.getNumberOfUnReadNotification(userIdentity.getId());
+        return meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId());
     }
-
+    @Override
+    public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
+        Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
+        Email email = Email.builder()
+                .context(context)
+                .subject(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .to(userIdentity.getEmail())
+                .template(FinancierMessages.FINANCIER_INVITE_TO_VEHICLE.getMessage())
+                .firstName(userIdentity.getFirstName())
+                .build();
+        sendMail(userIdentity, email);
+    }
     @Override
     public void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContextAndInvestmentVehicleName(getLinkFinancierToVehicle(userIdentity, investmentVehicle),userIdentity.getFirstName(), investmentVehicle.getName());

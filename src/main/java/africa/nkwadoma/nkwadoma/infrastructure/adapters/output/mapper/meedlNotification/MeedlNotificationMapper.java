@@ -2,7 +2,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNoti
 
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -10,9 +12,12 @@ import java.util.List;
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MeedlNotificationMapper {
 
-    MeedlNotificationEntity toMeedlNotification(MeedlNotification meedlNotification);
+    MeedlNotificationEntity toMeedlNotificationEntity(MeedlNotification meedlNotification);
 
-    MeedlNotification toMeedlNotificationEntity(MeedlNotificationEntity meedlNotificationEntity);
+    MeedlNotification toMeedlNotification(MeedlNotificationEntity meedlNotificationEntity);
 
     List<MeedlNotification> toMeedlNotifications(List<MeedlNotificationEntity> allNotification);
+
+
+    MeedlNotification mapProjectionToNotificaltion(NotificationProjection notificationProjection);
 }

@@ -15,12 +15,11 @@ public class MeedlNotificationReponse {
     private String title;
     private String name;
     private String firstName;
-    private boolean isRead;
+    private boolean read;
     private LocalDateTime timestamp;
     private boolean callToAction;
     private String senderMail;
     private String senderFullName;
     private String contentDetail;
     private String duration;
-
 }
