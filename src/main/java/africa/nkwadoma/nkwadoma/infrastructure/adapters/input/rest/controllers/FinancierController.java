@@ -38,7 +38,7 @@ public class FinancierController {
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
         Financier financier = financierRestMapper.map(financierRequest);
-        financier.setUserIdentity(financierRequest.getIndividual());
+        financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
         String message = financierUseCase.inviteFinancier(financier);

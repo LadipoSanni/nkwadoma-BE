@@ -32,7 +32,7 @@ public class Financier {
     private int pageNumber;
     private int pageSize;
 
-    public void validateUserIdentity() throws MeedlException {
+    private void validateUserIdentity() throws MeedlException {
             validateIndividualEmail(userIdentity);
             MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
             MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
