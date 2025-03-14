@@ -52,7 +52,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investment-vehicle-details/{id}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') and hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
