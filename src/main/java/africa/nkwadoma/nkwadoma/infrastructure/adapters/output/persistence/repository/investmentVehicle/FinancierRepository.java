@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     @Query("SELECT f FROM FinancierEntity f " +
             "WHERE upper(concat(f.individual.firstName, ' ', f.individual.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
             "OR upper(concat(f.individual.lastName, ' ', f.individual.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
-    List<FinancierEntity> findByNameFragment( @Param("nameFragment") String nameFragment);
+    Page<FinancierEntity> findByNameFragment( @Param("nameFragment") String nameFragment, Pageable pageRequest);
 
     @Query("""
     select fe.id as id,fe.financierType as financierType,

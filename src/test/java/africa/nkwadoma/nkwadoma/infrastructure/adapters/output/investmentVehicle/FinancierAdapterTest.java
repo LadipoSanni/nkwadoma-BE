@@ -230,62 +230,70 @@ class FinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, financier.getPageNumber(), financier.getPageSize()));
     }
     @Test
     @Order(5)
     void searchFinancierByFirstName()  {
-        List<Financier> foundFinanciers = null;
+        Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName(),
+                    financier.getPageNumber(), financier.getPageSize()
+            );
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(6)
     void searchFinancierByLastName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
 
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName()
+                    , financier.getPageNumber(), financier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(7)
     void searchFinancierWithFirstNameBeforeLastName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+            foundFinanciers = financierOutputPort
+                    .search(financier.getIndividual().getFirstName() +" "+
+                            financier.getIndividual().getLastName(), financier.getPageNumber(),
+                            financier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(8)
     void searchFinancierWithLastNameBeforeFirstName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+
+                    financier.getIndividual().getFirstName()
+                , financier.getPageNumber(), financier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
-        assertNotNull(foundFinanciers.get(0).getIndividual());
-        assertEquals(foundFinanciers.get(0).getIndividual().getId(), userIdentity.getId());
+        assertNotNull(foundFinanciers.getContent().get(0));
+        assertNotNull(foundFinanciers.getContent().get(0).getIndividual());
+        assertEquals(foundFinanciers.getContent().get(0).getIndividual().getId(), userIdentity.getId());
     }
 
     @Test
@@ -295,7 +303,7 @@ class FinancierAdapterTest {
     }
 
     @Test
-    @Order(9)
+//    @Order(9)
     public void deleteFinancier(){
         try {
             Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);

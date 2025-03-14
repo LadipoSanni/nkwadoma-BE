@@ -248,9 +248,11 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public List<Financier> search(String name) throws MeedlException {
+    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
-        return financierOutputPort.search(name);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return financierOutputPort.search(name, pageNumber, pageSize);
     }
 
     @Override

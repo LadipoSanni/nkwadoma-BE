@@ -20,5 +20,5 @@ public interface FinancierOutputPort {
 
     void delete(String financierId) throws MeedlException;
 
-    List<Financier> search(String name) throws MeedlException;
+    Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
 }

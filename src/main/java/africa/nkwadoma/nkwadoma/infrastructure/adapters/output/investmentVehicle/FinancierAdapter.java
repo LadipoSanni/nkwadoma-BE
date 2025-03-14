@@ -66,12 +66,14 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public List<Financier> search(String name) throws MeedlException {
+    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
-        List<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name, pageRequest);
         log.info("Financiers found with name: {} {}", name, financierEntities );
-        return financierEntities.stream().map
-                (financierMapper::map).toList();
+        return financierEntities.map(financierMapper::map);
     }
 
     @Override

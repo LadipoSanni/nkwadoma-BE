@@ -81,14 +81,22 @@ public class FinancierController {
     }
     @GetMapping("financier/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,@RequestParam String name) throws MeedlException {
-        List<Financier> financiers = financierUseCase.search(name);
+    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
+                                                  @RequestParam String name,
+                                                  @RequestParam int pageNumber,
+                                                  @RequestParam int pageSize,
+                                                  @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
+        Page<Financier> financiers = financierUseCase.search(name, pageNumber, pageSize);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
+        PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
+                financierResponses, financiers.hasNext(),
+                financiers.getTotalPages(), pageNumber, pageSize
+        );
 
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                data(financierResponses).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );

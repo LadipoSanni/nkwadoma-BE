@@ -58,14 +58,15 @@ public class FinancierServiceTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
-    private final Pageable pageRequest = PageRequest.of(0, 10);
+    private int pageSize = 10 ;
+    private int pageNumber = 0 ;
+    private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
     private Financier financier;
     private UserIdentity userIdentity;
     private String userIdentityId;
     private String financierId;
     private String investmentVehicleId;
-    int pageSize = 10 ;
-    int pageNumber = 0 ;
+
 
     @BeforeAll
     void setUp(){
@@ -335,60 +336,60 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, pageNumber, pageSize));
     }
     @Test
     @Order(6)
     void searchFinancierByFirstName()  {
-        List<Financier> foundFinanciers = null;
+        Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(7)
     void searchFinancierByLastName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
 
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(8)
     void searchFinancierWithFirstNameBeforeLastName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
     @Order(9)
     void searchFinancierWithLastNameBeforeFirstName() {
-        List<Financier> foundFinanciers;
+        Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
+        assertNotNull(foundFinanciers.getContent().get(0));
     }
     @AfterAll
     void tearDown() throws MeedlException {
