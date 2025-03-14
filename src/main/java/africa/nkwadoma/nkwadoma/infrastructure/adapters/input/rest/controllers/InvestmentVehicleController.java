@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
@@ -53,7 +52,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investment-vehicle-details/{id}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') and hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
@@ -134,15 +133,20 @@ public class InvestmentVehicleController {
 
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName,
+                                                                  @RequestParam InvestmentVehicleType investmentVehicleType,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
 
-        List<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.searchInvestmentVehicle(investmentVehicleName);
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.searchInvestmentVehicle(investmentVehicleName,investmentVehicleType,pageSize,pageNumber );
         List<InvestmentVehicleResponse> investmentVehicleResponses =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles);
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponses)
+                investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
+        PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
+                .data(paginatedResponse)
                 .message(SEARCH_INVESTMENT_VEHICLE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();

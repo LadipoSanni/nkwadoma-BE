@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -221,7 +218,8 @@ public class TestData {
                 .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
-                .invitedBy(testId)
+                .activationStatus(ActivationStatus.INVITED)
+                .financierType(FinancierType.INDIVIDUAL)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();

@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -58,6 +59,19 @@ public class FinancierService implements FinancierUseCase {
 
     private String inviteFinancierToPlatform(Financier financier) throws MeedlException {
         financier.validate();
+        if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
+            inviteIndividualFinancierToPlatform(financier);
+        }else {
+            inviteCooperateFinancierToPlatform(financier);
+        }
+        return "Financier has been invited to the platform";
+    }
+
+    private void inviteCooperateFinancierToPlatform(Financier financier) {
+        //TODO invite cooperation to platform
+    }
+
+    private void inviteIndividualFinancierToPlatform(Financier financier) throws MeedlException {
         try {
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
@@ -66,7 +80,6 @@ public class FinancierService implements FinancierUseCase {
             financier = saveNonExistingFinancier(financier);
             emailInviteNonExistingFinancierToPlatform(financier);
         }
-        return "Financier has been invited to the platform";
     }
 
     private void emailInviteNonExistingFinancierToPlatform(Financier financier) throws MeedlException {
@@ -77,7 +90,19 @@ public class FinancierService implements FinancierUseCase {
         financier.validate();
         validateFinancierDesignation(financier);
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        if (financier.getFinancierType() == FinancierType.INDIVIDUAL){
+            inviteIndividualFinancierToInvestmentVehicle(financier);
+        }else {
+            inviteCooperateFinancierToInvestmentVehicle(financier);
+        }
+        return "Financier added to investment vehicle";
+    }
 
+    private void inviteCooperateFinancierToInvestmentVehicle(Financier financier) {
+        //TODO invite cooperation to vehicle
+    }
+
+    private void inviteIndividualFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         try {
             financier = getFinancierByUserIdentity(financier);
@@ -94,7 +119,6 @@ public class FinancierService implements FinancierUseCase {
                 emailInviteNonExistingFinancierToVehicle(financier, investmentVehicle);
             }
         }
-        return "Financier added to investment vehicle";
     }
 
     private static void validateFinancierDesignation(Financier financier) throws MeedlException {

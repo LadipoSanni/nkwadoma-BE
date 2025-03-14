@@ -50,7 +50,16 @@ public class Financier {
     }
 
     public void validate() throws MeedlException {
-        validateUserIdentity();
-        MeedlValidator.validateUUID(invitedBy, "Valid user id performing this action is required");
+        MeedlValidator.validateObjectInstance(this.financierType, "Please specify if financier is individual or cooperate.");
+        MeedlValidator.validateUUID(invitedBy, "Valid user identification for user performing this action is required");
+        if (this.financierType == FinancierType.INDIVIDUAL){
+            validateUserIdentity();
+        }else{
+            validateCooperation();
+        }
+    }
+
+    private void validateCooperation() {
+
     }
 }
