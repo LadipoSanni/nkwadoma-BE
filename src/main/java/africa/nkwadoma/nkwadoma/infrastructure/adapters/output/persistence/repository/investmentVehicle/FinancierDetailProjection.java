@@ -12,6 +12,7 @@ public interface FinancierDetailProjection {
     }
 
     interface UserProjection {
+        String getId();
         String getEmail();
         String getPhoneNumber();
         String getResidentialAddress();

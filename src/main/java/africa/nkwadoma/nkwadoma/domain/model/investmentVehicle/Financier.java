@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -14,7 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -25,7 +23,7 @@ import java.util.Set;
 public class Financier {
     private String id;
     private String organizationName;
-    private UserIdentity individual;
+    private UserIdentity userIdentity;
     private String invitedBy;
     private FinancierType financierType;
     private ActivationStatus activationStatus;
@@ -35,10 +33,10 @@ public class Financier {
     private int pageSize;
 
     public void validateUserIdentity() throws MeedlException {
-            validateIndividualEmail(individual);
-            MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
-            MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
-            MeedlValidator.validateEmail(individual.getEmail());
+            validateIndividualEmail(userIdentity);
+            MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+            MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+            MeedlValidator.validateEmail(userIdentity.getEmail());
     }
 
 

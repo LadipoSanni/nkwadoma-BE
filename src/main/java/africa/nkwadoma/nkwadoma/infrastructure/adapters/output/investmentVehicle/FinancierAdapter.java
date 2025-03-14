@@ -17,8 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -47,6 +45,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public FinancierDetails findFinancierDetailsByFinancierId(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        log.info("Finding financier projection with id for find {}", financierId);
      FinancierDetailProjection financierDetailProjection = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
         return financierMapper.map(financierDetailProjection);
@@ -54,7 +53,7 @@ public class FinancierAdapter implements FinancierOutputPort {
 
     @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {
-        FinancierEntity foundFinancier = financierRepository.findByIndividual_Id(id)
+        FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
                 .orElseThrow(()-> new MeedlException("Financier not found") );
         return financierMapper.map(foundFinancier);
     }

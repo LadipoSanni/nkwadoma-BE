@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import jakarta.persistence.*;
@@ -22,7 +21,7 @@ public class FinancierEntity {
     @OneToOne
     private OrganizationEntity organizationEntity;
     @OneToOne
-    private UserEntity individual;
+    private UserEntity userIdentity;
     private String invitedBy;
     @Enumerated(EnumType.STRING)
     private FinancierType financierType;

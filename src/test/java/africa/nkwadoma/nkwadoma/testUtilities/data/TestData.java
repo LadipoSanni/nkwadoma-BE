@@ -218,7 +218,7 @@ public class TestData {
         Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         return Financier.builder()
-                .individual(userIdentity)
+                .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
                 .invitedBy(testId)

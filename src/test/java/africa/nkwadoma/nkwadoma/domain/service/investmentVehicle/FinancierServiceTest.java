@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -37,7 +36,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -124,7 +122,7 @@ public class FinancierServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidFirstName(String name)  {
         userIdentity.setFirstName(name);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
@@ -139,14 +137,14 @@ public class FinancierServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinancierWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
 
@@ -165,21 +163,21 @@ public class FinancierServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidFirstName(String name){
         userIdentity.setFirstName(name);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinanciersWithInvalidLastName(String name){
         userIdentity.setLastName(name);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
     public void inviteFinanciersWithInvalidEmail(String email){
         userIdentity.setEmail(email);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
@@ -343,7 +341,7 @@ public class FinancierServiceTest {
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName(), pageNumber, pageSize);
+            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -357,7 +355,7 @@ public class FinancierServiceTest {
         Page<Financier> foundFinanciers;
         try {
 
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName(), pageNumber, pageSize);
+            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getLastName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -370,7 +368,7 @@ public class FinancierServiceTest {
     void searchFinancierWithFirstNameBeforeLastName() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName(), pageNumber, pageSize);
+            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getFirstName() +" "+ financier.getUserIdentity().getLastName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -383,7 +381,7 @@ public class FinancierServiceTest {
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName(), pageNumber, pageSize);
+            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getLastName() +" "+ financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
