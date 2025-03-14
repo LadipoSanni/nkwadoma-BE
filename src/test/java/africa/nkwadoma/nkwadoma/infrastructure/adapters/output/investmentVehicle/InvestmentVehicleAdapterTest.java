@@ -156,7 +156,14 @@ class InvestmentVehicleAdapterTest {
 
     @Test
     void searchInvestmentVehicleDetailsWithNullId()  {
-        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.searchInvestmentVehicle(null));
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
+                searchInvestmentVehicle(null,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber));
+    }
+
+    @Test
+    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleType()  {
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
+                searchInvestmentVehicle("g",null,pageSize,pageNumber));
     }
 
     @Test
@@ -203,14 +210,15 @@ class InvestmentVehicleAdapterTest {
     @Order(4)
     @Test
     void searchInvestmentVehicle(){
-        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+            Page<InvestmentVehicle> investmentVehicles = null;
             try{
-                investmentVehicles  = investmentVehicleOutputPort.searchInvestmentVehicle("g");
+                investmentVehicles  = investmentVehicleOutputPort.
+                        searchInvestmentVehicle("g",InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
             }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
             assertNotNull(investmentVehicles);
-            assertEquals(1,investmentVehicles.size());
+            assertEquals(1,investmentVehicles.getContent().size());
     }
 
 

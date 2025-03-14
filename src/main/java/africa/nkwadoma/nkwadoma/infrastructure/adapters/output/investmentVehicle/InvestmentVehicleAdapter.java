@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
@@ -124,11 +123,14 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public List<InvestmentVehicle> searchInvestmentVehicle(String name) throws MeedlException {
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicleType investmentVehicleType,
+                                                           int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
-        List<InvestmentVehicleEntity> investmentVehicles =
-                investmentVehicleRepository.findAllByNameContainingIgnoreCase(name);
-        return investmentVehicles.stream().map(investmentVehicleMapper::toInvestmentVehicle).collect(Collectors.toList());
+        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty or null");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicles =
+                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleType(name,investmentVehicleType ,pageRequest);
+        return investmentVehicles.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
 
