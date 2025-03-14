@@ -126,7 +126,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicleType investmentVehicleType,
                                                            int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
-        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty or null");
+        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicles =
                 investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleType(name,investmentVehicleType ,pageRequest);
