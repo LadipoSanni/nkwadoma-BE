@@ -275,7 +275,16 @@ class FinancierAdapterTest {
     @Test
     @Order(8)
     void completeKyc(){
+        try{
+            Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            assertNull(financier.getIndividual().getNextOfKin());
+            log.info("----------------------> Next of kin actual value "+ financier.getIndividual().getNextOfKin());
+//            financierOutputPort.completeKYC(null);
+            assertNotNull(financier.getIndividual().getNextOfKin());
 
+        } catch (MeedlException e) {
+            log.info("===================> " + e.getMessage());
+        }
     }
 
     @Test
@@ -290,6 +299,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
 
     }
+
     @AfterAll
     void tearDown() throws MeedlException {
         Optional <UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());

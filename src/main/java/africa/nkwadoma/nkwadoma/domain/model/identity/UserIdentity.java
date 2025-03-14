@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,7 @@ public class UserIdentity {
     private String reactivationReason;
     private String bvn;
     private String nin;
+    private NextOfKin nextOfKin;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");
