@@ -7,8 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
-import java.util.List;
-
 public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
@@ -19,7 +17,7 @@ public interface InvestmentVehicleUseCase {
 
     Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber);
 
-    List<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName) throws MeedlException;
+    Page<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 
