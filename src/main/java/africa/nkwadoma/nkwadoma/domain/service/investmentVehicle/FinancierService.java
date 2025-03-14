@@ -91,7 +91,19 @@ public class FinancierService implements FinancierUseCase {
         financier.validate();
         validateFinancierDesignation(financier);
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        if (financier.getFinancierType() == FinancierType.INDIVIDUAL){
+            inviteIndividualFinancierToInvestmentVehicle(financier);
+        }else {
+            inviteCooperateFinancierToInvestmentVehicle(financier);
+        }
+        return "Financier added to investment vehicle";
+    }
 
+    private void inviteCooperateFinancierToInvestmentVehicle(Financier financier) {
+        //TODO invite cooperation to vehicle
+    }
+
+    private void inviteIndividualFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         try {
             financier = getFinancierByUserIdentity(financier);
@@ -108,7 +120,6 @@ public class FinancierService implements FinancierUseCase {
                 emailInviteNonExistingFinancierToVehicle(financier, investmentVehicle);
             }
         }
-        return "Financier added to investment vehicle";
     }
 
     private static void validateFinancierDesignation(Financier financier) throws MeedlException {

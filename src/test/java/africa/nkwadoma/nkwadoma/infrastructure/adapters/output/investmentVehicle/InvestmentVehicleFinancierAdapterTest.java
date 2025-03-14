@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Finan
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
@@ -51,12 +52,8 @@ class InvestmentVehicleFinancierAdapterTest {
         try {
             userIdentity = saveUserIdentity(TestData.createTestUserIdentity("InvestmentVehicleFinanciertest@notmail.com", "3f89a9e1-62a5-4b42-bff1-6c8b5f77c5e2"));
             log.info("Financier saved successfully for investment vehicle financier test. {}", userIdentity.getId());
-            financier = financierOutputPort.save(Financier
-                    .builder()
-                    .individual(userIdentity)
-                    .activationStatus(ActivationStatus.INVITED)
-                    .invitedBy(userIdentity.getId())
-                    .build());
+            financier = financierOutputPort.save(TestData.buildFinancierIndividual(userIdentity));
+
             financierId = financier.getId();
         } catch (MeedlException e) {
             log.warn("Failed to create user on db {}", e.getMessage(), e);
