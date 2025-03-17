@@ -1,18 +1,21 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -55,6 +58,8 @@ public class FinancierServiceTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
+    private BankDetailOutputPort bankDetailOutputPort;
+    @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
@@ -63,12 +68,14 @@ public class FinancierServiceTest {
     private UserIdentity userIdentity;
     private String userIdentityId;
     private String financierId;
+    private BankDetail bankDetail;
     private String investmentVehicleId;
     int pageSize = 10 ;
     int pageNumber = 0 ;
 
     @BeforeAll
     void setUp(){
+        bankDetail = TestData.buildBankDetail();
         userIdentity = TestData.createTestUserIdentity("financierservicetest2@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
         financier = TestData.buildFinancierIndividual(userIdentity);
@@ -182,7 +189,89 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
+    void completeIndividualKycWithoutFinancierObject(){
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(null));
+    }
+    @Test
+    void completeIndividualKycWithoutBankDetail(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.setBankDetail(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutAccountNumber(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.getBankDetail().setAccountNumber(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutAccountName(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.getBankDetail().setAccountName(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
+    void completeIndividualKycWithAccountNumberLessThanTen(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.getBankDetail().setAccountNumber("123456789");
+        assertThrows(MeedlException.class, ()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
+    void completeIndividualKycWithAccountNumberGreaterThanFifteen(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.getBankDetail().setAccountNumber("1234567890111213");
+        assertThrows(MeedlException.class, ()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
+    void completeIndividualKycWithoutTaxId(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.setTaxId(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutNin(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.setNin(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeKycWithoutNextOfKin(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
+        financierWithKycRequest.getIndividual().setNextOfKin(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
     @Order(2)
+    void completeKycIndividual() {
+        Financier financierUpdated = null;
+        try {
+            Financier foundFinancier = financierUseCase.viewFinancierDetail(financierId);
+            assertNotNull(foundFinancier.getIndividual());
+            assertEquals(AccreditationStatus.UNVERIFIED ,foundFinancier.getAccreditationStatus());
+            log.info("financier found accreditation status  -------------> {}", foundFinancier.getAccreditationStatus());
+            assertNull(foundFinancier.getIndividual().getNextOfKin());
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, bankDetailOutputPort.save(bankDetail));
+            financierUpdated = financierUseCase.completeKyc(financierWithKycRequest);
+            log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
+
+        } catch (MeedlException e) {
+            log.info("===================> " + e.getMessage());
+        }
+        assertNotNull(financierUpdated);
+        assertEquals(AccreditationStatus.VERIFIED ,financierUpdated.getAccreditationStatus());
+        assertNotNull(financierUpdated.getNin());
+        assertNotNull(financierUpdated.getTaxId());
+        assertNotNull(financierUpdated.getAddress());
+        assertNotNull(financierUpdated.getBankDetail());
+        assertNotNull(financierUpdated.getIndividual().getNextOfKin());
+
+    }
+    @Test
+    @Order(3)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -196,7 +285,7 @@ public class FinancierServiceTest {
         assertFalse(financiers.isEmpty());
     }
     @Test
-    @Order(3)
+    @Order(4)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
@@ -213,7 +302,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId));
     }
     @Test
-    @Order(4)
+    @Order(5)
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         financier.setInvestmentVehicleId(investmentVehicleId);
@@ -248,7 +337,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    @Order(3)
+    @Order(6)
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
@@ -272,7 +361,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, null, pageRequest));
     }
     @Test
-    @Order(5)
+    @Order(7)
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -338,38 +427,11 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
     }
     @Test
-    @Order(6)
+    @Order(8)
     void searchFinancierByFirstName()  {
         List<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName());
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertNotNull(foundFinanciers);
-        assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
-    }
-    @Test
-    @Order(7)
-    void searchFinancierByLastName() {
-        List<Financier> foundFinanciers;
-        try {
-
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName());
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertNotNull(foundFinanciers);
-        assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.get(0));
-    }
-    @Test
-    @Order(8)
-    void searchFinancierWithFirstNameBeforeLastName() {
-        List<Financier> foundFinanciers;
-        try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+            foundFinanciers = financierUseCase.search(financier.getIndividual().getFirstName());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -379,10 +441,37 @@ public class FinancierServiceTest {
     }
     @Test
     @Order(9)
+    void searchFinancierByLastName() {
+        List<Financier> foundFinanciers;
+        try {
+
+            foundFinanciers = financierUseCase.search(financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(10)
+    void searchFinancierWithFirstNameBeforeLastName() {
+        List<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierUseCase.search(financier.getIndividual().getFirstName() +" "+ financier.getIndividual().getLastName());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.get(0));
+    }
+    @Test
+    @Order(11)
     void searchFinancierWithLastNameBeforeFirstName() {
         List<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
+            foundFinanciers = financierUseCase.search(financier.getIndividual().getLastName() +" "+ financier.getIndividual().getFirstName());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

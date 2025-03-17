@@ -274,6 +274,8 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getId());
         if (foundFinancier.getIndividual().getNextOfKin() == null){
             NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();

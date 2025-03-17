@@ -61,12 +61,12 @@ public class Financier {
 
     public void validateKyc() throws MeedlException {
         MeedlValidator.validateObjectInstance(bankDetail, "Provide a valid bank detail.");
-        MeedlValidator.validateDataElement(bankDetail.getBankAccountName(), "Bank account name is required.");
-        MeedlValidator.validateDataElement(bankDetail.getBankAccountNumber(), "Bank account number is required.");
+        MeedlValidator.validateDataElement(bankDetail.getAccountName(), "Bank account name is required.");
+        MeedlValidator.validateDataElement(bankDetail.getAccountNumber(), "Bank account number is required.");
         MeedlValidator.validateObjectInstance(individual.getNextOfKin(), "Provide a valid next of kin detail.");
         MeedlValidator.validateDataElement(nin, "Nin is required");
         MeedlValidator.validateDataElement(taxId, "Tax id is required");
         MeedlValidator.validateDataElement(address, "Address is required");
-        MeedlValidator.validateAccountNumber(bankDetail.getBankAccountNumber(), "Account number cannot be less than ten or greater than fifteen");
+        MeedlValidator.validateAccountNumber(bankDetail.getAccountNumber(), "Account number is required");
     }
 }

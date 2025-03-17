@@ -210,8 +210,8 @@ public class TestData {
 
     public static Financier completeKycRequest(Financier financier, BankDetail bankDetail){
         financier.setBankDetail(bankDetail);
-        financier.getBankDetail().setBankAccountName("Meedl Bank");
-        financier.getBankDetail().setBankAccountNumber("1234567890");
+        financier.getBankDetail().setAccountName("Meedl Bank");
+        financier.getBankDetail().setAccountNumber("1234567890");
         financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
         financier.setNin("2025103002");
         financier.setTaxId("00000122");
@@ -450,4 +450,10 @@ public class TestData {
     }
 
 
+    public static BankDetail buildBankDetail() {
+        return BankDetail.builder()
+               .accountName("Lagos Main")
+               .accountNumber("1234567890")
+               .build();
+    }
 }

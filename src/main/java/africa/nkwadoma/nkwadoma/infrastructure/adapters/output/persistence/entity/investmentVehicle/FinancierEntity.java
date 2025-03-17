@@ -2,15 +2,18 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.enti
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankDetail.BankDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
+@ToString
 @Entity
 public class FinancierEntity {
 
@@ -25,8 +28,10 @@ public class FinancierEntity {
     private ActivationStatus activationStatus;
     @Enumerated(EnumType.STRING)
     private AccreditationStatus accreditationStatus;
+    private String address;
+    private String nin;
+    private String taxId;
     @OneToOne
     private BankDetailEntity bankDetailEntity;
-    private String taxId;
 
 }

@@ -75,6 +75,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         financier.validateKyc();
         financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
         FinancierEntity financierEntity = financierRepository.save(financierMapper.map(financier));
+        log.info("Financier with id : {} completed KYC successfully", financierEntity);
         return financierMapper.map(financierEntity);
     }
 
