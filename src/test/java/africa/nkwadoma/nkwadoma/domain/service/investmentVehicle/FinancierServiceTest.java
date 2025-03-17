@@ -248,10 +248,10 @@ public class FinancierServiceTest {
         log.info("User identity id for previously saved test user : {} ", userIdentityId);
         log.info("Financier details: {} ", foundFinancier);
         assertNotNull(foundFinancier);
-        assertNotNull(foundFinancier.getIndividual());
+        assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getNextOfKin());
         assertEquals(financierId, foundFinancier.getId());
-        assertEquals(userIdentityId, foundFinancier.getIndividual().getId());
+        assertEquals(userIdentityId, foundFinancier.getUserIdentity().getId());
     }
 
     @ParameterizedTest

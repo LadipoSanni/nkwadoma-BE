@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class FinancierDetails {
     private String id;
-    private UserIdentity individual;
+    private UserIdentity userIdentity;
     private OrganizationIdentity organizationIdentity;
     private NextOfKin nextOfKin;
     @Enumerated(EnumType.STRING)

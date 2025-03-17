@@ -6,7 +6,7 @@ public interface FinancierDetailProjection {
     NextOfKinProjection getNextOfKin();
 
 
-    UserProjection getIndividual();
+    UserProjection getUserIdentity();
     OrganizationProjection getOrganizationEntity();
 
     interface OrganizationProjection{

@@ -20,7 +20,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
     @Query("""
     select fe.id as id,fe.financierType as financierType,
-           fe.userIdentity as individual,
+           fe.userIdentity as userIdentity,
            n as nextOfKin,
            oe as organizationEntity
            
