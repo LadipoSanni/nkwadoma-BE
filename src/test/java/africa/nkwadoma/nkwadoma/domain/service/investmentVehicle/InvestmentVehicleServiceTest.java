@@ -10,7 +10,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -128,17 +131,40 @@ class InvestmentVehicleServiceTest {
 
 
     @Test
-    void setVisibilityWithNullInvestmentVehicleId(){
+    void cannotSetVisibilityWithNullInvestmentVehicleId(){
         assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(null,
+                InvestmentVehicleVisibility.PUBLIC));
+    }
+
+    @Test
+    void cannotSetVisibilityWithNullInvestmentVehicleVisibility(){
+        assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(investmentId,
+                null));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,"jhhfvh9394-k"})
+    void cannotSetVisibilityWithEmptyOrInvalidInvestmentVehicleId(String id){
+        assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(id,
                 InvestmentVehicleVisibility.PUBLIC));
     }
 
 
     @Order(7)
     @Test
-    void setUpVisibility(){
-
+    void setUpInvestmentVehicleVisibilityToPublic(){
+        InvestmentVehicle investmentVehicle = null;
+        try {
+             investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(investmentId,
+                    InvestmentVehicleVisibility.DEFAULT);
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicle);
+        assertEquals(InvestmentVehicleVisibility.PUBLIC,investmentVehicle.getInvestmentVehicleVisibility());
     }
+
 
     @Test
     void viewAllInvestmentVehiclesByFundRaisingStatus(){

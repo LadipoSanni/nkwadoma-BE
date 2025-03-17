@@ -20,6 +20,7 @@ import org.springframework.data.domain.*;
 import java.time.LocalDate;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 
@@ -150,7 +151,13 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     @Override
     public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId,InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
-        return null;
+        MeedlValidator.validateObjectInstance(investmentVehicleVisibility,INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+        if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
+            investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
+        }
+        return investmentVehicle;
     }
 
     private String generateInvestmentVehicleLink(String id) {
