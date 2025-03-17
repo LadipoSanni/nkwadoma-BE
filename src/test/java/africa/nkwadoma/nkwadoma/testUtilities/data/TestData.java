@@ -211,6 +211,7 @@ public class TestData {
 
     public static Financier completeKycRequest(Financier financier){
         financier.setBankDetail(new BankDetail());
+        financier.getIndividual().setEmail(financier.getIndividual().getEmail());
         financier.getBankDetail().setBankAccountName("Meedl Bank");
         financier.getBankDetail().setBankAccountNumber("1234567890");
         financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
