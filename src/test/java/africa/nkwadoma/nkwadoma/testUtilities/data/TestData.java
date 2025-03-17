@@ -15,12 +15,11 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 
 import java.math.BigDecimal;
@@ -209,8 +208,8 @@ public class TestData {
         return loanRequest;
     }
 
-    public static Financier completeKycRequest(Financier financier){
-        financier.setBankDetail(new BankDetail());
+    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail){
+        financier.setBankDetail(bankDetail);
         financier.getBankDetail().setBankAccountName("Meedl Bank");
         financier.getBankDetail().setBankAccountNumber("1234567890");
         financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");

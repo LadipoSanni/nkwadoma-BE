@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
@@ -72,6 +73,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         financier.validate();
         financier.validateKyc();
+        financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
         FinancierEntity financierEntity = financierRepository.save(financierMapper.map(financier));
         return financierMapper.map(financierEntity);
     }
