@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class NextOfKinIdentityAdapterTest {
+class NextOfKinAdapterTest {
     @Autowired
-    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private NextOfKinOutputPort nextOfKinOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
@@ -85,7 +85,7 @@ class NextOfKinIdentityAdapterTest {
     void saveNextOfKin() {
         NextOfKin savedNextOfKin = null;
         try {
-            savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             log.info("Saved next of Kin: {}", savedNextOfKin);
         } catch (MeedlException e) {
             log.error("Exception saving next of kin details", e);
@@ -96,20 +96,20 @@ class NextOfKinIdentityAdapterTest {
 
     @Test
     void saveNullNextOfKin() {
-        assertThrows(MeedlException.class, ()-> nextOfKinIdentityOutputPort.save(null));
+        assertThrows(MeedlException.class, ()-> nextOfKinOutputPort.save(null));
     }
 
     @Test
     void saveNullUserDetails() {
         nextOfKin.getLoanee().setUserIdentity(null);
-        assertThrows(MeedlException.class, () -> nextOfKinIdentityOutputPort.save(nextOfKin));
+        assertThrows(MeedlException.class, () -> nextOfKinOutputPort.save(nextOfKin));
     }
 
     @AfterAll
     void tearDown() {
         try {
-            NextOfKin foundNextOfKin = nextOfKinIdentityOutputPort.findByEmail(nextOfKin.getEmail());
-            nextOfKinIdentityOutputPort.deleteNextOfKin(foundNextOfKin.getId());
+            NextOfKin foundNextOfKin = nextOfKinOutputPort.findByEmail(nextOfKin.getEmail());
+            nextOfKinOutputPort.deleteNextOfKin(foundNextOfKin.getId());
             Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
             loaneeLoanDetailId = foundLoanee.getLoaneeLoanDetail().getId();
             loaneeOutputPort.deleteLoanee(foundLoanee.getId());

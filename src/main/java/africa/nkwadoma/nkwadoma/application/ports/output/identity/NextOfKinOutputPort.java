@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 
 import java.util.*;
 
-public interface NextOfKinIdentityOutputPort {
+public interface NextOfKinOutputPort {
     NextOfKin save(NextOfKin nextOfKin) throws MeedlException;
 
     void deleteNextOfKin(String nextOfKinId) throws MeedlException;

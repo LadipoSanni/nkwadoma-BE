@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -21,7 +20,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class NextOfKinService implements CreateNextOfKinUseCase {
-    private final NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private final NextOfKinOutputPort nextOfKinOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final UserIdentityMapper userIdentityMapper;
@@ -33,13 +32,13 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
         trimSpaceForUserIdentity(nextOfKin.getLoanee());
         Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId()).
                 orElseThrow(()-> new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage()));
-        Optional<NextOfKin> foundNextOfKin = nextOfKinIdentityOutputPort.findByLoaneeId(foundLoanee.getId());
+        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByLoaneeId(foundLoanee.getId());
         if (foundNextOfKin.isPresent()) {
             throw new MeedlException(IdentityMessages.LOANEE_HAS_NEXT_OF_KIN.getMessage());
         }
         foundLoanee = updateLoanee(nextOfKin, foundLoanee);
         nextOfKin.setLoanee(foundLoanee);
-        return nextOfKinIdentityOutputPort.save(nextOfKin);
+        return nextOfKinOutputPort.save(nextOfKin);
     }
 
     private Loanee updateLoanee(NextOfKin nextOfKin, Loanee foundLoanee) throws MeedlException {

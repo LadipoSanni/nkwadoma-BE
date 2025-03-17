@@ -4,13 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -22,7 +19,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
+public class NextOfKinAdapter implements NextOfKinOutputPort {
     private final NextOfKinRepository nextOfKinRepository;
     private final NextOfKinMapper nextOfKinMapper;
 
