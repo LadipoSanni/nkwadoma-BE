@@ -37,7 +37,8 @@ public class Portfolio {
     private List<InvestmentVehicle> underPerformingInvestmentVehicles;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectName(portfolioName,"portfolio cannot be empty");
+        MeedlValidator.validateObjectName(portfolioName,"portfolio cannot be empty",
+                "portfolio");
     }
 
 }

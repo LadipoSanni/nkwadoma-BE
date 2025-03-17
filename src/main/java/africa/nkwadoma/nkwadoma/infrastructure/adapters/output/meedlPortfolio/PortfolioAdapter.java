@@ -20,7 +20,7 @@ public class PortfolioAdapter implements PortfolioOutputPort {
 
     @Override
     public Portfolio save(Portfolio portfolio) throws MeedlException {
-        MeedlValidator.validateObjectInstance(portfolio);
+        MeedlValidator.validateObjectInstance(portfolio,"Portfolio cannot be empty");
         PortfolioEntity portfolioEntity
                 = portfolioMapper.toPortfolioEntity(portfolio);
         portfolioEntity = portfolioEntityRepository.save(portfolioEntity);
@@ -29,7 +29,7 @@ public class PortfolioAdapter implements PortfolioOutputPort {
 
     @Override
     public Portfolio findPortfolio(Portfolio portfolio) throws MeedlException {
-        MeedlValidator.validateObjectName(portfolio.getPortfolioName(),"Portfolio name cannot be empty");
+        MeedlValidator.validateObjectName(portfolio.getPortfolioName(),"Portfolio name cannot be empty","portfolio");
             PortfolioEntity portfolioEntity =
                     portfolioEntityRepository.findByPortfolioName(portfolio.getPortfolioName());
         return portfolioMapper.toMeedlPortfolio(portfolioEntity);
