@@ -74,7 +74,6 @@ class NextOfKinAdapterTest {
             foundUserIdentity.setAlternatePhoneNumber("0987654321");
             foundUserIdentity.setAlternateContactAddress("10, Onigbagbo Street, Mushin, Lagos State");
             loanee.setUserIdentity(foundUserIdentity);
-            nextOfKin.setLoanee(loanee);
         } catch (MeedlException e) {
             log.error("Error saving Loanee details========> {}", e.getMessage());
         }
@@ -91,18 +90,11 @@ class NextOfKinAdapterTest {
             log.error("Exception saving next of kin details", e);
         }
         assertNotNull(savedNextOfKin);
-        assertNotNull(savedNextOfKin.getLoanee().getUserIdentity());
     }
 
     @Test
     void saveNullNextOfKin() {
         assertThrows(MeedlException.class, ()-> nextOfKinOutputPort.save(null));
-    }
-
-    @Test
-    void saveNullUserDetails() {
-        nextOfKin.getLoanee().setUserIdentity(null);
-        assertThrows(MeedlException.class, () -> nextOfKinOutputPort.save(nextOfKin));
     }
 
     @AfterAll

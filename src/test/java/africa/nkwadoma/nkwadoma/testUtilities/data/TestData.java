@@ -286,7 +286,7 @@ public class TestData {
         nextOfKin.setPhoneNumber("0785678901");
         nextOfKin.setNextOfKinRelationship("Brother");
         nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-        nextOfKin.setLoanee(loanee);
+//        nextOfKin.setLoanee(loanee);
         return nextOfKin;
     }
 

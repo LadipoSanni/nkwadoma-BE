@@ -42,11 +42,11 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
     }
 
     private Loanee updateLoanee(NextOfKin nextOfKin, Loanee foundLoanee) throws MeedlException {
-        UserIdentity userIdentity = userIdentityMapper.updateUser(nextOfKin.getLoanee().getUserIdentity(), foundLoanee.getUserIdentity());
-        userIdentity = userIdentityOutputPort.save(userIdentity);
-        log.info("Updated User identity: {}", userIdentity);
-        foundLoanee.setUserIdentity(userIdentity);
-        foundLoanee = loaneeOutputPort.save(foundLoanee);
+//        UserIdentity userIdentity = userIdentityMapper.updateUser(nextOfKin.getLoanee().getUserIdentity(), foundLoanee.getUserIdentity());
+//        userIdentity = userIdentityOutputPort.save(userIdentity);
+//        log.info("Updated User identity: {}", userIdentity);
+//        foundLoanee.setUserIdentity(userIdentity);
+//        foundLoanee = loaneeOutputPort.save(foundLoanee);
         return foundLoanee;
     }
 
