@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
@@ -15,8 +16,14 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Slf4j
 public class FinancierServiceTest {
     @Autowired
-    private FinancierUseCase financierUseCase;
+        private FinancierUseCase financierUseCase;
     @Autowired
     private FinancierOutputPort financierOutputPort;
     @Autowired
@@ -64,6 +71,14 @@ public class FinancierServiceTest {
     private String userIdentityId;
     private String financierId;
     private String investmentVehicleId;
+    @Autowired
+    private LoaneeRepository loaneeRepository;
+    @Autowired
+    private LoaneeMapper loaneeMapper;
+    @Autowired
+    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private LoaneeEntity savedLoanee;
+    private NextOfKin savedNextOfKin;
 
 
     @BeforeAll
@@ -75,6 +90,19 @@ public class FinancierServiceTest {
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         investmentVehicleId = investmentVehicle.getId();
         financier.setInvestmentVehicleId(investmentVehicleId);
+
+    }
+
+    private void saveNextOfKin(UserIdentity userIdentity) {
+        Loanee loanee = Loanee.builder().userIdentity(userIdentity).build();
+        savedLoanee = loaneeRepository.save(loaneeMapper.toLoaneeEntity(loanee));
+        NextOfKin nextOfKin = TestData.createNextOfKinData(loaneeMapper.toLoanee(savedLoanee));
+        nextOfKin.setUserIdentity(userIdentity);
+        try {
+            savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) {
@@ -103,6 +131,8 @@ public class FinancierServiceTest {
             foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
             financierId = foundFinancier.getId();
             log.info("Financier id for test user with id : {} is {}", userIdentityId, financierId);
+            saveNextOfKin(userIdentity);
+            log.info("Next of kin details saved");
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -206,13 +236,36 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier);
         assertEquals(financierId, foundFinancier.getId());
     }
+    @Test
+    @Order(4)
+    void findFinancierProjectionDetailsByFinancierId() {
+        FinancierDetails foundFinancier = null;
+        try {
+            foundFinancier = financierUseCase.viewFinancierDetailByFinancierId(financierId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("User identity id for previously saved test user : {} ", userIdentityId);
+        log.info("Financier details: {} ", foundFinancier);
+        assertNotNull(foundFinancier);
+        assertNotNull(foundFinancier.getIndividual());
+        assertNotNull(foundFinancier.getNextOfKin());
+        assertEquals(financierId, foundFinancier.getId());
+        assertEquals(userIdentityId, foundFinancier.getIndividual().getId());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
+    void findFinancierDetailsByInvalidId(String invalidId) {
+        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetailByFinancierId(invalidId));
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidId(String invalidId) {
         assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId));
     }
     @Test
-    @Order(4)
+    @Order(5)
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         financier.setInvestmentVehicleId(investmentVehicleId);
@@ -247,7 +300,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financier));
     }
     @Test
-    @Order(3)
+    @Order(6)
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
@@ -271,7 +324,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, null, pageRequest));
     }
     @Test
-    @Order(5)
+    @Order(7)
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -334,14 +387,14 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, pageNumber, pageSize));
+        assertThrows(MeedlException.class,()-> financierUseCase.search(name, pageNumber, pageSize));
     }
     @Test
-    @Order(6)
+    @Order(8)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
+            foundFinanciers = financierUseCase.search(financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -355,20 +408,7 @@ public class FinancierServiceTest {
         Page<Financier> foundFinanciers;
         try {
 
-            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getLastName(), pageNumber, pageSize);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertNotNull(foundFinanciers);
-        assertFalse(foundFinanciers.isEmpty());
-        assertNotNull(foundFinanciers.getContent().get(0));
-    }
-    @Test
-    @Order(8)
-    void searchFinancierWithFirstNameBeforeLastName() {
-        Page<Financier> foundFinanciers;
-        try {
-            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getFirstName() +" "+ financier.getUserIdentity().getLastName(), pageNumber, pageSize);
+            foundFinanciers = financierUseCase.search(financier.getUserIdentity().getLastName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -378,10 +418,23 @@ public class FinancierServiceTest {
     }
     @Test
     @Order(9)
+    void searchFinancierWithFirstNameBeforeLastName() {
+        Page<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierUseCase.search(financier.getUserIdentity().getFirstName() +" "+ financier.getUserIdentity().getLastName(), pageNumber, pageSize);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.getContent().get(0));
+    }
+    @Test
+    @Order(10)
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierOutputPort.search(financier.getUserIdentity().getLastName() +" "+ financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
+            foundFinanciers = financierUseCase.search(financier.getUserIdentity().getLastName() +" "+ financier.getUserIdentity().getFirstName(), pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -396,6 +449,8 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
         identityManagerOutputPort.deleteUser(userIdentity);
+        nextOfKinIdentityOutputPort.deleteNextOfKin(savedNextOfKin.getId());
+        loaneeRepository.delete(savedLoanee);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");

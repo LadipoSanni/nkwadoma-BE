@@ -41,8 +41,8 @@ public class Financier {
 
 
     private static void validateIndividualEmail(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
         try {
-            MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
             MeedlValidator.validateEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
             throw new MeedlException(e.getMessage() + " for : "+ userIdentity.getEmail());

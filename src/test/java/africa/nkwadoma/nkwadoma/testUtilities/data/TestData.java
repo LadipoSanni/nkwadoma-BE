@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
@@ -36,7 +37,8 @@ public class TestData {
     }
     public static UserIdentity createTestUserIdentity(String email){
         return UserIdentity.builder()
-                .id(testId)
+//                .id(testId)
+                .id(UUID.randomUUID().toString())
                 .firstName("John")
                 .lastName("Doe")
                 .email(email)

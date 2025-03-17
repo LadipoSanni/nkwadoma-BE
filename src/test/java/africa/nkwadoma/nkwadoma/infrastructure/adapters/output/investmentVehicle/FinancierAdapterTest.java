@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
@@ -11,6 +13,11 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,18 +50,30 @@ class FinancierAdapterTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
+    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private LoaneeRepository loaneeRepository;
+    @Autowired
+    private LoaneeMapper loaneeMapper;
 
-    @BeforeEach
+    @BeforeAll
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailadaptertest@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
         userIdentity.setLastName("financierService");
-        userIdentity.setLastName("test");
+        userIdentity.setFirstName("test");
         try {
             userIdentity = userIdentityOutputPort.save(userIdentity);
             userIdentityId = userIdentity.getId();
             log.info("Test user identity saved for adapter financier id : {}", userIdentityId);
+
+            Loanee loanee = Loanee.builder().userIdentity(userIdentity).build();
+            LoaneeEntity savedLoanee = loaneeRepository.save(loaneeMapper.toLoaneeEntity(loanee));
+            NextOfKin nextOfKin = TestData.createNextOfKinData(loaneeMapper.toLoanee(savedLoanee));
+            nextOfKin.setUserIdentity(userIdentity);
+            nextOfKinIdentityOutputPort.save(nextOfKin);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +184,7 @@ class FinancierAdapterTest {
     void findFinancierByUserId() {
         Financier foundFinancier = null;
         try {
-            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -187,13 +206,14 @@ class FinancierAdapterTest {
         log.info("Financier details: {} ", foundFinancier);
         assertNotNull(foundFinancier);
         assertNotNull(foundFinancier.getIndividual());
+        assertNotNull(foundFinancier.getNextOfKin());
         assertEquals(financierId, foundFinancier.getId());
         assertEquals(userIdentityId, foundFinancier.getIndividual().getId());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierProjectionByInvalidFinancierId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(invalidId));
+        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierDetailsByFinancierId(invalidId));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
@@ -297,9 +317,10 @@ class FinancierAdapterTest {
         }
         assertNotNull(foundFinanciers);
         assertFalse(foundFinanciers.isEmpty());
+        log.info("Financiers found in search test {}", foundFinanciers.getContent().size());
         assertNotNull(foundFinanciers.getContent().get(0));
         assertNotNull(foundFinanciers.getContent().get(0).getUserIdentity());
-        assertEquals(foundFinanciers.getContent().get(0).getUserIdentity().getId(), userIdentity.getId());
+        assertEquals(foundFinanciers.getContent().get(0).getUserIdentity().getId(), userIdentityId);
     }
 
     @Test

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 import org.apache.commons.lang3.*;
@@ -20,6 +21,7 @@ public class NextOfKin {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
+    private UserIdentity userIdentity;
     private Loanee loanee;
 
     public void validate() throws MeedlException {

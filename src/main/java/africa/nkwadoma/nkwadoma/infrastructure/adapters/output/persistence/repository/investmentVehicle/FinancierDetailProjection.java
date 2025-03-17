@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 public interface FinancierDetailProjection {
     String getId();
     String getFinancierType();
+    NextOfKinProjection getNextOfKin();
+
 
     UserProjection getIndividual();
     OrganizationProjection getOrganizationEntity();
@@ -18,7 +20,6 @@ public interface FinancierDetailProjection {
         String getResidentialAddress();
 
         // Fetch Next of Kin Details
-        NextOfKinProjection getNextOfKin();
     }
 
     interface NextOfKinProjection {

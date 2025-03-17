@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Financ
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
@@ -53,6 +54,19 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
+        FinancierResponse financierResponse = financierRestMapper.map(financier);
+
+        ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
+                .data(financierResponse)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping("financier/view/details/{financierId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public  ResponseEntity<ApiResponse<?>> viewFinancierProjectionDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
+        FinancierDetails financier = financierUseCase.viewFinancierDetailByFinancierId(financierId);
         FinancierResponse financierResponse = financierRestMapper.map(financier);
 
         ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()

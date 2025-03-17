@@ -48,6 +48,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Finding financier projection with id for find {}", financierId);
      FinancierDetailProjection financierDetailProjection = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
+     log.info("Found financier projection next of kin: {}", financierDetailProjection.getNextOfKin());
         return financierMapper.map(financierDetailProjection);
     }
 
