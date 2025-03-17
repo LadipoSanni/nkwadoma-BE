@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +20,9 @@ import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -229,6 +233,18 @@ public class MeedlNotificationAdapterTest {
         }
         assertEquals(1, numberOfAllNotifications);
     }
+
+    @Test
+    void deleteMultipleNotificationWithNull() {
+        assertThrows(MeedlException.class,()->meedlNotificationOutputPort.deleteMultipleNotification(null));
+    }
+
+    @Test
+    void deleteMultipleNotificationWithEmpty() {
+        List<String> emptyList = Collections.emptyList();
+        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.deleteMultipleNotification(emptyList));
+    }
+
 
     @Test
     void deleteMultipleNotification(){
