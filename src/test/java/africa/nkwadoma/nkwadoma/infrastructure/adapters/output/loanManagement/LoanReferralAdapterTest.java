@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loan.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -84,6 +85,8 @@ class LoanReferralAdapterTest {
     private LoanMetrics loanMetrics;
     @Autowired
     private LoanMetricsUseCase loanMetricsUseCase;
+    @Autowired
+    private MeedlNotificationOutputPort meedlNotificationOutputPort;
 
     @BeforeAll
     void setUp() {
@@ -243,6 +246,7 @@ class LoanReferralAdapterTest {
                     loaneeLoanBreakDownRepository.deleteById(loaneeLoanBreakdown.getLoaneeLoanBreakdownId())
             );
             loaneeOutputPort.deleteLoanee(loaneeId);
+            meedlNotificationOutputPort.deleteNotificationByUserId(joel.getId());
             userIdentityOutputPort.deleteUserById(joel.getId());
             userIdentityOutputPort.deleteUserById(loaneeUserId);
             identityManagerOutputPort.deleteUser(loanee.getUserIdentity());

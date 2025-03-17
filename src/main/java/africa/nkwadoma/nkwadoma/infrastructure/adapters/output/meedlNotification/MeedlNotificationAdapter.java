@@ -8,12 +8,15 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.meedlNotification.MeedlNotificationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification.MeedlNotificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.MeedlNotificationRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.meedlNotification.NotificationProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,9 +31,9 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateObjectInstance(meedlNotification,"Notification object cannot be empty ");
         meedlNotification.validate();
         MeedlNotificationEntity meedlNotificationEntity =
-                meedlNotificationMapper.toMeedlNotification(meedlNotification);
+                meedlNotificationMapper.toMeedlNotificationEntity(meedlNotification);
         meedlNotificationEntity = meedlNotificationRepository.save(meedlNotificationEntity);
-        return meedlNotificationMapper.toMeedlNotificationEntity(meedlNotificationEntity);
+        return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }
 
     @Override
@@ -44,17 +47,35 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateUUID(id,"Notification id cannot be empty");
         MeedlNotificationEntity meedlNotificationEntity = meedlNotificationRepository.findById(id)
                 .orElseThrow(() -> new MeedlNotificationException("Notification not found"));
-        return meedlNotificationMapper.toMeedlNotificationEntity(meedlNotificationEntity);
+        return meedlNotificationMapper.toMeedlNotification(meedlNotificationEntity);
     }
 
     @Override
-    public List<MeedlNotification> findAllNotificationBelongingToAUser(String userId) throws MeedlException {
+    public Page<MeedlNotification> findAllNotificationBelongingToAUser(String userId, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(userId,"User id cannot be empty");
-        List<MeedlNotificationEntity> allNotification =
-                meedlNotificationRepository.findAllByUser_Id(userId, Sort.by("timestamp").ascending());
-        if (allNotification.isEmpty()) {
-            throw new MeedlNotificationException("User dosen't have any notifications");
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize,Sort.by("timestamp").descending());
+        Page<MeedlNotificationEntity> notificationEntities =
+                meedlNotificationRepository.findAllByUser_Id(pageRequest,userId);
+        if (notificationEntities.isEmpty()) {
+            return Page.empty();
         }
-        return meedlNotificationMapper.toMeedlNotifications(allNotification);
+        log.info("notification {}" , notificationEntities.map(meedlNotificationMapper::toMeedlNotification).getContent());
+        return notificationEntities.map(meedlNotificationMapper::toMeedlNotification);
     }
+
+    @Override
+    public MeedlNotification getNotificationCounts(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId,"User id cannot be empty");
+        NotificationProjection notificationProjection =
+                meedlNotificationRepository.getNotificationCounts(userId);
+        return meedlNotificationMapper.mapProjectionToNotificaltion(notificationProjection);
+    }
+
+    @Transactional
+    @Override
+    public void deleteNotificationByUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id,"User id cannot be empty");
+        meedlNotificationRepository.deleteAllByUserId(id);
+    }
+
 }

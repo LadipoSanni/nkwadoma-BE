@@ -1,8 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -58,7 +59,7 @@ public class BeanConfiguration {
                                                    IdentityManagerOutputPort identityManagerOutPutPort,
                                                    OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort,
                                                    TokenUtils tokenUtils,
-                                                   SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
+                                                   OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase,
                                                    PasswordEncoder passwordEncoder,
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper,
@@ -128,11 +129,10 @@ public class BeanConfiguration {
                                        LoanBreakdownOutputPort loanBreakdownOutputPort,
                                        LoaneeUseCase loaneeUseCase,
                                        CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort,
-                                       OrganizationIdentityOutputPort organizationIdentityOutputPort,
-                                       OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort){
+                                       OrganizationIdentityOutputPort organizationIdentityOutputPort){
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,organizationIdentityOutputPort,
-                organizationEmployeeIdentityOutputPort);
+        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,
+                organizationIdentityOutputPort);
     }
 
     @Bean

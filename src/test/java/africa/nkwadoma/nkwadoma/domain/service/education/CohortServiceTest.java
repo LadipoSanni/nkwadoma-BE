@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -55,15 +58,13 @@ class CohortServiceTest {
     @Mock
     private CohortMapper cohortMapper;
     @Mock
-    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
-    @Mock
-    private OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    @Mock
     private LoaneeOutputPort loaneeOutputPort;
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private ServiceOffering serviceOffering;
     private UserIdentity userIdentity;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
 
     @BeforeEach

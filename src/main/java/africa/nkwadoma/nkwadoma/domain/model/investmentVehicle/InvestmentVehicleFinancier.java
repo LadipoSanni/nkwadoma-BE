@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -19,7 +20,7 @@ public class InvestmentVehicleFinancier {
     private String id;
     private Financier financier;
     private InvestmentVehicle investmentVehicle;
-    private List<InvestmentVehicleDesignation> investmentVehicleRole;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier being added to investment vehicle can not be empty");

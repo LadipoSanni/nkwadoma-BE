@@ -254,7 +254,6 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         OrganizationIdentity organizationIdentity = findById(organizationId);
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() + 1);
         organizationIdentity.setOrganizationEmployees(organizationEmployeeIdentityOutputPort.findAllOrganizationEmployees(organizationIdentity.getId()));
-        save(organizationIdentity);
     }
 
     @Override

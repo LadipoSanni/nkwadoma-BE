@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.ContextMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.email.Email;
@@ -59,34 +59,42 @@ public class EmailAdapter implements EmailOutputPort {
     @Override
     public Context getNameAndLinkContext(String link, String firstName){
         Context context = new Context();
-        context.setVariable(CONTEXT_TOKEN.getMessage(), link);
-        context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
-        context.setVariable(CONTEXT_CURRENT_YEAR.getMessage(), LocalDate.now().getYear());
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_CURRENT_YEAR.getMessage(), LocalDate.now().getYear());
         return context;
     }
 
     @Override
     public Context getNameAndLinkContextAndIndustryName(String link, String firstName, String organizationName) {
         Context context = new Context();
-        context.setVariable(CONTEXT_TOKEN.getMessage(), link);
-        context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
-        context.setVariable(CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_ORGANIZATION_NAME.getMessage(),organizationName);
+        return context;
+    }
+    @Override
+    public Context getNameAndLinkContextAndInvestmentVehicleName(String link, String firstName, String investmentVehicleName) {
+        Context context = new Context();
+        context.setVariable(ContextMessages.CONTEXT_TOKEN.getMessage(), link);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_VEHICLE_NAME.getMessage(),investmentVehicleName);
         return context;
     }
 
     @Override
     public Context getNameAndLinkContextAndLoanOfferId(String firstName, String loanOfferId) {
         Context context = new Context();
-        context.setVariable(CONTEXT_LINK.getMessage(), loanOfferId);
-        context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), loanOfferId);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
         return context;
     }
 
     @Override
     public Context getNameAndLinkContextAndLoanOfferIdAndLoaneeId(String firstName,String loanOfferId) {
         Context context = new Context();
-        context.setVariable(CONTEXT_LINK.getMessage(), loanOfferId);
-        context.setVariable(CONTEXT_FIRST_NAME.getMessage(), firstName);
+        context.setVariable(ContextMessages.CONTEXT_LINK.getMessage(), loanOfferId);
+        context.setVariable(ContextMessages.CONTEXT_FIRST_NAME.getMessage(), firstName);
         return context;
     }
 

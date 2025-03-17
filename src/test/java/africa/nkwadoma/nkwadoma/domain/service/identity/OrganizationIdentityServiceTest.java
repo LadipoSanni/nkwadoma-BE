@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
@@ -53,7 +53,7 @@ class OrganizationIdentityServiceTest {
     @Mock
     private OrganizationEntityRepository organizationEntityRepository;
     @Mock
-    private SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    private OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     @Mock
     private LoanMetricsUseCase loanMetricsUseCase;
     private UserIdentity sarah;
@@ -297,8 +297,6 @@ class OrganizationIdentityServiceTest {
             when(organizationIdentityOutputPort.findById(roseCouture.getId())).thenReturn(roseCouture);
             when(identityManagerOutPutPort.disableUserAccount(sarah)).thenReturn(sarah);
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
-            when(organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(roseCouture))).
-                    thenReturn(any());
             OrganizationIdentity deactivatedOrganization =
                     organizationIdentityService.deactivateOrganization(roseCouture.getId(), "test 2 reason");
             assertFalse(deactivatedOrganization.isEnabled());

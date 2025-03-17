@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.InvestmentException;
@@ -32,20 +33,27 @@ class InvestmentVehicleAdapterTest {
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private InvestmentVehicle capitalGrowth;
     private InvestmentVehicle fundGrowth;
+    private InvestmentVehicle seaGrowth;
     private String investmentVehicleId;
     private int pageSize = 1;
     private int pageNumber = 0;
     private String draftInvestmentVehicleId;
-
-
-
+    private String seaGrowthInvestmentVehicleId;
+    private String fundRaisingInvestmentId;
+    private String commercialInvestmentId;
+    private String seaGrowthDraftInvestmentId;
 
     @BeforeEach
     void setUp(){
-        capitalGrowth = TestData.buildInvestmentVehicle("Growth Investment");
+        capitalGrowth = TestData.buildInvestmentVehicle("Capital Growth");
+        capitalGrowth.setFundRaisingStatus(FundRaisingStatus.CLOSED);
 
-        fundGrowth = TestData.buildInvestmentVehicle("Growth Investment2");
+        fundGrowth = TestData.buildInvestmentVehicle("Fund Growth");
         fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
+
+        seaGrowth = TestData.buildInvestmentVehicle("Sea Growth");
+        seaGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
+        seaGrowth.setInvestmentVehicleStatus(InvestmentVehicleStatus.DRAFT);
     }
 
 
@@ -148,7 +156,14 @@ class InvestmentVehicleAdapterTest {
 
     @Test
     void searchInvestmentVehicleDetailsWithNullId()  {
-        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.searchInvestmentVehicle(null));
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
+                searchInvestmentVehicle(null,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber));
+    }
+
+    @Test
+    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleType()  {
+        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
+                searchInvestmentVehicle("g",null,pageSize,pageNumber));
     }
 
     @Test
@@ -195,14 +210,15 @@ class InvestmentVehicleAdapterTest {
     @Order(4)
     @Test
     void searchInvestmentVehicle(){
-        List<InvestmentVehicle> investmentVehicles = new ArrayList<>();
+            Page<InvestmentVehicle> investmentVehicles = null;
             try{
-                investmentVehicles  = investmentVehicleOutputPort.searchInvestmentVehicle("g");
+                investmentVehicles  = investmentVehicleOutputPort.
+                        searchInvestmentVehicle("g",InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
             }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
             assertNotNull(investmentVehicles);
-            assertEquals(1,investmentVehicles.size());
+            assertEquals(1,investmentVehicles.getContent().size());
     }
 
 
@@ -226,81 +242,95 @@ class InvestmentVehicleAdapterTest {
     @Order(6)
     @Test
     void viewAllInvestmentVehicleByType() {
+        Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
                     pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-            assertNotNull(investmentVehiclesList);
-            assertEquals(1, investmentVehiclesList.size());
-            assertEquals(InvestmentVehicleType.ENDOWMENT, investmentVehiclesList.get(0).getInvestmentVehicleType());
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+            commercialInvestmentId = savedVehicle.getId();
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
     }
 
-    @Order(7)
     @Test
     void viewAllInvestmentVehicleByTypeCommercial() {
+        Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            investmentVehicleOutputPort.save(fundGrowth);
-            capitalGrowth.setInvestmentVehicleType(InvestmentVehicleType.COMMERCIAL);
-            Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
                     pageSize, pageNumber, InvestmentVehicleType.COMMERCIAL);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-
-            assertNotNull(investmentVehiclesList);
-            assertEquals(1, investmentVehiclesList.size());
-            assertEquals(InvestmentVehicleType.COMMERCIAL, investmentVehiclesList.get(0).getInvestmentVehicleType());
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.COMMERCIAL));
     }
 
-    @Order(8)
     @Test
     void viewAllInvestmentVehicleByTypeDoesNotReturnDraft() {
+        Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            Page<InvestmentVehicle> investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByType(
                     pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-            assertNotNull(investmentVehiclesList);
-            assertEquals(1, investmentVehiclesList.size());
-            assertEquals(InvestmentVehicleStatus.PUBLISHED, investmentVehiclesList.get(0).getInvestmentVehicleStatus());
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle -> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
+        assertThat(investmentVehicles).allMatch(investmentVehicle -> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
     @Test
     void viewAllInvestmentVehicleByStatus() {
-        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
+        Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(InvestmentVehicleStatus.PUBLISHED);
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(pageSize, pageNumber, InvestmentVehicleStatus.PUBLISHED);
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(investmentVehiclesList);
-        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFiltering(){
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try{
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(capitalGrowth);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(10, 0, null, null, FundRaisingStatus.CLOSED);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
+        } catch (MeedlException exception){
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle -> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.CLOSED));
     }
 
     @Test
     void viewAllInvestmentVehicleByStatusReturnDraft() {
-        List<InvestmentVehicle> investmentVehiclesList = new ArrayList<>();
+        Page<InvestmentVehicle> investmentVehicles = null;
         try {
-            InvestmentVehicle draftVehicle = TestData.buildInvestmentVehicle("Draft Vehicle");
-            investmentVehicleOutputPort.save(draftVehicle);
-
-            investmentVehiclesList = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(DRAFT);
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(pageSize, pageNumber, DRAFT);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(investmentVehiclesList);
-        assertThat(investmentVehiclesList).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
     }
 
     @Test
     void viewAllInvestmentVehicleByStatusThrowExceptionForNullParameter(){
-        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(null));
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(pageSize, pageNumber,null));
     }
 
     @Test
@@ -320,26 +350,64 @@ class InvestmentVehicleAdapterTest {
         try {
             investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(
                     pageSize, pageNumber, InvestmentVehicleType.ENDOWMENT, InvestmentVehicleStatus.PUBLISHED);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
     @Test
-    void viewAllInvestmentVehicleByTypeAndStatusCommercialDraft() {
+    void viewAllInvestmentVehicleByFundRaisingStatus() {
         Page<InvestmentVehicle> investmentVehicles = null;
-        try {
-            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(
-                    pageSize, pageNumber, InvestmentVehicleType.COMMERCIAL, DRAFT);
-            List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
-        } catch (Exception e) {
-            fail("Test failed due to unexpected exception: " + e.getMessage());
+        try{
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(fundGrowth);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
+                    pageSize, pageNumber, FundRaisingStatus.FUND_RAISING);
+            fundRaisingInvestmentId = savedVehicle.getId();
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
         assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.getContent().isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.FUND_RAISING));
+
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFundRaisingStatusReturnOnlyClosed(){
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try{
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(
+                    pageSize, pageNumber, FundRaisingStatus.CLOSED);
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.getContent().isEmpty());
+        assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.CLOSED));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByFundRaisingStatusWithNullValue(){
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, null));
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByTypeCommercialAndStatusDraft() {
+        Page<InvestmentVehicle> investmentVehicles = null;
+        try {
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(seaGrowth);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(
+                    pageSize, pageNumber, InvestmentVehicleType.COMMERCIAL, DRAFT);
+            seaGrowthInvestmentVehicleId = savedVehicle.getId();
+        } catch (Exception exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicles);
+        assertFalse(investmentVehicles.getContent().isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.COMMERCIAL));
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT));
     }
@@ -358,6 +426,9 @@ class InvestmentVehicleAdapterTest {
     void cleanUp() throws MeedlException {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(draftInvestmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(seaGrowthInvestmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(fundRaisingInvestmentId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(commercialInvestmentId);
     }
 
 }

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface FinancierOutputPort {
-    Financier saveFinancier(Financier financier) throws MeedlException;
+    Financier save(Financier financier) throws MeedlException;
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 

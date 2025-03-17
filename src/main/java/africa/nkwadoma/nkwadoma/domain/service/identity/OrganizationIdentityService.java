@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendOrganizationEmployeeEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -43,9 +43,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final OrganizationIdentityMapper organizationIdentityMapper;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
-    private final SendOrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
+    private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
-    private final OrganizationEntityRepository organizationEntityRepository;
     private final LoanMetricsUseCase  loanMetricsUseCase;
 
 
@@ -142,7 +141,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         foundOrganization.setEnabled(Boolean.TRUE);
         foundOrganization.setStatus(ActivationStatus.ACTIVE);
         foundOrganization.setTimeUpdated(LocalDateTime.now());
-        organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(foundOrganization));
+        organizationIdentityOutputPort.save(foundOrganization);
         log.info("Updated Organization entity status: {}", foundOrganization.getStatus());
         return foundOrganization;
     }
@@ -175,7 +174,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         identityManagerOutPutPort.disableClient(foundOrganization);
         foundOrganization.setEnabled(Boolean.FALSE);
         foundOrganization.setStatus(ActivationStatus.DEACTIVATED);
-        organizationEntityRepository.save(organizationIdentityMapper.toOrganizationEntity(foundOrganization));
+        organizationIdentityOutputPort.save(foundOrganization);
         return foundOrganization;
     }
 
@@ -233,23 +232,36 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                 foundUserIdentity.getRole() == IdentityRole.ORGANIZATION_ADMIN ||
                 foundUserIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER)
         {
-            OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
-                    id(foundUserIdentity.getId()).build();
-            employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
-            log.info("Found Employee identity to update status: {}", employeeIdentity);
-            OrganizationIdentity foundOrganizationIdentity =
-                    viewOrganizationDetails(employeeIdentity.getOrganization());
-            log.info("Found organization: {}", foundOrganizationIdentity);
-            employeeIdentity.setStatus(ActivationStatus.ACTIVE);
-            employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
-            log.info("Updated Organization Employee Status: {}", employeeIdentity.getStatus());
+
+            OrganizationEmployeeIdentity employeeIdentity = updateEmployeeStatus(foundUserIdentity);
+            updateOrganizationStatus(organizationIdentity, employeeIdentity);
+        }
+    }
+
+    private void updateOrganizationStatus(OrganizationIdentity organizationIdentity, OrganizationEmployeeIdentity employeeIdentity) throws MeedlException {
+        OrganizationIdentity foundOrganizationIdentity =
+                viewOrganizationDetails(employeeIdentity.getOrganization());
+        log.info("Found organization: {}", foundOrganizationIdentity);
+        if (foundOrganizationIdentity.getStatus() != ActivationStatus.ACTIVE) {
+            log.info("Organization found is not activated with id {} and status {}", foundOrganizationIdentity.getId(), foundOrganizationIdentity.getStatus());
             foundOrganizationIdentity.setStatus(ActivationStatus.ACTIVE);
             foundOrganizationIdentity.setUpdatedBy(organizationIdentity.getUserIdentity().getId());
             foundOrganizationIdentity.setTimeUpdated(LocalDateTime.now());
-            OrganizationEntity organizationEntity = organizationIdentityMapper.toOrganizationEntity(foundOrganizationIdentity);
-            organizationEntity = organizationEntityRepository.save(organizationEntity);
-            log.info("Updated Organization Entity Status: {}", organizationEntity.getStatus());
+            OrganizationIdentity savedOrganization = organizationIdentityOutputPort.save(foundOrganizationIdentity);
+            log.info("Updated Organization Entity Status: {}", savedOrganization.getStatus());
         }
+    }
+
+    private OrganizationEmployeeIdentity updateEmployeeStatus(UserIdentity userIdentity) throws MeedlException {
+        OrganizationEmployeeIdentity employeeIdentity = OrganizationEmployeeIdentity.builder().
+                id(userIdentity.getId()).build();
+        employeeIdentity = employeesUseCase.viewEmployeeDetails(employeeIdentity);
+        log.info("Found Employee identity to update status: {}", employeeIdentity);
+
+        employeeIdentity.setStatus(ActivationStatus.ACTIVE);
+        employeeIdentity = organizationEmployeeIdentityOutputPort.save(employeeIdentity);
+        log.info("Updated Organization Employee Status: {}", employeeIdentity.getStatus());
+        return employeeIdentity;
     }
 
     private void validateNonUpdatableValues(OrganizationIdentity organizationIdentity) throws MeedlException {

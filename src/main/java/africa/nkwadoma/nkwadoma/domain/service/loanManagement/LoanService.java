@@ -501,7 +501,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     @Override
     public Page<LoanDetail> searchLoan(LoanOffer loanOffer) throws MeedlException {
         MeedlValidator.validateUUID(loanOffer.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
-        MeedlValidator.validateObjectName(loanOffer.getName(),LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectName(loanOffer.getName(),LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage(),"Loan offer");
         MeedlValidator.validateUUID(loanOffer.getProgramId(),ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validateObjectInstance(loanOffer.getType(),"Status cannot be empty");
         MeedlValidator.validatePageSize(loanOffer.getPageSize());

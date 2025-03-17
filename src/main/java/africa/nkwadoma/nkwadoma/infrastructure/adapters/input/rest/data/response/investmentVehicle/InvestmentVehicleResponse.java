@@ -37,5 +37,6 @@ public class InvestmentVehicleResponse {
     private String fundManager;
     private String trustee;
     private String custodian;
+    private String bankPartner;
     private LocalDate lastUpdatedDate;
 }

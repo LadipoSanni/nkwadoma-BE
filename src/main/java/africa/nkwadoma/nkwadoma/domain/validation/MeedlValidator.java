@@ -86,12 +86,6 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateObjectInstance(Object instance) throws MeedlException {
-        if (ObjectUtils.isEmpty(instance)){
-            throw new MeedlException(MeedlMessages.INVALID_OBJECT.getMessage());
-        }
-    }
-
     public static void validateObjectInstance(Object instance, String message) throws MeedlException {
         if (ObjectUtils.isEmpty(instance)){
             throw new MeedlException(message);
@@ -133,14 +127,14 @@ public class MeedlValidator {
             throw new IdentityException(WEAK_PASSWORD.getMessage());
         }
     }
-    public static void validateObjectName(String name,  String message) throws MeedlException {
+    public static void validateObjectName(String name,  String message, String attributeName) throws MeedlException {
         MeedlValidator.validateDataElement(name, message);
         String regex =  "^(?=.*[A-Za-z])(?=.*['A-Za-z])[A-Za-z0-9' _-]+$";
         Pattern pattern = Pattern.compile(regex);
         boolean isValid = pattern.matcher(name).matches();
         if (!isValid){
             log.error("Invalid name pattern: {}", name);
-            throw new MeedlException("Name must include letters and can only contain letters, numbers, spaces - _ '");
+            throw new MeedlException(attributeName+" name must include letters and can only contain letters, numbers, spaces - _ '");
         }
     }
     public static void validateEmailDomain(String inviteeEmail, String inviterEmail) throws MeedlException {

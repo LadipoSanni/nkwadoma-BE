@@ -50,8 +50,16 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         MeedlValidator.validateUUID(id, UserMessages.INVALID_USER_ID.getMessage());
         log.info("Deleting user {}", id);
         employeeIdentityOutputPort.deleteEmployee(id);
-        UserEntity userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
-        userEntityRepository.delete(userEntity);
+        UserEntity userEntity = null;
+        try {
+            userEntity = userEntityRepository.findById(id).orElseThrow(() -> new IdentityException(USER_NOT_FOUND.getMessage()));
+        } catch (MeedlException meedlException) {
+            log.error("Failed to find user with id {} to delete.", id, meedlException);
+            throw new MeedlException(UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
+        }
+        if (userEntity != null) {
+            userEntityRepository.delete(userEntity);
+        }
     }
 
     @Override

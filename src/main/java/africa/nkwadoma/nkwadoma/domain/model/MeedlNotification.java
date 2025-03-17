@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -13,19 +14,22 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Builder
+@ToString
 public class MeedlNotification {
 
     private String id;
     private String contentId;
     private String title;
     private UserIdentity user;
-    private boolean isRead;
+    private boolean read;
     private LocalDateTime timestamp;
     private boolean callToAction;
     private String senderMail;
     private String senderFullName;
     private String contentDetail;
     private String duration;
+    private int unreadCount;
+    private int allNotificationsCount;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(contentId,"Content id cannot be empty");
@@ -34,6 +38,6 @@ public class MeedlNotification {
         MeedlValidator.validateObjectInstance(timestamp,"Timestamp cannot be empty");
         MeedlValidator.validateEmail(senderMail);
         callToAction = true;
-        MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty");
+        MeedlValidator.validateObjectName(senderFullName,"sender full name cannot be empty","Sender");
     }
 }

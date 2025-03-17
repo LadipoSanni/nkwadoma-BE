@@ -1,8 +1,7 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -24,7 +23,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.pre
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
@@ -213,10 +214,14 @@ public class TestData {
         return loaneeLoanAccount;
     }
     public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
+        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         return Financier.builder()
                 .individual(userIdentity)
+                .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
-                .invitedBy(testId)
+                .activationStatus(ActivationStatus.INVITED)
+                .financierType(FinancierType.INDIVIDUAL)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();
@@ -237,6 +242,7 @@ public class TestData {
         investmentVehicle.setRate(13F);
         investmentVehicle.setMandate("Long-term Growth");
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
+        investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setTenure(12);
         investmentVehicle.setCustodian("Custodian");
         investmentVehicle.setBankPartner("Gt Bank");
@@ -244,6 +250,7 @@ public class TestData {
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
         investmentVehicle.setSponsors("sponsors");
+        investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         return investmentVehicle;
     }
@@ -419,12 +426,14 @@ public class TestData {
     public static MeedlNotification createNotification(UserIdentity userIdentity) {
         return MeedlNotification.builder()
                 .user(userIdentity)
-                .isRead(false)
+                .read(false)
                 .timestamp(LocalDateTime.now())
                 .contentId(testId)
                 .title("Title")
                 .senderMail("qudusa55@gmail.com")
                 .senderFullName("John Doe")
+                .allNotificationsCount(4)
+                .unreadCount(2)
                 .build();
     }
 
