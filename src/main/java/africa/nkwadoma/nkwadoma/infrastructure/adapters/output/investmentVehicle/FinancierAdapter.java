@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CompleteKycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
@@ -74,6 +75,20 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Financiers found with name: {} {}", name, financierEntities );
         return financierEntities.stream().map
                 (financierMapper::map).toList();
+    }
+
+    @Override
+    public Financier completeKyc(CompleteKycRequest completeKycRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(completeKycRequest, "Kyc request cannot be empty");
+        Optional<FinancierEntity> financier = financierRepository.findByEmail(completeKycRequest.getFinancierEmail());
+
+        if(financier.isPresent()){
+            financier.get().setBankAccountName(completeKycRequest.getBankName());
+            financier.get().setBankAccountNumber(completeKycRequest.getBankNumber());
+
+            financierRepository.save(financier.get());
+        }
+        return null;
     }
 
     @Override

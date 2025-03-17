@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
@@ -26,6 +27,7 @@ public class Financier {
     private UserIdentity individual;
     private String invitedBy;
     private ActivationStatus activationStatus;
+    private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;

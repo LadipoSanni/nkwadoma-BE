@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
+import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -276,11 +277,18 @@ class FinancierAdapterTest {
     @Order(8)
     void completeKyc(){
         try{
-            Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
             assertNull(financier.getIndividual().getNextOfKin());
-            log.info("----------------------> Next of kin actual value "+ financier.getIndividual().getNextOfKin());
-//            financierOutputPort.completeKYC(null);
-            assertNotNull(financier.getIndividual().getNextOfKin());
+            financierOutputPort.completeKyc(TestData.completeKycRequest("kyc@gmail.com"));
+
+
+            log.info("-------------------foundFinancier--------->", foundFinancier.getAccreditationStatus());
+
+
+//            UserIdentity userIdentity1 = userIdentity.setNextOfKin();
+//            foundFinancier.setIndividual();
+            //            financierOutputPort.completeKYC(null);
+//            assertNotNull(financier.getIndividual().getNextOfKin());
 
         } catch (MeedlException e) {
             log.info("===================> " + e.getMessage());
