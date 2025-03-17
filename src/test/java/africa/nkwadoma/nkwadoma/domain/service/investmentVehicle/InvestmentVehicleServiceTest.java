@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -123,6 +124,20 @@ class InvestmentVehicleServiceTest {
         } catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
+    }
+
+
+    @Test
+    void setVisibilityWithNullInvestmentVehicleId(){
+        assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(null,
+                InvestmentVehicleVisibility.PUBLIC));
+    }
+
+
+    @Order(7)
+    @Test
+    void setUpVisibility(){
+
     }
 
     @Test
