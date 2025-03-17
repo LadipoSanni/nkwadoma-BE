@@ -159,7 +159,7 @@ public class FinancierServiceTest {
     }
     @Test
     public void inviteFinancierWithNullInvestmentVehicleFinancier() {
-        assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(null)));
+        assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(List.of()));
     }
 
     @ParameterizedTest
