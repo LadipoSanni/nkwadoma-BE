@@ -50,7 +50,8 @@ public class FinancierService implements FinancierUseCase {
 
 
     @Override
-    public String inviteFinancier(Financier financier) throws MeedlException {
+    public String inviteFinancier(List<Financier> financiers) throws MeedlException {
+        Financier financier = financiers.get(0);
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         if (StringUtils.isEmpty(financier.getInvestmentVehicleId())){
             return inviteFinancierToPlatform(financier);
