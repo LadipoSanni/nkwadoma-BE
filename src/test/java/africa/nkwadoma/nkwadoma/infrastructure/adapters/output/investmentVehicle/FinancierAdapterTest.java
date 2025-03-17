@@ -38,6 +38,7 @@ class FinancierAdapterTest {
     private UserIdentity userIdentity;
     private String financierId;
     private InvestmentVehicle investmentVehicle;
+
     @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
@@ -292,6 +293,21 @@ class FinancierAdapterTest {
         financierWithKycRequest.getBankDetail().setBankAccountName(null);
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
+
+    @Test
+    void completeIndividualKycWithAccountNumberLessThanTen(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.getBankDetail().setBankAccountNumber("123456789");
+        assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
+    void completeIndividualKycWithAccountNumberGreaterThanFifteen(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.getBankDetail().setBankAccountNumber("1234567890111213");
+        assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+
     @Test
     void completeIndividualKycWithoutTaxId(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);

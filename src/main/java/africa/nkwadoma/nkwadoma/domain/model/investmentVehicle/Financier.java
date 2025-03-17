@@ -67,5 +67,6 @@ public class Financier {
         MeedlValidator.validateDataElement(nin, "Nin is required");
         MeedlValidator.validateDataElement(taxId, "Tax id is required");
         MeedlValidator.validateDataElement(address, "Address is required");
+        MeedlValidator.validateAccountNumber(bankDetail.getBankAccountNumber(), "Account number cannot be less than ten or greater than fifteen");
     }
 }
