@@ -296,14 +296,14 @@ class FinancierAdapterTest {
 
     @Test
     void completeIndividualKycWithAccountNumberLessThanTen(){
-        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
         financierWithKycRequest.getBankDetail().setBankAccountNumber("123456789");
         assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
 
     @Test
     void completeIndividualKycWithAccountNumberGreaterThanFifteen(){
-        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail);
         financierWithKycRequest.getBankDetail().setBankAccountNumber("1234567890111213");
         assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
