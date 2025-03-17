@@ -18,6 +18,7 @@ import org.springframework.data.domain.*;
 
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
@@ -149,7 +150,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility) throws MeedlException {
+    public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, List<String> financierIds) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId,InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility,INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);

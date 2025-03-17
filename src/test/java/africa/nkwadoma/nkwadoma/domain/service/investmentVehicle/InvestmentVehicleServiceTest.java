@@ -133,13 +133,13 @@ class InvestmentVehicleServiceTest {
     @Test
     void cannotSetVisibilityWithNullInvestmentVehicleId(){
         assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(null,
-                InvestmentVehicleVisibility.PUBLIC));
+                InvestmentVehicleVisibility.PUBLIC,List.of()));
     }
 
     @Test
     void cannotSetVisibilityWithNullInvestmentVehicleVisibility(){
         assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(investmentId,
-                null));
+                null,List.of()));
     }
 
 
@@ -147,7 +147,7 @@ class InvestmentVehicleServiceTest {
     @ValueSource(strings = {StringUtils.EMPTY,"jhhfvh9394-k"})
     void cannotSetVisibilityWithEmptyOrInvalidInvestmentVehicleId(String id){
         assertThrows(MeedlException.class , () -> investmentVehicleUseCase.setInvestmentVehicleVisibility(id,
-                InvestmentVehicleVisibility.PUBLIC));
+                InvestmentVehicleVisibility.PUBLIC,List.of()));
     }
 
 
@@ -157,7 +157,7 @@ class InvestmentVehicleServiceTest {
         InvestmentVehicle investmentVehicle = null;
         try {
              investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(investmentId,
-                    InvestmentVehicleVisibility.DEFAULT);
+                    InvestmentVehicleVisibility.PUBLIC,List.of());
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }

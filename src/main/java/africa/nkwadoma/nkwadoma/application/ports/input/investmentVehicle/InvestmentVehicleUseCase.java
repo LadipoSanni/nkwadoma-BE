@@ -8,6 +8,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
+import java.util.List;
+
 public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
@@ -30,5 +32,5 @@ public interface InvestmentVehicleUseCase {
 
     Page<InvestmentVehicle> viewAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException;
 
-    InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility) throws MeedlException;
+    InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, List<String> financierIds) throws MeedlException;
 }
