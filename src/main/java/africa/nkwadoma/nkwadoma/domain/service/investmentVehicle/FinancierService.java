@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseC
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
@@ -49,6 +50,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase FinancierEmailUseCase;
+    private final NextOfKinOutputPort nextOfKinOutputPort;
     private final FinancierMapper financierMapper;
 
 
@@ -279,12 +281,11 @@ public class FinancierService implements FinancierUseCase {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getId());
         if (foundFinancier.getIndividual().getNextOfKin() == null){
             NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
-            nextOfKin.setFirstName(financier.getIndividual().getFirstName());
-            nextOfKin.setLastName(financier.getIndividual().getLastName());
-            UserIdentity userIdentity = financier.getIndividual();
-            userIdentity.setNextOfKin(nextOfKin);
-            foundFinancier.setIndividual(userIdentity);
-            foundFinancier.setAccreditationStatus(AccreditationStatus.VERIFIED);
+            NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
+            foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
+            financierOutputPort.completeKyc();
+        }else {
+            throw new MeedlException("Kyc already done.");
         }
 
 

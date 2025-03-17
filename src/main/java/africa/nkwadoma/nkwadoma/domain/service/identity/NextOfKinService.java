@@ -4,7 +4,6 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -21,7 +20,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class NextOfKinService implements CreateNextOfKinUseCase {
-    private final NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private final NextOfKinOutputPort nextOfKinIdentityOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final UserIdentityMapper userIdentityMapper;

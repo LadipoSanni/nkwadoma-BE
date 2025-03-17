@@ -27,7 +27,7 @@ class NextOfKinServiceTest {
     @InjectMocks
     private NextOfKinService nextOfKinService;
     @Mock
-    NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    NextOfKinOutputPort nextOfKinOutputPort;
     @Mock
     private LoaneeOutputPort loaneeOutputPort;
     @Mock
@@ -68,11 +68,11 @@ class NextOfKinServiceTest {
     void saveAdditionalDetails() {
         try {
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             NextOfKin savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
 
             assertNotNull(savedNextOfKin);
-            verify(nextOfKinIdentityOutputPort, times(1)).save(nextOfKin);
+            verify(nextOfKinOutputPort, times(1)).save(nextOfKin);
             assertEquals(nextOfKin.getFirstName(), savedNextOfKin.getFirstName());
             assertEquals(nextOfKin.getLastName(), savedNextOfKin.getLastName());
             assertEquals(nextOfKin.getEmail(), savedNextOfKin.getEmail());
@@ -97,7 +97,7 @@ class NextOfKinServiceTest {
             nextOfKin.setFirstName(firstName);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
             when(userIdentityOutputPort.save(any())).thenReturn(userIdentity);
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -112,7 +112,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setFirstName(lastName);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -127,7 +127,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setPhoneNumber(phoneNumber);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -142,7 +142,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setEmail(email);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -157,7 +157,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setContactAddress(contactAddress);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -172,7 +172,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.setNextOfKinRelationship(nextOfKinRelationship);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -187,7 +187,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternateEmail(alternateEmail);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -202,7 +202,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternatePhoneNumber(alternatePhoneNumber);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);
@@ -217,7 +217,7 @@ class NextOfKinServiceTest {
         try {
             nextOfKin.getLoanee().getUserIdentity().setAlternateContactAddress(alternateContactAddress);
             when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+            when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
         } catch (MeedlException e) {
             log.error("Failed to save next of kin", e);

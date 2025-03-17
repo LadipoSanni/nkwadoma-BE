@@ -57,7 +57,7 @@ class LoanAdapterTest {
     @Autowired
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     @Autowired
-    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private NextOfKinOutputPort nextOfKinIdentityOutputPort;
     private Loan loan;
     private LoaneeLoanAccount loaneeLoanAccount;
     private String savedLoanId;

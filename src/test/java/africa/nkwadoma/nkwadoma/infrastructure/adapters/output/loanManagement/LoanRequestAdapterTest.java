@@ -68,7 +68,7 @@ class LoanRequestAdapterTest {
     @Autowired
     private LoanRequestRepository loanRequestRepository;
     @Autowired
-    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private NextOfKinOutputPort nextOfKinOutputPort;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
@@ -210,7 +210,7 @@ class LoanRequestAdapterTest {
             loaneeLoanDetailId = loanee.getLoaneeLoanDetail().getId();
 
             nextOfKin = TestData.createNextOfKinData(loanee);
-            NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();
             log.info("Next of kin with id {} saved in test, with email {}", nextOfKinId, savedNextOfKin.getEmail());
@@ -434,7 +434,7 @@ class LoanRequestAdapterTest {
     @AfterAll
     void cleanUp() {
         try {
-            nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
+            nextOfKinOutputPort.deleteNextOfKin(nextOfKinId);
             loanReferralOutputPort.deleteLoanReferral(loanReferralId);
             loaneeLoanBreakDownOutputPort.deleteAll(loaneeLoanBreakdowns);
             loaneeOutputPort.deleteLoanee(loaneeId);

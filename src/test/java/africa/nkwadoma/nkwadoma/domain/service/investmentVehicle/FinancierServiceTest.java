@@ -58,8 +58,6 @@ public class FinancierServiceTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     @Autowired
-    private BankDetailOutputPort bankDetailOutputPort;
-    @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
@@ -254,7 +252,7 @@ public class FinancierServiceTest {
             assertEquals(AccreditationStatus.UNVERIFIED ,foundFinancier.getAccreditationStatus());
             log.info("financier found accreditation status  -------------> {}", foundFinancier.getAccreditationStatus());
             assertNull(foundFinancier.getIndividual().getNextOfKin());
-            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, bankDetailOutputPort.save(bankDetail));
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, bankDetail);
             financierUpdated = financierUseCase.completeKyc(financierWithKycRequest);
             log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
 
