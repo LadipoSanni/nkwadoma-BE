@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface FinancierUseCase {
-    String inviteFinancier(Financier financier) throws MeedlException;
+    String inviteFinancier(List<Financier> financier) throws MeedlException;
 
     Financier viewFinancierDetail(String financierId) throws MeedlException;
 
