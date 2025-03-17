@@ -15,11 +15,12 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CompleteKycRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 
 import java.math.BigDecimal;
@@ -208,19 +209,15 @@ public class TestData {
         return loanRequest;
     }
 
-    public static CompleteKycRequest completeKycRequest(String email){
-        CompleteKycRequest completeKycRequest = new CompleteKycRequest();
-        completeKycRequest.setFinancierEmail(email);
-        completeKycRequest.setBankName("Meedl Bank");
-        completeKycRequest.setBankNumber("1234567890");
-        completeKycRequest.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
-        completeKycRequest.setNin("2025103002");
-        completeKycRequest.setTaxId("00000122");
-        completeKycRequest.setNextOfKinFirstName("Harry");
-        completeKycRequest.setNextOfKinLastName("Potter");
-        completeKycRequest.setNextOfKinContactAddress("123 Main Street");
-        completeKycRequest.setFinancierEmail("Financier Email");
-        return completeKycRequest;
+    public static Financier completeKycRequest(Financier financier){
+        financier.setBankDetail(new BankDetail());
+        financier.getBankDetail().setBankAccountName("Meedl Bank");
+        financier.getBankDetail().setBankAccountNumber("1234567890");
+        financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
+        financier.setNin("2025103002");
+        financier.setTaxId("00000122");
+        financier.getIndividual().setNextOfKin(createNextOfKinData(null));
+        return financier;
     }
     
 
@@ -241,6 +238,7 @@ public class TestData {
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
                 .invitedBy(testId)
+                .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();

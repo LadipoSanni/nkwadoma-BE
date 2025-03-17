@@ -4,11 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Financ
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CompleteKycRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.education.CohortResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CompleteKycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
@@ -16,7 +15,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstan
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.pqc.jcajce.provider.Kyber;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
-import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_EDITED_SUCCESSFULLY;
 
 @Slf4j
 @RestController
@@ -57,8 +54,8 @@ public class FinancierController {
 
     @GetMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody CompleteKycRequest completeKycRequest) throws MeedlException {
-        Financier financier = financierRestMapper.map(completeKycRequest);
+    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
+        Financier financier = financierRestMapper.map(kycRequest);
         financier = financierUseCase.completeKyc(financier);
 
         CompleteKycResponse completeKycResponse = financierRestMapper.mapToFinancierResponse(financier);

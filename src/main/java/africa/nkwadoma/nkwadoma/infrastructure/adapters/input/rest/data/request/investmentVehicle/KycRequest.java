@@ -1,6 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.identity.NextOfKinRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -11,7 +10,7 @@ import lombok.*;
 @Builder
 @ToString
 @NoArgsConstructor
-public class CompleteKycRequest {
+public class KycRequest {
     @NotBlank(message= "Bank name is required")
     private String bankName;
     @NotBlank(message = "Bank number is required")

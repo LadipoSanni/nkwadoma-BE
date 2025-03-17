@@ -1,20 +1,11 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.CompleteKycRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
@@ -25,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,17 +68,12 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public Financier completeKyc(CompleteKycRequest completeKycRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(completeKycRequest, "Kyc request cannot be empty");
-        Optional<FinancierEntity> financier = financierRepository.findByEmail(completeKycRequest.getFinancierEmail());
-
-        if(financier.isPresent()){
-            financier.get().setBankAccountName(completeKycRequest.getBankName());
-            financier.get().setBankAccountNumber(completeKycRequest.getBankNumber());
-
-            financierRepository.save(financier.get());
-        }
-        return null;
+    public Financier completeKyc(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        financier.validate();
+        financier.validateKyc();
+        FinancierEntity financierEntity = financierRepository.save(financierMapper.map(financier));
+        return financierMapper.map(financierEntity);
     }
 
     @Override

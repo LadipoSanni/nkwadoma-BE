@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +49,7 @@ class FinancierAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
 
-    @BeforeEach
+    @BeforeAll
     void setUp(){
         userIdentity = TestData.createTestUserIdentity("financieremailadaptertest@mail.com");
         userIdentity.setRole(IdentityRole.FINANCIER);
@@ -62,7 +64,6 @@ class FinancierAdapterTest {
         investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         financier.setInvestmentVehicleId(investmentVehicle.getId());
-
     }
     private InvestmentVehicle createInvestmentVehicle(InvestmentVehicle investmentVehicle) {
         try {
@@ -274,25 +275,71 @@ class FinancierAdapterTest {
     }
 
     @Test
+    void completeIndividualKycWithoutFinancierObject(){
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(null));
+    }
+    @Test
+    void completeIndividualKycWithoutBankDetail(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.setBankDetail(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutAccountNumber(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.getBankDetail().setBankAccountNumber(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutAccountName(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.getBankDetail().setBankAccountName(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutTaxId(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.setTaxId(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeIndividualKycWithoutNin(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.setNin(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+    @Test
+    void completeKycWithoutNextOfKin(){
+        Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+        financierWithKycRequest.getIndividual().setNextOfKin(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
+    }
+
+    @Test
     @Order(8)
-    void completeKyc(){
-        try{
+    void completeKycIndividual() {
+        Financier financierUpdated = null;
+        try {
             Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+            assertNotNull(foundFinancier.getIndividual());
+            assertEquals(AccreditationStatus.UNVERIFIED ,foundFinancier.getAccreditationStatus());
+            log.info("financier found accreditation status  -------------> {}", foundFinancier.getAccreditationStatus());
             assertNull(financier.getIndividual().getNextOfKin());
-            financierOutputPort.completeKyc(TestData.completeKycRequest("kyc@gmail.com"));
-
-
-            log.info("-------------------foundFinancier--------->", foundFinancier.getAccreditationStatus());
-
-
-//            UserIdentity userIdentity1 = userIdentity.setNextOfKin();
-//            foundFinancier.setIndividual();
-            //            financierOutputPort.completeKYC(null);
-//            assertNotNull(financier.getIndividual().getNextOfKin());
+            Financier financierWithKycRequest = TestData.completeKycRequest(financier);
+            financierUpdated = financierOutputPort.completeKyc(financierWithKycRequest);
+            log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
 
         } catch (MeedlException e) {
             log.info("===================> " + e.getMessage());
         }
+        assertNotNull(financierUpdated);
+        assertEquals(AccreditationStatus.VERIFIED ,financierUpdated.getAccreditationStatus());
+        assertNotNull(financierUpdated.getIndividual().getNextOfKin());
+        assertNotNull(financierUpdated.getBankDetail());
+        assertNotNull(financierUpdated.getNin());
+        assertNotNull(financierUpdated.getTaxId());
+        assertNotNull(financierUpdated.getAddress());
+
     }
 
     @Test
