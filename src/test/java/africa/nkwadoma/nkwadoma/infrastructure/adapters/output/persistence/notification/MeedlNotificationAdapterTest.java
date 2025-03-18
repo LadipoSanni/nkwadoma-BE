@@ -246,29 +246,67 @@ public class MeedlNotificationAdapterTest {
     }
 
 
-    @Test
-    void deleteMultipleNotification(){
+//    @Test
+//    void deleteMultipleNotification(){
+//        try{
+//            MeedlNotification firstNotification = meedlNotificationOutputPort.save(meedlNotification);
+//            MeedlNotification secondNotification = meedlNotificationOutputPort.save(meedlNotification);
+//            firstNotificationId = firstNotification.getId();
+//            secondNotificationId = secondNotification.getId();
+//
+//            List<String> deleteNotificationList = new ArrayList<>();
+//            deleteNotificationList.add(firstNotificationId);
+//            deleteNotificationList.add(secondNotificationId);
+//            deleteNotificationList.add(meedlNotificationId);
+//
+//            MeedlNotification foundNotification = meedlNotificationOutputPort.findNotificationById(firstNotificationId);
+//            MeedlNotification meedlNotification = meedlNotificationOutputPort.findNotificationById(meedlNotificationId);
+//            assertNotNull(foundNotification);
+//            assertNotNull(meedlNotification);
+//            meedlNotificationOutputPort.deleteMultipleNotification(deleteNotificationList);
+//            assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(firstNotificationId));
+//            assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(secondNotificationId));
+//            assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(meedlNotificationId));
+//        } catch (MeedlException meedlException) {
+//            log.info(meedlException.getMessage());
+//        }
+//
+//    }
 
-        try{
+    @Test
+    void deleteMultipleNotification() {
+        try {
             MeedlNotification firstNotification = meedlNotificationOutputPort.save(meedlNotification);
             MeedlNotification secondNotification = meedlNotificationOutputPort.save(meedlNotification);
+
             firstNotificationId = firstNotification.getId();
             secondNotificationId = secondNotification.getId();
-            List<String> deleteNotificationList = Arrays.asList(firstNotificationId, secondNotificationId);
-            MeedlNotification foundNotification = meedlNotificationOutputPort.findNotificationById(firstNotificationId);
-            assertNotNull(foundNotification);
-            assertNotNull(secondNotification);
+
+            List<String> deleteNotificationList = new ArrayList<>();
+            deleteNotificationList.add(firstNotificationId);
+            deleteNotificationList.add(secondNotificationId);
+            deleteNotificationList.add(meedlNotificationId);
+
+            MeedlNotification foundFirstNotification = meedlNotificationOutputPort.findNotificationById(firstNotificationId);
+            MeedlNotification foundSecondNotification = meedlNotificationOutputPort.findNotificationById(secondNotificationId);
+            MeedlNotification foundMeedlNotification = meedlNotificationOutputPort.findNotificationById(meedlNotificationId);
+
+            assertNotNull(foundFirstNotification, "First notification should exist before deletion");
+            assertNotNull(foundSecondNotification, "Second notification should exist before deletion");
+            assertNotNull(foundMeedlNotification, "Notification created in setUp should exist before deletion");
+
             meedlNotificationOutputPort.deleteMultipleNotification(deleteNotificationList);
+
+            assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.findNotificationById(firstNotificationId), "First notification should be deleted");
+            assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.findNotificationById(secondNotificationId), "Second notification should be deleted");
+            assertThrows(MeedlException.class, () -> meedlNotificationOutputPort.findNotificationById(meedlNotificationId), "Notification created in setUp should be deleted");
         } catch (MeedlException meedlException) {
             log.info(meedlException.getMessage());
         }
-        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(firstNotificationId));
-        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(secondNotificationId));
     }
 
     @AfterAll
     void cleanUp() throws MeedlException {
-        meedlNotificationOutputPort.deleteNotification(meedlNotificationId);
         userIdentityOutputPort.deleteUserById(userId);
     }
 }
