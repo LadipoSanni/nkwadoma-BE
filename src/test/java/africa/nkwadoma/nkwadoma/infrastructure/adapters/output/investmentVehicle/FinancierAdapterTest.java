@@ -347,7 +347,7 @@ class FinancierAdapterTest {
             log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
 
         } catch (MeedlException e) {
-            log.info("===================> " + e.getMessage());
+            log.info("===================> {}",  e.getMessage(), e);
         }
         assertNotNull(financierUpdated);
         assertEquals(AccreditationStatus.VERIFIED ,financierUpdated.getAccreditationStatus());

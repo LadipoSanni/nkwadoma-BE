@@ -207,12 +207,13 @@ public class TestData {
 
     public static Financier completeKycRequest(Financier financier, BankDetail bankDetail){
         financier.setBankDetail(bankDetail);
+        financier.setFinancierType(FinancierType.INDIVIDUAL);
         financier.getBankDetail().setAccountName("Meedl Bank");
         financier.getBankDetail().setAccountNumber("1234567890");
         financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
         financier.setNin("2025103002");
         financier.setTaxId("00000122");
-        financier.getIndividual().setNextOfKin(createNextOfKinData(null));
+        financier.getIndividual().setNextOfKin(createNextOfKinData(financier.getIndividual()));
         return financier;
     }
 
@@ -295,15 +296,17 @@ public class TestData {
                 .currency("NGN").build();
     }
 
-    public static NextOfKin createNextOfKinData(Loanee loanee) {
+    public static NextOfKin createNextOfKinData(UserIdentity userIdentity) {
         NextOfKin nextOfKin = new NextOfKin();
+        nextOfKin.setUserIdentity(userIdentity);
+        nextOfKin.setUserId(userIdentity.getId());
         nextOfKin.setFirstName("Ahmad");
         nextOfKin.setLastName("Awwal");
         nextOfKin.setEmail("ahmad12@gmail.com");
         nextOfKin.setPhoneNumber("0785678901");
         nextOfKin.setNextOfKinRelationship("Brother");
         nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-        nextOfKin.setLoanee(loanee);
+
         return nextOfKin;
     }
 

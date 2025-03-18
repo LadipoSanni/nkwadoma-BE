@@ -25,10 +25,8 @@ public class NextOfKinAdapter implements NextOfKinOutputPort {
 
     @Override
     public NextOfKin save(NextOfKin nextOfKin) throws MeedlException {
-        if (ObjectUtils.isEmpty(nextOfKin)) {
-            throw new IdentityException(IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
-        }
-        MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity(), IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateObjectInstance(nextOfKin, IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
+        nextOfKin.validate();
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);
         return nextOfKinMapper.toNextOfKin(savedNextOfKinEntity);
@@ -55,9 +53,10 @@ public class NextOfKinAdapter implements NextOfKinOutputPort {
     }
 
     @Override
-    public Optional<NextOfKin> findByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
-        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByLoaneeEntityId(loaneeId);
+    public Optional<NextOfKin> findByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByUserId(userId);
+        log.info("Found nextOfKin optional {}", nextOfKinEntity.isPresent());
         return nextOfKinEntity.map(nextOfKinMapper::toNextOfKin);
     }
 }

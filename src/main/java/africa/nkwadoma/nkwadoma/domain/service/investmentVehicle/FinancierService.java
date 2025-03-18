@@ -318,6 +318,7 @@ public class FinancierService implements FinancierUseCase {
         }
 
 
+
         return foundFinancier;
     }
 
