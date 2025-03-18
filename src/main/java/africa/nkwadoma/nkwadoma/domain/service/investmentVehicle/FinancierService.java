@@ -308,12 +308,14 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
         if (foundFinancier.getIndividual().getNextOfKin() == null){
+            log.info("Financier found in service to complete kyc {}", foundFinancier);
             NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
             nextOfKin.setUserId(foundFinancier.getIndividual().getId());
             NextOfKin savedNextOfKin = nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
             foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
             financierOutputPort.completeKyc(foundFinancier);
         }else {
+            log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
 

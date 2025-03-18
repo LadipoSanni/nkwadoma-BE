@@ -255,7 +255,7 @@ public class FinancierServiceTest {
             log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
             assertNull(foundFinancier.getIndividual().getNextOfKin());
             Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, bankDetail);
-            log.info("financier before completing kyc individual : {}", financierWithKycRequest);
+            log.info("Financier before completing kyc individual : {}", financierWithKycRequest);
             financierUpdated = financierUseCase.completeKyc(financierWithKycRequest);
             log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
 

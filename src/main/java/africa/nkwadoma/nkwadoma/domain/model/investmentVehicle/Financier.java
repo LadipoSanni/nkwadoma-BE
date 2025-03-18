@@ -25,9 +25,9 @@ import java.util.Set;
 public class Financier {
     private String id;
     private String organizationName;
+    private FinancierType financierType;
     private UserIdentity individual;
     private String invitedBy;
-    private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
