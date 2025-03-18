@@ -23,38 +23,30 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
     private final NextOfKinOutputPort nextOfKinOutputPort;
     private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
-    private final UserIdentityMapper userIdentityMapper;
 
     @Override
     public NextOfKin saveAdditionalDetails(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin, "Next of kin cannot be empty.");
         nextOfKin.validate();
-        trimSpaceForUserIdentity(nextOfKin.getLoanee());
-        Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId()).
+
+        Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getUserIdentity().getId()).
                 orElseThrow(()-> new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage()));
-        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByLoaneeId(foundLoanee.getId());
+        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundLoanee.getUserIdentity().getId());
         if (foundNextOfKin.isPresent()) {
             throw new MeedlException(IdentityMessages.LOANEE_HAS_NEXT_OF_KIN.getMessage());
         }
-        foundLoanee = updateLoanee(nextOfKin, foundLoanee);
-        nextOfKin.setLoanee(foundLoanee);
-        return nextOfKinOutputPort.save(nextOfKin);
+        nextOfKin.setUserIdentity(foundLoanee.getUserIdentity());
+        NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
+        log.info("Saved next of kin: {}", savedNextOfKin);
+        updateUserNextOfKinDetails(foundLoanee.getUserIdentity(), savedNextOfKin);
+        return savedNextOfKin;
     }
 
-    private Loanee updateLoanee(NextOfKin nextOfKin, Loanee foundLoanee) throws MeedlException {
-//        UserIdentity userIdentity = userIdentityMapper.updateUser(nextOfKin.getLoanee().getUserIdentity(), foundLoanee.getUserIdentity());
-//        userIdentity = userIdentityOutputPort.save(userIdentity);
-//        log.info("Updated User identity: {}", userIdentity);
-//        foundLoanee.setUserIdentity(userIdentity);
-//        foundLoanee = loaneeOutputPort.save(foundLoanee);
-        return foundLoanee;
+    private void updateUserNextOfKinDetails(UserIdentity userIdentity, NextOfKin savedNextOfKin) throws MeedlException {
+        log.info("Updating next of kin for user : {}", userIdentity);
+        userIdentity.setNextOfKin(savedNextOfKin);
+        log.info("Next of kin before being updated on user db {}", userIdentity.getNextOfKin());
+        userIdentityOutputPort.save(userIdentity);
     }
 
-    private void trimSpaceForUserIdentity(Loanee loanee) {
-        if (ObjectUtils.isNotEmpty(loanee)) {
-            loanee.getUserIdentity().setAlternateContactAddress(loanee.getUserIdentity().getAlternateContactAddress().trim());
-            loanee.getUserIdentity().setAlternatePhoneNumber(loanee.getUserIdentity().getAlternatePhoneNumber().trim());
-            loanee.getUserIdentity().setAlternateEmail(loanee.getUserIdentity().getAlternateEmail().trim());
-        }
-    }
 }

@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
@@ -131,6 +132,10 @@ public class BeanConfiguration {
         return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
         ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,
                 organizationIdentityOutputPort);
+    }
+    @Bean
+    public StringTrimMapper stringTrimMapper() {
+        return new StringTrimMapper();
     }
 
     @Bean

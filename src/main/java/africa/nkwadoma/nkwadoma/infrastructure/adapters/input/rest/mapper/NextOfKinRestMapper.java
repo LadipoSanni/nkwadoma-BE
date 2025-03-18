@@ -5,12 +5,19 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.*;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = DurationTypeMapper.class)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = {DurationTypeMapper.class, StringTrimMapper.class})
 public interface NextOfKinRestMapper {
-    @Mapping(source = "alternateEmail", target = "loanee.userIdentity.alternateEmail")
-    @Mapping(source = "alternatePhoneNumber", target = "loanee.userIdentity.alternatePhoneNumber")
-    @Mapping(source = "alternateContactAddress", target = "loanee.userIdentity.alternateContactAddress")
-    NextOfKin toNextOfKin(NextOfKinRequest nextOfKinRequest);
+    @Mapping(target = "firstName", qualifiedByName = "trimString")
+    @Mapping(target = "lastName", qualifiedByName = "trimString")
+    @Mapping(target = "email", qualifiedByName = "trimString")
+    @Mapping(target = "phoneNumber", qualifiedByName = "trimString")
+    @Mapping(target = "nextOfKinRelationship", qualifiedByName = "trimString")
+    @Mapping(target = "contactAddress", qualifiedByName = "trimString")
+    @Mapping(target = "alternateContactAddress", qualifiedByName = "trimString")
+    @Mapping(target = "alternatePhoneNumber", qualifiedByName = "trimString")
+    @Mapping(target = "alternateEmail", qualifiedByName = "trimString")
+    @Mapping(source = "userId", target = "userIdentity.id")
+    NextOfKin toNextOfKin(NextOfKinRequest nextOfKinRequest, String userId);
 
     NextOfKinResponse toNextOfKinResponse(NextOfKin nextOfKin);
 }

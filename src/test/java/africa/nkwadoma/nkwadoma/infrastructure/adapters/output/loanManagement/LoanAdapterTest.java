@@ -158,7 +158,7 @@ class LoanAdapterTest {
             loaneeId = loanee.getId();
 
 
-            nextOfKin = TestData.createNextOfKinData(loanee);
+            nextOfKin = TestData.createNextOfKinData(userIdentity);
             NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();
