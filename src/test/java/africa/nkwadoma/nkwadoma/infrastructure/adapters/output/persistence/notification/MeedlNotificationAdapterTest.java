@@ -247,7 +247,9 @@ public class MeedlNotificationAdapterTest {
     @Test
     void deleteMultipleNotification(){
         try{
+            log.info("----------In the beginning-------->", meedlNotification);
             meedlNotification = TestData.createNotification(userIdentity);
+            log.info("----------In the Middle-------->", meedlNotification);
             MeedlNotification firstNotification = meedlNotificationOutputPort.save(meedlNotification);
             MeedlNotification secondNotification = meedlNotificationOutputPort.save(meedlNotification);
 
