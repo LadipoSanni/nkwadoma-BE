@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.loan;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 import org.apache.commons.lang3.*;
@@ -20,7 +21,11 @@ public class NextOfKin {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
-    private Loanee loanee;
+    private UserIdentity userIdentity;
+    private String userId;
+    private String alternateContactAddress;
+    private String alternatePhoneNumber;
+    private String alternateEmail;
 
     public void validate() throws MeedlException {
         String nextOfKin = "Next of kin ";
@@ -29,10 +34,7 @@ public class NextOfKin {
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
         MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternateContactAddress(), nextOfKin.concat("alternate contact address is required"));
-        MeedlValidator.validateDataElement(loanee.getUserIdentity().getAlternatePhoneNumber(), nextOfKin.concat("alternate phone number is required"));
-        MeedlValidator.validateEmail(loanee.getUserIdentity().getAlternateEmail());
-        MeedlValidator.validateUUID(loanee.getUserIdentity().getId(), UserMessages.INVALID_USER_ID.getMessage());
+
     }
 
     public void setFirstName(String firstName) {

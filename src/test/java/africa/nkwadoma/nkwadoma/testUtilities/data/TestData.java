@@ -278,15 +278,17 @@ public class TestData {
                 .currency("NGN").build();
     }
 
-    public static NextOfKin createNextOfKinData(Loanee loanee) {
+    public static NextOfKin createNextOfKinData(UserIdentity userIdentity) {
         NextOfKin nextOfKin = new NextOfKin();
+        nextOfKin.setUserIdentity(userIdentity);
+        nextOfKin.setUserId(userIdentity.getId());
         nextOfKin.setFirstName("Ahmad");
         nextOfKin.setLastName("Awwal");
         nextOfKin.setEmail("ahmad12@gmail.com");
         nextOfKin.setPhoneNumber("0785678901");
         nextOfKin.setNextOfKinRelationship("Brother");
         nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-        nextOfKin.setLoanee(loanee);
+
         return nextOfKin;
     }
 
