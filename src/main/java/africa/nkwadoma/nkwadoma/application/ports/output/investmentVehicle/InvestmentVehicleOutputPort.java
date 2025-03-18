@@ -7,8 +7,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
-import java.util.List;
-
 public interface InvestmentVehicleOutputPort {
     InvestmentVehicle save(InvestmentVehicle capitalGrowth) throws MeedlException;
 
@@ -20,7 +18,7 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException;
 
-    List<InvestmentVehicle>  searchInvestmentVehicle(String  name) throws MeedlException;
+    Page<InvestmentVehicle> searchInvestmentVehicle(String  name, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 

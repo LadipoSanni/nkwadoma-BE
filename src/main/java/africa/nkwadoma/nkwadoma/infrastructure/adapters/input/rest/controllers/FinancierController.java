@@ -43,7 +43,7 @@ public class FinancierController {
         financier.setIndividual(financierRequest.getIndividual());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
-        String message = financierUseCase.inviteFinancier(financier);
+        String message = financierUseCase.inviteFinancier(List.of(financier));
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .message(message)

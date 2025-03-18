@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
@@ -68,7 +67,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validateObjectInstance(type, INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleType(type, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -78,7 +77,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validateObjectInstance(investmentVehicleStatus, INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by("lastUpdatedDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleStatus(investmentVehicleStatus, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -90,7 +89,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validateObjectInstance(type, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
 
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleTypeAndStatus(type, status, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -99,7 +98,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Sort sort = Sort.by("createdDate").descending();
+        if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
+                 sort = Sort.by("lastUpdatedDate").descending();
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -110,7 +113,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
         MeedlValidator.validateObjectInstance(fundRaisingStatus, "Investment vehicle fundRaising Status cannot be empty or null");
 
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("startDate").descending());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findByInvestmentVehicleByFundRaisingStatus(fundRaisingStatus, pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -124,11 +127,14 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public List<InvestmentVehicle> searchInvestmentVehicle(String name) throws MeedlException {
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicleType investmentVehicleType,
+                                                           int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
-        List<InvestmentVehicleEntity> investmentVehicles =
-                investmentVehicleRepository.findAllByNameContainingIgnoreCase(name);
-        return investmentVehicles.stream().map(investmentVehicleMapper::toInvestmentVehicle).collect(Collectors.toList());
+        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicles =
+                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleType(name,investmentVehicleType ,pageRequest);
+        return investmentVehicles.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
 

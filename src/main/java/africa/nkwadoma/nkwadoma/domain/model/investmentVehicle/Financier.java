@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
@@ -26,6 +27,7 @@ public class Financier {
     private String organizationName;
     private UserIdentity individual;
     private String invitedBy;
+    private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
@@ -37,7 +39,7 @@ public class Financier {
     private int pageNumber;
     private int pageSize;
 
-    public void validateUserIdentity() throws MeedlException {
+    private void validateUserIdentity() throws MeedlException {
             validateIndividualEmail(individual);
             MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
             MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
@@ -55,8 +57,17 @@ public class Financier {
     }
 
     public void validate() throws MeedlException {
-        validateUserIdentity();
-        MeedlValidator.validateUUID(invitedBy, "Valid user id performing this action is required");
+        MeedlValidator.validateObjectInstance(this.financierType, "Please specify if financier is individual or cooperate.");
+        MeedlValidator.validateUUID(invitedBy, "Valid user identification for user performing this action is required");
+        if (this.financierType == FinancierType.INDIVIDUAL){
+            validateUserIdentity();
+        }else{
+            validateCooperation();
+        }
+    }
+
+    private void validateCooperation() {
+
     }
 
     public void validateKyc() throws MeedlException {

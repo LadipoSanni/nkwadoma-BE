@@ -7,6 +7,8 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
@@ -115,8 +117,10 @@ public class BeanConfiguration {
 
     @Bean
     public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort,
-                                                             InvestmentVehicleMapper investmentVehicleMapper){
-        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper);
+                                                             InvestmentVehicleMapper investmentVehicleMapper,
+                                                             FinancierOutputPort financierOutputPort,
+                                                             InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort){
+        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,financierOutputPort,investmentVehicleFinancierOutputPort);
     }
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
