@@ -31,6 +31,7 @@ public class InvestmentVehicleResponse {
     private BigDecimal totalIncomeGenerated;
     private BigDecimal netAssetValue;
     private LocalDate startDate;
+    private LocalDate createdDate;
     private String investmentVehicleLink;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private BigDecimal minimumInvestmentAmount;

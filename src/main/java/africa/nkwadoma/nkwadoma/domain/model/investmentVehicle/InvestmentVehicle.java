@@ -38,6 +38,7 @@ public class InvestmentVehicle {
     private String sponsors;
     private BigDecimal totalAvailableAmount;
     private BigDecimal minimumInvestmentAmount;
+    private LocalDate createdDate;
     private LocalDate startDate;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
@@ -68,7 +69,7 @@ public class InvestmentVehicle {
 
     public void setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
-        setStartDate(LocalDate.now());
+        setCreatedDate(LocalDate.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         setTotalAvailableAmount(size);
     }

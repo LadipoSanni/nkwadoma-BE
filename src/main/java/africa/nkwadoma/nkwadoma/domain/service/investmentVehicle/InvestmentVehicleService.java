@@ -46,6 +46,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         if (ObjectUtils.isNotEmpty(investmentVehicle.getId())){
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
+        investmentVehicle.setCreatedDate(LocalDate.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
