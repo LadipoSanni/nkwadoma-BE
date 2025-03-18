@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -157,6 +158,33 @@ public class FinancierServiceTest {
         financier.setInvitedBy(invitedBy);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
+
+    @Test
+    @Order(2)
+    void investInVehicle() {
+        financier.setInvestmentAmount(new BigDecimal("1000"));
+        financier.setId(financierId);
+        Financier financierThatHasInvested = null;
+        InvestmentVehicle investmentVehicle = null;
+        try {
+            investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
+            log.info("======Investment Vehicle Before Investment -------> {}", initialAmount);
+
+            financierThatHasInvested = financierUseCase.investInVehicle(financier);
+
+            InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
+            log.info("======Investment Vehicle After Investment -------> {}", currentAmount);
+
+            assertEquals(initialAmount.add(financierThatHasInvested.getInvestmentAmount()), currentAmount,
+                    "The total available amount should be updated correctly");
+
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     public void inviteFinancierWithNullInvestmentVehicleFinancier() {
         assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(List.of()));
@@ -184,7 +212,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
     @Test
-    @Order(2)
+    @Order(3)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -198,7 +226,7 @@ public class FinancierServiceTest {
         assertFalse(financiers.isEmpty());
     }
     @Test
-    @Order(3)
+    @Order(4)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
@@ -215,7 +243,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId));
     }
     @Test
-    @Order(4)
+    @Order(5)
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         financier.setInvestmentVehicleId(investmentVehicleId);
@@ -250,7 +278,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
     @Test
-    @Order(3)
+    @Order(6)
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
@@ -274,7 +302,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, null, pageRequest));
     }
     @Test
-    @Order(5)
+    @Order(7)
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -340,7 +368,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
     }
     @Test
-    @Order(6)
+    @Order(8)
     void searchFinancierByFirstName()  {
         List<Financier> foundFinanciers = null;
         try {
@@ -353,7 +381,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(7)
+    @Order(9)
     void searchFinancierByLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -367,7 +395,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(8)
+    @Order(10)
     void searchFinancierWithFirstNameBeforeLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -380,7 +408,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(9)
+    @Order(11)
     void searchFinancierWithLastNameBeforeFirstName() {
         List<Financier> foundFinanciers;
         try {

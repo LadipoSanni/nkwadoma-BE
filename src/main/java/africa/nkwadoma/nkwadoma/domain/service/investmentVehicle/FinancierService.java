@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -294,6 +295,18 @@ public class FinancierService implements FinancierUseCase {
                 log.error("Failed to find Financier when attempting to update Financier status for user with id {}", financier.getIndividual().getId(), e);
             }
         }
+    }
+
+    @Override
+    public Financier investInVehicle(Financier financier) throws MeedlException {
+        InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId() ,financier.getId())
+                .orElseThrow(()-> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
+        InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+        BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
+        BigDecimal newAmount = currentAmount.add(financier.getInvestmentAmount());
+        investmentVehicle.setTotalAvailableAmount(newAmount);
+        investmentVehicleOutputPort.save(investmentVehicle);
+        return financier;
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {

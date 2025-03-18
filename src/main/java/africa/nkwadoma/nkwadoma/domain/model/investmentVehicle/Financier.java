@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ public class Financier {
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private String investmentVehicleId;
+    private BigDecimal investmentAmount;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;
