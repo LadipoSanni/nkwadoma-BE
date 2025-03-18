@@ -159,7 +159,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     @Override
     public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
                                                             List<String> financierIds) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
@@ -173,7 +173,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             }
         }
-        return investmentVehicle;
+        return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
 
