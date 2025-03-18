@@ -64,5 +64,6 @@ public class InvestmentVehicleEntity {
     @OneToOne
     private BankAccountEntity syncingAccount;
     private LocalDate lastUpdatedDate;
+    @Enumerated(EnumType.STRING)
     private InvestmentVehicleVisibility investmentVehicleVisibility;
 }
