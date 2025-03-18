@@ -27,13 +27,8 @@ class NextOfKinAdapterTest {
     private NextOfKinOutputPort nextOfKinOutputPort;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
-    @Autowired
-    private LoaneeOutputPort loaneeOutputPort;
-    @Autowired
-    private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private NextOfKin nextOfKin;
     private UserIdentity userIdentity;
-    private String loaneeLoanDetailId;
     private String userId;
 
     @BeforeAll
@@ -98,10 +93,7 @@ class NextOfKinAdapterTest {
             NextOfKin foundNextOfKin = nextOfKinOutputPort.findByEmail(nextOfKin.getEmail());
             userIdentityOutputPort.deleteUserByEmail(userIdentity.getEmail());
             nextOfKinOutputPort.deleteNextOfKin(foundNextOfKin.getId());
-            Loanee foundLoanee = loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail());
-            loaneeLoanDetailId = foundLoanee.getLoaneeLoanDetail().getId();
-            loaneeOutputPort.deleteLoanee(foundLoanee.getId());
-            loaneeLoanDetailsOutputPort.delete(loaneeLoanDetailId);
+
         } catch (MeedlException e) {
             log.error("Error deleting details", e);
         }
