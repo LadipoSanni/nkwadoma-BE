@@ -162,14 +162,17 @@ public class FinancierServiceTest {
     @Test
     @Order(2)
     void investInVehicle() {
-        financier.setInvestmentAmount(new BigDecimal("1000"));
+        financier.setInvestmentAmount(new BigDecimal("1000.00"));
         financier.setId(financierId);
         Financier financierThatHasInvested = null;
         InvestmentVehicle investmentVehicle = null;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            if (investmentVehicle.getTotalAvailableAmount() == null) {
+                investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
+            }
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-            log.info("======Investment Vehicle Before Investment -------> {}", initialAmount);
+            log.info("======Investment Vehicle Before Investment -------> {} ---- -- {}", initialAmount, investmentVehicle.getInvestmentVehicleStatus());
 
             financierThatHasInvested = financierUseCase.investInVehicle(financier);
 

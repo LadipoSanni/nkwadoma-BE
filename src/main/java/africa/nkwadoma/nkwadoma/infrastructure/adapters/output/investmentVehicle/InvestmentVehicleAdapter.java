@@ -36,13 +36,15 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle, INVESTMENT_VEHICLE_CANNOT_BE_NULL.getMessage());
+        log.info("Investment vehicle at the adapter level before being seved {}", investmentVehicle);
         if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
                 investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
             investmentVehicle.validateDraft();
+            log.info("saving vehicle size as available amount for draft {}", investmentVehicle.getTotalAvailableAmount());
             return saveAndGetInvestmentVehicle(investmentVehicle);
         }
+
         investmentVehicle.validate();
-        investmentVehicle.setTotalAvailableAmount(investmentVehicle.getSize());
         log.info("saving vehicle size as available amount {}", investmentVehicle.getTotalAvailableAmount());
         return saveAndGetInvestmentVehicle(investmentVehicle);
     }
