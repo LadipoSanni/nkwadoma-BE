@@ -1,12 +1,17 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.InvestmentVehicleUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +42,28 @@ class InvestmentVehicleServiceTest {
     private InvestmentVehicleOutputPort outputPort;
     private int pageSize = 1;
     private int pageNumber = 0;
+    private Financier financier;
+    private UserIdentity userIdentity;
+    private String financierId;
+    @Autowired
+    private FinancierOutputPort financierOutputPort;
+    @Autowired
+    private UserIdentityOutputPort userIdentityOutputPort;
+    @Autowired
+    private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
 
-    @BeforeEach
+    @BeforeAll
     void setUp() {
         fundGrowth = TestData.buildInvestmentVehicle("Growth Investment limited");
+        userIdentity = TestData.createTestUserIdentity("iniestajnr12@gmail.com");
+        try {
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+            financier = TestData.buildFinancierIndividual(userIdentity);
+            financier = financierOutputPort.save(financier);
+            financierId = financier.getId();
+        }catch (MeedlException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Order(1)
@@ -165,6 +188,20 @@ class InvestmentVehicleServiceTest {
         assertEquals(InvestmentVehicleVisibility.PUBLIC,investmentVehicle.getInvestmentVehicleVisibility());
     }
 
+    @Order(8)
+    @Test
+    void setUpInvestmentVehicleVisibilityToPrivate(){
+        InvestmentVehicle investmentVehicle = null;
+        try {
+            investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(investmentId,
+                    InvestmentVehicleVisibility.PRIVATE,List.of(financier.getId()));
+        }catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(investmentVehicle);
+        assertEquals(InvestmentVehicleVisibility.PRIVATE,investmentVehicle.getInvestmentVehicleVisibility());
+    }
+
 
     @Test
     void viewAllInvestmentVehiclesByFundRaisingStatus(){
@@ -189,7 +226,9 @@ class InvestmentVehicleServiceTest {
     @AfterAll
     void cleanUp() {
         try {
+            investmentVehicleFinancierOutputPort.deleteByInvestmentVehicleIdAndFinancierId(investmentId,financierId);
             investmentVehicleUseCase.deleteInvestmentVehicle(investmentId);
+            financierOutputPort.delete(financier.getId());
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }

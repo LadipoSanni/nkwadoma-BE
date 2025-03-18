@@ -23,4 +23,7 @@ public interface InvestorInvestmentVehicleRepository extends JpaRepository<Inves
             @Param("investmentVehicleId") String investmentVehicleId,
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
-    );}
+    );
+
+    void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
+}
