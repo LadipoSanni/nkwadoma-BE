@@ -312,7 +312,7 @@ public class FinancierService implements FinancierUseCase {
 //            nextOfKin
             NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
-            financierOutputPort.completeKyc();
+//            financierOutputPort.completeKyc();
         }else {
             throw new MeedlException("Kyc already done.");
         }
