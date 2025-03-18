@@ -21,7 +21,6 @@ import java.util.*;
 @Slf4j
 public class NextOfKinService implements CreateNextOfKinUseCase {
     private final NextOfKinOutputPort nextOfKinOutputPort;
-    private final LoaneeOutputPort loaneeOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
@@ -29,16 +28,15 @@ public class NextOfKinService implements CreateNextOfKinUseCase {
         MeedlValidator.validateObjectInstance(nextOfKin, "Next of kin cannot be empty.");
         nextOfKin.validate();
 
-        Loanee foundLoanee = loaneeOutputPort.findByUserId(nextOfKin.getUserIdentity().getId()).
-                orElseThrow(()-> new MeedlException(IdentityMessages.LOANEE_NOT_FOUND.getMessage()));
-        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundLoanee.getUserIdentity().getId());
+        UserIdentity foundUserIdentity = userIdentityOutputPort.findById(nextOfKin.getUserIdentity().getId());
+        Optional<NextOfKin> foundNextOfKin = nextOfKinOutputPort.findByUserId(foundUserIdentity.getId());
         if (foundNextOfKin.isPresent()) {
-            throw new MeedlException(IdentityMessages.LOANEE_HAS_NEXT_OF_KIN.getMessage());
+            throw new MeedlException(IdentityMessages.USER_HAS_NEXT_OF_KIN.getMessage());
         }
-        nextOfKin.setUserIdentity(foundLoanee.getUserIdentity());
+        nextOfKin.setUserIdentity(foundUserIdentity);
         NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
         log.info("Saved next of kin: {}", savedNextOfKin);
-        updateUserNextOfKinDetails(foundLoanee.getUserIdentity(), savedNextOfKin);
+        updateUserNextOfKinDetails(foundUserIdentity, savedNextOfKin);
         return savedNextOfKin;
     }
 
