@@ -71,6 +71,7 @@ public class InvestmentVehicle {
         setStartDate(LocalDate.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         setTotalAvailableAmount(size);
+        setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
     }
 
     public void validateTenure(int tenure) throws MeedlException {

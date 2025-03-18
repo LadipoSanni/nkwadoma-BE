@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -70,5 +71,14 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateObjectInstance(activationStatus, "Please provide a valid activation status to find by.");
         Page<FinancierEntity> financiers = investorInvestmentVehicleRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
         return financiers.map(financierMapper::map);
+    }
+
+
+    @Transactional
+    @Override
+    public void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
+        investorInvestmentVehicleRepository.deleteByInvestmentVehicleIdAndFinancierId(investmentId, financierId);
     }
 }
