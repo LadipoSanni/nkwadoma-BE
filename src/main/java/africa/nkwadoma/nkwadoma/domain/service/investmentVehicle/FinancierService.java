@@ -1,10 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.NextOfKinUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
@@ -51,7 +51,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase FinancierEmailUseCase;
-    private final NextOfKinOutputPort nextOfKinOutputPort;
+    private final NextOfKinUseCase nextOfKinUseCase;
     private final FinancierMapper financierMapper;
 
 
@@ -306,13 +306,13 @@ public class FinancierService implements FinancierUseCase {
     public Financier completeKyc(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getId());
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
         if (foundFinancier.getIndividual().getNextOfKin() == null){
             NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
-//            nextOfKin
-            NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
+            nextOfKin.setUserId(foundFinancier.getIndividual().getId());
+            NextOfKin savedNextOfKin = nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
             foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
-//            financierOutputPort.completeKyc();
+            financierOutputPort.completeKyc(foundFinancier);
         }else {
             throw new MeedlException("Kyc already done.");
         }

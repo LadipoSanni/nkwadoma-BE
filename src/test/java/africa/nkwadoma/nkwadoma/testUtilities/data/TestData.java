@@ -298,12 +298,14 @@ public class TestData {
 
     public static NextOfKin createNextOfKinData(UserIdentity userIdentity) {
         NextOfKin nextOfKin = new NextOfKin();
-        nextOfKin.setUserIdentity(userIdentity);
         nextOfKin.setUserId(userIdentity.getId());
         nextOfKin.setFirstName("Ahmad");
         nextOfKin.setLastName("Awwal");
         nextOfKin.setEmail("ahmad12@gmail.com");
         nextOfKin.setPhoneNumber("0785678901");
+        nextOfKin.setAlternateContactAddress("alternate-contact-address filled");
+        nextOfKin.setAlternateEmail("alternatetest@email.com");
+        nextOfKin.setAlternatePhoneNumber("09098347384");
         nextOfKin.setNextOfKinRelationship("Brother");
         nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
 

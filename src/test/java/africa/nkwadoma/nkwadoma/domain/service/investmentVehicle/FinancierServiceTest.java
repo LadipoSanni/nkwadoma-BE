@@ -252,14 +252,15 @@ public class FinancierServiceTest {
             Financier foundFinancier = financierUseCase.viewFinancierDetail(financierId);
             assertNotNull(foundFinancier.getIndividual());
             assertEquals(AccreditationStatus.UNVERIFIED ,foundFinancier.getAccreditationStatus());
-            log.info("financier found accreditation status  -------------> {}", foundFinancier.getAccreditationStatus());
+            log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
             assertNull(foundFinancier.getIndividual().getNextOfKin());
             Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, bankDetail);
+            log.info("financier before completing kyc individual : {}", financierWithKycRequest);
             financierUpdated = financierUseCase.completeKyc(financierWithKycRequest);
             log.info("financier updated accreditation status -------------> {}", financierUpdated.getAccreditationStatus());
 
         } catch (MeedlException e) {
-            log.info("===================> " + e.getMessage());
+            log.info("===================> {}" , e.getMessage(), e);
         }
         assertNotNull(financierUpdated);
         assertEquals(AccreditationStatus.VERIFIED ,financierUpdated.getAccreditationStatus());
