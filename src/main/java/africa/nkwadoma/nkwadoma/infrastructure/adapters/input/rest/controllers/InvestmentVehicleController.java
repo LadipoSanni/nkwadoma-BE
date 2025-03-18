@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.*;
@@ -154,4 +155,18 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PostMapping("investment-vehicle/visibility")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> setUpVisibility(@RequestBody InvestmentVehicleVisibilityRequest vehicleVisibilityRequest) throws MeedlException {
+        InvestmentVehicle investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(vehicleVisibilityRequest.getInvestmentVehicleId(),
+                vehicleVisibilityRequest.getVisibility(),vehicleVisibilityRequest.getFinancierIds());
+        InvestmentVehicleResponse investmentVehicleResponse =
+                investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
+                .data(investmentVehicleResponse)
+                .message(INVESTMENT_VEHICLE_VISIBILITY_UPDATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

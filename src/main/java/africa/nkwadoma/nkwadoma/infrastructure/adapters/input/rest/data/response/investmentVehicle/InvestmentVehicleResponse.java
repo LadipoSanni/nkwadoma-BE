@@ -4,6 +4,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.james.mime4j.dom.datetime.DateTime;
@@ -40,4 +41,6 @@ public class InvestmentVehicleResponse {
     private String custodian;
     private String bankPartner;
     private LocalDate lastUpdatedDate;
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
+
 }
