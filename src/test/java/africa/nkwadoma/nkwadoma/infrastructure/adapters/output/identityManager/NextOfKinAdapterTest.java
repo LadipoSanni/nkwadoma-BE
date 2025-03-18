@@ -92,7 +92,7 @@ class NextOfKinAdapterTest {
         assertThrows(MeedlException.class, ()-> nextOfKinOutputPort.save(null));
     }
 
-//    @AfterAll
+    @AfterAll
     void tearDown() {
         try {
             NextOfKin foundNextOfKin = nextOfKinOutputPort.findByEmail(nextOfKin.getEmail());

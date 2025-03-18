@@ -12,7 +12,6 @@ public interface UserIdentityMapper {
     @Mapping(source = "nextOfKin", target = "nextOfKinEntity")
     UserEntity toUserEntity(UserIdentity userIdentity);
 
-//    @Mapping(source = "isIdentityVerified", target = "identityVerified")
     @Mapping(source = "firstName", target = "firstName")
     @Mapping(source = "nextOfKinEntity", target = "nextOfKin")
     UserIdentity toUserIdentity(UserEntity userEntity);

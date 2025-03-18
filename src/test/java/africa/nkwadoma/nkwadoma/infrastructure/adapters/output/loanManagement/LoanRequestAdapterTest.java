@@ -390,8 +390,7 @@ class LoanRequestAdapterTest {
 //            assertEquals("0785678901", userIdentity.getNextOfKin().getPhoneNumber());
 //            assertEquals("ahmad12@gmail.com", userIdentity.getNextOfKin().getEmail());
 //            assertEquals("Brother", userIdentity.getNextOfKin().getNextOfKinRelationship());
-//            assertEquals("2, Spencer Street, Yaba, Lagos", userIdentity.getNextOfKin().getContactAddress());
-
+//            assertEquals("2, Spencer Street, Yaba, Lagos", userIdentity.getNextOfKin().getContactAddress())
 
             assertEquals(joel.getGender(), foundLoanRequest.get().getUserIdentity().getGender());
             assertEquals(joel.getMaritalStatus(), foundLoanRequest.get().getUserIdentity().getMaritalStatus());
