@@ -309,6 +309,7 @@ public class FinancierService implements FinancierUseCase {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getId());
         if (foundFinancier.getIndividual().getNextOfKin() == null){
             NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
+            nextOfKin
             NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
             financierOutputPort.completeKyc();
