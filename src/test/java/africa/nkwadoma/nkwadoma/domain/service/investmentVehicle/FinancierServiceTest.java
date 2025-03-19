@@ -555,8 +555,8 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
         identityManagerOutputPort.deleteUser(userIdentity);
-        nextOfKinOutputPort.deleteNextOfKin(userIdentity.getNextOfKin().getId());
         userIdentityOutputPort.deleteUserById(userIdentityId);
+        nextOfKinOutputPort.deleteNextOfKin(userIdentity.getNextOfKin().getId());
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
     }

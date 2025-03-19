@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.identity.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.List;
 
@@ -32,7 +33,8 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public UserIdentity save(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         userIdentity.validate();
-        if (userEntityRepository.existsByEmail(userIdentity.getEmail())) {
+        if (ObjectUtils.isEmpty(userIdentity.getId()) &&
+                userEntityRepository.existsByEmail(userIdentity.getEmail())) {
             throw new MeedlException("Email already exists");
         }
         log.info("User in adapter before being mapped to save: {}", userIdentity);

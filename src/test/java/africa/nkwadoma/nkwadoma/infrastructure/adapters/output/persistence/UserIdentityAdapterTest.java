@@ -58,7 +58,8 @@ class UserIdentityAdapterTest {
     @Test
     @Order(2)
     void saveUserWithExistingEmail() {
-        assertThrows(MeedlException.class, ()->userIdentityOutputPort.save(john));
+        john.setId(null);
+        assertThrows(MeedlException.class, () -> userIdentityOutputPort.save(john));
     }
 
     @Test
