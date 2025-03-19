@@ -245,13 +245,13 @@ public class FinancierServiceTest {
     @Test
     void completeIndividualKycWithoutTaxId(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.setTaxId(null);
+        financierWithKycRequest.getIndividual().setTaxId(null);
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
     @Test
     void completeIndividualKycWithoutNin(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.setNin(null);
+        financierWithKycRequest.getIndividual().setNin(null);
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
     @Test
@@ -289,9 +289,9 @@ public class FinancierServiceTest {
         }
         assertNotNull(financierUpdated);
         assertEquals(AccreditationStatus.VERIFIED ,financierUpdated.getAccreditationStatus());
-        assertNotNull(financierUpdated.getNin());
-        assertNotNull(financierUpdated.getTaxId());
-        assertNotNull(financierUpdated.getAddress());
+        assertNotNull(financierUpdated.getIndividual().getNin());
+        assertNotNull(financierUpdated.getIndividual().getTaxId());
+        assertNotNull(financierUpdated.getIndividual().getAddress());
         assertNotNull(financierUpdated.getIndividual().getNextOfKin());
         assertNotNull(financierUpdated.getIndividual().getBankDetail());
 

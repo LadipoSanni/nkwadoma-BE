@@ -32,7 +32,7 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
     public UserIdentity save(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         userIdentity.validate();
-        log.info("next of kin in user adapter: {}", userIdentity.getNextOfKin());
+        log.info("User in adapter before being mapped to save: {}", userIdentity);
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
         log.info("UserIdentity saved to database {}", userEntity);

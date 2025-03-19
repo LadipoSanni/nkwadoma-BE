@@ -211,9 +211,9 @@ public class TestData {
         log.info("Bank Detail in test data {}", bankDetail);
         financier.getIndividual().setBankDetail(bankDetail);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
-        financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
-        financier.setNin("2025103002");
-        financier.setTaxId("00000122");
+        financier.getIndividual().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
+        financier.getIndividual().setNin("2025103002");
+        financier.getIndividual().setTaxId("00000122");
         financier.getIndividual().setNextOfKin(nextOfKin);
         return financier;
     }

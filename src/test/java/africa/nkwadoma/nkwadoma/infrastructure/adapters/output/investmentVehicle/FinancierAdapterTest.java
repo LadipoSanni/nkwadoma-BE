@@ -324,13 +324,13 @@ class FinancierAdapterTest {
     @Test
     void completeIndividualKycWithoutTaxId(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.setTaxId(null);
+        financierWithKycRequest.getIndividual().setTaxId(null);
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
     void completeIndividualKycWithoutNin(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.setNin(null);
+        financierWithKycRequest.getIndividual().setNin(null);
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
@@ -363,6 +363,9 @@ class FinancierAdapterTest {
             bankDetailId = savedBankDetail.getId();
             userIdentity.setBankDetail(savedBankDetail);
             userIdentity.setNextOfKin(savedNextOfKin);
+            userIdentity.setTaxId("48373748");
+            userIdentity.setNin("79827947923898");
+            userIdentity.setAddress("the place");
             userIdentity = userIdentityOutputPort.save(userIdentity);
             Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, savedBankDetail, savedNextOfKin);
 
@@ -375,9 +378,9 @@ class FinancierAdapterTest {
         }
         assertNotNull(financierUpdated);
         assertEquals(AccreditationStatus.VERIFIED, financierUpdated.getAccreditationStatus());
-        assertNotNull(financierUpdated.getNin());
-        assertNotNull(financierUpdated.getTaxId());
-        assertNotNull(financierUpdated.getAddress());
+        assertNotNull(financierUpdated.getIndividual().getNin());
+        assertNotNull(financierUpdated.getIndividual().getTaxId());
+        assertNotNull(financierUpdated.getIndividual().getAddress());
         assertEquals(AccreditationStatus.VERIFIED, foundFinancier.getAccreditationStatus());
         assertNotNull(foundFinancier.getIndividual());
         assertNotNull(foundFinancier.getIndividual().getNextOfKin());

@@ -347,9 +347,9 @@ public class FinancierService implements FinancierUseCase {
     private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
         NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
         foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
-        foundFinancier.setNin(financier.getNin());
-        foundFinancier.setTaxId(financier.getTaxId());
-        foundFinancier.setAddress(financier.getAddress());
+        foundFinancier.getIndividual().setNin(financier.getIndividual().getNin());
+        foundFinancier.getIndividual().setTaxId(financier.getIndividual().getTaxId());
+        foundFinancier.getIndividual().setAddress(financier.getIndividual().getAddress());
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {

@@ -63,6 +63,8 @@ public class UserIdentity {
     private String reactivationReason;
     private String bvn;
     private String nin;
+    private String address;
+    private String taxId;
     private NextOfKin nextOfKin;
     private BankDetail bankDetail;
 

@@ -49,6 +49,8 @@ public class UserEntity {
     private String deactivationReason;
     private String bvn;
     private String nin;
+    private String address;
+    private String taxId;
     @OneToOne
     private BankDetailEntity bankDetailEntity;
     @OneToOne

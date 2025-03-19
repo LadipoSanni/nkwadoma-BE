@@ -34,9 +34,6 @@ public class Financier {
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
-    private String address;
-    private String nin;
-    private String taxId;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;
@@ -81,8 +78,8 @@ public class Financier {
         MeedlValidator.validateObjectInstance(individual.getNextOfKin(), "Provide a valid next of kin detail.");
         MeedlValidator.validateObjectInstance(individual.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
         individual.getNextOfKin().validate();
-        MeedlValidator.validateDataElement(nin, "Nin is required");
-        MeedlValidator.validateDataElement(taxId, "Tax id is required");
-        MeedlValidator.validateDataElement(address, "Address is required");
+        MeedlValidator.validateDataElement(individual.getNin(), "Nin is required");
+        MeedlValidator.validateDataElement(individual.getTaxId(), "Tax id is required");
+        MeedlValidator.validateDataElement(individual.getAddress(), "Address is required");
     }
 }
