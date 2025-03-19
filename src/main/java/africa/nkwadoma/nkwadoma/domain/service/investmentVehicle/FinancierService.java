@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -319,18 +320,18 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         kycIdentityValidation(financier);
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
-        if (foundFinancier.getIndividual().getNextOfKin() == null &&
-            foundFinancier.getIndividual().getBankDetail() == null){
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+        if (foundFinancier.getUserIdentity().getNextOfKin() == null &&
+            foundFinancier.getUserIdentity().getBankDetail() == null){
             log.info("Financier details in service to use in completing kyc {}", financier);
 
             updateFinancierNextOfKinKycDetail(financier, foundFinancier);
             log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
 
-            BankDetail bankDetail = bankDetailOutputPort.save(financier.getIndividual().getBankDetail());
-            foundFinancier.getIndividual().setBankDetail(bankDetail);
+            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
+            foundFinancier.getUserIdentity().setBankDetail(bankDetail);
 
-            userIdentityOutputPort.save(foundFinancier.getIndividual());
+            userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             return financierOutputPort.completeKyc(foundFinancier);
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
@@ -340,30 +341,29 @@ public class FinancierService implements FinancierUseCase {
 
     private static void kycIdentityValidation(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
-        MeedlValidator.validateObjectInstance(financier.getIndividual(), "User performing this action is unknown");
-        MeedlValidator.validateUUID(financier.getIndividual().getId(), "User identification performing this action is unknown. ");
-        MeedlValidator.validateObjectInstance(financier.getIndividual().getNextOfKin(), "Next of kin is unknown");
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");
+        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), "User identification performing this action is unknown. ");
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity().getNextOfKin(), "Next of kin is unknown");
     }
 
     private NextOfKin updateNextOfKinForKyc(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
-        nextOfKin.setUserId(foundFinancier.getIndividual().getId());
+        NextOfKin nextOfKin = financier.getUserIdentity().getNextOfKin();
+        nextOfKin.setUserId(foundFinancier.getUserIdentity().getId());
         return nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
     }
 
     private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
         NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
-        foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
-        foundFinancier.getIndividual().setNin(financier.getIndividual().getNin());
-        foundFinancier.getIndividual().setTaxId(financier.getIndividual().getTaxId());
-        foundFinancier.getIndividual().setAddress(financier.getIndividual().getAddress());
+        foundFinancier.getUserIdentity().setNextOfKin(savedNextOfKin);
+        foundFinancier.getUserIdentity().setNin(financier.getUserIdentity().getNin());
+        foundFinancier.getUserIdentity().setTaxId(financier.getUserIdentity().getTaxId());
+        foundFinancier.getUserIdentity().setAddress(financier.getUserIdentity().getAddress());
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
         financier.setActivationStatus(ActivationStatus.INVITED);
         UserIdentity userIdentity = financier.getUserIdentity();
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
-        UserIdentity userIdentity = financier.getIndividual();
         log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
         userIdentity.setCreatedBy(financier.getInvitedBy());
         userIdentity.setRole(IdentityRole.FINANCIER);
