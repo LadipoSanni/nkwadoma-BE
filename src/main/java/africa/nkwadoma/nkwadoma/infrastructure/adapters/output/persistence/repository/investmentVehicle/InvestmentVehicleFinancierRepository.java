@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface InvestorInvestmentVehicleRepository extends JpaRepository<InvestmentVehicleFinancierEntity,String> {
+public interface InvestmentVehicleFinancierRepository extends JpaRepository<InvestmentVehicleFinancierEntity,String> {
     Optional<InvestmentVehicleFinancierEntity> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId);
     @Query("SELECT ivf.financier FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.investmentVehicle.id = :investmentVehicleId")
     Page<FinancierEntity> findFinanciersByInvestmentVehicleId(@Param("investmentVehicleId") String investmentVehicleId, Pageable pageable);

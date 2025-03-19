@@ -6,7 +6,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface NextOfKinMapper {
-    @Mapping(target = "userId", source = "userIdentity.id")
+    @Mapping(target = "userId", source = "userId")
      NextOfKinEntity toNextOfKinEntity(NextOfKin nextOfKin);
 
     @InheritInverseConfiguration

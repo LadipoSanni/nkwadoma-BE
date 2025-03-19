@@ -26,6 +26,7 @@ public class NextOfKinAdapter implements NextOfKinOutputPort {
     @Override
     public NextOfKin save(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin, IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
+
         nextOfKin.validate();
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         NextOfKinEntity savedNextOfKinEntity = nextOfKinRepository.save(nextOfKinEntity);

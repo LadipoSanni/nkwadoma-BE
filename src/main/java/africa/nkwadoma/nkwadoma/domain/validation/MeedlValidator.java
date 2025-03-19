@@ -212,6 +212,15 @@ public class MeedlValidator {
         }
     }
 
+    public static void validateAccountNumber(String bankAccountNumber, String message) throws MeedlException {
+        if (StringUtils.isEmpty(bankAccountNumber)){
+            throw new MeedlException(message);
+        }
+        if (bankAccountNumber.length() < 10 || bankAccountNumber.length() > 15){
+            throw new MeedlException("Bank account number cannot be less than ten or greater than fifteen");
+        }
+    }
+
     public static List<String> validateNotificationListAndFilter(List<String> deleteNotificationList) throws MeedlException {
         if (CollectionUtils.isEmpty(deleteNotificationList)) {
             throw new MeedlException(MeedlNotificationMessages.NOTIFICATION_LIST_CANNOT_BE_EMPTY.getMessage());

@@ -16,7 +16,7 @@ public interface NextOfKinRestMapper {
     @Mapping(target = "alternateContactAddress", qualifiedByName = "trimString")
     @Mapping(target = "alternatePhoneNumber", qualifiedByName = "trimString")
     @Mapping(target = "alternateEmail", qualifiedByName = "trimString")
-    @Mapping(source = "userId", target = "userIdentity.id")
+    @Mapping(source = "userId", target = "userId")
     NextOfKin toNextOfKin(NextOfKinRequest nextOfKinRequest, String userId);
 
     NextOfKinResponse toNextOfKinResponse(NextOfKin nextOfKin);
