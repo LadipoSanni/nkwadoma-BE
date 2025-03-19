@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ public class InvestmentVehicleFinancierEntity {
     @Id
     @UuidGenerator
     private String id;
+    private BigDecimal amountInvested;
     @ManyToOne
     private FinancierEntity financier;
     @ManyToOne
