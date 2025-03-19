@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.CompleteKycResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
@@ -39,6 +39,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
+        log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = financierRestMapper.map(financierRequest);
         financier.setIndividual(financierRequest.getIndividual());
         log.info("Mapped financier at controller {}", financier);
@@ -52,15 +53,15 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("financier/complete-kyc")
+    @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
-        Financier financier = financierRestMapper.map(kycRequest);
+        Financier financier = financierRestMapper.map(kycRequest, meedlUser.getClaimAsString("sub"));
         financier = financierUseCase.completeKyc(financier);
 
-        CompleteKycResponse completeKycResponse = financierRestMapper.mapToFinancierResponse(financier);
-        ApiResponse<CompleteKycResponse> apiResponse = ApiResponse.<CompleteKycResponse>builder()
-                .data(completeKycResponse)
+        KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
+        ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
+                .data(kycResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
                 .statusCode(HttpStatus.OK.toString())
                 .build();

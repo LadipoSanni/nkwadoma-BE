@@ -32,6 +32,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier save(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
         financier.validate();
+        log.info("Financier before saving is {}", financier);
         FinancierEntity financierEntity = financierMapper.map(financier);
         FinancierEntity savedFinancierEntity = financierRepository.save(financierEntity);
         log.info("Financier saved to db: {}", savedFinancierEntity);
@@ -41,8 +42,9 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findById(financierId)
+        FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
+        log.info("Financier next of kin found in adapter: {}", financierEntity.getIndividual().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
 
@@ -74,9 +76,13 @@ public class FinancierAdapter implements FinancierOutputPort {
         financier.validate();
         financier.validateKyc();
         financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
-        FinancierEntity financierEntity = financierRepository.save(financierMapper.map(financier));
+        FinancierEntity financierToSave = financierMapper.map(financier);
+        log.info("Financier to save: {}", financierToSave);
+        FinancierEntity financierEntity = financierRepository.save(financierToSave);
         log.info("Financier with id : {} completed KYC successfully", financierEntity);
-        return financierMapper.map(financierEntity);
+        Financier kycCompletedFinancier = financierMapper.map(financierEntity);
+        log.info("Kyc completed financier {}", kycCompletedFinancier);
+        return kycCompletedFinancier;
     }
 
     @Override

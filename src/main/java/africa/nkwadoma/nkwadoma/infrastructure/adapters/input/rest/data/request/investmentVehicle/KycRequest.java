@@ -15,8 +15,6 @@ public class KycRequest {
     private String bankName;
     @NotBlank(message = "Bank number is required")
     private String bankNumber;
-    private String financierName;
-    private String financierEmail;
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
     @NotBlank(message = "Address is required")
@@ -26,12 +24,12 @@ public class KycRequest {
     @NotBlank(message = "NextOfKin Last name is required")
     private String nextOfKinLastName;
     @NotBlank(message = "NextOfKin Phone number is required")
-    private String NextOfKinPhoneNumber;
+    private String nextOfKinPhoneNumber;
     @NotBlank(message = "NextOfKin Contact address is required")
-    private String NextOfKinContactAddress;
+    private String nextOfKinContactAddress;
     @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
-    private String NextOfKinEmail;
+    private String nextOfKinEmail;
     @NotBlank(message = "Relationship with next of kin is required")
     private String relationshipWithNextOfKin;
     @NotBlank(message = "National identification number is required")

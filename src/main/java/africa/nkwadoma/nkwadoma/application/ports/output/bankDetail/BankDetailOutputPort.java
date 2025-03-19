@@ -5,4 +5,8 @@ import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 
 public interface BankDetailOutputPort {
     BankDetail save(BankDetail bankDetail) throws MeedlException;
+
+    void deleteById(String id) throws MeedlException;
+
+    BankDetail findByBankDetailId(String bankDetailId) throws MeedlException;
 }

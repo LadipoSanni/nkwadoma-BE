@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
     private static final int pageSize = 10;
@@ -205,15 +207,14 @@ public class TestData {
         return loanRequest;
     }
 
-    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail){
-        financier.setBankDetail(bankDetail);
+    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail, NextOfKin nextOfKin){
+        log.info("Bank Detail in test data {}", bankDetail);
+        financier.getIndividual().setBankDetail(bankDetail);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
-        financier.getBankDetail().setAccountName("Meedl Bank");
-        financier.getBankDetail().setAccountNumber("1234567890");
         financier.setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
         financier.setNin("2025103002");
         financier.setTaxId("00000122");
-        financier.getIndividual().setNextOfKin(createNextOfKinData(financier.getIndividual()));
+        financier.getIndividual().setNextOfKin(nextOfKin);
         return financier;
     }
 

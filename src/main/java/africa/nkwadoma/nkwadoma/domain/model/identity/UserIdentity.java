@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
@@ -63,6 +64,7 @@ public class UserIdentity {
     private String bvn;
     private String nin;
     private NextOfKin nextOfKin;
+    private BankDetail bankDetail;
 
     public void validate() throws MeedlException {
         log.info("Started validating for user identity in validation");

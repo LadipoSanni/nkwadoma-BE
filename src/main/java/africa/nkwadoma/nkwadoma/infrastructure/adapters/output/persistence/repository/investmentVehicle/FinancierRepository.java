@@ -21,4 +21,10 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
     @Query("SELECT f FROM FinancierEntity f WHERE f.individual.email = :financierEmail")
     Optional<FinancierEntity> findByEmail(String financierEmail);
+
+    @Query("SELECT f FROM FinancierEntity f " +
+            "LEFT JOIN FETCH f.individual u " +
+            "LEFT JOIN FETCH u.nextOfKinEntity nk " +
+            "WHERE f.id = :financierId")
+    Optional<FinancierEntity> findByFinancierId(String financierId);
 }

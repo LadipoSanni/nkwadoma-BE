@@ -24,4 +24,18 @@ public class BankDetailAdapter implements BankDetailOutputPort {
         bankDetailEntity = bankDetailRepository.save(bankDetailEntity);
         return bankDetailMapper.toBankDetail(bankDetailEntity);
     }
+
+    @Override
+    public void deleteById(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, "Bank Detail id must be provided.");
+        bankDetailRepository.deleteById(id);
+    }
+
+    @Override
+    public BankDetail findByBankDetailId(String bankDetailId) throws MeedlException {
+        MeedlValidator.validateUUID(bankDetailId, "Bank Detail must be provided.");
+        BankDetailEntity bankDetailEntity = bankDetailRepository.findById(bankDetailId)
+                .orElseThrow(() -> new MeedlException("Bank Detail not found."));
+        return bankDetailMapper.toBankDetail(bankDetailEntity);
+    }
 }
