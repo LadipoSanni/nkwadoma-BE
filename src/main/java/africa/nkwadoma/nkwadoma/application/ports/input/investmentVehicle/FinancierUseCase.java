@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface FinancierUseCase {
-    String inviteFinancier(Financier financier) throws MeedlException;
+    String inviteFinancier(List<Financier> financier) throws MeedlException;
 
     Financier viewFinancierDetail(String financierId) throws MeedlException;
 
@@ -23,4 +23,6 @@ public interface FinancierUseCase {
     Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
 
     void updateFinancierStatus(Financier financier);
+
+    Financier completeKyc(Financier financier) throws MeedlException;
 }

@@ -4,13 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -22,7 +19,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
+public class NextOfKinAdapter implements NextOfKinOutputPort {
     private final NextOfKinRepository nextOfKinRepository;
     private final NextOfKinMapper nextOfKinMapper;
 
@@ -30,6 +27,7 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
     public NextOfKin save(NextOfKin nextOfKin) throws MeedlException {
         MeedlValidator.validateObjectInstance(nextOfKin, IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateObjectInstance(nextOfKin.getLoanee().getUserIdentity(), IdentityMessages.NEXT_OF_KIN_CANNOT_BE_NULL.getMessage());
+        nextOfKin.validate();
         log.info("Saving nextOfKin with user identity {}", nextOfKin.getUserIdentity());
         NextOfKinEntity nextOfKinEntity = nextOfKinMapper.toNextOfKinEntity(nextOfKin);
         log.info("Saving nextOfKin Entity with user entity {}", nextOfKinEntity.getUserEntity());
@@ -58,9 +56,10 @@ public class NextOfKinIdentityAdapter implements NextOfKinIdentityOutputPort {
     }
 
     @Override
-    public Optional<NextOfKin> findByLoaneeId(String loaneeId) throws MeedlException {
-        MeedlValidator.validateUUID(loaneeId, LoanMessages.INVALID_LOANEE_ID.getMessage());
-        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByLoaneeEntityId(loaneeId);
+    public Optional<NextOfKin> findByUserId(String userId) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+        Optional<NextOfKinEntity> nextOfKinEntity = nextOfKinRepository.findByUserId(userId);
+        log.info("Found nextOfKin optional {}", nextOfKinEntity.isPresent());
         return nextOfKinEntity.map(nextOfKinMapper::toNextOfKin);
     }
 }

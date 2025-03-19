@@ -21,8 +21,5 @@ public class NextOfKinEntity {
     private String phoneNumber;
     private String nextOfKinRelationship;
     private String contactAddress;
-    @OneToOne
-    private UserEntity userEntity;
-    @OneToOne
-    private LoaneeEntity loaneeEntity;
+    private String userId;
 }

@@ -6,9 +6,11 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle.FinancierAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +19,13 @@ import org.springframework.data.domain.*;
 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation.DONOR;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 
@@ -29,6 +36,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final FinancierOutputPort financierOutputPort;
+    private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
+
 
     @Override
     public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -46,6 +56,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         if (ObjectUtils.isNotEmpty(investmentVehicle.getId())){
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
+        investmentVehicle.setCreatedDate(LocalDate.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
@@ -145,6 +156,27 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateObjectInstance(fundRaisingStatus, "FundRaisingStatus cannot be empty or null");
         return investmentVehicleOutputPort.findAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, fundRaisingStatus);
     }
+
+    @Override
+    public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
+                                                            List<String> financierIds) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+        if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
+            return investmentVehicleOutputPort.save(investmentVehicle);
+        } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
+            for (String financierId : financierIds) {
+                Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+                InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
+                                .investmentVehicle(investmentVehicle).financier(financier).build();
+                investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+            }
+        }
+        return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
 
     private String generateInvestmentVehicleLink(String id) {
         return INVESTMENT_VEHICLE_URL+id;

@@ -23,16 +23,15 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 @RequiredArgsConstructor
 @RestController
 public class NextOfKinController {
-    private final CreateNextOfKinUseCase createNextOfKinUseCase;
+    private final NextOfKinUseCase nextOfKinUseCase;
     private final NextOfKinRestMapper nextOfKinRestMapper;
 
     @PostMapping("additional-details")
     public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
                                                                           @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
         log.info("User ID =====> " + meedlUserId.getClaim("sub"));
-        NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request);
-        nextOfKin.getLoanee().getUserIdentity().setId(meedlUserId.getClaim("sub"));
-        NextOfKin createdNextOfKin = createNextOfKinUseCase.saveAdditionalDetails(nextOfKin);
+        NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request, meedlUserId.getClaimAsString("sub") );
+        NextOfKin createdNextOfKin = nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
         return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
                .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))
                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())

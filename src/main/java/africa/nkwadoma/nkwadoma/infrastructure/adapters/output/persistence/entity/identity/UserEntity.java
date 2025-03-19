@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.NextOfKinEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankDetail.BankDetailEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString
 @Table(name = "meedl_user")
 public class UserEntity {
     @Id
@@ -46,4 +49,10 @@ public class UserEntity {
     private String deactivationReason;
     private String bvn;
     private String nin;
+    private String address;
+    private String taxId;
+    @OneToOne
+    private BankDetailEntity bankDetailEntity;
+    @OneToOne
+    private NextOfKinEntity nextOfKinEntity;
 }

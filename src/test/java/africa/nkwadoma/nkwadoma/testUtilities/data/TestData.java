@@ -12,11 +12,13 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 public class TestData {
     private static final String testId = "ead0f7cb-5483-4bb8-b271-813970a9c368";
     private static final int pageSize = 10;
@@ -206,6 +209,20 @@ public class TestData {
         return loanRequest;
     }
 
+    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail, NextOfKin nextOfKin){
+        log.info("Bank Detail in test data {}", bankDetail);
+        financier.getIndividual().setBankDetail(bankDetail);
+        financier.setFinancierType(FinancierType.INDIVIDUAL);
+        financier.getIndividual().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
+        financier.getIndividual().setNin("2025103002");
+        financier.getIndividual().setTaxId("00000122");
+        financier.getIndividual().setNextOfKin(nextOfKin);
+        return financier;
+    }
+
+
+
+
     public static LoaneeLoanAccount createLoaneeLoanAccount(LoanStatus loanStatus , AccountStatus status, String loaneeId) {
         LoaneeLoanAccount loaneeLoanAccount = new LoaneeLoanAccount();
         loaneeLoanAccount.setLoanStatus(loanStatus);
@@ -220,6 +237,8 @@ public class TestData {
                 .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
+                .invitedBy(testId)
+                .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .activationStatus(ActivationStatus.INVITED)
                 .financierType(FinancierType.INDIVIDUAL)
                 .pageNumber(pageNumber)
@@ -280,15 +299,19 @@ public class TestData {
                 .currency("NGN").build();
     }
 
-    public static NextOfKin createNextOfKinData(Loanee loanee) {
+    public static NextOfKin createNextOfKinData(UserIdentity userIdentity) {
         NextOfKin nextOfKin = new NextOfKin();
+        nextOfKin.setUserId(userIdentity.getId());
         nextOfKin.setFirstName("Ahmad");
         nextOfKin.setLastName("Awwal");
         nextOfKin.setEmail("ahmad12@gmail.com");
         nextOfKin.setPhoneNumber("0785678901");
+        nextOfKin.setAlternateContactAddress("alternate-contact-address filled");
+        nextOfKin.setAlternateEmail("alternatetest@email.com");
+        nextOfKin.setAlternatePhoneNumber("09098347384");
         nextOfKin.setNextOfKinRelationship("Brother");
         nextOfKin.setContactAddress("2, Spencer Street, Yaba, Lagos");
-        nextOfKin.setLoanee(loanee);
+
         return nextOfKin;
     }
 
@@ -430,5 +453,13 @@ public class TestData {
                 .financier(financier)
                 .investmentVehicle(investmentVehicle)
                 .build();
+    }
+
+
+    public static BankDetail buildBankDetail() {
+        return BankDetail.builder()
+               .accountName("Lagos Main")
+               .accountNumber("1234567890")
+               .build();
     }
 }
