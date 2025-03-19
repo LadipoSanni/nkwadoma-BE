@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
@@ -30,6 +31,7 @@ import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
@@ -270,5 +272,12 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
+    }
+
+    @Override
+    public void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException {
+        MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
+        notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
+        meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
     }
 }

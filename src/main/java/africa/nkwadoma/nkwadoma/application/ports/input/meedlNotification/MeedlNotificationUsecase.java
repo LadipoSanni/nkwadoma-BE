@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface MeedlNotificationUsecase {
     MeedlNotification sendNotification(MeedlNotification meedlNotification) throws MeedlException;
 
@@ -11,5 +13,6 @@ public interface MeedlNotificationUsecase {
 
     Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException;
 
+    void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException;
     MeedlNotification fetchNotificationCount(String id) throws MeedlException;
 }

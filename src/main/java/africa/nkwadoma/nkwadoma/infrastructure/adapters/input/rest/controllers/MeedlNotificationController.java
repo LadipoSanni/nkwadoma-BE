@@ -9,7 +9,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationCountResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse.MeedlNotificationReponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.meedlNotification.MeedlNotificationRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -87,4 +89,15 @@ public class MeedlNotificationController {
                         .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    
+    @DeleteMapping("notification/delete")
+    private ResponseEntity<ApiResponse<?>> deleteNotifications(@AuthenticationPrincipal Jwt meedlUser, @RequestParam List<String> notificationIds) throws MeedlException {
+
+        meedlNotificationUsecase.deleteMultipleNotification(meedlUser.getClaimAsString("sub"), notificationIds);
+
+        return new ResponseEntity<>(ApiResponse.builder()
+                .statusCode(HttpStatus.OK.toString())
+                .message("Notification " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(), HttpStatus.OK);
+    }
+
 }

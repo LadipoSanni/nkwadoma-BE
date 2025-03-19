@@ -7,6 +7,7 @@ public enum MeedlMessages {
     EMPTY_INPUT_FIELD_ERROR("Field cannot be empty"),
     TOKEN_REQUIRED("User validation mechanism in form of token is required"),
     INVALID_EMAIL_ADDRESS("Email address is not valid"),
+    USER_ID_CANNOT_BE_EMPTY("User id cannot be empty"),
     INVALID_INDUSTRY_OR_SERVICE_OFFERING("Industry or service offering cannot be empty"),
     EMAIL_NOT_FOUND("Email address cannot be found"),
     EMAIL_ALREADY_EXISTS("Email address already exist"),
