@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
@@ -13,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.Investment
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -57,6 +60,9 @@ class InvestmentVehicleServiceTest {
     @Mock
     private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    @Mock
+    private PortfolioOutputPort portfolioOutputPort;
+    private Portfolio portfolio;
 
 
     @BeforeEach
@@ -65,6 +71,7 @@ class InvestmentVehicleServiceTest {
         userIdentity = TestData.createTestUserIdentity("iniestajnr12@gmail.com");
         financier = TestData.buildFinancierIndividual(userIdentity);
         investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(financier,fundGrowth);
+        portfolio = TestData.createMeedlPortfolio();
     }
 
     @Test
@@ -74,6 +81,9 @@ class InvestmentVehicleServiceTest {
            when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(),DRAFT))
                    .thenReturn(null);
            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
+           when(portfolioOutputPort.findPortfolio(any()))
+                   .thenReturn(portfolio);
+           when(portfolioOutputPort.save(portfolio)).thenReturn(portfolio);
             createdInvestmentVehicle =
                    investmentVehicleService.setUpInvestmentVehicle(fundGrowth);
            investmentId = createdInvestmentVehicle.getId();
