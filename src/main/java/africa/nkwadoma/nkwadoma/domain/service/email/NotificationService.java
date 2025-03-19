@@ -276,7 +276,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
 
     @Override
     public void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException {
-        MeedlValidator.validateUUID(userId, USER_ID_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
         notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
         meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
     }
