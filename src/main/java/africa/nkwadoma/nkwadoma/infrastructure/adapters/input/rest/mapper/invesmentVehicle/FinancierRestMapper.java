@@ -18,11 +18,11 @@ public interface FinancierRestMapper {
     KycResponse mapToFinancierResponse(Financier financier);
 
     @Mapping(target = "individual.id", source = "userId")
-    @Mapping(target = "individual.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
-    @Mapping(target = "individual.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
-    @Mapping(target = "individual.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
-    @Mapping(target = "individual.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
-    @Mapping(target = "individual.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
-    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
+//    @Mapping(target = "individual.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
+//    @Mapping(target = "individual.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
+//    @Mapping(target = "individual.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
+//    @Mapping(target = "individual.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
+//    @Mapping(target = "individual.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
+//    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
     Financier map(KycRequest kycRequest, String userId);
 }
