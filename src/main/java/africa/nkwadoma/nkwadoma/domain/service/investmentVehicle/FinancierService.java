@@ -302,11 +302,20 @@ public class FinancierService implements FinancierUseCase {
         InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId() ,financier.getId())
                 .orElseThrow(()-> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
         InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+        BigDecimal newAmount = updateInvestmentVehicleAmount(financier, investmentVehicle);
+        log.info("New amount after adding to the investment vehicle {}... {}", newAmount, investmentVehicle.getTotalAvailableAmount());
+        investmentVehicleOutputPort.save(investmentVehicle);
+        return financier;
+    }
+
+    private static BigDecimal updateInvestmentVehicleAmount(Financier financier, InvestmentVehicle investmentVehicle) {
+        if (investmentVehicle.getTotalAvailableAmount() == null) {
+            investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
+        }
         BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
         BigDecimal newAmount = currentAmount.add(financier.getInvestmentAmount());
         investmentVehicle.setTotalAvailableAmount(newAmount);
-        investmentVehicleOutputPort.save(investmentVehicle);
-        return financier;
+        return newAmount;
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {

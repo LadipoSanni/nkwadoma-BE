@@ -7,11 +7,13 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.*;
 import java.time.LocalDate;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Setter
 @Getter
 @ToString
@@ -48,6 +50,7 @@ public class InvestmentVehicle {
 
 
     public void validate() throws MeedlException {
+        log.info("Validating a published or publishable investment vehicle {} name : {}", id, name);
         MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
         MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty","Trustee");
         MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty","Custodian");
@@ -65,6 +68,7 @@ public class InvestmentVehicle {
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
         MeedlValidator.validateBigDecimalDataElement(size, "Investment vehicle size is required");
         MeedlValidator.validateNegativeAmount(minimumInvestmentAmount,"Minimum investment ");
+        log.info("Validation completed for investment vehicle.");
     }
 
     public void setValues() {
@@ -83,6 +87,7 @@ public class InvestmentVehicle {
     }
 
     public void validateDraft() throws MeedlException {
+        log.info("Validating investment vehicle for draft {}, name :{} ", id, name);
         MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
