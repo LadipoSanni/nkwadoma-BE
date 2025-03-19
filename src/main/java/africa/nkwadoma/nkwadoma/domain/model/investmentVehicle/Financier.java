@@ -40,10 +40,10 @@ public class Financier {
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        validateIndividualEmail(individual);
-        MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
-        MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
-        MeedlValidator.validateEmail(individual.getEmail());
+        validateIndividualEmail(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
     }
 
 
@@ -72,14 +72,14 @@ public class Financier {
 
     public void validateKyc() throws MeedlException {
         MeedlValidator.validateUUID(id, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        MeedlValidator.validateObjectInstance(individual.getBankDetail(), "Provide a valid bank detail.");
-        MeedlValidator.validateUUID(individual.getBankDetail().getId(), "Provide a valid bank detail id.");
-        individual.getBankDetail().validate();
-        MeedlValidator.validateObjectInstance(individual.getNextOfKin(), "Provide a valid next of kin detail.");
-        MeedlValidator.validateObjectInstance(individual.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
-        individual.getNextOfKin().validate();
-        MeedlValidator.validateDataElement(individual.getNin(), "Nin is required");
-        MeedlValidator.validateDataElement(individual.getTaxId(), "Tax id is required");
-        MeedlValidator.validateDataElement(individual.getAddress(), "Address is required");
+        MeedlValidator.validateObjectInstance(userIdentity.getBankDetail(), "Provide a valid bank detail.");
+        MeedlValidator.validateUUID(userIdentity.getBankDetail().getId(), "Provide a valid bank detail id.");
+        userIdentity.getBankDetail().validate();
+        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin(), "Provide a valid next of kin detail.");
+        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
+        userIdentity.getNextOfKin().validate();
+        MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
+        MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
+        MeedlValidator.validateDataElement(userIdentity.getAddress(), "Address is required");
     }
 }
