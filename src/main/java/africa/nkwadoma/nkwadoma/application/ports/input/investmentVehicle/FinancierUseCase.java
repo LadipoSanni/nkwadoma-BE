@@ -22,4 +22,6 @@ public interface FinancierUseCase {
     void updateFinancierStatus(Financier financier);
 
     Financier investInVehicle(Financier financier) throws MeedlException;
+
+    Financier completeKyc(Financier financier) throws MeedlException;
 }

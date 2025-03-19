@@ -82,7 +82,8 @@ class NextOfKinAdapterTest {
         assertFalse(foundNextOfKin.isEmpty());
     }
 
-//    @Test
+
+    @Test
     void saveNullNextOfKin() {
         assertThrows(MeedlException.class, ()-> nextOfKinOutputPort.save(null));
     }

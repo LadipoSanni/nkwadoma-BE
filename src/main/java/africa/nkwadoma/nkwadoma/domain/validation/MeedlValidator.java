@@ -209,4 +209,13 @@ public class MeedlValidator {
             throw new MeedlException(message);
         }
     }
+
+    public static void validateAccountNumber(String bankAccountNumber, String message) throws MeedlException {
+        if (StringUtils.isEmpty(bankAccountNumber)){
+            throw new MeedlException(message);
+        }
+        if (bankAccountNumber.length() < 10 || bankAccountNumber.length() > 15){
+            throw new MeedlException("Bank account number cannot be less than ten or greater than fifteen");
+        }
+    }
 }
