@@ -13,7 +13,7 @@ Pre-requisites:
 4. Database
 
 DOCKER and DOCKER COMPOSE Installation
-- For windowws OS:
+- For windows OS:
     - Option 1: Use Windows subsystem for Linux(wsl) option
         - install windows sub-system for linux using this command: wsl --install
         - confirm wsl installed with the command: wsl --version
@@ -49,8 +49,13 @@ DOCKER and DOCKER COMPOSE Installation
 
   
 For Frontend-Engineer and QA-Engineer
+To pull the backend code from the registry require credentials: 
+credentials will be provided for you by the cloud team.
+once the credentials are provided and you authenticate successfully
+enter this command in the terminal: docker pull 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
 Navigate back to the project root directory with cd to the project "/nkwadoma-BE" path, where  the docker-compose.yml file is located.
 Run the following commands: To start the containers;
+
 docker-compose up -d
 
 To stop the containers;
