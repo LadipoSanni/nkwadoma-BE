@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import java.util.Set;
 public class InvestmentVehicleFinancier {
 
     private String id;
+    private BigDecimal amountInvested;
     private Financier financier;
     private InvestmentVehicle investmentVehicle;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;

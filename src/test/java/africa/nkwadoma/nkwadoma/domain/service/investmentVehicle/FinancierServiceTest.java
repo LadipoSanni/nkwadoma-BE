@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
@@ -31,7 +30,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -43,7 +41,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -184,7 +181,7 @@ public class FinancierServiceTest {
     @Test
     @Order(2)
     void investInVehicle() {
-        financier.setInvestmentAmount(new BigDecimal("1000.00"));
+        financier.setAmountToInvest(new BigDecimal("1000.00"));
         financier.setId(financierId);
         Financier financierThatHasInvested = null;
         InvestmentVehicle investmentVehicle = null;
@@ -198,7 +195,7 @@ public class FinancierServiceTest {
 
             InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
-            assertEquals(initialAmount.add(financierThatHasInvested.getInvestmentAmount()), currentAmount,
+            assertEquals(initialAmount.add(financierThatHasInvested.getAmountToInvest()), currentAmount,
                     "The total available amount should be updated correctly");
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -207,7 +204,7 @@ public class FinancierServiceTest {
 
     @Test
     void investInVehicleWithNullAmount(){
-        financier.setInvestmentAmount(null);
+        financier.setAmountToInvest(null);
         assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(financier));
     }
 

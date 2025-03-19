@@ -318,7 +318,19 @@ public class FinancierService implements FinancierUseCase {
         BigDecimal newAmount = updateInvestmentVehicleAmount(financier, investmentVehicle);
         log.info("New amount after adding to the investment vehicle {}... {}", newAmount, investmentVehicle.getTotalAvailableAmount());
         investmentVehicleOutputPort.save(investmentVehicle);
+
+        updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
         return financier;
+    }
+
+    private void updateInvestmentVehicleFinancierAmount(InvestmentVehicleFinancier investmentVehicleFinancier, Financier financier) throws MeedlException {
+        if (investmentVehicleFinancier.getAmountInvested() == null) {
+            investmentVehicleFinancier.setAmountInvested(BigDecimal.ZERO);
+        }
+        BigDecimal currentAmount = investmentVehicleFinancier.getAmountInvested();
+        BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
+        investmentVehicleFinancier.setAmountInvested(newAmount);
+        investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
     }
 
     private static BigDecimal updateInvestmentVehicleAmount(Financier financier, InvestmentVehicle investmentVehicle) {
@@ -326,7 +338,7 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
         }
         BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
-        BigDecimal newAmount = currentAmount.add(financier.getInvestmentAmount());
+        BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
         investmentVehicle.setTotalAvailableAmount(newAmount);
         return newAmount;
     }
