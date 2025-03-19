@@ -46,6 +46,7 @@ class NextOfKinServiceTest {
         nextOfKin = TestData.createNextOfKinData(userIdentity);
     }
 
+
     @Test
     void saveAdditionalDetails() {
         try {
