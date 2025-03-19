@@ -1,13 +1,16 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.identity.NextOfKinUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
@@ -17,10 +20,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,14 +52,26 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase FinancierEmailUseCase;
-
+    private final NextOfKinUseCase nextOfKinUseCase;
+    private final BankDetailOutputPort bankDetailOutputPort;
 
     @Override
-    public String inviteFinancier(Financier financier) throws MeedlException {
+    public String inviteFinancier(List<Financier> financiers) throws MeedlException {
+        if (financiers.isEmpty()){
+            throw new MeedlException(FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        }
+        Financier financier = financiers.get(0);
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        log.info("Financier type before saving is {}",financier.getFinancierType());
+        if(financier.getFinancierType() == null){
+            log.error("Financier does not have a valid type when inviting");
+            throw new MeedlException(FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
+        }
         if (StringUtils.isEmpty(financier.getInvestmentVehicleId())){
+            log.info("Financier invited without an investment vehicle id, therefore financier is invited to the platform.");
             return inviteFinancierToPlatform(financier);
         }
+        log.info("Financier invited into an investment vehicle with id {}", financier.getInvestmentVehicleId());
         return inviteFinancierToInvestmentVehicle(financier);
     }
 
@@ -113,7 +130,7 @@ public class FinancierService implements FinancierUseCase {
             }
         } catch (MeedlException e) {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
-            log.info("Inviting a new financier to the platform {} ",e.getMessage());
+            log.info("Inviting a new financier to the platform then to vehicle. {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
             Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = addFinancierToVehicle(financier, investmentVehicle);
             if (optionalInvestmentVehicleFinancier.isEmpty()) {
@@ -292,8 +309,52 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
+    @Override
+    public Financier completeKyc(Financier financier) throws MeedlException {
+        kycIdentityValidation(financier);
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+        if (foundFinancier.getIndividual().getNextOfKin() == null &&
+            foundFinancier.getIndividual().getBankDetail() == null){
+            log.info("Financier details in service to use in completing kyc {}", financier);
+
+            updateFinancierNextOfKinKycDetail(financier, foundFinancier);
+            log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
+
+            BankDetail bankDetail = bankDetailOutputPort.save(financier.getIndividual().getBankDetail());
+            foundFinancier.getIndividual().setBankDetail(bankDetail);
+
+            userIdentityOutputPort.save(foundFinancier.getIndividual());
+            return financierOutputPort.completeKyc(foundFinancier);
+        }else {
+            log.info("Financier {} has already completed kyc.", foundFinancier);
+            throw new MeedlException("Kyc already done.");
+        }
+    }
+
+    private static void kycIdentityValidation(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        MeedlValidator.validateObjectInstance(financier.getIndividual(), "User performing this action is unknown");
+        MeedlValidator.validateUUID(financier.getIndividual().getId(), "User identification performing this action is unknown. ");
+        MeedlValidator.validateObjectInstance(financier.getIndividual().getNextOfKin(), "Next of kin is unknown");
+    }
+
+    private NextOfKin updateNextOfKinForKyc(Financier financier, Financier foundFinancier) throws MeedlException {
+        NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
+        nextOfKin.setUserId(foundFinancier.getIndividual().getId());
+        return nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
+    }
+
+    private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
+        NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
+        foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
+        foundFinancier.getIndividual().setNin(financier.getIndividual().getNin());
+        foundFinancier.getIndividual().setTaxId(financier.getIndividual().getTaxId());
+        foundFinancier.getIndividual().setAddress(financier.getIndividual().getAddress());
+    }
+
     private Financier saveFinancier(Financier financier) throws MeedlException {
         financier.setActivationStatus(ActivationStatus.INVITED);
+        financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         UserIdentity userIdentity = financier.getIndividual();
         log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
         userIdentity.setCreatedBy(financier.getInvitedBy());

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface FinancierOutputPort {
     void delete(String financierId) throws MeedlException;
 
     List<Financier> search(String name) throws MeedlException;
+
+    Financier completeKyc(Financier financier) throws MeedlException;
 }

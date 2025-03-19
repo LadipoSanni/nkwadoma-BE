@@ -38,5 +38,4 @@ public class SetUpInvestmentVehicleRequest {
     private String sponsors;
     private BigDecimal minimumInvestmentAmount;
     private InvestmentVehicleStatus investmentVehicleStatus;
-    private InvestmentVehicleVisibility investmentVehicleVisibility;
 }
