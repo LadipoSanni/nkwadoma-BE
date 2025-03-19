@@ -211,12 +211,12 @@ public class TestData {
 
     public static Financier completeKycRequest(Financier financier, BankDetail bankDetail, NextOfKin nextOfKin){
         log.info("Bank Detail in test data {}", bankDetail);
-        financier.getIndividual().setBankDetail(bankDetail);
+        financier.getUserIdentity().setBankDetail(bankDetail);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
-        financier.getIndividual().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
-        financier.getIndividual().setNin("2025103002");
-        financier.getIndividual().setTaxId("00000122");
-        financier.getIndividual().setNextOfKin(nextOfKin);
+        financier.getUserIdentity().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
+        financier.getUserIdentity().setNin("2025103002");
+        financier.getUserIdentity().setTaxId("00000122");
+        financier.getUserIdentity().setNextOfKin(nextOfKin);
         return financier;
     }
 

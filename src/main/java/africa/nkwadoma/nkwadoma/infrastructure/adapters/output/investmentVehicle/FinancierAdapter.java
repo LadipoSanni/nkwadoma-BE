@@ -46,7 +46,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
-        log.info("Financier next of kin found in adapter: {}", financierEntity.getIndividual().getNextOfKinEntity());
+        log.info("Financier next of kin found in adapter: {}", financierEntity.getUserIdentity().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
 //    @Override

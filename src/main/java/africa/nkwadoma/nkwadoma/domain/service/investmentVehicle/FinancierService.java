@@ -234,11 +234,11 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         return financierOutputPort.findFinancierByFinancierId(financierId);
     }
-    @Override
-    public FinancierDetails viewFinancierDetailByFinancierId(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        return financierOutputPort.findFinancierDetailsByFinancierId(financierId);
-    }
+//    @Override
+//    public FinancierDetails viewFinancierDetailByFinancierId(String financierId) throws MeedlException {
+//        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+//        return financierOutputPort.findFinancierDetailsByFinancierId(financierId);
+//    }
 
     @Override
     public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {

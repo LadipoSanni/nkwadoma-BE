@@ -37,10 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,13 +75,6 @@ public class FinancierServiceTest {
     private List<Financier> financierList;
 
     private NextOfKin nextOfKin;
-    @Autowired
-    private LoaneeRepository loaneeRepository;
-    @Autowired
-    private LoaneeMapper loaneeMapper;
-    private LoaneeEntity savedLoanee;
-    private NextOfKin savedNextOfKin;
-
 
     @BeforeAll
     void setUp(){
@@ -97,7 +87,8 @@ public class FinancierServiceTest {
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         investmentVehicleId = investmentVehicle.getId();
         financier.setInvestmentVehicleId(investmentVehicleId);
-        financierList = List.of(financier);
+        financierList = new ArrayList<>();
+        financierList.add(financier);
         nextOfKin = TestData.createNextOfKinData(financier.getUserIdentity());
     }
 
@@ -350,29 +341,29 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier);
         assertEquals(financierId, foundFinancier.getId());
     }
-    @Test
-    @Order(5)
-    void findFinancierProjectionDetailsByFinancierId() {
-        FinancierDetails foundFinancier = null;
-        try {
-            foundFinancier = financierUseCase.viewFinancierDetailByFinancierId(financierId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("User identity id for previously saved test user : {} ", userIdentityId);
-        log.info("Financier details: {} ", foundFinancier);
-        assertNotNull(foundFinancier);
-        assertNotNull(foundFinancier.getUserIdentity());
-        assertNotNull(foundFinancier.getNextOfKin());
-        assertEquals(financierId, foundFinancier.getId());
-        assertEquals(userIdentityId, foundFinancier.getUserIdentity().getId());
-    }
+//    @Test
+//    @Order(5)
+//    void findFinancierProjectionDetailsByFinancierId() {
+//        FinancierDetails foundFinancier = null;
+//        try {
+//            foundFinancier = financierUseCase.viewFinancierDetailByFinancierId(financierId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.info("User identity id for previously saved test user : {} ", userIdentityId);
+//        log.info("Financier details: {} ", foundFinancier);
+//        assertNotNull(foundFinancier);
+//        assertNotNull(foundFinancier.getUserIdentity());
+//        assertNotNull(foundFinancier.getNextOfKin());
+//        assertEquals(financierId, foundFinancier.getId());
+//        assertEquals(userIdentityId, foundFinancier.getUserIdentity().getId());
+//    }
 
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
-    void findFinancierDetailsByInvalidId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetailByFinancierId(invalidId));
-    }
+//    @ParameterizedTest
+//    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
+//    void findFinancierDetailsByInvalidId(String invalidId) {
+//        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetailByFinancierId(invalidId));
+//    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidId(String invalidId) {
@@ -559,12 +550,12 @@ public class FinancierServiceTest {
     @AfterAll
     void tearDown() throws MeedlException {
         log.info("Started deleting data in financier service test." );
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userIdentityId);
         deleteNotification(userIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
         financierOutputPort.delete(financierId);
         identityManagerOutputPort.deleteUser(userIdentity);
-        nextOfKinOutputPort1.deleteNextOfKin(savedNextOfKin.getId());
-        loaneeRepository.delete(savedLoanee);
+        nextOfKinOutputPort.deleteNextOfKin(userIdentity.getNextOfKin().getId());
         userIdentityOutputPort.deleteUserById(userIdentityId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");

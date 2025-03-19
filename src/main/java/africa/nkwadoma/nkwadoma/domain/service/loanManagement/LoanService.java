@@ -371,7 +371,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         LoanOffer offer = loanOfferOutputPort.findLoanOfferById(loanOffer.getId());
         log.info("found Loan offer : {}", loanOffer);
         Optional<Loanee> loanee = loaneeOutputPort.findByUserId(loanOffer.getUserId());
-        log.info("Loan  : {}", loanOffer);
+        log.info("Loan offer: {}", loanOffer);
         if (loanee.isEmpty()) {
             log.info("Loanee is empty : {}", loanOffer);
             throw new LoanException(LoanMessages.LOANEE_NOT_FOUND.getMessage());

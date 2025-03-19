@@ -38,11 +38,11 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     //TODO
 
     @Query("SELECT f FROM FinancierEntity f " +
-            "WHERE upper(concat(f.individual.firstName, ' ', f.individual.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "OR upper(concat(f.individual.lastName, ' ', f.individual.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
+            "WHERE upper(concat(f.userIdentity.firstName, ' ', f.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
+            "OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
     List<FinancierEntity> findByNameFragment(@Param("nameFragment") String nameFragment);
 
-    @Query("SELECT f FROM FinancierEntity f WHERE f.individual.email = :financierEmail")
+    @Query("SELECT f FROM FinancierEntity f WHERE f.userIdentity.email = :financierEmail")
     Optional<FinancierEntity> findByEmail(String financierEmail);
 
     @Query("SELECT f FROM FinancierEntity f " +

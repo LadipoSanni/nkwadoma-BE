@@ -33,6 +33,4 @@ public class FinancierEntity {
     private AccreditationStatus accreditationStatus;
     @Enumerated(EnumType.STRING)
     private FinancierType financierType;
-    @OneToOne
-    private UserEntity individual;
 }

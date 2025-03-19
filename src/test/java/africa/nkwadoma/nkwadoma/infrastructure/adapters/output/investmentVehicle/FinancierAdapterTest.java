@@ -61,6 +61,14 @@ class FinancierAdapterTest {
         bankDetail = TestData.buildBankDetail();
         userIdentity = TestData.createTestUserIdentity(userEmail, "ead0f7cb-5483-4bb8-b271-813660a4c368");
         userIdentity.setRole(IdentityRole.FINANCIER);
+        try{
+            userIdentity  = userIdentityOutputPort.save(userIdentity);
+            userIdentityId = userIdentity.getId();
+            log.info("User saved in financier adapter test set up");
+        }catch (MeedlException meedlException){
+            log.error("set up financier adapter failure saving user {} ", meedlException.getMessage(), meedlException);
+            throw new RuntimeException(meedlException);
+        }
 
         financier = TestData.buildFinancierIndividual(userIdentity);
         investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForTest");
@@ -178,28 +186,28 @@ class FinancierAdapterTest {
         assertEquals(financierId, foundFinancier.getId());
         assertEquals(userIdentity.getId(), foundFinancier.getUserIdentity().getId());
     }
-    @Test
-    @Order(4)
-    void findFinancierProjectionDetailsByFinancierId() {
-        FinancierDetails foundFinancier = null;
-        try {
-            foundFinancier = financierOutputPort.findFinancierDetailsByFinancierId(financierId);
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("User identity id for previously saved test user : {} ", userIdentityId);
-        log.info("Financier details: {} ", foundFinancier);
-        assertNotNull(foundFinancier);
-        assertNotNull(foundFinancier.getUserIdentity());
-        assertNotNull(foundFinancier.getNextOfKin());
-        assertEquals(financierId, foundFinancier.getId());
-        assertEquals(userIdentityId, foundFinancier.getUserIdentity().getId());
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
-    void findFinancierProjectionByInvalidFinancierId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierDetailsByFinancierId(invalidId));
-    }
+//    @Test
+//    @Order(4)
+//    void findFinancierProjectionDetailsByFinancierId() {
+//        FinancierDetails foundFinancier = null;
+//        try {
+//            foundFinancier = financierOutputPort.findFinancierDetailsByFinancierId(financierId);
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.info("User identity id for previously saved test user : {} ", userIdentityId);
+//        log.info("Financier details: {} ", foundFinancier);
+//        assertNotNull(foundFinancier);
+//        assertNotNull(foundFinancier.getUserIdentity());
+//        assertNotNull(foundFinancier.getNextOfKin());
+//        assertEquals(financierId, foundFinancier.getId());
+//        assertEquals(userIdentityId, foundFinancier.getUserIdentity().getId());
+//    }
+//    @ParameterizedTest
+//    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
+//    void findFinancierProjectionByInvalidFinancierId(String invalidId) {
+//        assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierDetailsByFinancierId(invalidId));
+//    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidFinancierId(String invalidId) {
@@ -412,7 +420,7 @@ class FinancierAdapterTest {
     }
 
     @Test
-//    @Order(9)
+    @Order(9)
     public void deleteFinancier(){
         try {
             Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
