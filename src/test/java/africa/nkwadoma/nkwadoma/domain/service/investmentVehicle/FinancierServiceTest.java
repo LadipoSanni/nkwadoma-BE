@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -179,6 +180,44 @@ public class FinancierServiceTest {
         financier.setInvitedBy(invitedBy);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
+
+    @Test
+    @Order(2)
+    void investInVehicle() {
+        financier.setInvestmentAmount(new BigDecimal("1000.00"));
+        financier.setId(financierId);
+        Financier financierThatHasInvested = null;
+        InvestmentVehicle investmentVehicle = null;
+        try {
+            investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            if (investmentVehicle.getTotalAvailableAmount() == null) {
+                investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
+            }
+            BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
+            financierThatHasInvested = financierUseCase.investInVehicle(financier);
+
+            InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
+            assertEquals(initialAmount.add(financierThatHasInvested.getInvestmentAmount()), currentAmount,
+                    "The total available amount should be updated correctly");
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void investInVehicleWithNullAmount(){
+        financier.setInvestmentAmount(null);
+        assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(financier));
+    }
+
+    @Test
+    void investInVehicleWillNullInvestmentVehicleId() throws MeedlException {
+        financier.setInvestmentVehicleId(null);
+        Financier financier1 = financierUseCase.viewFinancierDetail(financierId);
+        assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(financier));
+    }
+
     @Test
     public void inviteFinancierWithNullInvestmentVehicleFinancier() {
         assertThrows(MeedlException.class,()-> financierUseCase.inviteFinancier(List.of()));

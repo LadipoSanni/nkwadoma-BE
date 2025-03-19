@@ -36,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -307,6 +308,27 @@ public class FinancierService implements FinancierUseCase {
                 log.error("Failed to find Financier when attempting to update Financier status for user with id {}", financier.getIndividual().getId(), e);
             }
         }
+    }
+
+    @Override
+    public Financier investInVehicle(Financier financier) throws MeedlException {
+        InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId() ,financier.getId())
+                .orElseThrow(()-> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
+        InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+        BigDecimal newAmount = updateInvestmentVehicleAmount(financier, investmentVehicle);
+        log.info("New amount after adding to the investment vehicle {}... {}", newAmount, investmentVehicle.getTotalAvailableAmount());
+        investmentVehicleOutputPort.save(investmentVehicle);
+        return financier;
+    }
+
+    private static BigDecimal updateInvestmentVehicleAmount(Financier financier, InvestmentVehicle investmentVehicle) {
+        if (investmentVehicle.getTotalAvailableAmount() == null) {
+            investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
+        }
+        BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
+        BigDecimal newAmount = currentAmount.add(financier.getInvestmentAmount());
+        investmentVehicle.setTotalAvailableAmount(newAmount);
+        return newAmount;
     }
 
     @Override
