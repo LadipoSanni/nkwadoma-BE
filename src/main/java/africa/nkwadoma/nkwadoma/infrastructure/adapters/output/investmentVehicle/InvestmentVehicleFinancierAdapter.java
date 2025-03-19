@@ -11,7 +11,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investment
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestorInvestmentVehicleRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinancierOutputPort {
-    private final InvestorInvestmentVehicleRepository investorInvestmentVehicleRepository;
+    private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
     @Override
@@ -34,7 +34,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         investmentVehicleFinancier.validate();
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
                 investmentVehicleFinancierMapper.toInvestmentVehicleFinancierEntity(investmentVehicleFinancier);
-        InvestmentVehicleFinancierEntity savedInvestmentVehicleFinancierEntity = investorInvestmentVehicleRepository.save(investmentVehicleFinancierEntity);
+        InvestmentVehicleFinancierEntity savedInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.save(investmentVehicleFinancierEntity);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(savedInvestmentVehicleFinancierEntity);
 
     }
@@ -44,7 +44,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
         log.info("Validated id for view InvestmentVehicleFinancier by vehicle id and financier id is {} ----- {}", investmentVehicleId, financierId);
-        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investorInvestmentVehicleRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
+        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
 
         if (optionalInvestmentVehicleFinancierEntity.isEmpty()){
             return Optional.empty();
@@ -56,20 +56,20 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     @Override
     public void deleteInvestmentVehicleFinancier(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "Invalid investment vehicle financier Id provided");
-        investorInvestmentVehicleRepository.deleteById(id);
+        investmentVehicleFinancierRepository.deleteById(id);
     }
 
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        Page<FinancierEntity> financiers = investorInvestmentVehicleRepository.findFinanciersByInvestmentVehicleId(investmentVehicleId, pageRequest);
+        Page<FinancierEntity> financiers = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleId(investmentVehicleId, pageRequest);
         return financiers.map(financierMapper::map);
     }
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(activationStatus, "Please provide a valid activation status to find by.");
-        Page<FinancierEntity> financiers = investorInvestmentVehicleRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        Page<FinancierEntity> financiers = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
         return financiers.map(financierMapper::map);
     }
 
@@ -79,6 +79,6 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String financierId) throws MeedlException {
         MeedlValidator.validateUUID(investmentId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
-        investorInvestmentVehicleRepository.deleteByInvestmentVehicleIdAndFinancierId(investmentId, financierId);
+        investmentVehicleFinancierRepository.deleteByInvestmentVehicleIdAndFinancierId(investmentId, financierId);
     }
 }

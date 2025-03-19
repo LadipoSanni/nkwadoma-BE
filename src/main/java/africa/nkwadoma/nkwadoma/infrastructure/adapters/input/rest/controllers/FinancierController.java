@@ -4,9 +4,11 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Financ
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
@@ -37,6 +39,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
+        log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = financierRestMapper.map(financierRequest);
         financier.setIndividual(financierRequest.getIndividual());
         log.info("Mapped financier at controller {}", financier);
@@ -49,6 +52,23 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
+    @PostMapping("financier/complete-kyc")
+    @PreAuthorize("hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
+        Financier financier = financierRestMapper.map(kycRequest, meedlUser.getClaimAsString("sub"));
+        financier = financierUseCase.completeKyc(financier);
+
+        KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
+        ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
+                .data(kycResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
     @GetMapping("financier/view/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {

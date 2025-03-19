@@ -1,19 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
@@ -24,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +32,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     public Financier save(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier can not be empty.");
         financier.validate();
+        log.info("Financier before saving is {}", financier);
         FinancierEntity financierEntity = financierMapper.map(financier);
         FinancierEntity savedFinancierEntity = financierRepository.save(financierEntity);
         log.info("Financier saved to db: {}", savedFinancierEntity);
@@ -49,8 +42,9 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByFinancierId(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        FinancierEntity financierEntity = financierRepository.findById(financierId)
+        FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
+        log.info("Financier next of kin found in adapter: {}", financierEntity.getIndividual().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
 
@@ -74,6 +68,21 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Financiers found with name: {} {}", name, financierEntities );
         return financierEntities.stream().map
                 (financierMapper::map).toList();
+    }
+
+    @Override
+    public Financier completeKyc(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        financier.validate();
+        financier.validateKyc();
+        financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
+        FinancierEntity financierToSave = financierMapper.map(financier);
+        log.info("Financier to save: {}", financierToSave);
+        FinancierEntity financierEntity = financierRepository.save(financierToSave);
+        log.info("Financier with id : {} completed KYC successfully", financierEntity);
+        Financier kycCompletedFinancier = financierMapper.map(financierEntity);
+        log.info("Kyc completed financier {}", kycCompletedFinancier);
+        return kycCompletedFinancier;
     }
 
     @Override

@@ -20,4 +20,6 @@ public interface FinancierUseCase {
     List<Financier> search(String name) throws MeedlException;
 
     void updateFinancierStatus(Financier financier);
+
+    Financier completeKyc(Financier financier) throws MeedlException;
 }
