@@ -6,5 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 
 public interface FinancierEmailUseCase {
+    void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException;
+
     void inviteFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException;
 }

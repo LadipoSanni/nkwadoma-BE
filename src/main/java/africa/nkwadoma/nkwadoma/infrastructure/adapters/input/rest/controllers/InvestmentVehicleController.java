@@ -5,12 +5,14 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import jakarta.validation.Valid;
 import lombok.*;
 import lombok.extern.slf4j.*;
@@ -51,7 +53,7 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investment-vehicle-details/{id}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') and hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
@@ -85,24 +87,6 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("view-all-investment-vehicle-by-type")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleType(
-            @RequestParam int pageSize,
-            @RequestParam int pageNumber,
-            @RequestParam InvestmentVehicleType type) throws MeedlException {
-        Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleByType(pageSize, pageNumber, type);
-        List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponse)
-                .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
 
     @GetMapping("investment-vehicle/all/view/by")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -117,87 +101,35 @@ public class InvestmentVehicleController {
                 .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
 
         List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
+                investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
 
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponse)
-                .message(VIEW_ALL_INVESTMENT_VEHICLE)
+        PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
+                investmentVehicleResponse, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
+                .data(paginatedResponse)
+                .message(String.format("Investment vehicle %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("view-all-investment-vehicle-by-status")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleType(
-            @RequestParam int pageSize,
-            @RequestParam int pageNumber,
-            @RequestParam InvestmentVehicleStatus status) throws MeedlException {
-        Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleByStatus(pageSize, pageNumber, status);
-
-        List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponse)
-                .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("view-all-investment-vehicle-by-type-and-status")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleTypeAndStatus(
-            @RequestParam int pageSize,
-            @RequestParam int pageNumber,
-            @RequestParam InvestmentVehicleType type,
-            @RequestParam InvestmentVehicleStatus status) throws MeedlException {
-        Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
-        List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponse)
-                .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("investment-vehicle/all/view")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleByFundRaisingStatus(
-            @RequestParam int pageSize,
-            @RequestParam int pageNumber,
-            @RequestParam FundRaisingStatus fundRaisingStatus) throws MeedlException {
-        Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleByFundRaisingStatus(pageSize, pageNumber, fundRaisingStatus);
-
-        List<InvestmentVehicleResponse> investmentVehicleResponse =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.toList());
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponse)
-                .message(VIEW_ALL_INVESTMENT_VEHICLE)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
 
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName,
+                                                                  @RequestParam InvestmentVehicleType investmentVehicleType,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+    ) throws MeedlException {
 
-        List<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.searchInvestmentVehicle(investmentVehicleName);
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.searchInvestmentVehicle(investmentVehicleName,investmentVehicleType,pageSize,pageNumber );
         List<InvestmentVehicleResponse> investmentVehicleResponses =
-                investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles);
-
-        ApiResponse<List<InvestmentVehicleResponse>> apiResponse = ApiResponse.<List<InvestmentVehicleResponse>>builder()
-                .data(investmentVehicleResponses)
+                investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
+        PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
+                .data(paginatedResponse)
                 .message(SEARCH_INVESTMENT_VEHICLE)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
@@ -205,4 +137,18 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PostMapping("investment-vehicle/visibility")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> setUpVisibility(@RequestBody InvestmentVehicleVisibilityRequest vehicleVisibilityRequest) throws MeedlException {
+        InvestmentVehicle investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(vehicleVisibilityRequest.getInvestmentVehicleId(),
+                vehicleVisibilityRequest.getVisibility(),vehicleVisibilityRequest.getFinancierIds());
+        InvestmentVehicleResponse investmentVehicleResponse =
+                investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
+                .data(investmentVehicleResponse)
+                .message(INVESTMENT_VEHICLE_VISIBILITY_UPDATED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

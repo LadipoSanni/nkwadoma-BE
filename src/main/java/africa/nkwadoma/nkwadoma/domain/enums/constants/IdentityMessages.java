@@ -41,7 +41,7 @@ public enum IdentityMessages {
     LOAN_0FFER_ID("Loan offer ID"),
     CONTEXT_LINK("loanOfferId"),
     CONTEXT_LOANEE_ID("loaneeId"),
-    LOANEE_HAS_NEXT_OF_KIN("Next of kin details exist for this loanee.");
+    USER_HAS_NEXT_OF_KIN("Next of kin details exist for this user.");
 
     public String format(Object... args) {
         return String.format(message, args);

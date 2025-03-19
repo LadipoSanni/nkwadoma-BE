@@ -21,7 +21,7 @@ public class MeedlNotification {
     private String contentId;
     private String title;
     private UserIdentity user;
-    private boolean isRead;
+    private boolean read;
     private LocalDateTime timestamp;
     private boolean callToAction;
     private String senderMail;
