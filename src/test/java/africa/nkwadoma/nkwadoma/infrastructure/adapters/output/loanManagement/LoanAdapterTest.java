@@ -57,7 +57,7 @@ class LoanAdapterTest {
     @Autowired
     private LoaneeLoanAccountOutputPort loaneeLoanAccountOutputPort;
     @Autowired
-    private NextOfKinIdentityOutputPort nextOfKinIdentityOutputPort;
+    private NextOfKinOutputPort nextOfKinOutputPort;
     private Loan loan;
     private LoaneeLoanAccount loaneeLoanAccount;
     private String savedLoanId;
@@ -158,8 +158,8 @@ class LoanAdapterTest {
             loaneeId = loanee.getId();
 
 
-            nextOfKin = TestData.createNextOfKinData(loanee);
-            NextOfKin savedNextOfKin = nextOfKinIdentityOutputPort.save(nextOfKin);
+            nextOfKin = TestData.createNextOfKinData(userIdentity);
+            NextOfKin savedNextOfKin = nextOfKinOutputPort.save(nextOfKin);
             assertNotNull(savedNextOfKin);
             nextOfKinId = savedNextOfKin.getId();
 
@@ -346,7 +346,7 @@ class LoanAdapterTest {
 
     private void deleteLoan() {
         try {
-            nextOfKinIdentityOutputPort.deleteNextOfKin(nextOfKinId);
+            nextOfKinOutputPort.deleteNextOfKin(nextOfKinId);
         } catch (MeedlException e) {
             log.error("Error deleting next of kin", e);
         }

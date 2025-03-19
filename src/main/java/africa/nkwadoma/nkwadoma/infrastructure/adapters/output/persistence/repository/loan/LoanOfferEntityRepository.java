@@ -57,9 +57,10 @@ public interface LoanOfferEntityRepository extends JpaRepository<LoanOfferEntity
     
     from LoanOfferEntity lo
     join LoaneeEntity l on lo.loanee.id = l.id
+    join UserEntity  u on l.userIdentity.id = u.id
     left join CohortEntity c on l.cohortId = c.id
     left join LoanProductEntity lp on lo.loanProduct.id = lp.id
-    left join NextOfKinEntity n on l.id = n.loaneeEntity.id
+    left join NextOfKinEntity n on u.nextOfKinEntity.id = n.id
     left join ProgramEntity p on c.programId = p.id
     where lo.id = :id
 """)

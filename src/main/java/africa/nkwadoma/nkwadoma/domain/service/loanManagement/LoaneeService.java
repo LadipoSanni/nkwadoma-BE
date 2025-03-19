@@ -266,6 +266,7 @@ public class LoaneeService implements LoaneeUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
         loanee.setReferredBy(organizationIdentity.getName());
+        loaneeOutputPort.save(loanee);
         return organizationIdentity;
     }
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {

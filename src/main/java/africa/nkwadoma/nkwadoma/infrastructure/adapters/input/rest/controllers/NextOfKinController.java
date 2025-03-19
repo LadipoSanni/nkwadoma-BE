@@ -30,8 +30,7 @@ public class NextOfKinController {
     public ResponseEntity<ApiResponse<NextOfKinResponse>> createNextOfKin(@RequestBody NextOfKinRequest request,
                                                                           @AuthenticationPrincipal Jwt meedlUserId) throws MeedlException {
         log.info("User ID =====> " + meedlUserId.getClaim("sub"));
-        NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request);
-        nextOfKin.getLoanee().getUserIdentity().setId(meedlUserId.getClaim("sub"));
+        NextOfKin nextOfKin = nextOfKinRestMapper.toNextOfKin(request, meedlUserId.getClaimAsString("sub") );
         NextOfKin createdNextOfKin = createNextOfKinUseCase.saveAdditionalDetails(nextOfKin);
         return ResponseEntity.ok(ApiResponse.<NextOfKinResponse>builder()
                .data(nextOfKinRestMapper.toNextOfKinResponse(createdNextOfKin))
