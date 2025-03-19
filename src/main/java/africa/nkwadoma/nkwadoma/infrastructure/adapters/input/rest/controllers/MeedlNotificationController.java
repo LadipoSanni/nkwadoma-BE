@@ -92,9 +92,9 @@ public class MeedlNotificationController {
     }
     
     @DeleteMapping("notification/delete")
-    private ResponseEntity<ApiResponse<?>> deleteNotifications(@RequestParam List<String> notificationIds) throws MeedlException {
+    private ResponseEntity<ApiResponse<?>> deleteNotifications(@AuthenticationPrincipal Jwt meedlUser, @RequestParam List<String> notificationIds) throws MeedlException {
 
-        meedlNotificationUsecase.deleteMultipleNotification(notificationIds);
+        meedlNotificationUsecase.deleteMultipleNotification(meedlUser.getClaimAsString("sub"), notificationIds);
 
         return new ResponseEntity<>(ApiResponse.builder()
                 .statusCode(HttpStatus.OK.toString())

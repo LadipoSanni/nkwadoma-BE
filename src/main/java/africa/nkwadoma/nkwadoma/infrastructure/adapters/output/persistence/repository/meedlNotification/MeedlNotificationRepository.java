@@ -25,4 +25,8 @@ public interface MeedlNotificationRepository extends JpaRepository<MeedlNotifica
 
     void deleteAllByUserId(String id);
 
+    @Modifying
+    @Query("DELETE FROM MeedlNotificationEntity mn WHERE mn.user.id = :userId AND mn.id IN :notificationIds")
+    void deleteByUserIdAndNotificationIds(@Param("userId") String userId, @Param("notificationIds") List<String> notificationIds);
+
 }

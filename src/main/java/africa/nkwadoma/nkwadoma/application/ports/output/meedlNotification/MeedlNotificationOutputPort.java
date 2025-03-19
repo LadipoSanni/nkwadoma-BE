@@ -19,6 +19,5 @@ public interface MeedlNotificationOutputPort {
 
     void deleteNotificationByUserId(String id) throws MeedlException;
 
-
-    void deleteMultipleNotification(List<String> deleteNotificationList) throws MeedlException;
+    void deleteMultipleNotification(String userId, List<String> deleteNotificationList) throws MeedlException;
 }

@@ -212,9 +212,32 @@ public class MeedlValidator {
         }
     }
 
-    public static void validateNotificationList(List<String> deleteNotificationList) throws MeedlException {
+    public static List<String> validateNotificationListAndFilter(List<String> deleteNotificationList) throws MeedlException {
         if (CollectionUtils.isEmpty(deleteNotificationList)) {
             throw new MeedlException(MeedlNotificationMessages.NOTIFICATION_LIST_CANNOT_BE_EMPTY.getMessage());
+        }
+
+        List<String> validUUIDs = deleteNotificationList.stream()
+                .filter(MeedlValidator::isValidUUID)
+                .toList();
+
+        if (validUUIDs.isEmpty()) {
+            throw new MeedlException("No valid notification IDs found in the list.");
+        }
+
+        return validUUIDs;
+    }
+
+
+    private static boolean isValidUUID(String id) {
+        if (id == null || id.isEmpty()) {
+            return false;
+        }
+        try {
+            UUID.fromString(id);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 }

@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.meedlNotification;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -79,11 +82,14 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         meedlNotificationRepository.deleteAllByUserId(id);
     }
 
+
     @Transactional
     @Override
-    public void deleteMultipleNotification(List<String> deleteNotificationList) throws MeedlException {
-        MeedlValidator.validateNotificationList(deleteNotificationList);
-        meedlNotificationRepository.deleteAllById(deleteNotificationList);
+    public void deleteMultipleNotification(String userId, List<String> deleteNotificationList) throws MeedlException {
+        MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateNotificationListAndFilter(deleteNotificationList);
+        meedlNotificationRepository.deleteByUserIdAndNotificationIds(userId, deleteNotificationList);
     }
+
 
 }

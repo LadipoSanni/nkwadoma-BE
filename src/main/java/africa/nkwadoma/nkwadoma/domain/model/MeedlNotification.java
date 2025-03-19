@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Builder
+@ToString
 public class MeedlNotification {
 
     private String id;

@@ -186,12 +186,42 @@ public class MeedlNotificationServiceTest {
 
     @Test
     void deleteMultipleNotification() throws MeedlException {
-        doNothing().when(meedlNotificationOutputPort).deleteMultipleNotification(notificationIdList);
-
-        assertDoesNotThrow(() -> notificationService.deleteMultipleNotification(notificationIdList));
-
-        verify(meedlNotificationOutputPort, times(1)).deleteMultipleNotification(notificationIdList);
+        doNothing().when(meedlNotificationOutputPort)
+                .deleteMultipleNotification(userIdentity.getId(), notificationIdList);
+        assertDoesNotThrow(() -> notificationService.deleteMultipleNotification(userIdentity.getId(), notificationIdList));
+        verify(meedlNotificationOutputPort, times(1))
+                .deleteMultipleNotification(userIdentity.getId(), notificationIdList);
 
     }
+
+    @Test
+    void deleteWithEmptyNotificationList() {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), List.of()));
+    }
+
+    @Test
+    void deleteWithNullNotificationList() {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, "invalidId", " "})
+    void deleteWithInvalidUserId(String invalidUserId) {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(invalidUserId, notificationIdList));
+    }
+
+    @Test
+    void deleteWithListOfInvalidNotificationIds() {
+        List<String> allInvalidNotificationIds = List.of(" ", "invalid-user-id", "");
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), allInvalidNotificationIds));
+    }
+
+
+
+
 
 }

@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
@@ -263,8 +264,9 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     }
 
     @Override
-    public void deleteMultipleNotification(List<String> notificationIdList) throws MeedlException {
-        MeedlValidator.validateNotificationList(notificationIdList);
-        meedlNotificationOutputPort.deleteMultipleNotification(notificationIdList);
+    public void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException {
+        MeedlValidator.validateUUID(userId, USER_ID_CANNOT_BE_EMPTY.getMessage());
+        notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
+        meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
     }
 }

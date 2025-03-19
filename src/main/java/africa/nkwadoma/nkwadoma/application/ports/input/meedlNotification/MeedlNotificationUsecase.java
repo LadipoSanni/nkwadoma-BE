@@ -13,6 +13,6 @@ public interface MeedlNotificationUsecase {
 
     Page<MeedlNotification> viewAllNotification(String id, int pageSize, int pageNumber) throws MeedlException;
 
-    void deleteMultipleNotification(List<String> notificationIdList) throws MeedlException;
+    void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException;
     MeedlNotification getNumberOfUnReadNotification(String id) throws MeedlException;
 }
