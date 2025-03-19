@@ -49,15 +49,16 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Financier next of kin found in adapter: {}", financierEntity.getIndividual().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
-    @Override
-    public FinancierDetails findFinancierDetailsByFinancierId(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        log.info("Finding financier projection with id for find {}", financierId);
-     FinancierDetailProjection financierDetailProjection = financierRepository.findByFinancierId(financierId)
-                .orElseThrow(()-> new MeedlException("Financier not found"));
-     log.info("Found financier projection next of kin: {}", financierDetailProjection.getNextOfKin());
-        return financierMapper.map(financierDetailProjection);
-    }
+//    @Override
+//    public FinancierDetails findFinancierDetailsByFinancierId(String financierId) throws MeedlException {
+//        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+//        log.info("Finding financier projection with id for find {}", financierId);
+//     FinancierDetailProjection financierDetailProjection = null;
+//             financierRepository.findByFinancierId(financierId)
+//                .orElseThrow(()-> new MeedlException("Financier not found"));
+//     log.info("Found financier projection next of kin: {}", financierDetailProjection.getNextOfKin());
+//        return financierMapper.map(financierDetailProjection);
+//    }
 
     @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {

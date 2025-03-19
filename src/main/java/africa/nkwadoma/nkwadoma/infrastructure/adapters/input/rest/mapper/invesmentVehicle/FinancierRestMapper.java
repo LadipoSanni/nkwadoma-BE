@@ -20,7 +20,7 @@ public interface FinancierRestMapper {
     FinancierResponse map(FinancierDetails financier);
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "individual.id", source = "userId")
+    @Mapping(target = "userIdentity.id", source = "userId")
 //    @Mapping(target = "individual.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
 //    @Mapping(target = "individual.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
 //    @Mapping(target = "individual.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
