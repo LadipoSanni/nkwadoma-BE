@@ -99,7 +99,7 @@ Ask the backend lead to provide a query to pre populate the database for defaul 
 
 Now you are Ready for Local Development.
 check the following link for the Project Environment Diagram
-- https://csgpr805b4tu.sg.larksuite.com/wiki/WZ6hw0mItisAECkSQ1kl4W2Vglc
+- https://csgpr805b4tu.sg.larksuite.com/wiki/WZ6hw0mItisAECkSQ1kl4W2Vglc?from=from_copylink
   
 Thank you!
 The Cloud Team
