@@ -3,9 +3,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -30,8 +32,12 @@ class AdminInitializerTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Autowired
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private PortfolioOutputPort portfolioOutputPort;
     private UserIdentity userIdentity;
     private OrganizationIdentity organizationIdentity;
+    private Portfolio portfolio;
+    private String portfolioId;
     @BeforeEach
     void setUp() {
        userIdentity = UserIdentity.builder()
@@ -41,6 +47,8 @@ class AdminInitializerTest {
                .role(PORTFOLIO_MANAGER)
                .createdBy("61fb3beb-f200-4b16-ac58-c28d737b546c")
                .build();
+
+       portfolio = Portfolio.builder().portfolioName("Portfolio").build();
     }
 
     @Test
@@ -136,5 +144,41 @@ class AdminInitializerTest {
             assertNull(foundUserInDb);
         }
     }
+
+    @Test
+    @Order(6)
+    void createPortfolio() {
+        Portfolio newPorfolio = null;
+        try {
+            newPorfolio = adminInitializer.createMeedlPortfolio(portfolio);
+            portfolioId = newPorfolio.getId();
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(newPorfolio);
+        assertEquals(portfolio.getPortfolioName(), newPorfolio.getPortfolioName());
+    }
+
+    @Test
+    @Order(7)
+    void portfolioAlreadyExistsDoesntCreateAnewOne() {
+        Portfolio existingPorfolio = null;
+        try {
+            existingPorfolio = adminInitializer.createMeedlPortfolio(portfolio);
+        }catch (MeedlException exception){
+            log.error(exception.getMessage());
+        }
+        assertNotNull(existingPorfolio);
+        assertEquals(portfolio.getPortfolioName(), existingPorfolio.getPortfolioName());
+        assertEquals(portfolioId, existingPorfolio.getId());
+    }
+
+
+    @AfterAll
+    void cleanUp() {
+        portfolioOutputPort.delete(portfolioId);
+    }
+
+
 
 }

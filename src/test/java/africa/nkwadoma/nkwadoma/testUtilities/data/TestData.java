@@ -17,6 +17,8 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -429,6 +431,18 @@ public class TestData {
                 .session(null)
                 .endpointName("NIN Verification")
                 .userId("USR-987654")
+                .build();
+    }
+
+    public static Portfolio createMeedlPortfolio() {
+        return Portfolio.builder()
+                .portfolioName("Portfolio")
+                .totalNumberOfCommercialFundsInvestmentVehicle(2)
+                .totalNumberOfFinancier(2)
+                .totalNumberOfEndowmentFundsInvestmentVehicle(2)
+                .totalNumberOfInvestmentVehicle(2)
+                .totalNumberOfInstitutionalFinancier(2)
+                .totalNumberOfIndividualFinancier(2)
                 .build();
     }
 
