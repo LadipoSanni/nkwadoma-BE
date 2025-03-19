@@ -172,20 +172,28 @@ public class FinancierServiceTest {
                 investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
             }
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-            log.info("======Investment Vehicle Before Investment -------> {} ---- -- {}", initialAmount, investmentVehicle.getInvestmentVehicleStatus());
-
             financierThatHasInvested = financierUseCase.investInVehicle(financier);
 
             InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
-            log.info("======Investment Vehicle After Investment -------> {}", currentAmount);
-
             assertEquals(initialAmount.add(financierThatHasInvested.getInvestmentAmount()), currentAmount,
                     "The total available amount should be updated correctly");
-
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void investInVehicleWithNullAmount(){
+        financier.setInvestmentAmount(null);
+        assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(financier));
+    }
+
+    @Test
+    void investInVehicleWillNullInvestmentVehicleId() throws MeedlException {
+        financier.setInvestmentVehicleId(null);
+        Financier financier1 = financierUseCase.viewFinancierDetail(financierId);
+        assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(financier));
     }
 
     @Test
