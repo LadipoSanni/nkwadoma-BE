@@ -491,4 +491,19 @@ public class TestData {
                 .operationStatus(OperationStatus.ACTIVE)
                 .build();
     }
+
+    public static CapitalDistribution buildCapitalDistribution() {
+        return CapitalDistribution.builder()
+                .due(0)
+                .totalCapitalPaidOut(BigDecimal.ZERO)
+                .build();
+    }
+
+    public static VehicleClosure buildVehicleClosure(CapitalDistribution capitalDistribution) {
+        return VehicleClosure.builder()
+                .capitalDistribution(capitalDistribution)
+                .investmentVehicleMode(InvestmentVehicleMode.OPEN)
+                .maturity("maturity")
+                .build();
+    }
 }
