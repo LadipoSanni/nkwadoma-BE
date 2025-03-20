@@ -25,4 +25,6 @@ public interface FinancierRestMapper {
 //    @Mapping(target = "individual.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
 //    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
     Financier map(KycRequest kycRequest, String userId);
+
+    Financier map(FinancierRequest financierRequest, String sub);
 }
