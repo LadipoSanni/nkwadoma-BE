@@ -13,9 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -473,5 +471,20 @@ public class TestData {
                .accountName("Lagos Main")
                .accountNumber("1234567890")
                .build();
+    }
+
+    public static CapitalDistribution buildCapitalDistribution() {
+        return CapitalDistribution.builder()
+                .due(0)
+                .totalCapitalPaidOut(BigDecimal.ZERO)
+                .build();
+    }
+
+    public static VehicleClosure buildVehicleClosure(CapitalDistribution capitalDistribution) {
+        return VehicleClosure.builder()
+                .capitalDistribution(capitalDistribution)
+                .investmentVehicleMode(InvestmentVehicleMode.OPEN)
+                .maturity("maturity")
+                .build();
     }
 }
