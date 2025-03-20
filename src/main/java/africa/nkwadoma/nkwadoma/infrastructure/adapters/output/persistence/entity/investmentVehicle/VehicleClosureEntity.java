@@ -4,10 +4,16 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
+@Setter
+@Getter
 @Entity
 public class VehicleClosureEntity {
     @Id
+    @UuidGenerator
     private String id;
     private InvestmentVehicleMode investmentVehicleMode;
     @OneToOne
