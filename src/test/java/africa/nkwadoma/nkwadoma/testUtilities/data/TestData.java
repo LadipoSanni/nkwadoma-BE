@@ -473,6 +473,25 @@ public class TestData {
                .build();
     }
 
+    public static CouponDistribution createCouponDistribution() {
+        return CouponDistribution.builder()
+                .due(0)
+                .paid(0)
+                .lastDatePaid(LocalDateTime.now())
+                .lastDateDue(LocalDateTime.now())
+                .build();
+    }
+
+    public static VehicleOperation createVehicleOperation(CouponDistribution couponDistribution) {
+        return VehicleOperation.builder()
+                .couponDistribution(couponDistribution)
+                .couponDistributionStatus(CouponDistributionStatus.DEFAULT)
+                .fundRaisingStatus(InvestmentVehicleMode.OPEN)
+                .deployingStatus(InvestmentVehicleMode.OPEN)
+                .operationStatus(OperationStatus.ACTIVE)
+                .build();
+    }
+
     public static CapitalDistribution buildCapitalDistribution() {
         return CapitalDistribution.builder()
                 .due(0)
