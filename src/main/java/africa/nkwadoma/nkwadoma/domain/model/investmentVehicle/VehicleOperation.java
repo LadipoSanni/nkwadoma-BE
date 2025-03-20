@@ -1,0 +1,31 @@
+package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.OperationStatus;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+@Builder
+public class VehicleOperation {
+
+    private String id;
+    private CouponDistributionStatus couponDistributionStatus;
+    private CouponDistribution couponDistribution;
+    private InvestmentVehicleMode fundRaisingStatus;
+    private InvestmentVehicleMode deployingStatus;
+    private OperationStatus operationStatus;
+
+    public void validate() throws MeedlException {
+        MeedlValidator.validateObjectInstance(couponDistribution,"Coupon distribution cannot be empty");
+        MeedlValidator.validateObjectInstance(fundRaisingStatus,"Fund raising status cannot be empty");
+        MeedlValidator.validateObjectInstance(deployingStatus,"Deploying status cannot be empty");
+        MeedlValidator.validateObjectInstance(operationStatus,"Operation status cannot be empty");
+        MeedlValidator.validateObjectInstance(couponDistributionStatus,"Coupon distribution status cannot be empty");
+    }
+}
