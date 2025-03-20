@@ -13,7 +13,7 @@ import java.util.UUID;
 class MeedlValidatorTest {
 
     @Test
-    void validateEmail_shouldThrowExceptionForInvalidEmail() {
+    void validateEmailShouldThrowExceptionForInvalidEmail() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateEmail("invalid-email")
         );
@@ -21,12 +21,12 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateEmail_shouldPassForValidEmail() {
+    void validateEmailShouldPassForValidEmail() {
         assertDoesNotThrow(() -> MeedlValidator.validateEmail("test@example.com"));
     }
 
     @Test
-    void validateLoanDecision_shouldThrowExceptionForInvalidDecision() {
+    void validateLoanDecisionShouldThrowExceptionForInvalidDecision() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateLoanDecision("PENDING")
         );
@@ -34,13 +34,13 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateLoanDecision_shouldPassForValidDecision() {
+    void validateLoanDecisionShouldPassForValidDecision() {
         assertDoesNotThrow(() -> MeedlValidator.validateLoanDecision("ACCEPTED"));
         assertDoesNotThrow(() -> MeedlValidator.validateLoanDecision("DECLINED"));
     }
 
     @Test
-    void validateUUID_shouldThrowExceptionForInvalidUUID() {
+    void validateUUIDShouldThrowExceptionForInvalidUUID() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateUUID("invalid-uuid", "Invalid UUID format")
         );
@@ -48,12 +48,12 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateUUID_shouldPassForValidUUID() {
+    void validateUUIDShouldPassForValidUUID() {
         assertDoesNotThrow(() -> MeedlValidator.validateUUID(UUID.randomUUID().toString(), "Valid UUID"));
     }
 
     @Test
-    void validateBigDecimalDataElement_shouldThrowExceptionForNull() {
+    void validateBigDecimalDataElementShouldThrowExceptionForNull() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateBigDecimalDataElement(null)
         );
@@ -61,12 +61,12 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateBigDecimalDataElement_shouldPassForValidValue() {
+    void validateBigDecimalDataElementShouldPassForValidValue() {
         assertDoesNotThrow(() -> MeedlValidator.validateBigDecimalDataElement(BigDecimal.valueOf(100.00)));
     }
 
     @Test
-    void validateBvn_shouldThrowExceptionForInvalidBvn() {
+    void validateBvnShouldThrowExceptionForInvalidBvn() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateBvn("123456")
         );
@@ -74,12 +74,12 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateBvn_shouldPassForValidBvn() {
+    void validateBvnShouldPassForValidBvn() {
         assertDoesNotThrow(() -> MeedlValidator.validateBvn("12345678901"));
     }
 
     @Test
-    void validateAccountNumber_shouldThrowExceptionForShortAccountNumber() {
+    void validateAccountNumberShouldThrowExceptionForShortAccountNumber() {
         MeedlException exception = assertThrows(MeedlException.class, () ->
                 MeedlValidator.validateAccountNumber("12345", "Invalid account number")
         );
@@ -87,7 +87,7 @@ class MeedlValidatorTest {
     }
 
     @Test
-    void validateAccountNumber_shouldPassForValidAccountNumber() {
+    void validateAccountNumberShouldPassForValidAccountNumber() {
         assertDoesNotThrow(() -> MeedlValidator.validateAccountNumber("1234567890", "Valid account number"));
     }
 }
