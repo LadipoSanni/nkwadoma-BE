@@ -68,6 +68,8 @@ public class FinancierServiceTest {
     private String financierId;
     private BankDetail bankDetail;
     private String investmentVehicleId;
+    private String secondInvestmentVehicleId;
+    private String publicInvestmentVehicleId;
     private List<Financier> financierList;
     int pageSize = 10 ;
     int pageNumber = 0 ;
@@ -252,6 +254,7 @@ public class FinancierServiceTest {
             publicInvestmentVehicle.setTotalAvailableAmount(publicInvestmentVehicle.getSize());
             publicInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
             investmentVehicle = createInvestmentVehicle(publicInvestmentVehicle);
+            publicInvestmentVehicleId = investmentVehicle.getId();
             financier.setInvestmentVehicleId(investmentVehicle.getId());
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
             assertEquals(new BigDecimal("4000.00"), initialAmount);
@@ -503,6 +506,7 @@ public class FinancierServiceTest {
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
+        secondInvestmentVehicleId = investmentVehicle.getId();
         financier.setInvestmentVehicleId(investmentVehicle.getId());
         String response;
         try {
@@ -618,14 +622,24 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @AfterAll
-    void tearDown() throws MeedlException {
+    void tearDown() {
+
         log.info("Started deleting data in financier service test." );
-        deleteNotification(userIdentityId);
-        deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
-        financierOutputPort.delete(financierId);
-        identityManagerOutputPort.deleteUser(userIdentity);
-        userIdentityOutputPort.deleteUserById(userIdentityId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+        try{
+            deleteNotification(userIdentityId);
+            deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
+            deleteInvestmentVehicleFinancier(secondInvestmentVehicleId, financierId);
+            deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, financierId);
+            financierOutputPort.delete(financierId);
+            identityManagerOutputPort.deleteUser(userIdentity);
+            userIdentityOutputPort.deleteUserById(userIdentityId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(secondInvestmentVehicleId);
+        }catch (MeedlException e) {
+            log.warn("Unable to delete test data for financier service test",e);
+            throw new RuntimeException(e);
+        }
         log.info("Test data deleted after test");
     }
 
