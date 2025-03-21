@@ -88,6 +88,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     @Override
     public List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        return investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciersEntity = investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciersEntity);
     }
 }
