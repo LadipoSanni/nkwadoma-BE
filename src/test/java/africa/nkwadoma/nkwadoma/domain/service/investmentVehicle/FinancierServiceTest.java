@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -631,12 +632,15 @@ public class FinancierServiceTest {
     @Test
     @Order(12)
     void viewInvestmentDetailsOfFinancier(){
+        FinancierVehicleDetails foundFinancierDetails = null;
         try {
-            Financier foundFinancier = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
-
+            foundFinancierDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+            log.info("-------->Found details---------> " + foundFinancierDetails);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
+        assertNotNull(foundFinancierDetails);
+        assertNotNull(foundFinancierDetails.getInvestmentVehicleDetailsList());
     }
 
     @AfterAll
