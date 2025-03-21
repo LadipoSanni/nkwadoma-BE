@@ -128,7 +128,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .contentId(updatedLoanRequest.getId())
-                .contentDetail(LOAN_REQUEST_DECLINED_CONTENT.getMessage())
+                .contentDetail(LOAN_REQUEST_DECLINED_CONTENT.getMessage().concat(" "+loanRequest.getDeclineReason()))
                 .title(LOAN_REQUEST.getMessage())
                 .user(updatedLoanRequest.getLoanee().getUserIdentity())
                 .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
