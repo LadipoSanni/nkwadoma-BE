@@ -313,13 +313,16 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public Financier investInVehicle(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+        financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = null;
         InvestmentVehicleFinancier investmentVehicleFinancier = null;
         log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility().equals(InvestmentVehicleVisibility.PUBLIC)) {
             log.info("Initiating investment into a public vehicle");
-            investmentVehicleFinancier = investInPublicVehicle(financier, foundInvestmentVehicle);
+            investInPublicVehicle(financier, foundFinancier, foundInvestmentVehicle);
             investmentVehicle = foundInvestmentVehicle;
         } else {
             investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
@@ -336,8 +339,7 @@ public class FinancierService implements FinancierUseCase {
         return financier;
     }
 
-    private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financier.getId());
+    private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, Financier foundFinancier, InvestmentVehicle investmentVehicle) throws MeedlException {
         if (foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
             log.info("User is active {}", foundFinancier.getActivationStatus());
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);

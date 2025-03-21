@@ -12,6 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", uses = UserIdentityMapper.class, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierRestMapper {
+    @Mapping(target = "id", source = "financierId")
     Financier map(FinancierRequest financierRequest);
     FinancierResponse map(Financier financier);
 
@@ -26,5 +27,6 @@ public interface FinancierRestMapper {
 //    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
     Financier map(KycRequest kycRequest, String userId);
 
-    Financier map(FinancierRequest financierRequest, String sub);
+    @Mapping(target = "individual.id", source = "userId")
+    Financier map(FinancierRequest financierRequest, String userId);
 }

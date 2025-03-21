@@ -69,9 +69,9 @@ public class FinancierController {
     }
     @PostMapping("financier/vehicle/invest")
     @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody FinancierRequest financierRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> investInVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody FinancierRequest financierRequest) throws MeedlException {
         Financier financier = financierRestMapper.map(financierRequest, meedlUser.getClaimAsString("sub"));
-        financier = financierUseCase.completeKyc(financier);
+        financier = financierUseCase.investInVehicle(financier);
 
         KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
         ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
