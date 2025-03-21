@@ -25,5 +25,6 @@ public class InvestmentVehicleFinancierEntity {
     private FinancierEntity financier;
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
+    @Enumerated(EnumType.STRING)
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 }

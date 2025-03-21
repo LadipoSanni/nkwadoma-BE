@@ -36,6 +36,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         investmentVehicleFinancier.validate();
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
                 investmentVehicleFinancierMapper.toInvestmentVehicleFinancierEntity(investmentVehicleFinancier);
+        log.info("The vehicle financier entity mapped {}", investmentVehicleFinancierEntity);
         InvestmentVehicleFinancierEntity savedInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.save(investmentVehicleFinancierEntity);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(savedInvestmentVehicleFinancierEntity);
 

@@ -1,21 +1,21 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
+package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
-import jakarta.persistence.Entity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CapitalDistributionEntity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+
 @Setter
 @Getter
-@Entity
-public class VehicleClosureEntity {
-    @Id
-    @UuidGenerator
+@Builder
+public class VehicleClosure {
+
     private String id;
     private InvestmentVehicleMode investmentVehicleMode;
-    @OneToOne
-    private CapitalDistributionEntity capitalDistribution;
+    private CapitalDistribution capitalDistribution;
     private String maturity;
 }

@@ -67,6 +67,20 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @PostMapping("financier/vehicle/invest")
+    @PreAuthorize("hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> investInVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody FinancierRequest financierRequest) throws MeedlException {
+        Financier financier = financierRestMapper.map(financierRequest, meedlUser.getClaimAsString("sub"));
+        financier = financierUseCase.investInVehicle(financier);
+
+        KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
+        ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
+                .data(kycResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
 
     @GetMapping("financier/view/{financierId}")

@@ -13,9 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -257,8 +255,9 @@ public class TestData {
     public static InvestmentVehicle buildInvestmentVehicle(String name) {
         InvestmentVehicle investmentVehicle = new InvestmentVehicle();
         investmentVehicle.setName(name);
-        investmentVehicle.setSize(BigDecimal.valueOf(4000));
+        investmentVehicle.setSize(new BigDecimal("4000.00"));
         investmentVehicle.setRate(13F);
+        investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
@@ -473,5 +472,39 @@ public class TestData {
                .accountName("Lagos Main")
                .accountNumber("1234567890")
                .build();
+    }
+
+    public static CouponDistribution createCouponDistribution() {
+        return CouponDistribution.builder()
+                .due(0)
+                .paid(0)
+                .lastDatePaid(LocalDateTime.now())
+                .lastDateDue(LocalDateTime.now())
+                .build();
+    }
+
+    public static VehicleOperation createVehicleOperation(CouponDistribution couponDistribution) {
+        return VehicleOperation.builder()
+                .couponDistribution(couponDistribution)
+                .couponDistributionStatus(CouponDistributionStatus.DEFAULT)
+                .fundRaisingStatus(InvestmentVehicleMode.OPEN)
+                .deployingStatus(InvestmentVehicleMode.OPEN)
+                .operationStatus(OperationStatus.ACTIVE)
+                .build();
+    }
+
+    public static CapitalDistribution buildCapitalDistribution() {
+        return CapitalDistribution.builder()
+                .due(0)
+                .totalCapitalPaidOut(BigDecimal.ZERO)
+                .build();
+    }
+
+    public static VehicleClosure buildVehicleClosure(CapitalDistribution capitalDistribution) {
+        return VehicleClosure.builder()
+                .capitalDistribution(capitalDistribution)
+                .investmentVehicleMode(InvestmentVehicleMode.OPEN)
+                .maturity("maturity")
+                .build();
     }
 }
