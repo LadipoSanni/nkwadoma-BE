@@ -25,8 +25,7 @@ import org.springframework.stereotype.*;
 
 import java.util.*;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_OFFER_CONTENT;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -118,8 +117,24 @@ public class LoanRequestService implements LoanRequestUseCase {
         else {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
             updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
+
+            sendLoanRequestDeclinedNotification(loanRequest, updatedLoanRequest);
+
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
+    }
+
+    private void sendLoanRequestDeclinedNotification(LoanRequest loanRequest, LoanRequest updatedLoanRequest) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(updatedLoanRequest.getId())
+                .contentDetail(LOAN_REQUEST_DECLINED_CONTENT.getMessage())
+                .title(LOAN_REQUEST.getMessage())
+                .user(updatedLoanRequest.getLoanee().getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
     private void sendNotification(LoanRequest loanRequest, LoanOffer loanOffer, LoanRequest updatedLoanRequest) throws MeedlException {
