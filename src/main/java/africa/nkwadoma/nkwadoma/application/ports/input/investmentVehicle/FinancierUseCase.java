@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -25,5 +26,5 @@ public interface FinancierUseCase {
 
     Financier completeKyc(Financier financier) throws MeedlException;
 
-    Financier viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException;
+    FinancierVehicleDetails viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException;
 }
