@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Getter
@@ -17,19 +19,10 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 public class FinancierVehicleDetails {
-    private String name;
-    private InvestmentVehicleType investmentVehicleType;
-    private LocalDateTime dateInvested;
-    private BigDecimal amountInvested;
-    private BigDecimal netAssetValue;
-    private double percentageOfPortfolio;
-    private LocalDateTime investmentStartDate;
-    private LocalDateTime maturityDate;
-    private InvestmentVehicleDesignation designation;
-    private String incomeEarned;
-    private String vehicleOperationStatus;
-    private String vehicleDistributionStatus;
-    private String vehicleClosureStatus;
-    private String vehicleVisibilityStatus;
+    private int numberOfInvestment;
+    private BigDecimal totalAmountInvested;
+    private BigDecimal totalIncomeEarned;
+    private int portfolioValue;
+    private List<InvestmentVehicleDetails> investmentVehicleDetailsList;
 
 }
