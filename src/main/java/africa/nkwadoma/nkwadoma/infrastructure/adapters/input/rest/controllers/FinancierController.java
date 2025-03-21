@@ -12,7 +12,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -69,6 +71,17 @@ public class FinancierController {
     }
     @PostMapping("financier/vehicle/invest")
     @PreAuthorize("hasRole('FINANCIER')")
+    @Operation(
+            summary = "Invest in a vehicle",
+            description = """
+                    Allows a financier to invest in a specified vehicle. This action requires the FINANCIER role. \
+                    The API expects the following request payload:\s
+                     {\s
+                    "amountToInvest": "10000",
+                     "investmentVehicleId": "investmentVehicleId"
+                     } \
+                    amountToInvest represents the amount the financier wishes to invest (e.g., 10000), and investmentVehicleId is the unique identifier of the investment vehicle to be funded."""
+    )
     public ResponseEntity<ApiResponse<?>> investInVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody FinancierRequest financierRequest) throws MeedlException {
         Financier financier = financierRestMapper.map(financierRequest, meedlUser.getClaimAsString("sub"));
         financier = financierUseCase.investInVehicle(financier);
