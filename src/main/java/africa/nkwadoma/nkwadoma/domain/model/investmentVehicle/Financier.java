@@ -25,7 +25,7 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private String organizationName;
+    private Cooperation organization;
     private UserIdentity individual;
     private String invitedBy;
     private FinancierType financierType;

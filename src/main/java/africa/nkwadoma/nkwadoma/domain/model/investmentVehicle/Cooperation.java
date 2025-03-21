@@ -1,0 +1,26 @@
+package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Builder
+@Getter
+@Setter
+public class Cooperation {
+    private String id;
+    private String name;
+    private UserIdentity userIdentity;
+
+    public void validate() throws MeedlException {
+        log.info("Validating cooperation details...");
+        MeedlValidator.validateObjectName(this.name,"name cannot be empty","Cooperation");
+        MeedlValidator.validateObjectInstance(this.userIdentity, "Admin detail cannot be empty");
+        MeedlValidator.validateEmail(this.userIdentity.getEmail());
+    }
+}

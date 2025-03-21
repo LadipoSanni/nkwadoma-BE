@@ -170,7 +170,26 @@ public class FinancierServiceTest {
         financier.setIndividual(userIdentity);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
+    @Test
+    public void inviteCooperateFinancierToThePlatform(){
+        String response;
+        Financier foundFinancier;
+        List<Financier> financierList = List.of(TestData.buildFinancierCooperate("Test cooperation", "testcooperation@email.com"));
+        try {
+            response = financierUseCase.inviteFinancier(financierList);
+//            userIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
+//            userIdentityId = userIdentity.getId();
+            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
+            financierId = foundFinancier.getId();
+            log.info("Financier id for test user with id : {} is {}", userIdentityId, financierId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(response);
+        assertEquals("Financier added to investment vehicle", response);
+        assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
 
+    }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void inviteFinancierWithInvalidCreatedBy(String invitedBy){
