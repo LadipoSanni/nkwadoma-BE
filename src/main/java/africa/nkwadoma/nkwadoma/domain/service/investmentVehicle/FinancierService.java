@@ -23,10 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
@@ -43,7 +40,6 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -58,6 +54,7 @@ public class FinancierService implements FinancierUseCase {
     private final FinancierEmailUseCase FinancierEmailUseCase;
     private final NextOfKinUseCase nextOfKinUseCase;
     private final BankDetailOutputPort bankDetailOutputPort;
+//    private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
 
     @Override
     public String inviteFinancier(List<Financier> financiers) throws MeedlException {
@@ -421,30 +418,42 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Financier viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
+    public FinancierVehicleDetails viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        List<InvestmentVehicleFinancier> financierInvestmentVehicleList = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicleList = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
         int numberOfInvestment = financierInvestmentVehicleList.size();
-        foundFinancier.setNumberOfInvestments(numberOfInvestment);
         BigDecimal totalInvestmentAmount = financierInvestmentVehicleList.stream()
                 .map(InvestmentVehicleFinancier::getAmountInvested)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicleList.stream()
-                        .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
-        foundFinancier.setTotalAmountInvested(totalInvestmentAmount);
-//        List<FinancierVehicleDetails> investmentDetails = financierInvestmentVehicleList.stream()
-//                .map(ivf -> new FinancierVehicleDetails(
-//                        ivf.getInvestmentVehicle().getName(),
-//                        ivf.getInvestmentVehicle().getInvestmentVehicleType(),
-//                                ivf.getInvestmentVehicle().getDateInvested(),
 
-//                        ivf.getAmountInvested(),
-//                        ivf.getInvestmentVehicleDesignation()
-//                ))
-//                .collect(Collectors.toList());
-//        foundFinancier.setInvestmentVehicleInvestedIn(investmentVehicles);
-        return foundFinancier;
+        List<InvestmentVehicleDetails> investmentVehicleDetails = convertToVehicleDetails(financierInvestmentVehicleList);
+//                investmentVehicleFinancierMapper.toInvestmentVehicleDetailsList(financierInvestmentVehicleList);
+        return FinancierVehicleDetails.builder()
+                .numberOfInvestment(numberOfInvestment)
+                .totalAmountInvested(totalInvestmentAmount)
+                .investmentVehicleDetailsList(investmentVehicleDetails)
+                .build();
+    }
+
+    private static List<InvestmentVehicleDetails> convertToVehicleDetails(List<InvestmentVehicleFinancier> financierInvestmentVehicleList) {
+        return financierInvestmentVehicleList.stream()
+                .map(financierInvestment -> {
+                    InvestmentVehicle investmentVehicle = financierInvestment.getInvestmentVehicle();
+
+                    return InvestmentVehicleDetails.builder()
+                            .investmentVehicleName(investmentVehicle.getName())
+                            .investmentVehicleType(investmentVehicle.getInvestmentVehicleType())
+                            .dateInvested(financierInvestment.getDateInvested())
+                            .amountInvested(financierInvestment.getAmountInvested())
+                            .netAssetValue(investmentVehicle.getNetAssetValue())
+                            .percentageOfPortfolio(investmentVehicle.getPercentageOfPortfolio())
+                            .investmentStartDate(investmentVehicle.getStartDate())
+                            .maturityDate(investmentVehicle.getMaturityDate())
+                            .designation(investmentVehicle.getInvestmentVehicleDesignation())
+                            .build();
+                })
+                .toList();
     }
 
     private static void kycIdentityValidation(Financier financier) throws MeedlException {
