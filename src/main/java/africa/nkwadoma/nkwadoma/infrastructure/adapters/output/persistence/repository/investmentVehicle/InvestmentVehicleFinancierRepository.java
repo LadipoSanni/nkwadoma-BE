@@ -30,5 +30,5 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :financierId AND ivf.amountInvested > 0")
-    List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId);
+    List<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedIn(String financierId);
 }
