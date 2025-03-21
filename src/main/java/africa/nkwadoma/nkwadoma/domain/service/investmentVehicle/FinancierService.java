@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
@@ -312,34 +313,86 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public Financier investInVehicle(Financier financier) throws MeedlException {
-        InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId() ,financier.getId())
-                .orElseThrow(()-> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
-        InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
-        BigDecimal newAmount = updateInvestmentVehicleAmount(financier, investmentVehicle);
-        log.info("New amount after adding to the investment vehicle {}... {}", newAmount, investmentVehicle.getTotalAvailableAmount());
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+        financier.setId(foundFinancier.getId());
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
+        InvestmentVehicle investmentVehicle = null;
+        InvestmentVehicleFinancier investmentVehicleFinancier = null;
+        log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility().equals(InvestmentVehicleVisibility.PUBLIC)) {
+            log.info("Initiating investment into a public vehicle");
+            investInPublicVehicle(financier, foundFinancier, foundInvestmentVehicle);
+            investmentVehicle = foundInvestmentVehicle;
+        } else {
+            investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
+                    .orElseThrow(() -> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
+            investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+            updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+            updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+            log.info("Updated the investment vehicle available amount for {}", investmentVehicle);
+            log.info("New amount after adding to the investment vehicle... {}", investmentVehicle.getTotalAvailableAmount());
+        }
+
         investmentVehicleOutputPort.save(investmentVehicle);
 
-        updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
         return financier;
+    }
+
+    private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, Financier foundFinancier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        if (foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
+            log.info("User is active {}", foundFinancier.getActivationStatus());
+            updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+            return updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
+        }else {
+            log.error("Financier is not active. Financier status is {}", foundFinancier.getActivationStatus());
+            throw new MeedlException("Financier is not active on the platform");
+        }
+    }
+
+    private InvestmentVehicleFinancier updateInvestmentVehicleFinancierAmountInvested(InvestmentVehicle investmentVehicle, Financier financier) throws MeedlException {
+        InvestmentVehicleFinancier investmentVehicleFinancier;
+        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                .findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+        log.info("Updating investment vehicle financier ");
+        if (optionalInvestmentVehicleFinancier.isPresent()) {
+            investmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
+            BigDecimal newAmount = investmentVehicleFinancier.getAmountInvested().add(financier.getAmountToInvest());
+            investmentVehicleFinancier.setAmountInvested(newAmount);
+            log.info("Updated the amount invested in the investment vehicle financier for {}... amount invested {}", newAmount, financier.getAmountToInvest());
+        }else {
+            log.info("First time financier is in vesting in this vehicle. Amount {}", financier.getAmountToInvest());
+            investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
+                    .investmentVehicle(investmentVehicle)
+                    .financier(financier)
+                    .amountInvested(financier.getAmountToInvest())
+                    .build();
+        }
+        return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
     }
 
     private void updateInvestmentVehicleFinancierAmount(InvestmentVehicleFinancier investmentVehicleFinancier, Financier financier) throws MeedlException {
         if (investmentVehicleFinancier.getAmountInvested() == null) {
+            log.info("Investment vehicle financier amount invested is null. Changing it to zero.");
             investmentVehicleFinancier.setAmountInvested(BigDecimal.ZERO);
         }
         BigDecimal currentAmount = investmentVehicleFinancier.getAmountInvested();
         BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
         investmentVehicleFinancier.setAmountInvested(newAmount);
+        log.info("Updating investment vehicle financier amount invested to {}",investmentVehicleFinancier.getAmountInvested());
         investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+
     }
 
-    private static BigDecimal updateInvestmentVehicleAmount(Financier financier, InvestmentVehicle investmentVehicle) {
+    private static BigDecimal updateInvestmentVehicleAvailableAmount(Financier financier, InvestmentVehicle investmentVehicle) {
         if (investmentVehicle.getTotalAvailableAmount() == null) {
+            log.info("Investment vehicle have no total available amount. Setting it up to zero. {}", investmentVehicle.getId());
             investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
         }
         BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
         BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
         investmentVehicle.setTotalAvailableAmount(newAmount);
+        log.info("Total amount available for this investment vehicle has been updated. {}", newAmount);
         return newAmount;
     }
 
