@@ -36,6 +36,7 @@ import java.util.List;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
 
+
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService implements OrganizationEmployeeEmailUseCase, SendColleagueEmailUseCase ,
@@ -222,11 +223,32 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         }
         meedlNotification.setRead(true);
         meedlNotificationOutputPort.save(meedlNotification);
-        meedlNotification.setDuration(
-                ChronoUnit.DAYS.between(meedlNotification.getTimestamp(), LocalDateTime.now())
-                +" days ago"
-        );
+        meedlNotification.setDuration(getDurationText(meedlNotification.getTimestamp()));
         return meedlNotification;
+    }
+
+    public String getDurationText(LocalDateTime timestamp) {
+        LocalDateTime now = LocalDateTime.now();
+        long minutes = ChronoUnit.MINUTES.between(timestamp, now);
+        long hours = ChronoUnit.HOURS.between(timestamp, now);
+        long days = ChronoUnit.DAYS.between(timestamp, now);
+        long months = ChronoUnit.MONTHS.between(timestamp, now);
+        long years = ChronoUnit.YEARS.between(timestamp, now);
+        if (minutes < 60) {
+            return formatDuration(minutes, "minute");
+        } else if (hours < 24) {
+            return formatDuration(hours, "hour");
+        } else if (days < 30) {
+            return formatDuration(days, "day");
+        } else if (days < 365) {
+            return formatDuration(months, "month");
+        } else {
+            return formatDuration(years, "year");
+        }
+    }
+
+    private String formatDuration(long value, String unit) {
+        return value + " " + unit + (value != 1 ? "s" : "") + " ago";
     }
 
     @Override
