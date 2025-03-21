@@ -16,6 +16,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -33,9 +34,14 @@ public class Financier {
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
+    private BigDecimal totalAmountInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;
+    private int numberOfInvestments;
+    private BigDecimal totalIncomeEarned;
+    private BigDecimal portfolioValue;
+    private List<FinancierVehicleDetails> investmentVehicleInvestedIn;
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());

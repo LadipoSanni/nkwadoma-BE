@@ -541,6 +541,24 @@ public class FinancierServiceTest {
         assertFalse(foundFinanciers.isEmpty());
         assertNotNull(foundFinanciers.get(0));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
+    void viewInvestmentDetailsOfFinancierWithNullId(String financierId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId));
+    }
+
+    @Test
+    @Order(12)
+    void viewInvestmentDetailsOfFinancier(){
+        try {
+            Financier foundFinancier = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @AfterAll
     void tearDown() throws MeedlException {
         log.info("Started deleting data in financier service test." );

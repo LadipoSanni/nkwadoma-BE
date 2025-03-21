@@ -23,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -41,6 +42,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -363,6 +365,33 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
+    }
+
+    @Override
+    public Financier viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicleList = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        int numberOfInvestment = financierInvestmentVehicleList.size();
+        foundFinancier.setNumberOfInvestments(numberOfInvestment);
+        BigDecimal totalInvestmentAmount = financierInvestmentVehicleList.stream()
+                .map(InvestmentVehicleFinancier::getAmountInvested)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicleList.stream()
+                        .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
+        foundFinancier.setTotalAmountInvested(totalInvestmentAmount);
+//        List<FinancierVehicleDetails> investmentDetails = financierInvestmentVehicleList.stream()
+//                .map(ivf -> new FinancierVehicleDetails(
+//                        ivf.getInvestmentVehicle().getName(),
+//                        ivf.getInvestmentVehicle().getInvestmentVehicleType(),
+//                                ivf.getInvestmentVehicle().getDateInvested(),
+
+//                        ivf.getAmountInvested(),
+//                        ivf.getInvestmentVehicleDesignation()
+//                ))
+//                .collect(Collectors.toList());
+//        foundFinancier.setInvestmentVehicleInvestedIn(investmentVehicles);
+        return foundFinancier;
     }
 
     private static void kycIdentityValidation(Financier financier) throws MeedlException {

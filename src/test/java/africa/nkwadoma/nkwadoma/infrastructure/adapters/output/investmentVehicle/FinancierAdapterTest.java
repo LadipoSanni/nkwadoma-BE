@@ -196,7 +196,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByUserId(invalidId));
     }
     @Test
-    @Order(3)
+    @Order(4)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -207,13 +207,6 @@ class FinancierAdapterTest {
         assertNotNull(financiersPage);
         List<Financier> financiers = financiersPage.toList();
         assertEquals(1, financiers.size());
-    }
-
-    @Test
-    @Order(4)
-    void viewInvestmentDetailsOfFinancier(){
-        Financier financier = null;
-
     }
 
     @Test
@@ -236,7 +229,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.search(name));
     }
     @Test
-    @Order(4)
+    @Order(5)
     void searchFinancierByFirstName()  {
         List<Financier> foundFinanciers = null;
         try {
@@ -249,7 +242,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(5)
+    @Order(6)
     void searchFinancierByLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -263,7 +256,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(6)
+    @Order(7)
     void searchFinancierWithFirstNameBeforeLastName() {
         List<Financier> foundFinanciers;
         try {
@@ -276,7 +269,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(7)
+    @Order(8)
     void searchFinancierWithLastNameBeforeFirstName() {
         List<Financier> foundFinanciers;
         try {
@@ -353,7 +346,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
-    @Order(8)
+    @Order(9)
     void completeKycIndividual() {
         Financier financierUpdated = null;
         Financier foundFinancier = null;
@@ -394,6 +387,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinancier.getIndividual().getBankDetail());
     }
 
+
     @Test
     public void deleteFinancier(){
         try {
@@ -405,6 +399,7 @@ class FinancierAdapterTest {
         }
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
     }
+
 
     @AfterAll
     void tearDown() throws MeedlException {

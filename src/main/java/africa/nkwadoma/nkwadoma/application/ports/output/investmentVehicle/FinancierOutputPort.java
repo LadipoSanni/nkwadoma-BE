@@ -21,4 +21,5 @@ public interface FinancierOutputPort {
     List<Financier> search(String name) throws MeedlException;
 
     Financier completeKyc(Financier financier) throws MeedlException;
+
 }
