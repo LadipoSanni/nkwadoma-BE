@@ -617,7 +617,7 @@ public class FinancierServiceTest {
         assertFalse(foundFinanciers.isEmpty());
         assertNotNull(foundFinanciers.get(0));
     }
-//    @AfterAll
+    @AfterAll
     void tearDown() throws MeedlException {
         log.info("Started deleting data in financier service test." );
         deleteNotification(userIdentityId);
