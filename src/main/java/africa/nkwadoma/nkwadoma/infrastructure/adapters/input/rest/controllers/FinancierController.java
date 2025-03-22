@@ -86,8 +86,8 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PostMapping("financier/view/investment-details/{financierId}")
-    @PreAuthorize("hasRole('PORFOLIO_MANAGER')")
+    @GetMapping("financier/view/investment-details/{financierId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
         FinancierVehicleDetails financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
         FinancierInvestmentDetailsResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
