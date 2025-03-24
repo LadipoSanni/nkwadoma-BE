@@ -51,7 +51,7 @@ public class InvestmentVehicle {
 
     public void validate() throws MeedlException {
         log.info("Validating a published or publishable investment vehicle {} name : {}", id, name);
-        MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
+        MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
         MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty","Trustee");
         MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty","Custodian");
         MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty","Bank Partner");
@@ -88,7 +88,7 @@ public class InvestmentVehicle {
 
     public void validateDraft() throws MeedlException {
         log.info("Validating investment vehicle for draft {}, name :{} ", id, name);
-        MeedlValidator.validateObjectName(name,"Name cannot be empty","InvestmentVehicle");
+        MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
 }

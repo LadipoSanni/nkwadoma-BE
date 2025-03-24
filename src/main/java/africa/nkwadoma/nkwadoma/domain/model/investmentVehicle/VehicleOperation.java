@@ -21,6 +21,15 @@ public class VehicleOperation {
     private InvestmentVehicleMode deployingStatus;
     private OperationStatus operationStatus;
 
+    public void changeOperationStatusesValidation(VehicleOperation vehicleOperation) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Vehicle operation id cannot be empty");
+        MeedlValidator.validateIncorrectStatus(vehicleOperation.getCouponDistributionStatus(),CouponDistributionStatus.values());
+        MeedlValidator.validateIncorrectStatus(vehicleOperation.getDeployingStatus(),InvestmentVehicleMode.values());
+        MeedlValidator.validateIncorrectStatus(vehicleOperation.getOperationStatus(),OperationStatus.values());
+        MeedlValidator.validateIncorrectStatus(vehicleOperation.getFundRaisingStatus(),InvestmentVehicleMode.values());
+    }
+
+
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(couponDistribution,"Coupon distribution cannot be empty");
         MeedlValidator.validateObjectInstance(fundRaisingStatus,"Fund raising status cannot be empty");

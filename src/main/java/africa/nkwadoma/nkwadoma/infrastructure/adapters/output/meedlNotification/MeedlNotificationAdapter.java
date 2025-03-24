@@ -92,5 +92,18 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         meedlNotificationRepository.deleteByUserIdAndNotificationIds(userId, deleteNotificationList);
     }
 
+    @Override
+    public Page<MeedlNotification> searchNotification(String userId, String title, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId,"User id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize,Sort.by("timestamp").descending());
+        Page<MeedlNotificationEntity> notificationEntities =
+                meedlNotificationRepository.searchByUserIdAndTitleContainingIgnoreCase(pageRequest,userId,title);
+        if (notificationEntities.isEmpty()) {
+            return Page.empty();
+        }
+        log.info("notification {}" , notificationEntities.map(meedlNotificationMapper::toMeedlNotification).getContent());
+        return notificationEntities.map(meedlNotificationMapper::toMeedlNotification);
+    }
+
 
 }

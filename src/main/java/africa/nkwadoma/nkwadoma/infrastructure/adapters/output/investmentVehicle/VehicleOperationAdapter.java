@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.VehicleOperationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.OperationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.VehicleOperation;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -33,5 +36,16 @@ public class VehicleOperationAdapter implements VehicleOperationOutputPort {
     public void deleteById(String vehicleOperationId) throws MeedlException {
         MeedlValidator.validateUUID(vehicleOperationId,"Vehicle operation id cannot be empty");
         vehicleOperationRepository.deleteById(vehicleOperationId);
+    }
+
+    @Override
+    public VehicleOperation changeOperationStatuses(VehicleOperation vehicleOperation) throws MeedlException {
+        vehicleOperation.changeOperationStatusesValidation(vehicleOperation);
+        VehicleOperationEntity vehicleOperationEntity =
+                vehicleOperationRepository.findById(vehicleOperation.getId()).orElseThrow(() ->
+                        new MeedlException("Vehicle operation not found"));
+        vehicleOperationMapper.updateVehicleOperation(vehicleOperationEntity,vehicleOperation);
+        vehicleOperationEntity = vehicleOperationRepository.save(vehicleOperationEntity);
+        return vehicleOperationMapper.toVehicleOperation(vehicleOperationEntity);
     }
 }

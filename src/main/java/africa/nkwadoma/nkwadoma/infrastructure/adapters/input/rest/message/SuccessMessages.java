@@ -18,6 +18,6 @@ public class SuccessMessages {
     public static final String LOAN_REQUEST_APPROVED_SUCCESSFULLY = "Loan request approved successfully";
     public static final String LOAN_REQUEST_DECLINED_SUCCESSFULLY = "Loan request declined successfully";
     public static final String NOTIFICATION_VIEW_SUCCESSFULLY = "Notification view successfully";
-    public static final String ALL_NOTIFICATION_VIEW_SUCCESSFULLY = "All notification view successfully";
+    public static final String ALL_NOTIFICATION_VIEW_SUCCESSFULLY = "Notifications retrieved";
     public static final String NOTIFICATION_COUNT = "Notification Count";
 }

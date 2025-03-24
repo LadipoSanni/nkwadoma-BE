@@ -275,8 +275,9 @@ public class TestData {
     public static InvestmentVehicle buildInvestmentVehicle(String name) {
         InvestmentVehicle investmentVehicle = new InvestmentVehicle();
         investmentVehicle.setName(name);
-        investmentVehicle.setSize(BigDecimal.valueOf(4000));
+        investmentVehicle.setSize(new BigDecimal("4000.00"));
         investmentVehicle.setRate(13F);
+        investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);

@@ -12,7 +12,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -58,6 +60,31 @@ public class FinancierController {
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
         Financier financier = financierRestMapper.map(kycRequest, meedlUser.getClaimAsString("sub"));
         financier = financierUseCase.completeKyc(financier);
+
+        KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
+        ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
+                .data(kycResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("financier/vehicle/invest")
+    @PreAuthorize("hasRole('FINANCIER')")
+    @Operation(
+            summary = "Invest in a vehicle",
+            description = """
+                    Allows a financier to invest in a specified vehicle. This action requires the FINANCIER role. \
+                    The API expects the following request payload:\s
+                     {\s
+                    "amountToInvest": "10000",
+                     "investmentVehicleId": "investmentVehicleId"
+                     } \
+                    amountToInvest represents the amount the financier wishes to invest (e.g., 10000), and investmentVehicleId is the unique identifier of the investment vehicle to be funded."""
+    )
+    public ResponseEntity<ApiResponse<?>> investInVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody FinancierRequest financierRequest) throws MeedlException {
+        Financier financier = financierRestMapper.map(financierRequest, meedlUser.getClaimAsString("sub"));
+        financier = financierUseCase.investInVehicle(financier);
 
         KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
         ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()

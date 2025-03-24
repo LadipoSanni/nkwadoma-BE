@@ -3,6 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CouponDistributionOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.VehicleOperationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.OperationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.CouponDistribution;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.VehicleOperation;
@@ -13,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -83,6 +86,48 @@ public class VehicleOperationAdapterTest {
     void cannotSaveVehicleOperationWithNullDeployingStatus() {
         vehicleOperation.setDeployingStatus(null);
         assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
+    }
+
+    @Order(2)
+    @Test
+    void changeVehicleOperationStatus() {
+        VehicleOperation operation = VehicleOperation.builder().build();
+        vehicleOperation.setId(vehicleOperationId);
+        vehicleOperation.setOperationStatus(null);
+        vehicleOperation.setDeployingStatus(InvestmentVehicleMode.CLOSE);
+        vehicleOperation.setFundRaisingStatus(InvestmentVehicleMode.CLOSE);
+        vehicleOperation.setCouponDistributionStatus(CouponDistributionStatus.PERFORMING);
+        try{
+            operation = vehicleOperationOutputPort.changeOperationStatuses(vehicleOperation);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(vehicleOperationId,operation.getId());
+        assertEquals(InvestmentVehicleMode.CLOSE,operation.getFundRaisingStatus());
+        assertEquals(InvestmentVehicleMode.CLOSE,operation.getDeployingStatus());
+        assertEquals(CouponDistributionStatus.PERFORMING,operation.getCouponDistributionStatus());
+        assertEquals(OperationStatus.ACTIVE,operation.getOperationStatus());
+    }
+
+    @Order(3)
+    @Test
+    void changeVehicleOperationStatusWithNullStatusesButTheOperationStatusDosentChangeToNull() {
+        VehicleOperation operation = VehicleOperation.builder().build();
+        vehicleOperation.setId(vehicleOperationId);
+        vehicleOperation.setOperationStatus(null);
+        vehicleOperation.setDeployingStatus(null);
+        vehicleOperation.setFundRaisingStatus(null);
+        vehicleOperation.setCouponDistributionStatus(null);
+        try{
+            operation = vehicleOperationOutputPort.changeOperationStatuses(vehicleOperation);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertEquals(vehicleOperationId,operation.getId());
+        assertEquals(InvestmentVehicleMode.CLOSE,operation.getFundRaisingStatus());
+        assertEquals(InvestmentVehicleMode.CLOSE,operation.getDeployingStatus());
+        assertEquals(CouponDistributionStatus.PERFORMING,operation.getCouponDistributionStatus());
+        assertEquals(OperationStatus.ACTIVE,operation.getOperationStatus());
     }
 
     @AfterAll

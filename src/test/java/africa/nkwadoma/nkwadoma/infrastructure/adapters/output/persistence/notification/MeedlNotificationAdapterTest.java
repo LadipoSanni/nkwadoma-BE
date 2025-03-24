@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -252,8 +253,40 @@ public class MeedlNotificationAdapterTest {
         assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.deleteMultipleNotification("invalidUserId", Collections.singletonList(meedlNotificationId)));
     }
 
-    @Test
     @Order(6)
+    @Test
+    void searchNotification(){
+        Page<MeedlNotification> meedlNotifications = Page.empty();
+        try{
+            meedlNotifications = meedlNotificationOutputPort.searchNotification(userId,"E",pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info(meedlException.getMessage());
+        }
+        assertEquals(userId, meedlNotifications.getContent().get(0).getUser().getId());
+        assertEquals(meedlNotificationId, meedlNotifications.getContent().get(0).getId());
+        assertEquals(1, meedlNotifications.getContent().size());
+    }
+
+    @Test
+    void searchNotificationWithNullUserId() {
+        assertThrows(MeedlException.class, ()-> meedlNotificationOutputPort.searchNotification(null,"e",pageSize,pageNumber));
+    }
+
+    @Test
+    void searchNotificationForAUserThatDoesNotHaveAnyNotification(){
+        Page<MeedlNotification> allNotification = Page.empty();
+        try {
+            allNotification = meedlNotificationOutputPort.searchNotification(
+                    "550e8400-e29b-41d4-a716-446655440000","e", pageSize, pageNumber);
+        }catch (MeedlException exception) {
+            log.info(exception.getMessage());
+        }
+        assertTrue(allNotification.getContent().isEmpty());
+        assertEquals(0, allNotification.getContent().size());
+    }
+
+    @Test
+    @Order(7)
     void deleteMultipleNotification(){
         log.info("meedle notification {}",meedlNotification);
         try{

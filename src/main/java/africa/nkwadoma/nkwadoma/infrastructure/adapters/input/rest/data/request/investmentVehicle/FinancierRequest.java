@@ -6,12 +6,15 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Getter
 @Setter
 public class FinancierRequest {
     private String organizationName;
+    private String financierId;
+    private BigDecimal amountToInvest;
     private FinancierType financierType;
     private UserIdentity individual;
     private String investmentVehicleId;
