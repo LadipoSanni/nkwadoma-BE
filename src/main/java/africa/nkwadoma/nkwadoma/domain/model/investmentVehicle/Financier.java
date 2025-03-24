@@ -25,7 +25,7 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private Cooperation organization;
+    private Cooperation cooperation;
     private UserIdentity individual;
     private String invitedBy;
     private FinancierType financierType;
@@ -39,18 +39,19 @@ public class Financier {
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        validateIndividualEmail(individual);
+        validateFinancierEmail(individual);
         MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
         MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
         MeedlValidator.validateEmail(individual.getEmail());
     }
 
 
-    private static void validateIndividualEmail(UserIdentity userIdentity) throws MeedlException {
+    private static void validateFinancierEmail(UserIdentity userIdentity) throws MeedlException {
         try {
             MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
             MeedlValidator.validateEmail(userIdentity.getEmail());
         } catch (MeedlException e) {
+            log.error("validate financier email",e);
             throw new MeedlException(e.getMessage() + " for : "+ userIdentity.getEmail());
         }
     }
@@ -65,8 +66,11 @@ public class Financier {
         }
     }
 
-    private void validateCooperation() {
-
+    private void validateCooperation() throws MeedlException {
+        MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(cooperation.getUserIdentity(), "Cooperation individual details must not be empty");
+        validateFinancierEmail(this.cooperation.getUserIdentity());
+        MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
     }
 
     public void validateKyc() throws MeedlException {

@@ -58,6 +58,8 @@ public class CooperationAdapterTest {
         assertNotNull(savedCooperation);
         assertNotNull(savedCooperation.getId());
         assertEquals(cooperation.getName(), savedCooperation.getName());
+        assertNotNull(savedCooperation.getUserIdentity());
+        assertEquals(cooperation.getUserIdentity().getEmail(), savedCooperation.getUserIdentity().getEmail());
         log.info("Saved cooperation {}", savedCooperation);
         cooperationId = savedCooperation.getId();
     }
@@ -109,6 +111,7 @@ public class CooperationAdapterTest {
     @Test
     @Order(4)
     void findCooperationByEmail() {
+        log.info("Cooperation email to find {} in test", email);
         Cooperation foundCooperation = null;
         try {
             foundCooperation = cooperationOutputPort.findByEmail(email);

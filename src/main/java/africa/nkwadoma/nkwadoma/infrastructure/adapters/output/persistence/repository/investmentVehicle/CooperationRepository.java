@@ -4,19 +4,17 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface CooperationRepository extends JpaRepository<CooperationEntity, String> {
     CooperationEntity findByName(String email);
 
     boolean existsByName(String name);
 
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
-            "FROM CooperationEntity c WHERE c.userEntity.email = :email")
-    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END " +
-            "FROM cooperation_entity c " +
-            "JOIN user_entity u ON c.user_entity_id = u.id " +
-            "WHERE u.email = :email", nativeQuery = true)
+@Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
+        "FROM CooperationEntity c WHERE c.userEntity.email = :email")
     boolean existsByEmail(String email);
 
     @Query("SELECT c FROM CooperationEntity c WHERE c.userEntity.email = :email")
-    CooperationEntity findByEmail(String email);
+    Optional<CooperationEntity> findByEmail(String email);
 }

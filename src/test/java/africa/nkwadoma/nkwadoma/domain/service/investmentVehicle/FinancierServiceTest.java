@@ -2,8 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.NextOfKinOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
@@ -60,13 +61,14 @@ public class FinancierServiceTest {
     @Autowired
     private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     @Autowired
-    private NextOfKinOutputPort nextOfKinOutputPort;
+    private CooperationOutputPort cooperationOutputPort;
     @Autowired
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
     private final Pageable pageRequest = PageRequest.of(0, 10);
     private Financier financier;
     private UserIdentity userIdentity;
     private String userIdentityId;
+    private String cooperationId;
     private String financierId;
     private BankDetail bankDetail;
     private String investmentVehicleId;
@@ -171,23 +173,25 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(financierList));
     }
     @Test
-    public void inviteCooperateFinancierToThePlatform(){
+    public void inviteCooperateFinancierToThePlatform() {
         String response;
         Financier foundFinancier;
-        List<Financier> financierList = List.of(TestData.buildFinancierCooperate("Test cooperation", "testcooperation@email.com"));
+        List<Financier> financierList = List.of(TestData.buildCooperateFinancier("Test cooperation", "testcooperation@email.com"));
+        Cooperation cooperation;
         try {
             response = financierUseCase.inviteFinancier(financierList);
-//            userIdentity = userIdentityOutputPort.findByEmail(userIdentity.getEmail());
-//            userIdentityId = userIdentity.getId();
-            foundFinancier = financierOutputPort.findFinancierByUserId(userIdentityId);
-            financierId = foundFinancier.getId();
-            log.info("Financier id for test user with id : {} is {}", userIdentityId, financierId);
+            cooperation = cooperationOutputPort.findByEmail(userIdentity.getEmail());
+            cooperationId = cooperation.getId();
+            foundFinancier = financierUseCase.findFinancierByCooperationId(cooperation.getId());
+//            financierId = foundFinancier.getId();
+            log.info("Cooperate financier id {} for test user with id is: {}", financierId, userIdentityId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
         assertNotNull(response);
         assertEquals("Financier added to investment vehicle", response);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
+        assertNotNull(cooperation);
 
     }
     @ParameterizedTest

@@ -228,11 +228,27 @@ public class TestData {
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
-    public static Financier buildFinancierCooperate(String name, String email) {
+    public static Financier buildCooperateFinancier(String name, String email) {
         Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
-        financier.setOrganization(buildCooperation(name, email));
+        financier.setCooperation(buildCooperation(name, email));
+        financier.setFinancierType(FinancierType.COOPERATE);
+        return financier;
+    }
+    public static Financier buildCooperateFinancier(String name, UserIdentity userIdentity) {
+        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
+        Financier financier = buildFinancier(investmentVehicleDesignations);
+        financier.setCooperation(buildCooperation(name, userIdentity));
+        financier.setFinancierType(FinancierType.COOPERATE);
+        return financier;
+    }
+    public static Financier buildCooperateFinancier(Cooperation cooperation) {
+        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
+        Financier financier = buildFinancier(investmentVehicleDesignations);
+        financier.setCooperation(cooperation);
         financier.setFinancierType(FinancierType.COOPERATE);
         return financier;
     }
@@ -263,7 +279,6 @@ public class TestData {
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
                 .investmentVehicleDesignation(investmentVehicleDesignations)
-                .invitedBy(testId)
                 .invitedBy(testId)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .activationStatus(ActivationStatus.INVITED)

@@ -21,6 +21,7 @@ public class Cooperation {
         log.info("Validating cooperation details...");
         MeedlValidator.validateObjectName(this.name,"name cannot be empty","Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, "Admin detail cannot be empty");
+        MeedlValidator.validateUUID(this.userIdentity.getId(), "Admin id cannot be empty");
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
 }
