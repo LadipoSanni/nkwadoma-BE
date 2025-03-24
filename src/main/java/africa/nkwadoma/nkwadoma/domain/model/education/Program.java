@@ -50,7 +50,7 @@ public class Program {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectName(this.name,"Name cannot be empty","Program");
+        MeedlValidator.validateObjectName(this.name,"Program name cannot be empty","Program");
         MeedlValidator.validateUUID(this.createdBy,  MeedlMessages.INVALID_CREATED_BY_ID.getMessage());
         if (this.duration > 48){
             throw new MeedlException("Program duration must not exceed 48 months");
