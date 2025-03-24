@@ -33,11 +33,6 @@ public class CooperationAdapter implements CooperationOutputPort {
     }
 
     private void confirmCooperationDoesNotPreviouslyExist(Cooperation cooperation) throws MeedlException {
-        boolean cooperationExistByEmail = cooperationRepository.existsByEmail(cooperation.getUserIdentity().getEmail());
-        if (cooperationExistByEmail) {
-            log.error("Cooperation already exists with email {} ", cooperation.getUserIdentity().getEmail());
-            throw new MeedlException("Cooperation with the same email already exists");
-        }
         boolean cooperationExistByName = cooperationRepository.existsByName(cooperation.getName());
         if (cooperationExistByName) {
             log.error("Cooperation already exists with name {} ", cooperation.getName());
@@ -57,16 +52,6 @@ public class CooperationAdapter implements CooperationOutputPort {
     public void deleteById(String cooperationId) throws MeedlException {
         MeedlValidator.validateUUID(cooperationId, "Cooperation id cannot be empty");
         cooperationRepository.deleteById(cooperationId);
-    }
-
-    @Override
-    public Cooperation findByEmail(String email) throws MeedlException {
-        MeedlValidator.validateEmail(email);
-        log.info("Cooperation email to find in adapter : {}", email);
-        CooperationEntity cooperationEntity = cooperationRepository.findByEmail(email)
-                .orElseThrow(() -> new MeedlException("Cooperation not found by email"));
-        log.info("Cooperation found in adapter by email: {}",cooperationEntity);
-        return cooperationMapper.toCooperation(cooperationEntity);
     }
 
     @Override

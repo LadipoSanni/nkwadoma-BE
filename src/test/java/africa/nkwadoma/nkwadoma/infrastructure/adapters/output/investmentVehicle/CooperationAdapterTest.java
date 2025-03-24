@@ -27,13 +27,10 @@ public class CooperationAdapterTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     private Cooperation cooperation;
     private String cooperationId;
-    private String userIdentityId;
     private final String email = "testemail@email.com";
     @BeforeAll
     void setUp() {
-        UserIdentity userIdentity = saveTestUser(email);
-        userIdentityId = userIdentity.getId();
-        cooperation = TestData.buildCooperation("cooperation adapter test", userIdentity);
+        cooperation = TestData.buildCooperation("cooperation adapter test");
 
     }
     private UserIdentity saveTestUser(String email){
@@ -58,8 +55,6 @@ public class CooperationAdapterTest {
         assertNotNull(savedCooperation);
         assertNotNull(savedCooperation.getId());
         assertEquals(cooperation.getName(), savedCooperation.getName());
-        assertNotNull(savedCooperation.getUserIdentity());
-        assertEquals(cooperation.getUserIdentity().getEmail(), savedCooperation.getUserIdentity().getEmail());
         log.info("Saved cooperation {}", savedCooperation);
         cooperationId = savedCooperation.getId();
     }
@@ -75,24 +70,14 @@ public class CooperationAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void saveCooperationWithInvalidName(String name){
-        Cooperation cooperation = TestData.buildCooperation(name, TestData.createTestUserIdentity(email));
+        Cooperation cooperation = TestData.buildCooperation(name);
         assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
-    void saveCooperationWithInvalidEmail(String name){
-        Cooperation cooperation = TestData.buildCooperation("test name cooperation", TestData.createTestUserIdentity(name));
-        assertThrows(MeedlException.class, () -> cooperationOutputPort.save(cooperation));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
-    void findCooperationByInvalidEmail(String email){
-        assertThrows(MeedlException.class, () -> cooperationOutputPort.findByEmail(email));
-    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void findCooperationByInvalidCompanyName(String companyName){
-        assertThrows(MeedlException.class, () -> cooperationOutputPort.findByEmail(companyName));
+        assertThrows(MeedlException.class, () -> cooperationOutputPort.findByName(companyName));
     }
     @Test
     @Order(3)
@@ -110,23 +95,6 @@ public class CooperationAdapterTest {
     }
     @Test
     @Order(4)
-    void findCooperationByEmail() {
-        log.info("Cooperation email to find {} in test", email);
-        Cooperation foundCooperation = null;
-        try {
-            foundCooperation = cooperationOutputPort.findByEmail(email);
-        } catch (MeedlException e) {
-            log.error("",e);
-            throw new RuntimeException(e);
-        }
-        assertNotNull(foundCooperation);
-        assertNotNull(foundCooperation.getUserIdentity());
-        assertEquals(cooperation.getName(), foundCooperation.getName());
-        assertEquals(cooperation.getUserIdentity().getEmail(), foundCooperation.getUserIdentity().getEmail());
-        log.info("found cooperation {}", foundCooperation);
-    }
-    @Test
-    @Order(5)
     void findCooperationByName() {
         Cooperation foundCooperation = null;
         try {
@@ -140,7 +108,7 @@ public class CooperationAdapterTest {
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
-    @Order(6)
+    @Order(5)
     void deleteCooperationById() {
         try {
             cooperationOutputPort.deleteById(cooperationId);
@@ -150,10 +118,4 @@ public class CooperationAdapterTest {
         }
         assertThrows(MeedlException.class, ()-> cooperationOutputPort.findById(cooperationId));
     }
-//    @AfterAll
-    void tearDown() throws MeedlException {
-        userIdentityOutputPort.deleteUserById(userIdentityId);
-        log.info("Test data deleted after test");
-    }
-
 }

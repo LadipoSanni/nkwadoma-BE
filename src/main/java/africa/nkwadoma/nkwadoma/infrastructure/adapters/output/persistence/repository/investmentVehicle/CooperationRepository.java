@@ -10,11 +10,4 @@ public interface CooperationRepository extends JpaRepository<CooperationEntity, 
     CooperationEntity findByName(String email);
 
     boolean existsByName(String name);
-
-@Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
-        "FROM CooperationEntity c WHERE c.userIdentity.email = :email")
-    boolean existsByEmail(String email);
-
-    @Query("SELECT c FROM CooperationEntity c WHERE c.userIdentity.email = :email")
-    Optional<CooperationEntity> findByEmail(String email);
 }

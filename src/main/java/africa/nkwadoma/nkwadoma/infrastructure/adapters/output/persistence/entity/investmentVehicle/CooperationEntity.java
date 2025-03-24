@@ -19,6 +19,6 @@ public class CooperationEntity {
     @UuidGenerator
     private String id;
     private String name;
-    @OneToOne
-    private UserEntity userIdentity;
+//    @OneToOne
+//    private UserEntity userIdentity;
 }

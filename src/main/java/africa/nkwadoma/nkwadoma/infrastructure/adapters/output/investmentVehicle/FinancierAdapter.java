@@ -51,7 +51,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByUserId(String userId) throws MeedlException {
         FinancierEntity foundFinancier = financierRepository.findByIndividual_Id(userId)
-                .orElseThrow(()-> new MeedlException("Financier not found") );
+                .orElseThrow(()-> new MeedlException("Financier not found id is "+userId) );
         return financierMapper.map(foundFinancier);
     }
 

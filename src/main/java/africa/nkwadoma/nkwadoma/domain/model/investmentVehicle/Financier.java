@@ -68,8 +68,6 @@ public class Financier {
 
     private void validateCooperation() throws MeedlException {
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(cooperation.getUserIdentity(), "Cooperation individual details must not be empty");
-        validateFinancierEmail(this.cooperation.getUserIdentity());
         MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
     }
 

@@ -228,27 +228,13 @@ public class TestData {
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
-    public static Financier buildCooperateFinancier(String name, String email) {
-        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
-        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
-        Financier financier = buildFinancier(investmentVehicleDesignations);
-        financier.setCooperation(buildCooperation(name, email));
-        financier.setFinancierType(FinancierType.COOPERATE);
-        return financier;
-    }
-    public static Financier buildCooperateFinancier(String name, UserIdentity userIdentity) {
-        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
-        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
-        Financier financier = buildFinancier(investmentVehicleDesignations);
-        financier.setCooperation(buildCooperation(name, userIdentity));
-        financier.setFinancierType(FinancierType.COOPERATE);
-        return financier;
-    }
-    public static Financier buildCooperateFinancier(Cooperation cooperation) {
+
+    public static Financier buildCooperateFinancier(Cooperation cooperation, UserIdentity userIdentity) {
         Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
         financier.setCooperation(cooperation);
+        financier.setIndividual(userIdentity);
         financier.setFinancierType(FinancierType.COOPERATE);
         return financier;
     }
@@ -260,18 +246,8 @@ public class TestData {
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
-    public static Cooperation buildCooperation(String name, String email){
-        return buildCooperation(name, UserIdentity.builder()
-                .id(testId)
-                .email(email)
-                .firstName(name)
-                .lastName(name)
-                .build());
-
-    }
-    public static Cooperation buildCooperation(String name, UserIdentity userIdentity){
+    public static Cooperation buildCooperation(String name){
         return Cooperation.builder()
-                .userIdentity(userIdentity)
                 .name(name)
                 .build();
     }

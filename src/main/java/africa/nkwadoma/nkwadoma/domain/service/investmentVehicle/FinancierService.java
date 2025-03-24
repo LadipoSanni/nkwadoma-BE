@@ -96,21 +96,30 @@ public class FinancierService implements FinancierUseCase {
         } catch (MeedlException e) {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
-//            financier = saveNonExistingCooperateFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier);
+            financier = saveNonExistingCooperateFinancier(financier);
+            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
         }
-       Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
-       financier.setCooperation(cooperation);
+    }
+
+    private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
+        log.info("Saving cooperate financier user identity to platform {} ",financier);
+        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getIndividual());
+        userIdentity = userIdentityOutputPort.save(userIdentity);
+        financier.setIndividual(userIdentity);
+        Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
+        financier.setCooperation(cooperation);
+        financier = financierOutputPort.save(financier);
+        return financier;
     }
 
     private Financier getCooperateFinancierByUserIdentity(Financier financier) throws MeedlException {
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getCooperation().getUserIdentity().getEmail());
+        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getIndividual().getEmail());
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
             log.info("Creating a new cooperation financier for user with this email : {}", userIdentity.getEmail());
-            financier.getCooperation().setUserIdentity(userIdentity);
+            financier.setIndividual(userIdentity);
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
@@ -126,12 +135,12 @@ public class FinancierService implements FinancierUseCase {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier);
+            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
         }
     }
 
-    private void emailInviteNonExistingFinancierToPlatform(Financier financier) throws MeedlException {
-        FinancierEmailUseCase.inviteFinancierToPlatform(financier.getIndividual());
+    private void emailInviteNonExistingFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
+        FinancierEmailUseCase.inviteFinancierToPlatform(userIdentity);
     }
 
     private String inviteFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
