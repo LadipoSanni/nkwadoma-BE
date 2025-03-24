@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 public class FinancierRequest {
     private String organizationName;
+    private String organizationEmail;
     private String financierId;
     private BigDecimal amountToInvest;
     private FinancierType financierType;
