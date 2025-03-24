@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Finan
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -141,7 +142,8 @@ class FinancierAdapterTest {
         assertNotNull(response);
         assertNotNull(response.getCooperation());
         assertNotNull(response.getCooperation().getUserIdentity());
-        assertEquals(individualFinancier.getCooperation().getUserIdentity().getId(), response.getIndividual().getId());
+        assertEquals( response.getIndividual().getId(), cooperateFinancier.getCooperation().getUserIdentity().getId());
+        assertEquals( response.getFinancierType(), FinancierType.COOPERATE);
         assertNull(response.getIndividual());
         assertNotNull(response.getId());
 //        financierId = response.getId();

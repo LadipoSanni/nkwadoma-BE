@@ -24,9 +24,11 @@ public class CooperationAdapter implements CooperationOutputPort {
         MeedlValidator.validateObjectInstance(cooperation, "Cooperation can not be empty");
         cooperation.validate();
         confirmCooperationDoesNotPreviouslyExist(cooperation);
-        log.info("Cooperation saved successfully with name : {}", cooperation.getName());
-        CooperationEntity cooperationEntity = cooperationRepository.save(cooperationMapper.toCooperationEntity(cooperation));
-        log.info("Cooperation saved successfully {}", cooperationEntity.getName());
+        log.info("Cooperation to save in cooperation adapter : {}", cooperation);
+        CooperationEntity cooperationEntityToSave = cooperationMapper.toCooperationEntity(cooperation);
+        log.info("Cooperation to save mapped : {}",cooperationEntityToSave);
+        CooperationEntity cooperationEntity = cooperationRepository.save(cooperationEntityToSave);
+        log.info("Cooperation saved successfully {}", cooperationEntity);
         return cooperationMapper.toCooperation(cooperationEntity);
     }
 

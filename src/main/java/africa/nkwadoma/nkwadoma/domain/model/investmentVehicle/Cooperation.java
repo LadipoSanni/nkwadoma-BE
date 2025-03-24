@@ -6,12 +6,14 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Builder
 @Getter
 @Setter
+@ToString
 public class Cooperation {
     private String id;
     private String name;

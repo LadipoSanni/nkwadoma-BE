@@ -120,7 +120,9 @@ public class CooperationAdapterTest {
             throw new RuntimeException(e);
         }
         assertNotNull(foundCooperation);
+        assertNotNull(foundCooperation.getUserIdentity());
         assertEquals(cooperation.getName(), foundCooperation.getName());
+        assertEquals(cooperation.getUserIdentity().getEmail(), foundCooperation.getUserIdentity().getEmail());
         log.info("found cooperation {}", foundCooperation);
     }
     @Test
@@ -148,9 +150,8 @@ public class CooperationAdapterTest {
         }
         assertThrows(MeedlException.class, ()-> cooperationOutputPort.findById(cooperationId));
     }
-    @AfterAll
+//    @AfterAll
     void tearDown() throws MeedlException {
-//        cooperationOutputPort.deleteById(cooperationId);
         userIdentityOutputPort.deleteUserById(userIdentityId);
         log.info("Test data deleted after test");
     }

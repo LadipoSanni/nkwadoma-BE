@@ -20,5 +20,5 @@ public class CooperationEntity {
     private String id;
     private String name;
     @OneToOne
-    private UserEntity userEntity;
+    private UserEntity userIdentity;
 }
