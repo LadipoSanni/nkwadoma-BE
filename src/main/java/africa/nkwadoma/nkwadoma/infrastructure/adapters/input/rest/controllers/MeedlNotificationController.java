@@ -75,6 +75,29 @@ public class MeedlNotificationController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("search-notification")
+    private ResponseEntity<ApiResponse<?>> viewAllNotification(@AuthenticationPrincipal Jwt meedlUser,
+                                                               @RequestParam(name = "title") String title,
+                                                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Page<MeedlNotification> meedlNotifications =
+                meedlNotificationUsecase.searchNotification(meedlUser.getClaimAsString("sub"),title,pageSize,pageNumber);
+        List<MeedlNotificationReponse> meedlNotificationReponse =
+                meedlNotifications.stream().map(meedlNotificationRestMapper::toMeedlNotificationResponse)
+                        .collect(Collectors.toList());
+        PaginatedResponse<MeedlNotificationReponse> response = new PaginatedResponse<>(
+                meedlNotificationReponse, meedlNotifications.hasNext(),
+                meedlNotifications.getTotalPages(),pageNumber,pageSize
+        );
+        ApiResponse<PaginatedResponse<MeedlNotificationReponse>> apiResponse =
+                ApiResponse.<PaginatedResponse<MeedlNotificationReponse>>builder()
+                        .data(response)
+                        .message(ALL_NOTIFICATION_VIEW_SUCCESSFULLY)
+                        .statusCode(HttpStatus.OK.toString())
+                        .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @GetMapping("notification-count")
     private ResponseEntity<ApiResponse<?>> notificationCount(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         MeedlNotification numberOfUnReadNotification =
@@ -99,5 +122,7 @@ public class MeedlNotificationController {
                 .statusCode(HttpStatus.OK.toString())
                 .message("Notification " + ControllerConstant.DELETED_SUCCESSFULLY.getMessage()).build(), HttpStatus.OK);
     }
+
+
 
 }
