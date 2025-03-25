@@ -9,6 +9,7 @@ public interface AllowedHost {
             "DELETE",
             "OPTIONS",
             "HEAD"
+        
     };
     String[] getPatterns();
 
