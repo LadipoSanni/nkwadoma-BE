@@ -76,6 +76,7 @@ public class FinancierServiceTest {
     int pageNumber = 0 ;
     private NextOfKin nextOfKin;
     private InvestmentVehicle publicInvestmentVehicle;
+
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
@@ -640,7 +641,7 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinancierDetails);
-        assertNotNull(foundFinancierDetails.getInvestmentVehicleDetailsList());
+        assertFalse(foundFinancierDetails.getInvestmentSummaryList().isEmpty());
     }
 
     @AfterAll
