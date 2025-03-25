@@ -23,22 +23,4 @@ public interface InvestmentVehicleFinancierMapper {
 
     FinancierInvestmentDetailsResponse map(FinancierVehicleDetails financierVehicleDetails);
 
-    /*@Mapping(source = "investmentVehicle.name", target = "investmentVehicleName")
-    @Mapping(source = "investmentVehicle.investmentVehicleType", target = "investmentVehicleType")
-    @Mapping(source = "dateInvested", target = "dateInvested")
-    @Mapping(source = "amountInvested", target = "amountInvested")
-    @Mapping(source = "investmentVehicle.netAssetValue", target = "netAssetValue")
-    @Mapping(source = "investmentVehicle.startDate", target = "investmentStartDate")
-    @Mapping(source = "investmentVehicle.maturityDate", target = "maturityDate")
-    @Mapping(source = "investmentVehicleDesignation", target = "designation")
-    @Mapping(source = "investmentVehicle.percentageOfPortfolio", target = "percentageOfPortfolio")
-    @Mapping(source = "investmentVehicle.incomeEarned", target = "incomeEarned")
-    @Mapping(source = "investmentVehicle.operationStatus", target = "operationStatus")
-    @Mapping(source = "investmentVehicle.distributionStatus", target = "vehicleDistributionStatus")
-    @Mapping(source = "investmentVehicle.closureStatus", target = "vehicleClosureStatus")
-    @Mapping(source = "investmentVehicle.visibilityStatus", target = "vehicleVisibilityStatus")
-//    InvestmentVehicleDetails toInvestmentVehicleDetails(InvestmentVehicleFinancier financier);
-
-    List<InvestmentVehicleDetails> toInvestmentVehicleDetailsList(List<InvestmentVehicleFinancier> financiers);
-    */
 }
