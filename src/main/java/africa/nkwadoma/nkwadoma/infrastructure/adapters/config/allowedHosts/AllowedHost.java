@@ -9,7 +9,7 @@ public interface AllowedHost {
             "DELETE",
             "OPTIONS",
             "HEAD"
-            "http://172.16.1.52:3000"
+        
     };
     String[] getPatterns();
 
