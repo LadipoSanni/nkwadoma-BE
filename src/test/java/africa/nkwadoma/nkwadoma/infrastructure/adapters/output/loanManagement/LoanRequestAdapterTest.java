@@ -174,6 +174,7 @@ class LoanRequestAdapterTest {
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
 
             UserIdentity userIdentity = TestData.createTestUserIdentity("loxeha1691@fundapk.com");
+            userIdentity.setIdentityVerified(true);
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
                     initialDeposit(BigDecimal.valueOf(1000000.00)).build();
             LoaneeLoanBreakdown accommodationBreakdown = LoaneeLoanBreakdown.builder().
