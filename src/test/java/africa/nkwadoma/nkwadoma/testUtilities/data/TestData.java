@@ -472,8 +472,8 @@ public class TestData {
 
     public static BankDetail buildBankDetail() {
         return BankDetail.builder()
-               .accountName("Lagos Main")
-               .accountNumber("1234567890")
+               .bankName("Lagos Main")
+               .bankNumber("1234567890")
                .build();
     }
 

@@ -343,14 +343,14 @@ public class FinancierServiceTest {
     @Test
     void completeIndividualKycWithoutAccountNumber(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber(null);
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber(null);
         financierList.add(financier);
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
     @Test
     void completeIndividualKycWithoutAccountName(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountName(null);
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankName(null);
         financierList.add(financier);
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
@@ -358,7 +358,7 @@ public class FinancierServiceTest {
     @Test
     void completeIndividualKycWithAccountNumberLessThanTen(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber("123456789");
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber("123456789");
         financierList.add(financier);
         assertThrows(MeedlException.class, ()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
@@ -366,7 +366,7 @@ public class FinancierServiceTest {
     @Test
     void completeIndividualKycWithAccountNumberGreaterThanFifteen(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber("1234567890111213");
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber("1234567890111213");
         financierList.add(financier);
         assertThrows(MeedlException.class, ()-> financierUseCase.completeKyc(financierWithKycRequest));
     }

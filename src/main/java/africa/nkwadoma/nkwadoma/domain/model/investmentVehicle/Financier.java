@@ -79,6 +79,6 @@ public class Financier {
         userIdentity.getNextOfKin().validate();
         MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
         MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
-        MeedlValidator.validateDataElement(userIdentity.getAddress(), "Address is required");
+//        MeedlValidator.validateDataElement(userIdentity.getAddress(), "Address is required");
     }
 }

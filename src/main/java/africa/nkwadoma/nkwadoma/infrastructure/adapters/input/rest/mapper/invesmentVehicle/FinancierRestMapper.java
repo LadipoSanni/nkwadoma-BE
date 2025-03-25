@@ -21,14 +21,17 @@ public interface FinancierRestMapper {
     FinancierResponse map(FinancierDetails financier);
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "userIdentity.id", source = "userId")
-//    @Mapping(target = "individual.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
-//    @Mapping(target = "individual.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
-//    @Mapping(target = "individual.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
-//    @Mapping(target = "individual.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
-//    @Mapping(target = "individual.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
-//    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
-    Financier map(KycRequest kycRequest, String userId);
+    @Mapping(target = "userIdentity.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
+    @Mapping(target = "userIdentity.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
+    @Mapping(target = "userIdentity.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
+    @Mapping(target = "userIdentity.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
+    @Mapping(target = "userIdentity.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
+    @Mapping(target = "userIdentity.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
+    @Mapping(target = "userIdentity.bankDetail.bankName", source = "kycRequest.bankName")
+    @Mapping(target = "userIdentity.bankDetail.bankNumber", source = "kycRequest.bankNumber")
+    @Mapping(target = "userIdentity.taxId", source = "kycRequest.taxId")
+    @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
+    Financier map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")
     Financier map(FinancierRequest financierRequest, String userId);

@@ -12,7 +12,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -336,27 +335,27 @@ class FinancierAdapterTest {
     @Test
     void completeIndividualKycWithoutAccountNumber(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber(null);
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber(null);
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
     void completeIndividualKycWithoutAccountName(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountName(null);
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankName(null);
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
 
     @Test
     void completeIndividualKycWithAccountNumberLessThanTen(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber("123456789");
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber("123456789");
         assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
 
     @Test
     void completeIndividualKycWithAccountNumberGreaterThanFifteen(){
         Financier financierWithKycRequest = TestData.completeKycRequest(financier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setAccountNumber("1234567890111213");
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber("1234567890111213");
         assertThrows(MeedlException.class, ()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
 

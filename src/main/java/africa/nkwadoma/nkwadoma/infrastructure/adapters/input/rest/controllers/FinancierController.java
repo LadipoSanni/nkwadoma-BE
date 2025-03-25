@@ -59,7 +59,8 @@ public class FinancierController {
     @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
-        Financier financier = financierRestMapper.map(kycRequest, meedlUser.getClaimAsString("sub"));
+        Financier financier = financierRestMapper.map(kycRequest);
+        financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
         financier = financierUseCase.completeKyc(financier);
 
         KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
@@ -110,18 +111,6 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-//    @GetMapping("financier/view/details/{financierId}")
-//    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-//    public  ResponseEntity<ApiResponse<?>> viewFinancierProjectionDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
-//        FinancierDetails financier = financierUseCase.viewFinancierDetailByFinancierId(financierId);
-//        FinancierResponse financierResponse = financierRestMapper.map(financier);
-//
-//        ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
-//                .data(financierResponse)
-//                .statusCode(HttpStatus.OK.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-//    }
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber,@RequestParam int pageSize) throws MeedlException {

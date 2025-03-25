@@ -12,8 +12,6 @@ public interface FinancierUseCase {
 
     Financier viewFinancierDetail(String financierId) throws MeedlException;
 
-//    FinancierDetails viewFinancierDetailByFinancierId(String financierId) throws MeedlException;
-
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
     Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException;

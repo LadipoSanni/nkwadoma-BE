@@ -236,11 +236,6 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         return financierOutputPort.findFinancierByFinancierId(financierId);
     }
-//    @Override
-//    public FinancierDetails viewFinancierDetailByFinancierId(String financierId) throws MeedlException {
-//        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-//        return financierOutputPort.findFinancierDetailsByFinancierId(financierId);
-//    }
 
     @Override
     public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
@@ -414,8 +409,9 @@ public class FinancierService implements FinancierUseCase {
 
             updateFinancierNextOfKinKycDetail(financier, foundFinancier);
             log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
-
+            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
+            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
             foundFinancier.getUserIdentity().setBankDetail(bankDetail);
 
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
