@@ -19,4 +19,6 @@ public interface InvestmentVehicleRestMapper {
     InvestmentVehicle mapUpdateInvestmentVehicleRequestToInvestmentVehicle(UpdateInvestmentVehicleRequest investmentVehicleRequest);
 
     List<InvestmentVehicleResponse> toViewAllInvestmentVehicleResponse(List<InvestmentVehicle> investmentVehicleIdentities);
+
+
 }
