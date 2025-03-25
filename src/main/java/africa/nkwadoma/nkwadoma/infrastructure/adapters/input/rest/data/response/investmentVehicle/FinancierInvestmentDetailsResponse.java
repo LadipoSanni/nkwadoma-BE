@@ -15,5 +15,5 @@ public class FinancierInvestmentDetailsResponse {
     private BigDecimal totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<InvestmentSummary> investmentSummary;
+    private List<InvestmentSummary> investmentSummaryList;
 }
