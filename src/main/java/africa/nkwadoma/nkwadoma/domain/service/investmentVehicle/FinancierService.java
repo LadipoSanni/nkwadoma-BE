@@ -150,7 +150,7 @@ public class FinancierService implements FinancierUseCase {
                 financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.INVESTOR) &&
                 financier.getInvestmentVehicleDesignation().size() > BigInteger.ONE.intValue()
         ){
-            throw new MeedlException("Financier can only be a signed a single role.");
+            throw new MeedlException("Financier can only be assigned a single role.");
         }
 
     }
