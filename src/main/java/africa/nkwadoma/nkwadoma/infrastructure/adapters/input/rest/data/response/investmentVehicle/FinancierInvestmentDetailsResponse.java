@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleDetails;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +14,6 @@ public class FinancierInvestmentDetailsResponse {
     private int numberOfInvestment;
     private BigDecimal totalAmountInvested;
     private BigDecimal totalIncomeEarned;
-    private int portfolioValue;
-    private List<InvestmentVehicleDetails> investmentVehicleDetailsList;
+    private BigDecimal portfolioValue;
+    private List<InvestmentSummary> investmentSummary;
 }
