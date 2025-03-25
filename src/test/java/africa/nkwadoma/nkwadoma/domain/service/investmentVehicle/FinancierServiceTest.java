@@ -659,7 +659,7 @@ public class FinancierServiceTest {
     void viewInvestmentDetailsOfFinancier(){
         FinancierVehicleDetails foundFinancierDetails = null;
         try {
-            foundFinancierDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+            foundFinancierDetails = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
             log.info("-------->Found details---------> " + foundFinancierDetails);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
