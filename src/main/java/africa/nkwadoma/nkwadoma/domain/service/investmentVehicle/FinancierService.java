@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,6 @@ public class FinancierService implements FinancierUseCase {
     private final FinancierEmailUseCase FinancierEmailUseCase;
     private final NextOfKinUseCase nextOfKinUseCase;
     private final BankDetailOutputPort bankDetailOutputPort;
-//    private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
 
     @Override
     public String inviteFinancier(List<Financier> financiers) throws MeedlException {
@@ -358,6 +358,9 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
             BigDecimal newAmount = investmentVehicleFinancier.getAmountInvested().add(financier.getAmountToInvest());
             investmentVehicleFinancier.setAmountInvested(newAmount);
+            if (investmentVehicleFinancier.getDateInvested() == null) {
+                investmentVehicleFinancier.setDateInvested(LocalDate.now());
+            }
             log.info("Updated the amount invested in the investment vehicle financier for {}... amount invested {}", newAmount, financier.getAmountToInvest());
         }else {
             log.info("First time financier is in vesting in this vehicle. Amount {}", financier.getAmountToInvest());
@@ -365,6 +368,7 @@ public class FinancierService implements FinancierUseCase {
                     .investmentVehicle(investmentVehicle)
                     .financier(financier)
                     .amountInvested(financier.getAmountToInvest())
+                    .dateInvested(LocalDate.now())
                     .build();
         }
         return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
@@ -378,6 +382,11 @@ public class FinancierService implements FinancierUseCase {
         BigDecimal currentAmount = investmentVehicleFinancier.getAmountInvested();
         BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
         investmentVehicleFinancier.setAmountInvested(newAmount);
+        if (investmentVehicleFinancier.getDateInvested() == null) {
+            investmentVehicleFinancier.setDateInvested(LocalDate.now());
+        } else {
+            investmentVehicleFinancier.setDateInvested(investmentVehicleFinancier.getDateInvested());
+        }
         log.info("Updating investment vehicle financier amount invested to {}",investmentVehicleFinancier.getAmountInvested());
         investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
 
@@ -427,21 +436,21 @@ public class FinancierService implements FinancierUseCase {
                 .map(InvestmentVehicleFinancier::getAmountInvested)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<InvestmentVehicleDetails> investmentVehicleDetails = convertToVehicleDetails(financierInvestmentVehicleList);
-//                investmentVehicleFinancierMapper.toInvestmentVehicleDetailsList(financierInvestmentVehicleList);
+        List<InvestmentSummary> investmentSummaryList = convertToVehicleDetails(financierInvestmentVehicleList);
         return FinancierVehicleDetails.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
-                .investmentVehicleDetailsList(investmentVehicleDetails)
+                .investmentSummaryList(investmentSummaryList)
+                .portfolioValue(foundFinancier.getPortfolioValue())
                 .build();
     }
 
-    private static List<InvestmentVehicleDetails> convertToVehicleDetails(List<InvestmentVehicleFinancier> financierInvestmentVehicleList) {
+    private static List<InvestmentSummary> convertToVehicleDetails(List<InvestmentVehicleFinancier> financierInvestmentVehicleList) {
         return financierInvestmentVehicleList.stream()
                 .map(financierInvestment -> {
                     InvestmentVehicle investmentVehicle = financierInvestment.getInvestmentVehicle();
 
-                    return InvestmentVehicleDetails.builder()
+                    return InvestmentSummary.builder()
                             .investmentVehicleName(investmentVehicle.getName())
                             .investmentVehicleType(investmentVehicle.getInvestmentVehicleType())
                             .dateInvested(financierInvestment.getDateInvested())
@@ -450,7 +459,11 @@ public class FinancierService implements FinancierUseCase {
                             .percentageOfPortfolio(investmentVehicle.getPercentageOfPortfolio())
                             .investmentStartDate(investmentVehicle.getStartDate())
                             .maturityDate(investmentVehicle.getMaturityDate())
-                            .designation(investmentVehicle.getInvestmentVehicleDesignation())
+                            .designations(financierInvestment.getInvestmentVehicleDesignation())
+//                            .operationStatus(investmentVehicle.getVehicleOperationStatus().getOperationStatus())
+//                            .couponDistributionStatus(investmentVehicle.getCouponDistributionStatus())
+                            .vehicleClosureStatus(investmentVehicle.getVehicleClosureStatus())
+                            .vehicleVisibilityStatus(investmentVehicle.getInvestmentVehicleVisibility())
                             .build();
                 })
                 .toList();
