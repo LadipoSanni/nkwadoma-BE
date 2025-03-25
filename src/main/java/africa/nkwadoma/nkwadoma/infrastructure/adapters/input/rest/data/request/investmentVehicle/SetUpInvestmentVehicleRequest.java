@@ -13,6 +13,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 
 
 @Setter
@@ -38,4 +39,5 @@ public class SetUpInvestmentVehicleRequest {
     private String sponsors;
     private BigDecimal minimumInvestmentAmount;
     private InvestmentVehicleStatus investmentVehicleStatus;
+    private LocalDate startDate;
 }
