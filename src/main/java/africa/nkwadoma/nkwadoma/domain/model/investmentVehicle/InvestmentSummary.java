@@ -8,12 +8,13 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
 @ToString
 @Builder
-public class InvestmentVehicleDetails {
+public class InvestmentSummary {
     private String investmentVehicleName;
     private InvestmentVehicleType investmentVehicleType;
     private LocalDate dateInvested;
@@ -22,8 +23,8 @@ public class InvestmentVehicleDetails {
     private double percentageOfPortfolio;
     private LocalDate investmentStartDate;
     private LocalDate maturityDate;
-    private InvestmentVehicleDesignation designation;
     private BigDecimal incomeEarned;
+    private Set<InvestmentVehicleDesignation> designations;
     private OperationStatus operationStatus;
     private CouponDistributionStatus couponDistributionStatus;
     private VehicleClosure vehicleClosureStatus;
