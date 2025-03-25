@@ -322,7 +322,7 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier investInVehicle(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = null;

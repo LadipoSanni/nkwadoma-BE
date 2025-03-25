@@ -18,13 +18,9 @@ import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -648,6 +644,7 @@ public class FinancierServiceTest {
 
         log.info("Started deleting data in financier service test." );
         try{
+            UserIdentity userIdentity = userIdentityOutputPort.findById(userIdentityId);
             deleteNotification(userIdentityId);
             deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
             deleteInvestmentVehicleFinancier(secondInvestmentVehicleId, financierId);
@@ -662,14 +659,6 @@ public class FinancierServiceTest {
             log.warn("Unable to delete test data for financier service test",e);
             throw new RuntimeException(e);
         }
-        UserIdentity userIdentity = userIdentityOutputPort.findById(userIdentityId);
-        deleteNotification(userIdentityId);
-        deleteInvestmentVehicleFinancier(investmentVehicleId, financierId);
-        financierOutputPort.delete(financierId);
-        identityManagerOutputPort.deleteUser(userIdentity);
-        userIdentityOutputPort.deleteUserById(userIdentityId);
-        nextOfKinOutputPort.deleteNextOfKin(userIdentity.getNextOfKin().getId());
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         log.info("Test data deleted after test");
     }
 
