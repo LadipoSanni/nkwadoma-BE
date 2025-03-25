@@ -6,15 +6,24 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -223,6 +232,82 @@ public class MeedlNotificationAdapterTest {
         }
         assertEquals(1, numberOfAllNotifications);
     }
+
+    @Test
+    void deleteMultipleNotificationWithNullUserId() {
+        assertThrows(MeedlException.class,()->meedlNotificationOutputPort.deleteMultipleNotification(null, Collections.singletonList(meedlNotificationId)));
+    }
+
+    @Test
+    void deleteMultipleNotificationWithNullNotificationId() {
+        assertThrows(MeedlException.class,()->meedlNotificationOutputPort.deleteMultipleNotification(meedlNotification.getUser().getId(),null));
+    }
+
+    @Test
+    void deleteMultipleNotificationWithEmptyList() {
+        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.deleteMultipleNotification(meedlNotification.getUser().getId(), Collections.emptyList()));
+    }
+
+    @Test
+    void deleteMultipleNotificationWithInvalidId() {
+        assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.deleteMultipleNotification("invalidUserId", Collections.singletonList(meedlNotificationId)));
+    }
+
+    @Order(6)
+    @Test
+    void searchNotification(){
+        Page<MeedlNotification> meedlNotifications = Page.empty();
+        try{
+            meedlNotifications = meedlNotificationOutputPort.searchNotification(userId,"E",pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info(meedlException.getMessage());
+        }
+        assertEquals(userId, meedlNotifications.getContent().get(0).getUser().getId());
+        assertEquals(meedlNotificationId, meedlNotifications.getContent().get(0).getId());
+        assertEquals(1, meedlNotifications.getContent().size());
+    }
+
+    @Test
+    void searchNotificationWithNullUserId() {
+        assertThrows(MeedlException.class, ()-> meedlNotificationOutputPort.searchNotification(null,"e",pageSize,pageNumber));
+    }
+
+    @Test
+    void searchNotificationForAUserThatDoesNotHaveAnyNotification(){
+        Page<MeedlNotification> allNotification = Page.empty();
+        try {
+            allNotification = meedlNotificationOutputPort.searchNotification(
+                    "550e8400-e29b-41d4-a716-446655440000","e", pageSize, pageNumber);
+        }catch (MeedlException exception) {
+            log.info(exception.getMessage());
+        }
+        assertTrue(allNotification.getContent().isEmpty());
+        assertEquals(0, allNotification.getContent().size());
+    }
+
+    @Test
+    @Order(7)
+    void deleteMultipleNotification(){
+        log.info("meedle notification {}",meedlNotification);
+        try{
+            MeedlNotification firstNotification = meedlNotificationOutputPort.save(meedlNotification);
+            MeedlNotification secondNotification = meedlNotificationOutputPort.save(meedlNotification);
+            String userId = firstNotification.getUser().getId();
+
+            List<String> deleteNotificationList = List.of(firstNotification.getId(),
+                                    secondNotification.getId());
+
+            MeedlNotification foundNotification = meedlNotificationOutputPort.findNotificationById(firstNotification.getId());
+            assertNotNull(foundNotification);
+            meedlNotificationOutputPort.deleteMultipleNotification(userId, deleteNotificationList);
+            assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(firstNotification.getId()));
+            assertThrows(MeedlException.class, ()->meedlNotificationOutputPort.findNotificationById(secondNotification.getId()));
+        } catch (MeedlException meedlException) {
+            log.info(meedlException.getMessage());
+            throw new RuntimeException(meedlException);
+        }
+    }
+
 
     @AfterAll
     void cleanUp() throws MeedlException {

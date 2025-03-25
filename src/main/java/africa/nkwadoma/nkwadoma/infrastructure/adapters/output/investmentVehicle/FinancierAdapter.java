@@ -49,21 +49,11 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Financier next of kin found in adapter: {}", financierEntity.getUserIdentity().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
-//    @Override
-//    public FinancierDetails findFinancierDetailsByFinancierId(String financierId) throws MeedlException {
-//        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-//        log.info("Finding financier projection with id for find {}", financierId);
-//     FinancierDetailProjection financierDetailProjection = null;
-//             financierRepository.findByFinancierId(financierId)
-//                .orElseThrow(()-> new MeedlException("Financier not found"));
-//     log.info("Found financier projection next of kin: {}", financierDetailProjection.getNextOfKin());
-//        return financierMapper.map(financierDetailProjection);
-//    }
 
     @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
-                .orElseThrow(()-> new MeedlException("Financier not found") );
+                .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
         return financierMapper.map(foundFinancier);
     }
 

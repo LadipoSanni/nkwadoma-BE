@@ -20,11 +20,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -40,6 +43,7 @@ public class MeedlNotificationServiceTest {
     private MeedlNotification meedlNotification;
     private UserIdentity userIdentity;
     private String notificationId = UUID.randomUUID().toString();
+    private List<String> notificationIdList = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
     int pageSize = 10 ;
     int pageNumber = 0 ;
 
@@ -179,5 +183,56 @@ public class MeedlNotificationServiceTest {
         MeedlNotification notification = notificationService.fetchNotificationCount(userIdentity.getId());
         assertEquals(4, notification.getAllNotificationsCount());
     }
+
+
+    @Test
+    void searchNotification() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.searchNotification(userIdentity.getId(),"e",pageSize,pageNumber))
+                .thenReturn(new PageImpl<>(List.of(meedlNotification)));
+        Page<MeedlNotification> meedlNotifications = notificationService.searchNotification(userIdentity.getId(),"e",pageSize,pageNumber);
+        assertNotNull(meedlNotifications);
+        assertEquals(1,meedlNotifications.getTotalElements());
+    }
+
+    @Test
+    void deleteMultipleNotification() throws MeedlException {
+        doNothing().when(meedlNotificationOutputPort)
+                .deleteMultipleNotification(userIdentity.getId(), notificationIdList);
+        assertDoesNotThrow(() -> notificationService.deleteMultipleNotification(userIdentity.getId(), notificationIdList));
+        verify(meedlNotificationOutputPort, times(1))
+                .deleteMultipleNotification(userIdentity.getId(), notificationIdList);
+
+    }
+
+    @Test
+    void deleteWithEmptyNotificationList() {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), List.of()));
+    }
+
+    @Test
+    void deleteWithNullNotificationList() {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, "invalidId", " "})
+    void deleteWithInvalidUserId(String invalidUserId) {
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(invalidUserId, notificationIdList));
+    }
+
+    @Test
+    void deleteWithListOfInvalidNotificationIds() {
+        List<String> allInvalidNotificationIds = List.of(" ", "invalid-user-id", "");
+        assertThrows(MeedlException.class, () ->
+                notificationService.deleteMultipleNotification(userIdentity.getId(), allInvalidNotificationIds));
+    }
+
+
+
+
 
 }

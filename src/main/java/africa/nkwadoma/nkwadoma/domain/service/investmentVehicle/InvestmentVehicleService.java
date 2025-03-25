@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -9,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle.FinancierAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
@@ -19,6 +21,8 @@ import org.springframework.data.domain.*;
 
 
 import java.time.LocalDate;
+import java.math.BigInteger;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +32,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleM
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation.DONOR;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +41,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final PortfolioOutputPort portfolioOutputPort;
     private final FinancierOutputPort financierOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
 
@@ -71,8 +77,26 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private InvestmentVehicle publishInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
+        setInvestmentVehicleNumbersOnMeedlPortfolio(investmentVehicle);
         investmentVehicle.setValues();
         return publishedInvestmentVehicle(investmentVehicle.getId(),investmentVehicle);
+    }
+
+    private void setInvestmentVehicleNumbersOnMeedlPortfolio(InvestmentVehicle investmentVehicle) throws MeedlException {
+        Portfolio portfolio = portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName("Meedl").build());
+        if (investmentVehicle.getInvestmentVehicleType().equals(COMMERCIAL)){
+            portfolio.setTotalNumberOfCommercialFundsInvestmentVehicle(
+                    portfolio.getTotalNumberOfCommercialFundsInvestmentVehicle() + BigInteger.ONE.intValue()
+            );
+        }else {
+            portfolio.setTotalNumberOfEndowmentFundsInvestmentVehicle(
+                    portfolio.getTotalNumberOfEndowmentFundsInvestmentVehicle() + BigInteger.ONE.intValue()
+            );
+        }
+        portfolio.setTotalNumberOfInvestmentVehicle(
+                portfolio.getTotalNumberOfInvestmentVehicle() + BigInteger.ONE.intValue()
+        );
+        portfolioOutputPort.save(portfolio);
     }
 
     private void checkIfInvestmentVehicleNameExist(InvestmentVehicle investmentVehicle) throws MeedlException {

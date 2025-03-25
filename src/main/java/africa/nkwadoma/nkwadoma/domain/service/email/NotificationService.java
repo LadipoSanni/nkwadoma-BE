@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
@@ -30,9 +31,11 @@ import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
+
 
 @RequiredArgsConstructor
 @Slf4j
@@ -220,11 +223,32 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         }
         meedlNotification.setRead(true);
         meedlNotificationOutputPort.save(meedlNotification);
-        meedlNotification.setDuration(
-                ChronoUnit.DAYS.between(meedlNotification.getTimestamp(), LocalDateTime.now())
-                +" days ago"
-        );
+        meedlNotification.setDuration(getDurationText(meedlNotification.getTimestamp()));
         return meedlNotification;
+    }
+
+    public String getDurationText(LocalDateTime timestamp) {
+        LocalDateTime now = LocalDateTime.now();
+        long minutes = ChronoUnit.MINUTES.between(timestamp, now);
+        long hours = ChronoUnit.HOURS.between(timestamp, now);
+        long days = ChronoUnit.DAYS.between(timestamp, now);
+        long months = ChronoUnit.MONTHS.between(timestamp, now);
+        long years = ChronoUnit.YEARS.between(timestamp, now);
+        if (minutes < 60) {
+            return formatDuration(minutes, "minute");
+        } else if (hours < 24) {
+            return formatDuration(hours, "hour");
+        } else if (days < 30) {
+            return formatDuration(days, "day");
+        } else if (days < 365) {
+            return formatDuration(months, "month");
+        } else {
+            return formatDuration(years, "year");
+        }
+    }
+
+    private String formatDuration(long value, String unit) {
+        return value + " " + unit + (value != 1 ? "s" : "") + " ago";
     }
 
     @Override
@@ -242,6 +266,16 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         UserIdentity userIdentity = userIdentityOutputPort.findById(id);
         return meedlNotificationOutputPort.getNotificationCounts(userIdentity.getId());
     }
+
+    @Override
+    public Page<MeedlNotification> searchNotification(String userId, String title, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId,"User id cannot empty");
+        MeedlValidator.validatePageNumber(pageNumber);
+        MeedlValidator.validatePageSize(pageSize);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        return meedlNotificationOutputPort.searchNotification(userIdentity.getId(),title,pageSize,pageNumber);
+    }
+
     @Override
     public void inviteFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
         Context context = emailOutputPort.getNameAndLinkContext(getLink(userIdentity),userIdentity.getFirstName());
@@ -270,5 +304,12 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);
         return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
+    }
+
+    @Override
+    public void deleteMultipleNotification(String userId, List<String> notificationIdList) throws MeedlException {
+        MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
+        notificationIdList = MeedlValidator.validateNotificationListAndFilter(notificationIdList);
+        meedlNotificationOutputPort.deleteMultipleNotification(userId, notificationIdList);
     }
 }

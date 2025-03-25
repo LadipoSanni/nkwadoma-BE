@@ -5,7 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -23,4 +25,9 @@ public interface MeedlNotificationRepository extends JpaRepository<MeedlNotifica
 
     void deleteAllByUserId(String id);
 
+    @Modifying
+    @Query("DELETE FROM MeedlNotificationEntity mn WHERE mn.user.id = :userId AND mn.id IN :notificationIds")
+    void deleteByUserIdAndNotificationIds(@Param("userId") String userId, @Param("notificationIds") List<String> notificationIds);
+
+    Page<MeedlNotificationEntity> searchByUserIdAndTitleContainingIgnoreCase(Pageable pageRequest, String userId, String title);
 }

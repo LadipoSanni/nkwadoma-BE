@@ -233,6 +233,13 @@ class FinancierAdapterTest {
     }
 
     @Test
+    @Order(4)
+    void viewInvestmentDetailsOfFinancier(){
+        Financier financier = null;
+
+    }
+
+    @Test
     void viewFinanciersWithNull(){
         assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinancier(null));
     }

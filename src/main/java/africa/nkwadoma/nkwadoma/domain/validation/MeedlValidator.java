@@ -2,9 +2,12 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
+import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -216,6 +219,47 @@ public class MeedlValidator {
         }
         if (bankAccountNumber.length() < 10 || bankAccountNumber.length() > 15){
             throw new MeedlException("Bank account number cannot be less than ten or greater than fifteen");
+        }
+    }
+
+    public static List<String> validateNotificationListAndFilter(List<String> deleteNotificationList) throws MeedlException {
+        if (CollectionUtils.isEmpty(deleteNotificationList)) {
+            throw new MeedlException(MeedlNotificationMessages.NOTIFICATION_LIST_CANNOT_BE_EMPTY.getMessage());
+        }
+
+        List<String> validUUIDs = deleteNotificationList.stream()
+                .filter(MeedlValidator::isValidUUID)
+                .toList();
+
+        if (validUUIDs.isEmpty()) {
+            throw new MeedlException("No valid notification IDs found in the list.");
+        }
+
+        return validUUIDs;
+    }
+
+
+    private static boolean isValidUUID(String id) {
+        if (id == null || id.isEmpty()) {
+            return false;
+        }
+        try {
+            UUID.fromString(id);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public static void validateIncorrectStatus(Object status, Object[] values) throws MeedlException {
+        if (status != null) {
+            boolean isValid = Arrays.asList(values).contains(status);
+            if (!isValid) {
+                throw new MeedlException(
+                        "Invalid status: " + status + ". Must be one of: " +
+                                Arrays.toString(values)
+                );
+            }
         }
     }
 }

@@ -7,17 +7,15 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankDetail.BankDetailEntity;
-import jakarta.persistence.OneToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Slf4j
@@ -34,6 +32,7 @@ public class Financier {
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
+    private BigDecimal amountToInvest;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;

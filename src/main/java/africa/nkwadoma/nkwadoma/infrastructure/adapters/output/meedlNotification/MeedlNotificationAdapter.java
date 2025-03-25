@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.meedlNotification;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -77,5 +82,28 @@ public class MeedlNotificationAdapter implements MeedlNotificationOutputPort {
         MeedlValidator.validateUUID(id,"User id cannot be empty");
         meedlNotificationRepository.deleteAllByUserId(id);
     }
+
+
+    @Transactional
+    @Override
+    public void deleteMultipleNotification(String userId, List<String> deleteNotificationList) throws MeedlException {
+        MeedlValidator.validateUUID(userId, MeedlMessages.USER_ID_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateNotificationListAndFilter(deleteNotificationList);
+        meedlNotificationRepository.deleteByUserIdAndNotificationIds(userId, deleteNotificationList);
+    }
+
+    @Override
+    public Page<MeedlNotification> searchNotification(String userId, String title, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId,"User id cannot be empty");
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize,Sort.by("timestamp").descending());
+        Page<MeedlNotificationEntity> notificationEntities =
+                meedlNotificationRepository.searchByUserIdAndTitleContainingIgnoreCase(pageRequest,userId,title);
+        if (notificationEntities.isEmpty()) {
+            return Page.empty();
+        }
+        log.info("notification {}" , notificationEntities.map(meedlNotificationMapper::toMeedlNotification).getContent());
+        return notificationEntities.map(meedlNotificationMapper::toMeedlNotification);
+    }
+
 
 }
