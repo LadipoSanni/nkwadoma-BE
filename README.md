@@ -22,18 +22,18 @@ DOCKER and DOCKER COMPOSE Installation
         - confirm wsl installed with the command: wsl --version
         - to use the windows sub-system for linux(wsl) send this command: wsl (and press enter)
           configure your wsl to use password if you want.(N:B sudo will ask you for this password)
-        - to install Docker, use the following commands : sudo apt update, sudo apt install docker.io
-        - check for successful installation with these commands: docker --version, docker-compose --version.
+        - to install Docker, use the following commands : sudo apt update && sudo apt install docker.io
+        - check for successful installation with these commands: docker --version, docker compose version.
         - If docker compose is not installed, install docker compose seperately.
         - Authenticate docker: Navigate to the project root folder in your terminal and run this command:
               aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
     - Option 2: Use Docker Desktop download option
-        -Download using this link: https://docs.docker.com/desktop/setup/install/windows-install/
+        - Download using this link: https://docs.docker.com/desktop/setup/install/windows-install/
             Recommended: install the Docker Desktop for Windows-x86_64
         - Run the downloaded installer.
         - Follow the installation steps.
         - Enable WSL 2 backend during installation (recommended)
-        - to check for successful installation use this commands: docker --version, docker-compose --version.
+        - to check for successful installation use this commands: docker --version, docker compose version or docker-compose --version.
         - Authenticate docker: Navigate to the project root folder in your terminal and run this command:
               aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
       
