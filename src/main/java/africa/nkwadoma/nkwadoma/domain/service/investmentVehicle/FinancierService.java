@@ -91,7 +91,6 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
-        //TODO invite cooperation to platform
         try {
             financier = getCooperateFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
