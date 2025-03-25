@@ -19,8 +19,6 @@ public class FinancierEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String organizationName;
-
     private String invitedBy;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
@@ -30,4 +28,6 @@ public class FinancierEntity {
     private FinancierType financierType;
     @OneToOne
     private UserEntity individual;
+    @OneToOne
+    private CooperationEntity cooperation;
 }

@@ -24,4 +24,6 @@ public interface FinancierUseCase {
     Financier investInVehicle(Financier financier) throws MeedlException;
 
     Financier completeKyc(Financier financier) throws MeedlException;
+
+    Financier findFinancierByCooperationId(String cooperationId) throws MeedlException;
 }
