@@ -52,6 +52,7 @@ public class InvestmentVehicle {
     public void validate() throws MeedlException {
         log.info("Validating a published or publishable investment vehicle {} name : {}", id, name);
         MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
+        MeedlValidator.validateObjectInstance(startDate,"Start date cannot be empty");
         MeedlValidator.validateObjectName(trustee,"Trustee cannot be empty","Trustee");
         MeedlValidator.validateObjectName(custodian,"Custodian cannot be empty","Custodian");
         MeedlValidator.validateObjectName(bankPartner,"Bank Partner cannot be empty","Bank Partner");
