@@ -270,6 +270,7 @@ public class TestData {
         investmentVehicle.setSponsors("sponsors");
         investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
+        investmentVehicle.setStartDate(LocalDate.now());
         return investmentVehicle;
     }
 

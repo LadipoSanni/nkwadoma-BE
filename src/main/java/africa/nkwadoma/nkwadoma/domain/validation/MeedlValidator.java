@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.validation;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.CouponDistributionStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeLoanBreakdownException;
@@ -46,7 +47,7 @@ public class MeedlValidator {
         log.info("validateUUID {}", dataElement);
         validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
         try {
-            UUID.fromString(dataElement);
+            UUID.fromString(dataElement);  
         } catch (IllegalArgumentException e) {
             log.info("{}. The invalid UUID : {} : {}", e.getMessage(), dataElement, message);
             throw new MeedlException(message);
@@ -247,6 +248,18 @@ public class MeedlValidator {
             return true;
         } catch (IllegalArgumentException e) {
             return false;
+        }
+    }
+
+    public static void validateIncorrectStatus(Object status, Object[] values) throws MeedlException {
+        if (status != null) {
+            boolean isValid = Arrays.asList(values).contains(status);
+            if (!isValid) {
+                throw new MeedlException(
+                        "Invalid status: " + status + ". Must be one of: " +
+                                Arrays.toString(values)
+                );
+            }
         }
     }
 }

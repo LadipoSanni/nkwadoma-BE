@@ -184,6 +184,17 @@ public class MeedlNotificationServiceTest {
         assertEquals(4, notification.getAllNotificationsCount());
     }
 
+
+    @Test
+    void searchNotification() throws MeedlException {
+        when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
+        when(meedlNotificationOutputPort.searchNotification(userIdentity.getId(),"e",pageSize,pageNumber))
+                .thenReturn(new PageImpl<>(List.of(meedlNotification)));
+        Page<MeedlNotification> meedlNotifications = notificationService.searchNotification(userIdentity.getId(),"e",pageSize,pageNumber);
+        assertNotNull(meedlNotifications);
+        assertEquals(1,meedlNotifications.getTotalElements());
+    }
+
     @Test
     void deleteMultipleNotification() throws MeedlException {
         doNothing().when(meedlNotificationOutputPort)

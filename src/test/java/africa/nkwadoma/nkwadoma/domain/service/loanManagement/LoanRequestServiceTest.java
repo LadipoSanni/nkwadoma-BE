@@ -276,6 +276,8 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findLoanRequestById(loanRequest.getId())).thenReturn(Optional.ofNullable(loanRequest));
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
+            when(userIdentityOutputPort.findById(loanRequest.getActorId()))
+                    .thenReturn(new UserIdentity());
             approvedLoanRequest = loanRequestService.respondToLoanRequest(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
