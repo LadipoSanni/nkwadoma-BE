@@ -13,7 +13,7 @@ After cloning this project, follow the steps below to ensure seamless developmen
     4. Database
 - Pull and Run Application:
     1. Authenticate docker
-    2. Pull Backend Application
+   
 
 DOCKER and DOCKER COMPOSE Installation
 - For windows OS:
@@ -25,8 +25,7 @@ DOCKER and DOCKER COMPOSE Installation
         - to install Docker, use the following commands : sudo apt update && sudo apt install docker.io
         - check for successful installation with these commands: docker --version, docker compose version.
         - If docker compose is not installed, install docker compose seperately.
-        - Authenticate docker: Navigate to the project root folder in your terminal and run this command:
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
+        
     - Option 2: Use Docker Desktop download option
         - Download using this link: https://docs.docker.com/desktop/setup/install/windows-install/
             Recommended: install the Docker Desktop for Windows-x86_64
@@ -34,8 +33,6 @@ DOCKER and DOCKER COMPOSE Installation
         - Follow the installation steps.
         - Enable WSL 2 backend during installation (recommended)
         - to check for successful installation use this commands: docker --version, docker compose version or docker-compose --version.
-        - Authenticate docker: Navigate to the project root folder in your terminal and run this command:
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
       
       N:B 
         Docker Compose is included in Docker Desktop for Windows and macOS. On Linux, it requires separate installation.
@@ -54,16 +51,13 @@ DOCKER and DOCKER COMPOSE Installation
 - Ensure Docker is running on your machine
    type the command: docker ps in your terminal and press enter. if docker is running you should see this in your terminal
     CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-- Authenticate docker: Navigate to the project root folder in your terminal and run this command:
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
 
 - For Mac OS
   - Download Docker Desktop from this link: https://docs.docker.com/desktop/setup/install/mac-install/
   - Install Docker: Open the downloaded .dmg file and drag Docker to the Applications folder.
   - Start Docker from Applications
   - Verify successful installation: docker --version docker-compose --version
-  - Authenticate docker: Navigate to the project root folder in your terminal and run this command:
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
+  
    
 
  
@@ -71,6 +65,10 @@ For Frontend-Engineer and QA-Engineer
 To pull the backend code from the registry require credentials: 
 credentials will be provided for you by the cloud team.
 once the credentials are provided and you authenticate successfully
+
+PULL & RUN APPLICATION:
+- Authenticate docker: Navigate to the project root folder in your terminal and run this command:
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 357586184453.dkr.ecr.us-east-1.amazonaws.com
 enter this command in the terminal: docker pull 357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
 Navigate back to the project root directory with cd to the project "/nkwadoma-BE" path, where  the docker-compose.yml file is located.
 Run the following commands: To start the containers;
