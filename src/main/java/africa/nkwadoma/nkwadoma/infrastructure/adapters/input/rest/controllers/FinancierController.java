@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -19,9 +20,11 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jdk.jfr.Description;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -122,13 +125,44 @@ public class FinancierController {
 
     @GetMapping("financier/view/investment-details/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @Operation(
+            summary = "View investment details of financier",
+            description = """
+        Allows a Portfolio Manager to check the investment details of a particular financier. 
+        This action requires the PORTFOLIO_MANAGER role.
+        The API expects the following request payload: 
+        {
+            "financierId": "UUID"
+        }
+        financierId is the unique number given to the financier.""",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully retrieved financier investment details",
+                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid financier id provided.",
+                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - User does not have the required role (PORTFOLIO_MANAGER)"
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "404",
+                            description = "Financier not found"
+                    )
+            }
+    )
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
         FinancierVehicleDetails financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
         FinancierInvestmentDetailsResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
 
         ApiResponse<FinancierInvestmentDetailsResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailsResponse>builder()
                 .data(financierInvestmentDetailsResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
