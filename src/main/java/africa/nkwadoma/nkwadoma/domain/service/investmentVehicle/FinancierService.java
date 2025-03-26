@@ -26,7 +26,6 @@ import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -98,15 +97,15 @@ public class FinancierService implements FinancierUseCase {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingCooperateFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
+            emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
         }
     }
 
     private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
         log.info("Saving cooperate financier user identity to platform {} ",financier);
-        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getIndividual());
+        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getUserIdentity());
         userIdentity = userIdentityOutputPort.save(userIdentity);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier = financierOutputPort.save(financier);
@@ -114,13 +113,13 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private Financier getCooperateFinancierByUserIdentity(Financier financier) throws MeedlException {
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getIndividual().getEmail());
+        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
             log.info("Creating a new cooperation financier for user with this email : {}", userIdentity.getEmail());
-            financier.setIndividual(userIdentity);
+            financier.setUserIdentity(userIdentity);
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
@@ -136,7 +135,7 @@ public class FinancierService implements FinancierUseCase {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
+            emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
         }
     }
 
@@ -213,8 +212,8 @@ public class FinancierService implements FinancierUseCase {
 
     private Financier getFinancierByUserIdentity(Financier financier) throws MeedlException {
 
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getIndividual().getEmail());
-        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getUserIdentity().getEmail());
+        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
+//        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getUserIdentity().getEmail());
         log.info("User identity found by email {} ,when inviting financier ", userIdentity.getEmail());
         if (userIdentity.getRole() != IdentityRole.FINANCIER) {
             //TODO Add new role to user.

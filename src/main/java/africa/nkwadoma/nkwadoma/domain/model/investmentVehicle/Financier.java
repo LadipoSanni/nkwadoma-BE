@@ -26,11 +26,9 @@ import java.util.Set;
 public class Financier {
     private String id;
     private Cooperation cooperation;
-    private UserIdentity individual;
     private String invitedBy;
     private FinancierType financierType;
     private UserIdentity userIdentity;
-    private String invitedBy;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
@@ -41,16 +39,16 @@ public class Financier {
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        validateIndividualEmail(userIdentity);
+        validateFinancierEmail(userIdentity);
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
         MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
         MeedlValidator.validateEmail(userIdentity.getEmail());
-        MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
 
-        validateFinancierEmail(individual);
-        MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
-        MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
-        MeedlValidator.validateEmail(individual.getEmail());
+        validateFinancierEmail(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
     }
 
 

@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
@@ -19,7 +18,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesm
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -48,7 +46,7 @@ public class FinancierController {
     FinancierRequest financierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = mapValues(meedlUser, financierRequest);
-        Financier financier = financierRestMapper.map(financierRequest);
+//        Financier financier = financierRestMapper.map(financierRequest);
         financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
@@ -63,11 +61,11 @@ public class FinancierController {
 
     private Financier mapValues(Jwt meedlUser, FinancierRequest financierRequest) {
         Financier financier = financierRestMapper.map(financierRequest);
-        financier.setIndividual(financierRequest.getIndividual());
+        financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
         if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
-            financier.setIndividual(UserIdentity.builder()
+            financier.setUserIdentity(UserIdentity.builder()
                             .email(financierRequest.getOrganizationEmail())
                             .createdBy(meedlUser.getClaimAsString("sub"))
                             .firstName("admin")
