@@ -91,6 +91,7 @@ public class MeedlValidator {
 
     public static void validateObjectInstance(Object instance, String message) throws MeedlException {
         if (ObjectUtils.isEmpty(instance)){
+            log.error("Object instance validation failed {}", message);
             throw new MeedlException(message);
         }
     }

@@ -20,12 +20,6 @@ public class FinancierEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String organizationName;
-    @OneToOne
-    private OrganizationEntity organizationEntity;
-    @OneToOne
-    private UserEntity userIdentity;
-
     private String invitedBy;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
@@ -33,4 +27,8 @@ public class FinancierEntity {
     private AccreditationStatus accreditationStatus;
     @Enumerated(EnumType.STRING)
     private FinancierType financierType;
+    @OneToOne
+    private UserEntity userIdentity;
+    @OneToOne
+    private CooperationEntity cooperation;
 }

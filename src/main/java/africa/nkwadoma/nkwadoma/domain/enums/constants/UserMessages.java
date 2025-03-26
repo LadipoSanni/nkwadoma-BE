@@ -13,7 +13,8 @@ public enum UserMessages {
     USER_IDENTITY_CANNOT_BE_EMPTY("User identity cannot be empty"),
     USER_IDENTITY_MUST_NOT_BE_EMPTY("User identity must not be empty"),
     BVN_CANNOT_BE_EMPTY("Bvn cannot be empty"),
-    REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token");
+    REFRESH_TOKEN_CANNOT_BE_EMPTY("Refresh token cannot be empty"), INVALID_REFRESH_TOKEN("Invalid refresh token"),
+    COOPERATION_MUST_NOT_BE_EMPTY("Cooperation cannot be empty");
     private final String message;
 
     UserMessages(String message) {

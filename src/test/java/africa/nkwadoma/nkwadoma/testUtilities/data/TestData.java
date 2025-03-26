@@ -40,7 +40,6 @@ public class TestData {
     }
     public static UserIdentity createTestUserIdentity(String email){
         return UserIdentity.builder()
-//                .id(testId)
                 .id(UUID.randomUUID().toString())
                 .firstName("John")
                 .lastName("Doe")
@@ -230,21 +229,42 @@ public class TestData {
         loaneeLoanAccount.setLoaneeId(loaneeId);
         return loaneeLoanAccount;
     }
+
+    public static Financier buildCooperateFinancier(Cooperation cooperation, UserIdentity userIdentity) {
+        Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
+        investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
+        Financier financier = buildFinancier(investmentVehicleDesignations);
+        financier.setCooperation(cooperation);
+        financier.setIndividual(userIdentity);
+        financier.setFinancierType(FinancierType.COOPERATE);
+        return financier;
+    }
     public static Financier buildFinancierIndividual(UserIdentity userIdentity) {
         Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
+        Financier financier = buildFinancier(investmentVehicleDesignations);
+        financier.setIndividual(userIdentity);
+        financier.setFinancierType(FinancierType.INDIVIDUAL);
+        return financier;
+    }
+    public static Cooperation buildCooperation(String name){
+        return Cooperation.builder()
+                .name(name)
+                .build();
+    }
+
+    private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
                 .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
-                .invitedBy(testId)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .activationStatus(ActivationStatus.INVITED)
-                .financierType(FinancierType.INDIVIDUAL)
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
                 .build();
     }
+
     public static PremblyResponse createTestPremblyResponse(){
         PremblyResponse response = new PremblyBvnResponse();
         Verification verifier = Verification.builder().status("VERIFIED").build();

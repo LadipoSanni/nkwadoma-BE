@@ -2,7 +2,11 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
@@ -43,6 +47,7 @@ public class FinancierController {
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", financierRequest);
+        Financier financier = mapValues(meedlUser, financierRequest);
         Financier financier = financierRestMapper.map(financierRequest);
         financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
@@ -54,6 +59,26 @@ public class FinancierController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    private Financier mapValues(Jwt meedlUser, FinancierRequest financierRequest) {
+        Financier financier = financierRestMapper.map(financierRequest);
+        financier.setIndividual(financierRequest.getIndividual());
+        log.info("Mapped financier at controller {}", financier);
+        financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
+        if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
+            financier.setIndividual(UserIdentity.builder()
+                            .email(financierRequest.getOrganizationEmail())
+                            .createdBy(meedlUser.getClaimAsString("sub"))
+                            .firstName("admin")
+                            .lastName("admin")
+                            .role(IdentityRole.FINANCIER)
+                    .build());
+            financier.setCooperation(Cooperation.builder()
+                            .name(financierRequest.getOrganizationName())
+                    .build());
+        }
+        return financier;
     }
 
     @PostMapping("financier/complete-kyc")
