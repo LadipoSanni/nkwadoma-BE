@@ -698,6 +698,14 @@ public class FinancierServiceTest {
 //        assertEquals("Financier added to investment vehicle", inviteResponse);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
     }
+
+    @Test
+    void viewInvestmentDetailWithNonExistingFinancierId(){
+        String testFinancierId = "547391e5-19be-42d6-b725-f7df35138dfb";
+        Exception exception = assertThrows(MeedlException.class, ()->financierOutputPort.findFinancierByFinancierId(testFinancierId));
+        log.info("------->Exception message------------>"+exception.getMessage());
+    }
+
     @AfterAll
     void tearDown() throws MeedlException {
 
