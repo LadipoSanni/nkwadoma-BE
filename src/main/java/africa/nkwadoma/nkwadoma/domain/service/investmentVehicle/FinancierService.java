@@ -403,6 +403,7 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
             BigDecimal newAmount = investmentVehicleFinancier.getAmountInvested().add(financier.getAmountToInvest());
             investmentVehicleFinancier.setAmountInvested(newAmount);
+            investmentVehicleFinancier.setDateInvested(investmentVehicleFinancier.getDateInvested());
             log.info("Updated the amount invested in the investment vehicle financier for {}... amount invested {}", newAmount, financier.getAmountToInvest());
         }else {
             log.info("First time financier is in vesting in this vehicle. Amount {}", financier.getAmountToInvest());
@@ -410,6 +411,7 @@ public class FinancierService implements FinancierUseCase {
                     .investmentVehicle(investmentVehicle)
                     .financier(financier)
                     .amountInvested(financier.getAmountToInvest())
+                    .dateInvested(LocalDate.now())
                     .build();
         }
         return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
