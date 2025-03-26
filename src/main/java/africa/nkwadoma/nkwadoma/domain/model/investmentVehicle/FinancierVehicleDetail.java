@@ -19,6 +19,6 @@ public class FinancierVehicleDetail {
     private BigDecimal totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<InvestmentSummary> investmentSummaryList;
+    private List<InvestmentSummary> investmentSummaries;
 
 }

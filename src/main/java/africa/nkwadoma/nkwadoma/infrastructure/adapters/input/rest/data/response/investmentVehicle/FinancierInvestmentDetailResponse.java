@@ -10,10 +10,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class FinancierInvestmentDetailsResponse {
+public class FinancierInvestmentDetailResponse {
     private int numberOfInvestment;
     private BigDecimal totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<InvestmentSummary> investmentSummaryList;
+    private List<InvestmentSummary> investmentSummaries;
 }

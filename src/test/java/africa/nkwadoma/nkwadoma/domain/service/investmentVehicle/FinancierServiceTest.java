@@ -657,15 +657,19 @@ public class FinancierServiceTest {
     @Test
     @Order(12)
     void viewInvestmentDetailsOfFinancier(){
-        FinancierVehicleDetail foundFinancierDetails = null;
+        FinancierVehicleDetail foundFinancierDetail = null;
         try {
-            foundFinancierDetails = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
-            log.info("-------->Found details---------> " + foundFinancierDetails);
+            foundFinancierDetail = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
+            log.info("-------->Found details---------> " + foundFinancierDetail);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
-        assertNotNull(foundFinancierDetails);
-        assertFalse(foundFinancierDetails.getInvestmentSummaryList().isEmpty());
+        assertNotNull(foundFinancierDetail);
+        assertTrue(foundFinancierDetail.getNumberOfInvestment() > 1);
+        assertFalse(foundFinancierDetail.getInvestmentSummaries().isEmpty());
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries());
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(0).getInvestmentVehicleName());
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(1).getDateInvested());
     }
 
     @Test

@@ -486,7 +486,7 @@ public class FinancierService implements FinancierUseCase {
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
-                .investmentSummaryList(investmentSummaryList)
+                .investmentSummaries(investmentSummaryList)
                 .portfolioValue(foundFinancier.getPortfolioValue())
                 .build();
     }

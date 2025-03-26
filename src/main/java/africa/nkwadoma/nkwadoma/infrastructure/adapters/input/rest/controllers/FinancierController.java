@@ -14,14 +14,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailsResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import jakarta.validation.Valid;
-import jdk.jfr.Description;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -154,9 +153,9 @@ public class FinancierController {
     )
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
         FinancierVehicleDetail financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
-        FinancierInvestmentDetailsResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
+        FinancierInvestmentDetailResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
 
-        ApiResponse<FinancierInvestmentDetailsResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailsResponse>builder()
+        ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
                 .data(financierInvestmentDetailsResponse)
                 .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())
