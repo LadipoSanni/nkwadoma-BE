@@ -42,7 +42,7 @@ public class Financier {
     private int numberOfInvestments;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<FinancierVehicleDetails> investmentVehicleInvestedIn;
+    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());

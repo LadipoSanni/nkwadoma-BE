@@ -473,7 +473,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public FinancierVehicleDetails viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
+    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicleList = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
@@ -483,7 +483,7 @@ public class FinancierService implements FinancierUseCase {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<InvestmentSummary> investmentSummaryList = convertToVehicleDetails(financierInvestmentVehicleList);
-        return FinancierVehicleDetails.builder()
+        return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
                 .investmentSummaryList(investmentSummaryList)

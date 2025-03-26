@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
-public class FinancierVehicleDetails {
+public class FinancierVehicleDetail {
     private int numberOfInvestment;
     private BigDecimal totalAmountInvested;
     private BigDecimal totalIncomeEarned;

@@ -9,7 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -147,17 +147,13 @@ public class FinancierController {
                             content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden - User does not have the required role (PORTFOLIO_MANAGER)"
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "404",
                             description = "Financier not found"
                     )
             }
     )
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
-        FinancierVehicleDetails financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+        FinancierVehicleDetail financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
         FinancierInvestmentDetailsResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
 
         ApiResponse<FinancierInvestmentDetailsResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailsResponse>builder()

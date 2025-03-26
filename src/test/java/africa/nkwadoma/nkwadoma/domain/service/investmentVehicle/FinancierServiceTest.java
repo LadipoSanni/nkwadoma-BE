@@ -21,7 +21,7 @@ import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -657,7 +657,7 @@ public class FinancierServiceTest {
     @Test
     @Order(12)
     void viewInvestmentDetailsOfFinancier(){
-        FinancierVehicleDetails foundFinancierDetails = null;
+        FinancierVehicleDetail foundFinancierDetails = null;
         try {
             foundFinancierDetails = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
             log.info("-------->Found details---------> " + foundFinancierDetails);

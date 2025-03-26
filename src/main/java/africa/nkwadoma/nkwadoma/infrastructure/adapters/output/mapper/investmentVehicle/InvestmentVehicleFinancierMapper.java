@@ -1,13 +1,10 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetails;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailsResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -21,6 +18,6 @@ public interface InvestmentVehicleFinancierMapper {
 
     List<InvestmentVehicleFinancier> toInvestmentVehicleFinancier(List<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntity);
 
-    FinancierInvestmentDetailsResponse map(FinancierVehicleDetails financierVehicleDetails);
+    FinancierInvestmentDetailsResponse map(FinancierVehicleDetail financierVehicleDetails);
 
 }
