@@ -287,7 +287,6 @@ public class TestData {
         investmentVehicle.setFundManager("Gt Manager");
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
-        investmentVehicle.setSponsors("sponsors");
         investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         investmentVehicle.setStartDate(LocalDate.now());

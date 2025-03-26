@@ -35,8 +35,6 @@ public class SetUpInvestmentVehicleRequest {
     private String bankPartner;
     @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.FUND_MANAGER_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
     private String fundManager;
-    @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.SPONSOR_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
-    private String sponsors;
     private BigDecimal minimumInvestmentAmount;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private LocalDate startDate;
