@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierDetails;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

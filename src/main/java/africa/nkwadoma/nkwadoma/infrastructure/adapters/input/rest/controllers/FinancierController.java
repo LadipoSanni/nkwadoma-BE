@@ -46,7 +46,6 @@ public class FinancierController {
     FinancierRequest financierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = mapValues(meedlUser, financierRequest);
-//        Financier financier = financierRestMapper.map(financierRequest);
         financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
