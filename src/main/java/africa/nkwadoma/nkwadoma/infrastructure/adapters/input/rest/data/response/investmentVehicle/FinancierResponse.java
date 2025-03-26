@@ -17,7 +17,7 @@ public class FinancierResponse {
     private FinancierType financierType;
     private List<InvestmentVehicleDesignation> investmentVehicleRole;
     private String organizationName;
-    private UserIdentityResponse userIdentity;
+    private FinancierUserIdentityResponse userIdentity;
     private String invitedBy;
     private String investmentVehicleId;
 }

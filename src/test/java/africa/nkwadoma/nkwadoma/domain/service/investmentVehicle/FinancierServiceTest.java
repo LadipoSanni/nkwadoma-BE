@@ -431,6 +431,10 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getUserIdentity().getTaxId());
         assertNotNull(financierUpdated.getUserIdentity().getAddress());
         assertNotNull(financierUpdated.getUserIdentity().getNextOfKin());
+        assertNotNull(financierUpdated.getUserIdentity().getNextOfKin().getContactAddress());
+        assertNotNull(financierUpdated.getUserIdentity().getNextOfKin().getEmail());
+        assertNotNull(financierUpdated.getUserIdentity().getNextOfKin().getNextOfKinRelationship());
+        assertEquals(financierUpdated.getUserIdentity().getNextOfKin().getNextOfKinRelationship(), nextOfKin.getNextOfKinRelationship());
         assertNotNull(financierUpdated.getUserIdentity().getBankDetail());
 
     }
@@ -459,6 +463,11 @@ public class FinancierServiceTest {
         }
         assertNotNull(foundFinancier);
         assertEquals(individualFinancierId, foundFinancier.getId());
+        assertNotNull(foundFinancier.getUserIdentity());
+        assertNotNull(foundFinancier.getUserIdentity().getNextOfKin());
+        assertNotNull(foundFinancier.getUserIdentity().getNextOfKin().getEmail());
+        assertNotNull(foundFinancier.getUserIdentity().getNextOfKin().getNextOfKinRelationship());
+        assertNotNull(foundFinancier.getUserIdentity().getNextOfKin().getContactAddress());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
@@ -675,7 +684,6 @@ public class FinancierServiceTest {
         assertEquals( foundFinancier.getUserIdentity().getEmail(), cooperateFinancier.getUserIdentity().getEmail());
         assertNotNull(foundFinancier.getId());
 
-//        assertEquals("Financier added to investment vehicle", inviteResponse);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
     }
     @AfterAll

@@ -127,6 +127,7 @@ public class FinancierController {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
         FinancierResponse financierResponse = financierRestMapper.map(financier);
 
+
         ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
                 .data(financierResponse)
                 .statusCode(HttpStatus.OK.toString())

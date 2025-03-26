@@ -16,9 +16,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface FinancierRestMapper {
     @Mapping(target = "id", source = "financierId")
     Financier map(FinancierRequest financierRequest);
+    @Mapping( source = "userIdentity", target = "userIdentity")
+    @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
     FinancierResponse map(Financier financier);
 
-    FinancierResponse map(FinancierDetails financier);
     KycResponse mapToFinancierResponse(Financier financier);
 
     @Mapping(target = "userIdentity.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
