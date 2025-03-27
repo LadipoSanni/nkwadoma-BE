@@ -8,13 +8,16 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -28,8 +31,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -40,6 +45,8 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class FinancierController {
     private final FinancierUseCase financierUseCase;
     private final FinancierRestMapper financierRestMapper;
+    private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
+    private final RestClient.Builder builder;
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -116,10 +123,26 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("financier/access/investmentVehicle/{investmentVehicleId}")
+    @PreAuthorize("hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> accessInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser, @PathVariable String investmentVehicleId) throws MeedlException {
+        String financierId = meedlUser.getClaimAsString("sub");
+        Optional<InvestmentVehicle> investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, financierId);
+
+        InvestmentVehicleResponse investmentVehicleResponse = investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle.get());
+
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
+                .data(investmentVehicleResponse)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 
     @GetMapping("financier/view/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
         FinancierResponse financierResponse = financierRestMapper.map(financier);
 
