@@ -19,6 +19,8 @@ import lombok.extern.slf4j.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -52,11 +54,12 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("investment-vehicle-details/{id}")
+    @GetMapping("investment-vehicle-details/{investmentVehicleId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@PathVariable String id) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@AuthenticationPrincipal Jwt meedlUser, @PathVariable String investmentVehicleId) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
-                investmentVehicleUseCase.viewInvestmentVehicleDetails(id);
+                investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId).get();
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()

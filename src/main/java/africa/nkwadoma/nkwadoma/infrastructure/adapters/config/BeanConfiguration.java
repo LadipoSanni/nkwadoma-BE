@@ -117,14 +117,7 @@ public class BeanConfiguration {
         return new InvestmentVehicleAdapter(vehicleEntityRepository, investmentVehicleMapper);
     }
 
-    @Bean
-    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort,
-                                                             InvestmentVehicleMapper investmentVehicleMapper,
-                                                             PortfolioOutputPort portfolioOutputPort,
-                                                             FinancierOutputPort financierOutputPort,
-                                                             InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort){
-        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,financierOutputPort,investmentVehicleFinancierOutputPort);
-    }
+//
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
                                        ProgramOutputPort programOutputPort,

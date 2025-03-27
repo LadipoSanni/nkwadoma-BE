@@ -473,28 +473,6 @@ public class FinancierService implements FinancierUseCase {
         return null;
     }
 
-    @Override
-    public Optional<InvestmentVehicle> accessInvestmentVehicle(String investmentVehicleId, String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-        Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
-
-        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
-            return Optional.of(foundInvestmentVehicle);
-        }
-        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
-            if (investmentVehicleFinancier.isPresent()){
-                return Optional.of(foundInvestmentVehicle);
-            } else {
-                throw new MeedlException("You need to be part of this investment vehicle to view it");
-            }
-        }
-        return Optional.empty();
-    }
-
     private static void kycIdentityValidation(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");

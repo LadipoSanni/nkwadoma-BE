@@ -691,96 +691,71 @@ public class FinancierServiceTest {
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
     }
 
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
-    void accessInvestmentVehicleWithInvalidVehicleId(String investmentVehicleId){
-        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(individualFinancierId, investmentVehicleId));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
-    void accessInvestmentVehicleWithInvalidFinancierId(String financierId){
-        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(financierId, investmentVehicleId));
-    }
-
-    @Test
-    void accessInvestmentVehicleWithFinancierIdThatDoesNotExistInTheDB() {
-        String nonExistingFinancierId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
-        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(nonExistingFinancierId, individualFinancierId));
-    }
-
-    @Test
-    void accessInvestmentVehicleWithInvestmentVehicleIdThatDoesNotExistInTheDB() {
-        String nonExistingVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
-        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(individualFinancierId, nonExistingVehicleId));
-    }
-
-    @Order(16)
-    @Test
-    void accessPrivateInvestmentVehicleThatFinancierIsNotPartOf() {
-        try {
-            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(privateInvestmentVehicle);
-            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
-            privateInvestmentVehicleId = savedVehicle.getId();
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(privateInvestmentVehicleId, individualFinancierId));
-    }
-
-    @Order(17)
-    @Test
-    void accessPublicInvestmentVehicle() {
-        Optional<InvestmentVehicle> investmentVehicle = null;
-        try{
-            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            assertNotNull(foundInvestmentVehicle);
-            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
-            investmentVehicleOutputPort.save(foundInvestmentVehicle);
-            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
-        } catch (MeedlException exception){
-            throw new RuntimeException(exception);
-        }
-        assertThat(investmentVehicle).isNotNull();
-        assertThat(investmentVehicle.get().getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PUBLIC);
-    }
-
-    @Order(18)
-    @Test
-    void accessPrivateInvestmentVehicleThatFinancierIsPartOf() {
-        Optional<InvestmentVehicle> investmentVehicle = null;
-        try{
-            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
-            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
-            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
-            assertNotNull(foundInvestmentVehicle);
-            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
-            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
-        } catch (MeedlException exception){
-            throw new RuntimeException(exception);
-        }
-        assertThat(investmentVehicle).isNotNull();
-    }
-
-    @Order(19)
-    @Test
-    void accessDefaultInvestmentVehicleThatFinancierIsPartOf() {
-        Optional<InvestmentVehicle> investmentVehicle = null;
-        try{
-            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
-            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
-            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
-            assertNotNull(foundInvestmentVehicle);
-            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
-            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
-        } catch (MeedlException exception){
-            throw new RuntimeException(exception);
-        }
-        assertTrue(investmentVehicle.isEmpty());
-    }
+//    @Order(16)
+//    @Test
+//    void accessPrivateInvestmentVehicleThatFinancierIsNotPartOf() {
+//        try {
+//            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(privateInvestmentVehicle);
+//            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+//            privateInvestmentVehicleId = savedVehicle.getId();
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(privateInvestmentVehicleId, individualFinancierId));
+//    }
+//
+//    @Order(17)
+//    @Test
+//    void accessPublicInvestmentVehicle() {
+//        Optional<InvestmentVehicle> investmentVehicle = null;
+//        try{
+//            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+//            assertNotNull(foundInvestmentVehicle);
+//            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
+//            investmentVehicleOutputPort.save(foundInvestmentVehicle);
+//            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+//        } catch (MeedlException exception){
+//            throw new RuntimeException(exception);
+//        }
+//        assertThat(investmentVehicle).isNotNull();
+//        assertThat(investmentVehicle.get().getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PUBLIC);
+//    }
+//
+//    @Order(18)
+//    @Test
+//    void accessPrivateInvestmentVehicleThatFinancierIsPartOf() {
+//        Optional<InvestmentVehicle> investmentVehicle = null;
+//        try{
+//            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+//            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
+//            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
+//            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+//            assertNotNull(foundInvestmentVehicle);
+//            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+//            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+//        } catch (MeedlException exception){
+//            throw new RuntimeException(exception);
+//        }
+//        assertThat(investmentVehicle).isNotNull();
+//    }
+//
+//    @Order(19)
+//    @Test
+//    void accessDefaultInvestmentVehicleThatFinancierIsPartOf() {
+//        Optional<InvestmentVehicle> investmentVehicle = null;
+//        try{
+//            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+//            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+//            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
+//            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
+//            assertNotNull(foundInvestmentVehicle);
+//            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
+//            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+//        } catch (MeedlException exception){
+//            throw new RuntimeException(exception);
+//        }
+//        assertTrue(investmentVehicle.isEmpty());
+//    }
 
     @AfterAll
     void tearDown() throws MeedlException {

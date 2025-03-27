@@ -126,23 +126,6 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("financier/access/investmentVehicle/{investmentVehicleId}")
-    @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> accessInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser, @PathVariable String investmentVehicleId) throws MeedlException {
-        String financierId = meedlUser.getClaimAsString("sub");
-        Optional<InvestmentVehicle> investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, financierId);
-
-        InvestmentVehicleResponse investmentVehicleResponse = investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle.get());
-
-        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
-                .data(investmentVehicleResponse)
-                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-
     @GetMapping("financier/view/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {

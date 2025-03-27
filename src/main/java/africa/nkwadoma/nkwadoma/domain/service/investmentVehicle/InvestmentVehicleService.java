@@ -1,14 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -22,10 +26,8 @@ import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.math.BigInteger;
+import java.util.*;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
@@ -44,6 +46,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final PortfolioOutputPort portfolioOutputPort;
     private final FinancierOutputPort financierOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
 
     @Override
@@ -112,8 +115,35 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException {
-        return investmentVehicleOutputPort.findById(id);
+    public Optional<InvestmentVehicle> viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+            return Optional.of(investmentVehicleOutputPort.findById(investmentVehicleId));
+        }
+
+        return forFinancier(investmentVehicleId, userId);
+    }
+
+    private Optional<InvestmentVehicle> forFinancier(String investmentVehicleId, String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
+
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
+            return Optional.of(foundInvestmentVehicle);
+        }
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
+            if (investmentVehicleFinancier.isPresent()){
+                return Optional.of(foundInvestmentVehicle);
+            } else {
+                throw new MeedlException("You need to be part of this investment vehicle to view it");
+            }
+        }
+        return Optional.empty();
     }
 
 
