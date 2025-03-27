@@ -21,7 +21,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesm
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,6 +53,9 @@ public class FinancierController {
     FinancierRequest financierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = mapValues(meedlUser, financierRequest);
+        financier.setUserIdentity(financierRequest.getUserIdentity());
+        log.info("Mapped financier at controller {}", financier);
+        financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
         String message = financierUseCase.inviteFinancier(List.of(financier));
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
@@ -65,11 +67,11 @@ public class FinancierController {
 
     private Financier mapValues(Jwt meedlUser, FinancierRequest financierRequest) {
         Financier financier = financierRestMapper.map(financierRequest);
-        financier.setIndividual(financierRequest.getIndividual());
+        financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
         financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
         if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
-            financier.setIndividual(UserIdentity.builder()
+            financier.setUserIdentity(UserIdentity.builder()
                             .email(financierRequest.getOrganizationEmail())
                             .createdBy(meedlUser.getClaimAsString("sub"))
                             .firstName("admin")
@@ -86,7 +88,8 @@ public class FinancierController {
     @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
-        Financier financier = financierRestMapper.map(kycRequest, meedlUser.getClaimAsString("sub"));
+        Financier financier = financierRestMapper.map(kycRequest);
+        financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
         financier = financierUseCase.completeKyc(financier);
 
         KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
@@ -146,12 +149,14 @@ public class FinancierController {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
         FinancierResponse financierResponse = financierRestMapper.map(financier);
 
+
         ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
                 .data(financierResponse)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber,@RequestParam int pageSize) throws MeedlException {
@@ -172,14 +177,22 @@ public class FinancierController {
     }
     @GetMapping("financier/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,@RequestParam String name) throws MeedlException {
-        List<Financier> financiers = financierUseCase.search(name);
+    public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
+                                                  @RequestParam String name,
+                                                  @RequestParam int pageNumber,
+                                                  @RequestParam int pageSize,
+                                                  @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
+        Page<Financier> financiers = financierUseCase.search(name, pageNumber, pageSize);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
+        PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
+                financierResponses, financiers.hasNext(),
+                financiers.getTotalPages(), pageNumber, pageSize
+        );
 
         return new ResponseEntity<>(ApiResponse.builder().
                 statusCode(HttpStatus.OK.toString()).
-                data(financierResponses).
+                data(response).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
                 build(), HttpStatus.OK
         );

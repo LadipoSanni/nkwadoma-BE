@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
@@ -12,10 +13,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 public class TestData {
@@ -39,7 +39,7 @@ public class TestData {
     }
     public static UserIdentity createTestUserIdentity(String email){
         return UserIdentity.builder()
-                .id(testId)
+                .id(UUID.randomUUID().toString())
                 .firstName("John")
                 .lastName("Doe")
                 .email(email)
@@ -209,12 +209,12 @@ public class TestData {
 
     public static Financier completeKycRequest(Financier financier, BankDetail bankDetail, NextOfKin nextOfKin){
         log.info("Bank Detail in test data {}", bankDetail);
-        financier.getIndividual().setBankDetail(bankDetail);
+        financier.getUserIdentity().setBankDetail(bankDetail);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
-        financier.getIndividual().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
-        financier.getIndividual().setNin("2025103002");
-        financier.getIndividual().setTaxId("00000122");
-        financier.getIndividual().setNextOfKin(nextOfKin);
+        financier.getUserIdentity().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
+        financier.getUserIdentity().setNin("2025103002");
+        financier.getUserIdentity().setTaxId("00000122");
+        financier.getUserIdentity().setNextOfKin(nextOfKin);
         return financier;
     }
 
@@ -234,7 +234,7 @@ public class TestData {
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
         financier.setCooperation(cooperation);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         financier.setFinancierType(FinancierType.COOPERATE);
         return financier;
     }
@@ -242,7 +242,7 @@ public class TestData {
         Set<InvestmentVehicleDesignation> investmentVehicleDesignations = new HashSet<>();
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.SPONSOR);
         Financier financier = buildFinancier(investmentVehicleDesignations);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
@@ -254,6 +254,7 @@ public class TestData {
 
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
+//                .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
                 .invitedBy(testId)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
@@ -286,7 +287,6 @@ public class TestData {
         investmentVehicle.setFundManager("Gt Manager");
         investmentVehicle.setMinimumInvestmentAmount(BigDecimal.valueOf(5000));
         investmentVehicle.setTrustee("trustee");
-        investmentVehicle.setSponsors("sponsors");
         investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         investmentVehicle.setStartDate(LocalDate.now());
@@ -489,8 +489,8 @@ public class TestData {
 
     public static BankDetail buildBankDetail() {
         return BankDetail.builder()
-               .accountName("Lagos Main")
-               .accountNumber("1234567890")
+               .bankName("Lagos Main")
+               .bankNumber("1234567890")
                .build();
     }
 

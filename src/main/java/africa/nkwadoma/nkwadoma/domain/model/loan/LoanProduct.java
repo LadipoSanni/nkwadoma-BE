@@ -143,6 +143,5 @@ public class LoanProduct {
 
     public void addInvestmentVehicleValues(InvestmentVehicle investmentVehicle){
         setInvestmentVehicleName(investmentVehicle.getName());
-        setSponsor(investmentVehicle.getSponsors());
     }
 }

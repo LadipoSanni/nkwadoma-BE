@@ -26,9 +26,9 @@ import java.util.Set;
 public class Financier {
     private String id;
     private Cooperation cooperation;
-    private UserIdentity individual;
     private String invitedBy;
     private FinancierType financierType;
+    private UserIdentity userIdentity;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
@@ -38,15 +38,22 @@ public class Financier {
     private int pageSize;
 
     private void validateUserIdentity() throws MeedlException {
-        MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        validateFinancierEmail(individual);
-        MeedlValidator.validateDataElement(individual.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
-        MeedlValidator.validateDataElement(individual.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
-        MeedlValidator.validateEmail(individual.getEmail());
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        validateFinancierEmail(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
+        MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+
+        validateFinancierEmail(userIdentity);
+        MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
+        MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
+        MeedlValidator.validateEmail(userIdentity.getEmail());
     }
 
 
     private static void validateFinancierEmail(UserIdentity userIdentity) throws MeedlException {
+        MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
         try {
             MeedlValidator.validateObjectInstance(userIdentity, "User details cannot be empty");
             MeedlValidator.validateEmail(userIdentity.getEmail());
@@ -73,14 +80,13 @@ public class Financier {
 
     public void validateKyc() throws MeedlException {
         MeedlValidator.validateUUID(id, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        MeedlValidator.validateObjectInstance(individual.getBankDetail(), "Provide a valid bank detail.");
-        MeedlValidator.validateUUID(individual.getBankDetail().getId(), "Provide a valid bank detail id.");
-        individual.getBankDetail().validate();
-        MeedlValidator.validateObjectInstance(individual.getNextOfKin(), "Provide a valid next of kin detail.");
-        MeedlValidator.validateObjectInstance(individual.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
-        individual.getNextOfKin().validate();
-        MeedlValidator.validateDataElement(individual.getNin(), "Nin is required");
-        MeedlValidator.validateDataElement(individual.getTaxId(), "Tax id is required");
-        MeedlValidator.validateDataElement(individual.getAddress(), "Address is required");
+        MeedlValidator.validateObjectInstance(userIdentity.getBankDetail(), "Provide a valid bank detail.");
+        MeedlValidator.validateUUID(userIdentity.getBankDetail().getId(), "Provide a valid bank detail id.");
+        userIdentity.getBankDetail().validate();
+        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin(), "Provide a valid next of kin detail.");
+        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
+        userIdentity.getNextOfKin().validate();
+        MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
+        MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
     }
 }

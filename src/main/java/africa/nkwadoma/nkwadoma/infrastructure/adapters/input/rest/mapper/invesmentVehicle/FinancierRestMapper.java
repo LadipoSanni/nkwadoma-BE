@@ -5,28 +5,34 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.NextOfKinMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = UserIdentityMapper.class, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", uses = {UserIdentityMapper.class, NextOfKinMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierRestMapper {
     @Mapping(target = "id", source = "financierId")
     Financier map(FinancierRequest financierRequest);
+    @Mapping( source = "userIdentity", target = "userIdentity")
+    @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
     FinancierResponse map(Financier financier);
 
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "individual.id", source = "userId")
-//    @Mapping(target = "individual.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
-//    @Mapping(target = "individual.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
-//    @Mapping(target = "individual.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
-//    @Mapping(target = "individual.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
-//    @Mapping(target = "individual.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
-//    @Mapping(target = "individual.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
-    Financier map(KycRequest kycRequest, String userId);
+    @Mapping(target = "userIdentity.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
+    @Mapping(target = "userIdentity.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
+    @Mapping(target = "userIdentity.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
+    @Mapping(target = "userIdentity.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
+    @Mapping(target = "userIdentity.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
+    @Mapping(target = "userIdentity.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
+    @Mapping(target = "userIdentity.bankDetail.bankName", source = "kycRequest.bankName")
+    @Mapping(target = "userIdentity.bankDetail.bankNumber", source = "kycRequest.bankNumber")
+    @Mapping(target = "userIdentity.taxId", source = "kycRequest.taxId")
+    @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
+    Financier map(KycRequest kycRequest);
 
-    @Mapping(target = "individual.id", source = "userId")
+    @Mapping(target = "userIdentity.id", source = "userId")
     Financier map(FinancierRequest financierRequest, String userId);
 }
