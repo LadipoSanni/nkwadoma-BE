@@ -17,7 +17,7 @@ public class FinancierRequest {
     private String financierId;
     private BigDecimal amountToInvest;
     private FinancierType financierType;
-    private UserIdentity individual;
+    private UserIdentity userIdentity;
     private String investmentVehicleId;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;

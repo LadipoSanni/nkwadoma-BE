@@ -18,7 +18,7 @@ public interface FinancierUseCase {
 
     Page<Financier> viewAllFinancierInInvestmentVehicleByActivationStatus(Financier financier) throws MeedlException;
 
-    List<Financier> search(String name) throws MeedlException;
+    Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
 
     void updateFinancierStatus(Financier financier);
 

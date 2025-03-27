@@ -35,7 +35,6 @@ public class InvestmentVehicleEntity {
     private InvestmentVehicleType investmentVehicleType;
     @Size( max = 2500, message = "Investment vehicle mandate must not exceed 2500 characters")
     private String mandate;
-    private String sponsors;
     private int tenure;
     private BigDecimal size;
     private BigDecimal totalAvailableAmount;

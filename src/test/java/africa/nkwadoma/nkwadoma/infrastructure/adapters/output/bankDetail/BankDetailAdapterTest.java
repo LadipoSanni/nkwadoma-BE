@@ -37,7 +37,7 @@ public class BankDetailAdapterTest {
         }
         assertNotNull(savedBankDetail);
         assertNotNull(savedBankDetail.getId());
-        assertEquals(builtBankDetail.getAccountName(), savedBankDetail.getAccountName());
+        assertEquals(builtBankDetail.getBankName(), savedBankDetail.getBankName());
     }
     @Test
     void saveBankDetailWithNull() {
@@ -45,12 +45,12 @@ public class BankDetailAdapterTest {
     }
     @Test
     void saveBankDetailWithNullAccountName() {
-        builtBankDetail.setAccountName(null);
+        builtBankDetail.setBankName(null);
         assertThrows(MeedlException.class, () -> bankDetailOutputPort.save(builtBankDetail));
     }
     @Test
     void saveBankDetailWithNullAccountNumber() {
-        builtBankDetail.setAccountNumber(null);
+        builtBankDetail.setBankNumber(null);
         assertThrows(MeedlException.class, () -> bankDetailOutputPort.save(builtBankDetail));
     }
 
@@ -70,8 +70,8 @@ public class BankDetailAdapterTest {
             throw new RuntimeException(e);
         }
         assertNotNull(bankDetail);
-        assertEquals(builtBankDetail.getAccountName(), bankDetail.getAccountName());
-        assertEquals(builtBankDetail.getAccountNumber(), bankDetail.getAccountNumber());
+        assertEquals(builtBankDetail.getBankName(), bankDetail.getBankName());
+        assertEquals(builtBankDetail.getBankNumber(), bankDetail.getBankNumber());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY, "nfdjnj"})
