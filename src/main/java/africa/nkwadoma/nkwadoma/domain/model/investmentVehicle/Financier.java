@@ -69,6 +69,8 @@ public class Financier {
     private void validateCooperation() throws MeedlException {
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
+        MeedlValidator.validateObjectInstance(individual, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateDataElement(individual.getEmail(), UserMessages.INVALID_EMAIL.getMessage());
     }
 
     public void validateKyc() throws MeedlException {
