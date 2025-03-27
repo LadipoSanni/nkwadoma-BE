@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Profile("prodsupport")
 @Component
-public class ProdSupportPattern implements AllowedHost{
+public class ProdSupportPatterns implements AllowedHost{
     @Value("${prodsupport}")
     private String allowedHost;
     @Value("${prodsupport2}")
