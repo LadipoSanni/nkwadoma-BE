@@ -570,7 +570,7 @@ public class FinancierServiceTest {
     public void inviteCooperateFinancierToNewVehicle1() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationService" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
