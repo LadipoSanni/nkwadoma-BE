@@ -26,7 +26,6 @@ import java.util.Set;
 public class Financier {
     private String id;
     private Cooperation cooperation;
-//    private String invitedBy;
     private FinancierType financierType;
     private UserIdentity userIdentity;
     private ActivationStatus activationStatus;
@@ -78,7 +77,7 @@ public class Financier {
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateDataElement(this.userIdentity.getEmail(), UserMessages.INVALID_EMAIL.getMessage());
+        MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
 
     public void validateKyc() throws MeedlException {

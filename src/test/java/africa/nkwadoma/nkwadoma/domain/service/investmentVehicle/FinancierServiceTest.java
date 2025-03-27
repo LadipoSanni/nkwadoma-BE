@@ -733,7 +733,6 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertTrue(optionalInvestmentVehicleFinancier.isEmpty());
-//        assertEquals("Financier added to investment vehicle", inviteResponse);
     }
     @AfterAll
     void tearDown() throws MeedlException {
