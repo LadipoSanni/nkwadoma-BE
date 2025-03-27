@@ -1,17 +1,18 @@
-name: Deploy Systest to Amazon EC2
+name: Deploy Prod-support to Amazon ECR
 
 on:
   push:
     branches:
       - dev
+      - prod-support
 
 
 env:
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
-  ECR_REPOSITORY: nkwadoma
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod-support
+  ECR_REPOSITORY: meedl-prod-support
   AWS_REGION: us-east-1
-  CLUSTER: learnspace-africa
-  SERVICE: learnspace-backend-systest
+  CLUSTER: meedl
+  SERVICE: meedl-prod-support
   EMAILS: 'sam@semicolon.africa,joshua.o@semicolon.africa,ladipo@semicolon.africa,t.lemon@semicolon.africa,divinemercy601@gmail.com,qudusa55@gmail.com,o.koleaje@semicolon.africa,ned@semicolon.africa,tade@semicolon.africa,moyinoluwa@semicolon.africa,mariam@semicolon.africa,i.james@semicolon.africa,david@semicolon.africa,abigail@semicolon.africa,precious@semicolon.africa,dapo@semicolon.africa,pauline@semicolon.africa,davidoso@semicolon.africa,henry@semicolon.africa'
   IV_AES_KEY: ${{ secrets.IV_AES_KEY }}
   AES_SECRET_KEY: ${{ secrets.AES_SECRET_KEY }}
@@ -129,35 +130,35 @@ jobs:
           AWS_REGION="us-east-1"
           AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
           ECR_REGISTRY="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-          ECR_REPOSITORY="nkwadoma"
+          ECR_REPOSITORY="meedl-prod-support"
           IMAGE_TAG="alpha"
       
           echo "Authenticating with ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
       
           echo "Fetching environment variables from S3..."
-          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
+          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/prod-support/nkwadoma.env nkwadoma.env --region ${{ env.S3_REGION }}
       
           # Pull the latest Docker image
           echo "Pulling the latest image..."
-          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod-support:alpha
           # Free port 8768 if it's in use
           echo "Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
               
           # Check if the container exists
-          if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
+          if [ "$(docker ps -aq -f name=meedl-prod-suport)" ]; then
              echo "Stopping and removing existing container..."
-             docker stop nkwadoma-container || true
-             docker rm nkwadoma-container || true
+             docker stop meedl-prod-support || true
+             docker rm meedl-prod-support || true
              echo "Stopped and removed containers."
           fi
               
           # Run the new container
           echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 8768:8768 \
-              --env-file nkwadoma-dev.env \
-              357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          docker run -d --name meedl-prod-support -p 8768:8768 \
+              --env-file nkwadoma.env \
+              357586184453.dkr.ecr.us-east-1.amazonaws.com/meedl-prod-support:alpha
           
          
           echo "Container started successfully!"
