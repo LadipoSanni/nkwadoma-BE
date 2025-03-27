@@ -4,8 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface FinancierOutputPort {
     Financier save(Financier financier) throws MeedlException;
 
@@ -17,7 +15,6 @@ public interface FinancierOutputPort {
 
     void delete(String financierId) throws MeedlException;
 
-    List<Financier> search(String name) throws MeedlException;
-
     Financier completeKyc(Financier financier) throws MeedlException;
+    Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
 }

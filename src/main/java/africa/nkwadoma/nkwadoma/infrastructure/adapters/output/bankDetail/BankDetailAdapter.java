@@ -8,8 +8,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.bankDetail
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.bankDetail.BankDetailEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.bankDetail.BankDetailRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class BankDetailAdapter implements BankDetailOutputPort {
@@ -19,8 +21,10 @@ public class BankDetailAdapter implements BankDetailOutputPort {
     @Override
     public BankDetail save(BankDetail bankDetail) throws MeedlException {
         MeedlValidator.validateObjectInstance(bankDetail, "Bank Detail must be provided.");
+        log.info("Bank Detail before saving : {}", bankDetail);
         bankDetail.validate();
         BankDetailEntity bankDetailEntity = bankDetailMapper.toBankDetailEntity(bankDetail);
+        log.info("Bank Detail Mapped to entity : {}", bankDetailEntity);
         bankDetailEntity = bankDetailRepository.save(bankDetailEntity);
         return bankDetailMapper.toBankDetail(bankDetailEntity);
     }

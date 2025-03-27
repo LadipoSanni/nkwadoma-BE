@@ -97,15 +97,15 @@ public class FinancierService implements FinancierUseCase {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingCooperateFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
+            emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
         }
     }
 
     private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
         log.info("Saving cooperate financier user identity to platform {} ",financier);
-        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getIndividual());
+        UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getUserIdentity());
         userIdentity = userIdentityOutputPort.save(userIdentity);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier = financierOutputPort.save(financier);
@@ -113,13 +113,13 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private Financier getCooperateFinancierByUserIdentity(Financier financier) throws MeedlException {
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getIndividual().getEmail());
+        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
             log.info("Creating a new cooperation financier for user with this email : {}", userIdentity.getEmail());
-            financier.setIndividual(userIdentity);
+            financier.setUserIdentity(userIdentity);
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
@@ -135,7 +135,7 @@ public class FinancierService implements FinancierUseCase {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingFinancier(financier);
-            emailInviteNonExistingFinancierToPlatform(financier.getIndividual());
+            emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
         }
     }
 
@@ -194,11 +194,11 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        FinancierEmailUseCase.inviteFinancierToVehicle(financier.getIndividual(), investmentVehicle);
+        FinancierEmailUseCase.inviteFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
     }
 
     private Financier saveNonExistingFinancier(Financier financier) {
-        log.warn("Started saving non existing financier {}", financier.getIndividual().getEmail());
+        log.warn("Started saving non existing financier {}", financier.getUserIdentity().getEmail());
         Financier savedFinancier;
         try {
             savedFinancier = saveFinancier(financier);
@@ -212,7 +212,12 @@ public class FinancierService implements FinancierUseCase {
 
     private Financier getFinancierByUserIdentity(Financier financier) throws MeedlException {
 
-        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getIndividual().getEmail());
+        UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
+//        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getUserIdentity().getEmail());
+        log.info("User identity found by email {} ,when inviting financier ", userIdentity.getEmail());
+        if (userIdentity.getRole() != IdentityRole.FINANCIER) {
+            //TODO Add new role to user.
+        }
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
             log.info("Financier found by user identity id {}", userIdentity.getId());
@@ -220,8 +225,8 @@ public class FinancierService implements FinancierUseCase {
 
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
-            log.info("Creating a new individual financier for user with email : {}", userIdentity.getEmail());
-            financier.setIndividual(userIdentity);
+            log.info("Creating a new financier for user with email : {}", userIdentity.getEmail());
+            financier.setUserIdentity(userIdentity);
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Individual financier saved successfully");
             log.info("User previously existing has now been made a financier");
@@ -242,11 +247,11 @@ public class FinancierService implements FinancierUseCase {
     private void notifyExistingFinancier(Financier financier) throws MeedlException {
         log.info("Started in app notification for existing financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getIndividual())
+                .user(financier.getUserIdentity())
                 .timestamp(LocalDateTime.now())
                 .contentId(financier.getId())
-                .senderMail(financier.getIndividual().getEmail())
-                .senderFullName(financier.getIndividual().getFirstName())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("You have now been made a financier on the platform.")
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
@@ -255,11 +260,11 @@ public class FinancierService implements FinancierUseCase {
     private void notifyExistingFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         log.info("Started in app notification for invite financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getIndividual())
+                .user(financier.getUserIdentity())
                 .timestamp(LocalDateTime.now())
                 .contentId(investmentVehicle.getId())
-                .senderMail(financier.getIndividual().getEmail())
-                .senderFullName(financier.getIndividual().getFirstName())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
@@ -288,7 +293,7 @@ public class FinancierService implements FinancierUseCase {
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
             InvestmentVehicleFinancier investmentVehicleFinancier =  assignDesignation(financier, investmentVehicle);
             investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
-            log.info("Financier {} added to investment vehicle {}.", financier.getIndividual().getEmail(), investmentVehicle.getName());
+            log.info("Financier {} added to investment vehicle {}.", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
         }
         return optionalInvestmentVehicleFinancier;
        }
@@ -333,22 +338,24 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public List<Financier> search(String name) throws MeedlException {
+    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
-        return financierOutputPort.search(name);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        return financierOutputPort.search(name, pageNumber, pageSize);
     }
 
     @Override
     public void updateFinancierStatus(Financier financier) {
-        if(ObjectUtils.isNotEmpty(financier) && ObjectUtils.isNotEmpty(financier.getIndividual())
-            && ObjectUtils.isNotEmpty(financier.getIndividual().getRole())
-            && financier.getIndividual().getRole() == IdentityRole.FINANCIER){
+        if(ObjectUtils.isNotEmpty(financier) && ObjectUtils.isNotEmpty(financier.getUserIdentity())
+            && ObjectUtils.isNotEmpty(financier.getUserIdentity().getRole())
+            && financier.getUserIdentity().getRole() == IdentityRole.FINANCIER){
             try {
-                Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+                Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
                 foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
                 financierOutputPort.save(foundFinancier);
             } catch (MeedlException e) {
-                log.error("Failed to find Financier when attempting to update Financier status for user with id {}", financier.getIndividual().getId(), e);
+                log.error("Failed to find Financier when attempting to update Financier status for user with id {}", financier.getUserIdentity().getId(), e);
             }
         }
     }
@@ -356,7 +363,7 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier investInVehicle(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = null;
@@ -441,18 +448,19 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         kycIdentityValidation(financier);
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getIndividual().getId());
-        if (foundFinancier.getIndividual().getNextOfKin() == null &&
-            foundFinancier.getIndividual().getBankDetail() == null){
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
+        if (foundFinancier.getUserIdentity().getNextOfKin() == null &&
+            foundFinancier.getUserIdentity().getBankDetail() == null){
             log.info("Financier details in service to use in completing kyc {}", financier);
 
             updateFinancierNextOfKinKycDetail(financier, foundFinancier);
             log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
+            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
+            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
+            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
+            foundFinancier.getUserIdentity().setBankDetail(bankDetail);
 
-            BankDetail bankDetail = bankDetailOutputPort.save(financier.getIndividual().getBankDetail());
-            foundFinancier.getIndividual().setBankDetail(bankDetail);
-
-            userIdentityOutputPort.save(foundFinancier.getIndividual());
+            userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             return financierOutputPort.completeKyc(foundFinancier);
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
@@ -467,36 +475,36 @@ public class FinancierService implements FinancierUseCase {
 
     private static void kycIdentityValidation(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
-        MeedlValidator.validateObjectInstance(financier.getIndividual(), "User performing this action is unknown");
-        MeedlValidator.validateUUID(financier.getIndividual().getId(), "User identification performing this action is unknown. ");
-        MeedlValidator.validateObjectInstance(financier.getIndividual().getNextOfKin(), "Next of kin is unknown");
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");
+        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), "User identification performing this action is unknown. ");
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity().getNextOfKin(), "Next of kin is unknown");
     }
 
     private NextOfKin updateNextOfKinForKyc(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin nextOfKin = financier.getIndividual().getNextOfKin();
-        nextOfKin.setUserId(foundFinancier.getIndividual().getId());
+        NextOfKin nextOfKin = financier.getUserIdentity().getNextOfKin();
+        nextOfKin.setUserId(foundFinancier.getUserIdentity().getId());
         return nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
     }
 
     private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
         NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
-        foundFinancier.getIndividual().setNextOfKin(savedNextOfKin);
-        foundFinancier.getIndividual().setNin(financier.getIndividual().getNin());
-        foundFinancier.getIndividual().setTaxId(financier.getIndividual().getTaxId());
-        foundFinancier.getIndividual().setAddress(financier.getIndividual().getAddress());
+        foundFinancier.getUserIdentity().setNextOfKin(savedNextOfKin);
+        foundFinancier.getUserIdentity().setNin(financier.getUserIdentity().getNin());
+        foundFinancier.getUserIdentity().setTaxId(financier.getUserIdentity().getTaxId());
+        foundFinancier.getUserIdentity().setAddress(financier.getUserIdentity().getAddress());
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
         financier.setActivationStatus(ActivationStatus.INVITED);
+        UserIdentity userIdentity = financier.getUserIdentity();
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
-        UserIdentity userIdentity = financier.getIndividual();
         log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
         userIdentity.setCreatedBy(financier.getInvitedBy());
         userIdentity.setRole(IdentityRole.FINANCIER);
         userIdentity.setCreatedAt(LocalDateTime.now());
         userIdentity = identityManagerOutputPort.createUser(userIdentity);
         userIdentity = userIdentityOutputPort.save(userIdentity);
-        financier.setIndividual(userIdentity);
+        financier.setUserIdentity(userIdentity);
         return financierOutputPort.save(financier);
     }
 }
