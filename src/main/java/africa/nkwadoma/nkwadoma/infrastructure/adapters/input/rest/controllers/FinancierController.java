@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleFinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
 import jakarta.validation.Valid;
@@ -46,6 +47,7 @@ public class FinancierController {
     private final FinancierUseCase financierUseCase;
     private final FinancierRestMapper financierRestMapper;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
+    private final InvestmentVehicleFinancierRestMapper investmentVehicleFinancierRestMapper;
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -152,8 +154,8 @@ public class FinancierController {
             }
     )
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
-        FinancierVehicleDetail financierVehicleDetails = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
-        FinancierInvestmentDetailResponse financierInvestmentDetailsResponse = investmentVehicleFinancierMapper.map(financierVehicleDetails);
+        FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+        FinancierInvestmentDetailResponse financierInvestmentDetailsResponse = investmentVehicleFinancierRestMapper.map(financierVehicleDetail);
 
         ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
                 .data(financierInvestmentDetailsResponse)

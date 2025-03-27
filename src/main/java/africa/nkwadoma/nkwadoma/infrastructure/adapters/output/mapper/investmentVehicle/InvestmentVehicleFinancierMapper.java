@@ -18,6 +18,5 @@ public interface InvestmentVehicleFinancierMapper {
 
     List<InvestmentVehicleFinancier> toInvestmentVehicleFinancier(List<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntity);
 
-    FinancierInvestmentDetailResponse map(FinancierVehicleDetail financierVehicleDetails);
 
 }
