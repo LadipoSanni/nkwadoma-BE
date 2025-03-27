@@ -26,7 +26,7 @@ import java.util.Set;
 public class Financier {
     private String id;
     private Cooperation cooperation;
-    private String invitedBy;
+//    private String invitedBy;
     private FinancierType financierType;
     private UserIdentity userIdentity;
     private ActivationStatus activationStatus;
@@ -65,7 +65,8 @@ public class Financier {
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
-        MeedlValidator.validateUUID(invitedBy, "Valid user identification for user performing this action is required");
+        MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
         if (this.financierType == FinancierType.INDIVIDUAL){
             validateUserIdentity();
         }else{

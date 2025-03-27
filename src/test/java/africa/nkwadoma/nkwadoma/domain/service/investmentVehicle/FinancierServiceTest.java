@@ -91,7 +91,6 @@ public class FinancierServiceTest {
         individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest2@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
         deleteTestUserIfExist(individualUserIdentity);
-        individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
@@ -100,11 +99,13 @@ public class FinancierServiceTest {
         publicInvestmentVehicle = TestData.buildInvestmentVehicle("publicInvestmentVehicleInTestClass");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         investmentVehicleId = investmentVehicle.getId();
-        individualFinancier.setInvestmentVehicleId(investmentVehicleId);
 
+        individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
+        individualFinancier.setInvestmentVehicleId(investmentVehicleId);
         individualFinancierList = List.of(individualFinancier);
-        cooperateFinancierList = List.of(cooperateFinancier);
         nextOfKin = TestData.createNextOfKinData(individualFinancier.getUserIdentity());
+
+        cooperateFinancierList = List.of(cooperateFinancier);
     }
 
     private Financier buildCooperateFinancier(UserIdentity userIdentity , String companyName) {
@@ -205,7 +206,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void inviteFinancierWithInvalidCreatedBy(String invitedBy){
-        individualFinancier.setInvitedBy(invitedBy);
+        individualFinancier.getUserIdentity().setCreatedBy(invitedBy);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList));
     }
 
@@ -506,6 +507,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void inviteFinancierWithInvalidOrNonExistingInvestmentVehicleId(String investmentVehicleId){
+//        individualFinancier.setUserIdentity(TestData.createTestUserIdentity(""));
         individualFinancier.setInvestmentVehicleId(investmentVehicleId);
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList));
     }
@@ -567,7 +569,7 @@ public class FinancierServiceTest {
     @Order(11)
     public void inviteCooperateFinancierToNewVehicle1() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
         Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
@@ -587,6 +589,7 @@ public class FinancierServiceTest {
         Page<Financier> financiers;
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            cooperateFinancier = financierOutputPort.findFinancierByUserId(cooperateUserIdentity.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
             investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicle.getId());
             financierOutputPort.delete(cooperateFinancier.getId());
