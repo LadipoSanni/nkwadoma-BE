@@ -16,4 +16,5 @@ public class IdentityVerificationRequest {
     private String nin;
     private String loanReferralId;
     private String imageUrl;
+    private String test;
 }

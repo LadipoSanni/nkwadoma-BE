@@ -69,8 +69,8 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private void addedToLoaneeLoan(String loanReferralId) {
         log.info("Added to Loanee loan to loanee's list of loans {} ", loanReferralId);
     }
-//    @Override
-    public String verifyIdentityMainCode(IdentityVerification identityVerification) throws MeedlException {
+    @Override
+    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
         LoanReferral loanReferral = validateIdentity(identityVerification);
         UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
 
@@ -217,7 +217,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         }
     }
 
-
     private boolean isIdentityVerified(PremblyResponse premblyResponse) {
         return premblyResponse.getVerification() != null &&
                 "VERIFIED".equals(premblyResponse.getVerification().getStatus());
@@ -243,98 +242,4 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         identityVerification.setDecryptedBvn(decryptedBvn);
         identityVerification.setDecryptedNin(decryptedNin);
     }
-
-
-    @Override
-    public String verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
-        LoanReferral loanReferral = validateIdentity(identityVerification);
-        UserIdentity userIdentity = userIdentityOutputPort.findByBvn(identityVerification.getEncryptedBvn());
-
-        if (isVerificationRequired(userIdentity)){
-            return processNewVerificationForAutomatedTest(identityVerification, loanReferral);
-        }else{
-            processAnotherVerificationAutomationTest(identityVerification, loanReferral);
-            log.info("Verification previously done and was successful");
-            addedToLoaneeLoan(loanReferral.getId());
-            return IDENTITY_VERIFIED.getMessage();
-        }
-    }
-
-    private String processAnotherVerificationAutomationTest(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        try{
-            PremblyBvnResponse premblyBvnResponse = createPremblyBvnTestResponse(identityVerification.getDecryptedBvn());
-            return handleAnotherVerification(identityVerification, loanReferral, premblyBvnResponse);
-        }catch (MeedlException exception){
-            log.error("Error verifying user's identity... {}", exception.getMessage());
-            createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
-            throw new MeedlException(exception.getMessage());
-        }
-    }
-
-    private String processNewVerificationForAutomatedTest(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        try {
-            PremblyBvnResponse premblyBvnResponse = createPremblyBvnTestResponse(identityVerification.getDecryptedBvn());
-            return confirmIdentityVerified(identityVerification, loanReferral, premblyBvnResponse);
-        } catch (MeedlException exception) {
-            log.error("Error verifying user's identity... {}", exception.getMessage());
-            createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
-            throw new MeedlException(exception.getMessage());
-        }
-    }
-    public static PremblyBvnResponse createPremblyBvnTestResponse(String bvn) {
-        return PremblyBvnResponse.builder()
-                .verificationCallSuccessful(true)
-                .detail("Verification successful")
-                .responseCode("00")
-                .data(PremblyBvnResponse.BvnData.builder()
-                        .bvn(bvn)
-                        .firstName("automatedTest")
-                        .middleName("automatedTest")
-                        .lastName("automatedTest")
-                        .dateOfBirth("1990-01-01")
-                        .registrationDate("2020-05-15")
-                        .enrollmentBank("First Bank Automated Test")
-                        .enrollmentBranch("Lagos Main Automated Test")
-                        .email("john.doe@example.com")
-                        .gender("Male")
-                        .levelOfAccount("Tier 3")
-                        .lgaOfOrigin("IkejaAutomatedTest")
-                        .lgaOfResidence("SurulereAutomatedTest")
-                        .maritalStatus("Single")
-                        .nin("12345678910")
-                        .nameOnCard("John D. Smith AutomatedTest")
-                        .nationality("Nigerian")
-                        .phoneNumber1("+2348012345678")
-                        .phoneNumber2("+2348098765432")
-                        .residentialAddress("123, Lagos Street, Ikeja AutomatedTest")
-                        .stateOfOrigin("Lagos")
-                        .stateOfResidence("Lagos")
-                        .title("Mr.")
-                        .watchListed("No")
-                        .image("base64-image-string")
-                        .number("12345")
-                        .faceData(createMockFaceData())
-                        .build())
-                .verification(createMockVerification())
-                .session(null)
-                .build();
-    }
-
-    public static Verification createMockVerification() {
-        return Verification.builder()
-                .status("VERIFIED")
-                .validIdentity(true)
-                .reference("REF-123456345")
-                .build();
-    }
-    public static PremblyFaceData createMockFaceData() {
-        return PremblyFaceData.builder()
-                .faceVerified(true)
-                .message("Face Match")
-                .confidence("99.9987564086914")
-                .responseCode("00")
-                .build();
-    }
-
-
 }
