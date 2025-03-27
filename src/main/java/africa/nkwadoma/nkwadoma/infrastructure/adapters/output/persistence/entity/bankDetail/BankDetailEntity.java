@@ -17,6 +17,6 @@ public class BankDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private String accountName;
-    private String accountNumber;
+    private String bankName;
+    private String bankNumber;
 }

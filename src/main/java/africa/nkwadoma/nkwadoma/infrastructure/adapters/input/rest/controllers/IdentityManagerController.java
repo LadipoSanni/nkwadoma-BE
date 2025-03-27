@@ -105,7 +105,7 @@ public class IdentityManagerController {
 
     private void activateFinancier(UserIdentity userIdentity) {
         log.info("Started updating financier status");
-        Financier financier = Financier.builder().individual(userIdentity).build();
+        Financier financier = Financier.builder().userIdentity(userIdentity).build();
         financierUseCase.updateFinancierStatus(financier);
     }
 

@@ -12,11 +12,11 @@ import lombok.*;
 @Builder
 public class BankDetail {
     private String id;
-    private String accountName;
-    private String accountNumber;
+    private String bankName;
+    private String bankNumber;
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateDataElement(accountName, "Bank account name is required.");
-        MeedlValidator.validateAccountNumber(accountNumber, "Bank account number is required.");
+        MeedlValidator.validateDataElement(this.bankName, "Bank account name is required.");
+        MeedlValidator.validateAccountNumber(this.bankNumber, "Bank account number is required.");
     }
 }

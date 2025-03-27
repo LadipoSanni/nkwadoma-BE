@@ -13,4 +13,6 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, String> 
     UserEntity findByBvn(String bvn);
 
     List<UserEntity> findAllByRole(IdentityRole identityRole);
+
+    boolean existsByEmail(String email);
 }

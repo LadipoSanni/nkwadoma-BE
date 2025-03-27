@@ -150,7 +150,6 @@ public class LoanOfferServiceTest {
 
     @Test
     void loaneeLoanAccountIsCreatedIfLoanOfferIsAccepted(){
-        loanOffer.setLoanee(Loanee.builder().id("ead0f7cb-5483-4bb8-b271-813970a9c368").build());
         loanOffer2.setLoaneeResponse(LoanDecision.ACCEPTED);
         loanOffer.setLoanProduct(loanProduct);
         try {
@@ -167,7 +166,6 @@ public class LoanOfferServiceTest {
         assertEquals(AccountStatus.NEW,loaneeLoanAccount.getAccountStatus());
         assertEquals(LoanStatus.AWAITING_DISBURSAL,loaneeLoanAccount.getLoanStatus());
     }
-
     @Test
     void loaneeLoanAccountIsNotCreatedIfLoanOfferIsDeclined(){
         LoaneeLoanAccount loaneeLoanAccount1 = null;

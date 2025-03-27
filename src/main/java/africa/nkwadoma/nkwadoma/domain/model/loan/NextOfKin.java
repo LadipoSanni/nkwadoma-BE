@@ -33,6 +33,7 @@ public class NextOfKin {
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
         MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
+        MeedlValidator.validateDataElement(contactAddress, nextOfKin.concat("contact address is required"));
 
     }
 

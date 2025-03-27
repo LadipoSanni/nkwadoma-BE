@@ -6,7 +6,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.FinancierRepository;
@@ -16,9 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,13 +40,13 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
-        log.info("Financier next of kin found in adapter: {}", financierEntity.getIndividual().getNextOfKinEntity());
+        log.info("Financier next of kin found in adapter: {}", financierEntity.getUserIdentity().getNextOfKinEntity());
         return financierMapper.map(financierEntity);
     }
 
     @Override
-    public Financier findFinancierByUserId(String userId) throws MeedlException {
-        FinancierEntity foundFinancier = financierRepository.findByIndividual_Id(userId)
+    public Financier findFinancierByUserId(String id) throws MeedlException {
+        FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
                 .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
         return financierMapper.map(foundFinancier);
     }
@@ -62,12 +58,14 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public List<Financier> search(String name) throws MeedlException {
+    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
-        List<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name);
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name, pageRequest);
         log.info("Financiers found with name: {} {}", name, financierEntities );
-        return financierEntities.stream().map
-                (financierMapper::map).toList();
+        return financierEntities.map(financierMapper::map);
     }
 
     @Override

@@ -11,6 +11,10 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.IdentityRole.LOANEE;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -25,27 +29,13 @@ class UserIdentityAdapterTest {
 
     @BeforeEach
     void setUp(){
-//        List<UserIdentity> users = new ArrayList<>();
-//        try {
-//            users = userIdentityOutputPort.findAllByRole(LOANEE);
-//        } catch (MeedlException e) {
-//            log.error(e.getMessage());
-//        }
-//        if (CollectionUtils.isNotEmpty(users)) {
-//            users.forEach(userIdentity -> {
-//                try {
-//                    userIdentityOutputPort.deleteUserById(userIdentity.getId());
-//                } catch (MeedlException e) {
-//                    log.error(e.getMessage());
-//                }
-//            });
-//        }
         john = new UserIdentity();
-        john = TestData.createTestUserIdentity("john@johnson.com");
+        john = TestData.createTestUserIdentity("john2@johnson.com", "ead0f7cb-5483-4bc8-b271-513970a9c363");
 
     }
 
     @Test
+    @Order(1)
     void saveUser(){
         try{
             assertThrows(MeedlException.class, ()->userIdentityOutputPort.findByEmail(john.getEmail()));
@@ -65,26 +55,11 @@ class UserIdentityAdapterTest {
         assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findAllByRole(null));
     }
 
-//    @Test
-//    void findAllUserByRole(){
-//        List<UserIdentity> userIdentities = new ArrayList<>();
-//        try{
-//            userIdentities = userIdentityOutputPort.findAllByRole(LOANEE);
-//        }catch (MeedlException exception){
-//            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
-//        }
-//        assertNotNull(userIdentities);
-//        assertEquals(1, userIdentities.size());
-//    }
-
     @Test
-    void saveUserWithExistingEmail(){
-        try{
-            UserIdentity savedJohn = userIdentityOutputPort.save(john);
-            assertEquals(john.getId(),savedJohn.getId());
-        }catch (MeedlException exception){
-            log.info("{} {}->",exception.getClass().getName(), exception.getMessage());
-        }
+    @Order(2)
+    void saveUserWithExistingEmail() {
+        john.setId(null);
+        assertThrows(MeedlException.class, () -> userIdentityOutputPort.save(john));
     }
 
     @Test
@@ -148,8 +123,20 @@ class UserIdentityAdapterTest {
         john.setCreatedBy(StringUtils.EMPTY);
         assertThrows(MeedlException.class, ()->userIdentityOutputPort.save(john));
     }
-
     @Test
+    @Order(3)
+    void findAllUserByRole(){
+        List<UserIdentity> userIdentities = new ArrayList<>();
+        try{
+            userIdentities = userIdentityOutputPort.findAllByRole(LOANEE);
+        }catch (MeedlException exception){
+            log.error("{} {}->",exception.getClass().getName(), exception.getMessage());
+        }
+        assertNotNull(userIdentities);
+        assertTrue( userIdentities.size()>0);
+    }
+    @Test
+    @Order(4)
     void deleteUser(){
        try{
             UserIdentity existingUser = userIdentityOutputPort.findByEmail(john.getEmail());
