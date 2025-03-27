@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -79,7 +80,7 @@ public class FinancierServiceTest {
     private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest2@mail.com";
     private BankDetail bankDetail;
     private String investmentVehicleId;
-    private String secondInvestmentVehicleId;
+    private String privateInvestmentVehicleId;
     private String publicInvestmentVehicleId;
     private List<Financier> financierList;
     private List<Financier> individualFinancierList;
@@ -88,6 +89,7 @@ public class FinancierServiceTest {
     int pageNumber = 0 ;
     private NextOfKin nextOfKin;
     private InvestmentVehicle publicInvestmentVehicle;
+    private InvestmentVehicle privateInvestmentVehicle;
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
@@ -102,7 +104,9 @@ public class FinancierServiceTest {
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         publicInvestmentVehicle = TestData.buildInvestmentVehicle("publicInvestmentVehicleInTestClass");
+        privateInvestmentVehicle = TestData.buildInvestmentVehicle("privateInvestmentVehicleInTestClass");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
+
         investmentVehicleId = investmentVehicle.getId();
         cooperateFinancier.setInvestmentVehicleId(investmentVehicleId);
         individualFinancier.setInvestmentVehicleId(investmentVehicleId);
@@ -529,7 +533,7 @@ public class FinancierServiceTest {
     public void inviteFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
-        secondInvestmentVehicleId = investmentVehicle.getId();
+        privateInvestmentVehicleId = investmentVehicle.getId();
         individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         String response;
@@ -646,7 +650,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.get(0));
     }
     @Test
-    @Order(12)
+    @Order(15)
     public void inviteCooperateFinancierToPlatform() {
         Financier foundFinancier;
         String inviteResponse;
@@ -675,13 +679,105 @@ public class FinancierServiceTest {
 //        assertEquals("Financier added to investment vehicle", inviteResponse);
         assertEquals(ActivationStatus.INVITED, foundFinancier.getActivationStatus());
     }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
+    void accessInvestmentVehicleWithInvalidVehicleId(String investmentVehicleId){
+        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(individualFinancierId, investmentVehicleId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
+    void accessInvestmentVehicleWithInvalidFinancierId(String financierId){
+        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(financierId, investmentVehicleId));
+    }
+
+    @Test
+    void accessInvestmentVehicleWithFinancierIdThatDoesNotExistInTheDB() {
+        String nonExistingFinancierId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
+        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(nonExistingFinancierId, individualFinancierId));
+    }
+
+    @Test
+    void accessInvestmentVehicleWithInvestmentVehicleIdThatDoesNotExistInTheDB() {
+        String nonExistingVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
+        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(individualFinancierId, nonExistingVehicleId));
+    }
+
+    @Order(16)
+    @Test
+    void accessPrivateInvestmentVehicleThatFinancierIsNotPartOf() {
+        try {
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(privateInvestmentVehicle);
+            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+            privateInvestmentVehicleId = savedVehicle.getId();
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertThrows(MeedlException.class, ()->financierUseCase.accessInvestmentVehicle(privateInvestmentVehicleId, individualFinancierId));
+    }
+
+    @Order(17)
+    @Test
+    void accessPublicInvestmentVehicle() {
+        Optional<InvestmentVehicle> investmentVehicle = null;
+        try{
+            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            assertNotNull(foundInvestmentVehicle);
+            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
+            investmentVehicleOutputPort.save(foundInvestmentVehicle);
+            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+        } catch (MeedlException exception){
+            throw new RuntimeException(exception);
+        }
+        assertThat(investmentVehicle).isNotNull();
+        assertThat(investmentVehicle.get().getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PUBLIC);
+    }
+
+    @Order(18)
+    @Test
+    void accessPrivateInvestmentVehicleThatFinancierIsPartOf() {
+        Optional<InvestmentVehicle> investmentVehicle = null;
+        try{
+            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
+            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+            assertNotNull(foundInvestmentVehicle);
+            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.PRIVATE);
+            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+        } catch (MeedlException exception){
+            throw new RuntimeException(exception);
+        }
+        assertThat(investmentVehicle).isNotNull();
+    }
+
+    @Order(19)
+    @Test
+    void accessDefaultInvestmentVehicleThatFinancierIsPartOf() {
+        Optional<InvestmentVehicle> investmentVehicle = null;
+        try{
+            InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            foundInvestmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(foundInvestmentVehicle);
+            assertThat(savedVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
+            assertNotNull(foundInvestmentVehicle);
+            assertThat(foundInvestmentVehicle.getInvestmentVehicleVisibility()).isEqualTo(InvestmentVehicleVisibility.DEFAULT);
+            investmentVehicle = financierUseCase.accessInvestmentVehicle(investmentVehicleId, individualFinancierId);
+        } catch (MeedlException exception){
+            throw new RuntimeException(exception);
+        }
+        assertTrue(investmentVehicle.isEmpty());
+    }
+
     @AfterAll
     void tearDown() throws MeedlException {
 
         log.info("Started deleting data in financier service test." );
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-        deleteInvestmentVehicleFinancier(secondInvestmentVehicleId, individualFinancierId);
+        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
 
         financierOutputPort.delete(individualFinancierId);
@@ -691,7 +787,6 @@ public class FinancierServiceTest {
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
 
-
         financierOutputPort.delete(cooperateFinancierId);
         cooperateUserIdentity.setId(cooperateUserIdentityId);
         identityManagerOutputPort.deleteUser(cooperateUserIdentity);
@@ -699,7 +794,7 @@ public class FinancierServiceTest {
 
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(secondInvestmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
         log.info("Test data deleted after test");
     }
