@@ -280,7 +280,6 @@ public class TestData {
         investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
-        investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setTenure(12);
         investmentVehicle.setCustodian("Custodian");
         investmentVehicle.setBankPartner("Gt Bank");
