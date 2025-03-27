@@ -591,8 +591,10 @@ public class FinancierServiceTest {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
             cooperateFinancier = financierOutputPort.findFinancierByUserId(cooperateUserIdentity.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
-            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicle.getId());
             financierOutputPort.delete(cooperateFinancier.getId());
+            userIdentityOutputPort.deleteUserById(cooperateUserIdentity.getId());
+            identityManagerOutputPort.deleteUser(cooperateUserIdentity);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicle.getId());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
