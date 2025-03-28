@@ -120,10 +120,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return investmentVehicleOutputPort.findById(investmentVehicleId);
         }
 
-        return forFinancier(investmentVehicleId, userId);
+        return getInvestmentVehicleFinancier(investmentVehicleId, userId);
     }
 
-    private InvestmentVehicle forFinancier(String investmentVehicleId, String userId) throws MeedlException {
+    private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, String userId) throws MeedlException {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
         MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
