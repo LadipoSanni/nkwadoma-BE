@@ -82,12 +82,7 @@ class InvestmentVehicleServiceTest {
     void setUpInvestmentVehicle() {
         InvestmentVehicle createdInvestmentVehicle = new InvestmentVehicle();
         try {
-           when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(),DRAFT))
-                   .thenReturn(null);
            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
-           when(portfolioOutputPort.findPortfolio(any()))
-                   .thenReturn(portfolio);
-           when(portfolioOutputPort.save(portfolio)).thenReturn(portfolio);
             createdInvestmentVehicle =
                    investmentVehicleService.setUpInvestmentVehicle(fundGrowth);
            investmentId = createdInvestmentVehicle.getId();
@@ -96,6 +91,7 @@ class InvestmentVehicleServiceTest {
        }
         assertNotNull(createdInvestmentVehicle);
     }
+
 
     @Test
     void setUpInvestmentVehicleWithTenureGreaterThanThreeDigits() {

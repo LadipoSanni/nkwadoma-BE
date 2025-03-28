@@ -53,19 +53,16 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     @Override
     public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
-        if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
-                investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
             investmentVehicle.validateDraft();
             investmentVehicle.setLastUpdatedDate(LocalDate.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
-        }
-        return publishInvestmentVehicle(investmentVehicle);
     }
 
     private InvestmentVehicle saveInvestmentVehicleToDraft(InvestmentVehicle investmentVehicle) throws MeedlException {
         if (ObjectUtils.isNotEmpty(investmentVehicle.getId())){
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
+        investmentVehicle.setInvestmentVehicleStatus(DRAFT);
         investmentVehicle.setCreatedDate(LocalDate.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
