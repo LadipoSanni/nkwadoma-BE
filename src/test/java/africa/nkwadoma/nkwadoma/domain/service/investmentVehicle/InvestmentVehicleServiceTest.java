@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Finan
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
@@ -17,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +32,13 @@ import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +65,9 @@ class InvestmentVehicleServiceTest {
     @Mock
     private PortfolioOutputPort portfolioOutputPort;
     private Portfolio portfolio;
+    private String investmentVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
+    private String testFinancierId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+    private String nonExistingVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
 
 
     @BeforeEach
@@ -88,18 +93,27 @@ class InvestmentVehicleServiceTest {
         assertNotNull(createdInvestmentVehicle);
     }
 
-
     @Test
-    void viewInvestmentVehicleDetails() {
-        InvestmentVehicle viewedInvestmentVehicle = new InvestmentVehicle();
+    void viewNonExistentInvestmentVehicle() {
+        String nonExistingId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
+        String validFinancierId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
+        UserIdentity mockUser = UserIdentity.builder()
+                .role(IdentityRole.FINANCIER)
+                .build();
         try {
-            when(investmentVehicleOutputPort.findById(investmentId)).thenReturn(fundGrowth);
-            viewedInvestmentVehicle = investmentVehicleService.viewInvestmentVehicleDetails(investmentId);
-        } catch (MeedlException exception) {
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+            when(userIdentityOutputPort.findById(validFinancierId)).thenReturn(mockUser);
+            Financier mockFinancier = Financier.builder()
+                    .id(validFinancierId)
+                    .build();
+            when(financierOutputPort.findFinancierByUserId(validFinancierId)).thenReturn(mockFinancier);
+            when(investmentVehicleOutputPort.findById(nonExistingId))
+                    .thenThrow(new MeedlException("Investment vehicle not found"));
+        } catch (MeedlException exception){
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(viewedInvestmentVehicle);
-        assertEquals(viewedInvestmentVehicle.getId(),investmentId);
+        Exception exception = assertThrows(MeedlException.class, () ->
+                investmentVehicleService.viewInvestmentVehicleDetails(nonExistingId, validFinancierId));
+        assertEquals("Investment vehicle not found", exception.getMessage());
     }
 
     @Test
@@ -234,6 +248,173 @@ class InvestmentVehicleServiceTest {
     @Test
     void viewAllInvestmentVehiclesByStatusWithNullParameter(){
         assertThrows(MeedlException.class, ()->investmentVehicleService.viewAllInvestmentVehicleByStatus(pageSize, pageNumber,null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
+    void accessInvestmentVehicleWithInvalidVehicleId(String investmentVehicleId){
+        assertThrows(MeedlException.class, ()->investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, financierId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid"})
+    void viewInvestmentVehicleWithInvalidFinancierId(String financierId){
+        assertThrows(MeedlException.class, ()->investmentVehicleService.viewInvestmentVehicleDetails(investmentId, financierId));
+    }
+
+    @Test
+    void viewInvestmentVehicleWithFinancierIdThatDoesNotExistInTheDB() {
+        String nonExistingFinancierId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
+        assertThrows(MeedlException.class, ()->investmentVehicleService.viewInvestmentVehicleDetails(investmentId, nonExistingFinancierId));
+    }
+
+    @Test
+    void viewInvestmentVehicleWithInvestmentVehicleIdThatDoesNotExistInTheDB() {
+        UserIdentity mockUser = UserIdentity.builder()
+                .role(IdentityRole.FINANCIER)
+                .build();
+        try {
+            when(userIdentityOutputPort.findById(testFinancierId)).thenReturn(mockUser);
+            Financier mockFinancier = Financier.builder()
+                    .id(testFinancierId)
+                    .build();
+            when(financierOutputPort.findFinancierByUserId(testFinancierId)).thenReturn(mockFinancier);
+            doThrow(new MeedlException("Investment vehicle not found"))
+                    .when(investmentVehicleOutputPort).findById(nonExistingVehicleId);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        Exception exception = assertThrows(MeedlException.class,
+                () -> investmentVehicleService.viewInvestmentVehicleDetails(nonExistingVehicleId, testFinancierId));
+        assertEquals("Investment vehicle not found", exception.getMessage());
+    }
+
+    @Test
+    void accessPrivateInvestmentVehicleThatFinancierIsNotPartOf() {
+        InvestmentVehicle privateVehicle = InvestmentVehicle.builder()
+                .id(investmentVehicleId)
+                .investmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE)
+                .build();
+        try{
+            when(investmentVehicleOutputPort.findById(investmentVehicleId))
+                    .thenReturn(privateVehicle);
+            UserIdentity mockUser = UserIdentity.builder()
+                    .role(IdentityRole.FINANCIER)
+                    .build();
+            when(userIdentityOutputPort.findById(testFinancierId))
+                    .thenReturn(mockUser);
+            Financier mockFinancier = Financier.builder()
+                    .id(testFinancierId)
+                    .build();
+            when(financierOutputPort.findFinancierByUserId(testFinancierId))
+                    .thenReturn(mockFinancier);
+
+            when(investmentVehicleFinancierOutputPort
+                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
+                    .thenReturn(Optional.empty());
+            Exception exception = assertThrows(MeedlException.class,
+                    () -> investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId));
+            assertEquals("Investment Vehicle not found", exception.getMessage());
+
+            verify(investmentVehicleOutputPort).findById(investmentVehicleId);
+            verify(userIdentityOutputPort).findById(testFinancierId);
+            verify(financierOutputPort).findFinancierByUserId(testFinancierId);
+            verify(investmentVehicleFinancierOutputPort)
+                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId);
+        } catch (MeedlException exception) {
+            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        }
+    }
+
+    @Test
+    void accessPublicInvestmentVehicle() throws MeedlException {
+        InvestmentVehicle publicVehicle = InvestmentVehicle.builder()
+                .id(investmentVehicleId)
+                .investmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC)
+                .build();
+        when(investmentVehicleOutputPort.findById(investmentVehicleId))
+                .thenReturn(publicVehicle);
+        UserIdentity mockUser = UserIdentity.builder()
+                .role(IdentityRole.FINANCIER)
+                .build();
+        when(userIdentityOutputPort.findById(testFinancierId))
+                .thenReturn(mockUser);
+        Financier mockFinancier = Financier.builder()
+                .id(testFinancierId)
+                .build();
+        when(financierOutputPort.findFinancierByUserId(testFinancierId))
+                .thenReturn(mockFinancier);
+        InvestmentVehicle result = investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId);
+        assertNotNull(result);
+        assertEquals(InvestmentVehicleVisibility.PUBLIC, result.getInvestmentVehicleVisibility());
+    }
+
+    @Test
+    void accessPrivateInvestmentVehicleThatFinancierIsPartOf() throws MeedlException {
+        InvestmentVehicle privateVehicle = InvestmentVehicle.builder()
+                .id(investmentVehicleId)
+                .investmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE)
+                .build();
+        when(investmentVehicleOutputPort.findById(investmentVehicleId))
+                .thenReturn(privateVehicle);
+        UserIdentity mockUser = UserIdentity.builder()
+                .role(IdentityRole.FINANCIER)
+                .build();
+        when(userIdentityOutputPort.findById(testFinancierId))
+                .thenReturn(mockUser);
+        Financier mockFinancier = Financier.builder()
+                .id(testFinancierId)
+                .build();
+        when(financierOutputPort.findFinancierByUserId(testFinancierId))
+                .thenReturn(mockFinancier);
+        InvestmentVehicleFinancier investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(mockFinancier, privateVehicle);
+        when(investmentVehicleFinancierOutputPort
+                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
+                .thenReturn(Optional.of(investmentVehicleFinancier));
+        InvestmentVehicle result = investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId);
+        assertNotNull(result);
+        assertEquals(InvestmentVehicleVisibility.PRIVATE, result.getInvestmentVehicleVisibility());
+    }
+
+    @Test
+    void financierAccessingDefaultInvestmentVehicle() throws MeedlException {
+        UserIdentity mockUser = UserIdentity.builder()
+                .role(IdentityRole.FINANCIER)
+                .build();
+        when(userIdentityOutputPort.findById(testFinancierId))
+                .thenReturn(mockUser);
+        InvestmentVehicle defaultVehicle = InvestmentVehicle.builder()
+                .id(investmentVehicleId)
+                .investmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT)
+                .build();
+        when(investmentVehicleOutputPort.findById(investmentVehicleId))
+                .thenReturn(defaultVehicle);
+        Financier mockFinancier = Financier.builder().id(testFinancierId).build();
+            when(financierOutputPort.findFinancierByUserId(testFinancierId))
+                    .thenReturn(mockFinancier);
+        assertThrows(MeedlException.class, () ->
+                investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId));
+    }
+
+    @Test
+    void portfolioManagerCanAccessDefaultInvestmentVehicle() throws MeedlException {
+        String portfolioManagerId = UUID.randomUUID().toString();
+        UserIdentity portfolioManager = UserIdentity.builder()
+                .role(IdentityRole.PORTFOLIO_MANAGER)
+                .build();
+        when(userIdentityOutputPort.findById(portfolioManagerId))
+                .thenReturn(portfolioManager);
+        InvestmentVehicle defaultVehicle = InvestmentVehicle.builder()
+                .id(investmentVehicleId)
+                .investmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT)
+                .build();
+        when(investmentVehicleOutputPort.findById(investmentVehicleId))
+                .thenReturn(defaultVehicle);
+        InvestmentVehicle investmentVehicle = investmentVehicleService.viewInvestmentVehicleDetails(
+                investmentVehicleId,
+                portfolioManagerId);
+        assertNotNull(investmentVehicle);
+        assertEquals(InvestmentVehicleVisibility.DEFAULT, investmentVehicle.getInvestmentVehicleVisibility());
     }
 
 }
