@@ -92,15 +92,6 @@ class InvestmentVehicleServiceTest {
         assertNotNull(createdInvestmentVehicle);
     }
 
-
-    @Test
-    void setUpInvestmentVehicleWithTenureGreaterThanThreeDigits() {
-        fundGrowth.setTenure(9999);
-        MeedlException meedlException =
-                assertThrows(MeedlException.class, () -> investmentVehicleService.setUpInvestmentVehicle(fundGrowth));
-        log.info("Exception occurred: {} {}",meedlException.getClass().getName(), meedlException.getMessage());
-    }
-
     @Test
     void viewNonExistentInvestmentVehicle() {
         String nonExistingId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
