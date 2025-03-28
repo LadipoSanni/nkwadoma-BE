@@ -36,6 +36,5 @@ public class SetUpInvestmentVehicleRequest {
     @Pattern(regexp = MeedlPatterns.CHARACTER_REGEX, message = ErrorMessages.FUND_MANAGER_MUST_NOT_START_OR_END_WITH_APOSTROPHE_OR_HYPHEN)
     private String fundManager;
     private BigDecimal minimumInvestmentAmount;
-    private InvestmentVehicleStatus investmentVehicleStatus;
     private LocalDate startDate;
 }

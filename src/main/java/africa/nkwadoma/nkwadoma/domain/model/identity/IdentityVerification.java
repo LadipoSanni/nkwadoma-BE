@@ -28,6 +28,7 @@ public class IdentityVerification {
     private String imageUrl;
     private String email;
     private String token;
+    private String test;
     private IdentityVerificationEnum typeOfIdentity;
 
     public void validate() throws MeedlException {

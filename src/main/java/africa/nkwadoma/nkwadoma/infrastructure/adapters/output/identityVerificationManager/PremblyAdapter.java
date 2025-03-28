@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerifi
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.AutomationTestData;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyLivelinessResponse;
@@ -20,7 +21,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -40,7 +40,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     private String apiKey;
 
     private final RestTemplate restTemplate;
-
 
     @Override
     public PremblyResponse verifyIdentity(IdentityVerification identityVerification) throws MeedlException {
@@ -123,6 +122,10 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (identityVerification.getTest() != null
+                && identityVerification.getTest().equals("Q-A_TEST")) {
+            return AutomationTestData.createPremblyBvnTestResponse(identityVerification.getDecryptedBvn());
+        }
         return getBvnDetails(identityVerification);
     }
 

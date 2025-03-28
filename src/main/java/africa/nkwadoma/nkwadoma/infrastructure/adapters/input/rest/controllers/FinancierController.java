@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -43,9 +44,9 @@ public class FinancierController {
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
-    List<FinancierRequest> financierRequests) throws MeedlException {
-        log.info("Inviting a financier with request {}", financierRequests);
-        List<Financier> financiers = mapValues(meedlUser.getClaimAsString("sub"), financierRequests);
+    InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
+        log.info("Inviting a financier with request {}", inviteFinancierRequest);
+        List<Financier> financiers = mapValues(meedlUser.getClaimAsString("sub"), inviteFinancierRequest.getFinancierRequests());
         log.info("Mapped financier at controller {}", financiers);
         String message = financierUseCase.inviteFinancier(financiers);
 
@@ -65,7 +66,6 @@ public class FinancierController {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
             }
             financier.getUserIdentity().setCreatedBy(meedlUserId);
-            financier.setInvitedBy(meedlUserId);
             return financier;
         }).toList();
     }
@@ -73,7 +73,7 @@ public class FinancierController {
     private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
         financier.setUserIdentity(UserIdentity.builder()
                 .email(financierRequest.getOrganizationEmail())
-                .firstName("admin")
+                .firstName("cooperateFinancier")
                 .lastName("admin")
                 .role(IdentityRole.FINANCIER)
                 .build());
