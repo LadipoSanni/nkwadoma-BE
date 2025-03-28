@@ -51,13 +51,11 @@ public class FinancierController {
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
+    public  ResponseEntity<ApiResponse<?>> inviteFinancier(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
     FinancierRequest financierRequest) throws MeedlException {
         log.info("Inviting a financier with request {}", financierRequest);
         Financier financier = mapValues(meedlUser, financierRequest);
-        financier.setUserIdentity(financierRequest.getUserIdentity());
         log.info("Mapped financier at controller {}", financier);
-        financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
         String message = financierUseCase.inviteFinancier(List.of(financier));
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
@@ -70,12 +68,10 @@ public class FinancierController {
     private Financier mapValues(Jwt meedlUser, FinancierRequest financierRequest) {
         Financier financier = financierRestMapper.map(financierRequest);
         financier.setUserIdentity(financierRequest.getUserIdentity());
-        log.info("Mapped financier at controller {}", financier);
-        financier.setInvitedBy(meedlUser.getClaimAsString("sub"));
+        log.info("Financier type before mapping at the controller level {}", financierRequest.getFinancierType());
         if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
             financier.setUserIdentity(UserIdentity.builder()
                             .email(financierRequest.getOrganizationEmail())
-                            .createdBy(meedlUser.getClaimAsString("sub"))
                             .firstName("admin")
                             .lastName("admin")
                             .role(IdentityRole.FINANCIER)
@@ -84,6 +80,7 @@ public class FinancierController {
                             .name(financierRequest.getOrganizationName())
                     .build());
         }
+        financier.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
         return financier;
     }
 
@@ -171,7 +168,7 @@ public class FinancierController {
 
     @GetMapping("financier/view/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
         FinancierResponse financierResponse = financierRestMapper.map(financier);
 

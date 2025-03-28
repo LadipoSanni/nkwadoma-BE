@@ -254,9 +254,7 @@ public class TestData {
 
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
-//                .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
-                .invitedBy(testId)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .activationStatus(ActivationStatus.INVITED)
                 .pageNumber(pageNumber)
@@ -280,7 +278,6 @@ public class TestData {
         investmentVehicle.setRate(13F);
         investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");
-        investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
         investmentVehicle.setTenure(12);
         investmentVehicle.setCustodian("Custodian");

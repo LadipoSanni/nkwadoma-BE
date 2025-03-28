@@ -20,7 +20,6 @@ public class FinancierEntity {
     @Id
     @UuidGenerator
     private String id;
-    private String invitedBy;
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
     @Enumerated(EnumType.STRING)

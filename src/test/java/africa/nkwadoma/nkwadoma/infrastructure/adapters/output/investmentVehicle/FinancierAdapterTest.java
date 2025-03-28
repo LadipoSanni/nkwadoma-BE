@@ -172,7 +172,7 @@ class FinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void inviteFinancierWithInvalidCreatedBy(String invitedBy){
-        individualFinancier.setInvitedBy(invitedBy);
+        individualFinancier.getUserIdentity().setCreatedBy(invitedBy);
         assertThrows( MeedlException.class,()-> financierOutputPort.save(individualFinancier));
     }
     @Test

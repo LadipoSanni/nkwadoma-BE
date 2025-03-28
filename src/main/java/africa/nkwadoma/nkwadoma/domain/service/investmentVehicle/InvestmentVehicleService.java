@@ -1,14 +1,18 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -17,10 +21,12 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDate;
 import java.math.BigInteger;
+import java.util.*;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
@@ -31,7 +37,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.Investment
 
 @Slf4j
 @RequiredArgsConstructor
-
+@Service
 public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
@@ -39,24 +45,22 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final PortfolioOutputPort portfolioOutputPort;
     private final FinancierOutputPort financierOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
 
     @Override
     public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
-        if (ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleStatus()) &&
-                investmentVehicle.getInvestmentVehicleStatus().equals(DRAFT)){
             investmentVehicle.validateDraft();
             investmentVehicle.setLastUpdatedDate(LocalDate.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
-        }
-        return publishInvestmentVehicle(investmentVehicle);
     }
 
     private InvestmentVehicle saveInvestmentVehicleToDraft(InvestmentVehicle investmentVehicle) throws MeedlException {
         if (ObjectUtils.isNotEmpty(investmentVehicle.getId())){
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
+        investmentVehicle.setInvestmentVehicleStatus(DRAFT);
         investmentVehicle.setCreatedDate(LocalDate.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
@@ -107,8 +111,35 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException {
-        return investmentVehicleOutputPort.findById(id);
+    public InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+            return investmentVehicleOutputPort.findById(investmentVehicleId);
+        }
+
+        return getInvestmentVehicleFinancier(investmentVehicleId, userId);
+    }
+
+    private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, String userId) throws MeedlException {
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
+            return foundInvestmentVehicle;
+        }
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
+            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
+            if (investmentVehicleFinancier.isPresent()){
+                return foundInvestmentVehicle;
+            } else {
+                throw new MeedlException("Investment Vehicle not found");
+            }
+        }
+        throw new MeedlException("Investment Vehicle not found");
     }
 
 
