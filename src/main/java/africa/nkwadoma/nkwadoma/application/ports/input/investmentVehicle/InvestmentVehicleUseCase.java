@@ -15,7 +15,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
-    Optional<InvestmentVehicle> viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
+    InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
 
     void deleteInvestmentVehicle(String investmentId) throws MeedlException;
 

@@ -116,35 +116,35 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Optional<InvestmentVehicle> viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
+    public InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
-            return Optional.of(investmentVehicleOutputPort.findById(investmentVehicleId));
+            return investmentVehicleOutputPort.findById(investmentVehicleId);
         }
 
         return forFinancier(investmentVehicleId, userId);
     }
 
-    private Optional<InvestmentVehicle> forFinancier(String investmentVehicleId, String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+    private InvestmentVehicle forFinancier(String investmentVehicleId, String userId) throws MeedlException {
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-        Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
 
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PUBLIC){
-            return Optional.of(foundInvestmentVehicle);
+            return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
+            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
             if (investmentVehicleFinancier.isPresent()){
-                return Optional.of(foundInvestmentVehicle);
+                return foundInvestmentVehicle;
             } else {
                 throw new MeedlException("You need to be part of this investment vehicle to view it");
             }
         }
-        return Optional.empty();
+        throw new MeedlException("Vehicle not found");
     }
 
 

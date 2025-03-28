@@ -59,7 +59,7 @@ public class InvestmentVehicleController {
     public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetails(@AuthenticationPrincipal Jwt meedlUser, @PathVariable String investmentVehicleId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
-                investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId).get();
+                investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
