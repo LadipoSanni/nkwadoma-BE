@@ -136,25 +136,30 @@ jobs:
           sudo fuser -k 8768/tcp || true
           sleep 2  # Allow time for port release
       
-          # Ensure no existing container is running
+          # Check if the container exists
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
-             echo "🛑 Stopping and removing existing container..."
-             docker stop nkwadoma-container || true
-             docker rm -f nkwadoma-container || true
-             sleep 3  # Ensure complete removal
-             echo "✅ Container stopped and removed."
+              echo "🛑 Stopping existing container..."
+              docker stop nkwadoma-container || true
+              sleep 10  # Allow time for the container to stop
+          
+              echo "🗑 Removing existing container..."
+              docker rm -f nkwadoma-container || true
+              sleep 5  # Allow time for the container to be fully removed
           fi
-      
+          
           # Ensure container is completely removed before continuing
-          while docker ps -a --format '{{.Names}}' | grep -q "nkwadoma-container"; do
-              echo "⏳ Waiting for container removal..."
-              sleep 2
-          done
+          if docker ps -a --format '{{.Names}}' | grep -q "nkwadoma-container"; then
+              echo "⏳ Container still exists, waiting for final removal..."
+              sleep 10
+          fi
+          
+          echo "✅ Container removed successfully!"
+
       
           # Run the new container
           echo "🚀 Starting the new container..."
           docker run -d --name nkwadoma-container -p 8768:8768 \
-              --env-file nkwadoma-dev.env \
+              --env-file nkwadoma.env \
               --restart unless-stopped \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       
