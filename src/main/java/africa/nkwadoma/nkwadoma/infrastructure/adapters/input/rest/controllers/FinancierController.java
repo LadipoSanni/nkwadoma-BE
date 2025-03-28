@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
-import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
 
@@ -44,8 +43,6 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class FinancierController {
     private final FinancierUseCase financierUseCase;
     private final FinancierRestMapper financierRestMapper;
-    private final InvestmentVehicleRestMapper investmentVehicleRestMapper;
-    private final RestClient.Builder builder;
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")

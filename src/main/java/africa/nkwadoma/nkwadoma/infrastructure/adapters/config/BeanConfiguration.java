@@ -117,7 +117,6 @@ public class BeanConfiguration {
         return new InvestmentVehicleAdapter(vehicleEntityRepository, investmentVehicleMapper);
     }
 
-//
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
                                        ProgramOutputPort programOutputPort,
@@ -195,6 +194,5 @@ public class BeanConfiguration {
                                                                                  LoaneeLoanDetailMapper loaneeLoanDetailMapper){
         return new LoaneeLoanDetailPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
     }
-
 
 }
