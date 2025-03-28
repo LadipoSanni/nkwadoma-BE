@@ -1,9 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -11,9 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +59,14 @@ class InvestmentVehicleServiceTest {
     @Mock
     private PortfolioOutputPort portfolioOutputPort;
     private Portfolio portfolio;
+    private VehicleOperation vehicleOperation;
+    @Mock
+    private VehicleOperationOutputPort vehicleOperationOutputPort;
+    @Mock
+    private CouponDistributionOutputPort couponDistributionOutputPort;
+    private CouponDistribution couponDistribution;
+
+
 
 
     @BeforeEach
@@ -72,6 +76,9 @@ class InvestmentVehicleServiceTest {
         financier = TestData.buildFinancierIndividual(userIdentity);
         investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(financier,fundGrowth);
         portfolio = TestData.createMeedlPortfolio();
+        vehicleOperation = TestData.createVehicleOperation(null);
+        couponDistribution = TestData.createCouponDistribution();
+
     }
 
     @Test
@@ -234,6 +241,30 @@ class InvestmentVehicleServiceTest {
     @Test
     void viewAllInvestmentVehiclesByStatusWithNullParameter(){
         assertThrows(MeedlException.class, ()->investmentVehicleService.viewAllInvestmentVehicleByStatus(pageSize, pageNumber,null));
+    }
+
+    @Test
+    void setInvestmentVehicleOperationStatus() {
+        fundGrowth.setId(mockId);
+        fundGrowth.setVehicleOperation(vehicleOperation);
+        try {
+            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(TestData.buildInvestmentVehicle("Name"));
+            when(couponDistributionOutputPort.save(any(CouponDistribution.class))).thenReturn(couponDistribution);
+            when(vehicleOperationOutputPort.save(vehicleOperation)).thenReturn(vehicleOperation);
+            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
+            when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(),DRAFT))
+                    .thenReturn(fundGrowth);
+            when(portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName("Meedl").build()))
+                    .thenReturn(portfolio);
+            when(portfolioOutputPort.save(portfolio)).thenReturn(portfolio);
+            when()
+            fundGrowth = investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth);
+        } catch (MeedlException meedlException) {
+            log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
+        }
+        assertNotNull(fundGrowth);
+        assertEquals(vehicleOperation, fundGrowth.getVehicleOperation());
+        assertEquals(vehicleOperation.getFundRaisingStatus(), fundGrowth.getVehicleOperation().getFundRaisingStatus());
     }
 
 }
