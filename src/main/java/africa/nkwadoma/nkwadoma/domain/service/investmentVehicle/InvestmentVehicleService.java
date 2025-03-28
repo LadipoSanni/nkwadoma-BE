@@ -138,10 +138,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             if (investmentVehicleFinancier.isPresent()){
                 return foundInvestmentVehicle;
             } else {
-                throw new MeedlException("InvestmentVehicle not found");
+                throw new MeedlException("Investment Vehicle not found");
             }
         }
-        throw new MeedlException("InvestmentVehicle not found");
+        throw new MeedlException("Investment Vehicle not found");
     }
 
 

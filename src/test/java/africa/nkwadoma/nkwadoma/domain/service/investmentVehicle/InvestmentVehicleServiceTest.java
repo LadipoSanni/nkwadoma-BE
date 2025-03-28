@@ -314,7 +314,7 @@ class InvestmentVehicleServiceTest {
                     .thenReturn(Optional.empty());
             Exception exception = assertThrows(MeedlException.class,
                     () -> investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId));
-            assertEquals("Vehicle not found", exception.getMessage());
+            assertEquals("Investment Vehicle not found", exception.getMessage());
 
             verify(investmentVehicleOutputPort).findById(investmentVehicleId);
             verify(userIdentityOutputPort).findById(testFinancierId);
