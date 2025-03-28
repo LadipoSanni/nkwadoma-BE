@@ -254,9 +254,7 @@ public class TestData {
 
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
-//                .userIdentity(userIdentity)
                 .investmentVehicleDesignation(investmentVehicleDesignations)
-                .invitedBy(testId)
                 .accreditationStatus(AccreditationStatus.UNVERIFIED)
                 .activationStatus(ActivationStatus.INVITED)
                 .pageNumber(pageNumber)
