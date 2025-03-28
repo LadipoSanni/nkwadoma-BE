@@ -90,15 +90,18 @@ public class FinancierService implements FinancierUseCase {
         return "Financier has been invited to the platform";
     }
 
-    private void inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
+    private Financier inviteCooperateFinancierToPlatform(Financier financier) throws MeedlException {
+        log.info("Financier invited into the platform before getCooperateFinancierByUserIdentity is called.");
         try {
             financier = getCooperateFinancierByUserIdentity(financier);
+            log.info("cooperate financier found on the platform ");
         } catch (MeedlException e) {
             log.warn("Failed to find user on application. Financier not yet onboarded.");
             log.info("Inviting a new financier to the platform {} ",e.getMessage());
             financier = saveNonExistingCooperateFinancier(financier);
             emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
         }
+        return financier;
     }
 
     private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
@@ -116,9 +119,12 @@ public class FinancierService implements FinancierUseCase {
         UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
         try {
             Financier existingFinancier = financierOutputPort.findFinancierByUserId(userIdentity.getId());
+            log.info("Financier found on the platform you the user id: {} email is {}", existingFinancier.getId(), existingFinancier.getUserIdentity().getEmail());
         }catch (MeedlException e){
             log.warn("User is not previously a financier but exists on the platform");
             log.info("Creating a new cooperation financier for user with this email : {}", userIdentity.getEmail());
+            Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
+            financier.setCooperation(cooperation);
             financier.setUserIdentity(userIdentity);
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
@@ -147,19 +153,12 @@ public class FinancierService implements FinancierUseCase {
         financier.validate();
         validateFinancierDesignation(financier);
         MeedlValidator.validateUUID(financier.getInvestmentVehicleId(), InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        if (financier.getFinancierType() == FinancierType.INDIVIDUAL){
-            inviteIndividualFinancierToInvestmentVehicle(financier);
-        }else {
-            inviteCooperateFinancierToInvestmentVehicle(financier);
-        }
+        addFinancierToInvestmentVehicle(financier);
         return "Financier added to investment vehicle";
     }
 
-    private void inviteCooperateFinancierToInvestmentVehicle(Financier financier) {
-        //TODO invite cooperation to vehicle
-    }
 
-    private void inviteIndividualFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
+    private void addFinancierToInvestmentVehicle(Financier financier) throws MeedlException {
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         try {
             financier = getFinancierByUserIdentity(financier);
@@ -495,16 +494,19 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
-        financier.setActivationStatus(ActivationStatus.INVITED);
-        UserIdentity userIdentity = financier.getUserIdentity();
-        financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
-        log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
-        userIdentity.setCreatedBy(financier.getInvitedBy());
-        userIdentity.setRole(IdentityRole.FINANCIER);
-        userIdentity.setCreatedAt(LocalDateTime.now());
-        userIdentity = identityManagerOutputPort.createUser(userIdentity);
-        userIdentity = userIdentityOutputPort.save(userIdentity);
-        financier.setUserIdentity(userIdentity);
-        return financierOutputPort.save(financier);
+        if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
+            financier.setActivationStatus(ActivationStatus.INVITED);
+            UserIdentity userIdentity = financier.getUserIdentity();
+            financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
+            log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
+            userIdentity.setRole(IdentityRole.FINANCIER);
+            userIdentity.setCreatedAt(LocalDateTime.now());
+            userIdentity = identityManagerOutputPort.createUser(userIdentity);
+            userIdentity = userIdentityOutputPort.save(userIdentity);
+            financier.setUserIdentity(userIdentity);
+            return financierOutputPort.save(financier);
+        }else {
+            return inviteCooperateFinancierToPlatform(financier);
+        }
     }
 }
