@@ -22,6 +22,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDate;
@@ -38,7 +39,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.Investment
 
 @Slf4j
 @RequiredArgsConstructor
-
+@Service
 public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
