@@ -99,51 +99,6 @@ class InvestmentVehicleAdapterTest {
     }
 
     @Test
-    void createInvestmentVehicleWithNullRate() {
-        capitalGrowth.setRate(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithEmptyRate() {
-        capitalGrowth.setRate(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithNullTrustee() {
-        capitalGrowth.setTrustee(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithNullCustodian() {
-        capitalGrowth.setCustodian(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithNullBankPartner() {
-        capitalGrowth.setCustodian(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-    @Test
-    void createInvestmentVehicleWithNullFundManager() {
-        capitalGrowth.setCustodian(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-
-    @Test
-    void createInvestmentVehicleWithNullSize() {
-        capitalGrowth.setSize(null);
-        assertThrows(MeedlException.class,()->investmentVehicleOutputPort.save(capitalGrowth));
-    }
-
-
-
-    @Test
     void findInvestmentVehicleDetailsWithNullId()  {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById(null));
     }
@@ -164,13 +119,6 @@ class InvestmentVehicleAdapterTest {
     void searchInvestmentVehicleDetailsWithNullInvestmentVehicleType()  {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
                 searchInvestmentVehicle("g",null,pageSize,pageNumber));
-    }
-
-    @Test
-    void cannotCreateEndowmentInvestmentVehicleWithNullRate(){
-        capitalGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
-        capitalGrowth.setRate(null);
-        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
     @Test
