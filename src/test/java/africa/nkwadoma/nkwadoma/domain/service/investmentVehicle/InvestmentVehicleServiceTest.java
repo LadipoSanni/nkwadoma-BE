@@ -105,25 +105,27 @@ class InvestmentVehicleServiceTest {
         log.info("Exception occurred: {} {}",meedlException.getClass().getName(), meedlException.getMessage());
     }
 
-
-
     @Test
     void viewNonExistentInvestmentVehicle() {
         String nonExistingId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
         String validFinancierId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-
         UserIdentity mockUser = UserIdentity.builder()
                 .role(IdentityRole.FINANCIER)
                 .build();
-        try{
+        try {
             when(userIdentityOutputPort.findById(validFinancierId)).thenReturn(mockUser);
+            Financier mockFinancier = Financier.builder()
+                    .id(validFinancierId)
+                    .build();
+            when(financierOutputPort.findFinancierByUserId(validFinancierId)).thenReturn(mockFinancier);
             when(investmentVehicleOutputPort.findById(nonExistingId))
                     .thenThrow(new MeedlException("Investment vehicle not found"));
         } catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
-        assertThrows(MeedlException.class, () ->
+        Exception exception = assertThrows(MeedlException.class, () ->
                 investmentVehicleService.viewInvestmentVehicleDetails(nonExistingId, validFinancierId));
+        assertEquals("Investment vehicle not found", exception.getMessage());
     }
 
     @Test
@@ -282,22 +284,28 @@ class InvestmentVehicleServiceTest {
 
     @Test
     void viewInvestmentVehicleWithInvestmentVehicleIdThatDoesNotExistInTheDB() {
+        // Arrange
         String nonExistingVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
         String financierId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
 
         UserIdentity mockUser = UserIdentity.builder()
                 .role(IdentityRole.FINANCIER)
                 .build();
-        try{
+
+        try {
             when(userIdentityOutputPort.findById(financierId)).thenReturn(mockUser);
+            Financier mockFinancier = Financier.builder()
+                    .id(financierId)
+                    .build();
+            when(financierOutputPort.findFinancierByUserId(financierId)).thenReturn(mockFinancier);
             doThrow(new MeedlException("Investment vehicle not found"))
                     .when(investmentVehicleOutputPort).findById(nonExistingVehicleId);
-        } catch (MeedlException exception) {
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
         }
+
         Exception exception = assertThrows(MeedlException.class,
                 () -> investmentVehicleService.viewInvestmentVehicleDetails(nonExistingVehicleId, financierId));
-
         assertEquals("Investment vehicle not found", exception.getMessage());
     }
 
