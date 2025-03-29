@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,6 +66,8 @@ class InvestmentVehicleServiceTest {
     @Mock
     private CouponDistributionOutputPort couponDistributionOutputPort;
     private CouponDistribution couponDistribution;
+    @Mock
+    private VehicleOperationMapper vehicleOperationMapper;
 
 
 
@@ -249,15 +252,11 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setVehicleOperation(vehicleOperation);
         try {
             when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(TestData.buildInvestmentVehicle("Name"));
-            when(couponDistributionOutputPort.save(any(CouponDistribution.class))).thenReturn(couponDistribution);
-            when(vehicleOperationOutputPort.save(vehicleOperation)).thenReturn(vehicleOperation);
+            when(vehicleOperationOutputPort.save(fundGrowth.getVehicleOperation())).thenReturn(vehicleOperation);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
-            when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(),DRAFT))
-                    .thenReturn(fundGrowth);
-            when(portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName("Meedl").build()))
-                    .thenReturn(portfolio);
-            when(portfolioOutputPort.save(portfolio)).thenReturn(portfolio);
-            when()
+            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).
+                    thenReturn(fundGrowth);
+            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
             fundGrowth = investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth);
         } catch (MeedlException meedlException) {
             log.info("{} {}", meedlException.getClass().getName(), meedlException.getMessage());
