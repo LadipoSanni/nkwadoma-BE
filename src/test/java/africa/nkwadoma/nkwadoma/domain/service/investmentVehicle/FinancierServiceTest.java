@@ -39,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -77,7 +78,7 @@ public class FinancierServiceTest {
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
     private BankDetail bankDetail;
     private String investmentVehicleId;
-    private String secondInvestmentVehicleId;
+    private String privateInvestmentVehicleId;
     private String publicInvestmentVehicleId;
 
     private List<Financier> individualFinancierList;
@@ -85,6 +86,7 @@ public class FinancierServiceTest {
     private NextOfKin nextOfKin;
 
     private InvestmentVehicle publicInvestmentVehicle;
+    private InvestmentVehicle privateInvestmentVehicle;
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
@@ -97,7 +99,9 @@ public class FinancierServiceTest {
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
         publicInvestmentVehicle = TestData.buildInvestmentVehicle("publicInvestmentVehicleInTestClass");
+        privateInvestmentVehicle = TestData.buildInvestmentVehicle("privateInvestmentVehicleInTestClass");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
+
         investmentVehicleId = investmentVehicle.getId();
 
         individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
@@ -540,7 +544,9 @@ public class FinancierServiceTest {
     public void inviteIndividualFinancierToNewVehicle() {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForIndividualServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
-        secondInvestmentVehicleId = investmentVehicle.getId();
+        privateInvestmentVehicleId = investmentVehicle.getId();
+        privateInvestmentVehicleId = investmentVehicle.getId();
+        individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         String response;
         try {
@@ -734,19 +740,23 @@ public class FinancierServiceTest {
         }
         assertTrue(optionalInvestmentVehicleFinancier.isEmpty());
     }
+
     @AfterAll
     void tearDown() throws MeedlException {
 
         log.info("Started deleting data in financier service test." );
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-        deleteInvestmentVehicleFinancier(secondInvestmentVehicleId, individualFinancierId);
+        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
 
         financierOutputPort.delete(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
 
+
+        deleteNotification(individualUserIdentityId);
+        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
 
         financierOutputPort.delete(cooperateFinancierId);
         cooperateUserIdentity.setId(cooperateUserIdentityId);
@@ -755,7 +765,7 @@ public class FinancierServiceTest {
 
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(secondInvestmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
         log.info("Test data deleted after test");
     }

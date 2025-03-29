@@ -207,5 +207,4 @@ public class BeanConfiguration {
         return new LoaneeLoanDetailPersistenceAdapter(loaneeLoanDetailRepository,loaneeLoanDetailMapper);
     }
 
-
 }

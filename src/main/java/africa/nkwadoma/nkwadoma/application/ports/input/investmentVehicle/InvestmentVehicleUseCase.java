@@ -9,12 +9,13 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException;
 
-    InvestmentVehicle viewInvestmentVehicleDetails(String id) throws MeedlException;
+    InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
 
     void deleteInvestmentVehicle(String investmentId) throws MeedlException;
 
