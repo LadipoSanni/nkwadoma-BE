@@ -122,12 +122,13 @@ public class BeanConfiguration {
                                                              PortfolioOutputPort portfolioOutputPort,
                                                              FinancierOutputPort financierOutputPort,
                                                              InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort,
+                                                             UserIdentityOutputPort userIdentityOutputPort,
                                                              VehicleOperationOutputPort vehicleOperationOutputPort,
                                                              CouponDistributionOutputPort couponDistributionOutputPort,
                                                              VehicleOperationMapper vehicleOperationMapper){
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,
-                financierOutputPort,investmentVehicleFinancierOutputPort,vehicleOperationOutputPort,couponDistributionOutputPort,
-                vehicleOperationMapper);
+                financierOutputPort,investmentVehicleFinancierOutputPort,userIdentityOutputPort,
+                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper);
     }
     @Bean
     public CohortService cohortService(CohortOutputPort cohortOutputPort,
