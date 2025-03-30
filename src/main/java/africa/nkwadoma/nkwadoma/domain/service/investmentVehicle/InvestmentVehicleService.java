@@ -235,7 +235,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     @Override
     public InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException {
-        MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be empty ");
+        MeedlValidator.validateObjectInstance(investmentVehicle,"Investment vehicle object cannot be empty ");
         MeedlValidator.validateObjectInstance(investmentVehicle.getVehicleOperation(),"Vehicle Operation cannot be empty");
         investmentVehicle.getVehicleOperation().validateFundraisingAndDeployingStatus();
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
