@@ -98,6 +98,7 @@ class InvestmentVehicleAdapterTest {
         assertThrows(MeedlException.class,()-> investmentVehicleOutputPort.save(capitalGrowth));
     }
 
+
     @Test
     void findInvestmentVehicleDetailsWithNullId()  {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.findById(null));

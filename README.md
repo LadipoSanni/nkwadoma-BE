@@ -113,7 +113,7 @@ Click "Add Role" and define the necessary roles (e.g. SPONSOR, DONOR, PORTFOLIO_
 
 DATABASE SETUP
 use pg_admin url specified in the .env to access the database UI.
-Ask the backend lead to provide a query to pre populate the database for defaul values
+Ask the backend lead to provide a query to pre populate the database for default values if necessary.
 
 Now you are Ready for Local Development.
 check the following link for the Project Environment Diagram

@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
 
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.james.mime4j.dom.datetime.DateTime;
@@ -24,7 +21,6 @@ public class InvestmentVehicleResponse {
     private int tenure;
     private BigDecimal size;
     private Float rate;
-    private FundRaisingStatus fundRaisingStatus;
     private BigDecimal totalAmountInInvestmentVehicle =BigDecimal.ZERO;
     private BigDecimal amountRaised = BigDecimal.ZERO;
     private BigDecimal amountDisbursed = BigDecimal.ZERO;
@@ -42,5 +38,7 @@ public class InvestmentVehicleResponse {
     private String bankPartner;
     private LocalDate lastUpdatedDate;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private InvestmentVehicleMode fundRaisingStatus;
+    private InvestmentVehicleMode deployingStatus;
 
 }
