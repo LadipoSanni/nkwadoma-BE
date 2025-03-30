@@ -48,7 +48,7 @@ public class FinancierController {
         log.info("Inviting a financier with request {}", inviteFinancierRequest);
         List<Financier> financiers = mapValues(meedlUser.getClaimAsString("sub"), inviteFinancierRequest.getFinancierRequests());
         log.info("Mapped financier at controller {}", financiers);
-        String message = financierUseCase.inviteFinancier(financiers);
+        String message = financierUseCase.inviteFinancier(financiers, inviteFinancierRequest.getInvestmentVehicleId());
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .message(message)
