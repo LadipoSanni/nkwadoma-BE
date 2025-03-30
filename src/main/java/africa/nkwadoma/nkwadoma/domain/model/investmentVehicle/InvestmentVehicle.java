@@ -45,6 +45,7 @@ public class InvestmentVehicle {
     private String investmentVehicleLink;
     private LocalDate lastUpdatedDate;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private VehicleOperation vehicleOperation;
 
 
 
@@ -90,4 +91,6 @@ public class InvestmentVehicle {
         MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
+
+
 }
