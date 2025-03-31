@@ -550,7 +550,7 @@ public class FinancierServiceTest {
         individualFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         String response;
         try {
-            response = financierUseCase.inviteFinancier(individualFinancierList, secondInvestmentVehicleId);
+            response = financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId);
         } catch (MeedlException e) {
             log.error("Failed to invite with error {}", e.getMessage(), e);
             throw new RuntimeException(e);
