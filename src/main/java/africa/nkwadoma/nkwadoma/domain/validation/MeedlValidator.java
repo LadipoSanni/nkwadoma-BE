@@ -42,14 +42,25 @@ public class MeedlValidator {
             throw new LoanException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
         }
     }
+    public static boolean isValidId(String id) {
+        return !isEmptyString(id) && isValidUUid(id);
+    }
+    private static boolean isValidUUid(String id){
+        try {
+            UUID.fromString(id);
+            return true;
+        } catch (IllegalArgumentException e) {
+            log.info("{}. The invalid UUID : {}", e.getMessage(), id);
+            return false;
+        }
+    }
+
 
     public static void validateUUID(String dataElement, String message) throws MeedlException {
         log.info("validateUUID {}", dataElement);
         validateDataElement(dataElement, message.concat(StringUtils.SPACE).concat(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage()));
-        try {
-            UUID.fromString(dataElement);  
-        } catch (IllegalArgumentException e) {
-            log.info("{}. The invalid UUID : {} : {}", e.getMessage(), dataElement, message);
+        if (!isValidUUID(dataElement)) {
+            log.info("{}. The invalid UUID : {}", dataElement, message);
             throw new MeedlException(message);
         }
     }
@@ -87,6 +98,19 @@ public class MeedlValidator {
         if (dataElement < BigInteger.ONE.intValue()) {
             throw new MeedlException(message);
         }
+    }
+    public static void validateCollection(Object collection, String message) throws MeedlException {
+        if (collection == null || isEmpty(collection)) {
+            log.error("Collection validation failed {}", message);
+            throw new MeedlException(message);
+        }
+    }
+
+    private static boolean isEmpty(Object obj) {
+        if (obj instanceof Collection<?>) {
+            return ((Collection<?>) obj).isEmpty();
+        }
+        return true;
     }
 
     public static void validateObjectInstance(Object instance, String message) throws MeedlException {

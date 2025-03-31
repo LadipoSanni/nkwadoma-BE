@@ -63,13 +63,15 @@ public class Financier {
     }
 
     public void validate() throws MeedlException {
-        MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
-        MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
-        if (this.financierType == FinancierType.INDIVIDUAL){
-            validateUserIdentity();
-        }else{
-            validateCooperation();
+        if (!MeedlValidator.isValidId(this.id)) {
+            MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
+            MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
+            MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
+            if (this.financierType == FinancierType.INDIVIDUAL) {
+                validateUserIdentity();
+            } else {
+                validateCooperation();
+            }
         }
     }
 
