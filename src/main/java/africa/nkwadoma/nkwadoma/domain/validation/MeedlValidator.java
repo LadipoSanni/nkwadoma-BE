@@ -42,6 +42,9 @@ public class MeedlValidator {
             throw new LoanException(LoanMessages.INVALID_LOAN_DECISION.getMessage());
         }
     }
+    public static boolean isNotValidId(String id) {
+        return !isValidId(id);
+    }
     public static boolean isValidId(String id) {
         return !isEmptyString(id) && isValidUUid(id);
     }

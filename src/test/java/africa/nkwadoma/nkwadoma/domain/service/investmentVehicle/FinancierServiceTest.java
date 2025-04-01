@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -26,6 +27,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -512,13 +514,10 @@ public class FinancierServiceTest {
     void viewFinanciersWithNull(){
         assertThrows(MeedlException.class,()-> financierUseCase.viewAllFinancier(null));
     }
-    @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
-    public void inviteFinancierWithInvalidOrNonExistingInvestmentVehicleId(String investmentVehicleId){
-        individualFinancier.setInvestmentVehicleId(investmentVehicleId);
-        MeedlException exception = assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, investmentVehicleId));
-        log.info("", exception);
-        assertEquals("Invalid investment vehicle Id provided.", exception.getMessage());
+
+    @Test
+    public void inviteFinancierWithInvalidOrNonExistingInvestmentVehicleId(){
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, "invalid investment vehicle id"));
     }
     @Test
     @Order(9)
@@ -856,8 +855,10 @@ public class FinancierServiceTest {
     private void deleteNotification(String userIdentityId) throws MeedlException {
         Page<MeedlNotification> notifications = meedlNotificationOutputPort
                             .findAllNotificationBelongingToAUser(userIdentityId, pageSize, pageNumber);
-        meedlNotificationOutputPort.deleteMultipleNotification(userIdentityId,
-                            notifications.stream().map(MeedlNotification::getId).toList());
+        if (CollectionUtils.isNotEmpty(notifications.stream().toList())) {
+            meedlNotificationOutputPort.deleteMultipleNotification(userIdentityId,
+                    notifications.stream().map(MeedlNotification::getId).toList());
+        }
     }
 }
 

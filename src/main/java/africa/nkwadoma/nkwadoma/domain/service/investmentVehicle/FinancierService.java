@@ -70,7 +70,7 @@ public class FinancierService implements FinancierUseCase {
         investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
         String response = null;
         if (financiers.size() == 1) {
-            response =  inviteSingleFinancier(financiers, investmentVehicle);
+            response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
         }
@@ -87,25 +87,34 @@ public class FinancierService implements FinancierUseCase {
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
                         log.error("financier details {}", financier ,e);
+                        //TODO notify financier on failure
                         throw new RuntimeException(e);
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
     }
 
-    private String inviteSingleFinancier(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Financier financier = financiers.get(0);
+    private String inviteSingleFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        confirmFinancierHasType(financier);
-        inviteFinancier(financier, investmentVehicle);
+        try{
+            confirmFinancierHasType(financier);
+            inviteFinancier(financier, investmentVehicle);
+        }catch (MeedlException e){
+            log.error("financier details {}", financier ,e);
+            //TODO notify financier on failure
+            throw new MeedlException(e);
+        }
         return getMessageForSingleFinancier(investmentVehicle);
     }
 
     private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId, InvestmentVehicle investmentVehicle) throws MeedlException {
-        if (StringUtils.isNotEmpty(investmentVehicleId) || StringUtils.isNotBlank(investmentVehicleId)){
+        if (StringUtils.isNotEmpty(investmentVehicleId) && StringUtils.isNotBlank(investmentVehicleId)){
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+            log.info("Fetching investment vehicle with id {}", investmentVehicleId);
             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            log.info("Investment vehicle found with id {}", investmentVehicle.getId());
         }
+        log.info("is the vehicle id presence : {}", StringUtils.isNotEmpty(investmentVehicleId) || StringUtils.isNotBlank(investmentVehicleId));
         return investmentVehicle;
     }
 
@@ -158,10 +167,12 @@ public class FinancierService implements FinancierUseCase {
 
     private static void confirmFinancierHasType(Financier financier) throws MeedlException {
         log.info("Financier type before saving is {}", financier.getFinancierType());
-        if(financier.getFinancierType() == null){
+        if(financier.getFinancierType() == null && MeedlValidator.isNotValidId(financier.getId())){
             log.error("Financier does not have a valid type when inviting");
+            //TODO Notify admin on failure to invite financier
             throw new MeedlException(FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
         }
+        log.info("Financier either has a type or has an id {} {}", financier.getFinancierType(), financier.getId());
     }
 
     private void inviteFinancierToPlatform(Financier financier) throws MeedlException {

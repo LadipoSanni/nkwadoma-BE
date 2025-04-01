@@ -62,10 +62,11 @@ public class FinancierController {
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
                 mapCooperateValues(financierRequest, financier);
-            }else {
+                financier.getUserIdentity().setCreatedBy(meedlUserId);
+            } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
+                financier.getUserIdentity().setCreatedBy(meedlUserId);
             }
-            financier.getUserIdentity().setCreatedBy(meedlUserId);
             return financier;
         }).toList();
     }
