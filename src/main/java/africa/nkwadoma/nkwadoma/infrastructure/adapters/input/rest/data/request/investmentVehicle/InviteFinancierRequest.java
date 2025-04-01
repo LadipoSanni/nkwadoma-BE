@@ -9,6 +9,5 @@ import java.util.List;
 @Setter
 public class InviteFinancierRequest {
     private List<FinancierRequest> financierRequests;
-    private List<String> financierIds;
     private String investmentVehicleId;
 }
