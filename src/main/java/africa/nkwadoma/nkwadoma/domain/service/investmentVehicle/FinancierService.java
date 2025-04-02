@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Coope
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -56,10 +57,11 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
-    private final FinancierEmailUseCase FinancierEmailUseCase;
+    private final FinancierEmailUseCase financierEmailUseCase;
     private final NextOfKinUseCase nextOfKinUseCase;
     private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private List<Financier> financiersToMail;
 
     @Override
@@ -74,7 +76,7 @@ public class FinancierService implements FinancierUseCase {
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
         }
-        sendFinancierEmail(investmentVehicle);
+        asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
         return response;
     }
 
@@ -118,27 +120,6 @@ public class FinancierService implements FinancierUseCase {
         return investmentVehicle;
     }
 
-    private void sendFinancierEmail(InvestmentVehicle investmentVehicle) {
-        if (ObjectUtils.isNotEmpty(investmentVehicle)){
-            financiersToMail.forEach(financier -> {
-                try {
-                    emailInviteNonExistingFinancierToVehicle(financier, investmentVehicle);
-                } catch (MeedlException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-        }else {
-            financiersToMail.forEach(financier -> {
-                try {
-                    emailInviteNonExistingFinancierToPlatform(financier.getUserIdentity());
-                } catch (MeedlException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-
-    }
 
     private static String getMessageForSingleFinancier(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
@@ -238,11 +219,6 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier with email {} added for email sending.", financier.getUserIdentity().getEmail());
         }
     }
-
-    private void emailInviteNonExistingFinancierToPlatform(UserIdentity userIdentity) throws MeedlException {
-        FinancierEmailUseCase.inviteFinancierToPlatform(userIdentity);
-    }
-
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         financier.validate();
         validateFinancierDesignation(financier);
@@ -287,10 +263,6 @@ public class FinancierService implements FinancierUseCase {
             log.error("Investment vehicle designation for financier --- Designation(s) : {}", financier.getInvestmentVehicleDesignation());
             throw new MeedlException("Financier can only be a signed a single role.");
         }
-    }
-
-    private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        FinancierEmailUseCase.inviteFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
     }
 
     private Financier saveNonExistingFinancier(Financier financier, String message) {
