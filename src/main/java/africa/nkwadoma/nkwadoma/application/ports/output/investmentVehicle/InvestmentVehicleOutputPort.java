@@ -30,4 +30,5 @@ public interface InvestmentVehicleOutputPort {
     Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException;
 
 
+    Page<InvestmentVehicle> findAllInvestmentVehicleExcludingPrivate(int pageSize, int pageNumber) throws MeedlException;
 }

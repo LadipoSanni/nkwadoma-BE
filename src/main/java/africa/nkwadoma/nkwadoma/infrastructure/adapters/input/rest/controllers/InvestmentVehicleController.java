@@ -71,13 +71,14 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("view-all-investment-vehicle")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
+            @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam int pageSize,
-            @RequestParam int pageNumber) {
+            @RequestParam int pageNumber) throws MeedlException {
 
         Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicle(pageSize, pageNumber);
+                investmentVehicleUseCase.viewAllInvestmentVehicle(meedlUser.getClaimAsString("sub"),pageSize, pageNumber);
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
