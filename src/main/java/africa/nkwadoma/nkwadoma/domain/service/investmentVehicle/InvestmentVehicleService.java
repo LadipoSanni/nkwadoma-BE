@@ -11,12 +11,14 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -46,6 +48,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final FinancierOutputPort financierOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final VehicleOperationOutputPort vehicleOperationOutputPort;
+    private final CouponDistributionOutputPort couponDistributionOutputPort;
+    private final VehicleOperationMapper vehicleOperationMapper;
+
 
 
     @Override
@@ -225,6 +231,41 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             }
         }
         return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    @Override
+    public InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException {
+        MeedlValidator.validateObjectInstance(investmentVehicle,"Investment vehicle object cannot be empty ");
+        MeedlValidator.validateObjectInstance(investmentVehicle.getVehicleOperation(),"Vehicle Operation cannot be empty");
+        investmentVehicle.getVehicleOperation().validateFundraisingAndDeployingStatus();
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
+        if (foundInvestmentVehicle.getVehicleOperation() == null) {
+            setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
+            return foundInvestmentVehicle;
+        }
+        updateExistingInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
+        return foundInvestmentVehicle;
+    }
+
+    private void setNewInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
+        CouponDistribution couponDistribution =
+                couponDistributionOutputPort.save(CouponDistribution.builder().build());
+        investmentVehicle.getVehicleOperation().setCouponDistribution(couponDistribution);
+        investmentVehicle.getVehicleOperation().setCouponDistributionStatus(CouponDistributionStatus.DEFAULT);
+        investmentVehicle.getVehicleOperation().setOperationStatus(OperationStatus.ACTIVE);
+        foundInvestmentVehicle.setVehicleOperation(
+                vehicleOperationOutputPort.save(investmentVehicle.getVehicleOperation())
+        );
+        investmentVehicleOutputPort.save(foundInvestmentVehicle);
+        publishInvestmentVehicle(foundInvestmentVehicle);
+    }
+
+    private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
+        vehicleOperationMapper.updateExistiingVehicleOperation(foundInvestmentVehicle.getVehicleOperation(), investmentVehicle.getVehicleOperation());
+        foundInvestmentVehicle.setVehicleOperation(
+                vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
+        );
+        investmentVehicleOutputPort.save(foundInvestmentVehicle);
     }
 
 

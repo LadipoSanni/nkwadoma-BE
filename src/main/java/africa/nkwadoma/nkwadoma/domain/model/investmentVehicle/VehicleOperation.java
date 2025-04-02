@@ -37,4 +37,9 @@ public class VehicleOperation {
         MeedlValidator.validateObjectInstance(operationStatus,"Operation status cannot be empty");
         MeedlValidator.validateObjectInstance(couponDistributionStatus,"Coupon distribution status cannot be empty");
     }
+
+    public void validateFundraisingAndDeployingStatus() throws MeedlException {
+        MeedlValidator.validateObjectInstance(fundRaisingStatus,"Fund raising status cannot be empty");
+        MeedlValidator.validateObjectInstance(deployingStatus,"Deploying status cannot be empty");
+    }
 }

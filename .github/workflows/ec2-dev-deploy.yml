@@ -112,8 +112,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i QA-KP.pem $EC2_USER@$EC2_HOST << 'EOF'
           set -e
       
-          echo "SSH connection established!"
-          
+          echo "✅ SSH connection established!"
+      
           # Define variables
           AWS_REGION="us-east-1"
           AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
@@ -121,40 +121,56 @@ jobs:
           ECR_REPOSITORY="nkwadoma"
           IMAGE_TAG="alpha"
       
-          echo "Authenticating with ECR..."
+          echo "🔐 Authenticating with Amazon ECR..."
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
       
-          echo "Fetching environment variables from S3..."
+          echo "📥 Fetching environment variables from S3..."
           aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma-dev.env --region ${{ env.S3_REGION }}
       
           # Pull the latest Docker image
-          echo "Pulling the latest image..."
-          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+          echo "📦 Pulling the latest image..."
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
           # Free port 8768 if it's in use
-          echo "Freeing port 8768 if in use..."
+          echo "🔄 Freeing port 8768 if in use..."
           sudo fuser -k 8768/tcp || true
-              
+          sleep 2  # Allow time for port release
+      
           # Check if the container exists
           if [ "$(docker ps -aq -f name=nkwadoma-container)" ]; then
-             echo "Stopping and removing existing container..."
-             docker stop nkwadoma-container || true
-             docker rm nkwadoma-container || true
-             echo "Stopped and removed containers."
-          fi
-              
-          # Run the new container
-          echo "Starting the new container..."
-          docker run -d --name nkwadoma-container -p 8768:8768 \
-              --env-file nkwadoma-dev.env \
-              357586184453.dkr.ecr.us-east-1.amazonaws.com/nkwadoma:alpha
+              echo "🛑 Stopping existing container..."
+              docker stop nkwadoma-container || true
+              sleep 10  # Allow time for the container to stop
           
-         
-          echo "Container started successfully!"
-          # Clean up unused Docker resources without affecting running containers
-          echo "Performing safe Docker cleanup..."
+              echo "🗑 Removing existing container..."
+              docker rm -f nkwadoma-container || true
+              sleep 5  # Allow time for the container to be fully removed
+          fi
+          
+          # Ensure container is completely removed before continuing
+          if docker ps -a --format '{{.Names}}' | grep -q "nkwadoma-container"; then
+              echo "⏳ Container still exists, waiting for final removal..."
+              sleep 10
+          fi
+          
+          echo "✅ Container removed successfully!"
+
+      
+          # Run the new container
+          echo "🚀 Starting the new container..."
+          docker run -d --name nkwadoma-container -p 8768:8768 \
+              --env-file nkwadoma.env \
+              --restart unless-stopped \
+              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
+          echo "✅ Container started successfully!"
+      
+          # Perform safe Docker cleanup
+          echo "🧹 Cleaning up unused Docker resources..."
           docker system prune -f
       
           EOF
+
 
   # profile-application:
   #   runs-on: ubuntu-24.04

@@ -16,4 +16,6 @@ public interface VehicleOperationMapper {
     VehicleOperation toVehicleOperation(VehicleOperationEntity vehicleOperationEntity);
 
     void updateVehicleOperation(@MappingTarget VehicleOperationEntity vehicleOperationEntity, VehicleOperation vehicleOperation);
+
+    void updateExistiingVehicleOperation(@MappingTarget VehicleOperation vehicleOperation, VehicleOperation vehicleOperation1);
 }

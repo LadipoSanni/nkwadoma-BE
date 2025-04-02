@@ -7,14 +7,12 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.education.CohortService;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
@@ -31,6 +29,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.U
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoanBreakdownPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneeLoanDetailPersistenceAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.LoaneePersistenceAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
@@ -118,18 +117,18 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort,
-                                       ProgramOutputPort programOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort,
-                                       ProgramCohortOutputPort programCohortOutputPort,
-                                       LoanDetailsOutputPort loanDetailsOutputPort,
-                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
-                                       LoaneeUseCase loaneeUseCase,
-                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort,
-                                       OrganizationIdentityOutputPort organizationIdentityOutputPort){
-        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,
-                organizationIdentityOutputPort);
+    public InvestmentVehicleService investmentVehicleService(InvestmentVehicleOutputPort investmentVehicleIdentityOutputPort,
+                                                             InvestmentVehicleMapper investmentVehicleMapper,
+                                                             PortfolioOutputPort portfolioOutputPort,
+                                                             FinancierOutputPort financierOutputPort,
+                                                             InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort,
+                                                             UserIdentityOutputPort userIdentityOutputPort,
+                                                             VehicleOperationOutputPort vehicleOperationOutputPort,
+                                                             CouponDistributionOutputPort couponDistributionOutputPort,
+                                                             VehicleOperationMapper vehicleOperationMapper){
+        return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,
+                financierOutputPort,investmentVehicleFinancierOutputPort,userIdentityOutputPort,
+                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper);
     }
     @Bean
     public StringTrimMapper stringTrimMapper() {

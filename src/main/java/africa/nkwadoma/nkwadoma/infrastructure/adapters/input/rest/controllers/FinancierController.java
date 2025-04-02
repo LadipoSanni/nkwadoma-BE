@@ -10,6 +10,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -51,12 +53,12 @@ public class FinancierController {
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> inviteFinancier(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
-    FinancierRequest financierRequest) throws MeedlException {
-        log.info("Inviting a financier with request {}", financierRequest);
-        Financier financier = mapValues(meedlUser, financierRequest);
-        log.info("Mapped financier at controller {}", financier);
-        String message = financierUseCase.inviteFinancier(List.of(financier));
+    public  ResponseEntity<ApiResponse<?>> inviteFinancierToVehicle(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
+    InviteFinancierRequest inviteFinancierRequest) throws MeedlException {
+        log.info("Inviting a financier with request {}", inviteFinancierRequest);
+        List<Financier> financiers = mapValues(meedlUser.getClaimAsString("sub"), inviteFinancierRequest.getFinancierRequests());
+        log.info("Mapped financier at controller {}", financiers);
+        String message = financierUseCase.inviteFinancier(financiers, inviteFinancierRequest.getInvestmentVehicleId());
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .message(message)
@@ -65,23 +67,31 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    private Financier mapValues(Jwt meedlUser, FinancierRequest financierRequest) {
-        Financier financier = financierRestMapper.map(financierRequest);
-        financier.setUserIdentity(financierRequest.getUserIdentity());
-        log.info("Financier type before mapping at the controller level {}", financierRequest.getFinancierType());
-        if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
-            financier.setUserIdentity(UserIdentity.builder()
-                            .email(financierRequest.getOrganizationEmail())
-                            .firstName("admin")
-                            .lastName("admin")
-                            .role(IdentityRole.FINANCIER)
-                    .build());
-            financier.setCooperation(Cooperation.builder()
-                            .name(financierRequest.getOrganizationName())
-                    .build());
-        }
-        financier.getUserIdentity().setCreatedBy(meedlUser.getClaimAsString("sub"));
-        return financier;
+    private List<Financier> mapValues(String meedlUserId, List<FinancierRequest> financierRequests) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financierRequests, "The list of financier is missing.");
+        return financierRequests.stream().map(financierRequest ->{
+            Financier financier = financierRestMapper.map(financierRequest);
+            if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
+                mapCooperateValues(financierRequest, financier);
+                financier.getUserIdentity().setCreatedBy(meedlUserId);
+            } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
+                financier.setUserIdentity(financierRequest.getUserIdentity());
+                financier.getUserIdentity().setCreatedBy(meedlUserId);
+            }
+            return financier;
+        }).toList();
+    }
+
+    private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
+        financier.setUserIdentity(UserIdentity.builder()
+                .email(financierRequest.getOrganizationEmail())
+                .firstName("cooperateFinancier")
+                .lastName("admin")
+                .role(IdentityRole.FINANCIER)
+                .build());
+        financier.setCooperation(Cooperation.builder()
+                .name(financierRequest.getOrganizationName())
+                .build());
     }
 
     @PostMapping("financier/complete-kyc")
