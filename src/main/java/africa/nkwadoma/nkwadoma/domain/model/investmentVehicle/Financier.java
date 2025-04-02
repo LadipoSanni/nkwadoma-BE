@@ -16,6 +16,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Set;
 
 @Slf4j
@@ -93,4 +94,17 @@ public class Financier {
         MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
         MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
     }
+    public void validateFinancierDesignation() throws MeedlException {
+        MeedlValidator.validateObjectInstance(this.investmentVehicleDesignation, FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
+        MeedlValidator.validateCollection(this.investmentVehicleDesignation, FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
+        if ((this.investmentVehicleDesignation.contains(InvestmentVehicleDesignation.DONOR) ||
+                this.investmentVehicleDesignation.contains(InvestmentVehicleDesignation.ENDOWER) ||
+                this.investmentVehicleDesignation.contains(InvestmentVehicleDesignation.INVESTOR)) &&
+                this.investmentVehicleDesignation.size() > BigInteger.ONE.intValue()
+        ){
+            log.error("Investment vehicle designation for financier --- Designation(s) : {}", this.investmentVehicleDesignation);
+            throw new MeedlException("Financier can only be a signed a single role.");
+        }
+    }
+
 }

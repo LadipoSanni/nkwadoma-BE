@@ -221,7 +221,7 @@ public class FinancierService implements FinancierUseCase {
     }
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         financier.validate();
-        validateFinancierDesignation(financier);
+        financier.validateFinancierDesignation();
         addFinancierToInvestmentVehicle(financier, investmentVehicle);
     }
 
@@ -251,20 +251,6 @@ public class FinancierService implements FinancierUseCase {
             //TODO notify the admin that the financier has been added to the investment vehicle previously.
         }
     }
-
-    private static void validateFinancierDesignation(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier.getInvestmentVehicleDesignation(), FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
-        MeedlValidator.validateCollection(financier.getInvestmentVehicleDesignation(), FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
-        if ((financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.DONOR) ||
-                financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.ENDOWER) ||
-                financier.getInvestmentVehicleDesignation().contains(InvestmentVehicleDesignation.INVESTOR)) &&
-                financier.getInvestmentVehicleDesignation().size() > BigInteger.ONE.intValue()
-        ){
-            log.error("Investment vehicle designation for financier --- Designation(s) : {}", financier.getInvestmentVehicleDesignation());
-            throw new MeedlException("Financier can only be a signed a single role.");
-        }
-    }
-
     private Financier saveNonExistingFinancier(Financier financier, String message) {
         log.warn("Failed to find user on application. Financier not yet onboarded.");
         log.info("Inviting a new financier to the platform {} ",message);
