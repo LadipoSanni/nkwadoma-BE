@@ -227,7 +227,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
                 InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                                 .investmentVehicle(investmentVehicle).financier(financier).
-                        investmentVehicleDesignation(financier.getInvestmentVehicleDesignation()).build();
+                        investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             }
         }
