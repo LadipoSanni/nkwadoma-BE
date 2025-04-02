@@ -63,7 +63,6 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
 
-
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
         log.info("Validating loanee before adding");
