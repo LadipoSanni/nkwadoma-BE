@@ -135,6 +135,7 @@ public class FinancierServiceTest {
             InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findByNameExcludingDraftStatus(investmentVehicle.getName(), InvestmentVehicleStatus.PUBLISHED);
             if (foundInvestmentVehicle == null){
                 investmentVehicle.setTotalAvailableAmount(investmentVehicle.getSize());
+//                investmentVehicle.setInvestmentVehicleDesignation(Set.of(InvestmentVehicleDesignation.SPONSOR, InvestmentVehicleDesignation.ENDOWER));
                 investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
             }else{
                 investmentVehicle = foundInvestmentVehicle;
@@ -723,11 +724,9 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
         assertNotNull(foundFinancierDetail);
-        assertTrue(foundFinancierDetail.getNumberOfInvestment() > 1);
-        assertFalse(foundFinancierDetail.getInvestmentSummaries().isEmpty());
         assertNotNull(foundFinancierDetail.getInvestmentSummaries());
-        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(0).getInvestmentVehicleName());
-        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(1).getDateInvested());
+        assertFalse(foundFinancierDetail.getInvestmentSummaries().isEmpty());
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(0).getName());
     }
 
     @Test

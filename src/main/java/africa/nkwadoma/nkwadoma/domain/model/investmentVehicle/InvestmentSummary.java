@@ -15,18 +15,18 @@ import java.util.Set;
 @ToString
 @Builder
 public class InvestmentSummary {
-    private String investmentVehicleName;
+    private String name;
     private InvestmentVehicleType investmentVehicleType;
     private LocalDate dateInvested;
     private BigDecimal amountInvested;
     private BigDecimal netAssetValue;
     private double percentageOfPortfolio;
-    private LocalDate investmentStartDate;
+    private LocalDate startDate;
     private LocalDate maturityDate;
     private BigDecimal incomeEarned;
     private Set<InvestmentVehicleDesignation> designations;
     private OperationStatus operationStatus;
     private CouponDistributionStatus couponDistributionStatus;
     private VehicleClosure vehicleClosureStatus;
-    private InvestmentVehicleVisibility vehicleVisibilityStatus;
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
 }

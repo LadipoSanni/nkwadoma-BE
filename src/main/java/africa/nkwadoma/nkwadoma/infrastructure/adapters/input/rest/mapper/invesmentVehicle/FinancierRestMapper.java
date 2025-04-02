@@ -1,8 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.NextOfKinMapper;
@@ -10,6 +14,9 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {UserIdentityMapper.class, NextOfKinMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierRestMapper {
@@ -35,4 +42,12 @@ public interface FinancierRestMapper {
 
     @Mapping(target = "userIdentity.id", source = "userId")
     Financier map(FinancierRequest financierRequest, String userId);
+
+    @Mapping(target = "numberOfInvestment", source = "numberOfInvestment")
+    @Mapping(target = "totalAmountInvested", source = "totalAmountInvested")
+    @Mapping(target = "totalIncomeEarned", source = "totalIncomeEarned")
+    @Mapping(target = "portfolioValue", source = "portfolioValue")
+    @Mapping(target = "investmentSummaries", source = "investmentSummaries")
+    FinancierInvestmentDetailResponse mapToFinancierDetailResponse(FinancierVehicleDetail financierVehicleDetail);
+
 }

@@ -156,10 +156,10 @@ public class FinancierController {
     )
     public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
         FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
-        FinancierInvestmentDetailResponse financierInvestmentDetailsResponse = investmentVehicleFinancierRestMapper.map(financierVehicleDetail);
+        FinancierInvestmentDetailResponse financierInvestmentDetailResponse = financierRestMapper.mapToFinancierDetailResponse(financierVehicleDetail);
 
         ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
-                .data(financierInvestmentDetailsResponse)
+                .data(financierInvestmentDetailResponse)
                 .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())
                 .build();

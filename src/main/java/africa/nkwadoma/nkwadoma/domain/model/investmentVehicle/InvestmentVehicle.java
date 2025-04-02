@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.*;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -49,9 +50,11 @@ public class InvestmentVehicle {
     private LocalDate maturityDate;
     private VehicleClosure vehicleClosureStatus;
     private BigDecimal incomeEarned;
-    private VehicleOperation vehicleOperationStatus;
-    private CouponDistributionStatus couponDistributionStatus;
+    private VehicleOperation vehicleOperation;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private LocalDate dateInvested;
+    private Set<InvestmentVehicleDesignation> designations;
+    private BigDecimal amountInvested;
 
 
     public void validate() throws MeedlException {
