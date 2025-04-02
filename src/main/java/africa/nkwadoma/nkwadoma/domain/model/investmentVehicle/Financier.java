@@ -103,7 +103,7 @@ public class Financier {
                 this.investmentVehicleDesignation.size() > BigInteger.ONE.intValue()
         ){
             log.error("Investment vehicle designation for financier --- Designation(s) : {}", this.investmentVehicleDesignation);
-            throw new MeedlException("Financier can only be a signed a single role.");
+            throw new MeedlException("Financier can only be assigned a single role.");
         }
     }
 
