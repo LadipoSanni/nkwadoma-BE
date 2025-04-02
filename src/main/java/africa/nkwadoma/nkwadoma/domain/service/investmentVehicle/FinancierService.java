@@ -243,6 +243,11 @@ public class FinancierService implements FinancierUseCase {
         Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
             InvestmentVehicleFinancier investmentVehicleFinancier =  assignDesignation(financier, investmentVehicle);
+            if (isFinancierInvesting(financier) ){
+                investmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
+
+                investmentVehicleOutputPort.save()
+            }
             investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             notifyExistingFinancier(financier, investmentVehicle);
             log.info("Financier {} added to investment vehicle {}.", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
@@ -251,6 +256,10 @@ public class FinancierService implements FinancierUseCase {
             //TODO notify the admin that the financier has been added to the investment vehicle previously.
         }
     }
+
+    private boolean isFinancierInvesting(Financier financier) {
+    }
+
     private Financier saveNonExistingFinancier(Financier financier, String message) {
         log.warn("Failed to find user on application. Financier not yet onboarded.");
         log.info("Inviting a new financier to the platform {} ",message);
@@ -439,7 +448,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, Financier foundFinancier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        if (foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
+        if (isFinancierActive(foundFinancier)) {
             log.info("User is active {}", foundFinancier.getActivationStatus());
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             return updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
@@ -447,6 +456,10 @@ public class FinancierService implements FinancierUseCase {
             log.error("Financier is not active. Financier status is {}", foundFinancier.getActivationStatus());
             throw new MeedlException("Financier is not active on the platform");
         }
+    }
+
+    private static boolean isFinancierActive(Financier foundFinancier) {
+        return foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE);
     }
 
     private InvestmentVehicleFinancier updateInvestmentVehicleFinancierAmountInvested(InvestmentVehicle investmentVehicle, Financier financier) throws MeedlException {
