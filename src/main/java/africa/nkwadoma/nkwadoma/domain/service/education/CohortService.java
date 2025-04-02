@@ -2,24 +2,20 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -58,7 +54,7 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-
+//    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -250,11 +246,13 @@ public class CohortService implements CohortUseCase {
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
+//            asynchronousMailOutputPort.notifyLoanReferralActors(cohortLoanees);
             loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
         log.info("Number of referable loanees :{} ", cohortLoanees.size());
+//            asynchronousMailOutputPort.notifyLoanReferralActors(cohortLoanees);
         loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
         return COHORT_INVITED;
     }

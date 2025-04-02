@@ -50,6 +50,13 @@ public class FinancierAdapter implements FinancierOutputPort {
                 .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
         return financierMapper.map(foundFinancier);
     }
+    @Override
+    public Financier findFinancierByEmail(String email) throws MeedlException {
+        FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Email(email)
+                .orElseThrow(()-> new MeedlException("Financier with this email not found") );
+        return financierMapper.map(foundFinancier);
+    }
+
 
     @Override
     public void delete(String financierId) throws MeedlException {
