@@ -153,7 +153,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public Page<InvestmentVehicle> viewAllInvestmentVehicle(String userId,int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole() == IdentityRole.FINANCIER) {
-            return investmentVehicleOutputPort.findAllInvestmentVehicleExcludingPrivate(pageSize,pageNumber);
+            return investmentVehicleOutputPort.findAllInvestmentVehicleExcludingPrivate(userIdentity.getId(),pageSize,pageNumber);
         }
         return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize, pageNumber);
     }
