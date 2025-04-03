@@ -145,7 +145,7 @@ public class InvestmentVehicleController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> setUpVisibility(@RequestBody InvestmentVehicleVisibilityRequest vehicleVisibilityRequest) throws MeedlException {
         InvestmentVehicle investmentVehicle = investmentVehicleUseCase.setInvestmentVehicleVisibility(vehicleVisibilityRequest.getInvestmentVehicleId(),
-                vehicleVisibilityRequest.getVisibility(),vehicleVisibilityRequest.getFinancierIds());
+                vehicleVisibilityRequest.getVisibility(),vehicleVisibilityRequest.getFinanciers());
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()

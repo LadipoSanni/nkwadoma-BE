@@ -131,20 +131,6 @@ public class BeanConfiguration {
                 vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper);
     }
     @Bean
-    public CohortService cohortService(CohortOutputPort cohortOutputPort,
-                                       ProgramOutputPort programOutputPort,
-                                       LoaneeOutputPort loaneeOutputPort,
-                                       ProgramCohortOutputPort programCohortOutputPort,
-                                       LoanDetailsOutputPort loanDetailsOutputPort,
-                                       LoanBreakdownOutputPort loanBreakdownOutputPort,
-                                       LoaneeUseCase loaneeUseCase,
-                                       CohortMapper cohortMapper,UserIdentityOutputPort userIdentityOutputPort,
-                                       OrganizationIdentityOutputPort organizationIdentityOutputPort){
-        return new CohortService(cohortOutputPort,programOutputPort,loaneeOutputPort,programCohortOutputPort
-        ,loanDetailsOutputPort,loanBreakdownOutputPort,cohortMapper,userIdentityOutputPort,loaneeUseCase,
-                organizationIdentityOutputPort);
-    }
-    @Bean
     public StringTrimMapper stringTrimMapper() {
         return new StringTrimMapper();
     }

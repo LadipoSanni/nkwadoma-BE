@@ -12,7 +12,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@ToString
 public class FinancierRequest {
     private String organizationName;
     private String organizationEmail;

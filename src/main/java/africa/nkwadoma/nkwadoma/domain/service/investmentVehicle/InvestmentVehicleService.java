@@ -219,7 +219,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
     @Override
     public InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
-                                                            List<String> financierIds) throws MeedlException {
+                                                            List<Financier> financiers) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
@@ -227,10 +227,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             return investmentVehicleOutputPort.save(investmentVehicle);
         } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
-            for (String financierId : financierIds) {
-                Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+            for (Financier eachFinancier : financiers) {
+                Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
                 InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
-                                .investmentVehicle(investmentVehicle).financier(financier).build();
+                                .investmentVehicle(investmentVehicle).financier(financier).
+                        investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             }
         }
