@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,5 +14,5 @@ public class InvestmentVehicleVisibilityRequest {
 
     private String investmentVehicleId;
     private InvestmentVehicleVisibility visibility;
-    private List<String> financierIds;
+    private List<Financier> financiers;
 }

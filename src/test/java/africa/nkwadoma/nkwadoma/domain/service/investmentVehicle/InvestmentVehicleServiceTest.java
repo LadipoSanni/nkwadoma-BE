@@ -229,7 +229,7 @@ class InvestmentVehicleServiceTest {
             when(financierOutputPort.findFinancierByFinancierId(financier.getId())).thenReturn(financier);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
             investmentVehicle = investmentVehicleService.setInvestmentVehicleVisibility(fundGrowth.getId(),
-                    InvestmentVehicleVisibility.PRIVATE,List.of(financier.getId()));
+                    InvestmentVehicleVisibility.PRIVATE,List.of(financier));
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
