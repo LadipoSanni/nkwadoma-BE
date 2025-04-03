@@ -236,8 +236,6 @@ class LoanRequestAdapterTest {
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(loanee);
             loanRequest.setLoaneeId(loaneeId);
-            loanRequest.setLoanReferralId(loanReferralId);
-            loanRequest.setCohortId(eliteCohortId);
             loanRequest.setCreatedDate(LocalDateTime.now());
             loanRequest.setLoanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
         }
@@ -255,6 +253,7 @@ class LoanRequestAdapterTest {
     void save() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
@@ -286,6 +285,7 @@ class LoanRequestAdapterTest {
     @Test
     void viewAllLoanRequests() {
         try {
+            loanRequest.setId(loanReferralId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
@@ -306,6 +306,7 @@ class LoanRequestAdapterTest {
     void viewAllLoanRequestsThatHaveBeenApproved() {
         try {
             loanRequest.setStatus(LoanRequestStatus.APPROVED);
+            loanRequest.setId(loanReferralId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
@@ -325,6 +326,7 @@ class LoanRequestAdapterTest {
     @Test
     void viewAllLoanRequestsByOrganizationId() {
         try {
+            loanRequest.setId(loanReferralId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
@@ -360,6 +362,7 @@ class LoanRequestAdapterTest {
     void viewLoanRequestById() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
@@ -403,6 +406,7 @@ class LoanRequestAdapterTest {
     void findLoanRequestById() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);

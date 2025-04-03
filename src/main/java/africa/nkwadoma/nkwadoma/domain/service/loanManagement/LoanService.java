@@ -260,6 +260,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+            loanRequest.setId(loanReferral.getId());
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);

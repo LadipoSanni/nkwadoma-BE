@@ -94,8 +94,8 @@ class LoanServiceTest {
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoaneeId(loanee.getId());
+        loanRequest.setId(loanReferral.getId());
         loanRequest.setLoanProductId(loanProduct.getId());
-        loanRequest.setLoanReferralId(loanReferral.getId());
         loanRequest.setReferredBy(organizationIdentity.getName());
         loanRequest.setCreatedDate(LocalDateTime.now());
 
