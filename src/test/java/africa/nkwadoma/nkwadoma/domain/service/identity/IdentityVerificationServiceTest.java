@@ -129,9 +129,9 @@ class IdentityVerificationServiceTest {
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
 //        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
-        PremblyBvnResponse premblyBvnResponse = new PremblyBvnResponse();
+        PremblyNinResponse premblyBvnResponse = new PremblyNinResponse();
         premblyBvnResponse.setVerification(Verification.builder().status("NOT-VERIFIED").build());
-        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(
+        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(
                 premblyBvnResponse);
 //        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
 //        )).thenReturn(favour);
