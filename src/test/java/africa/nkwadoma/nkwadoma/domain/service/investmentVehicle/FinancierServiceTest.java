@@ -228,9 +228,8 @@ public class FinancierServiceTest {
         InvestmentVehicle investmentVehicle;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-            if (investmentVehicle.getTotalAvailableAmount() == null) {
-                investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
-            }
+            assertNotNull(investmentVehicle.getTotalAvailableAmount());
+
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
             assertEquals(new BigDecimal("4000.00"), initialAmount);
             financierUseCase.investInVehicle(individualFinancier);
@@ -576,14 +575,14 @@ public class FinancierServiceTest {
     }
     @Test
     @Order(11)
-    public void inviteCooperateFinancierToNewVehicle1() {
+    public void inviteCooperateFinancierToNewVehicle() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
         Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationService" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
-        cooperateFinancier.setInvestmentVehicleId(investmentVehicle.getId());
+//        cooperateFinancier.setInvestmentVehicleId(investmentVehicle.getId());
         List<Financier> cooperateFinancierList = List.of(cooperateFinancier);
 
         String response;
@@ -798,6 +797,66 @@ public class FinancierServiceTest {
                             }
                         }
                 );
+
+    }
+    @Test
+    @Order(18)
+    public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
+
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtestwithamount@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationServiceWithAmountToInvest" );
+
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTestWithFinancierAmountToInvest");
+        investmentVehicle = createInvestmentVehicle(investmentVehicle);
+        cooperateFinancier.setAmountToInvest(new BigDecimal("10000.00"));
+        List<Financier> cooperateFinancierList = List.of(cooperateFinancier);
+
+        String response;
+        Financier foundFinancier;
+        try {
+            assertNotNull(investmentVehicle.getTotalAvailableAmount());
+            BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
+            assertEquals(new BigDecimal("4000.00"), initialAmount);
+
+            response = financierUseCase.inviteFinancier(cooperateFinancierList, investmentVehicle.getId());
+
+            InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
+            BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
+            assertEquals(initialAmount.add(cooperateFinancier.getAmountToInvest()), currentAmount,
+                    "The total available amount should be updated correctly");
+
+            foundFinancier = financierOutputPort.findFinancierByEmail(cooperateFinancier.getUserIdentity().getEmail());
+
+            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), foundFinancier.getId());
+            assertTrue(investmentVehicleFinancier.isPresent());
+            assertEquals(cooperateFinancier.getAmountToInvest(), investmentVehicleFinancier.get().getAmountInvested(),
+                    "The amount to invest should be updated correctly");
+//            investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(investmentVehicleFinancier.get().getId());
+        } catch (MeedlException e) {
+            log.error("Failed to invite with error {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+        assertNotNull(response);
+        assertEquals("Financier has been added to investment vehicle", response);
+        Page<Financier> financiers;
+        try {
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            cooperateFinancier = foundFinancier;
+            deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
+            financierOutputPort.delete(cooperateFinancier.getId());
+            deleteNotification(cooperateUserIdentity.getId());
+            userIdentityOutputPort.deleteUserById(cooperateUserIdentity.getId());
+            identityManagerOutputPort.deleteUser(cooperateUserIdentity);
+            investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicle.getId());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiers);
+        assertFalse(financiers.isEmpty());
+        assertNotNull(cooperateFinancier.getId());
+        assertEquals(cooperateFinancier.getId(), financiers.getContent().get(0).getId());
+        assertEquals(ActivationStatus.INVITED, financiers.getContent().get(0).getActivationStatus());
+        assertEquals(AccreditationStatus.UNVERIFIED, financiers.getContent().get(0).getAccreditationStatus());
 
     }
 

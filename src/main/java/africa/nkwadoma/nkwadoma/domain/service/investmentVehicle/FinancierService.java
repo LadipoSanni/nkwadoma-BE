@@ -250,7 +250,8 @@ public class FinancierService implements FinancierUseCase {
             if (isFinancierInvesting(financier)){
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
                 updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
-                updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
+//                updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
+                updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
