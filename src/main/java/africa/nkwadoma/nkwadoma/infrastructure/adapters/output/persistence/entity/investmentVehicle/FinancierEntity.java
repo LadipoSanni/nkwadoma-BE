@@ -11,6 +11,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @ToString
@@ -30,4 +32,5 @@ public class FinancierEntity {
     private UserEntity userIdentity;
     @OneToOne
     private CooperationEntity cooperation;
+    private BigDecimal totalAmountInvested;
 }

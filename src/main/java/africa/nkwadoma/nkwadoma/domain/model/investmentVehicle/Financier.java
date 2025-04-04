@@ -31,6 +31,7 @@ public class Financier {
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
+    private BigDecimal totalAmountInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private Cooperation cooperation;
     private UserIdentity userIdentity;
