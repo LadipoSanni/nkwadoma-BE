@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface InvestmentVehicleUseCase {
 
@@ -17,7 +16,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
 
-    void deleteInvestmentVehicle(String investmentId) throws MeedlException;
+    String deleteInvestmentVehicle(String investmentId) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber);
 

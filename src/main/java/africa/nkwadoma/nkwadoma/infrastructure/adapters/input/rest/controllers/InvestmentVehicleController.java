@@ -172,4 +172,19 @@ public class InvestmentVehicleController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @DeleteMapping("delete-investment-vehicle/{investmentVehicleId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> deleteInvestmentVehicle(@PathVariable String investmentVehicleId) throws MeedlException {
+
+        String response =
+                investmentVehicleUseCase.deleteInvestmentVehicle(investmentVehicleId);
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(INVESTMENT_VEHICLE_DELETED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }
