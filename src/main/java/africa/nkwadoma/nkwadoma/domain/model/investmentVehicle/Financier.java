@@ -28,15 +28,15 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private Cooperation cooperation;
     private FinancierType financierType;
-    private UserIdentity userIdentity;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
     private BigDecimal totalAmountInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private Cooperation cooperation;
+    private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
     private int numberOfInvestments;
