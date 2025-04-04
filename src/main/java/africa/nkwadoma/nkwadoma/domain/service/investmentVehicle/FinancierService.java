@@ -141,7 +141,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier invited without an investment vehicle id, therefore financier is invited to the platform.");
             inviteFinancierToPlatform(financier);
         }else {
-            log.info("Inviting financier into an investment vehicle with id {}", financier.getInvestmentVehicleId());
+            log.info("Inviting financier into an investment vehicle with id {}", investmentVehicle.getId());
             inviteFinancierToInvestmentVehicle(financier, investmentVehicle);
         }
     }
@@ -153,7 +153,7 @@ public class FinancierService implements FinancierUseCase {
             //TODO Notify admin on failure to invite financier
             throw new MeedlException(FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
         }
-        log.info("Financier either has a type or has an id {} {}", financier.getFinancierType(), financier.getId());
+        log.info("Financier either has a type {} or has an id {}", financier.getFinancierType(), financier.getId());
     }
 
     private void inviteFinancierToPlatform(Financier financier) throws MeedlException {
@@ -222,12 +222,15 @@ public class FinancierService implements FinancierUseCase {
     private void inviteFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         financier.validate();
         financier.validateFinancierDesignation();
+        log.info("Done validating financier details for a financier invite and/ added to a vehicle");
         addFinancierToInvestmentVehicle(financier, investmentVehicle);
     }
 
 
     private void addFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        BigDecimal amountToInvest = financier.getAmountToInvest();
         if (MeedlValidator.isValidId(financier.getId())){
+            log.info("The financier has a valid id {} therefore the financier is only being added to the vehicle", financier.getId());
             financier = financierOutputPort.findFinancierByFinancierId(financier.getId());
         }else {
             try {
@@ -236,21 +239,36 @@ public class FinancierService implements FinancierUseCase {
                 financier = saveNonExistingFinancier(financier, e.getMessage());
             }
         }
+        financier.setAmountToInvest(amountToInvest);
         addAndNotifyFinancier(financier, investmentVehicle);
     }
 
     private void addAndNotifyFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
-            InvestmentVehicleFinancier investmentVehicleFinancier =  assignDesignation(financier, investmentVehicle);
-            investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+            InvestmentVehicleFinancier investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
+            if (isFinancierInvesting(financier)){
+                log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
+                updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+//                updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
+                updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+            }else {
+                log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
+                investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+            }
             notifyExistingFinancier(financier, investmentVehicle);
-            log.info("Financier {} added to investment vehicle {}.", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
+            log.info("Financier {} added to investment vehicle {}. Investment vehicle financier was not found. ", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
         }{
             log.warn("Attempted to add financier with email {} to the same investment vehicle twice with name {} and id {}", financier.getUserIdentity().getEmail(), investmentVehicle.getName(), investmentVehicle.getId());
             //TODO notify the admin that the financier has been added to the investment vehicle previously.
         }
     }
+
+    private boolean isFinancierInvesting(Financier financier) {
+        log.info("Would financier invest {}: {}", (financier.getAmountToInvest() != null && financier.getAmountToInvest().compareTo(BigDecimal.ZERO) >= 0), financier.getAmountToInvest());
+        return financier.getAmountToInvest() != null && financier.getAmountToInvest().compareTo(BigDecimal.ZERO) >= 0;
+    }
+
     private Financier saveNonExistingFinancier(Financier financier, String message) {
         log.warn("Failed to find user on application. Financier not yet onboarded.");
         log.info("Inviting a new financier to the platform {} ",message);
@@ -271,7 +289,6 @@ public class FinancierService implements FinancierUseCase {
     private Financier getFinancierByUserIdentity(Financier financier) throws MeedlException {
 
         UserIdentity userIdentity = findFinancierUserIdentityByEmail(financier.getUserIdentity().getEmail());
-//        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(financier.getUserIdentity().getEmail());
         log.info("User identity found by email {} ,when inviting financier ", userIdentity.getEmail());
         if (userIdentity.getRole() != IdentityRole.FINANCIER) {
             //TODO Add new role to user.
@@ -432,14 +449,11 @@ public class FinancierService implements FinancierUseCase {
             log.info("Updated the investment vehicle available amount for {}", investmentVehicle);
             log.info("New amount after adding to the investment vehicle... {}", investmentVehicle.getTotalAvailableAmount());
         }
-
-        investmentVehicleOutputPort.save(investmentVehicle);
-
         return financier;
     }
 
     private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, Financier foundFinancier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        if (foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
+        if (isFinancierActive(foundFinancier)) {
             log.info("User is active {}", foundFinancier.getActivationStatus());
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             return updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
@@ -447,6 +461,23 @@ public class FinancierService implements FinancierUseCase {
             log.error("Financier is not active. Financier status is {}", foundFinancier.getActivationStatus());
             throw new MeedlException("Financier is not active on the platform");
         }
+    }
+    private BigDecimal updateInvestmentVehicleAvailableAmount(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+        if (investmentVehicle.getTotalAvailableAmount() == null) {
+            log.info("Investment vehicle have no total available amount. Setting it up to zero. {}", investmentVehicle.getId());
+            investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
+        }
+        BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
+        BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
+        investmentVehicle.setTotalAvailableAmount(newAmount);
+        log.info("Total amount available for this investment vehicle has been updated. {}", newAmount);
+        investmentVehicleOutputPort.save(investmentVehicle);
+        return newAmount;
+    }
+
+
+    private static boolean isFinancierActive(Financier foundFinancier) {
+        return foundFinancier.getActivationStatus().equals(ActivationStatus.ACTIVE);
     }
 
     private InvestmentVehicleFinancier updateInvestmentVehicleFinancierAmountInvested(InvestmentVehicle investmentVehicle, Financier financier) throws MeedlException {
@@ -482,19 +513,6 @@ public class FinancierService implements FinancierUseCase {
         investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
 
     }
-
-    private static BigDecimal updateInvestmentVehicleAvailableAmount(Financier financier, InvestmentVehicle investmentVehicle) {
-        if (investmentVehicle.getTotalAvailableAmount() == null) {
-            log.info("Investment vehicle have no total available amount. Setting it up to zero. {}", investmentVehicle.getId());
-            investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
-        }
-        BigDecimal currentAmount = investmentVehicle.getTotalAvailableAmount();
-        BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
-        investmentVehicle.setTotalAvailableAmount(newAmount);
-        log.info("Total amount available for this investment vehicle has been updated. {}", newAmount);
-        return newAmount;
-    }
-
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         kycIdentityValidation(financier);
