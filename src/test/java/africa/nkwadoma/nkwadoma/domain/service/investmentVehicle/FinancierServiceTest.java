@@ -404,12 +404,6 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
     @Test
-    void completeKycWithoutNextOfKin(){
-        Financier financierWithKycRequest = TestData.completeKycRequest(individualFinancier, bankDetail, nextOfKin);
-        financierWithKycRequest.getUserIdentity().setNextOfKin(null);
-        assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
-    }
-    @Test
     void completeKycWithNullUser(){
         Financier financierWithKycRequest = TestData.completeKycRequest(individualFinancier, bankDetail, nextOfKin);
         financierWithKycRequest.setUserIdentity(null);

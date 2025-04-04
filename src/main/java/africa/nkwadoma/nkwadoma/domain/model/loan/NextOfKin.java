@@ -1,8 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.model.loan;
 
-import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 import org.apache.commons.lang3.*;
@@ -20,6 +19,7 @@ public class NextOfKin {
     private String email;
     private String phoneNumber;
     private String nextOfKinRelationship;
+//    private UserRelationship nextOfKinRelationship;
     private String contactAddress;
     private String userId;
     private String alternateContactAddress;
@@ -32,7 +32,7 @@ public class NextOfKin {
         MeedlValidator.validateDataElement(lastName, nextOfKin.concat("last name is required"));
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
-        MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
+        MeedlValidator.validateDataElement(nextOfKinRelationship.toString(), nextOfKin.concat("relationship should be defined"));
         MeedlValidator.validateDataElement(contactAddress, nextOfKin.concat("contact address is required"));
 
     }

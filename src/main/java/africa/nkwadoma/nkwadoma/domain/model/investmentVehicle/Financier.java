@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -36,6 +37,10 @@ public class Financier {
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private int pageNumber;
     private int pageSize;
+    private boolean declarationAndAgreement;
+    private boolean politicallyExposed;
+    private List<PoliticalPartiesExposedTo> politicalPartiesExposedTo;
+
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
@@ -82,15 +87,17 @@ public class Financier {
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
+    private void validationBeforeKycProcessing() throws MeedlException {
+        MeedlValidator.validateObjectInstance(this.userIdentity, "User performing this action is unknown");
+        MeedlValidator.validateUUID(this.userIdentity.getId(), "User identification performing this action is unknown. ");
+        .kjhbhgbh
+    }
 
     public void validateKyc() throws MeedlException {
         MeedlValidator.validateUUID(id, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateObjectInstance(userIdentity.getBankDetail(), "Provide a valid bank detail.");
         MeedlValidator.validateUUID(userIdentity.getBankDetail().getId(), "Provide a valid bank detail id.");
         userIdentity.getBankDetail().validate();
-        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin(), "Provide a valid next of kin detail.");
-        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
-        userIdentity.getNextOfKin().validate();
         MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
         MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
     }

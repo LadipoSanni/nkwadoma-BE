@@ -499,12 +499,8 @@ public class FinancierService implements FinancierUseCase {
     public Financier completeKyc(Financier financier) throws MeedlException {
         kycIdentityValidation(financier);
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
-        if (foundFinancier.getUserIdentity().getNextOfKin() == null &&
-            foundFinancier.getUserIdentity().getBankDetail() == null){
+        if (foundFinancier.getUserIdentity().getBankDetail() == null){
             log.info("Financier details in service to use in completing kyc {}", financier);
-
-            updateFinancierNextOfKinKycDetail(financier, foundFinancier);
-            log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
             log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
             log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
@@ -527,21 +523,6 @@ public class FinancierService implements FinancierUseCase {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");
         MeedlValidator.validateUUID(financier.getUserIdentity().getId(), "User identification performing this action is unknown. ");
-        MeedlValidator.validateObjectInstance(financier.getUserIdentity().getNextOfKin(), "Next of kin is unknown");
-    }
-
-    private NextOfKin updateNextOfKinForKyc(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin nextOfKin = financier.getUserIdentity().getNextOfKin();
-        nextOfKin.setUserId(foundFinancier.getUserIdentity().getId());
-        return nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
-    }
-
-    private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
-        foundFinancier.getUserIdentity().setNextOfKin(savedNextOfKin);
-        foundFinancier.getUserIdentity().setNin(financier.getUserIdentity().getNin());
-        foundFinancier.getUserIdentity().setTaxId(financier.getUserIdentity().getTaxId());
-        foundFinancier.getUserIdentity().setAddress(financier.getUserIdentity().getAddress());
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
