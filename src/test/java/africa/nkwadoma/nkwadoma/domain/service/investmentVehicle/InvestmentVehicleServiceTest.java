@@ -130,6 +130,7 @@ class InvestmentVehicleServiceTest {
     void viewAllInvestmentVehicle() throws MeedlException {
         when(investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize,pageNumber)).
                 thenReturn(new PageImpl<>(List.of(fundGrowth)));
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleService.viewAllInvestmentVehicle(
                 mockId,pageSize, pageNumber);
         List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
