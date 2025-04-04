@@ -35,6 +35,7 @@ import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleM
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
 
 @Slf4j
@@ -112,8 +113,14 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public void deleteInvestmentVehicle(String investmentId) throws MeedlException {
+    public String deleteInvestmentVehicle(String investmentId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentId,InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentId);
+        if (investmentVehicle.getInvestmentVehicleStatus().equals(PUBLISHED)){
+            throw new InvestmentException(InvestmentVehicleMessages.PUBLISHED_INVESTMENT_VEHICLE_CANNOT_BE_DELETED.getMessage());
+        }
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentId);
+        return InvestmentVehicleMessages.DELETED.getMessage();
     }
 
     @Override
