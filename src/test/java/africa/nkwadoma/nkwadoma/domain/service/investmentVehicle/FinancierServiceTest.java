@@ -831,7 +831,6 @@ public class FinancierServiceTest {
             assertTrue(investmentVehicleFinancier.isPresent());
             assertEquals(cooperateFinancier.getAmountToInvest(), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
-//            investmentVehicleFinancierOutputPort.deleteInvestmentVehicleFinancier(investmentVehicleFinancier.get().getId());
         } catch (MeedlException e) {
             log.error("Failed to invite with error {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -842,6 +841,7 @@ public class FinancierServiceTest {
         try {
             financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
             cooperateFinancier = foundFinancier;
+            investmentVehicleFinancierOutputPort.deleteByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), cooperateFinancier.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
             financierOutputPort.delete(cooperateFinancier.getId());
             deleteNotification(cooperateUserIdentity.getId());
