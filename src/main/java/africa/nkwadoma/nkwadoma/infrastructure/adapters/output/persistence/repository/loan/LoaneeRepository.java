@@ -41,7 +41,7 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                 join LoanOfferEntity lo ON lo.id = loan.loanOfferId
                 join LoanRequestEntity lr ON lr.id = lo.loanRequest.id
                 where
-                        lo.loanProduct = :loanProductId
+                        lo.loanProduct.id = :loanProductId
         """)
-    Page<LoaneeProjection> findAllByLoanProductId( @Param("loanProductId")String id, Pageable pageRequest);
+    Page<LoaneeProjection> findAllByLoanProductId( @Param("loanProductId")String loanProductId, Pageable pageRequest);
 }
