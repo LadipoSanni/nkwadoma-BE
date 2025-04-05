@@ -157,7 +157,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicle(int pageSize, int pageNumber) {
+    public Page<InvestmentVehicle> viewAllInvestmentVehicle(String userId,int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole() == IdentityRole.FINANCIER) {
+            return investmentVehicleOutputPort.findAllInvestmentVehicleExcludingPrivate(userIdentity.getId(),pageSize,pageNumber);
+        }
         return investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize, pageNumber);
     }
 
