@@ -84,6 +84,8 @@ class LoaneeServiceTest {
     private TokenUtils tokenUtils;
     @Mock
     private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Mock
+    private LoanProductOutputPort loanProductOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -97,6 +99,7 @@ class LoaneeServiceTest {
     private LoanReferral loanReferral;
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
+    private LoanProduct loanProduct;
 
 
     @BeforeEach
@@ -159,6 +162,8 @@ class LoaneeServiceTest {
         organizationIdentity.setCreatedBy(mockId);
 
         atlasProgram = TestData.createProgramTestData("AtlasProgram");
+
+        loanProduct = TestData.buildTestLoanProduct("product",TestData.createTestVendor("vendor"));
 
     }
 
@@ -355,12 +360,6 @@ class LoaneeServiceTest {
     }
 
 
-
-
-
-
-
-
     @Test
     void searchLoaneeInACohort(){
         List<Loanee> loanees = new ArrayList<>();
@@ -373,6 +372,36 @@ class LoaneeServiceTest {
         assertEquals(1,loanees.size());
     }
 
+
+    @Test
+    void cannotFindAllLoanBeneficiriesFromLoanProductWithNullLoanProductId(){
+        assertThrows(MeedlException.class,()-> loaneeService.viewAllLoaneeThatBenefitedFromLoanProduct(null,
+                pageSize,pageNumber));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,"jhfdsyhj-=jwuy"})
+    void cannotFindAllLoanBeneficiriesFromLoanProductWithInvalidLoanProductId(String loanProductId){
+        assertThrows(MeedlException.class,()-> loaneeService.viewAllLoaneeThatBenefitedFromLoanProduct(loanProductId,
+                pageSize,pageNumber));
+
+    }
+
+    @Test
+    void findALLLoanBeneficiriesFromLoanProduct(){
+        Page<Loanee> loanees = new  PageImpl<>(List.of(firstLoanee));
+        try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber))
+                    .thenReturn(loanees);
+            loanees = loaneeService.viewAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertNotNull(loanees);
+        assertEquals(1,loanees.getContent().size());
+    }
 }
 
 

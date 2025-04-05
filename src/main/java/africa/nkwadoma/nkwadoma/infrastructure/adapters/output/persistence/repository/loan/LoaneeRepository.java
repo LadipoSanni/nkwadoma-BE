@@ -29,4 +29,19 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
             "OR upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))")
     List<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
                                                      @Param("nameFragment") String nameFragment);
+
+    @Query("""
+        SELECT l.id as id,
+               l.userIdentity.firstName as firstName,
+               l.userIdentity.lastName as lastName,
+               lr.referredBy as instituteName
+      
+        FROM LoanEntity loan
+                Join loan.loaneeEntity l
+                join LoanOfferEntity lo ON lo.id = loan.loanOfferId
+                join LoanRequestEntity lr ON lr.id = lo.loanRequest.id
+                where
+                        lo.loanProduct = :loanProductId
+        """)
+    Page<LoaneeProjection> findAllByLoanProductId( @Param("loanProductId")String id, Pageable pageRequest);
 }
