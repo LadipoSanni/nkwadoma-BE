@@ -452,6 +452,8 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+            log.info("Amount weh financier wan put ----> "+ financier.getAmountToInvest());
+            updateFinancierTotalAmountInvested(financier);
             log.info("Updated the investment vehicle available amount for {}", investmentVehicle);
             log.info("New amount after adding to the investment vehicle... {}", investmentVehicle.getTotalAvailableAmount());
         }
@@ -462,6 +464,7 @@ public class FinancierService implements FinancierUseCase {
         if (isFinancierActive(foundFinancier)) {
             log.info("User is active {}", foundFinancier.getActivationStatus());
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+            updateFinancierTotalAmountInvested(financier);
             return updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
         }else {
             log.error("Financier is not active. Financier status is {}", foundFinancier.getActivationStatus());
@@ -479,6 +482,17 @@ public class FinancierService implements FinancierUseCase {
         log.info("Total amount available for this investment vehicle has been updated. {}", newAmount);
         investmentVehicleOutputPort.save(investmentVehicle);
         return newAmount;
+    }
+
+    private void updateFinancierTotalAmountInvested(Financier financier) throws MeedlException {
+        Financier financierToBeUpdate = financierOutputPort.findFinancierByFinancierId(financier.getId());
+        BigDecimal currentTotalAmountInvested = financierToBeUpdate.getTotalAmountInvested();
+        if (currentTotalAmountInvested == null) {
+            currentTotalAmountInvested = BigDecimal.ZERO;
+        }
+        BigDecimal newTotalAmountInvested = currentTotalAmountInvested.add(financier.getAmountToInvest());
+        financierToBeUpdate.setTotalAmountInvested(newTotalAmountInvested);
+        financierOutputPort.save(financierToBeUpdate);
     }
 
 

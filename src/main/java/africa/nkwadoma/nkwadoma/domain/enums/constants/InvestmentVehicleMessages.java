@@ -13,6 +13,8 @@ public enum InvestmentVehicleMessages {
     INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL("Investment vehicle type cannot be empty"),
     INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL("Investment vehicle status cannot be empty"),
     INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL("Investment vehicle visibility cannot be empty"),
+    PUBLISHED_INVESTMENT_VEHICLE_CANNOT_BE_DELETED("Published investment vehicle cannot be deleted"),
+    DELETED("Deleted"),
     INVESTMENT_VEHICLE_ALREADY_PUBLISHED("Investment Vehicle already published and cannot be edited");
     private final String message;
 

@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -42,7 +41,6 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -229,11 +227,15 @@ public class FinancierServiceTest {
         individualFinancier.setAmountToInvest(new BigDecimal("1000.00"));
         individualFinancier.setId(individualFinancierId);
         InvestmentVehicle investmentVehicle;
+        Financier financier;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
             assertNotNull(investmentVehicle.getTotalAvailableAmount());
+            assertNotNull(financier);
 
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
+//            assertEquals(BigDecimal.ZERO, financier.getTotalAmountInvested());
             assertEquals(new BigDecimal("4000.00"), initialAmount);
             financierUseCase.investInVehicle(individualFinancier);
 
@@ -245,6 +247,10 @@ public class FinancierServiceTest {
             assertTrue(investmentVehicleFinancier.isPresent());
             assertEquals(individualFinancier.getAmountToInvest(), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
+            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            log.info("-----> financier.getAmountToInvest ---->" + financier.getAmountToInvest());
+            log.info("-----> financier.getTotalAmountInvested ---->" + financier.getTotalAmountInvested());
+            assertEquals(individualFinancier.getAmountToInvest(), financier.getTotalAmountInvested());
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
             throw new RuntimeException(e);
@@ -256,21 +262,30 @@ public class FinancierServiceTest {
         individualFinancier.setAmountToInvest(new BigDecimal("1000.00"));
         individualFinancier.setId(individualFinancierId);
         InvestmentVehicle investmentVehicle = null;
+        Financier financier = null;
         try {
             investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, individualFinancierId);
+            assertTrue(investmentVehicleFinancier.isPresent());
+            assertEquals(investmentVehicleFinancier.get().getAmountInvested(), financier.getTotalAmountInvested());
+            BigDecimal initialInvestedAmount = investmentVehicleFinancier.get().getAmountInvested();
+            assertNotNull(financier);
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
             assertEquals( new BigDecimal("5000.00"), initialAmount);
             if (investmentVehicle.getTotalAvailableAmount() == null) {
                 investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
             }
             financierUseCase.investInVehicle(individualFinancier);
-
+            financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, individualFinancierId);
+            assertTrue(investmentVehicleFinancier.isPresent());
+            BigDecimal totalInvestedAmount = initialInvestedAmount.add(individualFinancier.getAmountToInvest());
+            assertEquals(totalInvestedAmount, financier.getTotalAmountInvested());
             InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
             assertEquals(initialAmount.add(individualFinancier.getAmountToInvest()), currentAmount,
                     "The total available amount should be updated correctly");
-            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, individualFinancierId);
-            assertTrue(investmentVehicleFinancier.isPresent());
             assertEquals(individualFinancier.getAmountToInvest().add(new BigDecimal("1000.00")), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
         } catch (MeedlException e) {
