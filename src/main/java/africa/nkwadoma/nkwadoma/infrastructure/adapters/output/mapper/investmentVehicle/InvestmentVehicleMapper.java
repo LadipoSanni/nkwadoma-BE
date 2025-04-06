@@ -34,4 +34,20 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "vehicleClosureStatus", source = "vehicleClosureStatus")
     @Mapping(target = "investmentVehicleVisibility", source = "investmentVehicleVisibility")
     List<InvestmentSummary> toInvestmentSummaries(List<InvestmentVehicle> investmentVehicleForFinancier);
+
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
+    @Mapping(target = "dateInvested", source = "dateInvested")
+    @Mapping(target = "amountInvested", source = "amountInvested")
+    @Mapping(target = "netAssetValue", source = "netAssetValue")
+    @Mapping(target = "percentageOfPortfolio", source = "percentageOfPortfolio")
+    @Mapping(target = "startDate", source = "startDate")
+    @Mapping(target = "maturityDate", source = "maturityDate")
+    @Mapping(target = "incomeEarned", source = "incomeEarned")
+    @Mapping(target = "designations", source = "designations")
+    @Mapping(target = "operationStatus", source = "vehicleOperation.operationStatus")
+    @Mapping(target = "couponDistributionStatus", source = "vehicleOperation.couponDistributionStatus")
+    @Mapping(target = "vehicleClosureStatus", source = "vehicleClosureStatus")
+    @Mapping(target = "investmentVehicleVisibility", source = "investmentVehicleVisibility")
+    InvestmentSummary toInvestmentSummary(InvestmentVehicle investmentVehicle);
 }

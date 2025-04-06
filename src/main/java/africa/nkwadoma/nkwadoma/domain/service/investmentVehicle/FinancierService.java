@@ -558,16 +558,13 @@ public class FinancierService implements FinancierUseCase {
     public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        log.info("--------> FoundFinancier ----> " + foundFinancier);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
-        BigDecimal totalInvestmentAmount = financierInvestmentVehicles.stream()
-                .map(InvestmentVehicleFinancier::getAmountInvested)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
+        log.info("-----> Total amount invested ------> " + totalInvestmentAmount);
 
-        List<InvestmentVehicle> investmentVehicleForFinancier = getInvestmentVehicle(financierInvestmentVehicles);
-        log.info("Investment vehicles from financier ---> " + investmentVehicleForFinancier);
-        List<InvestmentSummary> investmentSummaries = investmentVehicleMapper.toInvestmentSummaries(investmentVehicleForFinancier);
-        log.info("Investment summaries --> " + investmentSummaries);
+        List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
@@ -576,14 +573,15 @@ public class FinancierService implements FinancierUseCase {
                 .build();
     }
 
-    private static List<InvestmentVehicle> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
+    private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()
                 .map(investmentVehicleFinancier -> {
                     InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
-                    investmentVehicle.setDateInvested(investmentVehicleFinancier.getDateInvested());
-                    investmentVehicle.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
-                    investmentVehicle.setAmountInvested(investmentVehicleFinancier.getAmountInvested());
-                    return investmentVehicle;
+                    InvestmentSummary investmentSummary = investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
+                    investmentSummary.setDateInvested(investmentVehicleFinancier.getDateInvested());
+                    investmentSummary.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
+                    investmentSummary.setAmountInvested(investmentVehicleFinancier.getAmountInvested());
+                    return investmentSummary;
                 })
                 .toList();
     }
