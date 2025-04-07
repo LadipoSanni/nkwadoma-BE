@@ -389,7 +389,7 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void findALLLoanBeneficiriesFromLoanProduct(){
+    void findALLLoanBeneficiariesFromLoanProduct(){
         Page<Loanee> loanees = new  PageImpl<>(List.of(firstLoanee));
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
@@ -401,6 +401,37 @@ class LoaneeServiceTest {
         }
         assertNotNull(loanees);
         assertEquals(1,loanees.getContent().size());
+    }
+
+    @Test
+    void searchLoanBeneficiariesFromLoanProduct(){
+        Page<Loanee> loanees = new  PageImpl<>(List.of(firstLoanee));
+        try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"q",pageSize,pageNumber))
+                    .thenReturn(loanees);
+            loanees = loaneeService.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"q",pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertNotNull(loanees);
+        assertEquals(1,loanees.getContent().size());
+    }
+
+
+    @Test
+    void searchLoanBeneficiariesFromLoanProductReturnEmptyListIfNonIsFound(){
+        Page<Loanee> loanees =  Page.empty();
+        try {
+            when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
+            when(loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber))
+                    .thenReturn(loanees);
+            loanees = loaneeService.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),"z",pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        assertTrue(loanees.getContent().isEmpty());
+        assertEquals(0,loanees.getContent().size());
     }
 }
 

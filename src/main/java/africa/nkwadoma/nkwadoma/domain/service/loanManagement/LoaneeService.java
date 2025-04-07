@@ -336,5 +336,12 @@ public class LoaneeService implements LoaneeUseCase {
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
         return loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
     }
+
+    @Override
+    public Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+    }
 }
 
