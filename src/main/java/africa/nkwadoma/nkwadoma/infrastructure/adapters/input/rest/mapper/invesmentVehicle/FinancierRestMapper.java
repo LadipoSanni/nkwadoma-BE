@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierDashboardResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
@@ -25,6 +26,18 @@ public interface FinancierRestMapper {
     @Mapping( source = "userIdentity", target = "userIdentity")
     @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
     FinancierResponse map(Financier financier);
+
+    @Mapping(target = "financierName", expression = "java(financier.getUserIdentity().getFirstName() + ' ' + financier.getUserIdentity().getLastName())")
+    @Mapping(target = "financierType", source="financierType")
+    @Mapping(target = "nextOfKin", source="userIdentity.nextOfKin")
+    @Mapping(target = "taxId", source="userIdentity.taxId")
+    @Mapping(target = "totalAmountInvested", source="totalAmountInvested")
+    @Mapping(target = "email", source="userIdentity.email")
+    @Mapping(target = "phoneNumber", source="userIdentity.phoneNumber")
+    @Mapping(target = "address", source="userIdentity.address")
+    @Mapping(target = "rcNumber", source = "rcNumber")
+    @Mapping(target = "numberOfInvestment", source = "numberOfInvestment")
+    FinancierDashboardResponse mapToDashboardResponse(Financier financier);
 
     KycResponse mapToFinancierResponse(Financier financier);
 

@@ -40,13 +40,13 @@ public class Financier {
     private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
-    private int numberOfInvestments;
+    private int numberOfInvestment;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
     private String taxInformationNumber;
-    private String rcNumber;
     private List<InvestmentVehicle> investmentVehicles;
+    private String rcNumber;
 
 
     private void validateUserIdentity() throws MeedlException {

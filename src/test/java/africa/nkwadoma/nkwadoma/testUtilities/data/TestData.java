@@ -45,7 +45,7 @@ public class TestData {
                 .email(email)
                 .phoneNumber("090876536217")
                 .createdBy(testId)
-                .role(IdentityRole.LOANEE)
+                .role(IdentityRole.FINANCIER)
                 .alternateEmail("alt276@example.com")
                 .image("loanee-img.png")
                 .gender("Male")
