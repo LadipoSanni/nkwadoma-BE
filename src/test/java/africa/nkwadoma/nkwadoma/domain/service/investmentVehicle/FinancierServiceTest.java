@@ -235,7 +235,6 @@ public class FinancierServiceTest {
             assertNotNull(financier);
 
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-//            assertEquals(BigDecimal.ZERO, financier.getTotalAmountInvested());
             assertEquals(new BigDecimal("4000.00"), initialAmount);
             financierUseCase.investInVehicle(individualFinancier);
 
@@ -248,8 +247,6 @@ public class FinancierServiceTest {
             assertEquals(individualFinancier.getAmountToInvest(), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
-            log.info("-----> financier.getAmountToInvest ---->" + financier.getAmountToInvest());
-            log.info("-----> financier.getTotalAmountInvested ---->" + financier.getTotalAmountInvested());
             assertEquals(individualFinancier.getAmountToInvest(), financier.getTotalAmountInvested());
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
