@@ -2,7 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.exceptions;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
-import com.fasterxml.jackson.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mapping.*;
 import org.springframework.http.HttpStatus;

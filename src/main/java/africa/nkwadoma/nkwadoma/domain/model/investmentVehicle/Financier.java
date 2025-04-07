@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -38,10 +40,12 @@ public class Financier {
     private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
-    private String taxInformationNumber;
-    private String rcNumber;
+    private int numberOfInvestments;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
+    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
+    private String taxInformationNumber;
+    private String rcNumber;
     private List<InvestmentVehicle> investmentVehicles;
 
 

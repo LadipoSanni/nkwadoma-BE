@@ -25,12 +25,15 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +67,8 @@ public class FinancierService implements FinancierUseCase {
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private List<Financier> financiersToMail;
+    private final FinancierMapper financierMapper;
+    private final InvestmentVehicleMapper investmentVehicleMapper;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -506,12 +512,16 @@ public class FinancierService implements FinancierUseCase {
             BigDecimal newAmount = investmentVehicleFinancier.getAmountInvested().add(financier.getAmountToInvest());
             investmentVehicleFinancier.setAmountInvested(newAmount);
             log.info("Updated the amount invested in the investment vehicle financier for {}... amount invested {}", newAmount, financier.getAmountToInvest());
+            if (investmentVehicleFinancier.getDateInvested() == null) {
+                investmentVehicleFinancier.setDateInvested(LocalDate.now());
+            }
         }else {
             log.info("First time financier is in vesting in this vehicle. Amount {}", financier.getAmountToInvest());
             investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                     .investmentVehicle(investmentVehicle)
                     .financier(financier)
                     .amountInvested(financier.getAmountToInvest())
+                    .dateInvested(LocalDate.now())
                     .build();
         }
         return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
@@ -525,6 +535,9 @@ public class FinancierService implements FinancierUseCase {
         BigDecimal currentAmount = investmentVehicleFinancier.getAmountInvested();
         BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
         investmentVehicleFinancier.setAmountInvested(newAmount);
+        if (investmentVehicleFinancier.getDateInvested() == null) {
+            investmentVehicleFinancier.setDateInvested(LocalDate.now());
+        }
         log.info("Updating investment vehicle financier amount invested to {}",investmentVehicleFinancier.getAmountInvested());
         investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
 
@@ -555,6 +568,38 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier findFinancierByCooperationId(String cooperationId) throws MeedlException {
         return null;
+    }
+
+    @Override
+    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        log.info("--------> FoundFinancier ----> " + foundFinancier);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
+        int numberOfInvestment = financierInvestmentVehicles.size();
+        BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
+        log.info("-----> Total amount invested ------> " + totalInvestmentAmount);
+
+        List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
+        return FinancierVehicleDetail.builder()
+                .numberOfInvestment(numberOfInvestment)
+                .totalAmountInvested(totalInvestmentAmount)
+                .investmentSummaries(investmentSummaries)
+                .portfolioValue(foundFinancier.getPortfolioValue())
+                .build();
+    }
+
+    private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
+        return financierInvestmentVehicles.stream()
+                .map(investmentVehicleFinancier -> {
+                    InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+                    InvestmentSummary investmentSummary = investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
+                    investmentSummary.setDateInvested(investmentVehicleFinancier.getDateInvested());
+                    investmentSummary.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
+                    investmentSummary.setAmountInvested(investmentVehicleFinancier.getAmountInvested());
+                    return investmentSummary;
+                })
+                .toList();
     }
 
     private static void kycIdentityValidation(Financier financier) throws MeedlException {

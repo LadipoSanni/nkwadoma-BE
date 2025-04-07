@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -81,5 +83,12 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
         investmentVehicleFinancierRepository.deleteByInvestmentVehicleIdAndFinancierId(investmentId, financierId);
+    }
+
+    @Override
+    public List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciersEntity = investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciersEntity);
     }
 }

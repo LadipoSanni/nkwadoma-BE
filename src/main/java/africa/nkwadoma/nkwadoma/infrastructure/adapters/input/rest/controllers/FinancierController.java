@@ -3,23 +3,30 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.FinancierRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleFinancierRestMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,6 +48,8 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 public class FinancierController {
     private final FinancierUseCase financierUseCase;
     private final FinancierRestMapper financierRestMapper;
+    private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
+    private final InvestmentVehicleFinancierRestMapper investmentVehicleFinancierRestMapper;
 
     @PostMapping("financier/invite")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
@@ -121,6 +130,47 @@ public class FinancierController {
         ApiResponse<KycResponse> apiResponse = ApiResponse.<KycResponse>builder()
                 .data(kycResponse)
                 .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("financier/view/investment-details/{financierId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @Operation(
+            summary = "View investment details of financier",
+            description = """
+        Allows a Portfolio Manager to check the investment details of a particular financier. 
+        This action requires the PORTFOLIO_MANAGER role.
+        The API expects the following request payload: 
+        {
+            "financierId": "UUID"
+        }
+        financierId is the unique number given to the financier.""",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully retrieved financier investment details",
+                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid financier id provided.",
+                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "404",
+                            description = "Financier not found"
+                    )
+            }
+    )
+    public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
+        FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
+        FinancierInvestmentDetailResponse financierInvestmentDetailResponse = financierRestMapper.mapToFinancierDetailResponse(financierVehicleDetail);
+
+        ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
+                .data(financierInvestmentDetailResponse)
+                .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

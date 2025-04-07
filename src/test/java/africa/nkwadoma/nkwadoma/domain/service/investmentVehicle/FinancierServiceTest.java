@@ -21,6 +21,7 @@ import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -87,6 +88,7 @@ public class FinancierServiceTest {
 
     private InvestmentVehicle publicInvestmentVehicle;
     private InvestmentVehicle privateInvestmentVehicle;
+
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
@@ -133,6 +135,7 @@ public class FinancierServiceTest {
             InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findByNameExcludingDraftStatus(investmentVehicle.getName(), InvestmentVehicleStatus.PUBLISHED);
             if (foundInvestmentVehicle == null){
                 investmentVehicle.setTotalAvailableAmount(investmentVehicle.getSize());
+//                investmentVehicle.setInvestmentVehicleDesignation(Set.of(InvestmentVehicleDesignation.SPONSOR, InvestmentVehicleDesignation.ENDOWER));
                 investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
             }else{
                 investmentVehicle = foundInvestmentVehicle;
@@ -232,7 +235,6 @@ public class FinancierServiceTest {
             assertNotNull(financier);
 
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-//            assertEquals(BigDecimal.ZERO, financier.getTotalAmountInvested());
             assertEquals(new BigDecimal("4000.00"), initialAmount);
             financierUseCase.investInVehicle(individualFinancier);
 
@@ -245,8 +247,6 @@ public class FinancierServiceTest {
             assertEquals(individualFinancier.getAmountToInvest(), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
-            log.info("-----> financier.getAmountToInvest ---->" + financier.getAmountToInvest());
-            log.info("-----> financier.getTotalAmountInvested ---->" + financier.getTotalAmountInvested());
             assertEquals(individualFinancier.getAmountToInvest(), financier.getTotalAmountInvested());
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
@@ -724,6 +724,29 @@ public class FinancierServiceTest {
         assertFalse(foundFinanciers.isEmpty());
         assertNotNull(foundFinanciers.getContent().get(0));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
+    void viewInvestmentDetailsOfFinancierWithNullId(String financierId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId));
+    }
+
+    @Test
+    @Order(12)
+    void viewInvestmentDetailsOfFinancier(){
+        FinancierVehicleDetail foundFinancierDetail = null;
+        try {
+            foundFinancierDetail = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
+            log.info("-------->Found details---------> " + foundFinancierDetail);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinancierDetail);
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries());
+        assertFalse(foundFinancierDetail.getInvestmentSummaries().isEmpty());
+        assertNotNull(foundFinancierDetail.getInvestmentSummaries().get(0).getName());
+    }
+
     @Test
     @Order(16)
     public void inviteCooperateFinancierToPlatform() {
@@ -875,6 +898,14 @@ public class FinancierServiceTest {
         assertEquals(AccreditationStatus.UNVERIFIED, financiers.getContent().get(0).getAccreditationStatus());
 
     }
+
+    @Test
+    void viewInvestmentDetailWithNonExistingFinancierId(){
+        String testFinancierId = "547391e5-19be-42d6-b725-f7df35138dfb";
+        Exception exception = assertThrows(MeedlException.class, ()->financierOutputPort.findFinancierByFinancierId(testFinancierId));
+        log.info("------->Exception message------------>"+exception.getMessage());
+    }
+
 
     @AfterAll
     void tearDown() throws MeedlException {
