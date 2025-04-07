@@ -483,6 +483,7 @@ public class FinancierServiceTest {
         Financier foundFinancier = null;
         try {
             foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            log.info("-----> financier -----> " + foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -879,27 +880,27 @@ public class FinancierServiceTest {
     void tearDown() throws MeedlException {
 
         log.info("Started deleting data in financier service test." );
-        deleteNotification(individualUserIdentityId);
-        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
-        deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
-
-        financierOutputPort.delete(individualFinancierId);
-        identityManagerOutputPort.deleteUser(individualUserIdentity);
-        userIdentityOutputPort.deleteUserById(individualUserIdentityId);
-
-
-        deleteNotification(individualUserIdentityId);
-        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-
-        financierOutputPort.delete(cooperateFinancierId);
-        cooperateUserIdentity.setId(cooperateUserIdentityId);
-        identityManagerOutputPort.deleteUser(cooperateUserIdentity);
-        userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
-
-        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
-        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
+//        deleteNotification(individualUserIdentityId);
+//        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
+//        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
+//        deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
+//
+//        financierOutputPort.delete(individualFinancierId);
+//        identityManagerOutputPort.deleteUser(individualUserIdentity);
+//        userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+//
+//
+//        deleteNotification(individualUserIdentityId);
+//        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
+//
+//        financierOutputPort.delete(cooperateFinancierId);
+//        cooperateUserIdentity.setId(cooperateUserIdentityId);
+//        identityManagerOutputPort.deleteUser(cooperateUserIdentity);
+//        userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
+//
+//        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+//        investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
+//        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
         log.info("Test data deleted after test");
     }

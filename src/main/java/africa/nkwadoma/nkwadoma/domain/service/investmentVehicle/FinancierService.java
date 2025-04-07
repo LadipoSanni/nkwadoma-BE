@@ -355,7 +355,9 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier viewFinancierDetail(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        return financierOutputPort.findFinancierByFinancierId(financierId);
+        Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+        log.info("-----> Financier ------> " + financier);
+        return financier;
     }
 
     @Override

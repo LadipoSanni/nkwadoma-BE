@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -37,6 +38,12 @@ public class Financier {
     private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
+    private String taxInformationNumber;
+    private String rcNumber;
+    private BigDecimal totalIncomeEarned;
+    private BigDecimal portfolioValue;
+    private List<InvestmentVehicle> investmentVehicles;
+
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());

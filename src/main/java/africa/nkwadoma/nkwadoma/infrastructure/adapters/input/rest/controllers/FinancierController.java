@@ -137,7 +137,7 @@ public class FinancierController {
                 .data(financierResponse)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("financier/all/view")
