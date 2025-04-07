@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.*;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -44,9 +45,16 @@ public class InvestmentVehicle {
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
     private LocalDate lastUpdatedDate;
-    private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private BigDecimal netAssetValue;
+    private double percentageOfPortfolio;
+    private LocalDate maturityDate;
+    private VehicleClosure vehicleClosureStatus;
+    private BigDecimal incomeEarned;
     private VehicleOperation vehicleOperation;
-
+    private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private LocalDate dateInvested;
+    private Set<InvestmentVehicleDesignation> designations;
+    private BigDecimal amountInvested;
 
 
     public void validate() throws MeedlException {
@@ -91,6 +99,4 @@ public class InvestmentVehicle {
         MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
     }
-
-
 }

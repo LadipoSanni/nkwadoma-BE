@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +25,7 @@ public class InvestmentVehicleFinancier {
     private Financier financier;
     private InvestmentVehicle investmentVehicle;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private LocalDate dateInvested;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Financier being added to investment vehicle can not be empty");
