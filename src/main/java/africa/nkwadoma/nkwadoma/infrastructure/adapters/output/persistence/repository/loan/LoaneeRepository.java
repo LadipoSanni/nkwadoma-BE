@@ -60,5 +60,5 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                         and (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
                         or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         """)
-    Page<LoaneeProjection> findAllByLoanProductIdAndNameFragment(String id, @Param("nameFragment") String nameFragment, Pageable pageRequest);
+    Page<LoaneeProjection> findAllByLoanProductIdAndNameFragment(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
 }
