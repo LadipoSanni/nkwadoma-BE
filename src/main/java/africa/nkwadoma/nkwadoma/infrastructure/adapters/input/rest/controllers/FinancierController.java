@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierDashboardResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
@@ -180,14 +181,28 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
         Financier financier = financierUseCase.viewFinancierDetail(financierId);
-        FinancierResponse financierResponse = financierRestMapper.map(financier);
+        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
 
-
-        ApiResponse<FinancierResponse> apiResponse = ApiResponse.<FinancierResponse>builder()
-                .data(financierResponse)
+        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .data(financierDashboardResponse)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("financier/view/dashboard")
+    @PreAuthorize("hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewMyDashboard(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Financier foundFinancier = financierUseCase.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
+        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(foundFinancier);
+
+        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+                .data(financierDashboardResponse)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("financier/all/view")
