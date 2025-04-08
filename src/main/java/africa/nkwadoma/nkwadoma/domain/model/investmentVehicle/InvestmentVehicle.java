@@ -57,6 +57,7 @@ public class InvestmentVehicle {
     private LocalDate dateInvested;
     private Set<InvestmentVehicleDesignation> designations;
     private BigDecimal amountInvested;
+    private BigDecimal talentFunded;
 
 
     public void validate() throws MeedlException {
