@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBreakdownResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
@@ -39,4 +40,9 @@ public interface LoaneeRestMapper {
     LoaneeReferralResponse toLoaneeReferralResponse(LoanReferral loanReferral);
 
     List<LoaneeResponse> toLoaneeResponses(List<Loanee> loanee);
+
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "instituteName", source = "referredBy")
+    LoanBeneficiaryResponse toLoanBeneficiaryResponse(Loanee loanee);
 }

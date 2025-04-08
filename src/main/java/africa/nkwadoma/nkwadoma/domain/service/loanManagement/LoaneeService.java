@@ -10,10 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanMetricsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanBreakDownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
@@ -62,6 +59,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final CreditRegistryOutputPort creditRegistryOutputPort;
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
+    private final LoanProductOutputPort loanProductOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -332,6 +330,18 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
 
+    @Override
+    public Page<Loanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        return loaneeOutputPort.findAllLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),pageSize,pageNumber);
+    }
 
+    @Override
+    public Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
+        LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
+        return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+    }
 }
 

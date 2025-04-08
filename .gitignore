@@ -35,5 +35,5 @@ src/main/resources/application-local.properties
 src/main/resources/application-localtest.properties
 docker-compose-local.yml
 .dockerignore
-
+.DS_Store
 

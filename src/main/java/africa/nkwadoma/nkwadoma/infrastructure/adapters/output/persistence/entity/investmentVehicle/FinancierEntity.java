@@ -14,6 +14,8 @@ import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -26,9 +28,6 @@ public class FinancierEntity {
     @Id
     @UuidGenerator
     private String id;
-    @OneToOne
-    private CooperationEntity cooperation;
-
     @Enumerated(EnumType.STRING)
     private ActivationStatus activationStatus;
     @Enumerated(EnumType.STRING)
@@ -77,4 +76,7 @@ public class FinancierEntity {
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
 
+    @OneToOne
+    private CooperationEntity cooperation;
+    private BigDecimal totalAmountInvested;
 }

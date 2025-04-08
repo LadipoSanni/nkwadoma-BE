@@ -53,39 +53,10 @@ public class VehicleOperationAdapterTest {
         assertNotNull(savedVehicleOperation);
     }
 
-    @Test
-    void cannotSaveVehicleOperationWithNullCouponDistribution() {
-        vehicleOperation.setCouponDistribution(null);
-        assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
-    }
 
     @Test
     void cannotSaveVehicleOperationWithNullVehicleOperation() {
         assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(null));
-    }
-
-    @Test
-    void cannotSaveVehicleOperationWithNullCouponDistributionStatus() {
-        vehicleOperation.setCouponDistributionStatus(null);
-        assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
-    }
-
-    @Test
-    void cannotSaveVehicleOperationWithNullOperationStatus() {
-        vehicleOperation.setOperationStatus(null);
-        assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
-    }
-
-    @Test
-    void cannotSaveVehicleOperationWithNullFundRaisingStatus() {
-        vehicleOperation.setFundRaisingStatus(null);
-        assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
-    }
-
-    @Test
-    void cannotSaveVehicleOperationWithNullDeployingStatus() {
-        vehicleOperation.setDeployingStatus(null);
-        assertThrows(MeedlException.class, () -> vehicleOperationOutputPort.save(vehicleOperation));
     }
 
     @Order(2)

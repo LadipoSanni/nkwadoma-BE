@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanBeneficiaryResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeReferralResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoaneeResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.LoaneeRestMapper;
@@ -105,6 +106,58 @@ public class LoaneeController {
                .build();
        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
 
+    }
+
+    @GetMapping("loanProduct/loanees/{loanProductId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanBeneficiaryFromLoanProduct(
+            @PathVariable String loanProductId,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+
+    )throws MeedlException {
+
+        Page<Loanee> loanees =
+                loaneeUseCase.viewAllLoaneeThatBenefitedFromLoanProduct(loanProductId,pageSize,pageNumber);
+        List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
+                .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();
+        PaginatedResponse<LoanBeneficiaryResponse> paginatedResponse = new PaginatedResponse<>(
+                loaneeResponses, loanees.hasNext(),
+                loanees.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanBeneficiaryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanBeneficiaryResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
+    @GetMapping("loanProduct/search-loanees/{loanProductId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
+            @PathVariable String loanProductId,
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+
+    )throws MeedlException {
+
+        Page<Loanee> loanees =
+                loaneeUseCase.searchLoaneeThatBenefitedFromLoanProduct(loanProductId,name,pageSize,pageNumber);
+        List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
+                .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();
+        PaginatedResponse<LoanBeneficiaryResponse> paginatedResponse = new PaginatedResponse<>(
+                loaneeResponses, loanees.hasNext(),
+                loanees.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanBeneficiaryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanBeneficiaryResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 }

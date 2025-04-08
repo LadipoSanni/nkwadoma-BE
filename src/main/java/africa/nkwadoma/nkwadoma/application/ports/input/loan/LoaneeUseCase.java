@@ -20,4 +20,8 @@ public interface LoaneeUseCase {
 
     List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException;
 
+    Page<Loanee> viewAllLoaneeThatBenefitedFromLoanProduct(String loanProductId,int pageSize,int pageNumber) throws MeedlException;
+
+
+    Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException;
 }

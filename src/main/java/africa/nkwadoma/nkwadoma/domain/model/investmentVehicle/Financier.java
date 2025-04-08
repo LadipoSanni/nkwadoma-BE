@@ -22,6 +22,9 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.List;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -31,16 +34,24 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
-    private Cooperation cooperation;
     private FinancierType financierType;
-    private UserIdentity userIdentity;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
     private String investmentVehicleId;
     private BigDecimal amountToInvest;
+    private BigDecimal totalAmountInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private Cooperation cooperation;
+    private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
+    private int totalNumberOfInvestment;
+    private BigDecimal totalIncomeEarned;
+    private BigDecimal portfolioValue;
+    private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
+    private List<InvestmentVehicle> investmentVehicles;
+    private String rcNumber;
+
     //source of fund
     private String personalOrJointSavings;
     private String employmentIncome;
