@@ -362,12 +362,15 @@ public class FinancierService implements FinancierUseCase {
     public Financier viewFinancierDetail(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
-        List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        return updateFinancierDetails(financier);
+    }
+
+    private Financier updateFinancierDetails(Financier financier) throws MeedlException {
+        List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
-                        .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
+                .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
         financier.setNumberOfInvestment(financierInvestmentVehicle.size());
         financier.setInvestmentVehicles(investmentVehicles);
-        log.info("-----> Financier ------> " + financier);
         return financier;
     }
 
@@ -596,9 +599,9 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public Financier findFinancierByUserId(String userId) throws MeedlException {
-        Financier financier = financierOutputPort.findFinancierByUserId(userId);
-        log.info("---------> Financier --------> "+ financier);
-        return financier;
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        foundFinancier = viewFinancierDetail(foundFinancier.getId());
+        return updateFinancierDetails(foundFinancier);
     }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
