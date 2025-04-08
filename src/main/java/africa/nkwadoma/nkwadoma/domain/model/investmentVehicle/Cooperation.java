@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 public class Cooperation {
     private String id;
     private String name;
-    private String rcNumber;
 
     public void validate() throws MeedlException {
         log.info("Validating cooperation details...");

@@ -32,7 +32,7 @@ public class NextOfKin {
         MeedlValidator.validateDataElement(lastName, nextOfKin.concat("last name is required"));
         MeedlValidator.validateEmail(email);
         MeedlValidator.validateDataElement(phoneNumber, nextOfKin.concat("phone number is required"));
-        MeedlValidator.validateDataElement(nextOfKinRelationship.toString(), nextOfKin.concat("relationship should be defined"));
+        MeedlValidator.validateDataElement(nextOfKinRelationship, nextOfKin.concat("relationship should be defined"));
         MeedlValidator.validateDataElement(contactAddress, nextOfKin.concat("contact address is required"));
 
     }
