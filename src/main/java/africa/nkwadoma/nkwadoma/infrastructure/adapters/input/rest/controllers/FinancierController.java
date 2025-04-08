@@ -135,15 +135,8 @@ public class FinancierController {
     @GetMapping("financier/view/investment-details/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(
-            summary = "View investment details of financier",
-            description = """
-        Allows a Portfolio Manager to check the investment details of a particular financier. 
-        This action requires the PORTFOLIO_MANAGER role.
-        The API expects the following request payload: 
-        {
-            "financierId": "UUID"
-        }
-        financierId is the unique number given to the financier.""",
+            summary = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_OF_FINANCIER,
+            description = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_OF_FINANCIER_DESCRIPTION,
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
@@ -176,15 +169,8 @@ public class FinancierController {
     @GetMapping("financier/view/investment-details")
     @PreAuthorize("hasRole('FINANCIER')")
     @Operation(
-            summary = "View investment details of financier",
-            description = """
-        Allows a Portfolio Manager to check the investment details of a particular financier. 
-        This action requires the FINANCIER role.
-        The API expects the following request payload: 
-        {
-            "financierId": "UUID"
-        }
-        financierId is the unique number given to the financier.""",
+            summary = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS,
+            description = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_DESCRIPTION,
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
