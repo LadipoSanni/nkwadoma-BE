@@ -433,6 +433,7 @@ class InvestmentVehicleServiceTest {
     void setInvestmentVehicleOperationStatus() {
         fundGrowth.setId(mockId);
         fundGrowth.setVehicleOperation(vehicleOperation);
+        fundGrowth.getVehicleOperation().setDeployingStatus(null);
         try {
             when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(TestData.buildInvestmentVehicle("Name"));
             when(vehicleOperationOutputPort.save(fundGrowth.getVehicleOperation())).thenReturn(vehicleOperation);
@@ -447,6 +448,22 @@ class InvestmentVehicleServiceTest {
         assertNotNull(fundGrowth);
         assertEquals(vehicleOperation, fundGrowth.getVehicleOperation());
         assertEquals(vehicleOperation.getFundRaisingStatus(), fundGrowth.getVehicleOperation().getFundRaisingStatus());
+    }
+
+    @Test
+    void cannotSetBothFundRaisingAndDeployingStatus() {
+        fundGrowth.setId(mockId);
+        fundGrowth.setVehicleOperation(vehicleOperation);
+        assertThrows(MeedlException.class, ()-> investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth));
+    }
+
+    @Test
+    void bothFundRaisingAndDeployingStatusCannotBeNull() {
+        fundGrowth.setId(mockId);
+        vehicleOperation.setDeployingStatus(null);
+        vehicleOperation.setFundRaisingStatus(null);
+        fundGrowth.setVehicleOperation(vehicleOperation);
+        assertThrows(MeedlException.class, ()-> investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth));
     }
 
     @Test
