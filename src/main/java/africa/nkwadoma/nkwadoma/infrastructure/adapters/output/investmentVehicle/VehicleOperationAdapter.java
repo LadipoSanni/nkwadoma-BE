@@ -25,7 +25,6 @@ public class VehicleOperationAdapter implements VehicleOperationOutputPort {
     @Override
     public VehicleOperation save(VehicleOperation vehicleOperation) throws MeedlException {
         MeedlValidator.validateObjectInstance(vehicleOperation,"Vehicle operation cannot be empty");
-        vehicleOperation.validate();
         VehicleOperationEntity vehicleOperationEntity =
                 vehicleOperationMapper.toVehicleOperationEntity(vehicleOperation);
         vehicleOperationEntity = vehicleOperationRepository.save(vehicleOperationEntity);

@@ -39,7 +39,12 @@ public class VehicleOperation {
     }
 
     public void validateFundraisingAndDeployingStatus() throws MeedlException {
-        MeedlValidator.validateObjectInstance(fundRaisingStatus,"Fund raising status cannot be empty");
-        MeedlValidator.validateObjectInstance(deployingStatus,"Deploying status cannot be empty");
+        if (fundRaisingStatus != null && deployingStatus != null) {
+            throw new MeedlException("Fundraising status and deploying status cannot be the set at the same time");
+        }
+        if (fundRaisingStatus == null && deployingStatus == null) {
+            throw new MeedlException("Both fundraising status and deploying status cannot be empty");
+        }
+
     }
 }
