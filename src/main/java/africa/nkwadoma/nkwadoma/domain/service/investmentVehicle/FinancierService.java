@@ -49,6 +49,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -579,14 +580,21 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
+    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        Financier foundFinancier = null;
+        if (userIdentity.getRole() == IdentityRole.FINANCIER){
+            foundFinancier = findFinancierByUserId(financierId);
+        } else if(userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER){
+            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
         BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
-
         List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
+
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)

@@ -10,23 +10,17 @@ public class SwaggerDocumentation {
              "investmentVehicleId": "investmentVehicleId"
              } \
             amountToInvest represents the amount the financier wishes to invest (e.g., 10000), and investmentVehicleId is the unique identifier of the investment vehicle to be funded.""";
-    public static final String VIEW_INVESTMENT_DETAILS = "View investment details";
-    public static final String VIEW_INVESTMENT_DETAILS_DESCRIPTION = """
-            Allows a Financier to check their investment details.
-            This action requires the FINANCIER role.
-            The authenticated user's ID is extracted from the JWT token.
-        """;
+
     public static final String VIEW_INVESTMENT_DETAILS_OF_FINANCIER = "View investment details of financier";
 
-
     public static final String VIEW_INVESTMENT_DETAILS_OF_FINANCIER_DESCRIPTION = """
-        Allows a Portfolio Manager to check the investment details of a particular financier. 
-        This action requires the PORTFOLIO_MANAGER role.
-        The API expects the following request payload: 
-        {
-            "financierId": "UUID"
-        }
-        financierId is the unique number given to the financier.""";
+        Allows a Portfolio Manager or Financier to view the investment details of a particular financier. 
+        This action requires either the PORTFOLIO_MANAGER or FINANCIER role.
+        The API expects an optional financierId parameter in the request:
+        If financierId is provided, the investment details for the specified financier are retrieved.
+        If financierId is not provided, the investment details for the authenticated user are retrieved.
+        financierId refers to the unique identifier assigned to a financier.""";
+
 
 
 }
