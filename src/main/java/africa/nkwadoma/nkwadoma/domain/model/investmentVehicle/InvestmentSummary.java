@@ -27,6 +27,7 @@ public class InvestmentSummary {
     private LocalDate startDate;
     private LocalDate maturityDate;
     private BigDecimal incomeEarned;
+    private IncomeInterval incomeInterval;
     private Set<InvestmentVehicleDesignation> designations;
     private OperationStatus operationStatus;
     private CouponDistributionStatus couponDistributionStatus;

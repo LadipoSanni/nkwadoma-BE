@@ -46,6 +46,7 @@ public class InvestmentVehicle {
     private String investmentVehicleLink;
     private LocalDate lastUpdatedDate;
     private BigDecimal netAssetValue;
+    private double netAssetValueInPercent;
     private double percentageOfPortfolio;
     private LocalDate maturityDate;
     private VehicleClosure vehicleClosureStatus;
