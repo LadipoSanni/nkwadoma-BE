@@ -20,7 +20,7 @@ public class FinancierDashboardResponse {
     private NextOfKin nextOfKin;
     private String taxId;
     private String rcNumber;
-    private int numberOfInvestment;
+    private int totalNumberOfInvestment;
     private String totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;

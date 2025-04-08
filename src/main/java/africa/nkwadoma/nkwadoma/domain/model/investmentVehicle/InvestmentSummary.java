@@ -17,9 +17,11 @@ import java.util.Set;
 public class InvestmentSummary {
     private String name;
     private InvestmentVehicleType investmentVehicleType;
+    private String fundManager;
     private LocalDate dateInvested;
     private BigDecimal amountInvested;
-    private BigDecimal netAssetValue;
+    private double netAssetValue;
+    private BigDecimal talentFunded;
     private double percentageOfPortfolio;
     private LocalDate startDate;
     private LocalDate maturityDate;

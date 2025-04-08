@@ -40,7 +40,7 @@ public class Financier {
     private UserIdentity userIdentity;
     private int pageNumber;
     private int pageSize;
-    private int numberOfInvestment;
+    private int totalNumberOfInvestment;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
