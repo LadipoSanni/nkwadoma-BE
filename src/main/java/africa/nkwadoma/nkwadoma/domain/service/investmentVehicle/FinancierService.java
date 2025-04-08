@@ -582,11 +582,9 @@ public class FinancierService implements FinancierUseCase {
     public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        log.info("--------> FoundFinancier ----> " + foundFinancier);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
         BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
-        log.info("-----> Total amount invested ------> " + totalInvestmentAmount);
 
         List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
         return FinancierVehicleDetail.builder()

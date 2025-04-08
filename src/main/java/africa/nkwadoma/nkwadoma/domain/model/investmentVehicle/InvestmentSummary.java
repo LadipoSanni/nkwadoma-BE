@@ -20,12 +20,14 @@ public class InvestmentSummary {
     private String fundManager;
     private LocalDate dateInvested;
     private BigDecimal amountInvested;
-    private double netAssetValue;
+    private BigDecimal netAssetValue;
+    private double netAssetValueInPercent;
     private BigDecimal talentFunded;
     private double percentageOfPortfolio;
     private LocalDate startDate;
     private LocalDate maturityDate;
     private BigDecimal incomeEarned;
+    private IncomeInterval incomeInterval;
     private Set<InvestmentVehicleDesignation> designations;
     private OperationStatus operationStatus;
     private CouponDistributionStatus couponDistributionStatus;
