@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -27,4 +28,5 @@ public class InvestmentVehicleFinancierEntity {
     private InvestmentVehicleEntity investmentVehicle;
     @Enumerated(EnumType.STRING)
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private LocalDate dateInvested;
 }

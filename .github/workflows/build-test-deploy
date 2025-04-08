@@ -3,14 +3,14 @@ name: Deploy to Dev Environment
 on:
   push:
     branches:
-      - dev
-      - main
-      - prod-support
+      - devs
+      - mains
+    
   pull_request:
     branches
-      - dev
-      - main
-      - prod-support
+      - devs
+      - mains
+
 env:
   ECR_REPO: learnspace-backend-systest
   CLUSTER: nkwadoma

@@ -71,13 +71,14 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("view-all-investment-vehicle")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleDetails(
+            @AuthenticationPrincipal Jwt meedlUser,
             @RequestParam int pageSize,
-            @RequestParam int pageNumber) {
+            @RequestParam int pageNumber) throws MeedlException {
 
         Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicle(pageSize, pageNumber);
+                investmentVehicleUseCase.viewAllInvestmentVehicle(meedlUser.getClaimAsString("sub"),pageSize, pageNumber);
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicleRestMapper.toViewAllInvestmentVehicleResponse(investmentVehicles.getContent());
 
@@ -172,4 +173,19 @@ public class InvestmentVehicleController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @DeleteMapping("delete-investment-vehicle/{investmentVehicleId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> deleteInvestmentVehicle(@PathVariable String investmentVehicleId) throws MeedlException {
+
+        String response =
+                investmentVehicleUseCase.deleteInvestmentVehicle(investmentVehicleId);
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(INVESTMENT_VEHICLE_DELETED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }

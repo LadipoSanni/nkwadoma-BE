@@ -252,13 +252,6 @@ class FinancierAdapterTest {
     }
 
     @Test
-    @Order(4)
-    void viewInvestmentDetailsOfFinancier(){
-        Financier financier = null;
-
-    }
-
-    @Test
     void viewFinanciersWithNull(){
         assertThrows(MeedlException.class,()-> financierOutputPort.viewAllFinancier(null));
     }
@@ -405,7 +398,7 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
-    @Order(8)
+    @Order(9)
     void completeKycIndividual() {
         Financier financierUpdated = null;
         Financier foundFinancier = null;
@@ -468,6 +461,7 @@ class FinancierAdapterTest {
         assertNotNull(response.getId());
     }
 
+
     @Test
     @Order(10)
     public void deleteFinancier(){
@@ -480,6 +474,7 @@ class FinancierAdapterTest {
         }
         assertThrows(MeedlException.class, ()-> financierOutputPort.findFinancierByFinancierId(financierId));
     }
+
 
     @AfterAll
     void tearDown() throws MeedlException {

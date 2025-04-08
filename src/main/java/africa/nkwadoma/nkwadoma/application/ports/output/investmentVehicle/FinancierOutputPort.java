@@ -19,4 +19,5 @@ public interface FinancierOutputPort {
     Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
 
     Financier findFinancierByEmail(String email) throws MeedlException;
+
 }

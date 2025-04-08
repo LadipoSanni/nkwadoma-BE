@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -82,6 +83,13 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         return loaneeEntities.stream().map(loaneeMapper::toLoanee).toList();
     }
 
+    @Override
+    public Page<Loanee> findAllLoaneeThatBenefitedFromLoanProduct(String id,int pageSize,int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeProjection> loaneeProjections = loaneeRepository.findAllByLoanProductId(id,pageRequest);
+        return loaneeProjections.map(loaneeMapper::mapProjecttionToLoanee);
+    }
 
 
     @Override

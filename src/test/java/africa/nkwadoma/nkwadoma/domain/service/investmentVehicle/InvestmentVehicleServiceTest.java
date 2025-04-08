@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -127,11 +128,12 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
-    void viewAllInvestmentVehicle(){
+    void viewAllInvestmentVehicle() throws MeedlException {
         when(investmentVehicleOutputPort.findAllInvestmentVehicle(pageSize,pageNumber)).
                 thenReturn(new PageImpl<>(List.of(fundGrowth)));
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleService.viewAllInvestmentVehicle(
-                pageSize, pageNumber);
+                mockId,pageSize, pageNumber);
         List<InvestmentVehicle> investmentVehiclesList = investmentVehicles.toList();
         assertEquals(1, investmentVehiclesList.size());
     }
@@ -445,6 +447,36 @@ class InvestmentVehicleServiceTest {
         assertNotNull(fundGrowth);
         assertEquals(vehicleOperation, fundGrowth.getVehicleOperation());
         assertEquals(vehicleOperation.getFundRaisingStatus(), fundGrowth.getVehicleOperation().getFundRaisingStatus());
+    }
+
+    @Test
+    void deleteInvestmentVehicleSavedInDraftWithNullId() {
+        assertThrows(MeedlException.class, () -> investmentVehicleService.deleteInvestmentVehicle(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY,"jdhhfjh=djdj"})
+    void deleteInvestmentVehicleSavedInDraftWithInvalidId(String invalidId) {
+        assertThrows(MeedlException.class, () -> investmentVehicleService.deleteInvestmentVehicle(invalidId));
+    }
+
+    @Test
+    void cannotDeletePublishedInvestmentVehicle() throws MeedlException {
+        when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        assertThrows(MeedlException.class, () -> investmentVehicleService.deleteInvestmentVehicle(mockId));
+        verify(investmentVehicleOutputPort, times(1)).findById(mockId);
+        verify(investmentVehicleOutputPort, never()).deleteInvestmentVehicle(mockId);
+    }
+
+    @Test
+    void deleteInvestmentVehicleInDraft() throws MeedlException {
+        fundGrowth.setInvestmentVehicleStatus(DRAFT);
+        when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        String response = investmentVehicleService.deleteInvestmentVehicle(mockId);
+        assertNotNull(response);
+        verify(investmentVehicleOutputPort, times(1)).findById(mockId);
+        verify(investmentVehicleOutputPort, times(1)).deleteInvestmentVehicle(mockId);
+        verifyNoMoreInteractions(investmentVehicleOutputPort);
     }
 
 }

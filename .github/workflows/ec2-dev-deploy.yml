@@ -1,16 +1,15 @@
-name: Deploy Systest to Amazon EC2
+name: Deploy dev to Amazon EC2
 
 on:
   push:
     branches:
-      - dev
+      - devs
 
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
   ECR_REPOSITORY: nkwadoma
   AWS_REGION: us-east-1
-  CLUSTER: learnspace-africa
-  SERVICE: learnspace-backend-systest
+
 
 jobs:
   build-and-push:

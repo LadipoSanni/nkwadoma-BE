@@ -54,4 +54,12 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     Page<InvestmentVehicleEntity> findByInvestmentVehicleByFundRaisingStatus(FundRaisingStatus fundRaisingStatus, Pageable pageRequest);
 
 
+    @Query("SELECT i FROM InvestmentVehicleEntity i " +
+            "WHERE i.investmentVehicleVisibility != 'PRIVATE' " +
+            "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
+            "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle = i " +
+            "AND ivf.financier.userIdentity.id = :userId))")
+    Page<InvestmentVehicleEntity> findAllInvestmentVehicleExcludingPrivate(
+            @Param("userId") String userId,Pageable pageRequest);
 }
