@@ -133,4 +133,31 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+
+    @GetMapping("loanProduct/search-loanees/{loanProductId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
+            @PathVariable String loanProductId,
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+
+    )throws MeedlException {
+
+        Page<Loanee> loanees =
+                loaneeUseCase.searchLoaneeThatBenefitedFromLoanProduct(loanProductId,name,pageSize,pageNumber);
+        List<LoanBeneficiaryResponse> loaneeResponses = loanees.stream()
+                .map(loaneeRestMapper::toLoanBeneficiaryResponse).toList();
+        PaginatedResponse<LoanBeneficiaryResponse> paginatedResponse = new PaginatedResponse<>(
+                loaneeResponses, loanees.hasNext(),
+                loanees.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanBeneficiaryResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoanBeneficiaryResponse>>builder()
+                .data(paginatedResponse)
+                .message(ControllerConstant.RETURNED_SUCCESSFULLY.toString())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }
