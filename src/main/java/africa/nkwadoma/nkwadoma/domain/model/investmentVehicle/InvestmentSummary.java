@@ -20,6 +20,7 @@ public class InvestmentSummary {
     private LocalDate dateInvested;
     private BigDecimal amountInvested;
     private BigDecimal netAssetValue;
+    private double netAssetValueInPercent;
     private double percentageOfPortfolio;
     private LocalDate startDate;
     private LocalDate maturityDate;

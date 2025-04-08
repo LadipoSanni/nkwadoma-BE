@@ -50,6 +50,7 @@ public class InvestmentVehicle {
     private LocalDate maturityDate;
     private VehicleClosure vehicleClosureStatus;
     private BigDecimal incomeEarned;
+    private IncomeInterval incomeInterval;
     private VehicleOperation vehicleOperation;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private LocalDate dateInvested;
