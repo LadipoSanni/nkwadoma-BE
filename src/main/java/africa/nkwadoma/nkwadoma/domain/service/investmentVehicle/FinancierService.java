@@ -361,7 +361,17 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier viewFinancierDetail(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        return financierOutputPort.findFinancierByFinancierId(financierId);
+        Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+        return updateFinancierDetails(financier);
+    }
+
+    private Financier updateFinancierDetails(Financier financier) throws MeedlException {
+        List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
+        List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
+                .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
+        financier.setTotalNumberOfInvestment(financierInvestmentVehicle.size());
+        financier.setInvestmentVehicles(investmentVehicles);
+        return financier;
     }
 
     @Override
@@ -585,6 +595,13 @@ public class FinancierService implements FinancierUseCase {
                 .investmentSummaries(investmentSummaries)
                 .portfolioValue(foundFinancier.getPortfolioValue())
                 .build();
+    }
+
+    @Override
+    public Financier findFinancierByUserId(String userId) throws MeedlException {
+        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        foundFinancier = viewFinancierDetail(foundFinancier.getId());
+        return updateFinancierDetails(foundFinancier);
     }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
