@@ -51,7 +51,6 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "vehicleClosureStatus", source = "vehicleClosureStatus")
     @Mapping(target = "investmentVehicleVisibility", source = "investmentVehicleVisibility")
     @Mapping(target = "fundManager", source="fundManager")
-    @Mapping(target = "percentageOfPortfolio", source = "percentageOfPortfolio")
     @Mapping(target = "incomeInterval", source = "incomeInterval")
     @Mapping(target = "talentFunded", source = "talentFunded", defaultValue = "0")
     InvestmentSummary toInvestmentSummary(InvestmentVehicle investmentVehicle);
