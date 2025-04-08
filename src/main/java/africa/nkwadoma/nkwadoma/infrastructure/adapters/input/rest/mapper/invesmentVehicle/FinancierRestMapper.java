@@ -36,7 +36,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "phoneNumber", source="userIdentity.phoneNumber")
     @Mapping(target = "address", source="userIdentity.address")
     @Mapping(target = "rcNumber", source = "rcNumber")
-    @Mapping(target = "totalNumberOfInvestment", source = "numberOfInvestment")
+    @Mapping(target = "totalNumberOfInvestment", source = "totalNumberOfInvestment")
     FinancierDashboardResponse mapToDashboardResponse(Financier financier);
 
     KycResponse mapToFinancierResponse(Financier financier);

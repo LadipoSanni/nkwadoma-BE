@@ -369,7 +369,7 @@ public class FinancierService implements FinancierUseCase {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
                 .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
-        financier.setNumberOfInvestment(financierInvestmentVehicle.size());
+        financier.setTotalNumberOfInvestment(financierInvestmentVehicle.size());
         financier.setInvestmentVehicles(investmentVehicles);
         return financier;
     }
