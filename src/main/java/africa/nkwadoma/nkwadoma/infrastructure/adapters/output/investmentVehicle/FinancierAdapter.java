@@ -40,12 +40,13 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
-        log.info("Financier next of kin found in adapter: {}", financierEntity.getUserIdentity().getNextOfKinEntity());
+        log.info("Financier found at the adapter level for view by financier id {}", financierEntity);
         return financierMapper.map(financierEntity);
     }
 
     @Override
     public Financier findFinancierByUserId(String id) throws MeedlException {
+        MeedlValidator.validateUUID(id, "User id is required to view financier details.");
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
                 .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
         return financierMapper.map(foundFinancier);
@@ -82,9 +83,9 @@ public class FinancierAdapter implements FinancierOutputPort {
         financier.validateKyc();
         financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
         FinancierEntity financierToSave = financierMapper.map(financier);
-        log.info("Financier to save: {}", financierToSave);
+        log.info("Financier to save for kyc: {}", financierToSave);
         FinancierEntity financierEntity = financierRepository.save(financierToSave);
-        log.info("Financier with id : {} completed KYC successfully", financierEntity);
+        log.info("Financier completed KYC successfully : {} ", financierEntity);
         Financier kycCompletedFinancier = financierMapper.map(financierEntity);
         log.info("Kyc completed financier {}", kycCompletedFinancier);
         return kycCompletedFinancier;

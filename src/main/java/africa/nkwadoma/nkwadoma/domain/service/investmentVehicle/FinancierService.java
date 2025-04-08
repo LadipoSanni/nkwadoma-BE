@@ -19,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -29,7 +28,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
-import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +37,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -496,33 +494,49 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
+    @Transactional
     public Financier completeKyc(Financier financier) throws MeedlException {
-        kycIdentityValidation(financier);
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        financier.validateKyc();
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         if (foundFinancier.getUserIdentity().getBankDetail() == null){
             log.info("Financier details in service to use in completing kyc {}", financier);
             log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
             log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
-            foundFinancier.getUserIdentity().setBankDetail(bankDetail);
+            mapKycFinancierUpdatedValues(financier, foundFinancier, bankDetail);
 
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
-            return financierOutputPort.completeKyc(foundFinancier);
+            log.info("updated user details for kyc");
+            return financierOutputPort.completeKyc(financier);
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
     }
 
+    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {
+        UserIdentity userIdentity = foundFinancier.getUserIdentity();
+        log.info("updating user details in kyc {}", userIdentity.getId());
+
+        userIdentity.setNin(financier.getUserIdentity().getNin());
+        userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
+        userIdentity.setBvn(financier.getUserIdentity().getBvn());
+        userIdentity.setBankDetail(bankDetail);
+        userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
+
+        foundFinancier.setUserIdentity(userIdentity);
+
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setUserIdentity(userIdentity);
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setId(foundFinancier.getId());
+
+    }
+
     @Override
     public Financier findFinancierByCooperationId(String cooperationId) throws MeedlException {
         return null;
-    }
-
-    private static void kycIdentityValidation(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
-        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");
-        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), "User identification performing this action is unknown. ");
     }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
