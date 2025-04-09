@@ -200,7 +200,14 @@ public class CohortService implements CohortUseCase {
         if (ObjectUtils.isNotEmpty(loanees)) {
             throw new CohortException(CohortMessages.COHORT_WITH_LOANEE_CANNOT_BE_DELETED.getMessage());
         }
-        cohortOutputPort.deleteCohort(id);
+        Cohort cohort = cohortOutputPort.findCohort(id);
+        cohortOutputPort.deleteCohort(cohort.getId());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        program.setNumberOfCohort(program.getNumberOfCohort() - 1);
+        programOutputPort.saveProgram(program);
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
+        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - 1);
+        organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     @Override
