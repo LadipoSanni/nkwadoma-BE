@@ -4,6 +4,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -17,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,10 +49,43 @@ public class Financier {
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
-    private String taxInformationNumber;
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
 
+    //source of fund
+    private String personalOrJointSavings;
+    private String employmentIncome;
+    private String salesOfAssets;
+    private String donation;
+    private String inheritanceOrGift;
+    private String compensationOfLegalSettlements;
+    private BigDecimal profitFromLegitimateActivities;
+    private String occupation;
+
+    //Beneficial owner information
+    private FinancierType beneficialOwnerType;
+    //beneficial Entity
+    private String entityName;
+    private String beneficialRcNumber;
+    private String taxInformationNumber;
+    private Country countryOfIncorporation;
+
+    //beneficial individual
+    private String beneficialOwnerFirstName;
+    private String beneficialOwnerLastName;
+    private UserRelationship beneficialOwnerRelationship;
+    private LocalDate beneficialOwnerDateOfBirth;
+    private double percentageOwnershipOrShare;
+//    Gov ID
+    private String votersCard;
+    private String nationalIdCard;
+    private String driverLicensetionalIdCard;
+    private String driverLicense;
+
+    //Declaration
+    private boolean declarationAndAgreement;
+    private boolean politicallyExposed;
+    private List<PoliticalPartyExposedTo> politicalPartiesExposedTo;
 
     private void validateUserIdentity() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
@@ -56,11 +94,6 @@ public class Financier {
         MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
         MeedlValidator.validateEmail(userIdentity.getEmail());
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
-
-        validateFinancierEmail(userIdentity);
-        MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
-        MeedlValidator.validateDataElement(userIdentity.getLastName(), UserMessages.INVALID_LAST_NAME.getMessage());
-        MeedlValidator.validateEmail(userIdentity.getEmail());
     }
 
 
@@ -80,12 +113,15 @@ public class Financier {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
             MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
             MeedlValidator.validateUUID(this.getUserIdentity().getCreatedBy(), "Valid user identification for user performing this action is required");
-            if (this.financierType == FinancierType.INDIVIDUAL) {
+            if (financierIsIndividual()) {
                 validateUserIdentity();
             } else {
                 validateCooperation();
             }
         }
+    }
+    private boolean financierIsIndividual(){
+        return this.financierType == FinancierType.INDIVIDUAL;
     }
 
     private void validateCooperation() throws MeedlException {
@@ -94,17 +130,77 @@ public class Financier {
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
-
     public void validateKyc() throws MeedlException {
-        MeedlValidator.validateUUID(id, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        MeedlValidator.validateObjectInstance(userIdentity.getBankDetail(), "Provide a valid bank detail.");
-        MeedlValidator.validateUUID(userIdentity.getBankDetail().getId(), "Provide a valid bank detail id.");
-        userIdentity.getBankDetail().validate();
-        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin(), "Provide a valid next of kin detail.");
-        MeedlValidator.validateObjectInstance(userIdentity.getNextOfKin().getId(), "Provide a valid next of kin detail id.");
-        userIdentity.getNextOfKin().validate();
+        MeedlValidator.validateObjectInstance(this.userIdentity, "User performing this action is unknown.");
+        MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
+        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
+        this.userIdentity.getBankDetail().validate();
+        MeedlValidator.validateDataElement(this.userIdentity.getPhoneNumber(), "Phone number is required.");
+        if (financierIsIndividual()){
+            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
+            validateKycIdentityNumbers();
+        }else {
+            MeedlValidator.validateDataElement(this.taxInformationNumber, "Tax information number is required.");
+            MeedlValidator.validateDataElement(this.beneficialRcNumber, "Rc number is required.");
+        }
+        validateSourceOfFund();
+        validateDeclaration();
+        validateBeneficialOwnerKyc();
+    }
+    private void validateBeneficialOwnerKyc() throws MeedlException {
+        if (beneficialOwnerType != null){
+            log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", beneficialOwnerType);
+            validateProofOfBeneficialOwnership();
+            if (this.beneficialOwnerType == FinancierType.INDIVIDUAL){
+                MeedlValidator.validateDataElement(this.beneficialOwnerFirstName, "Beneficial owner first name is required.");
+                MeedlValidator.validateDataElement(this.beneficialOwnerLastName, "Beneficial owner last name is required.");
+                MeedlValidator.validateObjectInstance(this.beneficialOwnerRelationship, "Beneficial owner relationship is required.");
+                MeedlValidator.validateObjectInstance(this.beneficialOwnerDateOfBirth, "Beneficial owner date of birth is required.");
+                MeedlValidator.validateDoubleDataElement(this.percentageOwnershipOrShare, "Beneficial owner percentage ownership or share is required.");
+            }{
+                MeedlValidator.validateDataElement(this.entityName, "Entity name is required.");
+                MeedlValidator.validateRCNumber(this.beneficialRcNumber);
+                MeedlValidator.validateObjectInstance(this.countryOfIncorporation, "Country of incorporation is required.");
+            }
+        }
+    }
+    public void validateProofOfBeneficialOwnership() throws MeedlException {
+        if (isBlank(this.votersCard) && isBlank(this.nationalIdCard) && isBlank(this.driverLicense) && isBlank(this.driverLicensetionalIdCard)) {
+            throw new MeedlException("At least one form of beneficial owner identification must be provided.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private void validateDeclaration() throws MeedlException {
+        if (this.declarationAndAgreement){
+            if (this.isPoliticallyExposed()){
+                for (PoliticalPartyExposedTo party : this.politicalPartiesExposedTo) {
+                    MeedlValidator.validateObjectInstance(party, "Political party exposed to should be declared.");
+                    party.validate();
+                }
+            }
+        }else {
+            throw new MeedlException("Please agree to the declaration and agreement.");
+        }
+    }
+    private void validateSourceOfFund() throws MeedlException {
+        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
+        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
+        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
+        MeedlValidator.validateDataElement(this.donation, "Donation needs to be stated.");
+        MeedlValidator.validateDataElement(this.occupation, "Occupation needs to be stated.");
+        MeedlValidator.validateDataElement(this.inheritanceOrGift, "Inheritance or gift needs to be stated.");
+        MeedlValidator.validateDataElement(this.compensationOfLegalSettlements, "Compensation of legal settlements needs to be stated.");
+        MeedlValidator.validateObjectInstance(this.profitFromLegitimateActivities, "Profit From Legitimate Activities of legal settlements needs to be stated.");
+    }
+
+    private void validateKycIdentityNumbers() throws MeedlException {
         MeedlValidator.validateDataElement(userIdentity.getNin(), "Nin is required");
         MeedlValidator.validateDataElement(userIdentity.getTaxId(), "Tax id is required");
+        MeedlValidator.validateDataElement(userIdentity.getBvn(), "Bvn is required");
     }
     public void validateFinancierDesignation() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.investmentVehicleDesignation, FinancierMessages.FINANCIER_DESIGNATION_REQUIRED.getMessage());
