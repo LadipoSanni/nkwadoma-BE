@@ -387,7 +387,7 @@ public class FinancierServiceTest {
     @Test
     void completeIndividualKycWithoutAccountName(){
         Financier financierWithKycRequest = TestData.completeKycRequest(individualFinancier, bankDetail);
-        financierWithKycRequest.getUserIdentity().getBankDetail().setBankNumber(null);
+        financierWithKycRequest.getUserIdentity().getBankDetail().setBankName(null);
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
 
