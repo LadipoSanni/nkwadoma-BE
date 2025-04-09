@@ -150,7 +150,7 @@ public class Financier {
     private void validateBeneficialOwnerKyc() throws MeedlException {
         if (beneficialOwnerType != null){
             log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", beneficialOwnerType);
-//            validateProofOfBeneficialOwnership();
+            validateProofOfBeneficialOwnership();
             if (this.beneficialOwnerType == FinancierType.INDIVIDUAL){
                 MeedlValidator.validateDataElement(this.beneficialOwnerFirstName, "Beneficial owner first name is required.");
                 MeedlValidator.validateDataElement(this.beneficialOwnerLastName, "Beneficial owner last name is required.");
@@ -164,18 +164,14 @@ public class Financier {
             }
         }
     }
-
-    private void validateProofOfBeneficialOwnership() throws MeedlException {
-        log.info("votersCard {} , nationalIdCard {}, driverLicensetionalIdCard {}, driverLicense {}",votersCard, nationalIdCard, driverLicensetionalIdCard, driverLicense);
-        if (MeedlValidator.isNotEmptyString(this.votersCard) ||
-            MeedlValidator.isNotEmptyString(this.nationalIdCard) ||
-            MeedlValidator.isNotEmptyString(this.driverLicensetionalIdCard) ||
-            MeedlValidator.isNotEmptyString(this.driverLicense)){
-            log.info("Proof of beneficial ownership was provided. At least one was given.");
-        }{
-            throw new MeedlException("Please provide at least one. Voters card/national id card/drivers licensetionak id card/driver license.");
+    public void validateProofOfBeneficialOwnership() throws MeedlException {
+        if (isBlank(this.votersCard) && isBlank(this.nationalIdCard) && isBlank(this.driverLicense) && isBlank(this.driverLicensetionalIdCard)) {
+            throw new MeedlException("At least one form of beneficial owner identification must be provided.");
         }
+    }
 
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     private void validateDeclaration() throws MeedlException {
