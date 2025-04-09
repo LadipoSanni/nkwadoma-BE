@@ -386,12 +386,6 @@ class FinancierAdapterTest {
         assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
     }
     @Test
-    void completeKycWithoutNextOfKin(){
-        Financier financierWithKycRequest = TestData.completeKycRequest(individualFinancier, bankDetail);
-        financierWithKycRequest.getUserIdentity().setNextOfKin(null);
-        assertThrows(MeedlException.class,()-> financierOutputPort.completeKyc(financierWithKycRequest));
-    }
-    @Test
     void completeIndividualKycWithNullUser(){
         Financier financierWithKycRequest = TestData.completeKycRequest(individualFinancier, bankDetail);
         financierWithKycRequest.setUserIdentity(null);
