@@ -169,7 +169,7 @@ class LoanProductServiceTest {
             when(userIdentityOutputPort.findById(loanProduct.getCreatedBy())).thenReturn(userIdentity);
 
             // Corrected line:
-            doNothing().when(identityManagerOutPutPort).verifyUserExistsAndIsEnabled(userIdentity);
+            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(userIdentity)).thenReturn(userIdentity);
 
             when(loanProductOutputPort.existsByName(loanProduct.getName())).thenReturn(Boolean.TRUE);
 
