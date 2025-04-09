@@ -48,6 +48,7 @@ public class LoanProductEntity {
     private BigDecimal minRepaymentAmount;
     private String bankPartner;
     private String disbursementTerms;
+    private String investmentVehicleId;
     private String investmentVehicleName;
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
     private int totalNumberOfLoanees;
