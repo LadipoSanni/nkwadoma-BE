@@ -163,6 +163,17 @@ class LoanProductServiceTest {
         assertThrows(MeedlException.class,()-> loanService.viewLoanProductDetailsById(value));
     }
     @Test
+    void createLoanProductWithExistingLoanProductName(){
+//        try {
+//            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
+//            assertNotNull(foundLoanProduct);
+//            assertEquals(foundLoanProduct.getName(),gemsLoanProduct.getName());
+//        } catch (MeedlException exception) {
+//            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
+//        }
+//        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
+    }
+    @Test
     void viewLoanProductDetailsWithValidId(){
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);
