@@ -129,7 +129,8 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities =
                 investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExcludingPrivateAndDefault
-                        (userId,investmentVehicle.getInvestmentVehicleStatus(),investmentVehicle.getInvestmentVehicleType(),pageRequest);
+                        (userId,investmentVehicle.getInvestmentVehicleStatus(),
+                                investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
