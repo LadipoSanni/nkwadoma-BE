@@ -1,12 +1,15 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
@@ -32,6 +35,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     private final InvestmentVehicleEntityRepository investmentVehicleRepository;
     private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -90,15 +94,28 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField, String userId) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        Sort sort = Sort.by("createdDate").descending();
+        Sort sort = (sortField == null || sortField.isEmpty())
+                ? Sort.by("createdDate").descending()
+                : Sort.by(sortField).descending();
         if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
-                 sort = Sort.by("lastUpdatedDate").descending();
+            sort = (sortField == null || sortField.isEmpty())
+                    ? Sort.by("lastUpdatedDate").descending()
+                    : Sort.by(sortField).descending();
         }
+        IdentityRole userRole = userIdentityOutputPort.findById(userId).getRole();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+
+        if (userRole.equals(IdentityRole.FINANCIER)){
+            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(
+                    investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, userId, pageable);
+        }
+        else {
+            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+        }
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 

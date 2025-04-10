@@ -93,16 +93,19 @@ public class InvestmentVehicleController {
 
 
     @GetMapping("investment-vehicle/all/view/by")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleBy(
             @RequestParam int pageSize,
             @RequestParam int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
-            @RequestParam(required = false)FundRaisingStatus fundRaisingStatus) throws MeedlException {
+            @RequestParam(required = false)FundRaisingStatus fundRaisingStatus,
+            @RequestParam(required = false) String sortField,
+            @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
+        String userId = meedlUser.getClaimAsString("sub");
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
-                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
+                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, sortField, userId);
 
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();

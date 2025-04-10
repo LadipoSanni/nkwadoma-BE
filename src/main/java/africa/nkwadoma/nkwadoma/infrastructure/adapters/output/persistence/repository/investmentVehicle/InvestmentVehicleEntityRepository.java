@@ -53,13 +53,30 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.fundRaisingStatus = :fundRaisingStatus AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.createdDate DESC")
     Page<InvestmentVehicleEntity> findByInvestmentVehicleByFundRaisingStatus(FundRaisingStatus fundRaisingStatus, Pageable pageRequest);
 
-
     @Query("SELECT i FROM InvestmentVehicleEntity i " +
-            "WHERE i.investmentVehicleVisibility != 'PRIVATE' " +
+            "WHERE i.investmentVehicleVisibility != 'DEFAULT' " +
+            "AND (i.investmentVehicleVisibility = 'PUBLIC' " +
             "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
             "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId))")
+            "AND ivf.financier.userIdentity.id = :userId)))")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleExcludingPrivate(
             @Param("userId") String userId,Pageable pageRequest);
+
+    @Query("SELECT i FROM InvestmentVehicleEntity i " +
+            "WHERE i.investmentVehicleVisibility != 'DEFAULT' " +
+            "AND (i.investmentVehicleVisibility = 'PUBLIC' " +
+            "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
+            "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle = i " +
+            "AND ivf.financier.userIdentity.id = :userId))) " +
+            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
+            "AND (:investmentVehicleStatus IS NULL OR i.investmentVehicleStatus = :investmentVehicleStatus) " +
+            "AND (:fundRaisingStatus IS NULL OR i.fundRaisingStatus = :fundRaisingStatus)")
+    Page<InvestmentVehicleEntity> findAllInvestmentVehicleForFinancier(
+            @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
+            @Param("investmentVehicleStatus") InvestmentVehicleStatus investmentVehicleStatus,
+            @Param("fundRaisingStatus") FundRaisingStatus fundRaisingStatus,
+            @Param("userId") String userId,
+            Pageable pageable);
 }

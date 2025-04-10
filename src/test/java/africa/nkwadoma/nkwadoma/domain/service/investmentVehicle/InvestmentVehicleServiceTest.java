@@ -12,7 +12,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
@@ -24,8 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +75,12 @@ class InvestmentVehicleServiceTest {
     private CouponDistributionOutputPort couponDistributionOutputPort;
     private CouponDistribution couponDistribution;
     @Mock
+    private InvestmentVehicleEntityRepository investmentVehicleRepository;
+
+    @Mock
+    private InvestmentVehicleMapper investmentVehicleMapper;
+    @Mock
     private VehicleOperationMapper vehicleOperationMapper;
-
-
 
 
     @BeforeEach
@@ -151,6 +156,30 @@ class InvestmentVehicleServiceTest {
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
         assertEquals(1, investmentVehiclesList.size());
+    }
+
+    @Test
+    void viewAllInvestmentVehicleByForPortfolioManagerNoFilters() throws MeedlException {
+        String portfolioManagerId = UUID.randomUUID().toString();
+        UserIdentity portfolioManager = UserIdentity.builder().role(IdentityRole.PORTFOLIO_MANAGER).build();
+        when(userIdentityOutputPort.findById(portfolioManagerId)).thenReturn(portfolioManager);
+
+        InvestmentVehicleEntity entity = new InvestmentVehicleEntity();
+        List<InvestmentVehicleEntity> entities = List.of(entity);
+        Page<InvestmentVehicleEntity> entityPage = new PageImpl<>(entities, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending()), 1);
+        when(investmentVehicleRepository.findAllInvestmentVehicleBy(null, null, null, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending())))
+                .thenReturn(entityPage);
+
+        when(investmentVehicleMapper.toInvestmentVehicle(entity)).thenReturn(fundGrowth);
+
+        Page<InvestmentVehicle> result = investmentVehicleService.viewAllInvestmentVehicleBy(
+                pageSize, pageNumber, null, null, null, null, portfolioManagerId);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(fundGrowth, result.getContent().get(0));
+        verify(investmentVehicleOutputPort).findAllInvestmentVehicleBy(pageSize, pageNumber, null, null, null, null, portfolioManagerId);
+        verify(userIdentityOutputPort).findById(portfolioManagerId);
+        verify(investmentVehicleRepository).findAllInvestmentVehicleBy(null, null, null, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending()));
     }
 
     @Test
