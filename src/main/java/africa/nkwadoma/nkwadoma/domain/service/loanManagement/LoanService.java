@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -69,6 +70,9 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanProduct.validateLoanProductDetails();
         UserIdentity foundUser = userIdentityOutputPort.findById(loanProduct.getCreatedBy());
         identityManagerOutPutPort.verifyUserExistsAndIsEnabled(foundUser);
+        if (loanProductOutputPort.existsByName(loanProduct.getName())){
+            throw new ResourceAlreadyExistsException("Loan product " + loanProduct.getName() + " already exists");
+        }
         log.info("Searching for investment vehicle with id {} ", loanProduct.getInvestmentVehicleId());
         InvestmentVehicle investmentVehicle = checkProductSizeNotMoreThanAvailableInvestmentAmount(loanProduct);
         investmentVehicle.setTotalAvailableAmount(investmentVehicle.getTotalAvailableAmount().subtract(loanProduct.getLoanProductSize()));

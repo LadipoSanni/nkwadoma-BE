@@ -163,6 +163,22 @@ class LoanProductServiceTest {
         assertThrows(MeedlException.class,()-> loanService.viewLoanProductDetailsById(value));
     }
     @Test
+    void createLoanProductWithExistingLoanProductName(){
+        try {
+            UserIdentity userIdentity = new UserIdentity();
+            when(userIdentityOutputPort.findById(loanProduct.getCreatedBy())).thenReturn(userIdentity);
+
+            // Corrected line:
+            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(userIdentity)).thenReturn(userIdentity);
+
+            when(loanProductOutputPort.existsByName(loanProduct.getName())).thenReturn(Boolean.TRUE);
+
+            assertThrows(MeedlException.class, () -> loanService.createLoanProduct(loanProduct));
+        } catch (MeedlException exception) {
+            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
+        }
+    }
+    @Test
     void viewLoanProductDetailsWithValidId(){
         try {
             when(loanProductOutputPort.findById(loanProduct.getId())).thenReturn(loanProduct);

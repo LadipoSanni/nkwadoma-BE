@@ -91,6 +91,17 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         return loaneeProjections.map(loaneeMapper::mapProjecttionToLoanee);
     }
 
+    @Override
+    public Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String id, String name, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id,"Loan product id cannot empty");
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<LoaneeProjection> loaneeProjections = loaneeRepository.findAllByLoanProductIdAndNameFragment(id,name,pageRequest);
+        if (loaneeProjections.isEmpty()){
+            return new PageImpl<>(new ArrayList<>());
+        }
+        return loaneeProjections.map(loaneeMapper::mapProjecttionToLoanee);
+    }
+
 
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
