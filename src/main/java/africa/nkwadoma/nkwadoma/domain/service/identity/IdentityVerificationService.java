@@ -172,7 +172,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             if ((premblyNinResponse.getVerification().getStatus().equals("VERIFIED") && premblyNinResponse.getNinData()!= null &&
                     premblyNinResponse.getFaceData() != null && premblyNinResponse.getFaceData().isFaceVerified())) {
                 log.info("Identity verified successfully. {}", premblyNinResponse.getNinData());
-//                return handleSuccessfulVerification(identityVerification, loanReferral, premblyNinResponse);
                 return handleSuccessfulVerification(identityVerification, loanReferral, premblyNinResponse);
             } else {
                 return handleFailedVerification(loanReferral, premblyNinResponse);

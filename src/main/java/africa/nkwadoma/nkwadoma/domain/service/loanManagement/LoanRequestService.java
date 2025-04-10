@@ -54,7 +54,6 @@ public class LoanRequestService implements LoanRequestUseCase {
         log.info("Loan requests from repository: {}", loanRequests.getContent());
         return loanRequests;
     }
-
     @Override
     public LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());

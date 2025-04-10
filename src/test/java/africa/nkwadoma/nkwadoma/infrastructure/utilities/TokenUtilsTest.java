@@ -58,7 +58,7 @@ class TokenUtilsTest {
     @Test
     void testEncryptData() {
         try {
-            String encryptedAES = tokenUtils.encryptAES(DECRYPTED_DATA);
+            String encryptedAES = tokenUtils.encryptAES("85652544854");
             assertNotNull(encryptedAES);
             assertEquals(ENCRYPTED_DATA, encryptedAES);
         } catch (MeedlException e) {
