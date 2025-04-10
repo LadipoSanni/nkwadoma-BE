@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.education.*;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,12 +41,15 @@ class ProgramServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
+    @Mock
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private Program program;
     private int pageSize = 10;
     private int pageNumber = 0;
     private String testId = "1de71eaa-de6d-4cdf-8f93-aa7be533f4aa";
     UserIdentity userIdentity;
     OrganizationEmployeeIdentity employeeIdentity;
+    OrganizationIdentity organizationIdentity;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +62,7 @@ class ProgramServiceTest {
                 programDescription("A great program").programStatus(ActivationStatus.ACTIVE).
                 createdBy(testId).deliveryType(DeliveryType.ONSITE).
                 mode(ProgramMode.FULL_TIME).duration(BigInteger.ONE.intValue()).build();
+        organizationIdentity = TestData.createOrganizationTestData("organization","RC12345678",List.of(employeeIdentity));
     }
 
     @Test
@@ -249,12 +254,16 @@ class ProgramServiceTest {
     void deleteProgram() {
         try {
             when(programOutputPort.findProgramById(program.getId())).thenReturn(program);
-
+            program.setOrganizationId(organizationIdentity.getId());
+            when(organizationIdentityOutputPort.findById(program.getOrganizationId())).
+                    thenReturn(organizationIdentity);
+            organizationIdentity.setNumberOfPrograms(1);
             programService.deleteProgram(program);
             verify(programOutputPort, times(1)).deleteProgram(program.getId());
         } catch (MeedlException e) {
             log.error("Error deleting program", e);
         }
+        assertEquals(0, organizationIdentity.getNumberOfPrograms());
     }
 
     @Test
