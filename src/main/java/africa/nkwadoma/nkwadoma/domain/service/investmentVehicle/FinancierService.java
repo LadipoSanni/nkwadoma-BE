@@ -603,10 +603,9 @@ public class FinancierService implements FinancierUseCase {
         Financier foundFinancier = null;
         if (userIdentity.getRole() == IdentityRole.FINANCIER){
             foundFinancier = findFinancierByUserId(financierId);
-        } else if(userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER){
+        } else {
             foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
-        foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
         BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
