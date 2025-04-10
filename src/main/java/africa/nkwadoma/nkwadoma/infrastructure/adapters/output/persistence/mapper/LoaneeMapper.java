@@ -9,7 +9,7 @@ import java.util.*;
 
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoaneeMapper {
-    @Mapping(source = "userIdentity", target = "userIdentity")
+    @Mapping(target = "userIdentity", source = "userIdentity")
     LoaneeEntity toLoaneeEntity(Loanee loanee);
 
     @InheritInverseConfiguration
