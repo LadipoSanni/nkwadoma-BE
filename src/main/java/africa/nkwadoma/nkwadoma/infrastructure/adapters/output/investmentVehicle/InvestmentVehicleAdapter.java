@@ -128,7 +128,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities =
-                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExludingPrivate
+                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExcludingPrivateAndDefault
                         (userId,investmentVehicle.getInvestmentVehicleStatus(),investmentVehicle.getInvestmentVehicleType(),pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -143,14 +143,12 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicleType investmentVehicleType,
-                                                           InvestmentVehicleStatus investmentVehicleStatus,int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
-        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty");
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicle investmentVehicle,int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(investmentVehicle.getInvestmentVehicleStatus(), "Investment vehicle status cannot be empty");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicles =
                 investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStaus(name,
-                        investmentVehicleType,investmentVehicleStatus,pageRequest);
+                        investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getInvestmentVehicleStatus(),pageRequest);
         return investmentVehicles.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 

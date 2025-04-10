@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -113,13 +114,14 @@ class InvestmentVehicleAdapterTest {
     @Test
     void searchInvestmentVehicleDetailsWithNullId()  {
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
-                searchInvestmentVehicle(null,InvestmentVehicleType.ENDOWMENT,InvestmentVehicleStatus.PUBLISHED,pageSize,pageNumber));
+                searchInvestmentVehicle(null,fundGrowth,pageSize,pageNumber));
     }
 
     @Test
-    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleType()  {
+    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleStatus()  {
+        fundGrowth.setInvestmentVehicleStatus(null);
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
-                searchInvestmentVehicle("g",null,InvestmentVehicleStatus.PUBLISHED,pageSize,pageNumber));
+                searchInvestmentVehicle("g",fundGrowth,pageSize,pageNumber));
     }
 
     @Test
@@ -160,9 +162,11 @@ class InvestmentVehicleAdapterTest {
     @Test
     void searchInvestmentVehicle(){
             Page<InvestmentVehicle> investmentVehicles = null;
+            fundGrowth.setInvestmentVehicleStatus(PUBLISHED);
+            fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
             try{
                 investmentVehicles  = investmentVehicleOutputPort.
-                        searchInvestmentVehicle("g",InvestmentVehicleType.ENDOWMENT,InvestmentVehicleStatus.PUBLISHED,pageSize,pageNumber);
+                        searchInvestmentVehicle("g",fundGrowth,pageSize,pageNumber);
             }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }

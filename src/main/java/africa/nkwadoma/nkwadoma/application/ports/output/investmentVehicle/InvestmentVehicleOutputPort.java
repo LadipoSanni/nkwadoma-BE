@@ -18,7 +18,7 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException;
 
-    Page<InvestmentVehicle> searchInvestmentVehicle(String  name, InvestmentVehicleType investmentVehicleType,InvestmentVehicleStatus investmentVehicleStatus,
+    Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicle investmentVehicle,
                                                     int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;

@@ -65,11 +65,18 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             @Param("userId") String userId,Pageable pageRequest);
 
     @Query("SELECT i FROM InvestmentVehicleEntity i " +
-            "WHERE i.investmentVehicleVisibility != 'PRIVATE' " +
+            "WHERE (i.investmentVehicleVisibility NOT IN ('PRIVATE', 'DEFAULT') " +
             "OR (i.investmentVehicleVisibility = 'PRIVATE' " +
             "AND EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId))")
-    Page<InvestmentVehicleEntity> findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExludingPrivate(
-            String userId, InvestmentVehicleStatus investmentVehicleStatus, InvestmentVehicleType investmentVehicleType, Pageable pageRequest);
+            "AND ivf.financier.userIdentity.id = :userId))) " +
+            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
+            "AND i.investmentVehicleStatus = :investmentVehicleStatus " +
+            "AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    Page<InvestmentVehicleEntity> findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExcludingPrivateAndDefault(
+            @Param("userId") String userId,
+            @Param("investmentVehicleStatus") InvestmentVehicleStatus investmentVehicleStatus,
+            @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
+            @Param("name") String name,
+            Pageable pageRequest);
 }

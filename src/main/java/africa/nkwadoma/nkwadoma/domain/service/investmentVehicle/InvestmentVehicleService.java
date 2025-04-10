@@ -174,7 +174,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                     investmentVehicle,pageSize,pageNumber);
         }
         return investmentVehicleOutputPort.searchInvestmentVehicle(
-                investmentVehicleName,investmentVehicleType,investmentVehicleStatus,pageSize,pageNumber);
+                userIdentity.getId(),investmentVehicle,pageSize,pageNumber);
     }
 
     private InvestmentVehicle publishedInvestmentVehicle(String investmentVehicleId,InvestmentVehicle investmentVehicle) throws MeedlException {
