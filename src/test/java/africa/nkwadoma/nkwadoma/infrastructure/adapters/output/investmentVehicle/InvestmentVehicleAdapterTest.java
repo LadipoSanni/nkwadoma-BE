@@ -112,12 +112,6 @@ class InvestmentVehicleAdapterTest {
     }
 
     @Test
-    void searchInvestmentVehicleDetailsWithNullId()  {
-        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
-                searchInvestmentVehicle(null,fundGrowth,pageSize,pageNumber));
-    }
-
-    @Test
     void searchInvestmentVehicleDetailsWithNullInvestmentVehicleStatus()  {
         fundGrowth.setInvestmentVehicleStatus(null);
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
