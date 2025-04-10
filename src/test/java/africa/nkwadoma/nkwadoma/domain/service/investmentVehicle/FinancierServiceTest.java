@@ -432,7 +432,7 @@ public class FinancierServiceTest {
         Financier foundFinancier = null;
         Financier financierWithKycRequest = null;
         try {
-            foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
             assertNotNull(foundFinancier.getUserIdentity());
             assertEquals(AccreditationStatus.UNVERIFIED, foundFinancier.getAccreditationStatus());
             log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
@@ -927,7 +927,6 @@ public class FinancierServiceTest {
         cooperateUserIdentity.setId(cooperateUserIdentityId);
         identityManagerOutputPort.deleteUser(cooperateUserIdentity);
         userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
-        userIdentityOutputPort.deleteUserById(portfolioManagerUserIdentity.getId());
 
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
