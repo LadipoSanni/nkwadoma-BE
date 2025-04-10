@@ -1,14 +1,23 @@
 name: Deploy Systest to Amazon EC2 and Local
 
 on:
-  push:
+  pull_request:
     branches:
       - 'dev'
       - 'systest'
-  pull_request:
+  push:
     branches:
-      - 'dev' 
-      - 'systest'
+      - 'dev'
+
+# on:
+#   push:
+#     branches:
+#       - 'dev'
+#       - 'systest'
+#   pull_request:
+#     branches:
+#       - 'dev' 
+#       - 'systest'
 
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
@@ -19,7 +28,8 @@ jobs:
   # ======================= BUILD AND PUSH =======================
   build-and-push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' 
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    # if: github.event_name == 'pull_request' 
     
     steps:
       - name: Checkout code
@@ -59,7 +69,8 @@ jobs:
   deploy-to-ec2:
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.event_name == 'pull_request' 
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    # if: github.event_name == 'pull_request' 
     
     steps:
       - name: SSH into EC2 and Deploy Container
@@ -117,8 +128,10 @@ jobs:
   # ======================= DEPLOY TO LOCAL =======================
   deploy-to-local:
     runs-on: self-hosted  # Runs on a self-hosted runner (local machine)
-    if: github.event_name == 'pull_request' 
     needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    # if: github.event_name == 'pull_request' 
+    
     
     steps:
       - name: Authenticate with Amazon ECR
