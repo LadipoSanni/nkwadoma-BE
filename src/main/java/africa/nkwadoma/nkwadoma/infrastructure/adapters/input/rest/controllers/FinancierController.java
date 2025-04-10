@@ -178,9 +178,10 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view/{financierId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
-        Financier financier = financierUseCase.viewFinancierDetail(financierId);
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable(required = false) String financierId) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
 
         ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
@@ -191,19 +192,19 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("financier/view/dashboard")
-    @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> viewMyDashboard(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        Financier foundFinancier = financierUseCase.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
-        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(foundFinancier);
-
-        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
-                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
-                .data(financierDashboardResponse)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
+//    @GetMapping("financier/view/dashboard")
+//    @PreAuthorize("hasRole('FINANCIER')")
+//    public ResponseEntity<ApiResponse<?>> viewMyDashboard(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+//        Financier foundFinancier = financierUseCase.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
+//        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(foundFinancier);
+//
+//        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
+//                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
+//                .data(financierDashboardResponse)
+//                .statusCode(HttpStatus.OK.toString())
+//                .build();
+//        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+//    }
 
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")

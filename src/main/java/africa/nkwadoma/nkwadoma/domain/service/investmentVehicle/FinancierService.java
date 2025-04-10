@@ -359,10 +359,27 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Financier viewFinancierDetail(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
+    public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
+        return financierDetails(userId, financierId);
+    }
+
+    private Financier financierDetails(String userId, String financierId) throws MeedlException {
+        Financier financier = null;
+        if (isFinancier(userId)) {
+            financier = financierOutputPort.findFinancierByUserId(userId);
+        } else {
+            if (financierId == null || financierId.isEmpty()) {
+                throw new MeedlException(FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            }
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            financier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
         return updateFinancierDetails(financier);
+    }
+
+
+    private boolean isFinancier(String userId) throws MeedlException {
+        return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
     }
 
     private Financier updateFinancierDetails(Financier financier) throws MeedlException {
@@ -597,12 +614,12 @@ public class FinancierService implements FinancierUseCase {
                 .build();
     }
 
-    @Override
-    public Financier findFinancierByUserId(String userId) throws MeedlException {
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
-        foundFinancier = viewFinancierDetail(foundFinancier.getId());
-        return updateFinancierDetails(foundFinancier);
-    }
+//    @Override
+//    public Financier findFinancierByUserId(String userId) throws MeedlException {
+//        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+//        foundFinancier = viewFinancierDetail(foundFinancier.getId());
+//        return updateFinancierDetails(foundFinancier);
+//    }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()

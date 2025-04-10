@@ -88,12 +88,14 @@ public class FinancierServiceTest {
 
     private InvestmentVehicle publicInvestmentVehicle;
     private InvestmentVehicle privateInvestmentVehicle;
+    private UserIdentity portfolioManagerUserIdentity;
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
         individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest2@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
+        portfolioManagerUserIdentity = TestData.createTestUserIdentity("pm@gmail.com", "ead0f7cb-5483-4bb8-b271-413990a9c398");
         deleteTestUserIfExist(individualUserIdentity);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
@@ -436,7 +438,10 @@ public class FinancierServiceTest {
     void completeKycIndividual() {
         Financier financierUpdated = null;
         try {
-            Financier foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            userIdentityOutputPort.save(portfolioManagerUserIdentity);
+            log.info("------> found financier ---------> " + userIdentityOutputPort.findById(individualFinancierId));
+            Financier foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
+            log.info("------> found financier ---------> " +foundFinancier);
             assertNotNull(foundFinancier.getUserIdentity());
             assertEquals(AccreditationStatus.UNVERIFIED ,foundFinancier.getAccreditationStatus());
             log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
@@ -482,7 +487,7 @@ public class FinancierServiceTest {
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
-            foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
             log.info("-----> financier -----> " + foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -498,7 +503,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId));
+        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId, individualFinancierId));
     }
     @Test
     @Order(8)
@@ -928,6 +933,7 @@ public class FinancierServiceTest {
         cooperateUserIdentity.setId(cooperateUserIdentityId);
         identityManagerOutputPort.deleteUser(cooperateUserIdentity);
         userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
+        userIdentityOutputPort.deleteUserById(portfolioManagerUserIdentity.getId());
 
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
