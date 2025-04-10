@@ -185,8 +185,8 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
 
         LoanProduct loanProduct = loanProductOutputPort.findById(loanRequest.getLoanProductId());
-        loanProduct.setTotalNumberOfLoanees(
-                loanProduct.getTotalNumberOfLoanees() + 1
+        loanProduct.setTotalNumberOfLoanee(
+                loanProduct.getTotalNumberOfLoanee() + 1
         );
         loanProduct = loanProductOutputPort.save(loanProduct);
         foundLoanRequest.setStatus(LoanRequestStatus.APPROVED);

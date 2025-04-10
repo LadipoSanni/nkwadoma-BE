@@ -51,6 +51,6 @@ public class LoanProductEntity {
     private String investmentVehicleId;
     private String investmentVehicleName;
     @Column(nullable = false, columnDefinition = "int DEFAULT 0")
-    private int totalNumberOfLoanees;
+    private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
 }
