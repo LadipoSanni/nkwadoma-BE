@@ -41,19 +41,25 @@ public interface FinancierRestMapper {
     @Mapping(target = "totalNumberOfInvestment", source = "totalNumberOfInvestment")
     FinancierDashboardResponse mapToDashboardResponse(Financier financier);
 
+    @Mapping( target = "bankName", source = "userIdentity.bankDetail.bankName")
+    @Mapping( target = "bankNumber", source = "userIdentity.bankDetail.bankNumber")
+    @Mapping( target = "firstName", source = "userIdentity.firstName")
+    @Mapping( target = "lastName", source = "userIdentity.lastName")
+    @Mapping( target = "financierEmail", source = "userIdentity.email")
+    @Mapping( target = "phoneNumber", source = "userIdentity.phoneNumber")
+    @Mapping( target = "nin", source = "userIdentity.nin")
+    @Mapping( target = "bvn", source = "userIdentity.bvn")
+    @Mapping( target = "taxId", source = "userIdentity.taxId")
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "userIdentity.nextOfKin.firstName", source = "kycRequest.nextOfKinFirstName")
-    @Mapping(target = "userIdentity.nextOfKin.lastName", source = "kycRequest.nextOfKinLastName")
-    @Mapping(target = "userIdentity.nextOfKin.phoneNumber", source = "kycRequest.nextOfKinPhoneNumber")
-    @Mapping(target = "userIdentity.nextOfKin.email", source = "kycRequest.nextOfKinEmail")
-    @Mapping(target = "userIdentity.nextOfKin.contactAddress", source = "kycRequest.nextOfKinContactAddress")
-    @Mapping(target = "userIdentity.nextOfKin.nextOfKinRelationship", source = "kycRequest.relationshipWithNextOfKin")
     @Mapping(target = "userIdentity.bankDetail.bankName", source = "kycRequest.bankName")
     @Mapping(target = "userIdentity.bankDetail.bankNumber", source = "kycRequest.bankNumber")
     @Mapping(target = "userIdentity.taxId", source = "kycRequest.taxId")
     @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
-    Financier map(KycRequest kycRequest);
+    @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
+    @Mapping(target = "userIdentity.phoneNumber", source = "kycRequest.phoneNumber")
+    @Mapping(target = "percentageOwnershipOrShare", source = "percentageOwnershipOrShare", defaultValue = "0.0")
+    Financier  map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")
     Financier map(FinancierRequest financierRequest, String userId);

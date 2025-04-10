@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.testUtilities.data;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
+import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -207,14 +209,48 @@ public class TestData {
         return loanRequest;
     }
 
-    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail, NextOfKin nextOfKin){
+    public static Financier completeKycRequest(Financier financier, BankDetail bankDetail){
         log.info("Bank Detail in test data {}", bankDetail);
         financier.getUserIdentity().setBankDetail(bankDetail);
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         financier.getUserIdentity().setAddress("No 289, Herbert Marculey way, Yaba, Lagos");
         financier.getUserIdentity().setNin("2025103002");
+        financier.getUserIdentity().setBvn("2025143002");
         financier.getUserIdentity().setTaxId("00000122");
-        financier.getUserIdentity().setNextOfKin(nextOfKin);
+        financier.setOccupation("Doctor");
+
+        financier.setPersonalOrJointSavings("Personal or joint savings stated.");
+        financier.setEmploymentIncome("Employment income stated.");
+        financier.setSalesOfAssets("Sales of assets stated.");
+        financier.setDonation("Donation stated.");
+        financier.setInheritanceOrGift("Inheritance or gift stated.");
+        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
+        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
+
+        financier.setBeneficialOwnerType(FinancierType.INDIVIDUAL);
+
+        financier.setEntityName("EntityName");
+        financier.setBeneficialRcNumber("RC8789945");
+        financier.setCountryOfIncorporation(Country.SERBIA);
+
+        financier.setBeneficialOwnerFirstName("Beneficial first name");
+        financier.setBeneficialOwnerLastName("Beneficial last name");
+        financier.setBeneficialOwnerRelationship(UserRelationship.BROTHER);
+        financier.setBeneficialOwnerDateOfBirth(LocalDate.now());
+        financier.setPercentageOwnershipOrShare(6);
+
+        financier.setVotersCard("voters card");
+        financier.setNationalIdCard("national id card");
+        financier.setDriverLicensetionalIdCard("driver licensetional id card");
+        financier.setDriverLicense("driver license");
+        financier.setDeclarationAndAgreement(Boolean.TRUE);
+        financier.setPoliticallyExposed(Boolean.FALSE);
+
+        PoliticalPartyExposedTo politicalPartyExposedTo = new PoliticalPartyExposedTo();
+        politicalPartyExposedTo.setPositionHeld("President");
+        politicalPartyExposedTo.setCountry(Country.SERBIA);
+        List<PoliticalPartyExposedTo> politicalPartiesExposedTo = List.of(politicalPartyExposedTo);
+        financier.setPoliticalPartiesExposedTo(politicalPartiesExposedTo);
         return financier;
     }
 

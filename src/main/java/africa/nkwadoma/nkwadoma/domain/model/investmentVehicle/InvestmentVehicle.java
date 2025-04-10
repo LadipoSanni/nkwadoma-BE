@@ -46,15 +46,18 @@ public class InvestmentVehicle {
     private String investmentVehicleLink;
     private LocalDate lastUpdatedDate;
     private BigDecimal netAssetValue;
+    private double netAssetValueInPercent;
     private double percentageOfPortfolio;
     private LocalDate maturityDate;
     private VehicleClosure vehicleClosureStatus;
     private BigDecimal incomeEarned;
+    private IncomeInterval incomeInterval;
     private VehicleOperation vehicleOperation;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private LocalDate dateInvested;
     private Set<InvestmentVehicleDesignation> designations;
     private BigDecimal amountInvested;
+    private BigDecimal talentFunded;
 
 
     public void validate() throws MeedlException {
