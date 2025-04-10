@@ -166,11 +166,15 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName, InvestmentVehicleType investmentVehicleType,
-                                                           InvestmentVehicleStatus investmentVehicleStatus,int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateDataElement(investmentVehicleName,
-                InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
-        return investmentVehicleOutputPort.searchInvestmentVehicle(investmentVehicleName,investmentVehicleType,investmentVehicleStatus,pageSize,pageNumber);
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String userId, InvestmentVehicle investmentVehicle,
+                                                           int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole() == IdentityRole.FINANCIER) {
+            return investmentVehicleOutputPort.searchInvestmentVehicleExcludingPrivate(userIdentity.getId(),
+                    investmentVehicle,pageSize,pageNumber);
+        }
+        return investmentVehicleOutputPort.searchInvestmentVehicle(
+                investmentVehicleName,investmentVehicleType,investmentVehicleStatus,pageSize,pageNumber);
     }
 
     private InvestmentVehicle publishedInvestmentVehicle(String investmentVehicleId,InvestmentVehicle investmentVehicle) throws MeedlException {
