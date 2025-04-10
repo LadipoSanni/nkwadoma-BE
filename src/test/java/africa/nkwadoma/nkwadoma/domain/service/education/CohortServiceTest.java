@@ -9,11 +9,13 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -284,22 +286,37 @@ class CohortServiceTest {
     void deleteCohortWithInvalidId(String cohortId){
         assertThrows(MeedlException.class, ()-> cohortService.deleteCohort(cohortId));
     }
+
+
     @Test
-    void deleteCohort(){
+    void deleteCohort() {
         try {
-            when(cohortOutputPort.viewCohortDetails(mockId,mockId)).thenReturn(xplorers);
-            when(programOutputPort.findProgramById(mockId)).thenReturn(program);
-            Cohort cohort = cohortService.viewCohortDetails(mockId, mockId);
-            assertNotNull(cohort);
-
-            doNothing().when(cohortOutputPort).deleteCohort(mockId);
+            when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(new ArrayList<>());
+            xplorers.setId(mockId);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(xplorers);
+            when(programOutputPort.findProgramById(xplorers.getProgramId())).thenReturn(program);
+            when(organizationIdentityOutputPort.findById(program.getOrganizationId()))
+                    .thenReturn(organizationIdentity);
+            program.setNumberOfCohort(1);
+            organizationIdentity.setNumberOfCohort(1);
             cohortService.deleteCohort(mockId);
-
-            doThrow(MeedlException.class).when(cohortOutputPort).viewCohortDetails(mockId, mockId);
-            assertThrows(MeedlException.class, ()-> cohortService.viewCohortDetails(mockId,mockId));
+            verify(cohortOutputPort).deleteCohort(xplorers.getId());
+            verify(programOutputPort).saveProgram(program);
+            verify(organizationIdentityOutputPort).save(organizationIdentity);
         } catch (MeedlException e) {
             log.error("Error deleting cohort {}",e.getMessage());
         }
+        assertEquals(0, program.getNumberOfCohort());
+        assertEquals(0, organizationIdentity.getNumberOfCohort());
+    }
+
+    @Test
+    void deleteCohort_withLoanees_throwsException() throws MeedlException {
+        List<Loanee> loanees = List.of(new Loanee());
+        when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(loanees);
+        assertThrows(CohortException.class, () ->
+                cohortService.deleteCohort(mockId));
+        verify(cohortOutputPort, never()).deleteCohort(anyString());
     }
 
     @Test

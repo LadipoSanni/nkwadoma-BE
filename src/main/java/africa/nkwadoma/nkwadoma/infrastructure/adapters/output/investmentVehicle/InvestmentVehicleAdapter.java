@@ -17,13 +17,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investment
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
@@ -141,6 +138,19 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
+    @Override
+    public Page<InvestmentVehicle> searchInvestmentVehicleExcludingPrivate(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStatusExcludingPrivateAndDefault
+                        (userId,investmentVehicle.getInvestmentVehicleStatus(),
+                                investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
 
     @Override
     public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {
@@ -151,13 +161,12 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicleType investmentVehicleType,
-                                                           int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateObjectName(name, INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage(),"Investment vehicle");
-        MeedlValidator.validateObjectInstance(investmentVehicleType, "Investment vehicle type cannot be empty");
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicle investmentVehicle,int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(investmentVehicle.getInvestmentVehicleStatus(), "Investment vehicle status cannot be empty");
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicles =
-                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleType(name,investmentVehicleType ,pageRequest);
+                investmentVehicleRepository.findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStaus(name,
+                        investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getInvestmentVehicleStatus(),pageRequest);
         return investmentVehicles.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
