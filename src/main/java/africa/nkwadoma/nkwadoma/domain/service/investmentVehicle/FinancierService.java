@@ -41,10 +41,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -374,7 +372,7 @@ public class FinancierService implements FinancierUseCase {
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             financier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
-        return updateFinancierDetails(financier);
+        return updateFinancierDetail(financier);
     }
 
 
@@ -382,7 +380,7 @@ public class FinancierService implements FinancierUseCase {
         return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
     }
 
-    private Financier updateFinancierDetails(Financier financier) throws MeedlException {
+    private Financier updateFinancierDetail(Financier financier) throws MeedlException {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
                 .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
@@ -628,13 +626,6 @@ public class FinancierService implements FinancierUseCase {
                 .portfolioValue(foundFinancier.getPortfolioValue())
                 .build();
     }
-
-//    @Override
-//    public Financier findFinancierByUserId(String userId) throws MeedlException {
-//        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
-//        foundFinancier = viewFinancierDetail(foundFinancier.getId());
-//        return updateFinancierDetails(foundFinancier);
-//    }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()
