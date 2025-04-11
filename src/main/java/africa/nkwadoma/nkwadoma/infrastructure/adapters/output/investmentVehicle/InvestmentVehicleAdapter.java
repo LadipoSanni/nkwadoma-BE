@@ -118,21 +118,6 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.FINANCIER);
     }
 
-//    @Override
-//    public Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
-//        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
-//        int pageSize = viewInvestmentVehicleRequest.getPageSize();
-//        Sort sort = getSortValue(viewInvestmentVehicleRequest);
-//
-//        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
-//        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
-//
-//        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-//        Page<InvestmentVehicleEntity> investmentVehicleEntities;
-//        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, userId, pageable);
-//        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
-//    }
-
     private Sort getSortValue(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest){
         String sortField = viewInvestmentVehicleRequest.getSortField();
         InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
