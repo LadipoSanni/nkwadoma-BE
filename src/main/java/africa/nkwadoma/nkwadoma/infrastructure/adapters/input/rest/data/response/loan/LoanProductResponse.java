@@ -34,5 +34,5 @@ LoanProductResponse {
     private String disbursementTerms;
     private String investmentVehicleId;
     private String investmentVehicleName;
-    private int numberOfLoanees;
+    private int totalNumberOfLoanee;
 }
