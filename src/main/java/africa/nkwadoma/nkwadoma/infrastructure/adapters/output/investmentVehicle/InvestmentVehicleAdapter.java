@@ -1,14 +1,18 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
@@ -29,6 +33,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
     private final InvestmentVehicleEntityRepository investmentVehicleRepository;
     private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public InvestmentVehicle save(InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -87,16 +92,41 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Sort sort = Sort.by("createdDate").descending();
-        if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
-                 sort = Sort.by("lastUpdatedDate").descending();
-        }
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException {
+        Sort sort = getSortValue(sortField, investmentVehicle.getInvestmentVehicleStatus());
+
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<InvestmentVehicleEntity> investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+
+        InvestmentVehicleType investmentVehicleType = investmentVehicle.getInvestmentVehicleType();
+        InvestmentVehicleStatus investmentVehicleStatus = investmentVehicle.getInvestmentVehicleStatus();
+        InvestmentVehicleMode investmentVehicleMode = investmentVehicle.getVehicleOperation().getFundRaisingStatus();
+
+        if (isFinancier(userId)) {
+            investmentVehicleEntities = investmentVehicleRepository
+                    .findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, investmentVehicleMode, userId, pageable);
+        } else {
+            investmentVehicleEntities = investmentVehicleRepository
+                    .findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, investmentVehicleMode, pageable);
+            log.info("investment vehicle pm {}",investmentVehicleEntities);
+        }
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    private boolean isFinancier(String userId) throws MeedlException {
+        return userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.FINANCIER);
+    }
+
+    private Sort getSortValue(String sortField, InvestmentVehicleStatus investmentVehicleStatus) {
+        Sort sort = (sortField == null || sortField.isEmpty())
+                ? Sort.by("createdDate").descending()
+                : Sort.by(sortField).descending();
+        if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
+            sort = (sortField == null || sortField.isEmpty())
+                    ? Sort.by("lastUpdatedDate").descending()
+                    : Sort.by(sortField).descending();
+        }
+        return sort;
     }
 
     @Override
@@ -133,6 +163,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
                                 investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
+
 
 
     @Override

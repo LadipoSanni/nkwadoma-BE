@@ -112,8 +112,8 @@ public class BeanConfiguration {
 
     @Bean
     public InvestmentVehicleAdapter investmentVehicleIdentityAdapter(InvestmentVehicleEntityRepository vehicleEntityRepository,
-                                                                     InvestmentVehicleMapper investmentVehicleMapper){
-        return new InvestmentVehicleAdapter(vehicleEntityRepository, investmentVehicleMapper);
+                                                                     InvestmentVehicleMapper investmentVehicleMapper, UserIdentityOutputPort userIdentityOutputport){
+        return new InvestmentVehicleAdapter(vehicleEntityRepository, investmentVehicleMapper, userIdentityOutputport);
     }
 
     @Bean
