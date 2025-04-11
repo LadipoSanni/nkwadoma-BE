@@ -36,5 +36,4 @@ public interface InvestmentVehicleOutputPort {
 
     Page<InvestmentVehicle> searchInvestmentVehicleExcludingPrivate(String id, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 
-//    Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userid) throws MeedlException;
 }

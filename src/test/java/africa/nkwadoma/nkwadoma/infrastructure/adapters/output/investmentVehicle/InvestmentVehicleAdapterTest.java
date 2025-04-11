@@ -245,21 +245,6 @@ class InvestmentVehicleAdapterTest {
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
     }
 
-//    @Test
-//    void viewAllInvestmentVehicleByFiltering(){
-//        Page<InvestmentVehicle> investmentVehicles = null;
-//        try{
-//            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(capitalGrowth);
-//            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(10, 0, null, null, FundRaisingStatus.CLOSED, null, );
-//            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
-//        } catch (MeedlException exception){
-//            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-//        }
-//        assertNotNull(investmentVehicles);
-//        assertFalse(investmentVehicles.isEmpty());
-//        assertThat(investmentVehicles).allMatch(investmentVehicle -> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.CLOSED));
-//    }
-
     @Test
     void viewAllInvestmentVehicleByStatusReturnDraft() {
         Page<InvestmentVehicle> investmentVehicles = null;
