@@ -74,11 +74,11 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
         PremblyNinResponse premblyNinResponse = getIdentityDetailsByNin(identityVerification);
         log.info("PremblyNinResponse: {}", premblyNinResponse);
-        if (premblyNinResponse.getVerification() != null) {
-            log.info("Updating update valid identity if status is verified: {}", premblyNinResponse.getVerification().getStatus());
+        if (premblyNinResponse.getVerification() != null){
+            log.info("Updating valid identity if verified or not...");
             premblyNinResponse.getVerification().updateValidIdentity();
         }else {
-            log.warn("Prembly nin response verification object is null {}", premblyNinResponse);
+            log.info("No verification info was returned in verify with nin {}", premblyNinResponse.getDetail());
         }
         log.info("Response: {}", premblyNinResponse);
         return premblyNinResponse;

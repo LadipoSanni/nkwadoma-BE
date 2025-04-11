@@ -177,7 +177,6 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 log.warn("Identity verification not successful, failed at the nin level");
                 verificationResponse = IdentityMessages.IDENTITY_NOT_VERIFIED.getMessage();
             }
-
         } catch (MeedlException exception) {
             log.error("Error verifying user's identity... {}", exception.getMessage());
             createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
