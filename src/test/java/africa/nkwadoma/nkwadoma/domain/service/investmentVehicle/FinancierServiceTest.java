@@ -88,6 +88,8 @@ public class FinancierServiceTest {
 
     private InvestmentVehicle publicInvestmentVehicle;
     private InvestmentVehicle privateInvestmentVehicle;
+    private UserIdentity portfolioManager;
+    private String portfolioManagerId;
 
     @BeforeAll
     void setUp(){
@@ -95,6 +97,9 @@ public class FinancierServiceTest {
         individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest2@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
         deleteTestUserIfExist(individualUserIdentity);
+        portfolioManager = TestData.createTestUserIdentity("manager@gmail.com");
+        portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        portfolioManagerId = portfolioManager.getId();
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
@@ -728,7 +733,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
     void viewInvestmentDetailsOfFinancierWithNullId(String financierId){
-        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId, individualUserIdentityId));
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId, portfolioManagerId));
     }
 
     @Test
@@ -910,27 +915,28 @@ public class FinancierServiceTest {
     void tearDown() throws MeedlException {
 
         log.info("Started deleting data in financier service test." );
-//        deleteNotification(individualUserIdentityId);
-//        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-//        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
-//        deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
-//
-//        financierOutputPort.delete(individualFinancierId);
-//        identityManagerOutputPort.deleteUser(individualUserIdentity);
-//        userIdentityOutputPort.deleteUserById(individualUserIdentityId);
-//
-//
-//        deleteNotification(individualUserIdentityId);
-//        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
-//
-//        financierOutputPort.delete(cooperateFinancierId);
-//        cooperateUserIdentity.setId(cooperateUserIdentityId);
-//        identityManagerOutputPort.deleteUser(cooperateUserIdentity);
-//        userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
-//
-//        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
-//        investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
-//        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
+        deleteNotification(individualUserIdentityId);
+        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
+        deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
+        deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
+
+        financierOutputPort.delete(individualFinancierId);
+        identityManagerOutputPort.deleteUser(individualUserIdentity);
+        userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+
+
+        deleteNotification(individualUserIdentityId);
+        deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
+
+        financierOutputPort.delete(cooperateFinancierId);
+        cooperateUserIdentity.setId(cooperateUserIdentityId);
+        identityManagerOutputPort.deleteUser(cooperateUserIdentity);
+        userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
+
+        investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
+        investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
+
 
         log.info("Test data deleted after test");
     }

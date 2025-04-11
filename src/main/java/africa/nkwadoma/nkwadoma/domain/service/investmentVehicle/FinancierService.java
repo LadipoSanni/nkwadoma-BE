@@ -617,6 +617,9 @@ public class FinancierService implements FinancierUseCase {
         if (userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER){
             foundFinancier = findFinancierByUserId(userId);
         } else {
+            if (financierId == null || financierId.isEmpty()){
+                throw new MeedlException(FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            }
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
