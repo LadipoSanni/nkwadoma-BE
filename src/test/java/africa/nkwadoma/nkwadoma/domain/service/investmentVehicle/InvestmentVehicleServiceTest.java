@@ -158,30 +158,6 @@ class InvestmentVehicleServiceTest {
         assertEquals(1, investmentVehiclesList.size());
     }
 
-//    @Test
-//    void viewAllInvestmentVehicleByForPortfolioManagerNoFilters() throws MeedlException {
-//        String portfolioManagerId = UUID.randomUUID().toString();
-//        UserIdentity portfolioManager = UserIdentity.builder().role(IdentityRole.PORTFOLIO_MANAGER).build();
-//        when(userIdentityOutputPort.findById(portfolioManagerId)).thenReturn(portfolioManager);
-//
-//        InvestmentVehicleEntity entity = new InvestmentVehicleEntity();
-//        List<InvestmentVehicleEntity> entities = List.of(entity);
-//        Page<InvestmentVehicleEntity> entityPage = new PageImpl<>(entities, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending()), 1);
-//        when(investmentVehicleRepository.findAllInvestmentVehicleBy(null, null, null, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending())))
-//                .thenReturn(entityPage);
-//
-//        when(investmentVehicleMapper.toInvestmentVehicle(entity)).thenReturn(fundGrowth);
-//
-//        Page<InvestmentVehicle> result = investmentVehicleService.viewAllInvestmentVehicleBy(
-//                pageSize, pageNumber, null, null, null, null, portfolioManagerId);
-//
-//        assertEquals(1, result.getTotalElements());
-//        assertEquals(fundGrowth, result.getContent().get(0));
-//        verify(investmentVehicleOutputPort).findAllInvestmentVehicleBy(pageSize, pageNumber, null, null, null, null, portfolioManagerId);
-//        verify(userIdentityOutputPort).findById(portfolioManagerId);
-//        verify(investmentVehicleRepository).findAllInvestmentVehicleBy(null, null, null, PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending()));
-//    }
-
     @Test
     void viewAllInvestmentVehiclesByStatus(){
         Page<InvestmentVehicle> investmentVehicles = null;
