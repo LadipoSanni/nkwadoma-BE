@@ -73,7 +73,7 @@ public class FinancierServiceTest {
     private Financier cooperateFinancier;
     private String cooperateUserIdentityId;
     private String cooperateFinancierId;
-    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest2@mail.com";
+    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest24@mail.com";
     private int pageSize = 10 ;
     private int pageNumber = 0 ;
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -432,7 +432,7 @@ public class FinancierServiceTest {
         Financier foundFinancier = null;
         Financier financierWithKycRequest = null;
         try {
-            foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
             assertNotNull(foundFinancier.getUserIdentity());
             assertEquals(AccreditationStatus.UNVERIFIED, foundFinancier.getAccreditationStatus());
             log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
@@ -479,7 +479,7 @@ public class FinancierServiceTest {
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
-            foundFinancier = financierUseCase.viewFinancierDetail(individualFinancierId);
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
             log.info("-----> financier -----> " + foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -497,7 +497,7 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
     void findFinancierByInvalidId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId));
+        assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId, individualFinancierId));
     }
     @Test
     @Order(8)
@@ -736,7 +736,6 @@ public class FinancierServiceTest {
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
             foundFinancierDetail = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
-            log.info("-------->Found details---------> " + foundFinancierDetail);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -918,7 +917,6 @@ public class FinancierServiceTest {
         financierOutputPort.delete(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
-
 
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
