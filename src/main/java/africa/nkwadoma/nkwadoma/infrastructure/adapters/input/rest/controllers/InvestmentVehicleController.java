@@ -2,10 +2,8 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.*;
@@ -99,13 +97,13 @@ public class InvestmentVehicleController {
             @RequestParam int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
-            @RequestParam(required = false)FundRaisingStatus fundRaisingStatus,
             @RequestParam(required = false) String sortField,
             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
         String userId = meedlUser.getClaimAsString("sub");
+        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = getViewRequest(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, sortField);
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
-                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, sortField, userId);
+                .viewAllInvestmentVehicleBy(viewInvestmentVehicleRequest, userId);
 
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
@@ -118,6 +116,15 @@ public class InvestmentVehicleController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    private ViewInvestmentVehicleRequest getViewRequest(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, String sortField) {
+        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = new ViewInvestmentVehicleRequest();
+        viewInvestmentVehicleRequest.setPageSize(pageSize);
+        viewInvestmentVehicleRequest.setPageNumber(pageNumber);
+        viewInvestmentVehicleRequest.setInvestmentVehicleType(investmentVehicleType);
+        viewInvestmentVehicleRequest.setInvestmentVehicleStatus(investmentVehicleStatus);
+        return viewInvestmentVehicleRequest;
     }
 
 

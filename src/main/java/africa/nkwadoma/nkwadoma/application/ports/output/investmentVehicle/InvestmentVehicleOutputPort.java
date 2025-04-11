@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import org.springframework.data.domain.*;
 
 public interface InvestmentVehicleOutputPort {
@@ -27,11 +28,13 @@ public interface InvestmentVehicleOutputPort {
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException;
 
-    Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField, String userId) throws MeedlException;
+    Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest) throws MeedlException;
     Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException;
 
 
     Page<InvestmentVehicle> findAllInvestmentVehicleExcludingPrivate(String userId,int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> searchInvestmentVehicleExcludingPrivate(String id, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userid) throws MeedlException;
 }

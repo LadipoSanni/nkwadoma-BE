@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
@@ -91,29 +92,48 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField, String userId) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest) throws MeedlException {
+        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
+        int pageSize = viewInvestmentVehicleRequest.getPageSize();
+        Sort sort = getSortValue(viewInvestmentVehicleRequest);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
+        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+
+        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, pageable);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
+        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
+        int pageSize = viewInvestmentVehicleRequest.getPageSize();
+        Sort sort = getSortValue(viewInvestmentVehicleRequest);
+
+        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
+        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, userId, pageable);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
+    private Sort getSortValue(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest){
+        String sortField = viewInvestmentVehicleRequest.getSortField();
+        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+
         Sort sort = (sortField == null || sortField.isEmpty())
                 ? Sort.by("createdDate").descending()
-                : Sort.by(sortField).descending();
+                : Sort.by(viewInvestmentVehicleRequest.getSortField()).descending();
         if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
             sort = (sortField == null || sortField.isEmpty())
                     ? Sort.by("lastUpdatedDate").descending()
                     : Sort.by(sortField).descending();
         }
-        IdentityRole userRole = userIdentityOutputPort.findById(userId).getRole();
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<InvestmentVehicleEntity> investmentVehicleEntities;
-
-        if (userRole.equals(IdentityRole.FINANCIER)){
-            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(
-                    investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, userId, pageable);
-        }
-        else {
-            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
-        }
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return sort;
     }
 
     @Override
@@ -150,6 +170,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
                                 investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
+
 
 
     @Override

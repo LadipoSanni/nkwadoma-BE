@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import lombok.*;
@@ -217,10 +218,28 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField, String userId) throws MeedlException {
-            MeedlValidator.validatePageSize(pageSize);
-            MeedlValidator.validatePageNumber(pageNumber);
-        return investmentVehicleOutputPort.findAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, sortField, userId);
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
+        MeedlValidator.validatePageSize(viewInvestmentVehicleRequest.getPageSize());
+        MeedlValidator.validatePageNumber(viewInvestmentVehicleRequest.getPageNumber());
+//        Sort sort = getSortValue(viewInvestmentVehicleRequest);
+
+        IdentityRole userRole = userIdentityOutputPort.findById(userId).getRole();
+//        Pageable pageable = PageRequest.of(viewInvestmentVehicleRequest.getPageNumber(), viewInvestmentVehicleRequest.getPageSize(), sort);
+//        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+        Page<InvestmentVehicle> investmentVehicles = null;
+        if (userRole.equals(IdentityRole.FINANCIER)) {
+//            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(
+//                    investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, userId, pageable);
+
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleForFinancier(viewInvestmentVehicleRequest, userId);
+        } else {
+//            investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(
+//                    investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(viewInvestmentVehicleRequest);
+        }
+//        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicles;
+
     }
 
     @Override
