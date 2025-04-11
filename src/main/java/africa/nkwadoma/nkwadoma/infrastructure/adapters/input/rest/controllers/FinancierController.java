@@ -26,6 +26,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.swagg
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleFinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -205,6 +206,36 @@ public class FinancierController {
 
     @GetMapping("financier/view/{financierId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @Operation(
+            summary = SwaggerDocumentation.VIEW_DETAILS,
+            description = SwaggerDocumentation.VIEW_DETAILS_DESCRIPTION
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Financier details retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid financier ID provided",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Financier not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
@@ -217,20 +248,6 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
-//    @GetMapping("financier/view/dashboard")
-//    @PreAuthorize("hasRole('FINANCIER')")
-//    public ResponseEntity<ApiResponse<?>> viewMyDashboard(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-//        Financier foundFinancier = financierUseCase.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
-//        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(foundFinancier);
-//
-//        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
-//                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
-//                .data(financierDashboardResponse)
-//                .statusCode(HttpStatus.OK.toString())
-//                .build();
-//        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-//    }
 
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
