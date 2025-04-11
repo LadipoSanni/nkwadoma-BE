@@ -598,25 +598,29 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId, String userId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        Financier foundFinancier = null;
-        if (userIdentity.getRole() == IdentityRole.FINANCIER){
-            foundFinancier = findFinancierByUserId(financierId);
-        } else {
-            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        }
-        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
+        Financier financier = getFinancierByUserType(financierId, userId);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
-        BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
+        BigDecimal totalInvestmentAmount = financier.getTotalAmountInvested();
         List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
 
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
                 .investmentSummaries(investmentSummaries)
-                .portfolioValue(foundFinancier.getPortfolioValue())
+                .portfolioValue(financier.getPortfolioValue())
                 .build();
+    }
+
+    public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
+        Financier foundFinancier = null;
+        if (userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER){
+            foundFinancier = findFinancierByUserId(userId);
+        } else {
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        return foundFinancier;
     }
 
     @Override
