@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -97,11 +98,15 @@ public class InvestmentVehicleController {
             @RequestParam int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
+            @RequestParam(required = false) FundRaisingStatus fundRaisingStatus,
             @RequestParam(required = false) String sortField,
             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
         String userId = meedlUser.getClaimAsString("sub");
-        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = getViewRequest(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, sortField);
+        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = getViewRequest(pageSize,
+                pageNumber, investmentVehicleType, investmentVehicleStatus,
+                fundRaisingStatus, sortField);
+
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
                 .viewAllInvestmentVehicleBy(viewInvestmentVehicleRequest, userId);
 
@@ -118,12 +123,14 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    private ViewInvestmentVehicleRequest getViewRequest(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, String sortField) {
+    private ViewInvestmentVehicleRequest getViewRequest(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField) {
         ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = new ViewInvestmentVehicleRequest();
         viewInvestmentVehicleRequest.setPageSize(pageSize);
         viewInvestmentVehicleRequest.setPageNumber(pageNumber);
         viewInvestmentVehicleRequest.setInvestmentVehicleType(investmentVehicleType);
         viewInvestmentVehicleRequest.setInvestmentVehicleStatus(investmentVehicleStatus);
+        viewInvestmentVehicleRequest.setFundRaisingStatus(fundRaisingStatus);
+
         viewInvestmentVehicleRequest.setSortField(sortField);
         return viewInvestmentVehicleRequest;
     }

@@ -43,10 +43,12 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
 
     @Query("SELECT v FROM InvestmentVehicleEntity v WHERE " +
             "(:investmentVehicleType IS NULL OR v.investmentVehicleType = :investmentVehicleType) AND " +
-            "(:investmentVehicleStatus IS NULL OR v.investmentVehicleStatus = :investmentVehicleStatus)")
+            "(:investmentVehicleStatus IS NULL OR v.investmentVehicleStatus = :investmentVehicleStatus)" +
+            "AND (:fundRaisingStatus IS NULL OR v.fundRaisingStatus = :fundRaisingStatus)")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleBy(
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
             @Param("investmentVehicleStatus") InvestmentVehicleStatus investmentVehicleStatus,
+            @Param("fundRaisingStatus") FundRaisingStatus fundRaisingStatus,
             Pageable pageable);
 
     @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.fundRaisingStatus = :fundRaisingStatus AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.createdDate DESC")
@@ -75,6 +77,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleForFinancier(
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
             @Param("investmentVehicleStatus") InvestmentVehicleStatus investmentVehicleStatus,
+            @Param("fundRaisingStatus") FundRaisingStatus fundRaisingStatus,
             @Param("userId") String userId,
             Pageable pageable);
 

@@ -13,6 +13,7 @@ public class ViewInvestmentVehicleRequest {
     private int pageNumber;
     private InvestmentVehicleType investmentVehicleType;
     private InvestmentVehicleStatus investmentVehicleStatus;
+    private FundRaisingStatus fundRaisingStatus;
     private String sortField;
     private String userId;
 }

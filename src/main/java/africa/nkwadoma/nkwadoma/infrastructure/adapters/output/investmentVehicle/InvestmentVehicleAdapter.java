@@ -92,34 +92,46 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest) throws MeedlException {
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
         int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
         int pageSize = viewInvestmentVehicleRequest.getPageSize();
         Sort sort = getSortValue(viewInvestmentVehicleRequest);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<InvestmentVehicleEntity> investmentVehicleEntities;
-        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
-        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
-
-        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, pageable);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
-    }
-
-    @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
-        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
-        int pageSize = viewInvestmentVehicleRequest.getPageSize();
-        Sort sort = getSortValue(viewInvestmentVehicleRequest);
 
         InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
         InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+        FundRaisingStatus fundRaisingStatus = viewInvestmentVehicleRequest.getFundRaisingStatus();
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<InvestmentVehicleEntity> investmentVehicleEntities;
-        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, userId, pageable);
+        if (isFinancier(userId)) {
+            investmentVehicleEntities = investmentVehicleRepository
+                    .findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, userId, pageable);
+        } else {
+            investmentVehicleEntities = investmentVehicleRepository
+                    .findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+        }
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
+
+    private boolean isFinancier(String userId) throws MeedlException {
+        return userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.FINANCIER);
+    }
+
+//    @Override
+//    public Page<InvestmentVehicle> findAllInvestmentVehicleForFinancier(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
+//        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
+//        int pageSize = viewInvestmentVehicleRequest.getPageSize();
+//        Sort sort = getSortValue(viewInvestmentVehicleRequest);
+//
+//        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
+//        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+//
+//        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+//        Page<InvestmentVehicleEntity> investmentVehicleEntities;
+//        investmentVehicleEntities = investmentVehicleRepository.findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, userId, pageable);
+//        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+//    }
 
     private Sort getSortValue(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest){
         String sortField = viewInvestmentVehicleRequest.getSortField();

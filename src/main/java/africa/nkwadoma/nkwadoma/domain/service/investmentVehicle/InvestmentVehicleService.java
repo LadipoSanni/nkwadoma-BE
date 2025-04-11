@@ -221,14 +221,15 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
         MeedlValidator.validatePageSize(viewInvestmentVehicleRequest.getPageSize());
         MeedlValidator.validatePageNumber(viewInvestmentVehicleRequest.getPageNumber());
-        IdentityRole userRole = userIdentityOutputPort.findById(userId).getRole();
+//        IdentityRole userRole = userIdentityOutputPort.findById(userId).getRole();
         Page<InvestmentVehicle> investmentVehicles = null;
 
-        if (userRole.equals(IdentityRole.FINANCIER)) {
-            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleForFinancier(viewInvestmentVehicleRequest, userId);
-        } else {
-            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(viewInvestmentVehicleRequest);
-        }
+//        if (userRole.equals(IdentityRole.FINANCIER)) {
+//            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleForFinancier(viewInvestmentVehicleRequest, userId);
+//        } else {
+//            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(viewInvestmentVehicleRequest);
+//        }
+        investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(viewInvestmentVehicleRequest, userId);
         return investmentVehicles;
     }
 
