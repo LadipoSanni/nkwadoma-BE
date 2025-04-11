@@ -180,7 +180,7 @@ class LoanRequestServiceTest {
                     .thenReturn(new UserIdentity());
 
 
-            LoanRequest response = loanRequestService.respondToLoanReq uest(loanRequest);
+            LoanRequest response = loanRequestService.respondToLoanRequest(loanRequest);
             assertNotNull(response);
             assertEquals(LoanRequestStatus.APPROVED, response.getStatus());
             assertEquals(new BigDecimal("500000"), response.getLoanAmountApproved());
