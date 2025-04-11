@@ -218,11 +218,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
-        MeedlValidator.validatePageSize(viewInvestmentVehicleRequest.getPageSize());
-        MeedlValidator.validatePageNumber(viewInvestmentVehicleRequest.getPageNumber());
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
         Page<InvestmentVehicle> investmentVehicles = null;
-        investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(viewInvestmentVehicleRequest, userId);
+        investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicle, sortField, userId);
         return investmentVehicles;
     }
 

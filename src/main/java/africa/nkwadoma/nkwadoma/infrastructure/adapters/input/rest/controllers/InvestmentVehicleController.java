@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -98,18 +99,19 @@ public class InvestmentVehicleController {
             @RequestParam int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
-            @RequestParam(required = false) FundRaisingStatus fundRaisingStatus,
+            @RequestParam(required = false)InvestmentVehicleMode investmentVehicleMode,
             @RequestParam(required = false) String sortField,
             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
 
         String userId = meedlUser.getClaimAsString("sub");
-        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = getViewRequest(pageSize,
-                pageNumber, investmentVehicleType, investmentVehicleStatus,
-                fundRaisingStatus, sortField);
+        InvestmentVehicle investmentVehicle = InvestmentVehicle.builder()
+                .investmentVehicleType(investmentVehicleType)
+                .investmentVehicleStatus(investmentVehicleStatus)
+                .vehicleOperation(VehicleOperation.builder().fundRaisingStatus(investmentVehicleMode).build())
+                .build();
 
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
-                .viewAllInvestmentVehicleBy(viewInvestmentVehicleRequest, userId);
-
+                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicle, sortField, userId);
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
 

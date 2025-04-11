@@ -28,7 +28,7 @@ public interface InvestmentVehicleOutputPort {
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException;
 
-    Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException;
+    Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException;
     Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException;
 
 

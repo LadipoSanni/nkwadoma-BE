@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Inves
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -91,24 +92,22 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest, String userId) throws MeedlException {
-        int pageNumber = viewInvestmentVehicleRequest.getPageNumber();
-        int pageSize = viewInvestmentVehicleRequest.getPageSize();
-        Sort sort = getSortValue(viewInvestmentVehicleRequest);
+    public Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException {
+        Sort sort = getSortValue(sortField, investmentVehicle.getInvestmentVehicleStatus());
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<InvestmentVehicleEntity> investmentVehicleEntities;
 
-        InvestmentVehicleType investmentVehicleType = viewInvestmentVehicleRequest.getInvestmentVehicleType();
-        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
-        FundRaisingStatus fundRaisingStatus = viewInvestmentVehicleRequest.getFundRaisingStatus();
+        InvestmentVehicleType investmentVehicleType = investmentVehicle.getInvestmentVehicleType();
+        InvestmentVehicleStatus investmentVehicleStatus = investmentVehicle.getInvestmentVehicleStatus();
+        InvestmentVehicleMode investmentVehicleMode = investmentVehicle.getVehicleOperation().getFundRaisingStatus();
 
         if (isFinancier(userId)) {
             investmentVehicleEntities = investmentVehicleRepository
-                    .findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, userId, pageable);
+                    .findAllInvestmentVehicleForFinancier(investmentVehicleType, investmentVehicleStatus, investmentVehicleMode, userId, pageable);
         } else {
             investmentVehicleEntities = investmentVehicleRepository
-                    .findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, fundRaisingStatus, pageable);
+                    .findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, investmentVehicleMode, pageable);
         }
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
@@ -117,13 +116,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return userIdentityOutputPort.findById(userId).getRole().equals(IdentityRole.FINANCIER);
     }
 
-    private Sort getSortValue(ViewInvestmentVehicleRequest viewInvestmentVehicleRequest){
-        String sortField = viewInvestmentVehicleRequest.getSortField();
-        InvestmentVehicleStatus investmentVehicleStatus = viewInvestmentVehicleRequest.getInvestmentVehicleStatus();
+    private Sort getSortValue(String sortField, InvestmentVehicleStatus investmentVehicleStatus) {
 
         Sort sort = (sortField == null || sortField.isEmpty())
                 ? Sort.by("createdDate").descending()
-                : Sort.by(viewInvestmentVehicleRequest.getSortField()).descending();
+                : Sort.by(sortField).descending();
         if (investmentVehicleStatus != null && investmentVehicleStatus.equals(DRAFT)) {
             sort = (sortField == null || sortField.isEmpty())
                     ? Sort.by("lastUpdatedDate").descending()
