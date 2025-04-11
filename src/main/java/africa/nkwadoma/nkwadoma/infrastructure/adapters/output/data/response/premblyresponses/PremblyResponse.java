@@ -28,4 +28,7 @@ public abstract class PremblyResponse {
     @JsonProperty("session")
     private Object session;
 
+    private String verificationResponse;
+    private boolean isLikenessCheckSuccessful;
+
 }
