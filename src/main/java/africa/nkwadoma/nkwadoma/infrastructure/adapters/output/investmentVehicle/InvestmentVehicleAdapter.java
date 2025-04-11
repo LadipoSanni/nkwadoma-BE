@@ -117,7 +117,6 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     private Sort getSortValue(String sortField, InvestmentVehicleStatus investmentVehicleStatus) {
-
         Sort sort = (sortField == null || sortField.isEmpty())
                 ? Sort.by("createdDate").descending()
                 : Sort.by(sortField).descending();

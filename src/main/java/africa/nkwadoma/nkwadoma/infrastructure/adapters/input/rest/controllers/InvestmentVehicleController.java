@@ -125,19 +125,6 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    private ViewInvestmentVehicleRequest getViewRequest(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus, String sortField) {
-        ViewInvestmentVehicleRequest viewInvestmentVehicleRequest = new ViewInvestmentVehicleRequest();
-        viewInvestmentVehicleRequest.setPageSize(pageSize);
-        viewInvestmentVehicleRequest.setPageNumber(pageNumber);
-        viewInvestmentVehicleRequest.setInvestmentVehicleType(investmentVehicleType);
-        viewInvestmentVehicleRequest.setInvestmentVehicleStatus(investmentVehicleStatus);
-        viewInvestmentVehicleRequest.setFundRaisingStatus(fundRaisingStatus);
-
-        viewInvestmentVehicleRequest.setSortField(sortField);
-        return viewInvestmentVehicleRequest;
-    }
-
-
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
