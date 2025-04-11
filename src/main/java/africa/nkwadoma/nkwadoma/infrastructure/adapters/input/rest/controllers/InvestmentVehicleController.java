@@ -124,6 +124,7 @@ public class InvestmentVehicleController {
         viewInvestmentVehicleRequest.setPageNumber(pageNumber);
         viewInvestmentVehicleRequest.setInvestmentVehicleType(investmentVehicleType);
         viewInvestmentVehicleRequest.setInvestmentVehicleStatus(investmentVehicleStatus);
+        viewInvestmentVehicleRequest.setSortField(sortField);
         return viewInvestmentVehicleRequest;
     }
 
