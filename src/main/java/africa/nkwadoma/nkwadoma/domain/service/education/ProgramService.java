@@ -29,6 +29,7 @@ public class ProgramService implements AddProgramUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     private final ProgramMapper programMapper;
+    private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {
@@ -104,6 +105,14 @@ public class ProgramService implements AddProgramUseCase {
         MeedlValidator.validateUUID(program.getId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         Program foundProgram = programOutputPort.findProgramById(program.getId());
         programOutputPort.deleteProgram(foundProgram.getId());
+        decreaseNumberOfProgramInOrganization(foundProgram);
+    }
+
+    private void decreaseNumberOfProgramInOrganization(Program foundProgram) throws MeedlException {
+        OrganizationIdentity  organizationIdentity =
+                organizationIdentityOutputPort.findById(foundProgram.getOrganizationId());
+        organizationIdentity.setNumberOfPrograms(organizationIdentity.getNumberOfPrograms() - 1);
+        organizationIdentityOutputPort.save(organizationIdentity);
     }
 
     @Override

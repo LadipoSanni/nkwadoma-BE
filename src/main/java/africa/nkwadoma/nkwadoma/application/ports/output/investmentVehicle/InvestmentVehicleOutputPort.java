@@ -18,7 +18,8 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException;
 
-    Page<InvestmentVehicle> searchInvestmentVehicle(String  name, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
+    Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicle investmentVehicle,
+                                                    int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 
@@ -31,4 +32,6 @@ public interface InvestmentVehicleOutputPort {
 
 
     Page<InvestmentVehicle> findAllInvestmentVehicleExcludingPrivate(String userId,int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicle> searchInvestmentVehicleExcludingPrivate(String id, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 }
