@@ -42,17 +42,17 @@ class TokenUtilsTest {
     }
     @Test
     void testValidDecryption() throws Exception {
-        String result = tokenUtils.decryptAES(ENCRYPTED_DATA);
+        String result = tokenUtils.decryptAES(ENCRYPTED_DATA, "Error processing identity verification");
         assertEquals(DECRYPTED_DATA, result, "Decrypted output does not match expected value.");
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE,  "INVALID_BASE64"})
     void testInvalidBase64Data(String emptyData) {
-        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(emptyData), "Should throw an exception for empty encrypted data.");
+        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(emptyData, "Error processing identity verification"), "Should throw an exception for empty encrypted data.");
     }
     @Test
     void testNullEncryptedData() {
-        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(null), "Should throw an exception for null encrypted data.");
+        assertThrows(MeedlException.class, () -> tokenUtils.decryptAES(null, "Error processing identity verification"), "Should throw an exception for null encrypted data.");
     }
 
     @Test

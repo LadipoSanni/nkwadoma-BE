@@ -140,7 +140,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     }
     private String decrypt(String encryptedData) throws MeedlException {
         log.info("decrypting identity verification values.");
-        return tokenUtils.decryptAES(encryptedData);
+        return tokenUtils.decryptAES(encryptedData, "Error processing identity verification");
     }
     private LoanReferral fetchLoanReferral(String loanReferralId) throws MeedlException {
         LoanReferral loanReferral = loanReferralOutputPort.findById(loanReferralId);

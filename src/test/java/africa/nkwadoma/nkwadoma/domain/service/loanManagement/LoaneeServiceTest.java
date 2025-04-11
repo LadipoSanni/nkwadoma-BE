@@ -308,7 +308,7 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
             when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
             when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-            when(tokenUtils.decryptAES(anyString())).thenReturn(anyString());
+            when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn(anyString());
             loanee = loaneeService.viewLoaneeDetails(mockId);
             verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
         } catch (MeedlException exception) {
@@ -325,7 +325,7 @@ class LoaneeServiceTest {
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
         when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
         when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-        when(tokenUtils.decryptAES(anyString())).thenReturn(anyString());
+        when(tokenUtils.decryptAES(anyString(), any())).thenReturn(anyString());
 
         Loanee result = loaneeService.viewLoaneeDetails(mockId);
 

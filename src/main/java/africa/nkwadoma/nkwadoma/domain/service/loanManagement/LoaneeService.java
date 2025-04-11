@@ -135,7 +135,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
-        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
+        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
 
         try {
