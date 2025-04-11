@@ -108,6 +108,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         } else {
             investmentVehicleEntities = investmentVehicleRepository
                     .findAllInvestmentVehicleBy(investmentVehicleType, investmentVehicleStatus, investmentVehicleMode, pageable);
+            log.info("investment vehicle pm {}",investmentVehicleEntities);
         }
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
