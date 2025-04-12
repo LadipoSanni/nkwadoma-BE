@@ -99,7 +99,6 @@ public class FinancierServiceTest {
         deleteTestUserIfExist(individualUserIdentity);
         portfolioManager = TestData.createTestUserIdentity("manager@gmail.com");
         portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
-        portfolioManagerId = portfolioManager.getId();
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
@@ -732,16 +731,36 @@ public class FinancierServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
-    void viewInvestmentDetailsOfFinancierWithNullId(String financierId){
-        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId, portfolioManagerId));
+    void viewInvestmentDetailOfFinancierWithNullFinancierId(String financierId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(financierId, portfolioManagerId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
+    void viewInvestmentDetailOfFinancierWithNullPortfolioManagerId(String pmId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, pmId));
+    }
+
+    @Test
+    void viewInvestmentDetailOfFinancierWithNonExistingUserId(){
+        String nonExistingUserId = "52eff78e-f01e-413e-93e6-8073f06ba25c";
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, nonExistingUserId));
+    }
+
+    @Test
+    void viewInvestmentDetailOfFinancierWithNonExistingFinancierId(){
+        String nonExistingFinancierId = "52eff78e-f01e-413e-93e6-8073f06ba25c";
+        Exception ex = assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, nonExistingFinancierId));
     }
 
     @Test
     @Order(12)
-    void viewInvestmentDetailsOfFinancier(){
+    void viewInvestmentDetailOfFinancierByPortfolioManager(){
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
-            foundFinancierDetail = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId, individualUserIdentityId);
+            UserIdentity manager = userIdentityOutputPort.save(portfolioManager);
+            portfolioManagerId = manager.getId();
+            foundFinancierDetail = financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, portfolioManagerId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -923,6 +942,7 @@ public class FinancierServiceTest {
         financierOutputPort.delete(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+        userIdentityOutputPort.deleteUserById(portfolioManagerId);
 
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);

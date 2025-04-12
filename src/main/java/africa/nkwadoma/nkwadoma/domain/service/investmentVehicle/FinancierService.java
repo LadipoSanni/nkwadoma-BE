@@ -604,7 +604,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId, String userId) throws MeedlException {
+    public FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException {
         Financier financier = getFinancierByUserType(financierId, userId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
