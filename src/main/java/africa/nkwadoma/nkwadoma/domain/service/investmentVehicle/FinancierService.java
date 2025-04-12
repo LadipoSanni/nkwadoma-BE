@@ -41,10 +41,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -360,13 +358,22 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Financier viewFinancierDetail(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
-        return updateFinancierDetails(financier);
+    public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
+        Financier financier = null;
+        if (isFinancier(userId)) {
+            financier = financierOutputPort.findFinancierByUserId(userId);
+        } else {
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            financier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        return updateFinancierDetail(financier);
     }
 
-    private Financier updateFinancierDetails(Financier financier) throws MeedlException {
+    private boolean isFinancier(String userId) throws MeedlException {
+        return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
+    }
+
+    private Financier updateFinancierDetail(Financier financier) throws MeedlException {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
                 .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
@@ -614,12 +621,9 @@ public class FinancierService implements FinancierUseCase {
 
     public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;
-        if (userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER){
+        if (isFinancier(userId)) {
             foundFinancier = findFinancierByUserId(userId);
         } else {
-            if (financierId == null || financierId.isEmpty()){
-                throw new MeedlException(FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-            }
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
@@ -629,8 +633,8 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier findFinancierByUserId(String userId) throws MeedlException {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
-        foundFinancier = viewFinancierDetail(foundFinancier.getId());
-        return updateFinancierDetails(foundFinancier);
+        foundFinancier = viewFinancierDetail(foundFinancier.getId(), userId);
+        return updateFinancierDetail(foundFinancier);
     }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
