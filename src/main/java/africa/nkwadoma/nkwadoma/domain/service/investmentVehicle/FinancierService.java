@@ -622,7 +622,7 @@ public class FinancierService implements FinancierUseCase {
     public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;
         if (isFinancier(userId)) {
-            foundFinancier = findFinancierByUserId(userId);
+            foundFinancier = financierOutputPort.findFinancierByUserId(userId);
         } else {
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
@@ -630,12 +630,6 @@ public class FinancierService implements FinancierUseCase {
         return foundFinancier;
     }
 
-    @Override
-    public Financier findFinancierByUserId(String userId) throws MeedlException {
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
-        foundFinancier = viewFinancierDetail(foundFinancier.getId(), userId);
-        return updateFinancierDetail(foundFinancier);
-    }
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()

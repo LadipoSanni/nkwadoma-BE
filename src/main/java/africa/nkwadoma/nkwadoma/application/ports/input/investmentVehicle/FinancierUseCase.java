@@ -30,6 +30,4 @@ public interface FinancierUseCase {
 
     FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
-    Financier findFinancierByUserId(String userId) throws MeedlException;
-
 }
