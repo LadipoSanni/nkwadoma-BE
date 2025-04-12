@@ -28,6 +28,6 @@ public interface FinancierUseCase {
 
     Financier findFinancierByCooperationId(String cooperationId) throws MeedlException;
 
-    FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException;
+    FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
 }

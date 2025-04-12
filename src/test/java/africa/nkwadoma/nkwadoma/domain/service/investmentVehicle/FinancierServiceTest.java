@@ -88,6 +88,8 @@ public class FinancierServiceTest {
 
     private InvestmentVehicle publicInvestmentVehicle;
     private InvestmentVehicle privateInvestmentVehicle;
+    private UserIdentity portfolioManager;
+    private String portfolioManagerId;
 
     @BeforeAll
     void setUp(){
@@ -95,6 +97,8 @@ public class FinancierServiceTest {
         individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest2@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
         deleteTestUserIfExist(individualUserIdentity);
+        portfolioManager = TestData.createTestUserIdentity("manager@gmail.com");
+        portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
@@ -460,6 +464,7 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getCountryOfIncorporation());
 
     }
+
     @Test
     @Order(6)
     void viewAllFinanciers(){
@@ -726,16 +731,36 @@ public class FinancierServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
-    void viewInvestmentDetailsOfFinancierWithNullId(String financierId){
-        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailsOfFinancier(financierId));
+    void viewInvestmentDetailOfFinancierWithNullFinancierId(String financierId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(financierId, portfolioManagerId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
+    void viewInvestmentDetailOfFinancierWithNullPortfolioManagerId(String pmId){
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, pmId));
+    }
+
+    @Test
+    void viewInvestmentDetailOfFinancierWithNonExistingUserId(){
+        String nonExistingUserId = "52eff78e-f01e-413e-93e6-8073f06ba25c";
+        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, nonExistingUserId));
+    }
+
+    @Test
+    void viewInvestmentDetailOfFinancierWithNonExistingFinancierId(){
+        String nonExistingFinancierId = "52eff78e-f01e-413e-93e6-8073f06ba25c";
+        Exception ex = assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, nonExistingFinancierId));
     }
 
     @Test
     @Order(12)
-    void viewInvestmentDetailsOfFinancier(){
+    void viewInvestmentDetailOfFinancierByPortfolioManager(){
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
-            foundFinancierDetail = financierUseCase.viewInvestmentDetailsOfFinancier(individualFinancierId);
+            UserIdentity manager = userIdentityOutputPort.save(portfolioManager);
+            portfolioManagerId = manager.getId();
+            foundFinancierDetail = financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, portfolioManagerId);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -917,6 +942,7 @@ public class FinancierServiceTest {
         financierOutputPort.delete(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+        userIdentityOutputPort.deleteUserById(portfolioManagerId);
 
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(investmentVehicleId, individualFinancierId);
@@ -929,6 +955,7 @@ public class FinancierServiceTest {
         investmentVehicleOutputPort.deleteInvestmentVehicle(investmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
+
 
         log.info("Test data deleted after test");
     }

@@ -358,10 +358,6 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
-        return financierDetails(userId, financierId);
-    }
-
-    private Financier financierDetails(String userId, String financierId) throws MeedlException {
         Financier financier = null;
         if (isFinancier(userId)) {
             financier = financierOutputPort.findFinancierByUserId(userId);
@@ -371,7 +367,6 @@ public class FinancierService implements FinancierUseCase {
         }
         return updateFinancierDetail(financier);
     }
-
 
     private boolean isFinancier(String userId) throws MeedlException {
         return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
@@ -608,21 +603,32 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
+    public FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException {
+        Financier financier = getFinancierByUserType(financierId, userId);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
-        BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
-
+        BigDecimal totalInvestmentAmount = financier.getTotalAmountInvested();
         List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
+
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
                 .investmentSummaries(investmentSummaries)
-                .portfolioValue(foundFinancier.getPortfolioValue())
+                .portfolioValue(financier.getPortfolioValue())
                 .build();
     }
+
+    public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
+        Financier foundFinancier = null;
+        if (isFinancier(userId)) {
+            foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        } else {
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        return foundFinancier;
+    }
+
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()
