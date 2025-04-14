@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
             investmentVehicle.validateDraft();
-            investmentVehicle.setLastUpdatedDate(LocalDate.now());
+            investmentVehicle.setLastUpdatedDate(LocalDateTime.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
     }
 
@@ -69,7 +70,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
         investmentVehicle.setInvestmentVehicleStatus(DRAFT);
-        investmentVehicle.setCreatedDate(LocalDate.now());
+        investmentVehicle.setCreatedDate(LocalDateTime.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 

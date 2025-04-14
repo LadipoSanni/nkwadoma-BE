@@ -4,10 +4,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.respons
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -27,8 +26,8 @@ public class InvestmentVehicleResponse {
     private BigDecimal amountAvailable = BigDecimal.ZERO;
     private BigDecimal totalIncomeGenerated;
     private BigDecimal netAssetValue;
-    private LocalDate startDate;
-    private LocalDate createdDate;
+    private LocalDateTime startDate;
+    private LocalDateTime createdDate;
     private String investmentVehicleLink;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private BigDecimal minimumInvestmentAmount;
@@ -36,7 +35,7 @@ public class InvestmentVehicleResponse {
     private String trustee;
     private String custodian;
     private String bankPartner;
-    private LocalDate lastUpdatedDate;
+    private LocalDateTime lastUpdatedDate;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private InvestmentVehicleMode fundRaisingStatus;
     private InvestmentVehicleMode deployingStatus;
