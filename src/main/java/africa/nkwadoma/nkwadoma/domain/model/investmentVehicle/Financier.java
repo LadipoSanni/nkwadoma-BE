@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.List;
@@ -47,6 +48,7 @@ public class Financier {
     private String taxInformationNumber;
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
+    private LocalDateTime createdAt;
 
 
     private void validateUserIdentity() throws MeedlException {

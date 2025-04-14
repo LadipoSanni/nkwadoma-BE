@@ -25,4 +25,7 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             "WHERE f.id = :financierId")
     Optional<FinancierEntity> findByFinancierId(String financierId);
 
+    @Query("SELECT f FROM FinancierEntity f JOIN f.userIdentity u ORDER BY u.createdAt DESC")
+    Page<FinancierEntity> findAllOrderByUserCreatedAt(Pageable pageable);
+
 }
