@@ -26,6 +26,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.swagg
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle.InvestmentVehicleFinancierRestMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.ControllerConstant;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -103,9 +104,11 @@ public class FinancierController {
 
     @PostMapping("financier/complete-kyc")
     @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser, @RequestBody KycRequest kycRequest) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
+                                                      @RequestBody KycRequest kycRequest) throws MeedlException {
         Financier financier = financierRestMapper.map(kycRequest);
         financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
+        log.info("Controller request for kyc mapped {}", financier);
         financier = financierUseCase.completeKyc(financier);
 
         KycResponse kycResponse = financierRestMapper.mapToFinancierResponse(financier);
@@ -135,8 +138,8 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("financier/view/investment-details/{financierId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @GetMapping("financier/view/investment-detail/{financierId}")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @Operation(
             summary = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_OF_FINANCIER,
             description = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_OF_FINANCIER_DESCRIPTION,
@@ -157,43 +160,9 @@ public class FinancierController {
                     )
             }
     )
-    public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable String financierId) throws MeedlException {
-        FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailsOfFinancier(financierId);
-        FinancierInvestmentDetailResponse financierInvestmentDetailResponse = financierRestMapper.mapToFinancierDetailResponse(financierVehicleDetail);
-
-        ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
-                .data(financierInvestmentDetailResponse)
-                .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("financier/view/investment-details")
-    @PreAuthorize("hasRole('FINANCIER')")
-    @Operation(
-            summary = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS,
-            description = SwaggerDocumentation.VIEW_INVESTMENT_DETAILS_DESCRIPTION,
-            responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved financier investment details",
-                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid financier id provided.",
-                            content = @Content(schema = @Schema(implementation = InvestmentVehicleMessages.class))
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "404",
-                            description = "Financier not found"
-                    )
-            }
-    )
-    public ResponseEntity<ApiResponse<?>> viewInvestmentDetails(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        Financier financier = financierOutputPort.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
-        FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailsOfFinancier(financier.getId());
+    public ResponseEntity<ApiResponse<?>> viewInvestmentDetailsOfFinancier(@PathVariable(required = false) String financierId, @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        FinancierVehicleDetail financierVehicleDetail = financierUseCase.viewInvestmentDetailOfFinancier(financierId, userId);
         FinancierInvestmentDetailResponse financierInvestmentDetailResponse = financierRestMapper.mapToFinancierDetailResponse(financierVehicleDetail);
 
         ApiResponse<FinancierInvestmentDetailResponse> apiResponse = ApiResponse.<FinancierInvestmentDetailResponse>builder()
@@ -205,24 +174,41 @@ public class FinancierController {
     }
 
     @GetMapping("financier/view/{financierId}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable String financierId) throws MeedlException {
-        Financier financier = financierUseCase.viewFinancierDetail(financierId);
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    @Operation(
+            summary = SwaggerDocumentation.VIEW_DETAILS,
+            description = SwaggerDocumentation.VIEW_DETAILS_DESCRIPTION
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Financier details retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid financier ID provided",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Financier not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable(required = false) String financierId) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
-
-        ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
-                .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())
-                .data(financierDashboardResponse)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("financier/view/dashboard")
-    @PreAuthorize("hasRole('FINANCIER')")
-    public ResponseEntity<ApiResponse<?>> viewMyDashboard(@AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
-        Financier foundFinancier = financierUseCase.findFinancierByUserId(meedlUser.getClaimAsString("sub"));
-        FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(foundFinancier);
 
         ApiResponse<FinancierDashboardResponse> apiResponse = ApiResponse.<FinancierDashboardResponse>builder()
                 .message(ControllerConstant.RETURNED_SUCCESSFULLY.getMessage())

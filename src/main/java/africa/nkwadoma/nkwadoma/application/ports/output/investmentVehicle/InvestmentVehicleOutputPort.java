@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import org.springframework.data.domain.*;
 
 public interface InvestmentVehicleOutputPort {
@@ -18,7 +19,8 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException;
 
-    Page<InvestmentVehicle> searchInvestmentVehicle(String  name, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
+    Page<InvestmentVehicle> searchInvestmentVehicle(String name, InvestmentVehicle investmentVehicle,
+                                                    int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException;
 
@@ -26,9 +28,12 @@ public interface InvestmentVehicleOutputPort {
 
     Page<InvestmentVehicle> findAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus) throws MeedlException;
 
-    Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException;
+    Page<InvestmentVehicle> findAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException;
     Page<InvestmentVehicle> findAllInvestmentVehicleByFundRaisingStatus(int pageSize, int pageNumber, FundRaisingStatus fundRaisingStatus) throws MeedlException;
 
 
     Page<InvestmentVehicle> findAllInvestmentVehicleExcludingPrivate(String userId,int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicle> searchInvestmentVehicleExcludingPrivate(String id, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
+
 }

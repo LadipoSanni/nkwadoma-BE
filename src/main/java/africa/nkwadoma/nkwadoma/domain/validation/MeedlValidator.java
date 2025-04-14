@@ -73,8 +73,11 @@ public class MeedlValidator {
         }
     }
 
-    private static boolean isEmptyString(String dataElement) {
+    public static boolean isEmptyString(String dataElement) {
         return StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement);
+    }
+    public static boolean isNotEmptyString(String dataElement) {
+        return !isEmptyString(dataElement);
     }
 
     public static void validateBigDecimalDataElement(BigDecimal dataElement) throws MeedlException {
@@ -142,7 +145,11 @@ public class MeedlValidator {
             throw new MeedlException("Invalid bvn provided");
         }
     }
-
+    public static void validateDoubleDataElement(Double dataElement, String message) throws MeedlException {
+        if (dataElement == null) {
+            throw new MeedlException(message);
+        }
+    }
     public static void validateDoubleDataElement(Double dataElement) throws MeedlException {
         if (dataElement == null) {
             throw new MeedlException(MeedlMessages.EMPTY_INPUT_FIELD_ERROR.getMessage());

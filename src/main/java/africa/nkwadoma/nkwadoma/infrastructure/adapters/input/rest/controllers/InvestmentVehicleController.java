@@ -3,9 +3,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.*;
@@ -93,17 +93,25 @@ public class InvestmentVehicleController {
 
 
     @GetMapping("investment-vehicle/all/view/by")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleBy(
             @RequestParam int pageSize,
             @RequestParam int pageNumber,
             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
             @RequestParam(required = false) InvestmentVehicleStatus investmentVehicleStatus,
-            @RequestParam(required = false)FundRaisingStatus fundRaisingStatus) throws MeedlException {
+            @RequestParam(required = false)InvestmentVehicleMode investmentVehicleMode,
+            @RequestParam(required = false) String sortField,
+            @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+
+        String userId = meedlUser.getClaimAsString("sub");
+        InvestmentVehicle investmentVehicle = InvestmentVehicle.builder()
+                .investmentVehicleType(investmentVehicleType)
+                .investmentVehicleStatus(investmentVehicleStatus)
+                .vehicleOperation(VehicleOperation.builder().fundRaisingStatus(investmentVehicleMode).build())
+                .build();
 
         Page<InvestmentVehicle> investmentVehicles = investmentVehicleUseCase
-                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
-
+                .viewAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicle, sortField, userId);
         List<InvestmentVehicleResponse> investmentVehicleResponse =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
 
@@ -117,17 +125,20 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-
     @GetMapping("investmentvehicle/search/{investmentVehicleName}")
-    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@PathVariable String investmentVehicleName,
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
+                                                                  @PathVariable String investmentVehicleName,
                                                                   @RequestParam InvestmentVehicleType investmentVehicleType,
+                                                                  @RequestParam InvestmentVehicleStatus investmentVehicleStatus,
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
     ) throws MeedlException {
-
+        InvestmentVehicle investmentVehicle = InvestmentVehicle.builder().investmentVehicleType(investmentVehicleType).
+        name(investmentVehicleName).investmentVehicleStatus(investmentVehicleStatus).build();
         Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.searchInvestmentVehicle(investmentVehicleName,investmentVehicleType,pageSize,pageNumber );
+                investmentVehicleUseCase.searchInvestmentVehicle(meedlUser.getClaimAsString("sub"),investmentVehicle,
+                        pageSize,pageNumber );
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(

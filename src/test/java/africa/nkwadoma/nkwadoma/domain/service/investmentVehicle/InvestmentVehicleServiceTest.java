@@ -12,7 +12,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
@@ -24,8 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +75,12 @@ class InvestmentVehicleServiceTest {
     private CouponDistributionOutputPort couponDistributionOutputPort;
     private CouponDistribution couponDistribution;
     @Mock
+    private InvestmentVehicleEntityRepository investmentVehicleRepository;
+
+    @Mock
+    private InvestmentVehicleMapper investmentVehicleMapper;
+    @Mock
     private VehicleOperationMapper vehicleOperationMapper;
-
-
 
 
     @BeforeEach

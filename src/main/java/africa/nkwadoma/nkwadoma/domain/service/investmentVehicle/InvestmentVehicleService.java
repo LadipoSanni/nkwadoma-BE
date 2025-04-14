@@ -17,6 +17,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import lombok.*;
@@ -166,10 +167,15 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> searchInvestmentVehicle(String investmentVehicleName, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateDataElement(investmentVehicleName,
-                InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_CANNOT_BE_EMPTY.getMessage());
-        return investmentVehicleOutputPort.searchInvestmentVehicle(investmentVehicleName,investmentVehicleType,pageSize,pageNumber);
+    public Page<InvestmentVehicle> searchInvestmentVehicle(String userId, InvestmentVehicle investmentVehicle,
+                                                           int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole() == IdentityRole.FINANCIER) {
+            return investmentVehicleOutputPort.searchInvestmentVehicleExcludingPrivate(userIdentity.getId(),
+                    investmentVehicle,pageSize,pageNumber);
+        }
+        return investmentVehicleOutputPort.searchInvestmentVehicle(
+                investmentVehicle.getName(),investmentVehicle,pageSize,pageNumber);
     }
 
     private InvestmentVehicle publishedInvestmentVehicle(String investmentVehicleId,InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -212,10 +218,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicleType investmentVehicleType, InvestmentVehicleStatus investmentVehicleStatus, FundRaisingStatus fundRaisingStatus) throws MeedlException {
-            MeedlValidator.validatePageSize(pageSize);
-            MeedlValidator.validatePageNumber(pageNumber);
-        return investmentVehicleOutputPort.findAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicleType, investmentVehicleStatus, fundRaisingStatus);
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleBy(int pageSize, int pageNumber, InvestmentVehicle investmentVehicle, String sortField, String userId) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Page<InvestmentVehicle> investmentVehicles = null;
+        investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(pageSize, pageNumber, investmentVehicle, sortField, userId);
+        return investmentVehicles;
     }
 
     @Override

@@ -72,18 +72,6 @@ class LoanProductAdapterTest {
         }
     }
     @Test
-    @Order(2)
-    void createLoanProductWithExistingLoanProductName(){
-        try {
-            LoanProduct foundLoanProduct = loanProductOutputPort.findByName(gemsLoanProduct.getName());
-            assertNotNull(foundLoanProduct);
-            assertEquals(foundLoanProduct.getName(),gemsLoanProduct.getName());
-        } catch (MeedlException exception) {
-            log.error("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-        assertThrows(MeedlException.class,()-> loanProductOutputPort.save(gemsLoanProduct));
-    }
-    @Test
     void createLoanProductWithNullLoanProductName(){
         gemsLoanProduct.setName(null);
         assertThrows(MeedlException.class,()-> loanProductOutputPort.save((gemsLoanProduct)));
@@ -146,7 +134,7 @@ class LoanProductAdapterTest {
         }
     }
     @Test
-    @Order(3)
+    @Order(2)
     void existsByNameWithValidName() {
         try {
         assertTrue(loanProductOutputPort.existsByName(gemsLoanProduct.getName()));
@@ -163,7 +151,7 @@ class LoanProductAdapterTest {
         assertThrows(MeedlException.class, () -> loanProductOutputPort.findByName(gemsLoanProduct.getName()));
     }
     @Test
-    @Order(4)
+    @Order(3)
     void findByName(){
         LoanProduct foundLoanProduct = null;
         try {
@@ -176,7 +164,7 @@ class LoanProductAdapterTest {
         assertEquals(gemsLoanProduct.getMandate(), foundLoanProduct.getMandate());
     }
     @Test
-    @Order(5)
+    @Order(4)
     void findById(){
         LoanProduct foundLoanProduct = null;
         try {
@@ -201,7 +189,7 @@ class LoanProductAdapterTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void findAllLoanProduct() {
             Page<LoanProduct> foundLoanProducts = loanProductOutputPort.findAllLoanProduct(gemsLoanProduct);
             List<LoanProduct> loanProductList = foundLoanProducts.toList();

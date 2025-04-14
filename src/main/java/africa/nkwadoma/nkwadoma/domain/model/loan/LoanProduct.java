@@ -50,7 +50,7 @@ public class LoanProduct {
     private String bankPartner;
     private String disbursementTerms;
     private String investmentVehicleId;
-    private int totalNumberOfLoanees;
+    private int totalNumberOfLoanee;
     private int totalNumberOfLoanProduct;
     private List<Vendor> vendors;
     private String investmentVehicleName;

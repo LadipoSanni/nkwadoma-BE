@@ -19,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
@@ -44,7 +43,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -360,13 +358,22 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Financier viewFinancierDetail(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);
-        return updateFinancierDetails(financier);
+    public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
+        Financier financier = null;
+        if (isFinancier(userId)) {
+            financier = financierOutputPort.findFinancierByUserId(userId);
+        } else {
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            financier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        return updateFinancierDetail(financier);
     }
 
-    private Financier updateFinancierDetails(Financier financier) throws MeedlException {
+    private boolean isFinancier(String userId) throws MeedlException {
+        return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
+    }
+
+    private Financier updateFinancierDetail(Financier financier) throws MeedlException {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
                 .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
@@ -553,25 +560,42 @@ public class FinancierService implements FinancierUseCase {
     }
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
-        kycIdentityValidation(financier);
+        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        financier.validateKyc();
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
-        if (foundFinancier.getUserIdentity().getNextOfKin() == null &&
-            foundFinancier.getUserIdentity().getBankDetail() == null){
+        if (foundFinancier.getUserIdentity().getBankDetail() == null){
             log.info("Financier details in service to use in completing kyc {}", financier);
-
-            updateFinancierNextOfKinKycDetail(financier, foundFinancier);
-            log.info("Financier found as {} -------  has added next of kin and bank details in kyc updated. {}",foundFinancier.getFinancierType(), foundFinancier);
             log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
             log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
-            foundFinancier.getUserIdentity().setBankDetail(bankDetail);
+            mapKycFinancierUpdatedValues(financier, foundFinancier, bankDetail);
 
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
-            return financierOutputPort.completeKyc(foundFinancier);
+            log.info("updated user details for kyc");
+            return financierOutputPort.completeKyc(financier);
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
+    }
+
+    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {
+        UserIdentity userIdentity = foundFinancier.getUserIdentity();
+        log.info("updating user details in kyc {}", userIdentity.getId());
+
+        userIdentity.setNin(financier.getUserIdentity().getNin());
+        userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
+        userIdentity.setBvn(financier.getUserIdentity().getBvn());
+        userIdentity.setBankDetail(bankDetail);
+        userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
+
+        foundFinancier.setUserIdentity(userIdentity);
+
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setUserIdentity(userIdentity);
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setId(foundFinancier.getId());
+
     }
 
     @Override
@@ -580,28 +604,32 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
-        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(foundFinancier.getId());
+    public FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException {
+        Financier financier = getFinancierByUserType(financierId, userId);
+        List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
-        BigDecimal totalInvestmentAmount = foundFinancier.getTotalAmountInvested();
-
+        BigDecimal totalInvestmentAmount = financier.getTotalAmountInvested();
         List<InvestmentSummary> investmentSummaries = getInvestmentVehicle(financierInvestmentVehicles);
+
         return FinancierVehicleDetail.builder()
                 .numberOfInvestment(numberOfInvestment)
                 .totalAmountInvested(totalInvestmentAmount)
                 .investmentSummaries(investmentSummaries)
-                .portfolioValue(foundFinancier.getPortfolioValue())
+                .portfolioValue(financier.getPortfolioValue())
                 .build();
     }
 
-    @Override
-    public Financier findFinancierByUserId(String userId) throws MeedlException {
-        Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
-        foundFinancier = viewFinancierDetail(foundFinancier.getId());
-        return updateFinancierDetails(foundFinancier);
+    public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
+        Financier foundFinancier = null;
+        if (isFinancier(userId)) {
+            foundFinancier = financierOutputPort.findFinancierByUserId(userId);
+        } else {
+            MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+            foundFinancier = financierOutputPort.findFinancierByFinancierId(financierId);
+        }
+        return foundFinancier;
     }
+
 
     private List<InvestmentSummary> getInvestmentVehicle(List<InvestmentVehicleFinancier> financierInvestmentVehicles) {
         return financierInvestmentVehicles.stream()

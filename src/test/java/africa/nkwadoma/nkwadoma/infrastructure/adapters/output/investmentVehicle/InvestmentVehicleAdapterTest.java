@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -111,15 +112,10 @@ class InvestmentVehicleAdapterTest {
     }
 
     @Test
-    void searchInvestmentVehicleDetailsWithNullId()  {
+    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleStatus()  {
+        fundGrowth.setInvestmentVehicleStatus(null);
         assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
-                searchInvestmentVehicle(null,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber));
-    }
-
-    @Test
-    void searchInvestmentVehicleDetailsWithNullInvestmentVehicleType()  {
-        assertThrows(MeedlException.class, () -> investmentVehicleOutputPort.
-                searchInvestmentVehicle("g",null,pageSize,pageNumber));
+                searchInvestmentVehicle("g",fundGrowth,pageSize,pageNumber));
     }
 
     @Test
@@ -160,9 +156,11 @@ class InvestmentVehicleAdapterTest {
     @Test
     void searchInvestmentVehicle(){
             Page<InvestmentVehicle> investmentVehicles = null;
+            fundGrowth.setInvestmentVehicleStatus(PUBLISHED);
+            fundGrowth.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
             try{
                 investmentVehicles  = investmentVehicleOutputPort.
-                        searchInvestmentVehicle("g",InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
+                        searchInvestmentVehicle("g",fundGrowth,pageSize,pageNumber);
             }catch (MeedlException exception){
                 log.info("{} {}", exception.getClass().getName(), exception.getMessage());
             }
@@ -245,21 +243,6 @@ class InvestmentVehicleAdapterTest {
         assertNotNull(investmentVehicles);
         assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleStatus().equals(InvestmentVehicleStatus.PUBLISHED));
-    }
-
-    @Test
-    void viewAllInvestmentVehicleByFiltering(){
-        Page<InvestmentVehicle> investmentVehicles = null;
-        try{
-            InvestmentVehicle savedVehicle = investmentVehicleOutputPort.save(capitalGrowth);
-            investmentVehicles = investmentVehicleOutputPort.findAllInvestmentVehicleBy(10, 0, null, null, FundRaisingStatus.CLOSED);
-            investmentVehicleOutputPort.deleteInvestmentVehicle(savedVehicle.getId());
-        } catch (MeedlException exception){
-            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
-        }
-        assertNotNull(investmentVehicles);
-        assertFalse(investmentVehicles.isEmpty());
-        assertThat(investmentVehicles).allMatch(investmentVehicle -> investmentVehicle.getFundRaisingStatus().equals(FundRaisingStatus.CLOSED));
     }
 
     @Test

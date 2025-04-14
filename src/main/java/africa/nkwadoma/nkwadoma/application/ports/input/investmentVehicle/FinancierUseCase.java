@@ -10,7 +10,7 @@ import java.util.List;
 public interface FinancierUseCase {
     String inviteFinancier(List<Financier> financier, String investmentVehicleId) throws MeedlException;
 
-    Financier viewFinancierDetail(String financierId) throws MeedlException;
+    Financier viewFinancierDetail(String userId, String financierId) throws MeedlException;
 
     Page<Financier> viewAllFinancier(Financier financier) throws MeedlException;
 
@@ -28,7 +28,6 @@ public interface FinancierUseCase {
 
     Financier findFinancierByCooperationId(String cooperationId) throws MeedlException;
 
-    FinancierVehicleDetail viewInvestmentDetailsOfFinancier(String financierId) throws MeedlException;
+    FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
-    Financier findFinancierByUserId(String userId) throws MeedlException;
 }
