@@ -94,7 +94,7 @@ public class FinancierService implements FinancierUseCase {
                     } catch (MeedlException e) {
                         log.error("financier details {}", financier ,e);
                         //TODO notify financier on failure
-                        throw new RuntimeException(e);
+                        throw new RuntimeException(e.getMessage());
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
@@ -108,7 +108,7 @@ public class FinancierService implements FinancierUseCase {
         }catch (MeedlException e){
             log.error("financier details {}", financier ,e);
             //TODO notify financier on failure
-            throw new MeedlException(e);
+            throw new MeedlException(e.getMessage());
         }
         return getMessageForSingleFinancier(investmentVehicle);
     }
