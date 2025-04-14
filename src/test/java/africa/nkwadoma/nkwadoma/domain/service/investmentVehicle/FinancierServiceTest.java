@@ -157,6 +157,7 @@ public class FinancierServiceTest {
         String response;
         Financier foundFinancier;
         try {
+            assertThrows(MeedlException.class, ()-> userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail()));
             response = financierUseCase.inviteFinancier(individualFinancierList, investmentVehicleId);
             individualUserIdentity = userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail());
             individualUserIdentityId = individualUserIdentity.getId();
@@ -228,7 +229,7 @@ public class FinancierServiceTest {
     @Test
     @Order(2)
     void investInVehicle() {
-        individualFinancier.setAmountToInvest(new BigDecimal("1000.00"));
+        individualFinancier.setAmountToInvest(new BigDecimal("5000.00"));
         individualFinancier.setId(individualFinancierId);
         InvestmentVehicle investmentVehicle;
         Financier financier;
@@ -260,7 +261,8 @@ public class FinancierServiceTest {
     @Test
     @Order(3)
     void investInPrivateVehicleTwice() {
-        individualFinancier.setAmountToInvest(new BigDecimal("1000.00"));
+        BigDecimal amountToInvest = new BigDecimal("5000.00");
+        individualFinancier.setAmountToInvest(amountToInvest);
         individualFinancier.setId(individualFinancierId);
         InvestmentVehicle investmentVehicle = null;
         Financier financier = null;
@@ -273,7 +275,7 @@ public class FinancierServiceTest {
             BigDecimal initialInvestedAmount = investmentVehicleFinancier.get().getAmountInvested();
             assertNotNull(financier);
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-            assertEquals( new BigDecimal("5000.00"), initialAmount);
+            assertEquals( new BigDecimal("9000.00"), initialAmount);
             if (investmentVehicle.getTotalAvailableAmount() == null) {
                 investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
             }
@@ -287,7 +289,7 @@ public class FinancierServiceTest {
             BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
             assertEquals(initialAmount.add(individualFinancier.getAmountToInvest()), currentAmount,
                     "The total available amount should be updated correctly");
-            assertEquals(individualFinancier.getAmountToInvest().add(new BigDecimal("1000.00")), investmentVehicleFinancier.get().getAmountInvested(),
+            assertEquals(individualFinancier.getAmountToInvest().add(amountToInvest), investmentVehicleFinancier.get().getAmountInvested(),
                     "The amount to invest should be updated correctly");
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
@@ -298,8 +300,7 @@ public class FinancierServiceTest {
     @Order(4)
     void investInPublicVehicle(){
         individualFinancier.setAmountToInvest(new BigDecimal("5000.00"));
-        individualFinancier.setId(individualFinancierId
-        );
+        individualFinancier.setId(individualFinancierId);
         InvestmentVehicle investmentVehicle;
         try {
             publicInvestmentVehicle.setTotalAvailableAmount(publicInvestmentVehicle.getSize());
@@ -327,11 +328,53 @@ public class FinancierServiceTest {
             throw new RuntimeException(e);
         }
     }
+    @Test
+    void investInVehicleWithAmountLowerThanMinimumAmount() {
+        InvestmentVehicle investmentVehicle = null;
+        BigDecimal initialAmountInvested;
+        InvestmentVehicle investmentVehicleToCheck;
+        Financier foundFinancier;
+        try {
+            investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+            initialAmountInvested = investmentVehicle.getAmountInvested();
+            BigDecimal minimumInvestmentAmount = investmentVehicle.getMinimumInvestmentAmount();
+            BigDecimal amountToInvest = new BigDecimal("1000");
 
+            individualUserIdentity = userIdentityOutputPort.findByEmail(individualUserIdentity.getEmail());
+            individualUserIdentityId = individualUserIdentity.getId();
+            foundFinancier = financierOutputPort.findFinancierByUserId(individualUserIdentityId);
+            foundFinancier.setAmountToInvest(amountToInvest);
+            foundFinancier.setInvestmentVehicleId(investmentVehicleId);
+            investmentVehicleToCheck = investmentVehicleOutputPort.findById(investmentVehicleId);
+            log.info("Investment vehicle initial amount --- amount {} investment vehicle id {}", initialAmountInvested, investmentVehicleId);
+        } catch (MeedlException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+
+        MeedlException exception = assertThrows(MeedlException.class, () -> financierUseCase.investInVehicle(foundFinancier));
+        log.error("", exception);
+
+        BigDecimal finalAmountInvested = investmentVehicleToCheck.getAmountInvested();
+        log.info("finalAmountInvested {}, initialAmountInvested {}", finalAmountInvested, initialAmountInvested);
+        assertEquals(finalAmountInvested, initialAmountInvested);
+    }
+    @Test
+    void investInVehicleWithoutUserId(){
+        individualFinancier.getUserIdentity().setId(null);
+        MeedlException exception =assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(individualFinancier));
+        log.info("",exception);
+    }
+    @Test
+    void investInVehicleNullUserIdentity(){
+        individualFinancier.setUserIdentity(null);
+        assertThrows(MeedlException.class, ()->financierUseCase.investInVehicle(individualFinancier));
+    }
     @Test
     void investInVehicleWithNullAmount(){
         individualFinancier.setAmountToInvest(null);
-        assertThrows(MeedlException.class, ()-> financierUseCase.investInVehicle(individualFinancier));
+        MeedlException exception = assertThrows(MeedlException.class, ()-> financierUseCase.investInVehicle(individualFinancier));
+        log.info("",exception);
     }
 
     @Test

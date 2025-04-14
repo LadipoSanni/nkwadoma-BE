@@ -453,6 +453,7 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier investInVehicle(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        financier.validateInvestInVehicleDetails();
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
@@ -461,12 +462,14 @@ public class FinancierService implements FinancierUseCase {
         log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility().equals(InvestmentVehicleVisibility.PUBLIC)) {
             log.info("Initiating investment into a public vehicle");
+            validateAmountToInvest(financier, foundInvestmentVehicle);
             investInPublicVehicle(financier, foundFinancier, foundInvestmentVehicle);
             investmentVehicle = foundInvestmentVehicle;
         } else {
             investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
                     .orElseThrow(() -> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
             investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+            validateAmountToInvest(financier, investmentVehicle);
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
             log.info("Amount weh financier wan put ----> "+ financier.getAmountToInvest());
@@ -475,6 +478,12 @@ public class FinancierService implements FinancierUseCase {
             log.info("New amount after adding to the investment vehicle... {}", investmentVehicle.getTotalAvailableAmount());
         }
         return financier;
+    }
+
+    private void validateAmountToInvest(Financier financier, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
+        if (!(financier.getAmountToInvest().compareTo(foundInvestmentVehicle.getMinimumInvestmentAmount()) >= 0)) {
+            throw new MeedlException("Amount you are investing "+ financier.getAmountToInvest() +" is below the minimum investment amount stated " + foundInvestmentVehicle.getMinimumInvestmentAmount());
+        }
     }
 
     private InvestmentVehicleFinancier investInPublicVehicle(Financier financier, Financier foundFinancier, InvestmentVehicle investmentVehicle) throws MeedlException {
