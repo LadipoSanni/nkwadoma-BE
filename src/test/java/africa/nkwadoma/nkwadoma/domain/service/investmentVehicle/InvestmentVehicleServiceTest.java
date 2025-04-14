@@ -235,6 +235,8 @@ class InvestmentVehicleServiceTest {
             fundGrowth.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
             when(financierOutputPort.findFinancierByFinancierId(financier.getId())).thenReturn(financier);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
+            when(portfolioOutputPort.findPortfolio(Portfolio.builder().portfolioName("Meedl").build())).thenReturn(portfolio);
+//            verify(investmentVehicleOutputPort, times(1)).save(fundGrowth);
             investmentVehicle = investmentVehicleService.setInvestmentVehicleVisibility(fundGrowth.getId(),
                     InvestmentVehicleVisibility.PRIVATE,List.of(financier));
         }catch (MeedlException exception){
@@ -483,7 +485,7 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
-    void cannotDeletePublishedInvestmentVehicle() throws MeedlException {
+    void cannotDeleteFinalizeInvestmentVehiclePublishing() throws MeedlException {
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
         assertThrows(MeedlException.class, () -> investmentVehicleService.deleteInvestmentVehicle(mockId));
         verify(investmentVehicleOutputPort, times(1)).findById(mockId);
