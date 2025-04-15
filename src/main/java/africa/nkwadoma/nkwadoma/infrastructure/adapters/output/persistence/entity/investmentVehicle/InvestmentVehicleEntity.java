@@ -15,6 +15,7 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -48,7 +49,7 @@ public class InvestmentVehicleEntity {
     private String bankPartner;
     private String fundManager;
     private BigDecimal minimumInvestmentAmount;
-    private LocalDateTime startDate;
+    private LocalDate startDate;
     private LocalDateTime createdDate;
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleStatus investmentVehicleStatus;

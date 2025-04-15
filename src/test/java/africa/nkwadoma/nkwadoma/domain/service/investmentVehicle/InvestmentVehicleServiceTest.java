@@ -31,7 +31,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -159,41 +161,53 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
-    void setUpInvestmentVehicleVisibilityToPublic(){
-        InvestmentVehicle investmentVehicle = null;
+    void setUpInvestmentVehicleVisibilityToPublic() throws MeedlException {
+        InvestmentVehicle result = null;
+        when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
+                .thenReturn(null);
+        when(portfolioOutputPort.findPortfolio(any()))
+                .thenReturn(portfolio);
+        fundGrowth.setInvestmentVehicleStatus(DRAFT);
+        when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
         try {
-            fundGrowth.setId(mockId);
-            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(fundGrowth);
-            fundGrowth.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
-            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
-            investmentVehicle = investmentVehicleService.setInvestmentVehicleVisibility(fundGrowth.getId(),
-                    InvestmentVehicleVisibility.PUBLIC,List.of());
-        }catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+            result = investmentVehicleService.setInvestmentVehicleVisibility(
+                    mockId,
+                    InvestmentVehicleVisibility.PUBLIC,
+                    List.of()
+            );
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(investmentVehicle);
-        assertEquals(InvestmentVehicleVisibility.PUBLIC,investmentVehicle.getInvestmentVehicleVisibility());
+        assertNotNull(result);
+        assertEquals(InvestmentVehicleVisibility.PUBLIC, result.getInvestmentVehicleVisibility());
+        assertEquals(PUBLISHED, result.getInvestmentVehicleStatus());
     }
+
 
     @Test
-    void setUpInvestmentVehicleVisibilityToPrivate(){
-        InvestmentVehicle investmentVehicle = null;
+    void setUpInvestmentVehicleVisibilityToPrivate() throws MeedlException {
+        InvestmentVehicle result = null;
+        when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
+                .thenReturn(null);
+        when(portfolioOutputPort.findPortfolio(any()))
+                .thenReturn(portfolio);
+        fundGrowth.setInvestmentVehicleStatus(DRAFT);
+        when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
         try {
-            financier.setId(mockId);
-            fundGrowth.setId(mockId);
-            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(fundGrowth);
-            fundGrowth.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
-            when(financierOutputPort.findFinancierByFinancierId(financier.getId())).thenReturn(financier);
-            when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
-            investmentVehicle = investmentVehicleService.setInvestmentVehicleVisibility(fundGrowth.getId(),
-                    InvestmentVehicleVisibility.PRIVATE,List.of(financier));
-        }catch (MeedlException exception){
-            log.info("{} {}",exception.getClass().getName(), exception.getMessage());
+            result = investmentVehicleService.setInvestmentVehicleVisibility(
+                    mockId,
+                    InvestmentVehicleVisibility.PRIVATE,
+                    List.of(financier)
+            );
+        } catch (MeedlException exception) {
+            log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertNotNull(investmentVehicle);
-        assertEquals(InvestmentVehicleVisibility.PRIVATE,investmentVehicle.getInvestmentVehicleVisibility());
+        assertNotNull(result);
+        assertEquals(InvestmentVehicleVisibility.PRIVATE, result.getInvestmentVehicleVisibility());
+        assertEquals(PUBLISHED, result.getInvestmentVehicleStatus());
     }
-
 
     @Test
     void viewAllInvestmentVehiclesByFundRaisingStatus(){
@@ -427,7 +441,7 @@ class InvestmentVehicleServiceTest {
     }
 
     @Test
-    void cannotDeletePublishedInvestmentVehicle() throws MeedlException {
+    void cannotDeleteFinalizeInvestmentVehiclePublishing() throws MeedlException {
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
         assertThrows(MeedlException.class, () -> investmentVehicleService.deleteInvestmentVehicle(mockId));
         verify(investmentVehicleOutputPort, times(1)).findById(mockId);
