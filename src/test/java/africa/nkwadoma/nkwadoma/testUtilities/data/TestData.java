@@ -311,6 +311,7 @@ public class TestData {
         InvestmentVehicle investmentVehicle = new InvestmentVehicle();
         investmentVehicle.setName(name);
         investmentVehicle.setSize(new BigDecimal("4000.00"));
+        investmentVehicle.setTotalAvailableAmount(new BigDecimal("0.00"));
         investmentVehicle.setRate(13F);
         investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");

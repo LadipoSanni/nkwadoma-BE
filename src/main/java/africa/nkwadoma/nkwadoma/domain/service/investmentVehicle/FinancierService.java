@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class FinancierService implements FinancierUseCase {
                     } catch (MeedlException e) {
                         log.error("financier details {}", financier ,e);
                         //TODO notify financier on failure
-                        throw new RuntimeException(e);
+                        throw new RuntimeException(e.getMessage());
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
@@ -108,7 +109,7 @@ public class FinancierService implements FinancierUseCase {
         }catch (MeedlException e){
             log.error("financier details {}", financier ,e);
             //TODO notify financier on failure
-            throw new MeedlException(e);
+            throw new MeedlException(e.getMessage());
         }
         return getMessageForSingleFinancier(investmentVehicle);
     }
@@ -457,18 +458,15 @@ public class FinancierService implements FinancierUseCase {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
-        InvestmentVehicle investmentVehicle = null;
-        InvestmentVehicleFinancier investmentVehicleFinancier = null;
         log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility().equals(InvestmentVehicleVisibility.PUBLIC)) {
             log.info("Initiating investment into a public vehicle");
             validateAmountToInvest(financier, foundInvestmentVehicle);
             investInPublicVehicle(financier, foundFinancier, foundInvestmentVehicle);
-            investmentVehicle = foundInvestmentVehicle;
         } else {
-            investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
+            InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
                     .orElseThrow(() -> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
-            investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+            InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
             validateAmountToInvest(financier, investmentVehicle);
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
@@ -531,23 +529,29 @@ public class FinancierService implements FinancierUseCase {
         Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort
                 .findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
         log.info("Updating investment vehicle financier ");
-        if (optionalInvestmentVehicleFinancier.isPresent()) {
-            investmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
-            BigDecimal newAmount = investmentVehicleFinancier.getAmountInvested().add(financier.getAmountToInvest());
-            investmentVehicleFinancier.setAmountInvested(newAmount);
-            log.info("Updated the amount invested in the investment vehicle financier for {}... amount invested {}", newAmount, financier.getAmountToInvest());
-            if (investmentVehicleFinancier.getDateInvested() == null) {
-                investmentVehicleFinancier.setDateInvested(LocalDate.now());
-            }
+        List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), financier.getId());
+
+        if (investmentVehicleFinanciers.size() == BigInteger.ONE.intValue() &&
+                (investmentVehicleFinanciers.get(0).getAmountInvested() == null ||
+                investmentVehicleFinanciers.get(0).getAmountInvested().compareTo(BigDecimal.ZERO) == BigInteger.ZERO.intValue())) {
+
+            InvestmentVehicleFinancier foundInvestmentVehicleFinancier = investmentVehicleFinanciers.get(0);
+            log.info("Financier was only added to the vehicle. {}", investmentVehicle.getName());
+            foundInvestmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
+            log.info("Updated the amount invested in the investment vehicle financier for {} ", foundInvestmentVehicleFinancier.getAmountInvested());
+            foundInvestmentVehicleFinancier.setDateInvested(LocalDate.now());
+            investmentVehicleFinancier = foundInvestmentVehicleFinancier;
+
         }else {
-            log.info("First time financier is in vesting in this vehicle. Amount {}", financier.getAmountToInvest());
-            investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
-                    .investmentVehicle(investmentVehicle)
-                    .financier(financier)
-                    .amountInvested(financier.getAmountToInvest())
-                    .dateInvested(LocalDate.now())
-                    .build();
-        }
+                log.info("Financier is investing in this vehicle. Amount {}", financier.getAmountToInvest());
+                investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
+                        .investmentVehicle(investmentVehicle)
+                        .financier(financier)
+                        .amountInvested(financier.getAmountToInvest())
+                        .dateInvested(LocalDate.now())
+                        .build();
+            }
+
         return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
     }
 

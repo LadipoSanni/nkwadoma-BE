@@ -86,7 +86,10 @@ public class InvestmentVehicle {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setCreatedDate(LocalDate.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
-        setTotalAvailableAmount(size);
+        if (this.totalAvailableAmount == null){
+            log.info("Setting up total available amount for {} investment vehicle.", name);
+            setTotalAvailableAmount(new BigDecimal("0.00"));
+        }
         setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
     }
 

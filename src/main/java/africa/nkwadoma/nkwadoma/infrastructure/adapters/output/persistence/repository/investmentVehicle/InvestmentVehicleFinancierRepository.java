@@ -32,4 +32,6 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :financierId AND ivf.amountInvested > 0")
     List<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedIn(String financierId);
+
+    List<InvestmentVehicleFinancierEntity> findAllByInvestmentVehicle_IdAndFinancier_Id(String investmentVehicleId, String financierId);
 }
