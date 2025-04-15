@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -26,7 +27,7 @@ public class InvestmentVehicleResponse {
     private BigDecimal amountAvailable = BigDecimal.ZERO;
     private BigDecimal totalIncomeGenerated;
     private BigDecimal netAssetValue;
-    private LocalDateTime startDate;
+    private LocalDate startDate;
     private LocalDateTime createdDate;
     private String investmentVehicleLink;
     private InvestmentVehicleStatus investmentVehicleStatus;

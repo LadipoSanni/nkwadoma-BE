@@ -186,8 +186,6 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             }
             investmentVehicleMapper.updateInvestmentVehicle(foundInvestmentVehicle,investmentVehicle);
         }
-        String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
-        investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
@@ -239,8 +237,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
-            return investmentVehicleOutputPort.save(investmentVehicle);
+            return prepareInvestmentVehicleForPublishing(investmentVehicle);
         } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
+            if (financiers.isEmpty()) {
+                throw new MeedlException(InvestmentVehicleMessages.CANNOT_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+            }
             for (Financier eachFinancier : financiers) {
                 Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
                 InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
@@ -261,7 +262,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
         if (foundInvestmentVehicle.getVehicleOperation() == null) {
             setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
-            return foundInvestmentVehicle;
+            String investmentVehicleLink = generateInvestmentVehicleLink(foundInvestmentVehicle.getId());
+            foundInvestmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
+            return investmentVehicleOutputPort.save(foundInvestmentVehicle);
         }
         updateExistingInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
         return foundInvestmentVehicle;
