@@ -33,4 +33,6 @@ public class InvestmentSummary {
     private CouponDistributionStatus couponDistributionStatus;
     private VehicleClosure vehicleClosureStatus;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private String mandate;
+    private InvestmentVehicleMode fundRaisingStatus;
 }
