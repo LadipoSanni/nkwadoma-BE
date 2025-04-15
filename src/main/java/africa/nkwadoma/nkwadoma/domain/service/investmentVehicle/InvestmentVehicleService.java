@@ -214,7 +214,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return prepareInvestmentVehicleForPublishing(investmentVehicle);
         } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
             if (financiers.isEmpty()) {
-                throw new MeedlException(InvestmentVehicleMessages.CANNOT_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+                throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
             }
             for (Financier eachFinancier : financiers) {
                 Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
