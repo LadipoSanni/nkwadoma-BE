@@ -41,6 +41,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.BASE_URL;
@@ -82,6 +83,7 @@ public class FinancierController {
             } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
                 financier.getUserIdentity().setCreatedBy(meedlUserId);
+                financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             }
             return financier;
         }).toList();
@@ -92,6 +94,7 @@ public class FinancierController {
                 .email(financierRequest.getOrganizationEmail())
                 .firstName("cooperateFinancier")
                 .lastName("admin")
+                .createdAt(LocalDateTime.now())
                 .role(IdentityRole.FINANCIER)
                 .build());
         financier.setCooperation(Cooperation.builder()
@@ -217,7 +220,9 @@ public class FinancierController {
 
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,@RequestParam int pageNumber,@RequestParam int pageSize) throws MeedlException {
+    public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
+                                                            @RequestParam int pageNumber,
+                                                            @RequestParam int pageSize) throws MeedlException {
        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();

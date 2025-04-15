@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,7 @@ public class Financier {
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
+    private LocalDateTime createdAt;
 
     //source of fund
     private String personalOrJointSavings;
