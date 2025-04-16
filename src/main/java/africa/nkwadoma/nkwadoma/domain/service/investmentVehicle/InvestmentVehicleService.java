@@ -9,7 +9,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -17,7 +16,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.ViewInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.VehicleOperationMapper;
 import lombok.*;
@@ -27,8 +25,8 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDate;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -60,7 +58,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle setUpInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
             investmentVehicle.validateDraft();
-            investmentVehicle.setLastUpdatedDate(LocalDate.now());
+            investmentVehicle.setLastUpdatedDate(LocalDateTime.now());
             return saveInvestmentVehicleToDraft(investmentVehicle);
     }
 
@@ -69,7 +67,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return updateInvestmentVehicleInDraft(investmentVehicle);
         }
         investmentVehicle.setInvestmentVehicleStatus(DRAFT);
-        investmentVehicle.setCreatedDate(LocalDate.now());
+        investmentVehicle.setCreatedDate(LocalDateTime.now());
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
@@ -81,12 +79,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return investmentVehicleOutputPort.save(foundInvestmentVehicle);
     }
 
-    private InvestmentVehicle publishInvestmentVehicle(InvestmentVehicle investmentVehicle) throws MeedlException {
+    private InvestmentVehicle prepareInvestmentVehicleForPublishing(InvestmentVehicle investmentVehicle) throws MeedlException {
         investmentVehicle.validate();
         checkIfInvestmentVehicleNameExist(investmentVehicle);
         setInvestmentVehicleNumbersOnMeedlPortfolio(investmentVehicle);
         investmentVehicle.setValues();
-        return publishedInvestmentVehicle(investmentVehicle.getId(),investmentVehicle);
+        return finalizeInvestmentVehiclePublishing(investmentVehicle.getId(),investmentVehicle);
     }
 
     private void setInvestmentVehicleNumbersOnMeedlPortfolio(InvestmentVehicle investmentVehicle) throws MeedlException {
@@ -178,7 +176,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 investmentVehicle.getName(),investmentVehicle,pageSize,pageNumber);
     }
 
-    private InvestmentVehicle publishedInvestmentVehicle(String investmentVehicleId,InvestmentVehicle investmentVehicle) throws MeedlException {
+    private InvestmentVehicle finalizeInvestmentVehiclePublishing(String investmentVehicleId, InvestmentVehicle investmentVehicle) throws MeedlException {
         if (ObjectUtils.isNotEmpty(investmentVehicleId)) {
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
              InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
@@ -187,34 +185,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             }
             investmentVehicleMapper.updateInvestmentVehicle(foundInvestmentVehicle,investmentVehicle);
         }
-        String investmentVehicleLink = generateInvestmentVehicleLink(investmentVehicle.getId());
-        investmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
         return investmentVehicleOutputPort.save(investmentVehicle);
-    }
-
-    @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleByType(int pageSize, int pageNumber, InvestmentVehicleType type) throws MeedlException {
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validateDataElement(String.valueOf(type), InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
-        return investmentVehicleOutputPort.findAllInvestmentVehicleByType(pageSize, pageNumber, type);
-    }
-
-    @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleByStatus(int pageSize, int pageNumber, InvestmentVehicleStatus status) throws MeedlException {
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
-        return investmentVehicleOutputPort.findAllInvestmentVehicleByStatus(pageSize, pageNumber, status);
-    }
-
-    @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleByTypeAndStatus(int pageSize, int pageNumber, InvestmentVehicleType type, InvestmentVehicleStatus status) throws MeedlException {
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validateObjectInstance(type, InvestmentVehicleMessages.INVESTMENT_VEHICLE_TYPE_CANNOT_BE_NULL.getMessage());
-        MeedlValidator.validateObjectInstance(status, InvestmentVehicleMessages.INVESTMENT_VEHICLE_STATUS_CANNOT_BE_NULL.getMessage());
-        return investmentVehicleOutputPort.findAllInvestmentVehicleByTypeAndStatus(pageSize, pageNumber, type, status);
     }
 
     @Override
@@ -240,8 +211,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
-            return investmentVehicleOutputPort.save(investmentVehicle);
+            return prepareInvestmentVehicleForPublishing(investmentVehicle);
         } else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
+            if (financiers.isEmpty()) {
+                throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+            }
             for (Financier eachFinancier : financiers) {
                 Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
                 InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
@@ -250,7 +224,8 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
             }
         }
-        return investmentVehicleOutputPort.save(investmentVehicle);
+        investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
+        return prepareInvestmentVehicleForPublishing(investmentVehicle);
     }
 
     @Override
@@ -261,7 +236,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
         if (foundInvestmentVehicle.getVehicleOperation() == null) {
             setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
-            return foundInvestmentVehicle;
+            String investmentVehicleLink = generateInvestmentVehicleLink(foundInvestmentVehicle.getId());
+            foundInvestmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
+            return investmentVehicleOutputPort.save(foundInvestmentVehicle);
         }
         updateExistingInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
         return foundInvestmentVehicle;
@@ -277,7 +254,6 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
                 vehicleOperationOutputPort.save(investmentVehicle.getVehicleOperation())
         );
         investmentVehicleOutputPort.save(foundInvestmentVehicle);
-        publishInvestmentVehicle(foundInvestmentVehicle);
     }
 
     private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {

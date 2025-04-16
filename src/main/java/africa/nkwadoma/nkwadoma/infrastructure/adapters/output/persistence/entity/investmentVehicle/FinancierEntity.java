@@ -14,6 +14,7 @@ import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -79,4 +80,5 @@ public class FinancierEntity {
     @OneToOne
     private CooperationEntity cooperation;
     private BigDecimal totalAmountInvested;
+    private LocalDateTime createdAt;
 }

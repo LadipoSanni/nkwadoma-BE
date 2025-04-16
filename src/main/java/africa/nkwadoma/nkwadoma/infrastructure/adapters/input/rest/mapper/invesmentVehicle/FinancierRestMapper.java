@@ -25,6 +25,7 @@ public interface FinancierRestMapper {
     Financier map(FinancierRequest financierRequest);
     @Mapping( source = "userIdentity", target = "userIdentity")
     @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
+    @Mapping( source = "cooperation.name", target = "organizationName")
     FinancierResponse map(Financier financier);
 
     @Mapping(target = "firstName", source="userIdentity.firstName")

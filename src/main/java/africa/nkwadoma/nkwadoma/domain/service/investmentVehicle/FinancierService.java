@@ -66,7 +66,6 @@ public class FinancierService implements FinancierUseCase {
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private List<Financier> financiersToMail;
-    private final FinancierMapper financierMapper;
     private final InvestmentVehicleMapper investmentVehicleMapper;
 
     @Override
@@ -192,6 +191,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setUserIdentity(userIdentity);
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
+        financier.setCreatedAt(LocalDateTime.now());
         financier = financierOutputPort.save(financier);
         return financier;
     }
@@ -207,6 +207,7 @@ public class FinancierService implements FinancierUseCase {
             Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
             financier.setCooperation(cooperation);
             financier.setUserIdentity(userIdentity);
+            financier.setCreatedAt(LocalDateTime.now());
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
@@ -688,6 +689,7 @@ public class FinancierService implements FinancierUseCase {
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = userIdentityOutputPort.save(userIdentity);
             financier.setUserIdentity(userIdentity);
+            financier.setCreatedAt(LocalDateTime.now());
             return financierOutputPort.save(financier);
         }else {
             return inviteCooperateFinancierToPlatform(financier);

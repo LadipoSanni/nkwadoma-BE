@@ -15,7 +15,8 @@ public enum InvestmentVehicleMessages {
     INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL("Investment vehicle visibility cannot be empty"),
     PUBLISHED_INVESTMENT_VEHICLE_CANNOT_BE_DELETED("Published investment vehicle cannot be deleted"),
     DELETED("Deleted"),
-    INVESTMENT_VEHICLE_ALREADY_PUBLISHED("Investment Vehicle already published and cannot be edited");
+    INVESTMENT_VEHICLE_ALREADY_PUBLISHED("Investment Vehicle already published and cannot be edited"),
+    CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER("Cannot make investment vehicle private with no financer");
     private final String message;
 
     InvestmentVehicleMessages(String message) {

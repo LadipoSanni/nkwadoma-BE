@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.investmentVehicl
 
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -97,9 +99,11 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         MeedlValidator.validatePageSize(financier.getPageSize());
         MeedlValidator.validatePageNumber(financier.getPageNumber());
-        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize(), Sort.by(Sort.Direction.DESC, MeedlMessages.CREATED_AT.getMessage()));
+
         log.info("Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
-        Page<FinancierEntity> financierEntities = financierRepository.findAll(pageRequest);
+        Page<FinancierEntity> financierEntities = financierRepository.findAllOrderByUserCreatedAt(pageRequest);
         log.info("Found financiers in db: {}", financierEntities);
         return financierEntities.map(financierMapper::map);
     }

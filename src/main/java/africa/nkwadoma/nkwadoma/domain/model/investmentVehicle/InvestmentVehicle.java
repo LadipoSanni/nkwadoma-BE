@@ -2,8 +2,6 @@ package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -11,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -40,21 +39,21 @@ public class InvestmentVehicle {
     private String fundManager;
     private BigDecimal totalAvailableAmount;
     private BigDecimal minimumInvestmentAmount;
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
     private LocalDate startDate;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
-    private LocalDate lastUpdatedDate;
+    private LocalDateTime lastUpdatedDate;
     private BigDecimal netAssetValue;
     private double netAssetValueInPercent;
     private double percentageOfPortfolio;
-    private LocalDate maturityDate;
+    private LocalDateTime maturityDate;
     private VehicleClosure vehicleClosureStatus;
     private BigDecimal incomeEarned;
     private IncomeInterval incomeInterval;
     private VehicleOperation vehicleOperation;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
-    private LocalDate dateInvested;
+    private LocalDateTime dateInvested;
     private Set<InvestmentVehicleDesignation> designations;
     private BigDecimal amountInvested;
     private BigDecimal talentFunded;
@@ -84,13 +83,17 @@ public class InvestmentVehicle {
 
     public void setValues() {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
-        setCreatedDate(LocalDate.now());
+        setCreatedDate(LocalDateTime.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         if (this.totalAvailableAmount == null){
             log.info("Setting up total available amount for {} investment vehicle.", name);
             setTotalAvailableAmount(new BigDecimal("0.00"));
         }
-        setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+//        setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+        if (!investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE) &&
+                ! investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
+            setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+        }
     }
 
     public void validateTenure(int tenure) throws MeedlException {
