@@ -129,7 +129,7 @@ public class InvestmentVehicleController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> searchInvestmentVehicle(@AuthenticationPrincipal Jwt meedlUser,
                                                                   @PathVariable String investmentVehicleName,
-                                                                  @RequestParam InvestmentVehicleType investmentVehicleType,
+                                                                  @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
                                                                   @RequestParam InvestmentVehicleStatus investmentVehicleStatus,
                                                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
