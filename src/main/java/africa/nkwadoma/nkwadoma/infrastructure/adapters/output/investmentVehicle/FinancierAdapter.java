@@ -102,8 +102,10 @@ public class FinancierAdapter implements FinancierOutputPort {
 
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize(), Sort.by(Sort.Direction.DESC, MeedlMessages.CREATED_AT.getMessage()));
 
-        log.info("Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
-        Page<FinancierEntity> financierEntities = financierRepository.findAllOrderByUserCreatedAt(pageRequest);
+        log.info("Page number: {}, page size: {}, financier type : {}", financier.getPageNumber(), financier.getPageSize(), financier.getFinancierType());
+        Page<FinancierEntity> financierEntities = financierRepository
+                .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), pageRequest);
+
         log.info("Found financiers in db: {}", financierEntities);
         return financierEntities.map(financierMapper::map);
     }

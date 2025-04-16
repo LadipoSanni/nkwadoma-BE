@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,5 +28,16 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
     @Query("SELECT f FROM FinancierEntity f JOIN f.userIdentity u ORDER BY u.createdAt DESC")
     Page<FinancierEntity> findAllOrderByUserCreatedAt(Pageable pageable);
+
+    @Query("""
+    SELECT f FROM FinancierEntity f 
+    JOIN f.userIdentity u 
+    WHERE (:financierType IS NULL OR f.financierType = :financierType)
+    ORDER BY u.createdAt DESC
+""")
+    Page<FinancierEntity> findAllByFinancierTypeOrderByUserCreatedAt(
+            @Param("financierType") FinancierType financierType,
+            Pageable pageable
+    );
 
 }
