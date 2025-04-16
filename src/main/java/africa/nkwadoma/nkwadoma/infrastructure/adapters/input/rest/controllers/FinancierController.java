@@ -222,8 +222,9 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
-                                                            @RequestParam int pageSize) throws MeedlException {
-       Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).build();
+                                                            @RequestParam int pageSize,
+                                                            @RequestParam(required = false) FinancierType financierType) throws MeedlException {
+       Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
