@@ -460,6 +460,9 @@ public class FinancierService implements FinancierUseCase {
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
         log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == null){
+            throw new MeedlException("Found vehicle visibility is not defined.");
+        }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility().equals(InvestmentVehicleVisibility.PUBLIC)) {
             log.info("Initiating investment into a public vehicle");
             validateAmountToInvest(financier, foundInvestmentVehicle);
