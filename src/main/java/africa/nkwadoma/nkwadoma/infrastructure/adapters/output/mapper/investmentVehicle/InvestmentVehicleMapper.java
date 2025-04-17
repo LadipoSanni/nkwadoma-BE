@@ -53,5 +53,6 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "fundManager", source="fundManager")
     @Mapping(target = "incomeInterval", source = "incomeInterval")
     @Mapping(target = "talentFunded", source = "talentFunded", defaultValue = "0")
+    @Mapping(target = "rate", source = "rate")
     InvestmentSummary toInvestmentSummary(InvestmentVehicle investmentVehicle);
 }
