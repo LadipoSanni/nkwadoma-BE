@@ -361,8 +361,10 @@ public class FinancierService implements FinancierUseCase {
     public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
         Financier financier = null;
         if (isFinancier(userId)) {
+            log.info("User is a financier.");
             financier = financierOutputPort.findFinancierByUserId(userId);
         } else {
+            log.info("User is not a financier");
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             financier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
@@ -370,7 +372,9 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private boolean isFinancier(String userId) throws MeedlException {
-        return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
+        IdentityRole role = userIdentityOutputPort.findById(userId).getRole();
+        log.info("Is user a financier {} {}", role == IdentityRole.FINANCIER, role);
+        return role == IdentityRole.FINANCIER;
     }
 
     private Financier updateFinancierDetail(Financier financier) throws MeedlException {

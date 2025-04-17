@@ -173,7 +173,7 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("financier/view/{financierId}")
+    @GetMapping("financier/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @Operation(
             summary = SwaggerDocumentation.VIEW_DETAILS,
@@ -205,7 +205,7 @@ public class FinancierController {
                     )
             )
     })
-    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable(required = false) String financierId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
