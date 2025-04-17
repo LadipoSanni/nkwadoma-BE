@@ -20,6 +20,27 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             "OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
     Page<FinancierEntity> findByNameFragment( @Param("nameFragment") String nameFragment, Pageable pageRequest);
 
+    @Query("""
+    SELECT f FROM FinancierEntity f
+    WHERE (
+        upper(concat(f.userIdentity.firstName, ' ', f.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(f.userIdentity.email) LIKE upper(concat('%', :nameFragment, '%'))
+    )
+    AND (
+        :investmentVehicleId IS NULL OR EXISTS (
+            SELECT ivf FROM InvestmentVehicleFinancierEntity ivf
+            WHERE ivf.financier = f AND ivf.investmentVehicle.id = :investmentVehicleId
+        )
+    )
+""")
+    Page<FinancierEntity> findByNameFragmentAndOptionalVehicleId(
+            @Param("nameFragment") String nameFragment,
+            @Param("investmentVehicleId") String investmentVehicleId,
+            Pageable pageable
+    );
+
+
     @Query("SELECT f FROM FinancierEntity f " +
             "LEFT JOIN FETCH f.userIdentity u " +
             "LEFT JOIN FETCH u.nextOfKinEntity nk " +
