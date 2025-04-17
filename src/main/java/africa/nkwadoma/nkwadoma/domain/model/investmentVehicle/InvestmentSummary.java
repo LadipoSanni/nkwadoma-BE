@@ -29,9 +29,12 @@ public class InvestmentSummary {
     private BigDecimal incomeEarned;
     private IncomeInterval incomeInterval;
     private Set<InvestmentVehicleDesignation> designations;
+    private VehicleOperation vehicleOperation;
     private OperationStatus operationStatus;
     private CouponDistributionStatus couponDistributionStatus;
     private VehicleClosure vehicleClosureStatus;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private Float rate;
+    private InvestmentVehicleMode fundRaisingStatus;
+    private InvestmentVehicleMode deployingStatus;
 }
