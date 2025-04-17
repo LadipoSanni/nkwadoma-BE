@@ -40,7 +40,7 @@ public class InvestmentVehicle {
     private BigDecimal totalAvailableAmount;
     private BigDecimal minimumInvestmentAmount;
     private LocalDateTime createdDate;
-    private LocalDateTime startDate;
+    private LocalDate startDate;
     private InvestmentVehicleStatus investmentVehicleStatus;
     private String investmentVehicleLink;
     private LocalDateTime lastUpdatedDate;
@@ -86,7 +86,10 @@ public class InvestmentVehicle {
         setCreatedDate(LocalDateTime.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
         setTotalAvailableAmount(size);
-        setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+        if (!investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE) &&
+                ! investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
+            setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
+        }
     }
 
     public void validateTenure(int tenure) throws MeedlException {

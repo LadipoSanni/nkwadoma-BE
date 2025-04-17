@@ -31,7 +31,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -185,6 +184,8 @@ public class FinancierService implements FinancierUseCase {
 
     private Financier saveNonExistingCooperateFinancier(Financier financier) throws MeedlException {
         log.info("Saving cooperate financier user identity to platform {} ",financier);
+        financier.getUserIdentity().setFirstName(financier.getCooperation().getName());
+        financier.getUserIdentity().setLastName(financier.getCooperation().getName());
         UserIdentity userIdentity = identityManagerOutputPort.createUser(financier.getUserIdentity());
         userIdentity = userIdentityOutputPort.save(userIdentity);
         financier.setUserIdentity(userIdentity);
@@ -361,8 +362,10 @@ public class FinancierService implements FinancierUseCase {
     public Financier viewFinancierDetail(String userId, String financierId) throws MeedlException {
         Financier financier = null;
         if (isFinancier(userId)) {
+            log.info("User is a financier.");
             financier = financierOutputPort.findFinancierByUserId(userId);
         } else {
+            log.info("User is not a financier");
             MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
             financier = financierOutputPort.findFinancierByFinancierId(financierId);
         }
@@ -370,7 +373,9 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private boolean isFinancier(String userId) throws MeedlException {
-        return userIdentityOutputPort.findById(userId).getRole() == IdentityRole.FINANCIER;
+        IdentityRole role = userIdentityOutputPort.findById(userId).getRole();
+        log.info("Is user a financier {} {}", role == IdentityRole.FINANCIER, role);
+        return role == IdentityRole.FINANCIER;
     }
 
     private Financier updateFinancierDetail(Financier financier) throws MeedlException {
@@ -429,11 +434,11 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
+    public Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
-        return financierOutputPort.search(name, pageNumber, pageSize);
+        return financierOutputPort.search(name, investmentVehicleId, pageNumber, pageSize);
     }
 
     @Override

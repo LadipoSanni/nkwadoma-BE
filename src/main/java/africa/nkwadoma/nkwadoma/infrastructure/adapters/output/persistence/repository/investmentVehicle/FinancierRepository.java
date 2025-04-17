@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,27 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             "OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
     Page<FinancierEntity> findByNameFragment( @Param("nameFragment") String nameFragment, Pageable pageRequest);
 
+    @Query("""
+    SELECT f FROM FinancierEntity f
+    WHERE (
+        upper(concat(f.userIdentity.firstName, ' ', f.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(f.userIdentity.email) LIKE upper(concat('%', :nameFragment, '%'))
+    )
+    AND (
+        :investmentVehicleId IS NULL OR EXISTS (
+            SELECT ivf FROM InvestmentVehicleFinancierEntity ivf
+            WHERE ivf.financier = f AND ivf.investmentVehicle.id = :investmentVehicleId
+        )
+    )
+""")
+    Page<FinancierEntity> findByNameFragmentAndOptionalVehicleId(
+            @Param("nameFragment") String nameFragment,
+            @Param("investmentVehicleId") String investmentVehicleId,
+            Pageable pageable
+    );
+
+
     @Query("SELECT f FROM FinancierEntity f " +
             "LEFT JOIN FETCH f.userIdentity u " +
             "LEFT JOIN FETCH u.nextOfKinEntity nk " +
@@ -27,5 +49,16 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
 
     @Query("SELECT f FROM FinancierEntity f JOIN f.userIdentity u ORDER BY u.createdAt DESC")
     Page<FinancierEntity> findAllOrderByUserCreatedAt(Pageable pageable);
+
+    @Query("""
+    SELECT f FROM FinancierEntity f 
+    JOIN f.userIdentity u 
+    WHERE (:financierType IS NULL OR f.financierType = :financierType)
+    ORDER BY u.createdAt DESC
+""")
+    Page<FinancierEntity> findAllByFinancierTypeOrderByUserCreatedAt(
+            @Param("financierType") FinancierType financierType,
+            Pageable pageable
+    );
 
 }

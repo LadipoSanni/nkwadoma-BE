@@ -92,8 +92,6 @@ public class FinancierController {
     private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
         financier.setUserIdentity(UserIdentity.builder()
                 .email(financierRequest.getOrganizationEmail())
-                .firstName("cooperateFinancier")
-                .lastName("admin")
                 .createdAt(LocalDateTime.now())
                 .role(IdentityRole.FINANCIER)
                 .build());
@@ -173,7 +171,7 @@ public class FinancierController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("financier/view/{financierId}")
+    @GetMapping("financier/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @Operation(
             summary = SwaggerDocumentation.VIEW_DETAILS,
@@ -205,7 +203,7 @@ public class FinancierController {
                     )
             )
     })
-    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@PathVariable(required = false) String financierId) throws MeedlException {
+    public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
         FinancierDashboardResponse financierDashboardResponse = financierRestMapper.mapToDashboardResponse(financier);
@@ -222,8 +220,9 @@ public class FinancierController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
-                                                            @RequestParam int pageSize) throws MeedlException {
-       Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).build();
+                                                            @RequestParam int pageSize,
+                                                            @RequestParam(required = false) FinancierType financierType) throws MeedlException {
+       Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
@@ -244,8 +243,10 @@ public class FinancierController {
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
                                                   @RequestParam int pageSize,
-                                                  @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
-        Page<Financier> financiers = financierUseCase.search(name, pageNumber, pageSize);
+                                                  @RequestParam(required = false) ActivationStatus activationStatus,
+                                                  @RequestParam(required = false) String investmentVehicleId
+    ) throws MeedlException {
+        Page<Financier> financiers = financierUseCase.search(name, investmentVehicleId, pageNumber, pageSize);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(

@@ -323,7 +323,7 @@ public class TestData {
         investmentVehicle.setTrustee("trustee");
         investmentVehicle.setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         investmentVehicle.setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
-        investmentVehicle.setStartDate(LocalDateTime.now());
+        investmentVehicle.setStartDate(LocalDate.now());
         return investmentVehicle;
     }
 
