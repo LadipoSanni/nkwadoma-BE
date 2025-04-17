@@ -16,7 +16,7 @@ public interface FinancierOutputPort {
     void delete(String financierId) throws MeedlException;
 
     Financier completeKyc(Financier financier) throws MeedlException;
-    Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException;
+    Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException;
 
     Financier findFinancierByEmail(String email) throws MeedlException;
 

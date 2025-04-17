@@ -268,7 +268,7 @@ class FinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, individualFinancier.getPageNumber(), individualFinancier.getPageSize()));
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, null, individualFinancier.getPageNumber(), individualFinancier.getPageSize()));
     }
     @Test
     @Order(5)
@@ -276,7 +276,7 @@ class FinancierAdapterTest {
         Page<Financier> foundFinanciers = null;
         try {
             foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getFirstName(),
-            individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
 
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -292,7 +292,7 @@ class FinancierAdapterTest {
         try {
 
             foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getLastName(),
-                    individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
 
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -308,7 +308,7 @@ class FinancierAdapterTest {
         try {
             foundFinanciers = financierOutputPort
                     .search(individualFinancier.getUserIdentity().getFirstName() +" "+
-                                    individualFinancier.getUserIdentity().getLastName(), individualFinancier.getPageNumber(),
+                                    individualFinancier.getUserIdentity().getLastName(), null, individualFinancier.getPageNumber(),
                             individualFinancier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -324,7 +324,7 @@ class FinancierAdapterTest {
         try {
             foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getLastName() +" "+
                             individualFinancier.getUserIdentity().getFirstName()
-                , individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

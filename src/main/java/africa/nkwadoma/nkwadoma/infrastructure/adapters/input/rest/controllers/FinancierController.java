@@ -92,8 +92,6 @@ public class FinancierController {
     private static void mapCooperateValues(FinancierRequest financierRequest, Financier financier) {
         financier.setUserIdentity(UserIdentity.builder()
                 .email(financierRequest.getOrganizationEmail())
-                .firstName("cooperateFinancier")
-                .lastName("admin")
                 .createdAt(LocalDateTime.now())
                 .role(IdentityRole.FINANCIER)
                 .build());
@@ -244,8 +242,10 @@ public class FinancierController {
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
                                                   @RequestParam int pageSize,
-                                                  @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
-        Page<Financier> financiers = financierUseCase.search(name, pageNumber, pageSize);
+                                                  @RequestParam(required = false) ActivationStatus activationStatus,
+                                                  @RequestParam(required = false) String investmentVehicleId
+    ) throws MeedlException {
+        Page<Financier> financiers = financierUseCase.search(name, investmentVehicleId, pageNumber, pageSize);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
