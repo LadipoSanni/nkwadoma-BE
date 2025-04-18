@@ -68,12 +68,12 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public Page<Financier> search(String name, int pageNumber, int pageSize) throws MeedlException {
+    public Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-        Page<FinancierEntity> financierEntities = financierRepository.findByNameFragment(name, pageRequest);
+        Page<FinancierEntity> financierEntities = financierRepository.findByNameFragmentAndOptionalVehicleId(name, investmentVehicleId, pageRequest);
         log.info("Financiers found with name: {} {}", name, financierEntities );
         return financierEntities.map(financierMapper::map);
     }
@@ -102,8 +102,10 @@ public class FinancierAdapter implements FinancierOutputPort {
 
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize(), Sort.by(Sort.Direction.DESC, MeedlMessages.CREATED_AT.getMessage()));
 
-        log.info("Page number: {}, page size: {}", financier.getPageNumber(), financier.getPageSize());
-        Page<FinancierEntity> financierEntities = financierRepository.findAllOrderByUserCreatedAt(pageRequest);
+        log.info("Page number: {}, page size: {}, financier type : {}", financier.getPageNumber(), financier.getPageSize(), financier.getFinancierType());
+        Page<FinancierEntity> financierEntities = financierRepository
+                .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), pageRequest);
+
         log.info("Found financiers in db: {}", financierEntities);
         return financierEntities.map(financierMapper::map);
     }

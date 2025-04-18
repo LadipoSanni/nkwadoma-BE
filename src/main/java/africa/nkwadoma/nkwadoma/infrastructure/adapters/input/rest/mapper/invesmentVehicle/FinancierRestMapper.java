@@ -2,8 +2,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.inves
 
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierDashboardResponse;
@@ -15,9 +13,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mappe
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {UserIdentityMapper.class, NextOfKinMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierRestMapper {

@@ -731,14 +731,14 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierUseCase.search(name, pageNumber, pageSize));
+        assertThrows(MeedlException.class,()-> financierUseCase.search(name, null, pageNumber, pageSize));
     }
     @Test
     @Order(12)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName(), pageNumber, pageSize);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName(), null, pageNumber, pageSize);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -753,7 +753,7 @@ public class FinancierServiceTest {
         try {
 
             foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName(),
-                    individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -767,7 +767,7 @@ public class FinancierServiceTest {
         Page<Financier> foundFinanciers;
         try {
             foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName() +" "+ individualFinancier.getUserIdentity().getLastName()
-            , individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -781,7 +781,7 @@ public class FinancierServiceTest {
         Page<Financier> foundFinanciers;
         try {
             foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName() +" "+ individualFinancier.getUserIdentity().getFirstName()
-            ,individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                    , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -789,17 +789,46 @@ public class FinancierServiceTest {
         assertFalse(foundFinanciers.isEmpty());
         assertNotNull(foundFinanciers.getContent().get(0));
     }
+    @Test
+    @Order(15)
+    void searchFinancierWithEmail() {
+        Page<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getEmail()
+                    , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        assertNotNull(foundFinanciers.getContent().get(0));
+    }
+    @Test
+    @Order(16)
+    void searchFinancierInVehicle() {
+        Page<Financier> foundFinanciers;
+        try {
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName()
+                    , privateInvestmentVehicleId, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(foundFinanciers);
+        assertFalse(foundFinanciers.isEmpty());
+        log.info("{}", foundFinanciers.stream().count());
+        assertNotNull(foundFinanciers.getContent().get(0));
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
     void viewInvestmentDetailOfFinancierWithNullFinancierId(String financierId){
-        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(financierId, portfolioManagerId));
+        assertThrows(MeedlException.class, ()-> financierUseCase.viewInvestmentDetailOfFinancier(financierId, portfolioManagerId));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ijk"})
     void viewInvestmentDetailOfFinancierWithNullPortfolioManagerId(String pmId){
-        assertThrows(MeedlException.class, ()->financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, pmId));
+        assertThrows(MeedlException.class, ()-> financierUseCase.viewInvestmentDetailOfFinancier(individualFinancierId, pmId));
     }
 
     @Test
@@ -815,7 +844,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     void viewInvestmentDetailOfFinancierByPortfolioManager(){
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
@@ -832,7 +861,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(17)
+    @Order(18)
     public void inviteCooperateFinancierToPlatform() {
         Financier foundFinancier;
         String inviteResponse;
@@ -869,7 +898,7 @@ public class FinancierServiceTest {
         assertTrue(optionalInvestmentVehicleFinancier.isEmpty());
     }
     @Test
-    @Order(18)
+    @Order(19)
     public void addMultipleExistingFinanciersToInvestmentVehicle() {
         List<Financier> financiers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -923,7 +952,7 @@ public class FinancierServiceTest {
 
     }
     @Test
-    @Order(19)
+    @Order(20)
     public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtestwithamount@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");

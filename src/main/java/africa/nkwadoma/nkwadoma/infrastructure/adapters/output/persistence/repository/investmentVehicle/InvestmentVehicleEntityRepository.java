@@ -19,7 +19,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
 
     @Query("SELECT i FROM InvestmentVehicleEntity i " +
             "WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND i.investmentVehicleType = :investmentVehicleType " +
+            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
             "AND i.investmentVehicleStatus = :investmentVehicleStatus ")
     Page<InvestmentVehicleEntity> findAllByNameContainingIgnoreCaseAndInvestmentVehicleTypeAndStaus(
             @Param("name") String name,
