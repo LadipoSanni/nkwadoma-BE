@@ -27,4 +27,6 @@ public interface InvestmentVehicleUseCase {
     InvestmentVehicle setInvestmentVehicleVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, List<Financier> financiers) throws MeedlException;
 
     InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException;
+
+    Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String sub, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 }
