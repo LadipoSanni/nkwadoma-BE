@@ -459,4 +459,17 @@ class InvestmentVehicleServiceTest {
         verifyNoMoreInteractions(investmentVehicleOutputPort);
     }
 
+    @Test
+    void searchMyInvestmentVehicle() throws MeedlException {
+        Page<InvestmentVehicle> page = new PageImpl<>(List.of(fundGrowth));
+        userIdentity.setId(mockId);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(investmentVehicleOutputPort.searchInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(),fundGrowth,pageSize,pageNumber)).
+                thenReturn(page);
+        page = investmentVehicleService.searchMyInvestment(mockId,fundGrowth,pageSize,pageNumber);
+        assertNotNull(page);
+        verify(userIdentityOutputPort, times(1)).findById(mockId);
+        assertEquals(1, page.getTotalElements());
+    }
+
 }
