@@ -91,4 +91,16 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciersEntity = investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciersEntity);
     }
+
+    @Override
+    public boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        return investmentVehicleFinancierRepository.checkIfAnyFinancierAlreadyInvestedInVehicle(investmentVehicleId);
+    }
+
+    @Override
+    public void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        investmentVehicleFinancierRepository.deleteByInvestmentVehicleId(investmentVehicleId);
+    }
 }

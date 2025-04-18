@@ -209,6 +209,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             return prepareInvestmentVehicleForPublishing(investmentVehicle);
@@ -226,6 +227,25 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         }
         investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
         return prepareInvestmentVehicleForPublishing(investmentVehicle);
+    }
+
+    private void updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
+        if(ObjectUtils.isEmpty(investmentVehicle.getInvestmentVehicleVisibility())){
+            if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.DEFAULT)) {
+                setVisibilityToDefault(investmentVehicleId);
+            }else {
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+                investmentVehicleOutputPort.save(investmentVehicle);
+            }
+        }
+    }
+
+    private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
+        boolean invested = investmentVehicleFinancierOutputPort.checkIfAnyFinancierHaveInvestedInVehicle(investmentVehicleId);
+        if (invested) {
+            throw new MeedlException(InvestmentVehicleMessages.CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
+        }
+        investmentVehicleFinancierOutputPort.removeFinancierAssociationWithInvestmentVehicle(investmentVehicleId);
     }
 
     @Override
