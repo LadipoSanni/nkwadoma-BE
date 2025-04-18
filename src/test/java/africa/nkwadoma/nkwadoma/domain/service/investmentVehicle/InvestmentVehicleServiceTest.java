@@ -164,6 +164,7 @@ class InvestmentVehicleServiceTest {
     void setUpInvestmentVehicleVisibilityToPublic() throws MeedlException {
         InvestmentVehicle result = null;
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
         when(portfolioOutputPort.findPortfolio(any()))
@@ -189,6 +190,7 @@ class InvestmentVehicleServiceTest {
     void setUpInvestmentVehicleVisibilityToPrivate() throws MeedlException {
         InvestmentVehicle result = null;
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
         when(portfolioOutputPort.findPortfolio(any()))
