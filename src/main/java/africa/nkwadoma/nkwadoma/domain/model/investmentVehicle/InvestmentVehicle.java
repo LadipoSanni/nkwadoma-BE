@@ -29,7 +29,7 @@ public class InvestmentVehicle {
     private String mandate;
     private int tenure;
     private BigDecimal size;
-    private Float rate;
+    private Float interestRateOffered;
     private FundRaisingStatus fundRaisingStatus;
     private Financier leads;
     private Financier contributors;
@@ -71,9 +71,9 @@ public class InvestmentVehicle {
         validateTenure(tenure);
         MeedlValidator.validateDataElement(investmentVehicleType.name(), "Investment vehicle type is required");
         if (investmentVehicleType.equals(InvestmentVehicleType.COMMERCIAL)) {
-            MeedlValidator.validateFloatDataElement(rate, "Investment Vehicle Rate Cannot be empty or less than zero");
+            MeedlValidator.validateFloatDataElement(interestRateOffered, "Investment Vehicle Rate Cannot be empty or less than zero");
         }else {
-            MeedlValidator.validateRate(rate,"Investment Vehicle Rate Cannot be empty");
+            MeedlValidator.validateRate(interestRateOffered,"Investment Vehicle Rate Cannot be empty");
         }
         MeedlValidator.validateDataElement(mandate,"Mandate cannot be empty");
         MeedlValidator.validateBigDecimalDataElement(size, "Investment vehicle size is required");

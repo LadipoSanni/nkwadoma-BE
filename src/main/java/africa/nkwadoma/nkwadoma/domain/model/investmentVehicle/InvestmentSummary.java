@@ -34,7 +34,7 @@ public class InvestmentSummary {
     private VehicleClosure vehicleClosureStatus;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private String mandate;
-    private Float rate;
+    private Float interestRateOffered;
     private InvestmentVehicleMode fundRaisingStatus;
     private InvestmentVehicleMode deployingStatus;
 }
