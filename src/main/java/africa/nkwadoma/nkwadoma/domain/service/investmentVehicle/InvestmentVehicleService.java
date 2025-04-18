@@ -209,7 +209,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
-        updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
+        if(ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleVisibility())) {
+            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
+        }
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             return prepareInvestmentVehicleForPublishing(investmentVehicle);
@@ -229,15 +231,14 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return prepareInvestmentVehicleForPublishing(investmentVehicle);
     }
 
-    private void updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
-        if(ObjectUtils.isEmpty(investmentVehicle.getInvestmentVehicleVisibility())){
+    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
             if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.DEFAULT)) {
                 setVisibilityToDefault(investmentVehicleId);
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
             }else {
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
-                investmentVehicleOutputPort.save(investmentVehicle);
             }
-        }
+        return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
     private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
