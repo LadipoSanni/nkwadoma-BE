@@ -79,6 +79,9 @@ class InvestmentVehicleServiceTest {
     private InvestmentVehicleMapper investmentVehicleMapper;
     @Mock
     private VehicleOperationMapper vehicleOperationMapper;
+    @Mock
+    private VehicleClosureOutputPort vehicleClosureOutputPort;
+
 
 
     @BeforeEach
@@ -400,8 +403,10 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setId(mockId);
         fundGrowth.setVehicleOperation(vehicleOperation);
         fundGrowth.getVehicleOperation().setDeployingStatus(null);
+        fundGrowth.setVehicleClosureStatus(TestData.buildVehicleClosure(CapitalDistribution.builder().build()));
+
         try {
-            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(TestData.buildInvestmentVehicle("Name"));
+            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(fundGrowth);
             when(vehicleOperationOutputPort.save(fundGrowth.getVehicleOperation())).thenReturn(vehicleOperation);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
             when(investmentVehicleOutputPort.findById(fundGrowth.getId())).
