@@ -107,6 +107,17 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             "WHERE ivf.investmentVehicle = i " +
             "AND ivf.financier.userIdentity.id = :userId) " +
             "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
+            "AND i.investmentVehicleStatus = 'PUBLISHED' ")
+    Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(
+            @Param("userId") String userId,
+            @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType, Pageable pageRequest);
+
+
+    @Query("SELECT i FROM InvestmentVehicleEntity i " +
+            "WHERE EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle = i " +
+            "AND ivf.financier.userIdentity.id = :userId) " +
+            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
             "AND i.investmentVehicleStatus = 'PUBLISHED' " +
             "AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType(

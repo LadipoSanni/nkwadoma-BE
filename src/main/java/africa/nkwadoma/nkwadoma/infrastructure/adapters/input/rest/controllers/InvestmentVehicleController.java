@@ -199,6 +199,29 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("investmentVehicle/all/financier/{investmentVehicleId}")
+    @PreAuthorize("hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
+                                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+        Page<InvestmentVehicle> investmentVehicles =
+                investmentVehicleUseCase.viewAllInvestmentVehicleInvestedIn(meedlUser.getClaimAsString("sub"),investmentVehicleType,
+                        pageSize,pageNumber );
+        List<InvestmentVehicleResponse> investmentVehicleResponses =
+                investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
+        PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
+                investmentVehicleResponses, investmentVehicles.hasNext(), investmentVehicles.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<InvestmentVehicleResponse>> apiResponse = ApiResponse.<PaginatedResponse<InvestmentVehicleResponse>>builder()
+                .data(paginatedResponse)
+                .message(VIEW_ALL_INVESTMENT_VEHICLE)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
 
     @GetMapping("investmentVehicle/search/financier/{investmentVehicleName}")
     @PreAuthorize("hasRole('FINANCIER')")
