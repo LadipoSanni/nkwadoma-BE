@@ -265,6 +265,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return foundInvestmentVehicle;
     }
 
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
+    }
+
     private void setNewInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
         CouponDistribution couponDistribution =
                 couponDistributionOutputPort.save(CouponDistribution.builder().build());
