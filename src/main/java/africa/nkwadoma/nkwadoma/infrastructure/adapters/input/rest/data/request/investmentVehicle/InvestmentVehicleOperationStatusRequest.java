@@ -14,6 +14,5 @@ public class InvestmentVehicleOperationStatusRequest {
     private InvestmentVehicleMode fundRaising;
     private InvestmentVehicleMode deployingStatus;
     private CouponDistributionStatus couponDistributionStatus;
-
-
+    private InvestmentVehicleMode recollectionStatus;
 }
