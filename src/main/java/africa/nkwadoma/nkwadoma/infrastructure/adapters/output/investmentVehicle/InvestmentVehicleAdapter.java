@@ -164,7 +164,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     }
 
     @Override
-    public Page<InvestmentVehicle> findAllInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
+    public Page<InvestmentVehicle> findAllInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validatePageSize(pageSize);
         MeedlValidator.validatePageNumber(pageNumber);
 
@@ -172,7 +172,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         Page<InvestmentVehicleEntity> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(userId,
-                                investmentVehicle.getInvestmentVehicleType(),pageRequest);
+                                investmentVehicleType,pageRequest);
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -466,9 +467,9 @@ class InvestmentVehicleServiceTest {
         Page<InvestmentVehicle> page = new PageImpl<>(List.of(fundGrowth));
         userIdentity.setId(mockId);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-        when(investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(),fundGrowth,pageSize,pageNumber)).
+        when(investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber)).
                 thenReturn(page);
-        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,fundGrowth,pageSize,pageNumber);
+        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
         assertNotNull(page);
         verify(userIdentityOutputPort, times(1)).findById(mockId);
         assertEquals(1, page.getTotalElements());

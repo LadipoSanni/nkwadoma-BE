@@ -266,9 +266,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(),investmentVehicle,pageSize,pageNumber);
+        return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
     }
 
     private void setNewInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
