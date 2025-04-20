@@ -163,6 +163,30 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
+    @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+                investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(userId,
+                                investmentVehicleType,pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+    @Override
+    public Page<InvestmentVehicle> searchInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+                investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType
+                (userId,
+                        investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
 
 
     @Override
