@@ -51,7 +51,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final VehicleOperationOutputPort vehicleOperationOutputPort;
     private final CouponDistributionOutputPort couponDistributionOutputPort;
     private final VehicleOperationMapper vehicleOperationMapper;
-
+    private final VehicleClosureOutputPort vehicleClosureOutputPort;
 
 
     @Override
@@ -290,7 +290,16 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
-        vehicleOperationMapper.updateExistiingVehicleOperation(foundInvestmentVehicle.getVehicleOperation(), investmentVehicle.getVehicleOperation());
+        foundInvestmentVehicle.getVehicleOperation().setDeployingStatus(investmentVehicle.getVehicleOperation().getDeployingStatus());
+        foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
+        if (investmentVehicle.getVehicleOperation().getCouponDistributionStatus() != null){
+            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+                    investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
+        }
+        if(investmentVehicle.getVehicleClosureStatus().getRecollectionStatus() != null){
+            foundInvestmentVehicle.setVehicleClosureStatus(
+                    vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus()));
+        }
         foundInvestmentVehicle.setVehicleOperation(
                 vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
         );

@@ -557,7 +557,7 @@ public class TestData {
     public static VehicleClosure buildVehicleClosure(CapitalDistribution capitalDistribution) {
         return VehicleClosure.builder()
                 .capitalDistribution(capitalDistribution)
-                .investmentVehicleMode(InvestmentVehicleMode.OPEN)
+                .recollectionStatus(InvestmentVehicleMode.OPEN)
                 .maturity("maturity")
                 .build();
     }

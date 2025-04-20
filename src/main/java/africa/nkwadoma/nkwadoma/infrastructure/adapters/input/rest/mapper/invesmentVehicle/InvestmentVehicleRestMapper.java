@@ -30,6 +30,8 @@ public interface InvestmentVehicleRestMapper {
 
     @Mapping( target= "vehicleOperation.fundRaisingStatus",source = "fundRaising")
     @Mapping(target = "vehicleOperation.deployingStatus", source = "deployingStatus")
+    @Mapping( target= "vehicleOperation.couponDistributionStatus",source = "couponDistributionStatus")
+    @Mapping(target = "vehicleClosureStatus.recollectionStatus", source = "recollectionStatus")
     @Mapping(target = "id", source = "investmentVehicleId")
     InvestmentVehicle mapInvestmentVehicleOperationStatusToVehicleOperationStatus(InvestmentVehicleOperationStatusRequest vehicleOperationStatus);
 }

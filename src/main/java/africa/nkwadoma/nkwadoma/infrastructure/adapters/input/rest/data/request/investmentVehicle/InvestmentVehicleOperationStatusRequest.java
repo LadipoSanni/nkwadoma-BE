@@ -13,4 +13,6 @@ public class InvestmentVehicleOperationStatusRequest {
     private String investmentVehicleId;
     private InvestmentVehicleMode fundRaising;
     private InvestmentVehicleMode deployingStatus;
+    private CouponDistributionStatus couponDistributionStatus;
+    private InvestmentVehicleMode recollectionStatus;
 }
