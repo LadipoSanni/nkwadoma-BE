@@ -89,7 +89,6 @@ public class InvestmentVehicle {
             log.info("Setting up total available amount for {} investment vehicle.", name);
             setTotalAvailableAmount(new BigDecimal("0.00"));
         }
-//        setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
         if (!investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE) &&
                 ! investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
