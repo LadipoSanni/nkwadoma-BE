@@ -13,7 +13,6 @@ public interface InvestmentVehicleFinancierMapper {
 
     InvestmentVehicleFinancierEntity toInvestmentVehicleFinancierEntity(InvestmentVehicleFinancier investmentVehicleFinancier);
 
-    @Mapping(source = "investmentVehicle", target = "investmentVehicle")
     InvestmentVehicleFinancier toInvestmentVehicleFinancier(InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity);
 
     List<InvestmentVehicleFinancier> toInvestmentVehicleFinancier(List<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntity);
