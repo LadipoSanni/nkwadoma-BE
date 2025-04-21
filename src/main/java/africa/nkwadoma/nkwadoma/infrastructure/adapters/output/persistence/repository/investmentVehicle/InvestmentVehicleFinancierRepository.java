@@ -31,10 +31,9 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
             "JOIN FETCH ivf.investmentVehicle iv " +
-            "JOIN FETCH iv.operation op " +
+            "LEFT JOIN FETCH iv.operation op " +
             "WHERE ivf.financier.id = :financierId " +
-            "AND ivf.amountInvested > 0 " +
-            "AND iv.operation IS NOT NULL")
+            "AND ivf.amountInvested > 0")
     List<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedIn(String financierId);
 
 

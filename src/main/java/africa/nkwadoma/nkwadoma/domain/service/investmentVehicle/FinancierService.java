@@ -640,9 +640,7 @@ public class FinancierService implements FinancierUseCase {
         return financierInvestmentVehicles.stream()
                 .map(investmentVehicleFinancier -> {
                     InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
-                    log.info("-----------> vehicle ========> "+ investmentVehicle);
                     InvestmentSummary investmentSummary = investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
-                    log.info("-----------> summary ========> "+ investmentSummary);
                     investmentSummary.setDateInvested(investmentVehicleFinancier.getDateInvested());
                     investmentSummary.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
                     investmentSummary.setAmountInvested(investmentVehicleFinancier.getAmountInvested());
