@@ -21,7 +21,7 @@ public class InvestmentVehicleResponse {
     private int tenure;
     private BigDecimal size;
     private Float rate;
-    private BigDecimal totalAmountInInvestmentVehicle =BigDecimal.ZERO;
+    private BigDecimal totalAvailableAmount=BigDecimal.ZERO;
     private BigDecimal amountRaised = BigDecimal.ZERO;
     private BigDecimal amountDisbursed = BigDecimal.ZERO;
     private BigDecimal amountAvailable = BigDecimal.ZERO;
