@@ -15,6 +15,8 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
+
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicleFinancier, "Investment vehicle financier can not be empty.");
