@@ -15,6 +15,7 @@ import java.util.Set;
 @ToString
 @Builder
 public class InvestmentSummary {
+    private String id;
     private String name;
     private InvestmentVehicleType investmentVehicleType;
     private String fundManager;

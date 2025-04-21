@@ -40,9 +40,9 @@ public class Financier {
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private Cooperation cooperation;
     private UserIdentity userIdentity;
+    private int totalNumberOfInvestment;
     private int pageNumber;
     private int pageSize;
-    private int totalNumberOfInvestment;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
     private List<FinancierVehicleDetail> investmentVehicleInvestedIn;
