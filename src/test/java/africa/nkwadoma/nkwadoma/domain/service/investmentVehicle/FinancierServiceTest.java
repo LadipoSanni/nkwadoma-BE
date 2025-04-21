@@ -985,7 +985,6 @@ public class FinancierServiceTest {
         investmentVehicleOutputPort.deleteInvestmentVehicle(publicInvestmentVehicleId);
         investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
-
         log.info("Test data deleted after test");
     }
 

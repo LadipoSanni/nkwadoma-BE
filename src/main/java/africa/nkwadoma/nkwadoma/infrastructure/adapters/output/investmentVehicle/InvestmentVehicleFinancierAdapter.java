@@ -30,6 +30,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
+
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicleFinancier, "Investment vehicle financier can not be empty.");
