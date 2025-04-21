@@ -51,7 +51,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private final VehicleOperationOutputPort vehicleOperationOutputPort;
     private final CouponDistributionOutputPort couponDistributionOutputPort;
     private final VehicleOperationMapper vehicleOperationMapper;
-
+    private final VehicleClosureOutputPort vehicleClosureOutputPort;
 
 
     @Override
@@ -209,6 +209,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
+        if(ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleVisibility())) {
+            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
+        }
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             return prepareInvestmentVehicleForPublishing(investmentVehicle);
@@ -228,6 +231,24 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return prepareInvestmentVehicleForPublishing(investmentVehicle);
     }
 
+    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
+            if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.DEFAULT)) {
+                setVisibilityToDefault(investmentVehicleId);
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+            }else {
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+            }
+        return investmentVehicleOutputPort.save(investmentVehicle);
+    }
+
+    private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
+        boolean invested = investmentVehicleFinancierOutputPort.checkIfAnyFinancierHaveInvestedInVehicle(investmentVehicleId);
+        if (invested) {
+            throw new MeedlException(InvestmentVehicleMessages.CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
+        }
+        investmentVehicleFinancierOutputPort.removeFinancierAssociationWithInvestmentVehicle(investmentVehicleId);
+    }
+
     @Override
     public InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment vehicle object cannot be empty ");
@@ -244,6 +265,18 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return foundInvestmentVehicle;
     }
 
+    @Override
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
+    }
+
+    @Override
+    public Page<InvestmentVehicle> searchMyInvestment(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        return investmentVehicleOutputPort.searchInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(),investmentVehicle,pageSize,pageNumber);
+    }
+
     private void setNewInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
         CouponDistribution couponDistribution =
                 couponDistributionOutputPort.save(CouponDistribution.builder().build());
@@ -257,7 +290,16 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
-        vehicleOperationMapper.updateExistiingVehicleOperation(foundInvestmentVehicle.getVehicleOperation(), investmentVehicle.getVehicleOperation());
+        foundInvestmentVehicle.getVehicleOperation().setDeployingStatus(investmentVehicle.getVehicleOperation().getDeployingStatus());
+        foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
+        if (investmentVehicle.getVehicleOperation().getCouponDistributionStatus() != null){
+            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+                    investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
+        }
+        if(investmentVehicle.getVehicleClosureStatus().getRecollectionStatus() != null){
+            foundInvestmentVehicle.setVehicleClosureStatus(
+                    vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus()));
+        }
         foundInvestmentVehicle.setVehicleOperation(
                 vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
         );
@@ -268,6 +310,9 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private String generateInvestmentVehicleLink(String id) {
         return INVESTMENT_VEHICLE_URL+id;
     }
+
+
+
 
 
 }

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
@@ -175,7 +174,7 @@ class InvestmentVehicleAdapterTest {
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("Save To Draft");
         investmentVehicle.setInvestmentVehicleStatus(DRAFT);
         investmentVehicle.setSize(null);
-        investmentVehicle.setRate(null);
+        investmentVehicle.setInterestRateOffered(null);
         try{
             investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
             draftInvestmentVehicleId = investmentVehicle.getId();

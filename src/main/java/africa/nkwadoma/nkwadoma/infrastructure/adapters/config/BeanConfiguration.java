@@ -125,10 +125,11 @@ public class BeanConfiguration {
                                                              UserIdentityOutputPort userIdentityOutputPort,
                                                              VehicleOperationOutputPort vehicleOperationOutputPort,
                                                              CouponDistributionOutputPort couponDistributionOutputPort,
-                                                             VehicleOperationMapper vehicleOperationMapper){
+                                                             VehicleOperationMapper vehicleOperationMapper,
+                                                             VehicleClosureOutputPort vehicleClosureOutputPort){
         return new InvestmentVehicleService(investmentVehicleIdentityOutputPort,investmentVehicleMapper,portfolioOutputPort,
                 financierOutputPort,investmentVehicleFinancierOutputPort,userIdentityOutputPort,
-                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper);
+                vehicleOperationOutputPort,couponDistributionOutputPort,vehicleOperationMapper,vehicleClosureOutputPort);
     }
     @Bean
     public StringTrimMapper stringTrimMapper() {

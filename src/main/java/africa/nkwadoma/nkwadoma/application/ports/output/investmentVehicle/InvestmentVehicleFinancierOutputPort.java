@@ -29,4 +29,8 @@ public interface InvestmentVehicleFinancierOutputPort {
     List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId) throws MeedlException;
 
     List<InvestmentVehicleFinancier> findByAll(String investmentVehicleId, String financierId);
+
+    boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException;
+
+    void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException;
 }

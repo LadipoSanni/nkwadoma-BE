@@ -14,10 +14,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface InvestmentVehicleRestMapper {
+    @Mapping(target = "interestRateOffered", source = "rate")
     InvestmentVehicle toInvestmentVehicle(SetUpInvestmentVehicleRequest investmentVehicleRequest);
 
     @Mapping( target= "fundRaisingStatus",source = "vehicleOperation.fundRaisingStatus")
     @Mapping(target = "deployingStatus", source = "vehicleOperation.deployingStatus")
+    @Mapping(target = "rate", source = "interestRateOffered")
     InvestmentVehicleResponse toInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 
     InvestmentVehicle mapUpdateInvestmentVehicleRequestToInvestmentVehicle(UpdateInvestmentVehicleRequest investmentVehicleRequest);
@@ -28,6 +30,8 @@ public interface InvestmentVehicleRestMapper {
 
     @Mapping( target= "vehicleOperation.fundRaisingStatus",source = "fundRaising")
     @Mapping(target = "vehicleOperation.deployingStatus", source = "deployingStatus")
+    @Mapping( target= "vehicleOperation.couponDistributionStatus",source = "couponDistributionStatus")
+    @Mapping(target = "vehicleClosureStatus.recollectionStatus", source = "recollectionStatus")
     @Mapping(target = "id", source = "investmentVehicleId")
     InvestmentVehicle mapInvestmentVehicleOperationStatusToVehicleOperationStatus(InvestmentVehicleOperationStatusRequest vehicleOperationStatus);
 }

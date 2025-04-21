@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -78,6 +79,9 @@ class InvestmentVehicleServiceTest {
     private InvestmentVehicleMapper investmentVehicleMapper;
     @Mock
     private VehicleOperationMapper vehicleOperationMapper;
+    @Mock
+    private VehicleClosureOutputPort vehicleClosureOutputPort;
+
 
 
     @BeforeEach
@@ -164,6 +168,7 @@ class InvestmentVehicleServiceTest {
     void setUpInvestmentVehicleVisibilityToPublic() throws MeedlException {
         InvestmentVehicle result = null;
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
         when(portfolioOutputPort.findPortfolio(any()))
@@ -189,6 +194,7 @@ class InvestmentVehicleServiceTest {
     void setUpInvestmentVehicleVisibilityToPrivate() throws MeedlException {
         InvestmentVehicle result = null;
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
+        fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
         when(portfolioOutputPort.findPortfolio(any()))
@@ -397,8 +403,10 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setId(mockId);
         fundGrowth.setVehicleOperation(vehicleOperation);
         fundGrowth.getVehicleOperation().setDeployingStatus(null);
+        fundGrowth.setVehicleClosureStatus(TestData.buildVehicleClosure(CapitalDistribution.builder().build()));
+
         try {
-            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(TestData.buildInvestmentVehicle("Name"));
+            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(fundGrowth);
             when(vehicleOperationOutputPort.save(fundGrowth.getVehicleOperation())).thenReturn(vehicleOperation);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
             when(investmentVehicleOutputPort.findById(fundGrowth.getId())).
@@ -457,6 +465,32 @@ class InvestmentVehicleServiceTest {
         verify(investmentVehicleOutputPort, times(1)).findById(mockId);
         verify(investmentVehicleOutputPort, times(1)).deleteInvestmentVehicle(mockId);
         verifyNoMoreInteractions(investmentVehicleOutputPort);
+    }
+
+    @Test
+    void viewAllInvestmentVehicleAddedTo() throws MeedlException {
+        Page<InvestmentVehicle> page = new PageImpl<>(List.of(fundGrowth));
+        userIdentity.setId(mockId);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber)).
+                thenReturn(page);
+        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
+        assertNotNull(page);
+        verify(userIdentityOutputPort, times(1)).findById(mockId);
+        assertEquals(1, page.getTotalElements());
+    }
+
+    @Test
+    void searchMyInvestmentVehicle() throws MeedlException {
+        Page<InvestmentVehicle> page = new PageImpl<>(List.of(fundGrowth));
+        userIdentity.setId(mockId);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(investmentVehicleOutputPort.searchInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(),fundGrowth,pageSize,pageNumber)).
+                thenReturn(page);
+        page = investmentVehicleService.searchMyInvestment(mockId,fundGrowth,pageSize,pageNumber);
+        assertNotNull(page);
+        verify(userIdentityOutputPort, times(1)).findById(mockId);
+        assertEquals(1, page.getTotalElements());
     }
 
 }

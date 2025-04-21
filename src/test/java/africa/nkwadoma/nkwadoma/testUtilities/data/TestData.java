@@ -311,6 +311,7 @@ public class TestData {
         InvestmentVehicle investmentVehicle = new InvestmentVehicle();
         investmentVehicle.setName(name);
         investmentVehicle.setSize(new BigDecimal("4000.00"));
+        investmentVehicle.setInterestRateOffered(13F);
         investmentVehicle.setTotalAvailableAmount(new BigDecimal("0.00"));
         investmentVehicle.setRate(13F);
         investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
@@ -558,7 +559,7 @@ public class TestData {
     public static VehicleClosure buildVehicleClosure(CapitalDistribution capitalDistribution) {
         return VehicleClosure.builder()
                 .capitalDistribution(capitalDistribution)
-                .investmentVehicleMode(InvestmentVehicleMode.OPEN)
+                .recollectionStatus(InvestmentVehicleMode.OPEN)
                 .maturity("maturity")
                 .build();
     }

@@ -37,7 +37,7 @@ public class InvestmentVehicleEntity {
     private int tenure;
     private BigDecimal size;
     private BigDecimal totalAvailableAmount;
-    private Float rate;
+    private Float interestRateOffered;
     @Enumerated(EnumType.STRING)
     private FundRaisingStatus fundRaisingStatus;
     @OneToOne

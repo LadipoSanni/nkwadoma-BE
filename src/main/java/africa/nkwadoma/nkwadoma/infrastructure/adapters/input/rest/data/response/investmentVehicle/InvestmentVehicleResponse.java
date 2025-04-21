@@ -41,4 +41,5 @@ public class InvestmentVehicleResponse {
     private InvestmentVehicleMode fundRaisingStatus;
     private InvestmentVehicleMode deployingStatus;
 
+
 }
