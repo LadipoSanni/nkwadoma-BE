@@ -313,7 +313,6 @@ public class TestData {
         investmentVehicle.setSize(new BigDecimal("4000.00"));
         investmentVehicle.setInterestRateOffered(13F);
         investmentVehicle.setTotalAvailableAmount(new BigDecimal("0.00"));
-        investmentVehicle.setRate(13F);
         investmentVehicle.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PRIVATE);
         investmentVehicle.setMandate("Long-term Growth");
         investmentVehicle.setInvestmentVehicleType(InvestmentVehicleType.ENDOWMENT);
