@@ -144,12 +144,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
-            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
-            if (investmentVehicleFinancier.isPresent()){
+            List<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                    .findByAll(investmentVehicleId, foundFinancier.getId());
+            if (!investmentVehicleFinancier.isEmpty()){
                 return foundInvestmentVehicle;
-            } else {
-                throw new MeedlException("Investment Vehicle not found");
             }
         }
         throw new MeedlException("Investment Vehicle not found");

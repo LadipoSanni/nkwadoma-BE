@@ -15,8 +15,6 @@ import java.util.Optional;
 
 public interface InvestmentVehicleFinancierOutputPort {
     InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException;
-    //Todo below findByInvestmentVehicleIdAndFinancierId is a method to remove
-    Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException;
 
     void deleteInvestmentVehicleFinancier(String id) throws MeedlException;
 
@@ -28,7 +26,7 @@ public interface InvestmentVehicleFinancierOutputPort {
 
     List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId) throws MeedlException;
 
-    List<InvestmentVehicleFinancier> findByAll(String investmentVehicleId, String financierId);
+    List<InvestmentVehicleFinancier> findByAll(String investmentVehicleId, String financierId) throws MeedlException;
 
     boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException;
 

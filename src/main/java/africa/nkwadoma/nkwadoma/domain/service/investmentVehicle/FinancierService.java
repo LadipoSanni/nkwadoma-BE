@@ -251,7 +251,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void addAndNotifyFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+        List<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), financier.getId());
         if (optionalInvestmentVehicleFinancier.isEmpty()) {
             InvestmentVehicleFinancier investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
             if (isFinancierInvesting(financier)){
@@ -474,12 +474,19 @@ public class FinancierService implements FinancierUseCase {
             validateAmountToInvest(financier, foundInvestmentVehicle);
             investInPublicVehicle(financier, foundFinancier, foundInvestmentVehicle);
         } else {
-            InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(financier.getInvestmentVehicleId(), financier.getId())
-                    .orElseThrow(() -> new MeedlException("You will needs to be part of the investment vehicle you want to finance "));
+            List<InvestmentVehicleFinancier> investmentVehicleFinancierList = investmentVehicleFinancierOutputPort.findByAll(financier.getInvestmentVehicleId(), financier.getId());
+            if (investmentVehicleFinancierList.isEmpty()){
+                throw  new MeedlException("You will needs to be part of the investment vehicle you want to finance ");
+            }
+            InvestmentVehicleFinancier investmentVehicleFinancier = investmentVehicleFinancierList.get(0);
             InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
             validateAmountToInvest(financier, investmentVehicle);
+
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+            financier.setInvestmentVehicleDesignation(investmentVehicleFinancier.getInvestmentVehicleDesignation());
+            investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
             updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+
             log.info("Amount weh financier wan put ----> "+ financier.getAmountToInvest());
             updateFinancierTotalAmountInvested(financier);
             log.info("Updated the investment vehicle available amount for {}", investmentVehicle);
@@ -536,9 +543,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private InvestmentVehicleFinancier updateInvestmentVehicleFinancierAmountInvested(InvestmentVehicle investmentVehicle, Financier financier) throws MeedlException {
-        InvestmentVehicleFinancier investmentVehicleFinancier;
-        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                .findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+        InvestmentVehicleFinancier investmentVehicleFinancier;;
         log.info("Updating investment vehicle financier ");
         List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), financier.getId());
 
@@ -567,13 +572,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void updateInvestmentVehicleFinancierAmount(InvestmentVehicleFinancier investmentVehicleFinancier, Financier financier) throws MeedlException {
-        if (investmentVehicleFinancier.getAmountInvested() == null) {
-            log.info("Investment vehicle financier amount invested is null. Changing it to zero.");
-            investmentVehicleFinancier.setAmountInvested(BigDecimal.ZERO);
-        }
-        BigDecimal currentAmount = investmentVehicleFinancier.getAmountInvested();
-        BigDecimal newAmount = currentAmount.add(financier.getAmountToInvest());
-        investmentVehicleFinancier.setAmountInvested(newAmount);
+        investmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
         if (investmentVehicleFinancier.getDateInvested() == null) {
             investmentVehicleFinancier.setDateInvested(LocalDate.now());
         }
