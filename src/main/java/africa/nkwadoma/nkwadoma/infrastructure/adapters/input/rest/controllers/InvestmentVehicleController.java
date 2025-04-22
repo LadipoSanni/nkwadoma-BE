@@ -60,6 +60,7 @@ public class InvestmentVehicleController {
         String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId);
+        log.info("The investment vehicle found is {}", investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()

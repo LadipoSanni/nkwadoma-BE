@@ -129,7 +129,7 @@ public class Financier {
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
     public void validateKyc() throws MeedlException {
-        MeedlValidator.validateObjectInstance(this.userIdentity, "User performing this action is unknown.");
+        MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
         MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
         this.userIdentity.getBankDetail().validate();
@@ -213,4 +213,9 @@ public class Financier {
         }
     }
 
+    public void validateInvestInVehicleDetails() throws MeedlException {
+        MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
+        MeedlValidator.validateUUID(this.userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateBigDecimalDataElement(this.amountToInvest, FinancierMessages.AMOUNT_TO_INVEST_REQUIRED.getMessage());
+    }
 }

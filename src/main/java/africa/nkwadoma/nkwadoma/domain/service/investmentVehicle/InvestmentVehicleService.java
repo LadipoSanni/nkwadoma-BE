@@ -127,6 +127,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+            log.info("Details being viewed by portfolio manger");
             return investmentVehicleOutputPort.findById(investmentVehicleId);
         }
 
@@ -143,12 +144,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
-            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
-            if (investmentVehicleFinancier.isPresent()){
+            List<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                    .findByAll(investmentVehicleId, foundFinancier.getId());
+            if (!investmentVehicleFinancier.isEmpty()){
                 return foundInvestmentVehicle;
-            } else {
-                throw new MeedlException("Investment Vehicle not found");
             }
         }
         throw new MeedlException("Investment Vehicle not found");

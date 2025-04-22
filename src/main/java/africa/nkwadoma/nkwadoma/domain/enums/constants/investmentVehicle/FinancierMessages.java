@@ -8,7 +8,8 @@ public enum FinancierMessages {
    FINANCIER_DESIGNATION_REQUIRED("Investment vehicle designation is required."),
    EMPTY_FINANCIER_PROVIDED("Financier object cannot be empty."),
    FINANCIER_INVITE_TO_VEHICLE("financier-to-vehicle-invite"),
-   INVALID_FINANCIER_TYPE("Please specify if financier is individual or cooperate.");
+   INVALID_FINANCIER_TYPE("Please specify if financier is individual or cooperate."),
+    AMOUNT_TO_INVEST_REQUIRED("Amount to invest is require.");
 
     private final String message;
 
