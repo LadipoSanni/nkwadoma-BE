@@ -245,7 +245,6 @@ class FinancierAdapterTest {
         Page<Financier> financiersPage = null;
         try {
             financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
-            log.info("--------------> " + financiersPage.getContent());
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
