@@ -46,12 +46,12 @@ public class BeneficialOwnerAdapterTest {
         beneficialOwnerId = savedBeneficialOwner.getId();
     }
     @Test
-    void saveCooperationWithNull(){
+    void saveBeneficialOwnerWithNull(){
         assertThrows(MeedlException.class, () -> beneficialOwnerOutputPort.save(null));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
-    void saveCooperationWithInvalidName(String name){
+    void saveBeneficialOwnerWithInvalidName(String name){
         BeneficialOwner beneficialOwner = TestData.buildBeneficialOwner();
         beneficialOwner.setBeneficialOwnerFirstName(name);
         assertThrows(MeedlException.class, () -> beneficialOwnerOutputPort.save(beneficialOwner));
@@ -59,7 +59,7 @@ public class BeneficialOwnerAdapterTest {
 
     @Test
     @Order(2)
-    void findCooperationById() {
+    void findBeneficialOwnerById() {
         BeneficialOwner foundBeneficialOwner = null;
         try {
             foundBeneficialOwner = beneficialOwnerOutputPort.findById(beneficialOwnerId);

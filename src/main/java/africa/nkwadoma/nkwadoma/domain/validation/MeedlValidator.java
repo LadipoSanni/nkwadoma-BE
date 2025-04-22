@@ -76,6 +76,8 @@ public class MeedlValidator {
     public static boolean isEmptyString(String dataElement) {
         return StringUtils.isEmpty(dataElement) || StringUtils.isBlank(dataElement);
     }
+
+
     public static boolean isNotEmptyString(String dataElement) {
         return !isEmptyString(dataElement);
     }

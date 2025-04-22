@@ -3,6 +3,8 @@ package africa.nkwadoma.nkwadoma.domain.model.financier;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,8 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@ToString
 @AllArgsConstructor
-
 @RequiredArgsConstructor
 public class BeneficialOwner {
     private String id;
@@ -37,7 +39,27 @@ public class BeneficialOwner {
     private String driverLicensetionalIdCard;
     private String driverLicense;
 
-    public void validate() {
+    public void validate() throws MeedlException {
         log.warn("Nothing being validated at the beneficial owner object");
+        if (this.getBeneficialOwnerType() != null){
+            log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", this.getBeneficialOwnerType());
+            validateProofOfBeneficialOwnership(this);
+            if (this.getBeneficialOwnerType() == FinancierType.INDIVIDUAL){
+                MeedlValidator.validateDataElement(this.getBeneficialOwnerFirstName(), "Beneficial owner first name is required.");
+                MeedlValidator.validateDataElement(this.getBeneficialOwnerLastName(), "Beneficial owner last name is required.");
+                MeedlValidator.validateObjectInstance(this.getBeneficialOwnerRelationship(), "Beneficial owner relationship is required.");
+                MeedlValidator.validateObjectInstance(this.getBeneficialOwnerDateOfBirth(), "Beneficial owner date of birth is required.");
+                MeedlValidator.validateDoubleDataElement(this.getPercentageOwnershipOrShare(), "Beneficial owner percentage ownership or share is required.");
+            }{
+                MeedlValidator.validateDataElement(this.getEntityName(), "Entity name is required.");
+                MeedlValidator.validateRCNumber(this.getBeneficialRcNumber());
+                MeedlValidator.validateObjectInstance(this.getCountryOfIncorporation(), "Country of incorporation is required.");
+            }
+        }
+    }
+    public void validateProofOfBeneficialOwnership(BeneficialOwner beneficialOwner) throws MeedlException {
+        if (MeedlValidator.isEmptyString(beneficialOwner.getVotersCard()) && MeedlValidator.isEmptyString(beneficialOwner.getNationalIdCard()) && MeedlValidator.isEmptyString(beneficialOwner.getDriverLicense()) && MeedlValidator.isEmptyString(beneficialOwner.getDriverLicensetionalIdCard())) {
+            throw new MeedlException("At least one form of beneficial owner identification must be provided.");
+        }
     }
 }

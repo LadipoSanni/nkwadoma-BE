@@ -22,7 +22,7 @@ public class BeneficialOwnerAdapter implements BeneficialOwnerOutputPort {
     public BeneficialOwner save(BeneficialOwner beneficialOwner) throws MeedlException {
         MeedlValidator.validateObjectInstance(beneficialOwner, "Beneficial owner can not be empty");
         beneficialOwner.validate();
-        log.info("Beneficial owner to save in cooperation adapter : {}", beneficialOwner);
+        log.info("Beneficial owner to save in beneficial owner adapter : {}", beneficialOwner);
         BeneficialOwnerEntity beneficialOwnerEntityToSave = beneficialOwnerMapper.toBeneficialOwnerEntity(beneficialOwner);
         log.info("Beneficial owner to save mapped : {}",beneficialOwnerEntityToSave);
         BeneficialOwnerEntity beneficialOwnerEntity = beneficialOwnerRepository.save(beneficialOwnerEntityToSave);

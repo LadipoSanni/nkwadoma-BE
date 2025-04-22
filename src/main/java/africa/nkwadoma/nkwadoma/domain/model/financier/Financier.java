@@ -134,34 +134,8 @@ public class Financier {
     private void validateBeneficialOwnersKyc() throws MeedlException {
         MeedlValidator.validateObjectInstance(beneficialOwners, "Please provide beneficial owner.");
         for (BeneficialOwner beneficialOwner : beneficialOwners){
-            validateBeneficialOwnerKyc(beneficialOwner);
+            beneficialOwner.validate();
         }
-    }
-    private void validateBeneficialOwnerKyc(BeneficialOwner beneficialOwner) throws MeedlException {
-        if (beneficialOwner.getBeneficialOwnerType() != null){
-            log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", beneficialOwner.getBeneficialOwnerType());
-            validateProofOfBeneficialOwnership(beneficialOwner);
-            if (beneficialOwner.getBeneficialOwnerType() == FinancierType.INDIVIDUAL){
-                MeedlValidator.validateDataElement(beneficialOwner.getBeneficialOwnerFirstName(), "Beneficial owner first name is required.");
-                MeedlValidator.validateDataElement(beneficialOwner.getBeneficialOwnerLastName(), "Beneficial owner last name is required.");
-                MeedlValidator.validateObjectInstance(beneficialOwner.getBeneficialOwnerRelationship(), "Beneficial owner relationship is required.");
-                MeedlValidator.validateObjectInstance(beneficialOwner.getBeneficialOwnerDateOfBirth(), "Beneficial owner date of birth is required.");
-                MeedlValidator.validateDoubleDataElement(beneficialOwner.getPercentageOwnershipOrShare(), "Beneficial owner percentage ownership or share is required.");
-            }{
-                MeedlValidator.validateDataElement(beneficialOwner.getEntityName(), "Entity name is required.");
-                MeedlValidator.validateRCNumber(beneficialOwner.getBeneficialRcNumber());
-                MeedlValidator.validateObjectInstance(beneficialOwner.getCountryOfIncorporation(), "Country of incorporation is required.");
-            }
-        }
-    }
-    public void validateProofOfBeneficialOwnership(BeneficialOwner beneficialOwner) throws MeedlException {
-        if (isBlank(beneficialOwner.getVotersCard()) && isBlank(beneficialOwner.getNationalIdCard()) && isBlank(beneficialOwner.getDriverLicense()) && isBlank(beneficialOwner.getDriverLicensetionalIdCard())) {
-            throw new MeedlException("At least one form of beneficial owner identification must be provided.");
-        }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 
     private void validateDeclaration() throws MeedlException {

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CooperationEntity;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,29 +48,8 @@ public class FinancierEntity {
 
     private String occupation;
 
-
-    //Beneficial owner information
-    @Enumerated(EnumType.STRING)
-    private FinancierType beneficialOwnerType;
-    //Entity
-    private String entityName;
-    private String  beneficialRcNumber;
-    @Enumerated(EnumType.STRING)
-    private Country countryOfIncorporation;
-
-    //beneficial individual
-    private String beneficialOwnerFirstName;
-    private String beneficialOwnerLastName;
-    @Enumerated(EnumType.STRING)
-    private UserRelationship beneficialOwnerRelationship;
-    private LocalDate beneficialOwnerDateOfBirth;
-    @Column(nullable = false, columnDefinition = "double precision default 0.0")
-    private double percentageOwnershipOrShare;
-    //    Gov ID
-    private String votersCard;
-    private String nationalIdCard;
-    private String driverLicensetionalIdCard;
-    private String driverLicense;
+    @OneToMany
+    private List<BeneficialOwnerEntity> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;

@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.NextOfKinUseCas
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
@@ -21,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -59,7 +61,7 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase financierEmailUseCase;
-    private final NextOfKinUseCase nextOfKinUseCase;
+    private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
@@ -592,8 +594,13 @@ public class FinancierService implements FinancierUseCase {
         }
     }
 
-    private void saveFinancierBeneficialOwners(Financier financier) {
-//        dhjd
+    private void saveFinancierBeneficialOwners(Financier financier) throws MeedlException {
+        List<BeneficialOwner> beneficialOwners = new ArrayList<>();
+        for (BeneficialOwner beneficialOwner : financier.getBeneficialOwners()) {
+            BeneficialOwner savedBeneficialOwner = beneficialOwnerOutputPort.save(beneficialOwner);
+            beneficialOwners.add(savedBeneficialOwner);
+        }
+        financier.setBeneficialOwners(beneficialOwners);
     }
 
     private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {
