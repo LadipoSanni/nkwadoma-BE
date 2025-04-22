@@ -11,10 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.Meedl
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
@@ -41,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -470,6 +468,7 @@ public class FinancierServiceTest {
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
+            individualFinancier.setActivationStatus(null);
             financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -479,13 +478,81 @@ public class FinancierServiceTest {
         List<Financier> financiers = financiersPage.toList();
         assertFalse(financiers.isEmpty());
     }
+
+    @Test
+    void viewAllActiveFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.ACTIVE));
+    }
+
+    @Test
+    void viewAllInvitedFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.INVITED);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.INVITED);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.INVITED));
+    }
+
+    @Test
+    void viewAllInactiveFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.INACTIVE);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.INACTIVE);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.INACTIVE));
+    }
+
+    @Test
+    void viewAllDeactivatedFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.DEACTIVATED));
+    }
+
     @Test
     @Order(7)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
             foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
-            log.info("-----> financier -----> " + foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
