@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum UserMessages {
 
     INVALID_EMAIL("Email is invalid"),
+    NULL_ACTOR_USER_IDENTITY("User performing this action is unknown."),
     INVALID_USER_ID("Please provide a valid user identification."),
     INVALID_FIRST_NAME("User first name is required."),
     INVALID_LAST_NAME("User last name is required."),

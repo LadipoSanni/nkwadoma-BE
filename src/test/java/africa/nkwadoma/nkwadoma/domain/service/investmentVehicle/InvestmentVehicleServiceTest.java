@@ -67,6 +67,7 @@ class InvestmentVehicleServiceTest {
     private String testFinancierId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private String nonExistingVehicleId = "f593a10f-6854-44d4-acc2-259065d3e5c8";
     private VehicleOperation vehicleOperation;
+    private VehicleClosure vehicleClosure;
     @Mock
     private VehicleOperationOutputPort vehicleOperationOutputPort;
     @Mock
@@ -92,6 +93,7 @@ class InvestmentVehicleServiceTest {
         investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(financier,fundGrowth);
         portfolio = TestData.createMeedlPortfolio();
         vehicleOperation = TestData.createVehicleOperation(null);
+        vehicleClosure = TestData.buildVehicleClosure(TestData.buildCapitalDistribution());
         couponDistribution = TestData.createCouponDistribution();
 
     }
@@ -291,8 +293,8 @@ class InvestmentVehicleServiceTest {
                     .thenReturn(mockFinancier);
 
             when(investmentVehicleFinancierOutputPort
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
-                    .thenReturn(Optional.empty());
+                    .findByAll(investmentVehicleId, testFinancierId))
+                    .thenReturn(List.of());
             Exception exception = assertThrows(MeedlException.class,
                     () -> investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId));
             assertEquals("Investment Vehicle not found", exception.getMessage());
@@ -301,7 +303,7 @@ class InvestmentVehicleServiceTest {
             verify(userIdentityOutputPort).findById(testFinancierId);
             verify(financierOutputPort).findFinancierByUserId(testFinancierId);
             verify(investmentVehicleFinancierOutputPort)
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId);
+                    .findByAll(investmentVehicleId, testFinancierId);
         } catch (MeedlException exception) {
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
@@ -350,8 +352,8 @@ class InvestmentVehicleServiceTest {
                 .thenReturn(mockFinancier);
         InvestmentVehicleFinancier investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(mockFinancier, privateVehicle);
         when(investmentVehicleFinancierOutputPort
-                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
-                .thenReturn(Optional.of(investmentVehicleFinancier));
+                .findByAll(investmentVehicleId, testFinancierId))
+                .thenReturn(List.of(investmentVehicleFinancier));
         InvestmentVehicle result = investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId);
         assertNotNull(result);
         assertEquals(InvestmentVehicleVisibility.PRIVATE, result.getInvestmentVehicleVisibility());
@@ -403,14 +405,15 @@ class InvestmentVehicleServiceTest {
         fundGrowth.setId(mockId);
         fundGrowth.setVehicleOperation(vehicleOperation);
         fundGrowth.getVehicleOperation().setDeployingStatus(null);
-        fundGrowth.setVehicleClosureStatus(TestData.buildVehicleClosure(CapitalDistribution.builder().build()));
+        fundGrowth.getVehicleOperation().setCouponDistributionStatus(null);
+        vehicleClosure.setRecollectionStatus(null);
+        vehicleClosure.setMaturity(null);
+        fundGrowth.setVehicleClosureStatus(vehicleClosure);
 
         try {
             when(investmentVehicleOutputPort.findById(fundGrowth.getId())).thenReturn(fundGrowth);
             when(vehicleOperationOutputPort.save(fundGrowth.getVehicleOperation())).thenReturn(vehicleOperation);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
-            when(investmentVehicleOutputPort.findById(fundGrowth.getId())).
-                    thenReturn(fundGrowth);
             when(investmentVehicleOutputPort.save(fundGrowth)).thenReturn(fundGrowth);
             fundGrowth = investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth);
         } catch (MeedlException meedlException) {
@@ -425,15 +428,20 @@ class InvestmentVehicleServiceTest {
     void cannotSetBothFundRaisingAndDeployingStatus() {
         fundGrowth.setId(mockId);
         fundGrowth.setVehicleOperation(vehicleOperation);
+        fundGrowth.setVehicleClosureStatus(vehicleClosure);
         assertThrows(MeedlException.class, ()-> investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth));
     }
 
     @Test
-    void bothFundRaisingAndDeployingStatusCannotBeNull() {
+    void allStatusCannotBeNull() {
         fundGrowth.setId(mockId);
         vehicleOperation.setDeployingStatus(null);
         vehicleOperation.setFundRaisingStatus(null);
+        vehicleOperation.setCouponDistributionStatus(null);
+        vehicleClosure.setRecollectionStatus(null);
+        vehicleClosure.setMaturity(null);
         fundGrowth.setVehicleOperation(vehicleOperation);
+        fundGrowth.setVehicleClosureStatus(vehicleClosure);
         assertThrows(MeedlException.class, ()-> investmentVehicleService.setInvestmentVehicleOperationStatus(fundGrowth));
     }
 

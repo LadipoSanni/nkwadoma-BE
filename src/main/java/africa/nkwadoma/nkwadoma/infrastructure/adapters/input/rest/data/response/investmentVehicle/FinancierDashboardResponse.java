@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class FinancierDashboardResponse {
+    private String id;
     private String firstName;
     private String lastName;
     private String organizationName;

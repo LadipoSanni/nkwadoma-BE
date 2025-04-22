@@ -60,6 +60,7 @@ public class InvestmentVehicleController {
         String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId);
+        log.info("The investment vehicle found is {}", investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
@@ -199,7 +200,7 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("investmentVehicle/all/financier/{investmentVehicleId}")
+    @GetMapping("investmentVehicle/all/financier")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
