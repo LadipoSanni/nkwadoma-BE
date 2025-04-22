@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class BeneficialOwner {
+    private String id;
     //Beneficial owner information
     private FinancierType beneficialOwnerType;
     //beneficial Entity

@@ -230,22 +230,7 @@ public class TestData {
         financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
         financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners =
-                List.of(BeneficialOwner.builder()
-                                .beneficialOwnerType(FinancierType.INDIVIDUAL)
-                                .entityName("Entity Name")
-                                .beneficialRcNumber("RC8789945")
-                                .countryOfIncorporation(Country.SERBIA)
-                                .beneficialOwnerFirstName("Beneficial first name")
-                                .beneficialOwnerLastName("Beneficial last name")
-                                .beneficialOwnerRelationship(UserRelationship.BROTHER)
-                                .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                                .percentageOwnershipOrShare(6)
-                                .votersCard("Voters card")
-                                .nationalIdCard("national id card")
-                                .driverLicensetionalIdCard("driver licensetional id card")
-                                .driverLicense("Drivers license")
-                            .build());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
@@ -564,6 +549,24 @@ public class TestData {
                 .capitalDistribution(capitalDistribution)
                 .recollectionStatus(InvestmentVehicleMode.OPEN)
                 .maturity("maturity")
+                .build();
+    }
+
+    public static BeneficialOwner buildBeneficialOwner() {
+        return BeneficialOwner.builder()
+                .beneficialOwnerType(FinancierType.INDIVIDUAL)
+                .entityName("Entity Name")
+                .beneficialRcNumber("RC8789945")
+                .countryOfIncorporation(Country.SERBIA)
+                .beneficialOwnerFirstName("Beneficial first name")
+                .beneficialOwnerLastName("Beneficial last name")
+                .beneficialOwnerRelationship(UserRelationship.BROTHER)
+                .beneficialOwnerDateOfBirth(LocalDateTime.now())
+                .percentageOwnershipOrShare(6)
+                .votersCard("Voters card")
+                .nationalIdCard("national id card")
+                .driverLicensetionalIdCard("driver licensetional id card")
+                .driverLicense("Drivers license")
                 .build();
     }
 }

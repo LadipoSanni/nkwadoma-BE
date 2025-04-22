@@ -593,7 +593,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void saveFinancierBeneficialOwners(Financier financier) {
-        dhjd
+//        dhjd
     }
 
     private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {
