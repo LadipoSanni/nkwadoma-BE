@@ -256,8 +256,8 @@ public class FinancierService implements FinancierUseCase {
             InvestmentVehicleFinancier investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
             if (isFinancierInvesting(financier)){
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
-                updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
-//                updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
+//                updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+                updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
@@ -485,7 +485,8 @@ public class FinancierService implements FinancierUseCase {
             updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             financier.setInvestmentVehicleDesignation(investmentVehicleFinancier.getInvestmentVehicleDesignation());
             investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
-            updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+//            updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
+            updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
 
             log.info("Amount weh financier wan put ----> "+ financier.getAmountToInvest());
             updateFinancierTotalAmountInvested(financier);
@@ -527,6 +528,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void updateFinancierTotalAmountInvested(Financier financier) throws MeedlException {
+        log.info("Update financier total amount invested ...");
         Financier financierToBeUpdate = financierOutputPort.findFinancierByFinancierId(financier.getId());
         BigDecimal currentTotalAmountInvested = financierToBeUpdate.getTotalAmountInvested();
         if (currentTotalAmountInvested == null) {
@@ -572,6 +574,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private void updateInvestmentVehicleFinancierAmount(InvestmentVehicleFinancier investmentVehicleFinancier, Financier financier) throws MeedlException {
+        log.info("Update investment vehicle financier amount");
         investmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
         if (investmentVehicleFinancier.getDateInvested() == null) {
             investmentVehicleFinancier.setDateInvested(LocalDate.now());

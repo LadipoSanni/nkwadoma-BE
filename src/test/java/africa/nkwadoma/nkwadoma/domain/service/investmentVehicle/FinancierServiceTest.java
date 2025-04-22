@@ -276,21 +276,24 @@ public class FinancierServiceTest {
             assertEquals(investmentVehicleFinanciers.get(0).getAmountInvested(), financier.getTotalAmountInvested());
             BigDecimal initialInvestedAmount = investmentVehicleFinanciers.get(0).getAmountInvested();
             BigDecimal initialAmount = investmentVehicle.getTotalAvailableAmount();
-            assertEquals(new BigDecimal("5000.00"), initialAmount);
-            if (investmentVehicle.getTotalAvailableAmount() == null) {
-                investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
-            }
+
+            assertEquals(FIVE_THOUSAND, initialAmount);
+
             financierUseCase.investInVehicle(individualFinancier);
             financier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
              investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(privateInvestmentVehicleId, individualFinancierId);
             assertFalse(investmentVehicleFinanciers.isEmpty());
+            assertTrue(investmentVehicleFinanciers.size() > BigInteger.ONE.intValue());
             BigDecimal totalInvestedAmount = initialInvestedAmount.add(individualFinancier.getAmountToInvest());
             assertEquals(totalInvestedAmount, financier.getTotalAmountInvested());
             InvestmentVehicle updatedInvestmentVehicle = investmentVehicleOutputPort.findById(privateInvestmentVehicleId);
             BigDecimal currentAmount = updatedInvestmentVehicle.getTotalAvailableAmount();
-            assertEquals(initialAmount.add(individualFinancier.getAmountToInvest()), currentAmount,
+
+            assertEquals(initialAmount.add(FIVE_THOUSAND), currentAmount,
                     "The total available amount should be updated correctly");
-            assertEquals(individualFinancier.getAmountToInvest().add(amountToInvest), investmentVehicleFinanciers.get(0).getAmountInvested(),
+            assertEquals(FIVE_THOUSAND, investmentVehicleFinanciers.get(0).getAmountInvested(),
+                    "The amount to invest should be updated correctly");
+            assertEquals(FIVE_THOUSAND, investmentVehicleFinanciers.get(1).getAmountInvested(),
                     "The amount to invest should be updated correctly");
         } catch (MeedlException e) {
             log.info("{}",e.getMessage(), e);
