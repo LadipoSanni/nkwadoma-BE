@@ -256,7 +256,6 @@ public class FinancierService implements FinancierUseCase {
             InvestmentVehicleFinancier investmentVehicleFinancier = assignDesignation(financier, investmentVehicle);
             if (isFinancierInvesting(financier)){
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
-//                updateInvestmentVehicleFinancierAmount(investmentVehicleFinancier, financier);
                 updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
             }else {
@@ -573,16 +572,6 @@ public class FinancierService implements FinancierUseCase {
         return investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
     }
 
-    private void updateInvestmentVehicleFinancierAmount(InvestmentVehicleFinancier investmentVehicleFinancier, Financier financier) throws MeedlException {
-        log.info("Update investment vehicle financier amount");
-        investmentVehicleFinancier.setAmountInvested(financier.getAmountToInvest());
-        if (investmentVehicleFinancier.getDateInvested() == null) {
-            investmentVehicleFinancier.setDateInvested(LocalDate.now());
-        }
-        log.info("Updating investment vehicle financier amount invested to {}",investmentVehicleFinancier.getAmountInvested());
-        investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
-
-    }
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
