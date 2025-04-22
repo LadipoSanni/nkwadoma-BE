@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.Financ
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
@@ -23,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -62,6 +64,7 @@ public class FinancierService implements FinancierUseCase {
     private final MeedlNotificationUsecase meedlNotificationUsecase;
     private final FinancierEmailUseCase financierEmailUseCase;
     private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
+    private final FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
     private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
@@ -601,6 +604,22 @@ public class FinancierService implements FinancierUseCase {
             beneficialOwners.add(savedBeneficialOwner);
         }
         financier.setBeneficialOwners(beneficialOwners);
+        List<FinancierBeneficialOwner> financierBeneficialOwners =
+                financier.getBeneficialOwners().stream()
+                .map(beneficialOwner ->
+                    FinancierBeneficialOwner.builder()
+                            .beneficialOwner(beneficialOwner)
+                            .financier(financier)
+                            .build()
+                ).map(financierBeneficialOwner -> {
+                            try {
+                                return financierBeneficialOwnerOutputPort.save(financierBeneficialOwner);
+                            } catch (MeedlException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .toList();
+
     }
 
     private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {

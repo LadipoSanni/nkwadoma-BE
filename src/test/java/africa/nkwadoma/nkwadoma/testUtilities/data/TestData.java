@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -567,6 +568,13 @@ public class TestData {
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
                 .driverLicense("Drivers license")
+                .build();
+    }
+
+    public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
+        return FinancierBeneficialOwner.builder()
+                .beneficialOwner(buildBeneficialOwner())
+                .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }
 }

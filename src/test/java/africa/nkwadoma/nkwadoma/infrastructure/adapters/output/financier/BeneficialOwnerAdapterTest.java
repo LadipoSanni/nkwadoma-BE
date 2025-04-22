@@ -23,7 +23,6 @@ public class BeneficialOwnerAdapterTest {
     private BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private BeneficialOwner beneficialOwner;
     private String beneficialOwnerId;
-    private final String email = "testbeneficialowneremail@email.com";
     @BeforeAll
     void setUp() {
         beneficialOwner = TestData.buildBeneficialOwner();
