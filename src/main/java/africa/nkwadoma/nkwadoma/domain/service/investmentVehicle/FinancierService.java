@@ -21,15 +21,15 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
-import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import lombok.AllArgsConstructor;
@@ -649,26 +649,6 @@ public class FinancierService implements FinancierUseCase {
                 .toList();
     }
 
-    private static void kycIdentityValidation(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
-        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), "User performing this action is unknown");
-        MeedlValidator.validateUUID(financier.getUserIdentity().getId(), "User identification performing this action is unknown. ");
-        MeedlValidator.validateObjectInstance(financier.getUserIdentity().getNextOfKin(), "Next of kin is unknown");
-    }
-
-    private NextOfKin updateNextOfKinForKyc(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin nextOfKin = financier.getUserIdentity().getNextOfKin();
-        nextOfKin.setUserId(foundFinancier.getUserIdentity().getId());
-        return nextOfKinUseCase.saveAdditionalDetails(nextOfKin);
-    }
-
-    private void updateFinancierNextOfKinKycDetail(Financier financier, Financier foundFinancier) throws MeedlException {
-        NextOfKin savedNextOfKin = updateNextOfKinForKyc(financier, foundFinancier);
-        foundFinancier.getUserIdentity().setNextOfKin(savedNextOfKin);
-        foundFinancier.getUserIdentity().setNin(financier.getUserIdentity().getNin());
-        foundFinancier.getUserIdentity().setTaxId(financier.getUserIdentity().getTaxId());
-        foundFinancier.getUserIdentity().setAddress(financier.getUserIdentity().getAddress());
-    }
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
         if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {

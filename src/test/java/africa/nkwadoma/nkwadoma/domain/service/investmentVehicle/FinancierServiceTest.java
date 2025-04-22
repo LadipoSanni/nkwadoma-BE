@@ -16,12 +16,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -459,9 +459,11 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getUserIdentity().getBankDetail());
         assertNotNull(financierUpdated.getInheritanceOrGift());
         assertEquals(financierUpdated.getInheritanceOrGift(), financierWithKycRequest.getInheritanceOrGift());
-        assertNotNull(financierUpdated.getPercentageOwnershipOrShare());
+        assertNotNull(financierUpdated.getBeneficialOwners());
+        assertFalse(financierUpdated.getBeneficialOwners().isEmpty());
+        assertNotNull(financierUpdated.getBeneficialOwners().get(0));
         assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
-        assertNotNull(financierUpdated.getCountryOfIncorporation());
+        assertNotNull(financierUpdated.getBeneficialOwners().get(0).getCountryOfIncorporation());
 
     }
 
@@ -496,8 +498,9 @@ public class FinancierServiceTest {
 //        assertNotNull(foundFinancier.getUserIdentity().getAddress());
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
         assertNotNull(foundFinancier.getInheritanceOrGift());
-        assertNotNull(foundFinancier.getPercentageOwnershipOrShare());
-        assertNotNull(foundFinancier.getCountryOfIncorporation());
+        assertNotNull(foundFinancier.getBeneficialOwners());
+        assertNotNull(foundFinancier.getBeneficialOwners().get(0));
+        assertNotNull(foundFinancier.getBeneficialOwners().get(0).getCountryOfIncorporation());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})

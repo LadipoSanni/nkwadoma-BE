@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+package africa.nkwadoma.nkwadoma.domain.model.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;

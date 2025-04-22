@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import org.springframework.data.domain.Page;
 
 public interface FinancierOutputPort {
