@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -6,7 +6,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CooperationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,13 +16,10 @@ import org.hibernate.annotations.UuidGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
 @Entity
 public class FinancierEntity {
 

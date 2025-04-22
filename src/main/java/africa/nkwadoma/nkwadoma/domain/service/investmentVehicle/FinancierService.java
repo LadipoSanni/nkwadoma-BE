@@ -8,7 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOu
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.AsynchronousMailingOutputPort;
@@ -47,7 +47,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -583,7 +582,7 @@ public class FinancierService implements FinancierUseCase {
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
             log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
             mapKycFinancierUpdatedValues(financier, foundFinancier, bankDetail);
-
+            saveFinancierBeneficialOwners(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
             return financierOutputPort.completeKyc(financier);
@@ -591,6 +590,10 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
+    }
+
+    private void saveFinancierBeneficialOwners(Financier financier) {
+        dhjd
     }
 
     private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {

@@ -4,10 +4,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Getter
 @Setter
 @Builder
@@ -33,4 +35,8 @@ public class BeneficialOwner {
     private String nationalIdCard;
     private String driverLicensetionalIdCard;
     private String driverLicense;
+
+    public void validate() {
+        log.warn("Nothing being validated at the beneficial owner object");
+    }
 }

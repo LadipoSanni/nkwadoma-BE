@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle;
+package africa.nkwadoma.nkwadoma.application.ports.output.financier;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;

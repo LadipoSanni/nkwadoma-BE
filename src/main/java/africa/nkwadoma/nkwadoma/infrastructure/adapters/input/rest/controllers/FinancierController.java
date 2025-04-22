@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
