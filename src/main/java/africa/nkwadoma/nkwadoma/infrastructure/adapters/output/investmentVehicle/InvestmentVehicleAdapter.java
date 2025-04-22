@@ -215,6 +215,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
                     investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
             return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
         }
+        log.info("Investment vehicle id to be viewed is null.");
         throw new InvestmentException(InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 

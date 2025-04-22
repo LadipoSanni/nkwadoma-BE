@@ -110,14 +110,16 @@ class InvestmentVehicleFinancierAdapterTest {
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
+        List<InvestmentVehicleFinancier> foundInvestmentVehicleFinancier = null;
         try {
-            Optional<InvestmentVehicleFinancier> foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
-            assertTrue(foundInvestmentVehicleFinancier.isPresent());
-            assertNotNull(foundInvestmentVehicleFinancier.get());
-            log.info("Financier investment vehicle found: " + foundInvestmentVehicleFinancier);
+            foundInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), financier.getId());
         } catch (MeedlException e) {
+            log.error("", e);
             throw new RuntimeException(e);
         }
+        assertFalse(foundInvestmentVehicleFinancier.isEmpty());
+        assertNotNull(foundInvestmentVehicleFinancier.get(0));
+        log.info("Financier investment vehicle found: " + foundInvestmentVehicleFinancier);
         assertNotNull(savedInvestmentVehicleFinancier);
         assertNotNull(savedInvestmentVehicleFinancier.getFinancier());
         assertNotNull(savedInvestmentVehicleFinancier.getInvestmentVehicle());
@@ -157,26 +159,26 @@ class InvestmentVehicleFinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void findByInvestmentVehicleIdAndInvalidFinancierId(String financierId){
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(),financierId));
+        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(),financierId));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt"})
     public void findByInvalidInvestmentVehicleIdAndValidFinancierId(String investmentVehicleId){
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId,userIdentity.getId()));
+        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.findByAll(investmentVehicleId,userIdentity.getId()));
     }
     @Test
     @Order(2)
     void findByInvestmentVehicleIdAndFinancierId(){
-        Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = null;
+        List<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = null;
         try {
             log.info("finding investment vehicle financier with vehicle id {} and financier id {}",investmentVehicle.getId(), userIdentity.getId());
-            optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), financier.getId());
+            optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(), financier.getId());
         } catch (MeedlException e) {
             log.error("Error while getting investment vehicle financier. {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
-        assertTrue(optionalInvestmentVehicleFinancier.isPresent());
-        InvestmentVehicleFinancier foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
+        assertFalse(optionalInvestmentVehicleFinancier.isEmpty());
+        InvestmentVehicleFinancier foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get(0);
         assertNotNull(foundInvestmentVehicleFinancier);
         assertEquals(foundInvestmentVehicleFinancier.getFinancier().getId(), financier.getId());
         assertEquals(foundInvestmentVehicleFinancier.getInvestmentVehicle().getId(), investmentVehicleId);
@@ -242,9 +244,9 @@ class InvestmentVehicleFinancierAdapterTest {
             log.info("Found user to delete in test with id : {}", foundUser.getId());
             foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
             log.info("Found investment vehicle for deleting with id {}", foundInvestmentVehicle.getId());
-            Optional<InvestmentVehicleFinancier> optionalInvestmentVehicleFinancier = investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId,financierId);
-            if (optionalInvestmentVehicleFinancier.isPresent()) {
-                foundInvestmentVehicleFinancier = optionalInvestmentVehicleFinancier.get();
+            List<InvestmentVehicleFinancier> investmentVehicleFinanciers = investmentVehicleFinancierOutputPort.findByAll(investmentVehicleId,financierId);
+            if (!investmentVehicleFinanciers.isEmpty()) {
+                foundInvestmentVehicleFinancier = investmentVehicleFinanciers.get(0);
                 log.info("Found investment vehicle financier for deletion in test :{}", foundInvestmentVehicleFinancier.getId());
             }else {
                 log.error("No investment vehicle financier found for deletion in test with user id : {}", foundUser.getId());

@@ -291,8 +291,8 @@ class InvestmentVehicleServiceTest {
                     .thenReturn(mockFinancier);
 
             when(investmentVehicleFinancierOutputPort
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
-                    .thenReturn(Optional.empty());
+                    .findByAll(investmentVehicleId, testFinancierId))
+                    .thenReturn(List.of());
             Exception exception = assertThrows(MeedlException.class,
                     () -> investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId));
             assertEquals("Investment Vehicle not found", exception.getMessage());
@@ -301,7 +301,7 @@ class InvestmentVehicleServiceTest {
             verify(userIdentityOutputPort).findById(testFinancierId);
             verify(financierOutputPort).findFinancierByUserId(testFinancierId);
             verify(investmentVehicleFinancierOutputPort)
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId);
+                    .findByAll(investmentVehicleId, testFinancierId);
         } catch (MeedlException exception) {
             log.info("{} {}",exception.getClass().getName(), exception.getMessage());
         }
@@ -350,8 +350,8 @@ class InvestmentVehicleServiceTest {
                 .thenReturn(mockFinancier);
         InvestmentVehicleFinancier investmentVehicleFinancier = TestData.buildInvestmentVehicleFinancier(mockFinancier, privateVehicle);
         when(investmentVehicleFinancierOutputPort
-                .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, testFinancierId))
-                .thenReturn(Optional.of(investmentVehicleFinancier));
+                .findByAll(investmentVehicleId, testFinancierId))
+                .thenReturn(List.of(investmentVehicleFinancier));
         InvestmentVehicle result = investmentVehicleService.viewInvestmentVehicleDetails(investmentVehicleId, testFinancierId);
         assertNotNull(result);
         assertEquals(InvestmentVehicleVisibility.PRIVATE, result.getInvestmentVehicleVisibility());

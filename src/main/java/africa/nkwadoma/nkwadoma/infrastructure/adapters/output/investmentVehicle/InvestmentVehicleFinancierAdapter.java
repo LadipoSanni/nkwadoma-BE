@@ -30,6 +30,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     private final InvestmentVehicleFinancierRepository investmentVehicleFinancierRepository;
     private final InvestmentVehicleFinancierMapper investmentVehicleFinancierMapper;
     private final FinancierMapper financierMapper;
+
     @Override
     public InvestmentVehicleFinancier save(InvestmentVehicleFinancier investmentVehicleFinancier) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicleFinancier, "Investment vehicle financier can not be empty.");
@@ -40,20 +41,6 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         InvestmentVehicleFinancierEntity savedInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.save(investmentVehicleFinancierEntity);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(savedInvestmentVehicleFinancierEntity);
 
-    }
-
-    @Override
-    public Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
-        log.info("Validated id for view InvestmentVehicleFinancier by vehicle id and financier id is {} ----- {}", investmentVehicleId, financierId);
-        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
-
-        if (optionalInvestmentVehicleFinancierEntity.isEmpty()){
-            return Optional.empty();
-        }
-        log.info("Investment vehicle financier found {}", optionalInvestmentVehicleFinancierEntity.get().getId());
-        return Optional.of(investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(optionalInvestmentVehicleFinancierEntity.get()));
     }
 
     @Override
@@ -88,8 +75,16 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     @Override
     public List<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIn(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciersEntity = investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
-        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciersEntity);
+        List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciers = investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedIn(financierId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciers);
+    }
+
+    @Override
+    public List<InvestmentVehicleFinancier> findByAll(String investmentVehicleId, String financierId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        List<InvestmentVehicleFinancierEntity> investmentVehicleFinanciers = investmentVehicleFinancierRepository.findAllByInvestmentVehicle_IdAndFinancier_Id(investmentVehicleId, financierId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinanciers);
     }
 
     @Override
