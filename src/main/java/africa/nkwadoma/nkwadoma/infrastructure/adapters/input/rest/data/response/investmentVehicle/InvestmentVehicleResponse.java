@@ -40,6 +40,8 @@ public class InvestmentVehicleResponse {
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private InvestmentVehicleMode fundRaisingStatus;
     private InvestmentVehicleMode deployingStatus;
-
+    private CouponDistributionStatus couponDistributionStatus;
+    private InvestmentVehicleMode recollectionStatus;
+    private String maturity;
 
 }
