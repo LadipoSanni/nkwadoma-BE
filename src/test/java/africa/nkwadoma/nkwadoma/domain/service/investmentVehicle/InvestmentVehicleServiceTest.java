@@ -193,10 +193,12 @@ class InvestmentVehicleServiceTest {
     @Test
     void setUpInvestmentVehicleVisibilityToPrivate() throws MeedlException {
         InvestmentVehicle result = null;
+        financier.setId(mockId);
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
         fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
+        when(financierOutputPort.findFinancierByFinancierId(mockId)).thenReturn(financier);
         when(portfolioOutputPort.findPortfolio(any()))
                 .thenReturn(portfolio);
         fundGrowth.setInvestmentVehicleStatus(DRAFT);
