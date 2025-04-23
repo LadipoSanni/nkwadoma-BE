@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierDashboardResponse;
@@ -54,8 +54,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
     @Mapping(target = "userIdentity.phoneNumber", source = "kycRequest.phoneNumber")
-    @Mapping(target = "percentageOwnershipOrShare", source = "percentageOwnershipOrShare", defaultValue = "0.0")
-    Financier  map(KycRequest kycRequest);
+    Financier map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")
     Financier map(FinancierRequest financierRequest, String userId);

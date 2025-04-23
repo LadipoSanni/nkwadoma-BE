@@ -5,12 +5,16 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.PoliticalPartyExposedTo;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -227,22 +231,8 @@ public class TestData {
         financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
         financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        financier.setBeneficialOwnerType(FinancierType.INDIVIDUAL);
-
-        financier.setEntityName("EntityName");
-        financier.setBeneficialRcNumber("RC8789945");
-        financier.setCountryOfIncorporation(Country.SERBIA);
-
-        financier.setBeneficialOwnerFirstName("Beneficial first name");
-        financier.setBeneficialOwnerLastName("Beneficial last name");
-        financier.setBeneficialOwnerRelationship(UserRelationship.BROTHER);
-        financier.setBeneficialOwnerDateOfBirth(LocalDate.now());
-        financier.setPercentageOwnershipOrShare(6);
-
-        financier.setVotersCard("voters card");
-        financier.setNationalIdCard("national id card");
-        financier.setDriverLicensetionalIdCard("driver licensetional id card");
-        financier.setDriverLicense("driver license");
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
+        financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
 
@@ -560,6 +550,31 @@ public class TestData {
                 .capitalDistribution(capitalDistribution)
                 .recollectionStatus(InvestmentVehicleMode.OPEN)
                 .maturity("maturity")
+                .build();
+    }
+
+    public static BeneficialOwner buildBeneficialOwner() {
+        return BeneficialOwner.builder()
+                .beneficialOwnerType(FinancierType.INDIVIDUAL)
+                .entityName("Entity Name")
+                .beneficialRcNumber("RC8789945")
+                .countryOfIncorporation(Country.SERBIA)
+                .beneficialOwnerFirstName("Beneficial first name")
+                .beneficialOwnerLastName("Beneficial last name")
+                .beneficialOwnerRelationship(UserRelationship.BROTHER)
+                .beneficialOwnerDateOfBirth(LocalDateTime.now())
+                .percentageOwnershipOrShare(6)
+                .votersCard("Voters card")
+                .nationalIdCard("national id card")
+                .driverLicensetionalIdCard("driver licensetional id card")
+                .driverLicense("Drivers license")
+                .build();
+    }
+
+    public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
+        return FinancierBeneficialOwner.builder()
+                .beneficialOwner(buildBeneficialOwner())
+                .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }
 }
