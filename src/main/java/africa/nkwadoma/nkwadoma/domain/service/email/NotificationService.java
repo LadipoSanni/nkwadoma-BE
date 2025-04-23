@@ -303,7 +303,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);
-        return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
+        return baseUrl + CREATE_PASSWORD_URL + token + "?investmentVehicleId=" + investmentVehicle.getId();
     }
 
     @Override
