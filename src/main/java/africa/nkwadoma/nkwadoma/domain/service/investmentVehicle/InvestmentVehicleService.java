@@ -236,6 +236,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             }
             investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
         }
+
     }
 
     private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
