@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

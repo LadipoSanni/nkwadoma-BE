@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
@@ -13,12 +15,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -52,6 +55,10 @@ public class FinancierServiceTest {
     private FinancierUseCase financierUseCase;
     @Autowired
     private FinancierOutputPort financierOutputPort;
+    @Autowired
+    private FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
+    @Autowired
+    private BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     @Autowired
     private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort ;
     @Autowired
@@ -553,9 +560,11 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getUserIdentity().getBankDetail());
         assertNotNull(financierUpdated.getInheritanceOrGift());
         assertEquals(financierUpdated.getInheritanceOrGift(), financierWithKycRequest.getInheritanceOrGift());
-        assertNotNull(financierUpdated.getPercentageOwnershipOrShare());
+        assertNotNull(financierUpdated.getBeneficialOwners());
+        assertFalse(financierUpdated.getBeneficialOwners().isEmpty());
+        assertNotNull(financierUpdated.getBeneficialOwners().get(0));
         assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
-        assertNotNull(financierUpdated.getCountryOfIncorporation());
+        assertNotNull(financierUpdated.getBeneficialOwners().get(0).getCountryOfIncorporation());
 
     }
 
@@ -658,8 +667,10 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
         assertNotNull(foundFinancier.getInheritanceOrGift());
-        assertNotNull(foundFinancier.getPercentageOwnershipOrShare());
-        assertNotNull(foundFinancier.getCountryOfIncorporation());
+        assertNotNull(foundFinancier.getBeneficialOwners());
+        assertFalse(foundFinancier.getBeneficialOwners().isEmpty());
+        assertNotNull(foundFinancier.getBeneficialOwners().get(0));
+        assertNotNull(foundFinancier.getBeneficialOwners().get(0).getCountryOfIncorporation());
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ndnifeif"})
@@ -1103,7 +1114,7 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
 
-        financierOutputPort.delete(individualFinancierId);
+        deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
         userIdentityOutputPort.deleteUserById(portfolioManagerId);
@@ -1111,7 +1122,7 @@ public class FinancierServiceTest {
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
 
-        financierOutputPort.delete(cooperateFinancierId);
+        deleteFinancierData(cooperateFinancierId);
         cooperateUserIdentity.setId(cooperateUserIdentityId);
         identityManagerOutputPort.deleteUser(cooperateUserIdentity);
         userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
@@ -1121,6 +1132,21 @@ public class FinancierServiceTest {
         investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
         log.info("Test data deleted after test");
+    }
+    private void deleteFinancierData(String financierId) throws MeedlException {
+        List<FinancierBeneficialOwner> financierBeneficialOwners = financierBeneficialOwnerOutputPort.findAllByFinancierId(financierId);
+        financierBeneficialOwners
+                        .forEach(financierBeneficialOwner -> {
+                            try {
+                                log.info("Beneficial owner {}", financierBeneficialOwner);
+                                financierBeneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getId());
+                                beneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getBeneficialOwner().getId());
+                            } catch (MeedlException e) {
+                                log.warn("Delete test data financier ", e);
+                                throw new RuntimeException(e);
+                            }
+                        });
+        financierOutputPort.delete(financierId);
     }
 
     private void deleteInvestmentVehicleFinancier(String investmentVehicleId, String financierId) throws MeedlException {

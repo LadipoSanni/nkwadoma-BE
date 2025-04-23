@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.model;
+package africa.nkwadoma.nkwadoma.domain.model.notification;
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
