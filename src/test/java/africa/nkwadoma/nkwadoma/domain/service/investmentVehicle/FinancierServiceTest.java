@@ -1,6 +1,8 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
@@ -16,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -54,6 +57,10 @@ public class FinancierServiceTest {
     private FinancierUseCase financierUseCase;
     @Autowired
     private FinancierOutputPort financierOutputPort;
+    @Autowired
+    private FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
+    @Autowired
+    private BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     @Autowired
     private InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort ;
     @Autowired
@@ -1040,7 +1047,7 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
 
-        financierOutputPort.delete(individualFinancierId);
+        deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
         userIdentityOutputPort.deleteUserById(portfolioManagerId);
@@ -1048,7 +1055,7 @@ public class FinancierServiceTest {
         deleteNotification(individualUserIdentityId);
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
 
-        financierOutputPort.delete(cooperateFinancierId);
+        deleteFinancierData(cooperateFinancierId);
         cooperateUserIdentity.setId(cooperateUserIdentityId);
         identityManagerOutputPort.deleteUser(cooperateUserIdentity);
         userIdentityOutputPort.deleteUserById(cooperateUserIdentityId);
@@ -1058,6 +1065,20 @@ public class FinancierServiceTest {
         investmentVehicleOutputPort.deleteInvestmentVehicle(privateInvestmentVehicleId);
 
         log.info("Test data deleted after test");
+    }
+    private void deleteFinancierData(String financierId) throws MeedlException {
+        List<FinancierBeneficialOwner> financierBeneficialOwners = financierBeneficialOwnerOutputPort.findAllByFinancierId(financierId);
+        financierBeneficialOwners
+                        .forEach(financierBeneficialOwner -> {
+                            try {
+                                log.info("Beneficial owner {}", financierBeneficialOwner);
+                                financierBeneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getId());
+                                beneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getBeneficialOwner().getId());
+                            } catch (MeedlException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+        financierOutputPort.delete(financierId);
     }
 
     private void deleteInvestmentVehicleFinancier(String investmentVehicleId, String financierId) throws MeedlException {

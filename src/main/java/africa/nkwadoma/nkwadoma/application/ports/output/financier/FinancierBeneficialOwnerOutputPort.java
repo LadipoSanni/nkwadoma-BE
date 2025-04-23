@@ -15,4 +15,6 @@ public interface FinancierBeneficialOwnerOutputPort {
     void deleteById(String beneficialOwnerId) throws MeedlException;
 
     List<BeneficialOwner> findAllBeneficialOwner(String financierId) throws MeedlException;
+
+    List<FinancierBeneficialOwner> findAllByFinancierId(String financierId) throws MeedlException;
 }

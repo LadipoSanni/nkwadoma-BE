@@ -6,9 +6,13 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+import java.util.List;
+
+@Mapper(componentModel = "spring",uses = {BeneficialOwnerMapper.class, FinancierMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierBeneficialOwnerMapper {
     FinancierBeneficialOwnerEntity toFinancierBeneficialOwnerEntity(FinancierBeneficialOwner financierBeneficialOwner);
 
     FinancierBeneficialOwner toFinancierBeneficialOwner(FinancierBeneficialOwnerEntity financierBeneficialOwnerEntity);
+
+    List<FinancierBeneficialOwner> toFinancierBeneficialOwners(List<FinancierBeneficialOwnerEntity> financierBeneficialOwnerEntities);
 }
