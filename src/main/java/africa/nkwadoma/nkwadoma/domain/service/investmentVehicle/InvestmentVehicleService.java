@@ -266,8 +266,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, String financierId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            MeedlValidator.validateUUID(financierId,"Financier id cannot be empty");
+            return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageSize,pageNumber);
+        }
         return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
     }
 

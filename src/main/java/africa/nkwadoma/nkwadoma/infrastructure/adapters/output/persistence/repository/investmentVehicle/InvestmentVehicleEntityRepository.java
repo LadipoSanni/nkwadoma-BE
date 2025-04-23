@@ -125,4 +125,12 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
             @Param("name") String name,
             Pageable pageRequest);
+
+    @Query("SELECT i FROM InvestmentVehicleEntity i " +
+            "WHERE EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle = i " +
+            "AND ivf.financier.id = :financierId) " +
+            "AND i.investmentVehicleStatus = 'PUBLISHED'")
+    Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(
+            @Param("financierId")String financierId, Pageable pageRequest);
 }

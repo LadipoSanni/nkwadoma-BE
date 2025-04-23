@@ -482,7 +482,7 @@ class InvestmentVehicleServiceTest {
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber)).
                 thenReturn(page);
-        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
+        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
         assertNotNull(page);
         verify(userIdentityOutputPort, times(1)).findById(mockId);
         assertEquals(1, page.getTotalElements());

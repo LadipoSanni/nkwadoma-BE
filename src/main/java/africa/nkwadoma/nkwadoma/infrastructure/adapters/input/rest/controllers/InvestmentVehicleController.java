@@ -201,14 +201,15 @@ public class InvestmentVehicleController {
     }
 
     @GetMapping("investmentVehicle/all/financier")
-    @PreAuthorize("hasRole('FINANCIER')")
+    @PreAuthorize("hasRole('FINANCIER') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestParam(required = false) String financierId,
                                                              @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleInvestedIn(meedlUser.getClaimAsString("sub"),investmentVehicleType,
-                        pageSize,pageNumber );
+                investmentVehicleUseCase.viewAllInvestmentVehicleInvestedIn(meedlUser.getClaimAsString("sub"),financierId,
+                        investmentVehicleType, pageSize,pageNumber );
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(
