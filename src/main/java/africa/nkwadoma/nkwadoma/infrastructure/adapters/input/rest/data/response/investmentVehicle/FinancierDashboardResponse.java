@@ -1,5 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
+import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
@@ -17,6 +19,8 @@ public class FinancierDashboardResponse {
     private String lastName;
     private String organizationName;
     private FinancierType financierType;
+    private ActivationStatus activationStatus;
+    private AccreditationStatus accreditationStatus;
     private String email;
     private String phoneNumber;
     private String address;
