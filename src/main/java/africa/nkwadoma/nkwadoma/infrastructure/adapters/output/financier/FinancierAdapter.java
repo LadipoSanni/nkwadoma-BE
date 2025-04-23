@@ -104,7 +104,7 @@ public class FinancierAdapter implements FinancierOutputPort {
 
         log.info("Page number: {}, page size: {}, financier type : {}", financier.getPageNumber(), financier.getPageSize(), financier.getFinancierType());
         Page<FinancierEntity> financierEntities = financierRepository
-                .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), pageRequest);
+                .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
 
         log.info("Found financiers in db: {}", financierEntities);
         return financierEntities.map(financierMapper::map);
