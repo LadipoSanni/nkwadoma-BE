@@ -210,7 +210,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         if(ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleVisibility())) {
-            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
+            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle,financiers);
         }
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
@@ -219,27 +219,43 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             if (financiers.isEmpty()) {
                 throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
             }
-            for (Financier eachFinancier : financiers) {
-                Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
-                InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
-                                .investmentVehicle(investmentVehicle).financier(financier).
-                        investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
-                investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
-            }
+            addFinancierToVehicle(financiers, investmentVehicle);
         }
         investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
         return prepareInvestmentVehicleForPublishing(investmentVehicle);
     }
 
-    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private void addFinancierToVehicle(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
+        for (Financier eachFinancier : financiers) {
+            Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
+            InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
+                            .investmentVehicle(investmentVehicle).financier(financier).
+                    investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
+            if (investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(),financier.getId()).isPresent()) {
+                throw new MeedlException(InvestmentVehicleMessages.FINANCIER_ALREADY_EXIST_IN_VEHICLE.getMessage());
+            }
+            investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+        }
+    }
+
+    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
+                                               InvestmentVehicle investmentVehicle,List<Financier> financiers) throws MeedlException {
             if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.DEFAULT)) {
                 setVisibilityToDefault(investmentVehicleId);
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+            }else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
+                if (!investmentVehicleFinancierOutputPort
+                        .checkIfFinancierExistInVehicle(investmentVehicle.getId()) && financiers.isEmpty()){
+                    throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+                };
+                addFinancierToVehicle(financiers, investmentVehicle);
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
             }else {
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
             }
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
+
 
     private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
         boolean invested = investmentVehicleFinancierOutputPort.checkIfAnyFinancierHaveInvestedInVehicle(investmentVehicleId);

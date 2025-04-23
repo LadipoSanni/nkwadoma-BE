@@ -31,4 +31,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException;
 
     void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException;
+
+    boolean checkIfFinancierExistInVehicle(String investmentVehicleId) throws MeedlException;
 }
