@@ -78,6 +78,7 @@ public class FinancierBeneficialOwnerAdapter implements FinancierBeneficialOwner
     }
     private FinancierBeneficialOwner mapToFinancierBeneficialOwner(FinancierBeneficialOwnerEntity financierBeneficialOwnerEntity) {
         FinancierBeneficialOwner financierBeneficialOwner = new FinancierBeneficialOwner();
+        financierBeneficialOwner.setId(financierBeneficialOwnerEntity.getId());
         financierBeneficialOwner.setBeneficialOwner(beneficialOwnerMapper.toBeneficialOwner(financierBeneficialOwnerEntity.getBeneficialOwnerEntity()));
         financierBeneficialOwner.setFinancier(financierMapper.map(financierBeneficialOwnerEntity.getFinancierEntity()));
         return financierBeneficialOwner;

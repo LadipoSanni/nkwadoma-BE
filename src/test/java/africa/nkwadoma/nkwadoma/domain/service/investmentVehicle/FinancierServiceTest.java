@@ -1075,6 +1075,7 @@ public class FinancierServiceTest {
                                 financierBeneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getId());
                                 beneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getBeneficialOwner().getId());
                             } catch (MeedlException e) {
+                                log.warn("Delete test data financier ", e);
                                 throw new RuntimeException(e);
                             }
                         });
