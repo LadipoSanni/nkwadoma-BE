@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+package africa.nkwadoma.nkwadoma.domain.model.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
@@ -10,6 +10,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +33,8 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
+    private List<BeneficialOwner> beneficialOwners;
+
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
@@ -59,26 +63,8 @@ public class Financier {
     private String compensationOfLegalSettlements;
     private BigDecimal profitFromLegitimateActivities;
     private String occupation;
-
-    //Beneficial owner information
-    private FinancierType beneficialOwnerType;
-    //beneficial Entity
-    private String entityName;
-    private String beneficialRcNumber;
     private String taxInformationNumber;
-    private Country countryOfIncorporation;
 
-    //beneficial individual
-    private String beneficialOwnerFirstName;
-    private String beneficialOwnerLastName;
-    private UserRelationship beneficialOwnerRelationship;
-    private LocalDate beneficialOwnerDateOfBirth;
-    private double percentageOwnershipOrShare;
-//    Gov ID
-    private String votersCard;
-    private String nationalIdCard;
-    private String driverLicensetionalIdCard;
-    private String driverLicense;
 
     //Declaration
     private boolean declarationAndAgreement;
@@ -86,6 +72,7 @@ public class Financier {
     private List<PoliticalPartyExposedTo> politicalPartiesExposedTo;
 
     private void validateUserIdentity() throws MeedlException {
+        log.info("Started validating financier user identity.");
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         validateFinancierEmail(userIdentity);
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
@@ -107,6 +94,7 @@ public class Financier {
     }
 
     public void validate() throws MeedlException {
+        log.info("Validating financier details to save.");
         if (MeedlValidator.isNotValidId(this.id)) {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
             MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
@@ -123,12 +111,14 @@ public class Financier {
     }
 
     private void validateCooperation() throws MeedlException {
+        log.info("Started cooperation validation in financier");
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
     public void validateKyc() throws MeedlException {
+        log.info("Started kyc validation in financier.");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
         MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
@@ -137,39 +127,21 @@ public class Financier {
         if (financierIsIndividual()){
             MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
             validateKycIdentityNumbers();
-        }else {
+        }
+        else {
             MeedlValidator.validateDataElement(this.taxInformationNumber, "Tax information number is required.");
-            MeedlValidator.validateDataElement(this.beneficialRcNumber, "Rc number is required.");
+            MeedlValidator.validateDataElement(this.rcNumber, "Rc number is required.");
         }
         validateSourceOfFund();
         validateDeclaration();
-        validateBeneficialOwnerKyc();
+        validateBeneficialOwnersKyc();
     }
-    private void validateBeneficialOwnerKyc() throws MeedlException {
-        if (beneficialOwnerType != null){
-            log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", beneficialOwnerType);
-            validateProofOfBeneficialOwnership();
-            if (this.beneficialOwnerType == FinancierType.INDIVIDUAL){
-                MeedlValidator.validateDataElement(this.beneficialOwnerFirstName, "Beneficial owner first name is required.");
-                MeedlValidator.validateDataElement(this.beneficialOwnerLastName, "Beneficial owner last name is required.");
-                MeedlValidator.validateObjectInstance(this.beneficialOwnerRelationship, "Beneficial owner relationship is required.");
-                MeedlValidator.validateObjectInstance(this.beneficialOwnerDateOfBirth, "Beneficial owner date of birth is required.");
-                MeedlValidator.validateDoubleDataElement(this.percentageOwnershipOrShare, "Beneficial owner percentage ownership or share is required.");
-            }{
-                MeedlValidator.validateDataElement(this.entityName, "Entity name is required.");
-                MeedlValidator.validateRCNumber(this.beneficialRcNumber);
-                MeedlValidator.validateObjectInstance(this.countryOfIncorporation, "Country of incorporation is required.");
-            }
+    private void validateBeneficialOwnersKyc() throws MeedlException {
+        log.info("Validating beneficial owners.");
+        MeedlValidator.validateObjectInstance(beneficialOwners, "Please provide beneficial owner.");
+        for (BeneficialOwner beneficialOwner : beneficialOwners){
+            beneficialOwner.validate();
         }
-    }
-    public void validateProofOfBeneficialOwnership() throws MeedlException {
-        if (isBlank(this.votersCard) && isBlank(this.nationalIdCard) && isBlank(this.driverLicense) && isBlank(this.driverLicensetionalIdCard)) {
-            throw new MeedlException("At least one form of beneficial owner identification must be provided.");
-        }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 
     private void validateDeclaration() throws MeedlException {

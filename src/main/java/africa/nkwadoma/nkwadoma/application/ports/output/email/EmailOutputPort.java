@@ -2,7 +2,7 @@ package africa.nkwadoma.nkwadoma.application.ports.output.email;
 
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
-import africa.nkwadoma.nkwadoma.domain.model.email.*;
+import africa.nkwadoma.nkwadoma.domain.model.notification.*;
 import org.thymeleaf.context.*;
 
 public interface EmailOutputPort {

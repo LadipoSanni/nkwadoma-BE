@@ -1,6 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification;
 
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import org.springframework.scheduling.annotation.Async;

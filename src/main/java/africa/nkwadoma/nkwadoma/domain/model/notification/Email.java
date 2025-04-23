@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.model.email;
+package africa.nkwadoma.nkwadoma.domain.model.notification;
 
 import lombok.*;
 import org.thymeleaf.context.*;
