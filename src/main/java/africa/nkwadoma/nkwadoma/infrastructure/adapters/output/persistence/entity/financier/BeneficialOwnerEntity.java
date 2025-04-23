@@ -34,7 +34,7 @@ public class BeneficialOwnerEntity {
     private String beneficialOwnerLastName;
     @Enumerated(EnumType.STRING)
     private UserRelationship beneficialOwnerRelationship;
-    private LocalDate beneficialOwnerDateOfBirth;
+    private LocalDateTime beneficialOwnerDateOfBirth;
     @Column(nullable = false, columnDefinition = "double precision default 0.0")
     private double percentageOwnershipOrShare;
     //    Gov ID

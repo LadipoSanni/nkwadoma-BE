@@ -594,6 +594,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
         assertNotNull(foundFinancier.getInheritanceOrGift());
         assertNotNull(foundFinancier.getBeneficialOwners());
+        assertFalse(foundFinancier.getBeneficialOwners().isEmpty());
         assertNotNull(foundFinancier.getBeneficialOwners().get(0));
         assertNotNull(foundFinancier.getBeneficialOwners().get(0).getCountryOfIncorporation());
     }

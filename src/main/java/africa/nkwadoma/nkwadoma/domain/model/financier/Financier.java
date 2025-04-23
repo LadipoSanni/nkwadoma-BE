@@ -33,6 +33,8 @@ import java.util.Set;
 @Builder
 public class Financier {
     private String id;
+    private List<BeneficialOwner> beneficialOwners;
+
     private FinancierType financierType;
     private ActivationStatus activationStatus;
     private AccreditationStatus accreditationStatus;
@@ -63,7 +65,6 @@ public class Financier {
     private String occupation;
     private String taxInformationNumber;
 
-    private List<BeneficialOwner> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;
@@ -71,6 +72,7 @@ public class Financier {
     private List<PoliticalPartyExposedTo> politicalPartiesExposedTo;
 
     private void validateUserIdentity() throws MeedlException {
+        log.info("Started validating financier user identity.");
         MeedlValidator.validateObjectInstance(userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         validateFinancierEmail(userIdentity);
         MeedlValidator.validateDataElement(userIdentity.getFirstName(), UserMessages.INVALID_FIRST_NAME.getMessage());
@@ -92,6 +94,7 @@ public class Financier {
     }
 
     public void validate() throws MeedlException {
+        log.info("Validating financier details to save.");
         if (MeedlValidator.isNotValidId(this.id)) {
             MeedlValidator.validateObjectInstance(this.financierType, FinancierMessages.INVALID_FINANCIER_TYPE.getMessage());
             MeedlValidator.validateObjectInstance(this.getUserIdentity(), UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
@@ -108,12 +111,14 @@ public class Financier {
     }
 
     private void validateCooperation() throws MeedlException {
+        log.info("Started cooperation validation in financier");
         MeedlValidator.validateObjectInstance(cooperation, UserMessages.COOPERATION_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectName(this.cooperation.getName(), " name cannot be empty", "Cooperation");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
     public void validateKyc() throws MeedlException {
+        log.info("Started kyc validation in financier.");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
         MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
@@ -132,6 +137,7 @@ public class Financier {
         validateBeneficialOwnersKyc();
     }
     private void validateBeneficialOwnersKyc() throws MeedlException {
+        log.info("Validating beneficial owners.");
         MeedlValidator.validateObjectInstance(beneficialOwners, "Please provide beneficial owner.");
         for (BeneficialOwner beneficialOwner : beneficialOwners){
             beneficialOwner.validate();

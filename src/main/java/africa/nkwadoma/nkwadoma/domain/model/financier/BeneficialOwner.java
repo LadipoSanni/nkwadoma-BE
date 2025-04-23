@@ -40,7 +40,7 @@ public class BeneficialOwner {
     private String driverLicense;
 
     public void validate() throws MeedlException {
-        log.warn("Nothing being validated at the beneficial owner object");
+        log.warn("Started validating at the beneficial owner object");
         if (this.getBeneficialOwnerType() != null){
             log.info("Beneficial own type stated {}, validations begin for beneficial own with this type.", this.getBeneficialOwnerType());
             validateProofOfBeneficialOwnership(this);
@@ -48,7 +48,7 @@ public class BeneficialOwner {
                 MeedlValidator.validateDataElement(this.getBeneficialOwnerFirstName(), "Beneficial owner first name is required.");
                 MeedlValidator.validateDataElement(this.getBeneficialOwnerLastName(), "Beneficial owner last name is required.");
                 MeedlValidator.validateObjectInstance(this.getBeneficialOwnerRelationship(), "Beneficial owner relationship is required.");
-                MeedlValidator.validateObjectInstance(this.getBeneficialOwnerDateOfBirth(), "Beneficial owner date of birth is required.");
+                MeedlValidator.validateObjectInstance(this.beneficialOwnerDateOfBirth, "Beneficial owner date of birth is required.");
                 MeedlValidator.validateDoubleDataElement(this.getPercentageOwnershipOrShare(), "Beneficial owner percentage ownership or share is required.");
             }{
                 MeedlValidator.validateDataElement(this.getEntityName(), "Entity name is required.");

@@ -388,6 +388,8 @@ public class FinancierService implements FinancierUseCase {
                 .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
         financier.setTotalNumberOfInvestment(financierInvestmentVehicle.size());
         financier.setInvestmentVehicles(investmentVehicles);
+        List<BeneficialOwner> beneficialOwners = financierBeneficialOwnerOutputPort.findAllBeneficialOwner(financier.getId());
+        financier.setBeneficialOwners(beneficialOwners);
         return financier;
     }
 
@@ -590,7 +592,9 @@ public class FinancierService implements FinancierUseCase {
             saveFinancierBeneficialOwners(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
-            return financierOutputPort.completeKyc(financier);
+            Financier savedFinancier = financierOutputPort.completeKyc(financier);
+            savedFinancier.setBeneficialOwners(financier.getBeneficialOwners());
+            return savedFinancier;
         }else {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
@@ -599,11 +603,14 @@ public class FinancierService implements FinancierUseCase {
 
     private void saveFinancierBeneficialOwners(Financier financier) throws MeedlException {
         List<BeneficialOwner> beneficialOwners = new ArrayList<>();
+        log.info("Started saving beneficial owner.");
         for (BeneficialOwner beneficialOwner : financier.getBeneficialOwners()) {
             BeneficialOwner savedBeneficialOwner = beneficialOwnerOutputPort.save(beneficialOwner);
             beneficialOwners.add(savedBeneficialOwner);
+            log.info("Financier saved with beneficial owner : {}", savedBeneficialOwner);
         }
         financier.setBeneficialOwners(beneficialOwners);
+        log.info("Saving financier beneficial owners...");
         List<FinancierBeneficialOwner> financierBeneficialOwners =
                 financier.getBeneficialOwners().stream()
                 .map(beneficialOwner ->
@@ -619,6 +626,7 @@ public class FinancierService implements FinancierUseCase {
                             }
                         })
                         .toList();
+        log.info("Saved... financier beneficial owners... {}", financier.getBeneficialOwners());
 
     }
 

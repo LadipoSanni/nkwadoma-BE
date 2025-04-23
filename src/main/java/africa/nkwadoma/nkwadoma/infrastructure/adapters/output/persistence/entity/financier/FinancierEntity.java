@@ -48,8 +48,8 @@ public class FinancierEntity {
 
     private String occupation;
 
-    @OneToMany
-    private List<BeneficialOwnerEntity> beneficialOwners;
+//    @OneToMany
+//    private List<BeneficialOwnerEntity> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;
