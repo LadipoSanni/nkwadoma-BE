@@ -260,8 +260,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
         boolean invested = investmentVehicleFinancierOutputPort.checkIfAnyFinancierHaveInvestedInVehicle(investmentVehicleId);
         if (invested) {
-            throw new MeedlException(InvestmentVehicleMessages.
-                    CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
+            throw new MeedlException(InvestmentVehicleMessages.CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
         }
         investmentVehicleFinancierOutputPort.removeFinancierAssociationWithInvestmentVehicle(investmentVehicleId);
     }
