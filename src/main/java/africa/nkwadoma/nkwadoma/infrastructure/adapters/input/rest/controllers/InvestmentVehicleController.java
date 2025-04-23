@@ -200,7 +200,7 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("investmentVehicle/all/financier/{investmentVehicleId}")
+    @GetMapping("investmentVehicle/all/financier")
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,

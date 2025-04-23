@@ -252,7 +252,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment vehicle object cannot be empty ");
         MeedlValidator.validateObjectInstance(investmentVehicle.getVehicleOperation(),"Vehicle Operation cannot be empty");
-        investmentVehicle.getVehicleOperation().validateFundraisingAndDeployingStatus();
+        investmentVehicle.validateVehicleStatuses();
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
         if (foundInvestmentVehicle.getVehicleOperation() == null) {
             setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
@@ -291,14 +291,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
         foundInvestmentVehicle.getVehicleOperation().setDeployingStatus(investmentVehicle.getVehicleOperation().getDeployingStatus());
         foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
-        if (investmentVehicle.getVehicleOperation().getCouponDistributionStatus() != null){
-            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+        foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
                     investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
-        }
-        if(investmentVehicle.getVehicleClosureStatus().getRecollectionStatus() != null){
             foundInvestmentVehicle.setVehicleClosureStatus(
                     vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus()));
-        }
+            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+                    investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
         foundInvestmentVehicle.setVehicleOperation(
                 vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
         );
