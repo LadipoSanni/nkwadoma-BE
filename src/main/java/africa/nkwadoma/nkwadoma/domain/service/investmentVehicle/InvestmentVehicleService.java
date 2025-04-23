@@ -331,5 +331,4 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
 
 
 
-
 }
