@@ -14,7 +14,7 @@ public class VehicleClosureEntity {
     @Id
     @UuidGenerator
     private String id;
-    private InvestmentVehicleMode investmentVehicleMode;
+    private InvestmentVehicleMode recollectionStatus;
     @OneToOne
     private CapitalDistributionEntity capitalDistribution;
     private String maturity;

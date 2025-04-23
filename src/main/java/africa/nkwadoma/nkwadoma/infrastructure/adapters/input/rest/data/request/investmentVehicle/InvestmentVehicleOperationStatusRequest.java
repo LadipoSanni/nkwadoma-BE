@@ -15,4 +15,5 @@ public class InvestmentVehicleOperationStatusRequest {
     private InvestmentVehicleMode deployingStatus;
     private CouponDistributionStatus couponDistributionStatus;
     private InvestmentVehicleMode recollectionStatus;
+    private String maturity;
 }
