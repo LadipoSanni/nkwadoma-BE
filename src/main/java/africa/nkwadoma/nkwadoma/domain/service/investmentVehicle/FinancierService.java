@@ -226,7 +226,6 @@ public class FinancierService implements FinancierUseCase {
             financier = getFinancierByUserIdentity(financier);
         } catch (MeedlException e) {
             financier = saveNonExistingFinancier(financier, e.getMessage());
-            financiersToMail.add(financier);
             log.info("Financier with email {} added for email sending.", financier.getUserIdentity().getEmail());
         }
     }
