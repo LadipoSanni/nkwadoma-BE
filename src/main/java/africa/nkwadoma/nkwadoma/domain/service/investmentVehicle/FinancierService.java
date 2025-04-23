@@ -236,7 +236,6 @@ public class FinancierService implements FinancierUseCase {
         addFinancierToInvestmentVehicle(financier, investmentVehicle);
     }
 
-
     private void addFinancierToInvestmentVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         BigDecimal amountToInvest = financier.getAmountToInvest();
         if (MeedlValidator.isValidId(financier.getId())){
