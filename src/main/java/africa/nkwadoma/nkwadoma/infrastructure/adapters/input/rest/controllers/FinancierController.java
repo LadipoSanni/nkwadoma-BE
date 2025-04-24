@@ -268,7 +268,7 @@ public class FinancierController {
                                                             @RequestParam int pageSize,
                                                             @RequestParam(required = false) ActivationStatus activationStatus,
                                                             @RequestParam String investmentVehicleId) throws MeedlException {
-        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).pageNumber(pageNumber).pageSize(pageSize).build();
+        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).activationStatus(activationStatus).pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
