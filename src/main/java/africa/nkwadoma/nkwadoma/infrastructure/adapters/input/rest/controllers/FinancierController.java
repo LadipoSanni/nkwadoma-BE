@@ -104,6 +104,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
+        log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
         Financier financier = financierRestMapper.map(kycRequest);
         financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
         log.info("Controller request for kyc mapped {}", financier);

@@ -8,7 +8,7 @@ public enum OrganizationMessages {
     RC_NUMBER_IS_REQUIRED("Company's RC number is required"),
     INVALID_SERVICE_OFFERING_ID("Please provide a valid service offering identification."),
     INVALID_INDUSTRY("Organization's industry must be BANKING or EDUCATION"),
-    INVALID_RC_NUMBER("Invalid Registration number"),
+    INVALID_RC_NUMBER("Invalid Registration number i.e RC"),
     ORGANIZATION_MUST_NOT_BE_EMPTY("Organization identity must not be empty"),
     ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY("Organization status must not be empty"),
     ORGANIZATION_TYPE_MUST_NOT_BE_EMPTY("Organization type must not be empty"),

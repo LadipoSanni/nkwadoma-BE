@@ -581,9 +581,11 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
+        log.info("Validating for kyc financier service {}", financier);
         financier.validateKyc();
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
-        if (foundFinancier.getUserIdentity().getBankDetail() == null){
+        if (foundFinancier.getAccreditationStatus() != null &&
+                foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
             log.info("Financier details in service to use in completing kyc {}", financier);
             log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
             BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());

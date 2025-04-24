@@ -55,14 +55,16 @@ public class Financier {
     private LocalDateTime createdAt;
 
     //source of fund
-    private String personalOrJointSavings;
-    private String employmentIncome;
-    private String salesOfAssets;
-    private String donation;
-    private String inheritanceOrGift;
-    private String compensationOfLegalSettlements;
-    private BigDecimal profitFromLegitimateActivities;
-    private String occupation;
+    private List<String> sourceOfFunds;
+
+//    private String personalOrJointSavings;
+//    private String employmentIncome;
+//    private String salesOfAssets;
+//    private String donation;
+//    private String inheritanceOrGift;
+//    private String compensationOfLegalSettlements;
+//    private BigDecimal profitFromLegitimateActivities;
+//    private String occupation;
     private String taxInformationNumber;
 
 
@@ -125,12 +127,12 @@ public class Financier {
         this.userIdentity.getBankDetail().validate();
         MeedlValidator.validateDataElement(this.userIdentity.getPhoneNumber(), "Phone number is required.");
         if (financierIsIndividual()){
-            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
+//            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
             validateKycIdentityNumbers();
         }
         else {
             MeedlValidator.validateDataElement(this.taxInformationNumber, "Tax information number is required.");
-            MeedlValidator.validateDataElement(this.rcNumber, "Rc number is required.");
+            MeedlValidator.validateRCNumber(this.rcNumber);
         }
         validateSourceOfFund();
         validateDeclaration();
@@ -157,14 +159,15 @@ public class Financier {
         }
     }
     private void validateSourceOfFund() throws MeedlException {
-        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
-        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
-        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
-        MeedlValidator.validateDataElement(this.donation, "Donation needs to be stated.");
-        MeedlValidator.validateDataElement(this.occupation, "Occupation needs to be stated.");
-        MeedlValidator.validateDataElement(this.inheritanceOrGift, "Inheritance or gift needs to be stated.");
-        MeedlValidator.validateDataElement(this.compensationOfLegalSettlements, "Compensation of legal settlements needs to be stated.");
-        MeedlValidator.validateObjectInstance(this.profitFromLegitimateActivities, "Profit From Legitimate Activities of legal settlements needs to be stated.");
+        MeedlValidator.validateObjectInstance(this.sourceOfFunds, "Source of fund cannot be empty");
+//        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
+//        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
+//        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
+//        MeedlValidator.validateDataElement(this.donation, "Donation needs to be stated.");
+//        MeedlValidator.validateDataElement(this.occupation, "Occupation needs to be stated.");
+//        MeedlValidator.validateDataElement(this.inheritanceOrGift, "Inheritance or gift needs to be stated.");
+//        MeedlValidator.validateDataElement(this.compensationOfLegalSettlements, "Compensation of legal settlements needs to be stated.");
+//        MeedlValidator.validateObjectInstance(this.profitFromLegitimateActivities, "Profit From Legitimate Activities of legal settlements needs to be stated.");
     }
 
     private void validateKycIdentityNumbers() throws MeedlException {
