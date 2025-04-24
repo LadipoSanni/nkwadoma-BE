@@ -1,7 +1,8 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier;
 
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.FinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -51,13 +52,15 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     Page<FinancierEntity> findAllOrderByUserCreatedAt(Pageable pageable);
 
     @Query("""
-    SELECT f FROM FinancierEntity f 
-    JOIN f.userIdentity u 
-    WHERE (:financierType IS NULL OR f.financierType = :financierType)
-    ORDER BY u.createdAt DESC
-""")
+        SELECT f FROM FinancierEntity f 
+        JOIN f.userIdentity u 
+        WHERE (:financierType IS NULL OR f.financierType = :financierType)
+        AND (:activationStatus IS NULL OR f.activationStatus = :activationStatus)
+        ORDER BY u.createdAt DESC
+    """)
     Page<FinancierEntity> findAllByFinancierTypeOrderByUserCreatedAt(
             @Param("financierType") FinancierType financierType,
+            @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
 

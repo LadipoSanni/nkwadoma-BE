@@ -14,8 +14,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
-import africa.nkwadoma.nkwadoma.domain.model.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.email.Email;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
+import africa.nkwadoma.nkwadoma.domain.model.notification.Email;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
@@ -303,7 +303,7 @@ public class NotificationService implements OrganizationEmployeeEmailUseCase, Se
     private String getLinkFinancierToVehicle(UserIdentity userIdentity, InvestmentVehicle investmentVehicle) throws MeedlException {
         String token = tokenUtils.generateToken(userIdentity.getEmail());
         log.info("Generated token for inviting financier to vehicle: {}", token);
-        return baseUrl + CREATE_PASSWORD_URL + token + "investmentVehicleId" + investmentVehicle.getId();
+        return baseUrl + CREATE_PASSWORD_URL + token + "?investmentVehicleId=" + investmentVehicle.getId();
     }
 
     @Override

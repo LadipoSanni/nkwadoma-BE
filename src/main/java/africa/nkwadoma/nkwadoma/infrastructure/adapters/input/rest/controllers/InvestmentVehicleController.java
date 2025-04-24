@@ -60,6 +60,7 @@ public class InvestmentVehicleController {
         String userId = meedlUser.getClaimAsString("sub");
         InvestmentVehicle investmentVehicle =
                 investmentVehicleUseCase.viewInvestmentVehicleDetails(investmentVehicleId, userId);
+        log.info("The investment vehicle found is {}", investmentVehicle);
         InvestmentVehicleResponse investmentVehicleResponse =
                 investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
         ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
@@ -199,15 +200,16 @@ public class InvestmentVehicleController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("investmentVehicle/all/financier/{investmentVehicleId}")
-    @PreAuthorize("hasRole('FINANCIER')")
+    @GetMapping("investmentVehicle/all/financier")
+    @PreAuthorize("hasRole('FINANCIER') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllInvestmentVehicleInvestedInOrAddedTo(@AuthenticationPrincipal Jwt meedlUser,
+                                                             @RequestParam(required = false) String financierId,
                                                              @RequestParam(required = false) InvestmentVehicleType investmentVehicleType,
                                                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Page<InvestmentVehicle> investmentVehicles =
-                investmentVehicleUseCase.viewAllInvestmentVehicleInvestedIn(meedlUser.getClaimAsString("sub"),investmentVehicleType,
-                        pageSize,pageNumber );
+                investmentVehicleUseCase.viewAllInvestmentVehicleInvestedIn(meedlUser.getClaimAsString("sub"),financierId,
+                        investmentVehicleType, pageSize,pageNumber );
         List<InvestmentVehicleResponse> investmentVehicleResponses =
                 investmentVehicles.stream().map(investmentVehicleRestMapper::toInvestmentVehicleResponse).toList();
         PaginatedResponse<InvestmentVehicleResponse> paginatedResponse = new PaginatedResponse<>(

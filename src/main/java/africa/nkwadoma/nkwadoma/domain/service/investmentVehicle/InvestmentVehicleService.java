@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
@@ -12,6 +13,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
@@ -27,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.List;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
@@ -127,6 +128,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole() == IdentityRole.PORTFOLIO_MANAGER) {
+            log.info("Details being viewed by portfolio manger");
             return investmentVehicleOutputPort.findById(investmentVehicleId);
         }
 
@@ -143,12 +145,10 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             return foundInvestmentVehicle;
         }
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == InvestmentVehicleVisibility.PRIVATE){
-            Optional<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
-                    .findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, foundFinancier.getId());
-            if (investmentVehicleFinancier.isPresent()){
+            List<InvestmentVehicleFinancier> investmentVehicleFinancier = investmentVehicleFinancierOutputPort
+                    .findByAll(investmentVehicleId, foundFinancier.getId());
+            if (!investmentVehicleFinancier.isEmpty()){
                 return foundInvestmentVehicle;
-            } else {
-                throw new MeedlException("Investment Vehicle not found");
             }
         }
         throw new MeedlException("Investment Vehicle not found");
@@ -271,7 +271,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     public InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment vehicle object cannot be empty ");
         MeedlValidator.validateObjectInstance(investmentVehicle.getVehicleOperation(),"Vehicle Operation cannot be empty");
-        investmentVehicle.getVehicleOperation().validateFundraisingAndDeployingStatus();
+        investmentVehicle.validateVehicleStatuses();
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
         if (foundInvestmentVehicle.getVehicleOperation() == null) {
             setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
@@ -284,8 +284,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, String financierId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            MeedlValidator.validateUUID(financierId,"Financier id cannot be empty");
+            return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageSize,pageNumber);
+        }
         return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
     }
 
@@ -310,14 +314,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private void updateExistingInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle, InvestmentVehicle foundInvestmentVehicle) throws MeedlException {
         foundInvestmentVehicle.getVehicleOperation().setDeployingStatus(investmentVehicle.getVehicleOperation().getDeployingStatus());
         foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
-        if (investmentVehicle.getVehicleOperation().getCouponDistributionStatus() != null){
-            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+        foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
                     investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
-        }
-        if(investmentVehicle.getVehicleClosureStatus().getRecollectionStatus() != null){
             foundInvestmentVehicle.setVehicleClosureStatus(
                     vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus()));
-        }
+            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+                    investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
         foundInvestmentVehicle.setVehicleOperation(
                 vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
         );

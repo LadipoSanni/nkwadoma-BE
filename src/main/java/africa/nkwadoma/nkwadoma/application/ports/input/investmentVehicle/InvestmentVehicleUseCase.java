@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import org.springframework.data.domain.*;
 
@@ -29,7 +30,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException;
 
-    Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
+    Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId,String financierId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> searchMyInvestment(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 }

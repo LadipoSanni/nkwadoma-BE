@@ -19,6 +19,9 @@ public interface InvestmentVehicleRestMapper {
 
     @Mapping( target= "fundRaisingStatus",source = "vehicleOperation.fundRaisingStatus")
     @Mapping(target = "deployingStatus", source = "vehicleOperation.deployingStatus")
+    @Mapping(target = "couponDistributionStatus", source = "vehicleOperation.couponDistributionStatus")
+    @Mapping(target = "recollectionStatus", source = "vehicleClosureStatus.recollectionStatus")
+    @Mapping(target = "maturity", source = "vehicleClosureStatus.maturity")
     @Mapping(target = "rate", source = "interestRateOffered")
     InvestmentVehicleResponse toInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 
@@ -32,6 +35,7 @@ public interface InvestmentVehicleRestMapper {
     @Mapping(target = "vehicleOperation.deployingStatus", source = "deployingStatus")
     @Mapping( target= "vehicleOperation.couponDistributionStatus",source = "couponDistributionStatus")
     @Mapping(target = "vehicleClosureStatus.recollectionStatus", source = "recollectionStatus")
+    @Mapping(target = "vehicleClosureStatus.maturity", source = "maturity")
     @Mapping(target = "id", source = "investmentVehicleId")
     InvestmentVehicle mapInvestmentVehicleOperationStatusToVehicleOperationStatus(InvestmentVehicleOperationStatusRequest vehicleOperationStatus);
 }

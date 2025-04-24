@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.FinancierOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
@@ -9,8 +9,8 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
@@ -221,8 +221,9 @@ public class FinancierController {
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
-                                                            @RequestParam(required = false) FinancierType financierType) throws MeedlException {
-       Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).pageSize(pageSize).build();
+                                                            @RequestParam(required = false) FinancierType financierType,
+                                                            @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
+        Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).activationStatus(activationStatus).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
@@ -237,6 +238,7 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
+
     @GetMapping("financier/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,

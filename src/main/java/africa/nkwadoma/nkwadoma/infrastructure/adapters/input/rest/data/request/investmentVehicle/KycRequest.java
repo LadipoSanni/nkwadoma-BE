@@ -3,15 +3,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
+import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -45,29 +44,13 @@ public class KycRequest {
     private BigDecimal profitFromLegitimateActivities;
     private String occupation;
 
-    //Beneficial owner information
-    private FinancierType beneficialOwnerType;
     private String taxInformationNumber;
-    //beneficial Entity
-    private String entityName;
-    private String  beneficialRcNumber;
-    private Country countryOfIncorporation;
 
-    //beneficial individual
-    private String beneficialOwnerFirstName;
-    private String beneficialOwnerLastName;
-    private UserRelationship beneficialOwnerRelationship;
-    private LocalDate beneficialOwnerDateOfBirth;
-    @PositiveOrZero(message = "Percentage ownership or share cannot be negative")
-    private double percentageOwnershipOrShare;
-    //    Gov ID
-    private String votersCard;
-    private String nationalIdCard;
-    private String driverLicensetionalIdCard;
-    private String driverLicense;
+    private List<BeneficialOwner> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
 
 }
+

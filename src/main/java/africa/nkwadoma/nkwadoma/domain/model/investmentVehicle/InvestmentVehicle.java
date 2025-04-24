@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -85,7 +86,10 @@ public class InvestmentVehicle {
         setFundRaisingStatus(FundRaisingStatus.FUND_RAISING);
         setCreatedDate(LocalDateTime.now());
         setInvestmentVehicleStatus(InvestmentVehicleStatus.PUBLISHED);
-        setTotalAvailableAmount(size);
+        if (this.totalAvailableAmount == null){
+            log.info("Setting up total available amount for {} investment vehicle.", name);
+            setTotalAvailableAmount(new BigDecimal("0.00"));
+        }
         if (!investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE) &&
                 ! investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
             setInvestmentVehicleVisibility(InvestmentVehicleVisibility.DEFAULT);
@@ -103,5 +107,19 @@ public class InvestmentVehicle {
         log.info("Validating investment vehicle for draft {}, name :{} ", id, name);
         MeedlValidator.validateObjectName(name,"Investment vehicle name cannot be empty","Investment vehicle");
         MeedlValidator.validateIntegerDataElement(tenure,"Tenure cannot be less than 1");
+    }
+
+    public void validateVehicleStatuses() throws MeedlException {
+        int nonNullCount = 0;
+        if (vehicleOperation.getCouponDistributionStatus() != null) nonNullCount++;
+        if (vehicleOperation.getFundRaisingStatus() != null) nonNullCount++;
+        if (vehicleOperation.getDeployingStatus() != null) nonNullCount++;
+        if (vehicleClosureStatus.getRecollectionStatus() != null) nonNullCount++;
+        if (vehicleClosureStatus.getMaturity() != null) nonNullCount++;
+        if (nonNullCount > 1){
+            throw new MeedlException("More than one status cannot be set on investment vehicle");
+        }else if (nonNullCount < 1){
+            throw new MeedlException("Investment vehicle must have one status");
+        }
     }
 }

@@ -1,12 +1,13 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier;
 
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
+import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.CooperationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,13 +17,11 @@ import org.hibernate.annotations.UuidGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @Entity
 public class FinancierEntity {
 
@@ -49,29 +48,8 @@ public class FinancierEntity {
 
     private String occupation;
 
-
-    //Beneficial owner information
-    @Enumerated(EnumType.STRING)
-    private FinancierType beneficialOwnerType;
-    //Entity
-    private String entityName;
-    private String  beneficialRcNumber;
-    @Enumerated(EnumType.STRING)
-    private Country countryOfIncorporation;
-
-    //beneficial individual
-    private String beneficialOwnerFirstName;
-    private String beneficialOwnerLastName;
-    @Enumerated(EnumType.STRING)
-    private UserRelationship beneficialOwnerRelationship;
-    private LocalDate beneficialOwnerDateOfBirth;
-    @Column(nullable = false, columnDefinition = "double precision default 0.0")
-    private double percentageOwnershipOrShare;
-    //    Gov ID
-    private String votersCard;
-    private String nationalIdCard;
-    private String driverLicensetionalIdCard;
-    private String driverLicense;
+//    @OneToMany
+//    private List<BeneficialOwnerEntity> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;

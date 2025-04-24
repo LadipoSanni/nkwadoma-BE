@@ -188,6 +188,18 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
+    @Override
+    public Page<InvestmentVehicle> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(String financierId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+                investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageRequest);
+        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+    }
+
 
     @Override
     public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {
@@ -215,6 +227,7 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
                     investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
             return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
         }
+        log.info("Investment vehicle id to be viewed is null.");
         throw new InvestmentException(InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
     }
 
