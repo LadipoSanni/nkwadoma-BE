@@ -41,17 +41,6 @@ public class FinancierEntity {
     //source of fund
     @ElementCollection(fetch = FetchType.EAGER)
     List<String> sourceOfFunds;
-//    private String personalOrJointSavings;
-//    private String employmentIncome;
-//    private String salesOfAssets;
-//    private String donation;
-//    private String inheritanceOrGift;
-//    private String compensationOfLegalSettlements;
-//    private BigDecimal profitFromLegitimateActivities;
-//    private String occupation;
-
-//    @OneToMany
-//    private List<BeneficialOwnerEntity> beneficialOwners;
 
     //Declaration
     private boolean declarationAndAgreement;

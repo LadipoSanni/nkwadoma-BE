@@ -31,15 +31,6 @@ public class KycRequest {
     //source of fund
     private List<String> sourceOfFunds;
 
-//    private String personalOrJointSavings;
-//    private String employmentIncome;
-//    private String salesOfAssets;
-//    private String donation;
-//    private String inheritanceOrGift;
-//    private String compensationOfLegalSettlements;
-//    private BigDecimal profitFromLegitimateActivities;
-//    private String occupation;
-
     private String taxInformationNumber;
 
     private List<BeneficialOwner> beneficialOwners;
