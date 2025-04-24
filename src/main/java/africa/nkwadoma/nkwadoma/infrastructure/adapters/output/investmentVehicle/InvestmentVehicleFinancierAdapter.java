@@ -48,18 +48,27 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         investmentVehicleFinancierRepository.deleteById(id);
     }
 
-    @Override
-    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        Page<FinancierEntity> financiers = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleId(investmentVehicleId, pageRequest);
-        return financiers.map(financierMapper::map);
-    }
+//    @Override
+//    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException {
+//        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+//        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities = investmentVehicleFinancierRepository.findAllByInvestmentVehicle_Id(investmentVehicleId, pageRequest);
+//        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierEntity -> {
+//            Financier financier =financierMapper.map(investmentVehicleFinancierEntity.getFinancier());
+//            financier.setInvestmentVehicleDesignation(investmentVehicleFinancierEntity.getInvestmentVehicleDesignation());
+//            return financier;
+//        });
+//    }
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        MeedlValidator.validateObjectInstance(activationStatus, "Please provide a valid activation status to find by.");
-        Page<FinancierEntity> financiers = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
-        return financiers.map(financierMapper::map);
+//        MeedlValidator.validateObjectInstance(activationStatus, "Please provide a valid activation status to find by.");
+
+        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierEntity -> {
+            Financier financier =financierMapper.map(investmentVehicleFinancierEntity.getFinancier());
+            financier.setInvestmentVehicleDesignation(investmentVehicleFinancierEntity.getInvestmentVehicleDesignation());
+            return financier;
+        });
     }
 
 

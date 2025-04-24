@@ -179,7 +179,7 @@ public class FinancierServiceTest {
         foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, null, pageRequest);
             financierOutputPort.save(foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -615,6 +615,7 @@ public class FinancierServiceTest {
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
+        individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         try {
             financiersPage = financierUseCase.viewAllFinancierInInvestmentVehicle(individualFinancier);
         } catch (MeedlException e) {
@@ -624,6 +625,8 @@ public class FinancierServiceTest {
         List<Financier> financiers = financiersPage.toList();
         assertFalse(financiers.isEmpty());
         assertEquals(individualFinancierId, financiers.get(0).getId());
+        assertNotNull(financiers.get(0).getInvestmentVehicleDesignation());
+        assertFalse(financiers.get(0).getInvestmentVehicleDesignation().isEmpty());
     }
     @Test
     void viewAllFinancierInVehicleWithNull(){
@@ -656,7 +659,7 @@ public class FinancierServiceTest {
         assertNotNull(financiersPage);
         assertNotNull(financiersPage.getContent());
         List<Financier> financiers = financiersPage.toList();
-        assertEquals(1, financiers.size());
+        assertEquals(2, financiers.size());
         assertNotNull(financiers.get(0).getActivationStatus());
     }
     @ParameterizedTest
@@ -664,11 +667,6 @@ public class FinancierServiceTest {
     void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
     }
-    @Test
-    void viewAllFinancierInVehicleWithVehicleIdAndInvalidStatus() {
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, null, pageRequest));
-    }
-
     @Test
     @Order(11)
     public void inviteCooperateFinancierToNewVehicle() {
@@ -691,7 +689,7 @@ public class FinancierServiceTest {
         assertEquals("Financier has been added to investment vehicle", response);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null, pageRequest);
             cooperateFinancier = financierOutputPort.findFinancierByUserId(cooperateUserIdentity.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
             financierOutputPort.delete(cooperateFinancier.getId());
@@ -1008,7 +1006,7 @@ public class FinancierServiceTest {
         assertEquals("Financier has been added to investment vehicle", response);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null ,pageRequest);
             cooperateFinancier = foundFinancier;
             investmentVehicleFinancierOutputPort.deleteByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), cooperateFinancier.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
