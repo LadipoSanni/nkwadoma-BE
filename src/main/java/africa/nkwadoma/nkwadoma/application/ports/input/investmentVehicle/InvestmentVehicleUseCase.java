@@ -16,7 +16,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
 
-    String deleteInvestmentVehicle(String investmentId) throws MeedlException;
+    String deleteInvestmentVehicle(String  investmentId) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicle(String userId,int pageSize, int pageNumber) throws MeedlException;
 

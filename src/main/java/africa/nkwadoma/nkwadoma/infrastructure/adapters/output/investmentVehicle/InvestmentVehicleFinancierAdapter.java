@@ -42,6 +42,7 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     }
 
+
     @Override
     public void deleteInvestmentVehicleFinancier(String id) throws MeedlException {
         MeedlValidator.validateUUID(id, "Invalid investment vehicle financier Id provided");
@@ -96,5 +97,11 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         investmentVehicleFinancierRepository.deleteByInvestmentVehicleId(investmentVehicleId);
+    }
+
+    @Override
+    public boolean checkIfFinancierExistInVehicle(String  investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        return investmentVehicleFinancierRepository.checkIfAnyFinancierExistInVehicle(investmentVehicleId);
     }
 }
