@@ -5,8 +5,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -44,19 +42,6 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
 
     }
 
-    @Override
-    public Optional<InvestmentVehicleFinancier> findByInvestmentVehicleIdAndFinancierId(String investmentVehicleId, String financierId) throws MeedlException {
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        MeedlValidator.validateUUID(financierId, "Invalid financier id provided");
-        log.info("Validated id for view InvestmentVehicleFinancier by vehicle id and financier id is {} ----- {}", investmentVehicleId, financierId);
-        Optional<InvestmentVehicleFinancierEntity> optionalInvestmentVehicleFinancierEntity = investmentVehicleFinancierRepository.findByInvestmentVehicleIdAndFinancierId(investmentVehicleId, financierId);
-
-        if (optionalInvestmentVehicleFinancierEntity.isEmpty()){
-            return Optional.empty();
-        }
-        log.info("Investment vehicle financier found {}", optionalInvestmentVehicleFinancierEntity.get().getId());
-        return Optional.of(investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(optionalInvestmentVehicleFinancierEntity.get()));
-    }
 
     @Override
     public void deleteInvestmentVehicleFinancier(String id) throws MeedlException {

@@ -231,12 +231,11 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                             .investmentVehicle(investmentVehicle).financier(financier).
                     investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
-            if (investmentVehicleFinancierOutputPort.findByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(),financier.getId()).isPresent()) {
+            if (!investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(),financier.getId()).isEmpty()) {
                 throw new MeedlException(InvestmentVehicleMessages.FINANCIER_ALREADY_EXIST_IN_VEHICLE.getMessage());
             }
             investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
         }
-
     }
 
     private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
