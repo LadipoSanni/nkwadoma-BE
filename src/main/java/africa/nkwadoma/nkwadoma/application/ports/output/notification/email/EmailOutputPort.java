@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.application.ports.output.email;
+package africa.nkwadoma.nkwadoma.application.ports.output.notification.email;
 
 
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;

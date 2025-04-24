@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
@@ -128,7 +129,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         UserIdentity userIdentity = userIdentityOutputPort.findById(loanRequest.getActorId());
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .contentId(updatedLoanRequest.getId())
-                .contentDetail(LOAN_REQUEST_DECLINED_CONTENT.getMessage().concat(" "+loanRequest.getDeclineReason()))
+                .contentDetail(MeedlNotificationMessages.LOAN_REQUEST_DECLINED_CONTENT.getMessage().concat(" "+loanRequest.getDeclineReason()))
                 .title(LOAN_REQUEST.getMessage())
                 .user(updatedLoanRequest.getLoanee().getUserIdentity())
                 .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())

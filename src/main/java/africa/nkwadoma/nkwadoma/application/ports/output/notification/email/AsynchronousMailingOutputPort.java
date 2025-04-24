@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification;
+package africa.nkwadoma.nkwadoma.application.ports.output.notification.email;
 
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
