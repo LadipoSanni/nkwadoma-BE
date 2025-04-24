@@ -272,7 +272,7 @@ public class FinancierController {
                                                             @RequestParam(required = false) ActivationStatus activationStatus,
                                                             @RequestParam String investmentVehicleId) throws MeedlException {
         Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Financier> financiers = viewAllBasedOnActivationStatus(activationStatus, financier);
+        Page<Financier> financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
@@ -286,17 +286,4 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
-
-    private Page<Financier> viewAllBasedOnActivationStatus(ActivationStatus activationStatus, Financier financier) throws MeedlException {
-        Page<Financier> financiers;
-        if (activationStatus != null) {
-            financier.setActivationStatus(activationStatus);
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicleByActivationStatus(financier);
-        } else {
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
-        }
-        return financiers;
-    }
-
-
 }

@@ -406,27 +406,16 @@ public class FinancierService implements FinancierUseCase {
                 .build();
     }
 
+
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
         viewAllFinancierInVehicleValidation(financier);
-
-        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
-        log.info("View all financiers in a vehicle with id {}. Page number: {}, page size: {}",financier.getInvestmentVehicleId(), financier.getPageNumber(), financier.getPageSize());
-        Page<Financier> foundFinanciers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(financier.getInvestmentVehicleId(), pageRequest);
-        log.info("Found financiers in db: {}", foundFinanciers);
-        return foundFinanciers;
-    }
-    @Override
-    public Page<Financier> viewAllFinancierInInvestmentVehicleByActivationStatus(Financier financier) throws MeedlException {
-        viewAllFinancierInVehicleValidation(financier);
-        MeedlValidator.validateObjectInstance(financier.getActivationStatus(), "Please provide a valid activation status.");
-
         Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
         log.info("View all financiers in a vehicle with id {}. Page number: {}, page size: {} and activation status {}",
                 financier.getInvestmentVehicleId(), financier.getPageNumber(), financier.getPageSize(), financier.getActivationStatus());
         Page<Financier> foundFinanciers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(
                 financier.getInvestmentVehicleId(), financier.getActivationStatus(), pageRequest);
-        log.info("Found financiers with activation status {} in db: {}",financier.getActivationStatus(), foundFinanciers);
+        log.info("Found financiers with activation status {} in db: {}",financier.getActivationStatus(), foundFinanciers.get());
         return foundFinanciers;
     }
 
