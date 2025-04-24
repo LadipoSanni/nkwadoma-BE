@@ -39,7 +39,7 @@ public class FinancierEntity {
     private UserEntity userIdentity;
 
     //source of fund
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     List<String> sourceOfFunds;
 //    private String personalOrJointSavings;
 //    private String employmentIncome;
