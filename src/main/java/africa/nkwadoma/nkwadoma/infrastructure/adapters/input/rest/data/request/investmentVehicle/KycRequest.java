@@ -1,15 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
-import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -33,16 +27,9 @@ public class KycRequest {
     private String bvn;
     @NotBlank(message = "Tax id is required")
     private String taxId;
-
+    private String rcNumber;
     //source of fund
-    private String personalOrJointSavings;
-    private String employmentIncome;
-    private String salesOfAssets;
-    private String donation;
-    private String inheritanceOrGift;
-    private String compensationOfLegalSettlements;
-    private BigDecimal profitFromLegitimateActivities;
-    private String occupation;
+    private List<String> sourceOfFunds;
 
     private String taxInformationNumber;
 

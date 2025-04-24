@@ -558,12 +558,12 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getUserIdentity().getNin());
         assertNotNull(financierUpdated.getUserIdentity().getTaxId());
         assertNotNull(financierUpdated.getUserIdentity().getBankDetail());
-        assertNotNull(financierUpdated.getInheritanceOrGift());
-        assertEquals(financierUpdated.getInheritanceOrGift(), financierWithKycRequest.getInheritanceOrGift());
+        assertNotNull(financierUpdated.getSourceOfFunds());
+        assertEquals(financierUpdated.getSourceOfFunds().get(0), financierWithKycRequest.getSourceOfFunds().get(0));
+//        assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
         assertNotNull(financierUpdated.getBeneficialOwners());
         assertFalse(financierUpdated.getBeneficialOwners().isEmpty());
         assertNotNull(financierUpdated.getBeneficialOwners().get(0));
-        assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
         assertNotNull(financierUpdated.getBeneficialOwners().get(0).getCountryOfIncorporation());
 
     }
@@ -666,7 +666,8 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
-        assertNotNull(foundFinancier.getInheritanceOrGift());
+        assertNotNull(foundFinancier.getSourceOfFunds());
+        assertFalse(foundFinancier.getSourceOfFunds().isEmpty());
         assertNotNull(foundFinancier.getBeneficialOwners());
         assertFalse(foundFinancier.getBeneficialOwners().isEmpty());
         assertNotNull(foundFinancier.getBeneficialOwners().get(0));

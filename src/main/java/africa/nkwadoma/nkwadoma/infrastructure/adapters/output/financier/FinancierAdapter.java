@@ -80,6 +80,7 @@ public class FinancierAdapter implements FinancierOutputPort {
 
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
+        log.info("Complete kyc of financier at adapter level ... ");
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         financier.validate();
         financier.validateKyc();

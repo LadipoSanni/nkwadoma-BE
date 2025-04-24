@@ -4,7 +4,8 @@ import lombok.*;
 
 @Getter
 public enum ControllerConstant {
-    RESPONSE_IS_SUCCESSFUL("Response is successful"),
+    RESPONSE_IS_SUCCESSFUL("Response is successful."),
+    RESPONSE_SUCCESSFUL_KYC("Kyc was done successfully."),
     INVESTED_SUCCESSFUL("Invested successful"),
     COLLEAGUE_INVITED("Colleague invited successfully"),
     LOGOUT_SUCCESSFUL("Logout successful"),
