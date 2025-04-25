@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Coope
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -433,7 +435,7 @@ class FinancierAdapterTest {
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
     }
     @Test
-    @Order(9)
+    @Order(10)
     public void saveCooperateFinancier() {
         Financier response;
         try {
@@ -457,7 +459,7 @@ class FinancierAdapterTest {
 
 
     @Test
-    @Order(10)
+    @Order(11)
     public void deleteFinancier(){
         try {
             Financier financier = financierOutputPort.findFinancierByFinancierId(financierId);

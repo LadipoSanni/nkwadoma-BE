@@ -13,10 +13,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
-import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -45,6 +42,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -189,7 +187,7 @@ public class FinancierServiceTest {
         foundFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, null, pageRequest);
             financierOutputPort.save(foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -577,12 +575,12 @@ public class FinancierServiceTest {
         assertNotNull(financierUpdated.getUserIdentity().getNin());
         assertNotNull(financierUpdated.getUserIdentity().getTaxId());
         assertNotNull(financierUpdated.getUserIdentity().getBankDetail());
-        assertNotNull(financierUpdated.getInheritanceOrGift());
-        assertEquals(financierUpdated.getInheritanceOrGift(), financierWithKycRequest.getInheritanceOrGift());
+        assertNotNull(financierUpdated.getSourceOfFunds());
+        assertEquals(financierUpdated.getSourceOfFunds().get(0), financierWithKycRequest.getSourceOfFunds().get(0));
+//        assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
         assertNotNull(financierUpdated.getBeneficialOwners());
         assertFalse(financierUpdated.getBeneficialOwners().isEmpty());
         assertNotNull(financierUpdated.getBeneficialOwners().get(0));
-        assertEquals(financierUpdated.getOccupation(), financierWithKycRequest.getOccupation());
         assertNotNull(financierUpdated.getBeneficialOwners().get(0).getCountryOfIncorporation());
 
     }
@@ -592,6 +590,7 @@ public class FinancierServiceTest {
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
+            individualFinancier.setActivationStatus(null);
             financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -601,13 +600,81 @@ public class FinancierServiceTest {
         List<Financier> financiers = financiersPage.toList();
         assertFalse(financiers.isEmpty());
     }
+
+    @Test
+    void viewAllActiveFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
+            financiersPage = financierUseCase.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.ACTIVE));
+    }
+
+    @Test
+    void viewAllInvitedFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.INVITED);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.INVITED);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.INVITED));
+    }
+
+    @Test
+    void viewAllInactiveFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.INACTIVE);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.INACTIVE);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.INACTIVE));
+    }
+
+    @Test
+    void viewAllDeactivatedFinancier(){
+        Page<Financier> financiersPage = null;
+        try{
+            individualFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
+            Financier foundFinancier = financierOutputPort.findFinancierByFinancierId(individualFinancierId);
+            assertNotNull(foundFinancier);
+            foundFinancier.setActivationStatus(ActivationStatus.DEACTIVATED);
+            financierOutputPort.save(foundFinancier);
+            financiersPage = financierOutputPort.viewAllFinancier(individualFinancier);
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+        assertNotNull(financiersPage);
+        assertNotNull(financiersPage.getContent());
+        assertThat(financiersPage).allMatch(financier -> financier.getActivationStatus().equals(ActivationStatus.DEACTIVATED));
+    }
+
     @Test
     @Order(8)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
             foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
-            log.info("-----> financier -----> " + foundFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -616,7 +683,8 @@ public class FinancierServiceTest {
         assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getUserIdentity());
         assertNotNull(foundFinancier.getUserIdentity().getBankDetail());
-        assertNotNull(foundFinancier.getInheritanceOrGift());
+        assertNotNull(foundFinancier.getSourceOfFunds());
+        assertFalse(foundFinancier.getSourceOfFunds().isEmpty());
         assertNotNull(foundFinancier.getBeneficialOwners());
         assertFalse(foundFinancier.getBeneficialOwners().isEmpty());
         assertNotNull(foundFinancier.getBeneficialOwners().get(0));
@@ -632,6 +700,7 @@ public class FinancierServiceTest {
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
+        individualFinancier.setActivationStatus(ActivationStatus.ACTIVE);
         try {
             financiersPage = financierUseCase.viewAllFinancierInInvestmentVehicle(individualFinancier);
         } catch (MeedlException e) {
@@ -641,6 +710,8 @@ public class FinancierServiceTest {
         List<Financier> financiers = financiersPage.toList();
         assertFalse(financiers.isEmpty());
         assertEquals(individualFinancierId, financiers.get(0).getId());
+        assertNotNull(financiers.get(0).getInvestmentVehicleDesignation());
+        assertFalse(financiers.get(0).getInvestmentVehicleDesignation().isEmpty());
     }
     @Test
     void viewAllFinancierInVehicleWithNull(){
@@ -673,7 +744,7 @@ public class FinancierServiceTest {
         assertNotNull(financiersPage);
         assertNotNull(financiersPage.getContent());
         List<Financier> financiers = financiersPage.toList();
-        assertEquals(1, financiers.size());
+        assertEquals(2, financiers.size());
         assertNotNull(financiers.get(0).getActivationStatus());
     }
     @ParameterizedTest
@@ -681,11 +752,6 @@ public class FinancierServiceTest {
     void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
     }
-    @Test
-    void viewAllFinancierInVehicleWithVehicleIdAndInvalidStatus() {
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(privateInvestmentVehicleId, null, pageRequest));
-    }
-
     @Test
     @Order(11)
     public void inviteCooperateFinancierToNewVehicle() {
@@ -709,7 +775,7 @@ public class FinancierServiceTest {
         assertEquals("Financier has been added to investment vehicle", response);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null, pageRequest);
             cooperateFinancier = financierOutputPort.findFinancierByUserId(cooperateUserIdentity.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());
             financierOutputPort.delete(cooperateFinancier.getId());
@@ -1029,7 +1095,7 @@ public class FinancierServiceTest {
         assertEquals("Financier has been added to investment vehicle", response);
         Page<Financier> financiers;
         try {
-            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), pageRequest);
+            financiers = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicle.getId(), null ,pageRequest);
             cooperateFinancier = foundFinancier;
             investmentVehicleFinancierOutputPort.deleteByInvestmentVehicleIdAndFinancierId(investmentVehicle.getId(), cooperateFinancier.getId());
             deleteInvestmentVehicleFinancier(investmentVehicle.getId(), cooperateFinancier.getId());

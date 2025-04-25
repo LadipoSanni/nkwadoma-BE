@@ -210,7 +210,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateObjectInstance(investmentVehicleVisibility, INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL.getMessage());
         InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findById(investmentVehicleId);
         if(ObjectUtils.isNotEmpty(investmentVehicle.getInvestmentVehicleVisibility())) {
-            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle);
+            return updateVisibility(investmentVehicleId, investmentVehicleVisibility, investmentVehicle,financiers);
         }
         investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
         if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PUBLIC)) {
@@ -219,21 +219,36 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
             if (financiers.isEmpty()) {
                 throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
             }
-            for (Financier eachFinancier : financiers) {
-                Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
-                InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
-                                .investmentVehicle(investmentVehicle).financier(financier).
-                        investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
-                investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
-            }
+            addFinancierToVehicle(financiers, investmentVehicle);
         }
         investmentVehicle = investmentVehicleOutputPort.save(investmentVehicle);
         return prepareInvestmentVehicleForPublishing(investmentVehicle);
     }
 
-    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private void addFinancierToVehicle(List<Financier> financiers, InvestmentVehicle investmentVehicle) throws MeedlException {
+        for (Financier eachFinancier : financiers) {
+            Financier financier = financierOutputPort.findFinancierByFinancierId(eachFinancier.getId());
+            InvestmentVehicleFinancier investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
+                            .investmentVehicle(investmentVehicle).financier(financier).
+                    investmentVehicleDesignation(eachFinancier.getInvestmentVehicleDesignation()).build();
+            if (!investmentVehicleFinancierOutputPort.findByAll(investmentVehicle.getId(),financier.getId()).isEmpty()) {
+                throw new MeedlException(InvestmentVehicleMessages.FINANCIER_ALREADY_EXIST_IN_VEHICLE.getMessage());
+            }
+            investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+        }
+    }
+
+    private InvestmentVehicle updateVisibility(String investmentVehicleId, InvestmentVehicleVisibility investmentVehicleVisibility,
+                                               InvestmentVehicle investmentVehicle,List<Financier> financiers) throws MeedlException {
             if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.DEFAULT)) {
                 setVisibilityToDefault(investmentVehicleId);
+                investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
+            }else if (investmentVehicleVisibility.equals(InvestmentVehicleVisibility.PRIVATE)) {
+                if (!investmentVehicleFinancierOutputPort
+                        .checkIfFinancierExistInVehicle(investmentVehicle.getId()) && financiers.isEmpty()){
+                    throw new MeedlException(InvestmentVehicleMessages.CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER.getMessage());
+                };
+                addFinancierToVehicle(financiers, investmentVehicle);
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
             }else {
                 investmentVehicle.setInvestmentVehicleVisibility(investmentVehicleVisibility);
@@ -241,10 +256,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return investmentVehicleOutputPort.save(investmentVehicle);
     }
 
+
     private void setVisibilityToDefault(String investmentVehicleId) throws MeedlException {
         boolean invested = investmentVehicleFinancierOutputPort.checkIfAnyFinancierHaveInvestedInVehicle(investmentVehicleId);
         if (invested) {
-            throw new MeedlException(InvestmentVehicleMessages.CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
+            throw new MeedlException(InvestmentVehicleMessages.
+                    CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT.getMessage());
         }
         investmentVehicleFinancierOutputPort.removeFinancierAssociationWithInvestmentVehicle(investmentVehicleId);
     }
@@ -266,8 +283,12 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     }
 
     @Override
-    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
+    public Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, String financierId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException {
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            MeedlValidator.validateUUID(financierId,"Financier id cannot be empty");
+            return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageSize,pageNumber);
+        }
         return investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), investmentVehicleType,pageSize,pageNumber);
     }
 
@@ -308,7 +329,6 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
     private String generateInvestmentVehicleLink(String id) {
         return INVESTMENT_VEHICLE_URL+id;
     }
-
 
 
 

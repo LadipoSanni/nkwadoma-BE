@@ -104,6 +104,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
+        log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
         Financier financier = financierRestMapper.map(kycRequest);
         financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
         log.info("Controller request for kyc mapped {}", financier);
@@ -221,8 +222,9 @@ public class FinancierController {
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
-                                                            @RequestParam(required = false) FinancierType financierType) throws MeedlException {
-       Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).pageSize(pageSize).build();
+                                                            @RequestParam(required = false) FinancierType financierType,
+                                                            @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
+        Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).activationStatus(activationStatus).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
@@ -237,6 +239,7 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
+
     @GetMapping("financier/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
@@ -269,7 +272,7 @@ public class FinancierController {
                                                             @RequestParam(required = false) ActivationStatus activationStatus,
                                                             @RequestParam String investmentVehicleId) throws MeedlException {
         Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Financier> financiers = viewAllBasedOnActivationStatus(activationStatus, financier);
+        Page<Financier> financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
@@ -283,17 +286,4 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
-
-    private Page<Financier> viewAllBasedOnActivationStatus(ActivationStatus activationStatus, Financier financier) throws MeedlException {
-        Page<Financier> financiers;
-        if (activationStatus != null) {
-            financier.setActivationStatus(activationStatus);
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicleByActivationStatus(financier);
-        } else {
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
-        }
-        return financiers;
-    }
-
-
 }

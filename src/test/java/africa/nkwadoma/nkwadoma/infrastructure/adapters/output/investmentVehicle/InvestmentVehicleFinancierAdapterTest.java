@@ -189,7 +189,7 @@ class InvestmentVehicleFinancierAdapterTest {
     void viewAllFinancierInVehicle(){
         Page<Financier> financiersPage = null;
         try {
-            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId,pageRequest);
+            financiersPage = investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId,null,pageRequest);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -216,16 +216,12 @@ class InvestmentVehicleFinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
     void viewAllFinancierInVehicleWithInvalidVehicleId(String invalidId) {
-        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, pageRequest));
+        assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, null, pageRequest));
     }
         @ParameterizedTest
         @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "ervkdldd"})
         void viewAllFinancierInVehicleWithStatusAndInvalidVehicleId(String invalidId) {
             assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
-        }
-        @Test
-        void viewAllFinancierInVehicleWithVehicleIdAndInvalidStatus() {
-            assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(investmentVehicleId, null, pageRequest));
         }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})

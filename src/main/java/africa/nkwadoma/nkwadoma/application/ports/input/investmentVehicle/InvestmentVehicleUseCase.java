@@ -16,7 +16,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle viewInvestmentVehicleDetails(String investmentVehicleId, String userId) throws MeedlException;
 
-    String deleteInvestmentVehicle(String investmentId) throws MeedlException;
+    String deleteInvestmentVehicle(String  investmentId) throws MeedlException;
 
     Page<InvestmentVehicle> viewAllInvestmentVehicle(String userId,int pageSize, int pageNumber) throws MeedlException;
 
@@ -30,7 +30,7 @@ public interface InvestmentVehicleUseCase {
 
     InvestmentVehicle setInvestmentVehicleOperationStatus(InvestmentVehicle investmentVehicle) throws MeedlException;
 
-    Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
+    Page<InvestmentVehicle> viewAllInvestmentVehicleInvestedIn(String userId,String financierId, InvestmentVehicleType investmentVehicleType, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> searchMyInvestment(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 }

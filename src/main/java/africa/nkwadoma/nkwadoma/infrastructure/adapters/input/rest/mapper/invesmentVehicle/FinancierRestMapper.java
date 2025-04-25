@@ -21,6 +21,7 @@ public interface FinancierRestMapper {
     @Mapping( source = "userIdentity", target = "userIdentity")
     @Mapping( source = "userIdentity.nextOfKin", target = "nextOfKin")
     @Mapping( source = "cooperation.name", target = "organizationName")
+    @Mapping( source = "investmentVehicleDesignation", target = "investmentVehicleRole")
     FinancierResponse map(Financier financier);
 
     @Mapping(target = "firstName", source="userIdentity.firstName")
@@ -54,6 +55,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
     @Mapping(target = "userIdentity.phoneNumber", source = "kycRequest.phoneNumber")
+    @Mapping(target = "rcNumber", source = "rcNumber")
     Financier map(KycRequest kycRequest);
 
     @Mapping(target = "userIdentity.id", source = "userId")
