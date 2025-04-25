@@ -1,31 +1,39 @@
 package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceNotFoundException;
+import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailureRecord;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.LoanMetricsMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
+import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.IDENTITY_NOT_VERIFIED;
@@ -48,6 +56,14 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
     private TokenUtils tokenUtils;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
+    @Autowired
+    private LoanMetricsMapper loanMetricsMapper;
+    @Autowired
+    private LoanMetricsOutputPort loanMetricsOutputPort;
+    @Autowired
+    private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Autowired
+    private LoanRequestOutputPort loanRequestOutputPort;
 
     @Override
     public String verifyIdentity(String loanReferralId) throws MeedlException, IdentityVerificationException {
@@ -169,6 +185,13 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
                 if (premblyBvnResponse.isLikenessCheckSuccessful()){
                     handleSuccessfulVerification(identityVerification, loanReferral, premblyNinResponse);
                     verificationResponse = IdentityMessages.IDENTITY_VERIFIED.getMessage();
+
+                    log.info("verification done successfully. {}", verificationResponse);
+                    log.info("about to increase loan request count  {}", loanReferral);
+                    LoanRequest loanRequest = loanRequestOutputPort.findLoanRequestByLoaneeId(loanReferral.getLoanee().getId());
+                    log.info("found loan request {}", loanRequest);
+                    updateLoanMetricsLoanRequestCount(loanRequest);
+                    log.info("done with loan request count {}", loanRequest);
                 }else {
                     log.warn("Identity verification not successful, failed at the bvn level");
                     verificationResponse = IdentityMessages.IDENTITY_NOT_VERIFIED.getMessage();
@@ -183,6 +206,23 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
             throw new MeedlException(exception.getMessage());
         }
         return verificationResponse;
+    }
+
+    private void updateLoanMetricsLoanRequestCount(LoanRequest loanRequest) throws MeedlException {
+        Optional<OrganizationIdentity> organization =
+                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
+        if (organization.isEmpty()) {
+            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
+        }
+        Optional<LoanMetrics> loanMetrics =
+                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
+        if (loanMetrics.isEmpty()) {
+            throw new LoanException("Organization has no loan metrics");
+        }
+        loanMetrics.get().setLoanRequestCount(
+                loanMetrics.get().getLoanRequestCount() + 1
+        );
+        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     private PremblyNinResponse ninLikenessVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {

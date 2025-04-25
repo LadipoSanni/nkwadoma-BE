@@ -107,4 +107,15 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
                         organizationId,pageRequest);
         return loanRequestProjections.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
+
+    @Override
+    public LoanRequest findLoanRequestByLoaneeId(String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        Optional<LoanRequestProjection> loanRequestProjection =
+                loanRequestRepository.findLoanRequestByLoaneeEntityId(loaneeId);
+        LoanRequest loanRequest = loanRequestMapper.mapProjectionToLoanRequest(loanRequestProjection.get());
+        log.info("Mapped Loan request: {}", loanRequest);
+        return loanRequest;
+    }
 }
