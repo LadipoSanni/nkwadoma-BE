@@ -3,57 +3,65 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.mee
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class AsynchronousNotificationAdapter implements AsynchronousNotificationOutputPort {
-    private MeedlNotificationUsecase meedlNotificationUsecase;
-    private UserIdentityOutputPort userIdentityOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
+    private List<MeedlNotification> notificationsToSend;
+
     @Override
     @Async
     public void notifyPortfolioManagerOfNewFinancier(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor) {
+        notificationsToSend = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(investmentVehicle)){
             financiersToMail.forEach(financier -> {
-                try {
-                    notifyPortfolioManagerOfNonExistingFinancierToVehicle(financier, investmentVehicle, actor);
-                } catch (MeedlException e) {
-                    throw new RuntimeException(e);
-                }
+               notificationsToSend.add(buildFinancierToInvestmentVehiclePmNotification(financier, investmentVehicle, actor));
             });
-
         }else {
             financiersToMail.forEach(financier -> {
-                try {
-                    notifyPortfolioManagerOfNonExistingFinancierToPlatform(financier, actor);
-                } catch (MeedlException e) {
-                    throw new RuntimeException(e);
-                }
+               notificationsToSend.add(buildFinancierToPlatformPmNotification(financier, actor));
             });
+        }
+        for (MeedlNotification meedlNotification : notificationsToSend) {
+            try {
+                notifyPortfolioManagers(meedlNotification);
+            } catch (MeedlException e) {
+                log.error("FAILED NOTIFICATION: Notify financier notification to financiers wasn't sent due to {}",e.getMessage(), e);
+            }
         }
     }
 
-    private void notifyPortfolioManagerOfNonExistingFinancierToPlatform(Financier financier, UserIdentity actor) throws MeedlException {
-        MeedlNotification meedlNotification = buildFinancierToPlatformPmNotification(financier, actor);
-        meedlNotificationUsecase.sendNotification(meedlNotification);
+    private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
+        notifyAllPortfolioManager(meedlNotification);
     }
-    private void notifyPortfolioManagerOfNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle, UserIdentity actor) throws MeedlException {
-        MeedlNotification meedlNotification = buildFinancierToInvestmentVehiclePmNotification(financier,investmentVehicle, actor);
+    private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
+        for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
+            meedlNotification.setUser(userIdentity);
+            log.info("Notifying portfolio manager on financier ");
         meedlNotificationUsecase.sendNotification(meedlNotification);
+        }
     }
 
     private MeedlNotification buildFinancierToInvestmentVehiclePmNotification(Financier financier, InvestmentVehicle investmentVehicle, UserIdentity sender) {
         return MeedlNotification.builder()
                 .title("Financier invited to platform")
-                .user(financier.getUserIdentity())
                 .contentId(financier.getId())
                 .contentDetail("A new " + financier.getFinancierType().name().toLowerCase() +
                         " financier " + financier.getUserIdentity().getFirstName() +
@@ -70,7 +78,6 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private MeedlNotification buildFinancierToPlatformPmNotification(Financier financier, UserIdentity sender ) {
         return MeedlNotification.builder()
                 .title("Financier invited to platform")
-                .user(financier.getUserIdentity())
                 .contentId(financier.getId())
                 .contentDetail("A new " + financier.getFinancierType().name().toLowerCase() +
                         " financier " + financier.getUserIdentity().getFirstName() +
