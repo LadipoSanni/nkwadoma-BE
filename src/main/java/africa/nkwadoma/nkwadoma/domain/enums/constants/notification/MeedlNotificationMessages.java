@@ -13,7 +13,6 @@ public enum MeedlNotificationMessages {
     LOAN_REQUEST("Loan Request"),
     NOTIFICATION_LIST_CANNOT_BE_EMPTY("Please select at least one notification to proceed.");
 
-
     private final String message;
 
     MeedlNotificationMessages(String message) {

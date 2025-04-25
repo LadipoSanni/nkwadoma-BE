@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.identity.NextOfKinUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
@@ -13,10 +12,12 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Coope
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
@@ -68,6 +69,7 @@ public class FinancierService implements FinancierUseCase {
     private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
 
@@ -77,6 +79,8 @@ public class FinancierService implements FinancierUseCase {
         InvestmentVehicle investmentVehicle = null;
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
+        UserIdentity actor = getActorPerformingAction(financiers);
+
         String response = null;
         if (financiers.size() == 1) {
             response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
@@ -84,7 +88,19 @@ public class FinancierService implements FinancierUseCase {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
         }
         asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
+        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
         return response;
+    }
+
+    private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {
+        try {
+            return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
+        } catch (MeedlException e) {
+            if (e.getMessage().equals(IdentityMessages.USER_NOT_FOUND.getMessage())){
+                throw new MeedlException("Actor performing this action (i.e invite financier) is unknown. please contact admin.");
+            }
+            throw new MeedlException(e);
+        }
     }
 
     private String inviteMultipleFinancier(List<Financier> financiers, InvestmentVehicle investmentVehicle) {

@@ -1,6 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.meedlNotification;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.meedlNotification;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.meedlException.MeedlNotificationException;
