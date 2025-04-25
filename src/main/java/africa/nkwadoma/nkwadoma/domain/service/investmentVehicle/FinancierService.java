@@ -94,11 +94,7 @@ public class FinancierService implements FinancierUseCase {
 
     private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {
         try {
-            UserIdentity userIdentity = userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
-            if (userIdentity.getRole() == null || !userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
-                throw new MeedlException("The actor performing this action (i.e invite financier) has to be a portfolio manager");
-            }
-            return userIdentity;
+            return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
         } catch (MeedlException e) {
             if (e.getMessage().equals(IdentityMessages.USER_NOT_FOUND.getMessage())){
                 throw new MeedlException("Actor performing this action (i.e invite financier) is unknown. please contact admin.");
