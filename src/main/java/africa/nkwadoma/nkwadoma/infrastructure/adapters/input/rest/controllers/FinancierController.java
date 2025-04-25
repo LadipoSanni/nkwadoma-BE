@@ -204,6 +204,7 @@ public class FinancierController {
                     )
             )
     })
+
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
@@ -216,7 +217,6 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
@@ -271,7 +271,7 @@ public class FinancierController {
                                                             @RequestParam int pageSize,
                                                             @RequestParam(required = false) ActivationStatus activationStatus,
                                                             @RequestParam String investmentVehicleId) throws MeedlException {
-        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).pageNumber(pageNumber).pageSize(pageSize).build();
+        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).activationStatus(activationStatus).pageNumber(pageNumber).pageSize(pageSize).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
