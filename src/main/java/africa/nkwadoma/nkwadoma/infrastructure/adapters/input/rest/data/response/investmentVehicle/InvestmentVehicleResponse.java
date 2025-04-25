@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -43,5 +44,8 @@ public class InvestmentVehicleResponse {
     private CouponDistributionStatus couponDistributionStatus;
     private InvestmentVehicleMode recollectionStatus;
     private String maturity;
+    private BigDecimal amountFinancierInvested;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
+    private LocalDate dateInvested;
 
 }

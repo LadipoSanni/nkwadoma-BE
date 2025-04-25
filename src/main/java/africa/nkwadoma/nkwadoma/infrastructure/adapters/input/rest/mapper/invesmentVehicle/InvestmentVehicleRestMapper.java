@@ -23,6 +23,8 @@ public interface InvestmentVehicleRestMapper {
     @Mapping(target = "recollectionStatus", source = "vehicleClosureStatus.recollectionStatus")
     @Mapping(target = "maturity", source = "vehicleClosureStatus.maturity")
     @Mapping(target = "rate", source = "interestRateOffered")
+    @Mapping(target = "amountFinancierInvested", source = "amountFinancierInvested")
+    @Mapping(target = "investmentVehicleDesignation", source = "investmentVehicleDesignation")
     InvestmentVehicleResponse toInvestmentVehicleResponse(InvestmentVehicle investmentVehicle);
 
     InvestmentVehicle mapUpdateInvestmentVehicleRequestToInvestmentVehicle(UpdateInvestmentVehicleRequest investmentVehicleRequest);

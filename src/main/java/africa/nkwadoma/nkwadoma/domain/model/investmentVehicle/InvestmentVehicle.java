@@ -54,10 +54,12 @@ public class InvestmentVehicle {
     private IncomeInterval incomeInterval;
     private VehicleOperation vehicleOperation;
     private InvestmentVehicleVisibility investmentVehicleVisibility;
-    private LocalDateTime dateInvested;
     private Set<InvestmentVehicleDesignation> designations;
     private BigDecimal amountInvested;
     private BigDecimal talentFunded;
+    private BigDecimal amountFinancierInvested;
+    private LocalDate dateInvested;
+    private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
 
 
     public void validate() throws MeedlException {

@@ -28,4 +28,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException;
 
     void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException;
+
+    InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleId(String id, String investmentVehicleId) throws MeedlException;
 }

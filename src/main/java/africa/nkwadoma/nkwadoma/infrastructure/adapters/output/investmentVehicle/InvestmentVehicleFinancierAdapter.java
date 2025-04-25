@@ -97,4 +97,13 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         investmentVehicleFinancierRepository.deleteByInvestmentVehicleId(investmentVehicleId);
     }
+
+    @Override
+    public InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+    }
 }

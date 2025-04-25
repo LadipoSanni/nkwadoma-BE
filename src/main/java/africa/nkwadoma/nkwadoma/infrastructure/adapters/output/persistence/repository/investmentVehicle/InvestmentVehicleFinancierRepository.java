@@ -45,4 +45,6 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
     boolean checkIfAnyFinancierAlreadyInvestedInVehicle(@Param("investmentVehicleId") String investmentVehicleId);
 
     void deleteByInvestmentVehicleId(String investmentVehicleId);
+
+    InvestmentVehicleFinancierEntity findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId);
 }
