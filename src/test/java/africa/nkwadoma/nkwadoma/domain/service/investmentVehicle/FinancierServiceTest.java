@@ -81,7 +81,7 @@ public class FinancierServiceTest {
     private Financier cooperateFinancier;
     private String cooperateUserIdentityId;
     private String cooperateFinancierId;
-    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest24@mail.com";
+    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest247@mail.com";
     private int pageSize = 10 ;
     private int pageNumber = 0 ;
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -91,24 +91,34 @@ public class FinancierServiceTest {
 
     private List<Financier> individualFinancierList;
     private List<Financier> cooperateFinancierList;
-    private NextOfKin nextOfKin;
 
     private InvestmentVehicle publicInvestmentVehicle;
     private InvestmentVehicle privateInvestmentVehicle;
     private UserIdentity portfolioManager;
     private String portfolioManagerId;
+    private final String actorId = "ead0f7cb-5453-4bb8-b261-413790a9c364";
     private final BigDecimal FIVE_THOUSAND = new BigDecimal("5000.00");
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
-        individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest2@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
+        UserIdentity actor = TestData.createTestUserIdentity("userforcreatedbyoractor7@mail.com", actorId);
+        actor.setRole(IdentityRole.PORTFOLIO_MANAGER);
+        try {
+            userIdentityOutputPort.save(actor);
+        } catch (MeedlException e) {
+            log.error("Error saving actor (pm) for invite financier.",e);
+            throw new RuntimeException(e);
+        }
+        individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest24@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
+        individualUserIdentity.setCreatedBy(actorId);
         deleteTestUserIfExist(individualUserIdentity);
-        portfolioManager = TestData.createTestUserIdentity("portfoliomanagertest@gmail.com");
+        portfolioManager = TestData.createTestUserIdentity("portfoliomanagertest6@gmail.com");
         portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
+        cooperateUserIdentity.setCreatedBy(actorId);
         cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
@@ -121,7 +131,6 @@ public class FinancierServiceTest {
         individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
         individualFinancierList = List.of(individualFinancier);
-        nextOfKin = TestData.createNextOfKinData(individualFinancier.getUserIdentity());
 
         cooperateFinancierList = List.of(cooperateFinancier);
     }
@@ -171,6 +180,7 @@ public class FinancierServiceTest {
             individualFinancierId = foundFinancier.getId();
             log.info("Financier id for test user with id : {} is {}", individualUserIdentityId, individualFinancierId);
         } catch (MeedlException e) {
+            log.info("Error occurred in financier service test --invite use case ", e);
             throw new RuntimeException(e);
         }
         assertNotNull(response);
@@ -195,11 +205,19 @@ public class FinancierServiceTest {
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    public void inviteFinancierWithInvalidActorId(String actorId){
+            UserIdentity actor = TestData.createTestUserIdentity("emailshouldnotsaveforanyreason@mail.com", actorId);
+            Financier financier = TestData.buildFinancierIndividual(actor);
+            Exception exception = assertThrows(MeedlException.class, ()->  financierUseCase.inviteFinancier(List.of(financier), privateInvestmentVehicleId));
+            log.error("{}",exception.getMessage(), exception);
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     public void inviteFinancierWithInvalidFirstName(String name)  {
         individualUserIdentity.setFirstName(name);
         individualFinancier.setUserIdentity(individualUserIdentity);
         individualFinancier.setId(null);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
     @Test
     public void assignDesignationToFinancierWrongly()  {
@@ -207,7 +225,7 @@ public class FinancierServiceTest {
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.LEAD);
         investmentVehicleDesignations.add(InvestmentVehicleDesignation.DONOR);
         individualFinancier.setInvestmentVehicleDesignation(investmentVehicleDesignations);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
@@ -215,7 +233,7 @@ public class FinancierServiceTest {
         individualUserIdentity.setLastName(name);
         individualFinancier.setUserIdentity(individualUserIdentity);
         individualFinancier.setId(null);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "gyfyt", "ead0f7cb-5483-4bb8-b271-813970a9c368"})
@@ -223,7 +241,7 @@ public class FinancierServiceTest {
         individualUserIdentity.setEmail(email);
         individualFinancier.setUserIdentity(individualUserIdentity);
         individualFinancier.setId(null);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
 
     @ParameterizedTest
@@ -231,7 +249,7 @@ public class FinancierServiceTest {
     public void inviteFinancierWithInvalidCreatedBy(String invitedBy){
         individualFinancier.getUserIdentity().setCreatedBy(invitedBy);
         individualFinancier.setId(null);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
 
     @Test
@@ -474,7 +492,7 @@ public class FinancierServiceTest {
     public void inviteFinanciersWithInvalidEmail(String email){
         individualUserIdentity.setEmail(email);
         individualFinancier.setUserIdentity(individualUserIdentity);
-        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, privateInvestmentVehicleId));
+        assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(List.of(individualFinancier), privateInvestmentVehicleId));
     }
     @Test
     void completeIndividualKycWithoutFinancierObject(){
@@ -545,7 +563,6 @@ public class FinancierServiceTest {
             assertEquals(AccreditationStatus.UNVERIFIED, foundFinancier.getAccreditationStatus());
             log.info("financier found {} accreditation status  -------------> {}", foundFinancier, foundFinancier.getAccreditationStatus());
             assertNull(foundFinancier.getUserIdentity().getNextOfKin());
-            nextOfKin.setUserId(foundFinancier.getUserIdentity().getId());
             financierWithKycRequest = TestData.completeKycRequest(foundFinancier, TestData.buildBankDetail());
             log.info("Financier before completing kyc individual : {}", financierWithKycRequest);
             financierUpdated = financierUseCase.completeKyc(financierWithKycRequest);
@@ -674,6 +691,7 @@ public class FinancierServiceTest {
     public void inviteCooperateFinancierToNewVehicle() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        cooperateUserIdentity.setCreatedBy(actorId);
         Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationService" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
@@ -919,11 +937,13 @@ public class FinancierServiceTest {
         for (int i = 1; i <= 3; i++) {
             UserIdentity userIdentity = TestData.createTestUserIdentity(i+"unittestfinancier@email.com", "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
             Financier financier = TestData.buildFinancierIndividual(userIdentity);
+            userIdentity.setCreatedBy(actorId);
             financiers.add(financier);
         }
         try {
             financierUseCase.inviteFinancier(financiers, null);
         } catch (MeedlException e) {
+            log.error("Add multiple financiers to vehicle failed in financier service test.", e);
             throw new RuntimeException(e);
         }
         List<Financier> invitedFinanciers = financiers.stream()
@@ -973,6 +993,7 @@ public class FinancierServiceTest {
     public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtestwithamount@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        cooperateUserIdentity.setCreatedBy(actorId);
         Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationServiceWithAmountToInvest" );
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTestWithFinancierAmountToInvest");
@@ -1050,6 +1071,7 @@ public class FinancierServiceTest {
         deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
         userIdentityOutputPort.deleteUserById(individualUserIdentityId);
+        deleteNotification(portfolioManagerId);
         userIdentityOutputPort.deleteUserById(portfolioManagerId);
 
         deleteNotification(individualUserIdentityId);

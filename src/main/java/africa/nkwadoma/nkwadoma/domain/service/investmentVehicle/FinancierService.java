@@ -75,12 +75,12 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
-        UserIdentity actor = getActorPerformingAction(financiers);
-
         financiersToMail = new ArrayList<>();
         InvestmentVehicle investmentVehicle = null;
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
+        UserIdentity actor = getActorPerformingAction(financiers);
+
         String response = null;
         if (financiers.size() == 1) {
             response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
@@ -94,7 +94,11 @@ public class FinancierService implements FinancierUseCase {
 
     private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {
         try {
-            return userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
+            UserIdentity userIdentity = userIdentityOutputPort.findById(financiers.get(0).getUserIdentity().getCreatedBy());
+            if (userIdentity.getRole() == null || !userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)) {
+                throw new MeedlException("The actor performing this action (i.e invite financier) has to be a portfolio manager");
+            }
+            return userIdentity;
         } catch (MeedlException e) {
             if (e.getMessage().equals(IdentityMessages.USER_NOT_FOUND.getMessage())){
                 throw new MeedlException("Actor performing this action (i.e invite financier) is unknown. please contact admin.");
