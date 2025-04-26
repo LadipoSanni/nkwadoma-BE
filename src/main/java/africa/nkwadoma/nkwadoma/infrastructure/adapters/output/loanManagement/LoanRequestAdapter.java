@@ -107,4 +107,9 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
                         organizationId,pageRequest);
         return loanRequestProjections.map(loanRequestMapper::mapProjectionToLoanRequest);
     }
+
+    @Override
+    public int getCountOfAllVerifiedLoanRequestInOrganization(String organizationId) {
+        return loanRequestRepository.getCountOfVerifiedLoanRequstInOrganization(organizationId);
+    }
 }

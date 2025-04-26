@@ -110,4 +110,6 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
     Page<LoanRequestProjection> filterLoanRequestByProgramIdAndOrganization(@Param("programId") String programId,
                                                                             @Param("organizationId") String organizationId,
                                                                             Pageable pageRequest);
+
+    int getCountOfVerifiedLoanRequstInOrganization(String organizationId);
 }
