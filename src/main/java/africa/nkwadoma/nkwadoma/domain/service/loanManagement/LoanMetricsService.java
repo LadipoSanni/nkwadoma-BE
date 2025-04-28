@@ -68,9 +68,9 @@ public class LoanMetricsService implements LoanMetricsUseCase {
                 loanMetrics.get().setLoanRequestCount(
                         loanRequestOutputPort.getCountOfAllVerifiedLoanRequestInOrganization(organizationIdentity.getId())
                 );
-                log.info("Loan request count change: {}", loanMetrics.get().getLoanRequestCount());
-                loanMetricsOutputPort.save(loanMetrics.get());
-                log.info("Loan metrics saved successfully: {}", loanMetrics.get());
+                 log.info("Loan request count change: {}", loanMetrics.get().getLoanRequestCount());
+                 loanMetricsOutputPort.save(loanMetrics.get());
+                 log.info("Loan metrics saved successfully: {}", loanMetrics.get());
             }
         }
     }
