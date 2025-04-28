@@ -121,6 +121,6 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
 
     @Override
     public int getCountOfAllVerifiedLoanRequestInOrganization(String organizationId) {
-        return loanRequestRepository.getCountOfVerifiedLoanRequstInOrganization(organizationId);
+        return loanRequestRepository.getCountOfVerifiedLoanRequestInOrganization(organizationId);
     }
 }

@@ -60,12 +60,18 @@ public class LoanMetricsService implements LoanMetricsUseCase {
     public void correctLoanRequestCount() throws MeedlException {
         List<OrganizationIdentity> organizationIdentities =
                 organizationIdentityOutputPort.findAllOrganization();
+        log.info("Found {} organization identity", organizationIdentities.size());
         for (OrganizationIdentity organizationIdentity : organizationIdentities) {
             Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
-            loanMetrics.get().setLoanRequestCount(
-                    loanRequestOutputPort.getCountOfAllVerifiedLoanRequestInOrganization(organizationIdentity.getId())
-            );
-            loanMetricsOutputPort.save(loanMetrics.get());
+            log.info("Loan metrics found: {}", loanMetrics);
+            if (loanMetrics.isPresent()) {
+                loanMetrics.get().setLoanRequestCount(
+                        loanRequestOutputPort.getCountOfAllVerifiedLoanRequestInOrganization(organizationIdentity.getId())
+                );
+                log.info("Loan request count change: {}", loanMetrics.get().getLoanRequestCount());
+                loanMetricsOutputPort.save(loanMetrics.get());
+                log.info("Loan metrics saved successfully: {}", loanMetrics.get());
+            }
         }
     }
 

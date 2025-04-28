@@ -133,5 +133,14 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
     """)
     Optional<LoanRequestProjection> findLoanRequestByLoaneeEntityId(@Param("loaneeId") String loaneeId);
 
-    int getCountOfVerifiedLoanRequstInOrganization(String organizationId);
+    @Query("""
+    SELECT COUNT(lr.id)
+    FROM LoanRequestEntity lr
+    JOIN LoaneeEntity l ON lr.loaneeEntity.id = l.id
+    JOIN CohortEntity c ON l.cohortId = c.id
+    JOIN ProgramEntity p ON c.programId = p.id
+    JOIN OrganizationEntity o ON p.organizationIdentity.id = o.id
+    WHERE lr.status = 'NEW' AND o.id = :organizationId AND l.userIdentity.isIdentityVerified = true
+""")
+    int getCountOfVerifiedLoanRequestInOrganization(@Param("organizationId") String organizationId);
 }
