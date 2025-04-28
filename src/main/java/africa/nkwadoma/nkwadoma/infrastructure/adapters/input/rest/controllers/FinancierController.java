@@ -246,10 +246,12 @@ public class FinancierController {
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
                                                   @RequestParam int pageSize,
+                                                  @RequestParam(required = false) FinancierType financierType,
                                                   @RequestParam(required = false) ActivationStatus activationStatus,
                                                   @RequestParam(required = false) String investmentVehicleId
     ) throws MeedlException {
-        Page<Financier> financiers = financierUseCase.search(name, investmentVehicleId, pageNumber, pageSize);
+        Financier financier = Financier.builder().pageSize(pageSize).pageNumber(pageNumber).financierType(financierType).investmentVehicleId(investmentVehicleId).activationStatus(activationStatus).build();
+        Page<Financier> financiers = financierUseCase.search(name, financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(

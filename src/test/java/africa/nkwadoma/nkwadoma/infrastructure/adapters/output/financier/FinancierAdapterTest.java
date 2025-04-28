@@ -270,15 +270,16 @@ class FinancierAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, null, individualFinancier.getPageNumber(), individualFinancier.getPageSize()));
+        individualFinancier.setInvestmentVehicleId(null);
+        assertThrows(MeedlException.class,()-> financierOutputPort.search(name, individualFinancier));
     }
     @Test
     @Order(5)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
+        individualFinancier.setInvestmentVehicleId(null);
         try {
-            foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getFirstName(),
-                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getFirstName(), individualFinancier);
 
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -292,9 +293,8 @@ class FinancierAdapterTest {
     void searchFinancierByLastName() {
         Page<Financier> foundFinanciers;
         try {
-
-            foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getLastName(),
-                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getLastName(), individualFinancier);
 
         } catch (MeedlException e) {
             throw new RuntimeException(e);
@@ -308,10 +308,10 @@ class FinancierAdapterTest {
     void searchFinancierWithFirstNameBeforeLastName() {
         Page<Financier> foundFinanciers;
         try {
+            individualFinancier.setInvestmentVehicleId(null);
             foundFinanciers = financierOutputPort
                     .search(individualFinancier.getUserIdentity().getFirstName() +" "+
-                                    individualFinancier.getUserIdentity().getLastName(), null, individualFinancier.getPageNumber(),
-                            individualFinancier.getPageSize());
+                                    individualFinancier.getUserIdentity().getLastName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -324,9 +324,9 @@ class FinancierAdapterTest {
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
+            individualFinancier.setInvestmentVehicleId(null);
             foundFinanciers = financierOutputPort.search(individualFinancier.getUserIdentity().getLastName() +" "+
-                            individualFinancier.getUserIdentity().getFirstName()
-                , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+                            individualFinancier.getUserIdentity().getFirstName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }

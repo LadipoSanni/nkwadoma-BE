@@ -829,14 +829,16 @@ public class FinancierServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
     void findByInvalidName(String name){
-        assertThrows(MeedlException.class,()-> financierUseCase.search(name, null, pageNumber, pageSize));
+        individualFinancier.setInvestmentVehicleId(null);
+        assertThrows(MeedlException.class,()-> financierUseCase.search(name, individualFinancier));
     }
     @Test
     @Order(12)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName(), null, pageNumber, pageSize);
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -849,9 +851,8 @@ public class FinancierServiceTest {
     void searchFinancierByLastName() {
         Page<Financier> foundFinanciers;
         try {
-
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName(),
-                    null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName(),individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -864,8 +865,8 @@ public class FinancierServiceTest {
     void searchFinancierWithFirstNameBeforeLastName() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName() +" "+ individualFinancier.getUserIdentity().getLastName()
-            , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getFirstName() +" "+ individualFinancier.getUserIdentity().getLastName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -878,8 +879,8 @@ public class FinancierServiceTest {
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName() +" "+ individualFinancier.getUserIdentity().getFirstName()
-                    , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName() +" "+ individualFinancier.getUserIdentity().getFirstName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -892,8 +893,8 @@ public class FinancierServiceTest {
     void searchFinancierWithEmail() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getEmail()
-                    , null, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getEmail(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
@@ -906,8 +907,8 @@ public class FinancierServiceTest {
     void searchFinancierInVehicle() {
         Page<Financier> foundFinanciers;
         try {
-            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName()
-                    , privateInvestmentVehicleId, individualFinancier.getPageNumber(), individualFinancier.getPageSize());
+            individualFinancier.setInvestmentVehicleId(null);
+            foundFinanciers = financierUseCase.search(individualFinancier.getUserIdentity().getLastName(), individualFinancier);
         } catch (MeedlException e) {
             throw new RuntimeException(e);
         }
