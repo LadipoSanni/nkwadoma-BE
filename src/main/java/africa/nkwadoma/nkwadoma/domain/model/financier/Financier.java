@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
@@ -53,6 +54,12 @@ public class Financier {
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
     private LocalDateTime createdAt;
+    private InvestmentVehicleType investmentVehicleType;
+    private String investmentVehicleName;
+    private BigDecimal amountInvested;
+    private LocalDate dateInvested;
+    private BigDecimal incomeEarned;
+    private BigDecimal netAssertValue;
 
     //source of fund
     private List<String> sourceOfFunds;
