@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
@@ -10,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.BlackListedTokenAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -20,6 +22,8 @@ import org.keycloak.representations.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +47,8 @@ class UserIdentityServiceTest {
     @Mock
     private OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     @Mock
+    private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    @Mock
     private TokenUtils tokenUtils;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
@@ -53,7 +59,7 @@ class UserIdentityServiceTest {
     private String newPassword;
     private final String generatedToken = "generatedToken";
     private OrganizationEmployeeIdentity employeeIdentity;
-
+    private  OrganizationIdentity organizationIdentity;
     @BeforeEach
     void setUp(){
         favour = new UserIdentity();
@@ -70,6 +76,8 @@ class UserIdentityServiceTest {
         employeeIdentity.setId("1234");
         employeeIdentity.setMeedlUser(favour);
 
+        organizationIdentity = TestData.createOrganizationTestData("OrganizationTest","RC3234322", List.of(employeeIdentity));
+
     }
 
     @Test
@@ -85,7 +93,8 @@ class UserIdentityServiceTest {
             when(userIdentityOutputPort.save(any())).thenReturn(favour);
             employeeIdentity.setId(favour.getId());
             when(organizationEmployeeIdentityOutputPort.save(any())).thenReturn(employeeIdentity);
-            when(organizationIdentityOutputPort.findById(any())).thenReturn(new OrganizationIdentity());
+            when(organizationIdentityOutputPort.findById(any())).thenReturn(organizationIdentity);
+            doNothing().when(asynchronousMailingOutputPort).sendColleagueEmail(organizationIdentity.getName(), favour);
 
             UserIdentity invitedColleague = userIdentityService.inviteColleague(favour);
             log.info("invited colleague {}", invitedColleague.getId());
@@ -98,6 +107,7 @@ class UserIdentityServiceTest {
             verify(organizationEmployeeIdentityOutputPort, times(1)).findByEmployeeId(favour.getCreatedBy());
             verify(identityManagerOutPutPort, times(1)).createUser(favour);
             verify(userIdentityOutputPort, times(1)).save(favour);
+            verify(asynchronousMailingOutputPort, times(1)).sendColleagueEmail(anyString(), any());
 
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());

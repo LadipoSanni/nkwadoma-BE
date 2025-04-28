@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
@@ -53,7 +54,7 @@ public class CohortService implements CohortUseCase {
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeUseCase loaneeUseCase;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
-//    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
     @Override
     public Cohort createCohort(Cohort cohort) throws MeedlException {
@@ -261,14 +262,14 @@ public class CohortService implements CohortUseCase {
         }
         if (cohortLoanees.size() == 1){
             inviteTrainee(cohortLoanees.get(0));
-//            asynchronousMailOutputPort.notifyLoanReferralActors(cohortLoanees);
-            loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
+            asynchronousMailingOutputPort.notifyLoanReferralActors(cohortLoanees);
+//            loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
             return LOANEE_HAS_BEEN_REFERED;
         }
         referCohort(cohortLoanees);
         log.info("Number of referable loanees :{} ", cohortLoanees.size());
-//            asynchronousMailOutputPort.notifyLoanReferralActors(cohortLoanees);
-        loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
+        asynchronousMailingOutputPort.notifyLoanReferralActors(cohortLoanees);
+//        loaneeUseCase.notifyLoanReferralActors(cohortLoanees);
         return COHORT_INVITED;
     }
 
