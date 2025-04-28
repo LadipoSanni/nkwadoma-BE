@@ -188,6 +188,15 @@ class LoaneeServiceTest {
 
 
     @Test
+    void cannotAddLoaneeWithZeroOrNegativeAmountToCohort() throws MeedlException {
+        loaneeLoanDetails.setInitialDeposit(BigDecimal.valueOf(800));
+        loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(0));
+        when(loaneeOutputPort.findByLoaneeEmail(firstLoanee.getUserIdentity().getEmail())).thenReturn(null);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
+    }
+
+    @Test
     void loaneeAmountRequestedCannotBeMoreThanCohortTotalFee() throws MeedlException {
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(7000));
         elites.setTotalCohortFee(BigDecimal.valueOf(200));

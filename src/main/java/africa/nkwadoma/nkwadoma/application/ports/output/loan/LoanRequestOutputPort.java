@@ -20,5 +20,7 @@ public interface LoanRequestOutputPort {
 
     Page<LoanRequest> filterLoanRequestByProgram(String programId, String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
+    LoanRequest findLoanRequestByLoaneeId(String id) throws MeedlException;
+
     int getCountOfAllVerifiedLoanRequestInOrganization(String id);
 }
