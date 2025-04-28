@@ -58,7 +58,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public Financier findFinancierByEmail(String email) throws MeedlException {
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Email(email)
-                .orElseThrow(()-> new MeedlException("Financier with this email not found") );
+                .orElseThrow(()-> new MeedlException("Financier not found with email : "+email ) );
         Financier financier = financierMapper.map(foundFinancier);
         return cooperationUserIdentityView(financier);
     }
@@ -67,6 +67,7 @@ public class FinancierAdapter implements FinancierOutputPort {
     @Override
     public void delete(String financierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        log.info("Deleting financier with id {} ",financierId);
         financierRepository.deleteById(financierId);
     }
 
