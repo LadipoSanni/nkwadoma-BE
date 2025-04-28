@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
@@ -63,9 +64,11 @@ public class BeanConfiguration {
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper,
                                                    BlackListedTokenAdapter blackListedTokenAdapter,
-                                                   OrganizationIdentityOutputPort organizationIdentityOutputPort
+                                                   OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                                   AsynchronousMailingOutputPort asynchronousMailingOutputPort
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
+                tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort, asynchronousMailingOutputPort);
     }
 
     @Bean

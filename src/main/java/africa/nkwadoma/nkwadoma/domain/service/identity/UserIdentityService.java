@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
@@ -49,6 +50,7 @@ public class UserIdentityService implements CreateUserUseCase {
     private final UserIdentityMapper userIdentityMapper;
     private final BlackListedTokenAdapter blackListedTokenAdapter;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
 
 
     @Override
@@ -73,7 +75,7 @@ public class UserIdentityService implements CreateUserUseCase {
         OrganizationIdentity organizationIdentity =
                 organizationIdentityOutputPort.findById(foundEmployee.getOrganization());
         log.info("Found organization identity: {}", organizationIdentity);
-        sendEmail.sendColleagueEmail(organizationIdentity.getName(),userIdentity);
+        asynchronousMailingOutputPort.sendColleagueEmail(organizationIdentity.getName(),userIdentity);
 
         return userIdentity;
     }
