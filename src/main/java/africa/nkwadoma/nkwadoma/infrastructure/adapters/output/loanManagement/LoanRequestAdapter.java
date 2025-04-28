@@ -118,4 +118,9 @@ public class LoanRequestAdapter implements LoanRequestOutputPort {
         log.info("Mapped Loan request: {}", loanRequest);
         return loanRequest;
     }
+
+    @Override
+    public int getCountOfAllVerifiedLoanRequestInOrganization(String organizationId) {
+        return loanRequestRepository.getCountOfVerifiedLoanRequestInOrganization(organizationId);
+    }
 }

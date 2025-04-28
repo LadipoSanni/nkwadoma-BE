@@ -251,4 +251,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         log.info("Found organization: {}", organizationEntity);
         return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
     }
+
+    @Override
+    public List<OrganizationIdentity> findAllOrganization() {
+        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll();
+        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
+    }
 }
