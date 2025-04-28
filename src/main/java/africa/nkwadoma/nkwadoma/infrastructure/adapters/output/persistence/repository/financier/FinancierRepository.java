@@ -16,11 +16,6 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
     Optional<FinancierEntity> findByUserIdentity_Id(String id);
     Optional<FinancierEntity> findByUserIdentity_Email(String email);
 
-    @Query("SELECT f FROM FinancierEntity f " +
-            "WHERE upper(concat(f.userIdentity.firstName, ' ', f.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "OR upper(concat(f.userIdentity.lastName, ' ', f.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%'))")
-    Page<FinancierEntity> findByNameFragment( @Param("nameFragment") String nameFragment, Pageable pageRequest);
-
     @Query("""
     SELECT f FROM FinancierEntity f
     WHERE (
@@ -34,12 +29,21 @@ public interface FinancierRepository extends JpaRepository<FinancierEntity,Strin
             WHERE ivf.financier = f AND ivf.investmentVehicle.id = :investmentVehicleId
         )
     )
+    AND (
+        :financierType IS NULL OR f.financierType = :financierType
+    )
+    AND (
+        :activationStatus IS NULL OR f.activationStatus = :activationStatus
+    )
 """)
-    Page<FinancierEntity> findByNameFragmentAndOptionalVehicleId(
+    Page<FinancierEntity> findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
             @Param("nameFragment") String nameFragment,
             @Param("investmentVehicleId") String investmentVehicleId,
+            @Param("financierType") FinancierType financierType,
+            @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
+
 
 
     @Query("SELECT f FROM FinancierEntity f " +

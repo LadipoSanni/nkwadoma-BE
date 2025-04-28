@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutp
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -34,7 +35,6 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierEntity financierEntity = financierMapper.map(financier);
         FinancierEntity savedFinancierEntity = financierRepository.save(financierEntity);
         log.info("Financier saved to db: {}", savedFinancierEntity);
-
         return financierMapper.map(savedFinancierEntity);
     }
     @Override
@@ -43,7 +43,8 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierEntity financierEntity = financierRepository.findByFinancierId(financierId)
                 .orElseThrow(()-> new MeedlException("Financier not found"));
         log.info("Financier found at the adapter level for view by financier id {}", financierEntity);
-        return financierMapper.map(financierEntity);
+        Financier financier = financierMapper.map(financierEntity);
+        return cooperationUserIdentityView(financier);
     }
 
     @Override
@@ -51,13 +52,15 @@ public class FinancierAdapter implements FinancierOutputPort {
         MeedlValidator.validateUUID(id, "User id is required to view financier details.");
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Id(id)
                 .orElseThrow(()-> new MeedlException("Apparently, you are not a financier. Contact admin.") );
-        return financierMapper.map(foundFinancier);
+        Financier financier = financierMapper.map(foundFinancier);
+        return cooperationUserIdentityView(financier);
     }
     @Override
     public Financier findFinancierByEmail(String email) throws MeedlException {
         FinancierEntity foundFinancier = financierRepository.findByUserIdentity_Email(email)
                 .orElseThrow(()-> new MeedlException("Financier with this email not found") );
-        return financierMapper.map(foundFinancier);
+        Financier financier = financierMapper.map(foundFinancier);
+        return cooperationUserIdentityView(financier);
     }
 
 
@@ -68,14 +71,30 @@ public class FinancierAdapter implements FinancierOutputPort {
     }
 
     @Override
-    public Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException {
+    public Page<Financier> search(String name, Financier financier) throws MeedlException {
         MeedlValidator.validateDataElement(name, "Provide a valid name to search.");
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
-        Page<FinancierEntity> financierEntities = financierRepository.findByNameFragmentAndOptionalVehicleId(name, investmentVehicleId, pageRequest);
-        log.info("Financiers found with name: {} {}", name, financierEntities );
-        return financierEntities.map(financierMapper::map);
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        MeedlValidator.validatePageSize(financier.getPageSize());
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        log.info("Search financier parameters: name {}, page size {}, page number {}, financier type {}, activation status {}, investment vehicle id {}",
+                name, financier.getPageSize(), financier.getPageNumber(), financier.getFinancierType(), financier.getActivationStatus(), financier.getInvestmentVehicleId());
+        Pageable pageRequest = PageRequest.of(financier.getPageNumber(), financier.getPageSize());
+        Page<FinancierEntity> financierEntities =
+                financierRepository.findByFinancierByNameFragmentOptionalInvestmentVehicleIdFinancierTypeActivationStatus(
+                        name, financier.getInvestmentVehicleId(), financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
+        log.info("Financiers found on Entity search : {} {}", name, financierEntities );
+        return financierEntities.map(financierEntity -> {
+            Financier financierMapped = financierMapper.map(financierEntity);
+            return cooperationUserIdentityView(financierMapped);
+        });
+    }
+
+    private Financier cooperationUserIdentityView(Financier financierMapped) {
+        if (financierMapped.getFinancierType() == FinancierType.COOPERATE){
+            financierMapped.getUserIdentity().setFirstName(null);
+            financierMapped.getUserIdentity().setLastName(null);
+        }
+        return financierMapped;
     }
 
     @Override
@@ -90,6 +109,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         FinancierEntity financierEntity = financierRepository.save(financierToSave);
         log.info("Financier completed KYC successfully : {} ", financierEntity);
         Financier kycCompletedFinancier = financierMapper.map(financierEntity);
+        cooperationUserIdentityView(kycCompletedFinancier);
         log.info("Kyc completed financier {}", kycCompletedFinancier);
         return kycCompletedFinancier;
     }
@@ -108,8 +128,11 @@ public class FinancierAdapter implements FinancierOutputPort {
                 .findAllByFinancierTypeOrderByUserCreatedAt(financier.getFinancierType(), financier.getActivationStatus(), pageRequest);
 
         log.info("Found financiers in db: {}", financierEntities);
-        return financierEntities.map(financierMapper::map);
+        return financierEntities.map(
+                financierEntity -> {
+                    Financier financierMapped = financierMapper.map(financierEntity);
+                    return cooperationUserIdentityView(financierMapped);
+                });
     }
-
 
 }
