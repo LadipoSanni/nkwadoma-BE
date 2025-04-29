@@ -214,6 +214,7 @@ public class FinancierService implements FinancierUseCase {
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier.setCreatedAt(LocalDateTime.now());
+        financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier = financierOutputPort.save(financier);
         return financier;
     }
@@ -593,7 +594,7 @@ public class FinancierService implements FinancierUseCase {
         if (foundFinancier.getAccreditationStatus() != null &&
                 foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
             log.info("Validating for kyc financier service {}", financier);
-            financier.validateKyc();
+            financier.validateKyc(foundFinancier.getFinancierType());
             log.info("Financier details in service to use in completing kyc {}", financier);
 //            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
 //            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
