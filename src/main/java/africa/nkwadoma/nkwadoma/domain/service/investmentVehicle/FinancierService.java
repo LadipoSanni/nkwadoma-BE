@@ -599,7 +599,7 @@ public class FinancierService implements FinancierUseCase {
 //            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
 //            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
 //            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
-            mapKycFinancierUpdatedValues(financier, foundFinancier, null);
+            mapKycFinancierUpdatedValues(financier, foundFinancier);
             saveFinancierBeneficialOwners(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
@@ -637,21 +637,26 @@ public class FinancierService implements FinancierUseCase {
                             }
                         })
                         .toList();
-        log.info("Saved... financier beneficial owners... {}", financier.getBeneficialOwners());
+        log.info("Saved... financier beneficial owners... {}",financierBeneficialOwners);
 
     }
 
-    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier, BankDetail bankDetail) {
+    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) {
         UserIdentity userIdentity = foundFinancier.getUserIdentity();
-        log.info("updating user details in kyc {}", userIdentity.getId());
+        log.info("updating user details in kyc service : {}", userIdentity);
 
         userIdentity.setNin(financier.getUserIdentity().getNin());
         userIdentity.setTaxId(financier.getUserIdentity().getTaxId());
         userIdentity.setBvn(financier.getUserIdentity().getBvn());
-        userIdentity.setBankDetail(bankDetail);
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
+        if (foundFinancier.getFinancierType() == FinancierType.COOPERATE){
+            userIdentity.setFirstName(foundFinancier.getCooperation().getName());
+            userIdentity.setLastName(foundFinancier.getCooperation().getName());
+        }
+
         foundFinancier.setUserIdentity(userIdentity);
+        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
 
         financier.setFinancierType(foundFinancier.getFinancierType());
         financier.setUserIdentity(userIdentity);
