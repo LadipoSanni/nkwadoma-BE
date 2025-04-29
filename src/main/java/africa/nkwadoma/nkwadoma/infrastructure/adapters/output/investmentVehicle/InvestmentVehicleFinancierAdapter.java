@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,25 +50,15 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         investmentVehicleFinancierRepository.deleteById(id);
     }
 
-//    @Override
-//    public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException {
-//        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-//        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities = investmentVehicleFinancierRepository.findAllByInvestmentVehicle_Id(investmentVehicleId, pageRequest);
-//        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierEntity -> {
-//            Financier financier =financierMapper.map(investmentVehicleFinancierEntity.getFinancier());
-//            financier.setInvestmentVehicleDesignation(investmentVehicleFinancierEntity.getInvestmentVehicleDesignation());
-//            return financier;
-//        });
-//    }
     @Override
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-//        MeedlValidator.validateObjectInstance(activationStatus, "Please provide a valid activation status to find by.");
 
-        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities = investmentVehicleFinancierRepository.findFinanciersByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
-        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierEntity -> {
-            Financier financier =financierMapper.map(investmentVehicleFinancierEntity.getFinancier());
-            financier.setInvestmentVehicleDesignation(investmentVehicleFinancierEntity.getInvestmentVehicleDesignation());
+        Page<FinancierWithDesignationDTO> financiersWithDesignationDTOS = investmentVehicleFinancierRepository.findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        return financiersWithDesignationDTOS.map(financierWithDesignationDTOS -> {
+            log.info("The roles financier has : {}", financierWithDesignationDTOS.getInvestmentVehicleDesignation());
+            Financier financier = financierMapper.map(financierWithDesignationDTOS.getFinancier());
+            financier.setInvestmentVehicleDesignation(financierWithDesignationDTOS.getInvestmentVehicleDesignation());
             return financier;
         });
     }
