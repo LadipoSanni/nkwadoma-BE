@@ -135,6 +135,17 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         return getInvestmentVehicleFinancier(investmentVehicleId, userId);
     }
 
+    @Override
+    public InvestmentVehicle viewInvestmentVehicleDetailsViaLink(String investmentVehicleLink) throws MeedlException {
+        MeedlValidator.validateDataElement(investmentVehicleLink, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_LINK.getMessage());
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findByInvestmentVehicleLink(investmentVehicleLink);
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() != InvestmentVehicleVisibility.PUBLIC){
+            log.info("Investment vehicle is not public therefore can not be viewed view link {}", investmentVehicleLink);
+            throw new MeedlException("Investment vehicle not found.");
+        }
+        return foundInvestmentVehicle;
+    }
+
     private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, String userId) throws MeedlException {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(userId);
         MeedlValidator.validateUUID(foundFinancier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());

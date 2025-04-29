@@ -4,12 +4,15 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FundRaisingStatus
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleMode;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface InvestmentVehicleEntityRepository extends JpaRepository<InvestmentVehicleEntity,String> {
 
@@ -41,6 +44,8 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             @Param("status") InvestmentVehicleStatus status,
             Pageable pageable
     );
+
+    Optional<InvestmentVehicleEntity> findByInvestmentVehicleLink(String investmentVehicleLink);
 
     @Query("SELECT i FROM InvestmentVehicleEntity i WHERE i.fundRaisingStatus = :fundRaisingStatus AND i.investmentVehicleStatus = 'PUBLISHED' ORDER BY i.createdDate DESC")
     Page<InvestmentVehicleEntity> findByInvestmentVehicleByFundRaisingStatus(FundRaisingStatus fundRaisingStatus, Pageable pageRequest);

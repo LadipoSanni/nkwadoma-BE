@@ -22,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.Optional;
+
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
 
@@ -230,11 +232,25 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
     public InvestmentVehicle findById(String id) throws MeedlException {
         if (id != null){
             InvestmentVehicleEntity investmentVehicleEntity =
-                    investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
+                    investmentVehicleRepository.findById(id).orElseThrow(()->new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_NOT_FOUND.getMessage()));
             return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
         }
         log.info("Investment vehicle id to be viewed is null.");
         throw new InvestmentException(InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+    }
+
+    @Override
+    public InvestmentVehicle findByInvestmentVehicleLink(String investmentVehicleLink) throws MeedlException {
+        MeedlValidator.validateDataElement(investmentVehicleLink, "Please provide a valid investment vehicle link.");
+        Optional<InvestmentVehicleEntity> optionalInvestmentVehicleEntity =
+                investmentVehicleRepository.findByInvestmentVehicleLink(investmentVehicleLink);
+
+        if(optionalInvestmentVehicleEntity.isEmpty()) {
+            log.error("The investment vehicle searched with link {} does not exist", investmentVehicleLink);
+            throw new InvestmentException(InvestmentVehicleMessages.INVESTMENT_VEHICLE_NOT_FOUND.getMessage());
+        }
+        log.info("Investment vehicle found is {}", optionalInvestmentVehicleEntity.get());
+        return investmentVehicleMapper.toInvestmentVehicle(optionalInvestmentVehicleEntity.get());
     }
 
     @Override

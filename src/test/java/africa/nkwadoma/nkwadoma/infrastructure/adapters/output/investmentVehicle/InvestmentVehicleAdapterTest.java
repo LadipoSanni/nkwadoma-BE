@@ -11,6 +11,8 @@ import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -67,6 +69,7 @@ class InvestmentVehicleAdapterTest {
             assertNotNull(savedInvestmentVehicle);
             InvestmentVehicle foundInvestmentVehicle =
                     investmentVehicleOutputPort.findById(savedInvestmentVehicle.getId());
+            log.info("Investment vehicle details in view by id test : {}", foundInvestmentVehicle);
             investmentVehicleId = foundInvestmentVehicle.getId();
             assertEquals(foundInvestmentVehicle.getName(), savedInvestmentVehicle.getName());
         }catch (MeedlException exception){
@@ -185,6 +188,11 @@ class InvestmentVehicleAdapterTest {
         assertEquals(DRAFT, investmentVehicle.getInvestmentVehicleStatus());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    void viewInvestmentVehicleDetailWithInvalidLink(String link){
+        assertThrows(MeedlException.class, ()->investmentVehicleOutputPort.findByInvestmentVehicleLink(link));
+    }
     @Order(6)
     @Test
     void viewAllInvestmentVehicleByType() {
@@ -201,7 +209,6 @@ class InvestmentVehicleAdapterTest {
         assertFalse(investmentVehicles.isEmpty());
         assertThat(investmentVehicles).allMatch(investmentVehicle-> investmentVehicle.getInvestmentVehicleType().equals(InvestmentVehicleType.ENDOWMENT));
     }
-
     @Test
     void viewAllInvestmentVehicleByTypeCommercial() {
         Page<InvestmentVehicle> investmentVehicles = null;
