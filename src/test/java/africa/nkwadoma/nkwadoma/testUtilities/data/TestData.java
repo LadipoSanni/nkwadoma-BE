@@ -221,7 +221,7 @@ public class TestData {
         financier.getUserIdentity().setNin("2025103002");
         financier.getUserIdentity().setBvn("2025143002");
         financier.getUserIdentity().setTaxId("00000122");
-        financier.setSourceOfFunds(List.of("PersonalOrJointSavings"));
+        financier.setSourceOfFunds(Set.of("PersonalOrJointSavings"));
 //        financier.setOccupation("Doctor");
 //
 //        financier.setPersonalOrJointSavings("Personal or joint savings stated.");

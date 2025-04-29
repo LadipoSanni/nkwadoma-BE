@@ -4,10 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.KycRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.FinancierRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierDashboardResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierInvestmentDetailResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.KycResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.FinancierResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.NextOfKinMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.UserIdentityMapper;
 import org.mapstruct.Mapper;
@@ -68,4 +65,12 @@ public interface FinancierRestMapper {
     @Mapping(target = "investmentSummaries", source = "investmentSummaries")
     FinancierInvestmentDetailResponse mapToFinancierDetailResponse(FinancierVehicleDetail financierVehicleDetail);
 
+    @Mapping(target = "portfolioValue", source = "portfolioValue")
+    @Mapping(target = "amountInvested", source = "amountInvested")
+    @Mapping(target = "dateInvested", source = "dateInvested")
+    @Mapping(target = "incomeEarned", source = "incomeEarned")
+    @Mapping(target = "netAssertValue", source = "netAssertValue")
+    @Mapping(target = "investmentId", source = "investmentId")
+    @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
+    FinancierInvestmentResponse mapToFinancierInvestment(Financier financier);
 }

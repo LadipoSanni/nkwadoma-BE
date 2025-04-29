@@ -28,4 +28,12 @@ public interface InvestmentVehicleFinancierOutputPort {
     void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException;
 
     boolean checkIfFinancierExistInVehicle(String investmentVehicleId) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByUserId(String id, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByFinancierId(String finanacierId, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
 }

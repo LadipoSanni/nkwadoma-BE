@@ -1,9 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +26,17 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
+
+    @Query("SELECT DISTINCT new africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO(ivf.financier, ivf.investmentVehicleDesignation) " +
+            "FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle.id = :investmentVehicleId " +
+            "AND (:activationStatus IS NULL OR ivf.financier.activationStatus = :activationStatus)")
+    Page<FinancierWithDesignationDTO> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
+            @Param("investmentVehicleId") String investmentVehicleId,
+            @Param("activationStatus") ActivationStatus activationStatus,
+            Pageable pageable
+    );
+
 
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
 
@@ -52,4 +63,26 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             "FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle.id = :investmentVehicleId ")
     boolean checkIfAnyFinancierExistInVehicle(String investmentVehicleId);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.userIdentity.id = :userId ")
+    Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByUserId(String userId, Pageable pageRequest);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :finanacierId ")
+    Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByFinancierId(String finanacierId, Pageable pageRequest);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.financier.userIdentity.id = :userId " +
+            "AND LOWER(ivf.investmentVehicle.name) LIKE LOWER(CONCAT('%', :investmentVehicleName, '%'))")
+    Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(
+            @Param("investmentVehicleName") String investmentVehicleName,
+            @Param("userId") String userId,
+            Pageable pageRequest);
+
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.financier.id = :financierId " +
+            "AND LOWER(ivf.investmentVehicle.name) LIKE LOWER(CONCAT('%', :investmentVehicleName, '%'))")
+    Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(
+            @Param("investmentVehicleName") String investmentVehicleName,
+            @Param("financierId") String financierId, Pageable pageRequest);
 }
