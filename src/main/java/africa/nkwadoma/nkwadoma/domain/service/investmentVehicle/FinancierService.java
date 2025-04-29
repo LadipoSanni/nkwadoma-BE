@@ -572,10 +572,11 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicleFinancier = foundInvestmentVehicleFinancier;
 
         }else {
-                log.info("Financier is investing in this vehicle. Amount {}", financier.getAmountToInvest());
+                log.info("Financier is investing in this vehicle. Amount {} role {}", financier.getAmountToInvest(), financier.getInvestmentVehicleDesignation());
                 investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                         .investmentVehicle(investmentVehicle)
                         .financier(financier)
+                        .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                         .amountInvested(financier.getAmountToInvest())
                         .dateInvested(LocalDate.now())
                         .build();
