@@ -1,7 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
-import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO;
@@ -70,4 +69,20 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
 
     @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :finanacierId ")
     Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByFinancierId(String finanacierId, Pageable pageRequest);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.financier.userIdentity.id = :userId " +
+            "AND LOWER(ivf.investmentVehicle.name) LIKE LOWER(CONCAT('%', :investmentVehicleName, '%'))")
+    Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(
+            @Param("investmentVehicleName") String investmentVehicleName,
+            @Param("userId") String userId,
+            Pageable pageRequest);
+
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.financier.id = :financierId " +
+            "AND LOWER(ivf.investmentVehicle.name) LIKE LOWER(CONCAT('%', :investmentVehicleName, '%'))")
+    Page<InvestmentVehicleFinancierEntity> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(
+            @Param("investmentVehicleName") String investmentVehicleName,
+            @Param("financierId") String financierId, Pageable pageRequest);
 }

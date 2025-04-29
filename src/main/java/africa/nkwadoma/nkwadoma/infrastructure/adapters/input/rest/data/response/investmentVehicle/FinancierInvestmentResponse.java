@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Getter
 public class FinancierInvestmentResponse {
 
+    private String investmentId;
     private String investmentVehicleName;
     private InvestmentVehicleType investmentVehicleType;
     private BigDecimal amountInvested;
