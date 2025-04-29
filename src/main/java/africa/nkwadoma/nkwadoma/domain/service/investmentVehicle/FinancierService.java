@@ -409,13 +409,6 @@ public class FinancierService implements FinancierUseCase {
         return financier;
     }
 
-    @Override
-    public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
-        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        return financierOutputPort.viewAllFinancier(financier);
-    }
-
-
     private InvestmentVehicleFinancier assignDesignation(Financier financier, InvestmentVehicle investmentVehicle) {
        return InvestmentVehicleFinancier.builder()
                 .financier(financier)
@@ -424,6 +417,16 @@ public class FinancierService implements FinancierUseCase {
                 .build();
     }
 
+    @Override
+    public Page<Financier> viewAllFinancier(Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
+        log.info("View all financiers with type {}. Page number: {}, page size: {} and activation status {}",
+                financier.getFinancierType(), financier.getPageNumber(), financier.getPageSize(), financier.getActivationStatus());
+        if (financier.getInvestmentVehicleId() != null){
+            return viewAllFinancierInInvestmentVehicle(financier);
+        }
+        return financierOutputPort.viewAllFinancier(financier);
+    }
 
     @Override
     public Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException {
@@ -475,7 +478,7 @@ public class FinancierService implements FinancierUseCase {
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         financier.setId(foundFinancier.getId());
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(financier.getInvestmentVehicleId());
-        log.info("Investment vehicle found is {}" ,foundInvestmentVehicle.getInvestmentVehicleVisibility());
+        log.info("Investment vehicle found is {}" ,foundInvestmentVehicle);
         if (foundInvestmentVehicle.getInvestmentVehicleVisibility() == null){
             log.error("The investment vehicle found has a null visibility. id : {} name : {}", foundInvestmentVehicle.getId(), foundInvestmentVehicle.getName());
             throw new MeedlException("Found vehicle visibility is not defined.");
@@ -572,10 +575,11 @@ public class FinancierService implements FinancierUseCase {
             investmentVehicleFinancier = foundInvestmentVehicleFinancier;
 
         }else {
-                log.info("Financier is investing in this vehicle. Amount {}", financier.getAmountToInvest());
+                log.info("Financier is investing in this vehicle. Amount {} role {}", financier.getAmountToInvest(), financier.getInvestmentVehicleDesignation());
                 investmentVehicleFinancier = InvestmentVehicleFinancier.builder()
                         .investmentVehicle(investmentVehicle)
                         .financier(financier)
+                        .investmentVehicleDesignation(financier.getInvestmentVehicleDesignation())
                         .amountInvested(financier.getAmountToInvest())
                         .dateInvested(LocalDate.now())
                         .build();

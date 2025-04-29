@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,17 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             @Param("activationStatus") ActivationStatus activationStatus,
             Pageable pageable
     );
+
+    @Query("SELECT DISTINCT new africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO(ivf.financier, ivf.investmentVehicleDesignation) " +
+            "FROM InvestmentVehicleFinancierEntity ivf " +
+            "WHERE ivf.investmentVehicle.id = :investmentVehicleId " +
+            "AND (:activationStatus IS NULL OR ivf.financier.activationStatus = :activationStatus)")
+    Page<FinancierWithDesignationDTO> findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(
+            @Param("investmentVehicleId") String investmentVehicleId,
+            @Param("activationStatus") ActivationStatus activationStatus,
+            Pageable pageable
+    );
+
 
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id);
 

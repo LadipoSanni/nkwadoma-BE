@@ -32,7 +32,7 @@ import java.util.Set;
 @Setter
 @ToString
 @Builder
-public class Financier {
+public class    Financier {
     private String id;
     private List<BeneficialOwner> beneficialOwners;
 
