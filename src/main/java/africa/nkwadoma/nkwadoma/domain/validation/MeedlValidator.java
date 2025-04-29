@@ -227,6 +227,7 @@ public class MeedlValidator {
     }
 
     public static void validateRCNumber(String rcNumber) throws MeedlException {
+        MeedlValidator.validateDataElement(rcNumber, "Rc number is required.");
         boolean patternMatches = Pattern.compile(MeedlPatterns.RC_NUMBER_REGEX_PATTERN).matcher(rcNumber).matches();
         if (!patternMatches) {
             log.error("{} - {}", OrganizationMessages.INVALID_RC_NUMBER.getMessage(), rcNumber);

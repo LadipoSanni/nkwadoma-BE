@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -62,7 +63,7 @@ public class    Financier {
     private BigDecimal netAssertValue;
 
     //source of fund
-    private List<String> sourceOfFunds;
+    private Set<String> sourceOfFunds;
 
     private String taxInformationNumber;
 
@@ -122,8 +123,8 @@ public class    Financier {
         log.info("Started kyc validation in financier.");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
-        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
-        this.userIdentity.getBankDetail().validate();
+//        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
+//        this.userIdentity.getBankDetail().validate();
         MeedlValidator.validateDataElement(this.userIdentity.getPhoneNumber(), "Phone number is required.");
         if (financierIsIndividual()){
 //            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
@@ -158,7 +159,21 @@ public class    Financier {
         }
     }
     private void validateSourceOfFund() throws MeedlException {
-        MeedlValidator.validateObjectInstance(this.sourceOfFunds, "Source of fund cannot be empty");
+        String sourceOfFundErrorMessage = "Source of fund cannot be empty";
+        MeedlValidator.validateObjectInstance(this.sourceOfFunds, sourceOfFundErrorMessage);
+        MeedlValidator.validateCollection(this.sourceOfFunds, sourceOfFundErrorMessage);
+        boolean atLeastOneSourceOfFund = Boolean.FALSE;
+        for (String sourceOfFund : this.sourceOfFunds) {
+            if (MeedlValidator.isNotEmptyString(sourceOfFund)) {
+                atLeastOneSourceOfFund = Boolean.TRUE;
+                log.info("At least one source of fund was provided {}", sourceOfFund);
+                break;
+            }
+        }
+        if (!atLeastOneSourceOfFund){
+            log.warn("Source of fund not provided");
+            throw new MeedlException(sourceOfFundErrorMessage);
+        }
 //        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
 //        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
 //        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
