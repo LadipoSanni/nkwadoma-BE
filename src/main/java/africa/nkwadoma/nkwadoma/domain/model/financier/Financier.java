@@ -175,7 +175,7 @@ public class    Financier {
         for (String sourceOfFund : this.sourceOfFunds) {
             if (MeedlValidator.isNotEmptyString(sourceOfFund)) {
                 atLeastOneSourceOfFund = Boolean.TRUE;
-                log.info("At least one source of fund was provided {}", sourceOfFund);
+                log.info("At least one source of fund was provided ----- {}", sourceOfFund);
                 break;
             }
         }
