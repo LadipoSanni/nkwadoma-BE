@@ -446,11 +446,12 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException {
+    public Page<Financier> search(String name, Financier financier) throws MeedlException {
+        MeedlValidator.validateObjectInstance(financier, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
-        MeedlValidator.validatePageSize(pageSize);
-        MeedlValidator.validatePageNumber(pageNumber);
-        return financierOutputPort.search(name, investmentVehicleId, pageNumber, pageSize);
+        MeedlValidator.validatePageSize(financier.getPageSize());
+        MeedlValidator.validatePageNumber(financier.getPageNumber());
+        return financierOutputPort.search(name, financier);
     }
 
     @Override
@@ -706,13 +707,13 @@ public class FinancierService implements FinancierUseCase {
 
 
     private Financier saveFinancier(Financier financier) throws MeedlException {
+        financier.setActivationStatus(ActivationStatus.INVITED);
+        financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         if (financier.getFinancierType() == FinancierType.INDIVIDUAL) {
-            financier.setActivationStatus(ActivationStatus.INVITED);
             UserIdentity userIdentity = financier.getUserIdentity();
-            financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
             log.info("User {} does not exist on platform and cannot be added to investment vehicle.", userIdentity.getEmail());
-            userIdentity.setRole(IdentityRole.FINANCIER);
             userIdentity.setCreatedAt(LocalDateTime.now());
+            userIdentity.setRole(IdentityRole.FINANCIER);
             userIdentity = identityManagerOutputPort.createUser(userIdentity);
             userIdentity = userIdentityOutputPort.save(userIdentity);
             financier.setUserIdentity(userIdentity);
