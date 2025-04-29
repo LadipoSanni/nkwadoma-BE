@@ -36,6 +36,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,7 @@ public class FinancierService implements FinancierUseCase {
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
+    private final FinancierMapper financierMapper;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -675,6 +677,21 @@ public class FinancierService implements FinancierUseCase {
                 .portfolioValue(financier.getPortfolioValue())
                 .build();
     }
+
+    @Override
+    public Page<Financier> viewAllFinancierInvestment(String actorId, String finanacierId, int pageSize, int pageNumber) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){
+            Page<InvestmentVehicleFinancier> investmentVehicleFinanciers =
+                    investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIntoByUserId(userIdentity.getId(),pageSize,pageNumber);
+            return investmentVehicleFinanciers.map(financierMapper::mapToFinancierInvestment);
+        }
+        MeedlValidator.validateUUID(finanacierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Page<InvestmentVehicleFinancier> investmentVehicleFinanciers =
+                investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIntoByFinancierId(finanacierId,pageSize,pageNumber);
+        return investmentVehicleFinanciers.map(financierMapper::mapToFinancierInvestment);
+    }
+
 
     public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;

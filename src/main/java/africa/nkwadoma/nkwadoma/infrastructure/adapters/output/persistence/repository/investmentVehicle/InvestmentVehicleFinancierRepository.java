@@ -52,4 +52,10 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
             "FROM InvestmentVehicleFinancierEntity ivf " +
             "WHERE ivf.investmentVehicle.id = :investmentVehicleId ")
     boolean checkIfAnyFinancierExistInVehicle(String investmentVehicleId);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.userIdentity.id = :userId ")
+    Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByUserId(String userId, Pageable pageRequest);
+
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf WHERE ivf.financier.id = :finanacierId ")
+    Page<InvestmentVehicleFinancierEntity> findAllInvestmentVehicleFinancierInvestedInByFinancierId(String finanacierId, Pageable pageRequest);
 }
