@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.Coope
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
@@ -26,6 +27,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
@@ -54,6 +56,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType.COOPERATE;
+
 @AllArgsConstructor
 @Service
 @Slf4j
@@ -74,6 +78,7 @@ public class FinancierService implements FinancierUseCase {
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
+    private final PortfolioOutputPort portfolioOutputPort;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
@@ -91,7 +96,22 @@ public class FinancierService implements FinancierUseCase {
         }
         asynchronousMailingOutputPort.sendFinancierEmail(financiersToMail, investmentVehicle);
         asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewFinancier(financiersToMail, investmentVehicle, actor);
+        updateNumberOfFinancierOnPortfolio(financiers);
         return response;
+    }
+
+    private void updateNumberOfFinancierOnPortfolio(List<Financier> financiers) throws MeedlException {
+        Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+        portfolio = portfolioOutputPort.findPortfolio(portfolio);
+        for (Financier financier : financiers) {
+            if (financier.getFinancierType().equals(COOPERATE)){
+                portfolio.setTotalNumberOfInstitutionalFinancier(portfolio.getTotalNumberOfInstitutionalFinancier() + 1);
+            }else {
+                portfolio.setTotalNumberOfIndividualFinancier(portfolio.getTotalNumberOfIndividualFinancier() + 1);
+            }
+            portfolio.setTotalNumberOfFinancier(portfolio.getTotalNumberOfFinancier() + 1);
+            portfolioOutputPort.save(portfolio);
+        }
     }
 
     private UserIdentity getActorPerformingAction(List<Financier> financiers) throws MeedlException {

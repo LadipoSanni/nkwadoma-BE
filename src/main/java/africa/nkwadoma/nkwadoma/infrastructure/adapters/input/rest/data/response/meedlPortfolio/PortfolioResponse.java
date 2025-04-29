@@ -20,6 +20,10 @@ public class PortfolioResponse {
     private int totalNumberOfFinancier;
     private int totalNumberOfIndividualFinancier;
     private int totalNumberOfInstitutionalFinancier;
+    private int totalNumberOfLoans;
+    private double loanReferralPercentage;
+    private double loanRequestPercentage;
+    private double loanDisbursalPercentage;
     private String assetUnderManagement;
     private double aumPercentage;
     private BigDecimal totalAvailable;
