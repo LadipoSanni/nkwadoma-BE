@@ -103,7 +103,7 @@ public class FinancierAdapter implements FinancierOutputPort {
         log.info("Complete kyc of financier at adapter level ... ");
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
         financier.validate();
-        financier.validateKyc();
+        financier.validateKyc(financier.getFinancierType());
         financier.setAccreditationStatus(AccreditationStatus.VERIFIED);
         FinancierEntity financierToSave = financierMapper.map(financier);
         log.info("Financier to save for kyc: {}", financierToSave);

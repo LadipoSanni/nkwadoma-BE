@@ -109,7 +109,12 @@ public class    Financier {
         }
     }
     private boolean financierIsIndividual(){
+        log.info("Financier is an individual {}", this.financierType == FinancierType.INDIVIDUAL);
         return this.financierType == FinancierType.INDIVIDUAL;
+    }
+    private boolean financierIsIndividual(FinancierType financierType) {
+        log.info("Financier is an individual {}", financierType == FinancierType.INDIVIDUAL);
+        return financierType == FinancierType.INDIVIDUAL;
     }
 
     private void validateCooperation() throws MeedlException {
@@ -119,14 +124,15 @@ public class    Financier {
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
-    public void validateKyc() throws MeedlException {
+    public void validateKyc(FinancierType financierType) throws MeedlException {
         log.info("Started kyc validation in financier.");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
 //        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
 //        this.userIdentity.getBankDetail().validate();
         MeedlValidator.validateDataElement(this.userIdentity.getPhoneNumber(), "Phone number is required.");
-        if (financierIsIndividual()){
+        if (financierIsIndividual(financierType)){
+            log.info("Validating individual financier for kyc");
 //            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
             validateKycIdentityNumbers();
         }
@@ -138,6 +144,7 @@ public class    Financier {
         validateDeclaration();
         validateBeneficialOwnersKyc();
     }
+
     private void validateBeneficialOwnersKyc() throws MeedlException {
         log.info("Validating beneficial owners.");
         MeedlValidator.validateObjectInstance(beneficialOwners, "Please provide beneficial owner.");
@@ -207,4 +214,6 @@ public class    Financier {
         MeedlValidator.validateUUID(this.userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(this.amountToInvest, FinancierMessages.AMOUNT_TO_INVEST_REQUIRED.getMessage());
     }
+
+
 }
