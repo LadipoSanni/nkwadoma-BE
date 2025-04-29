@@ -708,17 +708,15 @@ public class FinancierService implements FinancierUseCase {
     }
 
     @Override
-    public InvestmentVehicle viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleId, String userId) throws MeedlException {
+    public InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException {
         Financier financier = getFinancierByUserType(financierId, userId);
         InvestmentVehicleFinancier investmentVehicleFinancier =
-                investmentVehicleFinancierOutputPort.findByFinancierIdAndInvestmentVehicleId(financier.getId(), investmentVehicleId);
-        log.info("----- designation -----> " + investmentVehicleFinancier.getInvestmentVehicleDesignation());
+                investmentVehicleFinancierOutputPort.findByFinancierIdAndInvestmentVehicleFinancierId(financier.getId(), investmentVehicleFinancierId);
         InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
         investmentVehicle.setAmountFinancierInvested(investmentVehicleFinancier.getAmountInvested());
         investmentVehicle.setDateInvested(investmentVehicleFinancier.getDateInvested());
         investmentVehicle.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
-        log.info("-------> Vehicle -------> " + investmentVehicle);
-        return investmentVehicle;
+        return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
     }
 
     @Override

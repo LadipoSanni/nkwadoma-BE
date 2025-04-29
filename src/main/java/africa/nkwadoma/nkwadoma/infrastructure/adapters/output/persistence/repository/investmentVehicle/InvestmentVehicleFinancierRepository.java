@@ -59,7 +59,12 @@ public interface InvestmentVehicleFinancierRepository extends JpaRepository<Inve
 
     void deleteByInvestmentVehicleId(String investmentVehicleId);
 
-    InvestmentVehicleFinancierEntity findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId);
+    @Query("SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
+            "JOIN FETCH ivf.investmentVehicle iv " +
+            "LEFT JOIN FETCH ivf.investmentVehicleDesignation " +
+            "WHERE ivf.financier.id = :financierId " +
+            "AND ivf.id = :investmentVehicleFinancierId")
+    InvestmentVehicleFinancierEntity findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleFinancierId);
 
     @Query("SELECT CASE WHEN COUNT(ivf) > 0 THEN true ELSE false END " +
             "FROM InvestmentVehicleFinancierEntity ivf " +

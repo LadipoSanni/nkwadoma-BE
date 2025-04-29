@@ -102,15 +102,6 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     }
 
     @Override
-    public InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleId(String financierId, String investmentVehicleId) throws MeedlException {
-        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
-        MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
-        InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
-                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleId);
-        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
-    }
-
-    @Override
     public boolean checkIfFinancierExistInVehicle(String  investmentVehicleId) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
         return investmentVehicleFinancierRepository.checkIfAnyFinancierExistInVehicle(investmentVehicleId);
@@ -154,5 +145,14 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
                 investmentVehicleFinancierRepository.searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(investmentVehicleName,financierId,pageRequest);
         return investmentVehicleFinancierEntities.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+    }
+
+    @Override
+    public InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleFinancierId(String financierId, String investmentVehicleFinancierId) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        MeedlValidator.validateUUID(investmentVehicleFinancierId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
+                investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleFinancierId);
+        return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
     }
 }

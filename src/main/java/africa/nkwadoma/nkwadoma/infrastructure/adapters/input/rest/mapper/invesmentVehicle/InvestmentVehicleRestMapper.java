@@ -1,10 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.invesmentVehicle;
 
 
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InvestmentVehicleOperationStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.SetUpInvestmentVehicleRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.UpdateInvestmentVehicleRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentDetailResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle.InvestmentVehicleResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -40,4 +42,6 @@ public interface InvestmentVehicleRestMapper {
     @Mapping(target = "vehicleClosureStatus.maturity", source = "maturity")
     @Mapping(target = "id", source = "investmentVehicleId")
     InvestmentVehicle mapInvestmentVehicleOperationStatusToVehicleOperationStatus(InvestmentVehicleOperationStatusRequest vehicleOperationStatus);
+
+    InvestmentDetailResponse toInvestmentDetailResponse(InvestmentSummary investmentSummary);
 }

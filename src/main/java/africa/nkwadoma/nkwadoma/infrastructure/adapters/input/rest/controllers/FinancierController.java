@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle.InviteFinancierRequest;
@@ -160,14 +161,14 @@ public class FinancierController {
             }
     )
     public ResponseEntity<ApiResponse<?>> viewFinancierInvestmentDetail(@RequestParam(required = false) String financierId,
-                                                                        @RequestParam String investmentVehicleId,
+                                                                        @RequestParam String investmentVehicleFinancierId,
                                                                         @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
-        InvestmentVehicle investmentVehicle = financierUseCase.viewInvestmentDetailOfFinancier(financierId, investmentVehicleId, userId);
-        InvestmentVehicleResponse investmentVehicleResponse = investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+        InvestmentSummary investmentSummary = financierUseCase.viewInvestmentDetailOfFinancier(financierId, investmentVehicleFinancierId, userId);
+        InvestmentDetailResponse investmentDetailResponse = investmentVehicleRestMapper.toInvestmentDetailResponse(investmentSummary);
 
-        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
-                .data(investmentVehicleResponse)
+        ApiResponse<InvestmentDetailResponse> apiResponse = ApiResponse.<InvestmentDetailResponse>builder()
+                .data(investmentDetailResponse)
                 .message(ControllerConstant.VIEW_EMPLOYEE_DETAILS_SUCCESSFULLY.getMessage())
                 .statusCode(HttpStatus.OK.toString())
                 .build();
