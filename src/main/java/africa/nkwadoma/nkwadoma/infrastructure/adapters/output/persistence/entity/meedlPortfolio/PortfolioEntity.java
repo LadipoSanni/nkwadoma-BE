@@ -17,16 +17,24 @@ public class PortfolioEntity {
     @UuidGenerator
     private String id;
     private String portfolioName;
-    private int totalNumberOfInvestmentVehicle;
-    private int totalNumberOfCommercialFundsInvestmentVehicle;
-    private int totalNumberOfEndowmentFundsInvestmentVehicle;
-    private int totalNumberOfFinancier;
-    private int totalNumberOfIndividualFinancier;
-    private int totalNumberOfInstitutionalFinancier;
+    @Column(nullable = false)
+    private int totalNumberOfInvestmentVehicle = 0;
+    @Column(nullable = false)
+    private int totalNumberOfCommercialFundsInvestmentVehicle = 0;
+    @Column(nullable = false)
+    private int totalNumberOfEndowmentFundsInvestmentVehicle = 0;
+    @Column(nullable = false)
+    private int totalNumberOfFinancier = 0;
+    @Column(nullable = false)
+    private int totalNumberOfIndividualFinancier = 0;
+    @Column(nullable = false)
+    private int totalNumberOfInstitutionalFinancier = 0;
     @Column(nullable = false)
     private int totalNumberOfLoans = 0;
-    private double loanReferralPercentage;
-    private double loanRequestPercentage;
+    @Column(nullable = false)
+    private double loanReferralPercentage = 0.0;
+    @Column(nullable = false)
+    private double loanRequestPercentage = 0.0;
     @Column(nullable = false)
     private double loanDisbursalPercentage = 0.0;
 
