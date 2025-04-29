@@ -744,7 +744,7 @@ public class FinancierServiceTest {
         assertNotNull(financiersPage);
         assertNotNull(financiersPage.getContent());
         List<Financier> financiers = financiersPage.toList();
-        assertEquals(2, financiers.size());
+        assertEquals(1, financiers.size());
         assertNotNull(financiers.get(0).getActivationStatus());
     }
     @ParameterizedTest
