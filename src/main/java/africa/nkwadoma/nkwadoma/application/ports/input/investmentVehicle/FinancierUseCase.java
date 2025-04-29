@@ -17,9 +17,7 @@ public interface FinancierUseCase {
 
     Page<Financier> viewAllFinancierInInvestmentVehicle(Financier financier) throws MeedlException;
 
-    Page<Financier> viewAllFinancierInInvestmentVehicleByActivationStatus(Financier financier) throws MeedlException;
-
-    Page<Financier> search(String name, String investmentVehicleId, int pageNumber, int pageSize) throws MeedlException;
+    Page<Financier> search(String name, Financier financier) throws MeedlException;
 
     void updateFinancierStatus(Financier financier);
 
@@ -31,6 +29,9 @@ public interface FinancierUseCase {
 
     FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
+    Page<Financier> viewAllFinancierInvestment(String sub, String financierId, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<Financier> searchFinancierInvestment(Financier financier) throws MeedlException;
     InvestmentVehicle viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleId, String userId) throws MeedlException;
 
 }

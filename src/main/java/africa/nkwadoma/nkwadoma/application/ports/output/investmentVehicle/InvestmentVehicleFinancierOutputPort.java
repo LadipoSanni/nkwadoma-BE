@@ -15,8 +15,6 @@ public interface InvestmentVehicleFinancierOutputPort {
 
     void deleteInvestmentVehicleFinancier(String id) throws MeedlException;
 
-    Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, Pageable pageRequest) throws MeedlException;
-
     Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException;
 
     void deleteByInvestmentVehicleIdAndFinancierId(String investmentId, String id) throws MeedlException;
@@ -28,6 +26,16 @@ public interface InvestmentVehicleFinancierOutputPort {
     boolean checkIfAnyFinancierHaveInvestedInVehicle(String investmentVehicleId) throws MeedlException;
 
     void removeFinancierAssociationWithInvestmentVehicle(String investmentVehicleId) throws MeedlException;
+
+    boolean checkIfFinancierExistInVehicle(String investmentVehicleId) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByUserId(String id, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> findAllInvestmentVehicleFinancierInvestedIntoByFinancierId(String finanacierId, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
 
     InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleId(String id, String investmentVehicleId) throws MeedlException;
 }

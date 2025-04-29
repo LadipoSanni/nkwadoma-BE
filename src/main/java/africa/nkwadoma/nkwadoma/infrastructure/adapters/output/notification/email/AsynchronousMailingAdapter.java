@@ -1,9 +1,10 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.meedlNotification;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -25,6 +26,7 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final LoaneeEmailUsecase loaneeEmailUsecase;
     private final FinancierEmailUseCase financierEmailUseCase;
+    private final SendColleagueEmailUseCase sendEmail;
 
     @Async
     @Override
@@ -72,6 +74,13 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
             });
         }
     }
+
+    @Async
+    @Override
+    public void sendColleagueEmail(String organizationName, UserIdentity userIdentity) throws MeedlException {
+        sendEmail.sendColleagueEmail(organizationName,userIdentity);
+    }
+
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
         financierEmailUseCase.inviteFinancierToVehicle(financier.getUserIdentity(), investmentVehicle);
     }

@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
+import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
@@ -18,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -31,7 +33,7 @@ import java.util.Set;
 @Setter
 @ToString
 @Builder
-public class Financier {
+public class    Financier {
     private String id;
     private List<BeneficialOwner> beneficialOwners;
 
@@ -53,16 +55,18 @@ public class Financier {
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
     private LocalDateTime createdAt;
+    private String actorId;
+    private InvestmentVehicleType investmentVehicleType;
+    private String investmentId;
+    private String investmentVehicleName;
+    private BigDecimal amountInvested;
+    private LocalDate dateInvested;
+    private BigDecimal incomeEarned;
+    private BigDecimal netAssertValue;
 
     //source of fund
-    private String personalOrJointSavings;
-    private String employmentIncome;
-    private String salesOfAssets;
-    private String donation;
-    private String inheritanceOrGift;
-    private String compensationOfLegalSettlements;
-    private BigDecimal profitFromLegitimateActivities;
-    private String occupation;
+    private Set<String> sourceOfFunds;
+
     private String taxInformationNumber;
 
 
@@ -107,7 +111,12 @@ public class Financier {
         }
     }
     private boolean financierIsIndividual(){
+        log.info("Financier is an individual {}", this.financierType == FinancierType.INDIVIDUAL);
         return this.financierType == FinancierType.INDIVIDUAL;
+    }
+    private boolean financierIsIndividual(FinancierType financierType) {
+        log.info("Financier is an individual {}", financierType == FinancierType.INDIVIDUAL);
+        return financierType == FinancierType.INDIVIDUAL;
     }
 
     private void validateCooperation() throws MeedlException {
@@ -117,25 +126,27 @@ public class Financier {
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.USER_IDENTITY_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validateEmail(this.userIdentity.getEmail());
     }
-    public void validateKyc() throws MeedlException {
+    public void validateKyc(FinancierType financierType) throws MeedlException {
         log.info("Started kyc validation in financier.");
         MeedlValidator.validateObjectInstance(this.userIdentity, UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
         MeedlValidator.validateObjectInstance(this.userIdentity.getId(), "Identification for user performing this action is unknown.");
-        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
-        this.userIdentity.getBankDetail().validate();
+//        MeedlValidator.validateObjectInstance(this.userIdentity.getBankDetail(), "Provide a valid bank detail.");
+//        this.userIdentity.getBankDetail().validate();
         MeedlValidator.validateDataElement(this.userIdentity.getPhoneNumber(), "Phone number is required.");
-        if (financierIsIndividual()){
-            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
+        if (financierIsIndividual(financierType)){
+            log.info("Validating individual financier for kyc");
+//            MeedlValidator.validateDataElement(this.occupation, "Occupation is required.");
             validateKycIdentityNumbers();
         }
         else {
             MeedlValidator.validateDataElement(this.taxInformationNumber, "Tax information number is required.");
-            MeedlValidator.validateDataElement(this.rcNumber, "Rc number is required.");
+            MeedlValidator.validateRCNumber(this.rcNumber);
         }
         validateSourceOfFund();
         validateDeclaration();
         validateBeneficialOwnersKyc();
     }
+
     private void validateBeneficialOwnersKyc() throws MeedlException {
         log.info("Validating beneficial owners.");
         MeedlValidator.validateObjectInstance(beneficialOwners, "Please provide beneficial owner.");
@@ -157,14 +168,29 @@ public class Financier {
         }
     }
     private void validateSourceOfFund() throws MeedlException {
-        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
-        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
-        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
-        MeedlValidator.validateDataElement(this.donation, "Donation needs to be stated.");
-        MeedlValidator.validateDataElement(this.occupation, "Occupation needs to be stated.");
-        MeedlValidator.validateDataElement(this.inheritanceOrGift, "Inheritance or gift needs to be stated.");
-        MeedlValidator.validateDataElement(this.compensationOfLegalSettlements, "Compensation of legal settlements needs to be stated.");
-        MeedlValidator.validateObjectInstance(this.profitFromLegitimateActivities, "Profit From Legitimate Activities of legal settlements needs to be stated.");
+        String sourceOfFundErrorMessage = "Source of fund cannot be empty";
+        MeedlValidator.validateObjectInstance(this.sourceOfFunds, sourceOfFundErrorMessage);
+        MeedlValidator.validateCollection(this.sourceOfFunds, sourceOfFundErrorMessage);
+        boolean atLeastOneSourceOfFund = Boolean.FALSE;
+        for (String sourceOfFund : this.sourceOfFunds) {
+            if (MeedlValidator.isNotEmptyString(sourceOfFund)) {
+                atLeastOneSourceOfFund = Boolean.TRUE;
+                log.info("At least one source of fund was provided {}", sourceOfFund);
+                break;
+            }
+        }
+        if (!atLeastOneSourceOfFund){
+            log.warn("Source of fund not provided");
+            throw new MeedlException(sourceOfFundErrorMessage);
+        }
+//        MeedlValidator.validateDataElement(this.personalOrJointSavings, "Personal or joint savings needs to be stated.");
+//        MeedlValidator.validateDataElement(this.employmentIncome, "Employment income needs to be stated.");
+//        MeedlValidator.validateDataElement(this.salesOfAssets, "Sales of assets needs to be stated.");
+//        MeedlValidator.validateDataElement(this.donation, "Donation needs to be stated.");
+//        MeedlValidator.validateDataElement(this.occupation, "Occupation needs to be stated.");
+//        MeedlValidator.validateDataElement(this.inheritanceOrGift, "Inheritance or gift needs to be stated.");
+//        MeedlValidator.validateDataElement(this.compensationOfLegalSettlements, "Compensation of legal settlements needs to be stated.");
+//        MeedlValidator.validateObjectInstance(this.profitFromLegitimateActivities, "Profit From Legitimate Activities of legal settlements needs to be stated.");
     }
 
     private void validateKycIdentityNumbers() throws MeedlException {
@@ -190,4 +216,6 @@ public class Financier {
         MeedlValidator.validateUUID(this.userIdentity.getId(), UserMessages.INVALID_USER_ID.getMessage());
         MeedlValidator.validateBigDecimalDataElement(this.amountToInvest, FinancierMessages.AMOUNT_TO_INVEST_REQUIRED.getMessage());
     }
+
+
 }

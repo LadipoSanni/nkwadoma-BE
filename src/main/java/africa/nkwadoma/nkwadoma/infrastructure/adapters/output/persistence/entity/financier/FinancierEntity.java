@@ -22,6 +22,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @Entity
 public class FinancierEntity {
 
@@ -38,18 +39,8 @@ public class FinancierEntity {
     private UserEntity userIdentity;
 
     //source of fund
-    private String personalOrJointSavings;
-    private String employmentIncome;
-    private String salesOfAssets;
-    private String donation;
-    private String inheritanceOrGift;
-    private String compensationOfLegalSettlements;
-    private BigDecimal profitFromLegitimateActivities;
-
-    private String occupation;
-
-//    @OneToMany
-//    private List<BeneficialOwnerEntity> beneficialOwners;
+    @ElementCollection(fetch = FetchType.EAGER)
+    List<String> sourceOfFunds;
 
     //Declaration
     private boolean declarationAndAgreement;

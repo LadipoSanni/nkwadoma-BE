@@ -195,10 +195,12 @@ class InvestmentVehicleServiceTest {
     @Test
     void setUpInvestmentVehicleVisibilityToPrivate() throws MeedlException {
         InvestmentVehicle result = null;
+        financier.setId(mockId);
         when(investmentVehicleOutputPort.findById(mockId)).thenReturn(fundGrowth);
         fundGrowth.setInvestmentVehicleVisibility(null);
         when(investmentVehicleOutputPort.findByNameExcludingDraftStatus(fundGrowth.getName(), DRAFT))
                 .thenReturn(null);
+        when(financierOutputPort.findFinancierByFinancierId(mockId)).thenReturn(financier);
         when(portfolioOutputPort.findPortfolio(any()))
                 .thenReturn(portfolio);
         fundGrowth.setInvestmentVehicleStatus(DRAFT);
@@ -482,7 +484,7 @@ class InvestmentVehicleServiceTest {
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(investmentVehicleOutputPort.findAllInvestmentVehicleFinancierWasAddedTo(userIdentity.getId(), InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber)).
                 thenReturn(page);
-        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
+        page = investmentVehicleService.viewAllInvestmentVehicleInvestedIn(mockId,mockId,InvestmentVehicleType.ENDOWMENT,pageSize,pageNumber);
         assertNotNull(page);
         verify(userIdentityOutputPort, times(1)).findById(mockId);
         assertEquals(1, page.getTotalElements());

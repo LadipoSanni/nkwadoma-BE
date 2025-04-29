@@ -1,6 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.ContextMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;

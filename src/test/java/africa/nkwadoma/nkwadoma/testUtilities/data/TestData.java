@@ -221,15 +221,16 @@ public class TestData {
         financier.getUserIdentity().setNin("2025103002");
         financier.getUserIdentity().setBvn("2025143002");
         financier.getUserIdentity().setTaxId("00000122");
-        financier.setOccupation("Doctor");
-
-        financier.setPersonalOrJointSavings("Personal or joint savings stated.");
-        financier.setEmploymentIncome("Employment income stated.");
-        financier.setSalesOfAssets("Sales of assets stated.");
-        financier.setDonation("Donation stated.");
-        financier.setInheritanceOrGift("Inheritance or gift stated.");
-        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
-        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
+        financier.setSourceOfFunds(Set.of("PersonalOrJointSavings"));
+//        financier.setOccupation("Doctor");
+//
+//        financier.setPersonalOrJointSavings("Personal or joint savings stated.");
+//        financier.setEmploymentIncome("Employment income stated.");
+//        financier.setSalesOfAssets("Sales of assets stated.");
+//        financier.setDonation("Donation stated.");
+//        financier.setInheritanceOrGift("Inheritance or gift stated.");
+//        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
+//        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
         List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
         financier.setBeneficialOwners(beneficialOwners);

@@ -17,7 +17,8 @@ public enum InvestmentVehicleMessages {
     DELETED("Deleted"),
     INVESTMENT_VEHICLE_ALREADY_PUBLISHED("Investment Vehicle already published and cannot be edited"),
     CANNOT_MAKE_INVESTMENT_VEHICLE_PRIVATE_WITH_EMPTY_FINANCIER("Cannot make investment vehicle private with no financer"),
-    CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT("Cannot change investment vehicle to only me financier already invested"),;
+    CANNOT_CHANGE_INVESTMENT_VEHICLE_TO_DEFAULT("Cannot change investment vehicle to only me financier already invested"),
+    FINANCIER_ALREADY_EXIST_IN_VEHICLE("Financer already exist in vehicle");
     private final String message;
 
     InvestmentVehicleMessages(String message) {

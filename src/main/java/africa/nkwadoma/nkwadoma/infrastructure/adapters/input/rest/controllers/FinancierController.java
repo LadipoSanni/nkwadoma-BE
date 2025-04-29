@@ -104,6 +104,7 @@ public class FinancierController {
     @PreAuthorize("hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> completeKyc(@AuthenticationPrincipal Jwt meedlUser,
                                                       @RequestBody KycRequest kycRequest) throws MeedlException {
+        log.info("Kyc request controller {} , {}",LocalDateTime.now(), kycRequest);
         Financier financier = financierRestMapper.map(kycRequest);
         financier.getUserIdentity().setId(meedlUser.getClaimAsString("sub"));
         log.info("Controller request for kyc mapped {}", financier);
@@ -240,6 +241,7 @@ public class FinancierController {
                     )
             )
     })
+
     public ResponseEntity<ApiResponse<?>> viewFinancierDetail(@AuthenticationPrincipal Jwt meedlUser,@RequestParam(required = false) String financierId) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Financier financier = financierUseCase.viewFinancierDetail(userId, financierId);
@@ -252,14 +254,15 @@ public class FinancierController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
     @GetMapping("financier/all/view")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> viewAllFinancier(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestParam int pageNumber,
                                                             @RequestParam int pageSize,
-                                                            @RequestParam(required = false) FinancierType financierType) throws MeedlException {
-       Financier financier = Financier.builder().pageNumber(pageNumber).financierType(financierType).pageSize(pageSize).build();
+                                                            @RequestParam(required = false) String investmentVehicleId,
+                                                            @RequestParam(required = false) FinancierType financierType,
+                                                            @RequestParam(required = false) ActivationStatus activationStatus) throws MeedlException {
+        Financier financier = Financier.builder().pageNumber(pageNumber).pageSize(pageSize).investmentVehicleId(investmentVehicleId).financierType(financierType).activationStatus(activationStatus).build();
         Page<Financier> financiers = financierUseCase.viewAllFinancier(financier);
         List<FinancierResponse > financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("financiers mapped for view all financiers on the platform: {}", financierResponses);
@@ -274,16 +277,19 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
+
     @GetMapping("financier/search")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public  ResponseEntity<ApiResponse<?>> search(@AuthenticationPrincipal Jwt meedlUser,
                                                   @RequestParam String name,
                                                   @RequestParam int pageNumber,
                                                   @RequestParam int pageSize,
+                                                  @RequestParam(required = false) FinancierType financierType,
                                                   @RequestParam(required = false) ActivationStatus activationStatus,
                                                   @RequestParam(required = false) String investmentVehicleId
     ) throws MeedlException {
-        Page<Financier> financiers = financierUseCase.search(name, investmentVehicleId, pageNumber, pageSize);
+        Financier financier = Financier.builder().pageSize(pageSize).pageNumber(pageNumber).financierType(financierType).investmentVehicleId(investmentVehicleId).activationStatus(activationStatus).build();
+        Page<Financier> financiers = financierUseCase.search(name, financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("Found financiers for search financier: {}", financiers);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
@@ -305,8 +311,8 @@ public class FinancierController {
                                                             @RequestParam int pageSize,
                                                             @RequestParam(required = false) ActivationStatus activationStatus,
                                                             @RequestParam String investmentVehicleId) throws MeedlException {
-        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).pageNumber(pageNumber).pageSize(pageSize).build();
-        Page<Financier> financiers = viewAllBasedOnActivationStatus(activationStatus, financier);
+        Financier financier = Financier.builder().investmentVehicleId(investmentVehicleId).activationStatus(activationStatus).pageNumber(pageNumber).pageSize(pageSize).build();
+        Page<Financier> financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
         List<FinancierResponse> financierResponses = financiers.stream().map(financierRestMapper::map).toList();
         log.info("View all financier in investment vehicle. Financiers mapped: {} in ", financierResponses);
         PaginatedResponse<FinancierResponse> response = new PaginatedResponse<>(
@@ -321,15 +327,52 @@ public class FinancierController {
         );
     }
 
-    private Page<Financier> viewAllBasedOnActivationStatus(ActivationStatus activationStatus, Financier financier) throws MeedlException {
-        Page<Financier> financiers;
-        if (activationStatus != null) {
-            financier.setActivationStatus(activationStatus);
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicleByActivationStatus(financier);
-        } else {
-            financiers = financierUseCase.viewAllFinancierInInvestmentVehicle(financier);
-        }
-        return financiers;
+    @GetMapping("financier/all-investment")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
+                                                                     @RequestParam(required = false) String financierId,
+                                                                     @RequestParam int pageSize,
+                                                                     @RequestParam int pageNumber) throws MeedlException {
+        Page<Financier> financierInvestments =
+                financierUseCase.viewAllFinancierInvestment(meedlUser.getClaimAsString("sub"),financierId,pageSize,pageNumber);
+        List<FinancierInvestmentResponse> financierResponses = financierInvestments.stream().map(financierRestMapper::mapToFinancierInvestment).toList();
+        log.info("financiers investment mapped for view all financiers investment on the platform: {}", financierResponses);
+        PaginatedResponse<FinancierInvestmentResponse> response = new PaginatedResponse<>(
+                financierResponses, financierInvestments.hasNext(),
+                financierInvestments.getTotalPages(), pageNumber, pageSize
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
+
+
+    @GetMapping("financier/search-all-investment")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
+                                                                     @RequestParam String investmentVehicleName,
+                                                                     @RequestParam(required = false) String financierId,
+                                                                     @RequestParam int pageSize,
+                                                                     @RequestParam int pageNumber) throws MeedlException {
+        Financier financier = Financier.builder().investmentVehicleName(investmentVehicleName).id(financierId)
+                .actorId(meedlUser.getClaimAsString("sub")).pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Financier> financierInvestments =
+                financierUseCase.searchFinancierInvestment(financier);
+        List<FinancierInvestmentResponse> financierResponses = financierInvestments.stream().map(financierRestMapper::mapToFinancierInvestment).toList();
+        log.info("financiers investment mapped for search financiers investment on the platform: {}", financierResponses);
+        PaginatedResponse<FinancierInvestmentResponse> response = new PaginatedResponse<>(
+                financierResponses, financierInvestments.hasNext(),
+                financierInvestments.getTotalPages(), pageNumber, pageSize
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
     }
 
 

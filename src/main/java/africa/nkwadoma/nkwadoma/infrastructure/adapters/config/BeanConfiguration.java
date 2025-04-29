@@ -3,18 +3,19 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.config;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.email.EmailOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.EmailOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.service.email.NotificationService;
 import africa.nkwadoma.nkwadoma.domain.service.identity.UserIdentityService;
 import africa.nkwadoma.nkwadoma.domain.service.investmentVehicle.InvestmentVehicleService;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.StringTrimMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education.*;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email.EmailAdapter;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.email.EmailAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager.KeycloakAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.PremblyAdapter;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityVerificationManager.QoreIdAdapter;
@@ -63,9 +64,11 @@ public class BeanConfiguration {
                                                    SendColleagueEmailUseCase sendColleagueEmailUseCase,
                                                    UserIdentityMapper userIdentityMapper,
                                                    BlackListedTokenAdapter blackListedTokenAdapter,
-                                                   OrganizationIdentityOutputPort organizationIdentityOutputPort
+                                                   OrganizationIdentityOutputPort organizationIdentityOutputPort,
+                                                   AsynchronousMailingOutputPort asynchronousMailingOutputPort
                                                    ){
-        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase, tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort);
+        return new UserIdentityService(userIdentityOutputPort,identityManagerOutPutPort,organizationEmployeeIdentityOutputPort,sendOrganizationEmployeeEmailUseCase,
+                tokenUtils,passwordEncoder,sendColleagueEmailUseCase, userIdentityMapper, blackListedTokenAdapter, organizationIdentityOutputPort, asynchronousMailingOutputPort);
     }
 
     @Bean
