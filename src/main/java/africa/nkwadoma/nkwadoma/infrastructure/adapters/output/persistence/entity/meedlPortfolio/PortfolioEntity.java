@@ -23,7 +23,8 @@ public class PortfolioEntity {
     private int totalNumberOfFinancier;
     private int totalNumberOfIndividualFinancier;
     private int totalNumberOfInstitutionalFinancier;
-    private int totalNumberOfLoans;
+    @Column(nullable = false)
+    private int totalNumberOfLoans = 0;
     private double loanReferralPercentage;
     private double loanRequestPercentage;
     @Column(nullable = false)
