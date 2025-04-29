@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlPortfolio;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class PortfolioEntity {
     private int totalNumberOfLoans;
     private double loanReferralPercentage;
     private double loanRequestPercentage;
-    private double loanDisbursalPercentage;
+    @Column(nullable = false)
+    private double loanDisbursalPercentage = 0.0;
 
 }
