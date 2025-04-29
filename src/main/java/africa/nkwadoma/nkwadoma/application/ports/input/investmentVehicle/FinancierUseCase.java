@@ -29,4 +29,6 @@ public interface FinancierUseCase {
     FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
     Page<Financier> viewAllFinancierInvestment(String sub, String financierId, int pageSize, int pageNumber) throws MeedlException;
+
+    Page<Financier> searchFinancierInvestment(Financier financier) throws MeedlException;
 }

@@ -308,4 +308,31 @@ public class FinancierController {
         );
     }
 
+
+    @GetMapping("financier/search-all-investment")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
+    public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
+                                                                     @RequestParam String investmentVehicleName,
+                                                                     @RequestParam(required = false) String financierId,
+                                                                     @RequestParam int pageSize,
+                                                                     @RequestParam int pageNumber) throws MeedlException {
+        Financier financier = Financier.builder().investmentVehicleName(investmentVehicleName).id(financierId)
+                .actorId(meedlUser.getClaimAsString("sub")).pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Financier> financierInvestments =
+                financierUseCase.searchFinancierInvestment(financier);
+        List<FinancierInvestmentResponse> financierResponses = financierInvestments.stream().map(financierRestMapper::mapToFinancierInvestment).toList();
+        log.info("financiers investment mapped for search financiers investment on the platform: {}", financierResponses);
+        PaginatedResponse<FinancierInvestmentResponse> response = new PaginatedResponse<>(
+                financierResponses, financierInvestments.hasNext(),
+                financierInvestments.getTotalPages(), pageNumber, pageSize
+        );
+        return new ResponseEntity<>(ApiResponse.builder().
+                statusCode(HttpStatus.OK.toString()).
+                data(response).
+                message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).
+                build(), HttpStatus.OK
+        );
+    }
+
+
 }

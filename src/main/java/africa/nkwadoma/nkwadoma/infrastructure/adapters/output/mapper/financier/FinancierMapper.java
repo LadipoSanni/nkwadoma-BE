@@ -15,10 +15,12 @@ public interface FinancierMapper {
 
     Financier map(FinancierEntity financierEntity);
 
+
     @Mapping(target = "amountInvested", source = "amountInvested")
     @Mapping(target = "investmentVehicleType", source = "investmentVehicle.investmentVehicleType")
     @Mapping(target = "investmentVehicleName", source = "investmentVehicle.name")
     @Mapping(target = "dateInvested", source = "dateInvested")
     @Mapping(target = "netAssertValue", source = "financier.netAssertValue")
     @Mapping(target = "portfolioValue", source = "financier.portfolioValue")
+    @Mapping(target = "investmentId", source = "id")
     Financier mapToFinancierInvestment(InvestmentVehicleFinancier investmentVehicleFinancier);}

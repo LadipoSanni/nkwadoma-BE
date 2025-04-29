@@ -692,6 +692,22 @@ public class FinancierService implements FinancierUseCase {
         return investmentVehicleFinanciers.map(financierMapper::mapToFinancierInvestment);
     }
 
+    @Override
+    public Page<Financier> searchFinancierInvestment(Financier financier) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(financier.getActorId());
+        if (userIdentity.getRole().equals(IdentityRole.FINANCIER)){
+            Page<InvestmentVehicleFinancier> investmentVehicleFinanciers =
+                    investmentVehicleFinancierOutputPort.searchFinancierInvestmentByInvestmentVehicleNameAndUserId
+                            (financier.getInvestmentVehicleName(),userIdentity.getId(),financier.getPageSize(),financier.getPageNumber());
+            return investmentVehicleFinanciers.map(financierMapper::mapToFinancierInvestment);
+        }
+        MeedlValidator.validateUUID(financier.getId(), FinancierMessages.INVALID_FINANCIER_ID.getMessage());
+        Page<InvestmentVehicleFinancier> investmentVehicleFinanciers =
+                investmentVehicleFinancierOutputPort.searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId
+                        (financier.getInvestmentVehicleName(),financier.getId(),financier.getPageSize(),financier.getPageNumber());
+        return investmentVehicleFinanciers.map(financierMapper::mapToFinancierInvestment);
+    }
+
 
     public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;

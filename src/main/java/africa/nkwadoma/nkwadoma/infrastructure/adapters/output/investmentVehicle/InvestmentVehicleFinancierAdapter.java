@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier.FinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
@@ -134,6 +133,26 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
         Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
                 investmentVehicleFinancierRepository.findAllInvestmentVehicleFinancierInvestedInByFinancierId(finanacierId,pageRequest);
+        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+    }
+
+    @Override
+    public Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(String investmentVehicleName, String userId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
+        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
+                investmentVehicleFinancierRepository.searchFinancierInvestmentByInvestmentVehicleNameAndUserId(investmentVehicleName,userId,pageRequest);
+        return investmentVehicleFinancierEntities.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
+    }
+
+    @Override
+    public Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String financierId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(financierId, UserMessages.INVALID_USER_ID.getMessage());
+
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("dateInvested").descending());
+        Page<InvestmentVehicleFinancierEntity> investmentVehicleFinancierEntities =
+                investmentVehicleFinancierRepository.searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(investmentVehicleName,financierId,pageRequest);
         return investmentVehicleFinancierEntities.map(investmentVehicleFinancierMapper::toInvestmentVehicleFinancier);
     }
 }

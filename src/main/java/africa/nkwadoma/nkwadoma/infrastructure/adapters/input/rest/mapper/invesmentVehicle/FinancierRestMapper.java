@@ -70,6 +70,7 @@ public interface FinancierRestMapper {
     @Mapping(target = "dateInvested", source = "dateInvested")
     @Mapping(target = "incomeEarned", source = "incomeEarned")
     @Mapping(target = "netAssertValue", source = "netAssertValue")
+    @Mapping(target = "investmentId", source = "investmentId")
     @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
     FinancierInvestmentResponse mapToFinancierInvestment(Financier financier);
 }

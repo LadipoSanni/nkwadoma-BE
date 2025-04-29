@@ -54,7 +54,9 @@ public class Financier {
     private List<InvestmentVehicle> investmentVehicles;
     private String rcNumber;
     private LocalDateTime createdAt;
+    private String actorId;
     private InvestmentVehicleType investmentVehicleType;
+    private String investmentId;
     private String investmentVehicleName;
     private BigDecimal amountInvested;
     private LocalDate dateInvested;
