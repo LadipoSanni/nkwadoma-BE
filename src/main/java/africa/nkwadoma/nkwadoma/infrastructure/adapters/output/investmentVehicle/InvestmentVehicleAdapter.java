@@ -200,6 +200,12 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
     }
 
+    @Override
+    public boolean existByInvestmentVehicleLink(String investmentVehicleLink) throws MeedlException {
+        MeedlValidator.validateDataElement(investmentVehicleLink, "Investment vehicle link should be provided.");
+        return investmentVehicleRepository.existsByInvestmentVehicleLink(investmentVehicleLink);
+    }
+
 
     @Override
     public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {

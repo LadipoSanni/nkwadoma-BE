@@ -133,4 +133,8 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             "AND i.investmentVehicleStatus = 'PUBLISHED'")
     Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(
             @Param("financierId")String financierId, Pageable pageRequest);
+
+    boolean existsByName(String investmentVehicleName);
+
+    boolean existsByInvestmentVehicleLink(String investmentVehicleLink);
 }
