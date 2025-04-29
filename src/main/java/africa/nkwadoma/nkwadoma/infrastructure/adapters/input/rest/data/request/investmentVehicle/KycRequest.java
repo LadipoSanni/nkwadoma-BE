@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
+
 
 @AllArgsConstructor
 @Getter
@@ -20,7 +22,7 @@ public class KycRequest {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
     @NotBlank(message = "Address is required")
-    private String Address;
+    private String address;
     @NotBlank(message = "National identification number is required")
     private String nin;
     @NotBlank(message = "Bvn is required")
@@ -29,7 +31,7 @@ public class KycRequest {
     private String taxId;
     private String rcNumber;
     //source of fund
-    private List<String> sourceOfFunds;
+    private Set<String> sourceOfFunds;
 
     private String taxInformationNumber;
 

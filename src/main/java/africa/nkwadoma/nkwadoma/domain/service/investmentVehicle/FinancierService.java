@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
@@ -585,16 +586,19 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public Financier completeKyc(Financier financier) throws MeedlException {
         MeedlValidator.validateObjectInstance(financier, "Kyc request cannot be empty");
-        log.info("Validating for kyc financier service {}", financier);
-        financier.validateKyc();
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity(), UserMessages.NULL_ACTOR_USER_IDENTITY.getMessage());
+        MeedlValidator.validateObjectInstance(financier.getUserIdentity().getId(), "Identification for user performing this action is unknown.");
+
         Financier foundFinancier = financierOutputPort.findFinancierByUserId(financier.getUserIdentity().getId());
         if (foundFinancier.getAccreditationStatus() != null &&
                 foundFinancier.getAccreditationStatus().equals(AccreditationStatus.UNVERIFIED)){
+            log.info("Validating for kyc financier service {}", financier);
+            financier.validateKyc();
             log.info("Financier details in service to use in completing kyc {}", financier);
-            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
-            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
-            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
-            mapKycFinancierUpdatedValues(financier, foundFinancier, bankDetail);
+//            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
+//            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
+//            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
+            mapKycFinancierUpdatedValues(financier, foundFinancier, null);
             saveFinancierBeneficialOwners(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
