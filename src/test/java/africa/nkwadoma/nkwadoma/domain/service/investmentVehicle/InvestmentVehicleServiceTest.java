@@ -246,6 +246,34 @@ class InvestmentVehicleServiceTest {
     void viewInvestmentVehicleWithInvalidFinancierId(String financierId){
         assertThrows(MeedlException.class, ()->investmentVehicleService.viewInvestmentVehicleDetails(investmentId, financierId));
     }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void viewPublicInvestmentVehicleWithInvalidLink(String investmentVehicleLink){
+        assertThrows(MeedlException.class, ()->investmentVehicleService.viewInvestmentVehicleDetailsViaLink(investmentVehicleLink));
+    }
+    @Test
+    void viewPrivateInvestmentVehicleViaLink(){
+        String link = "link";
+        try {
+            when(investmentVehicleOutputPort.findByInvestmentVehicleLink(link)).thenReturn(fundGrowth);
+            assertThrows(MeedlException.class, ()-> investmentVehicleService.viewInvestmentVehicleDetailsViaLink(link));
+        } catch (MeedlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Test
+    void viewPublicInvestmentVehicleViaLink(){
+        String link = "link";
+        try {
+            fundGrowth.setInvestmentVehicleVisibility(InvestmentVehicleVisibility.PUBLIC);
+            when(investmentVehicleOutputPort.findByInvestmentVehicleLink(link)).thenReturn(fundGrowth);
+            InvestmentVehicle investmentVehicle = investmentVehicleService.viewInvestmentVehicleDetailsViaLink(link);
+            assertNotNull(investmentVehicle);
+        } catch (MeedlException e) {
+            log.warn("Failed ",e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     void viewInvestmentVehicleWithFinancierIdThatDoesNotExistInTheDB() {

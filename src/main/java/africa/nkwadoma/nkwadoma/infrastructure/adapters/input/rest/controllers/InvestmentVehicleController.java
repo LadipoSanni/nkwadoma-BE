@@ -70,6 +70,21 @@ public class InvestmentVehicleController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @GetMapping("investment-vehicle/detail/link/{investmentVehicleLink}")
+    public ResponseEntity<ApiResponse<?>> viewInvestmentVehicleDetailsViaLink(@PathVariable String investmentVehicleLink) throws MeedlException {
+
+        InvestmentVehicle investmentVehicle =
+                investmentVehicleUseCase.viewInvestmentVehicleDetailsViaLink(investmentVehicleLink);
+        log.info("The investment vehicle found via link is {}", investmentVehicle);
+        InvestmentVehicleResponse investmentVehicleResponse =
+                investmentVehicleRestMapper.toInvestmentVehicleResponse(investmentVehicle);
+        ApiResponse<InvestmentVehicleResponse> apiResponse = ApiResponse.<InvestmentVehicleResponse>builder()
+                .data(investmentVehicleResponse)
+                .message(INVESTMENT_VEHICLE_VIEWED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
     @GetMapping("view-all-investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")

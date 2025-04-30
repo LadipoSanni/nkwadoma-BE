@@ -16,5 +16,6 @@ public class WhiteList {
             "/api/v1/auth/refresh-token",
             "/api/v1/auth/password/reset",
             "/api/v1/identity/verification/failure-record/create",
+            "/api/v1/investment-vehicle/detail/link/**"
     };
 }
