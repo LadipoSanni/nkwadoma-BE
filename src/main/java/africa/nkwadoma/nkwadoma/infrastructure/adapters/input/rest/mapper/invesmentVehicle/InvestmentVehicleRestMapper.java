@@ -43,5 +43,6 @@ public interface InvestmentVehicleRestMapper {
     @Mapping(target = "id", source = "investmentVehicleId")
     InvestmentVehicle mapInvestmentVehicleOperationStatusToVehicleOperationStatus(InvestmentVehicleOperationStatusRequest vehicleOperationStatus);
 
+    @Mapping(target = "minimumInvestmentAmount", source = "minimumInvestmentAmount")
     InvestmentDetailResponse toInvestmentDetailResponse(InvestmentSummary investmentSummary);
 }

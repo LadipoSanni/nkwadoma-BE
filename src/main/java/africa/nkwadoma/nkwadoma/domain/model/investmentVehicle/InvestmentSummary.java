@@ -38,5 +38,5 @@ public class InvestmentSummary {
     private Float interestRateOffered;
     private InvestmentVehicleMode fundRaisingStatus;
     private InvestmentVehicleMode deployingStatus;
-    private BigDecimal minimumInvestedAmount;
+    private BigDecimal minimumInvestmentAmount;
 }

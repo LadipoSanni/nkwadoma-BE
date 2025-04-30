@@ -151,8 +151,16 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleFinancierId(String financierId, String investmentVehicleFinancierId) throws MeedlException {
         MeedlValidator.validateUUID(financierId, FinancierMessages.INVALID_FINANCIER_ID.getMessage());
         MeedlValidator.validateUUID(investmentVehicleFinancierId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
+        checkIfInvestmentExist(investmentVehicleFinancierId);
         InvestmentVehicleFinancierEntity investmentVehicleFinancierEntity =
                 investmentVehicleFinancierRepository.findByFinancierIdAndInvestmentVehicleId(financierId, investmentVehicleFinancierId);
         return investmentVehicleFinancierMapper.toInvestmentVehicleFinancier(investmentVehicleFinancierEntity);
+    }
+
+    public void checkIfInvestmentExist(String investmentVehicleFinancierId) throws MeedlException {
+        boolean investmentExist = investmentVehicleFinancierRepository.existsById(investmentVehicleFinancierId);
+        if (!investmentExist){
+            throw new MeedlException("Investment does not exist");
+        }
     }
 }
