@@ -16,6 +16,7 @@ public class PortfolioService implements PortfolioUseCase {
     @Override
     public Portfolio viewPortfolio() throws MeedlException {
         Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
+
         return portfolioOutputPort.findPortfolio(portfolio);
     }
 }
