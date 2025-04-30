@@ -12,6 +12,8 @@ public interface InvestmentVehicleOutputPort {
 
     InvestmentVehicle findById(String id) throws MeedlException;
 
+    InvestmentVehicle findByInvestmentVehicleLink(String investmentVehicleLink) throws MeedlException;
+
     void deleteInvestmentVehicle(String id) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicle(int pageSize, int pageNumber);
@@ -39,4 +41,6 @@ public interface InvestmentVehicleOutputPort {
     Page<InvestmentVehicle> searchInvestmentVehicleFinancierWasAddedTo(String id, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicle> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(String financierId, int pageSize, int pageNumber) throws MeedlException;
+
+    boolean existByInvestmentVehicleLink(String investmentVehicleName) throws MeedlException;
 }

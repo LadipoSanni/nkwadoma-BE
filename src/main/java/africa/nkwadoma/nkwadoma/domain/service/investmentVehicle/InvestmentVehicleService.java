@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_NAME_EXIST;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.INVESTMENT_VEHICLE_VISIBILITY_CANNOT_BE_NULL;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.DRAFT;
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.InvestmentVehicleConstants.INVESTMENT_VEHICLE_URL;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleStatus.PUBLISHED;
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType.COMMERCIAL;
 
@@ -133,6 +133,17 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         }
 
         return getInvestmentVehicleFinancier(investmentVehicleId, userId);
+    }
+
+    @Override
+    public InvestmentVehicle viewInvestmentVehicleDetailsViaLink(String investmentVehicleLink) throws MeedlException {
+        MeedlValidator.validateDataElement(investmentVehicleLink, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_LINK.getMessage());
+        InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findByInvestmentVehicleLink(investmentVehicleLink);
+        if (foundInvestmentVehicle.getInvestmentVehicleVisibility() != InvestmentVehicleVisibility.PUBLIC){
+            log.info("Investment vehicle is not public therefore can not be viewed view link {}", investmentVehicleLink);
+            throw new MeedlException("Investment vehicle not found.");
+        }
+        return foundInvestmentVehicle;
     }
 
     private InvestmentVehicle getInvestmentVehicleFinancier(String investmentVehicleId, String userId) throws MeedlException {
@@ -274,7 +285,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         InvestmentVehicle foundInvestmentVehicle = investmentVehicleOutputPort.findById(investmentVehicle.getId());
         if (foundInvestmentVehicle.getVehicleOperation() == null) {
             setNewInvestmentVehicleOperationStatus(investmentVehicle, foundInvestmentVehicle);
-            String investmentVehicleLink = generateInvestmentVehicleLink(foundInvestmentVehicle.getId());
+            String investmentVehicleLink = generateInvestmentVehicleLink(foundInvestmentVehicle.getName());
             foundInvestmentVehicle.setInvestmentVehicleLink(investmentVehicleLink);
             return investmentVehicleOutputPort.save(foundInvestmentVehicle);
         }
@@ -325,11 +336,24 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         investmentVehicleOutputPort.save(foundInvestmentVehicle);
     }
 
+    private String generateInvestmentVehicleLink(String name) throws MeedlException {
+        Random random = new Random();
+        String baseSlug = name.trim().toLowerCase()
+                .replaceAll("[\\s_]+", "-")
+//                .replaceAll("-{2,}", "-")
+                ;
 
-    private String generateInvestmentVehicleLink(String id) {
-        return INVESTMENT_VEHICLE_URL+id;
+        String uniqueSlug = baseSlug;
+        int counter = 1;
+        while (investmentVehicleOutputPort.existByInvestmentVehicleLink(uniqueSlug)) {
+            log.info("generating link for investment vehicle with name {}, search for name link {} time(s).",name, counter);
+            int randomNum = 1000 + random.nextInt(counter * 90);
+            uniqueSlug = baseSlug + "-" + randomNum;
+            counter++;
+        }
+        log.info("Link generated {} for investment vehicle with name {}.",uniqueSlug, name);
+        return uniqueSlug;
     }
-
 
 
 
