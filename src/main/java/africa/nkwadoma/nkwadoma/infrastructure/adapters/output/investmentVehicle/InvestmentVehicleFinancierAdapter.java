@@ -12,7 +12,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.financier.FinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleFinancierMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleFinancierEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationDTO;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.financier.FinancierWithDesignationProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleFinancierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +56,11 @@ public class InvestmentVehicleFinancierAdapter implements InvestmentVehicleFinan
     public Page<Financier> viewAllFinancierInAnInvestmentVehicle(String investmentVehicleId, ActivationStatus activationStatus, Pageable pageRequest) throws MeedlException {
         MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
 
-        Page<FinancierWithDesignationDTO> financiersWithDesignationDTOS = investmentVehicleFinancierRepository.findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
-        return financiersWithDesignationDTOS.map(financierWithDesignationDTOS -> {
-            log.info("The roles financier has : {}", financierWithDesignationDTOS.getInvestmentVehicleDesignation());
-            Financier financier = financierMapper.map(financierWithDesignationDTOS.getFinancier());
-            financier.setInvestmentVehicleDesignation(financierWithDesignationDTOS.getInvestmentVehicleDesignation());
+        Page<FinancierWithDesignationProjection> financiersWithDesignationProjection = investmentVehicleFinancierRepository.findDistinctFinanciersWithDesignationByInvestmentVehicleIdAndStatus(investmentVehicleId, activationStatus, pageRequest);
+        return financiersWithDesignationProjection.map(financierWithDesignationProjection -> {
+            log.info("The roles financier has : {}", financierWithDesignationProjection.getInvestmentVehicleDesignation());
+            Financier financier = financierMapper.map(financierWithDesignationProjection.getFinancier());
+            financier.setInvestmentVehicleDesignation(financierWithDesignationProjection.getInvestmentVehicleDesignation());
             return financier;
         });
     }
