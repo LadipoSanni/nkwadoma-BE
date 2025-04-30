@@ -235,6 +235,7 @@ public class FinancierService implements FinancierUseCase {
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier.setCreatedAt(LocalDateTime.now());
+        financier.setActivationStatus(ActivationStatus.INVITED);
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier = financierOutputPort.save(financier);
         return financier;
