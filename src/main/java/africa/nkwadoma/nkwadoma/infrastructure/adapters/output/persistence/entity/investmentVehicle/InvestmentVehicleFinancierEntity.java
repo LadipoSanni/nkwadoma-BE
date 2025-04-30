@@ -26,6 +26,7 @@ public class InvestmentVehicleFinancierEntity {
     @ManyToOne
     private InvestmentVehicleEntity investmentVehicle;
     @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private LocalDate dateInvested;
 }
