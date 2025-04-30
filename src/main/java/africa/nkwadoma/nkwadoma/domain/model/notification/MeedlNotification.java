@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.domain.model.notification;
 
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -31,6 +32,8 @@ public class MeedlNotification {
     private String duration;
     private int unreadCount;
     private int allNotificationsCount;
+    private NotificationFlag notificationFlag;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateUUID(contentId,"Content id cannot be empty");

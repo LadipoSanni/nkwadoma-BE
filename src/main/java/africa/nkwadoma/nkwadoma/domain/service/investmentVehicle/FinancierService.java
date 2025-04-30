@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
@@ -255,7 +256,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
         }
         return financier;
     }
@@ -352,7 +353,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Individual financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
             return updateFinancierDetails(financier, savedFinancier);
         }
     }
@@ -366,7 +367,7 @@ public class FinancierService implements FinancierUseCase {
         return userIdentity;
     }
 
-    private void notifyExistingFinancier(Financier financier) throws MeedlException {
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
         log.info("Started in app notification for existing financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(financier.getUserIdentity())
@@ -375,6 +376,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("You have now been made a financier on the platform.")
+                .notificationFlag(notificationFlag)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }

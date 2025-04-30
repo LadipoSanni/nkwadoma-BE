@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.meedlNotification;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -31,5 +32,6 @@ public class MeedlNotificationEntity {
     private String senderMail;
     private String senderFullName;
     private String contentDetail;
+    private NotificationFlag notificationFlag;
 
 }
