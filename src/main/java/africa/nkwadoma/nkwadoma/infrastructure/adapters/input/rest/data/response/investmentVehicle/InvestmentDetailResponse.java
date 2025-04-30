@@ -1,20 +1,17 @@
-package africa.nkwadoma.nkwadoma.domain.model.investmentVehicle;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
-import lombok.Builder;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.VehicleClosure;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
-@Getter
 @Setter
-@ToString
-@Builder
-public class InvestmentSummary {
+@Getter
+public class InvestmentDetailResponse {
     private String id;
     private String name;
     private InvestmentVehicleType investmentVehicleType;

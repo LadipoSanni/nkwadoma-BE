@@ -30,7 +30,6 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
@@ -695,7 +694,7 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException {
-        Financier financier = getFinancierByUserType(financierId, userId);
+        Financier financier = resolveFinancier(financierId, userId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
         BigDecimal totalInvestmentAmount = financier.getTotalAmountInvested();
@@ -707,6 +706,18 @@ public class FinancierService implements FinancierUseCase {
                 .investmentSummaries(investmentSummaries)
                 .portfolioValue(financier.getPortfolioValue())
                 .build();
+    }
+
+    @Override
+    public InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException {
+        Financier financier = resolveFinancier(financierId, userId);
+        InvestmentVehicleFinancier investmentVehicleFinancier =
+                investmentVehicleFinancierOutputPort.findByFinancierIdAndInvestmentVehicleFinancierId(financier.getId(), investmentVehicleFinancierId);
+        InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+        investmentVehicle.setAmountFinancierInvested(investmentVehicleFinancier.getAmountInvested());
+        investmentVehicle.setDateInvested(investmentVehicleFinancier.getDateInvested());
+        investmentVehicle.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
+        return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
     }
 
     @Override
@@ -740,7 +751,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
 
-    public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
+    public Financier resolveFinancier(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;
         if (isFinancier(userId)) {
             foundFinancier = financierOutputPort.findFinancierByUserId(userId);
