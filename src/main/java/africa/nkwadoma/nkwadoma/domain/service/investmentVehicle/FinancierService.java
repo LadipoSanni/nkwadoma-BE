@@ -622,9 +622,6 @@ public class FinancierService implements FinancierUseCase {
             log.info("Validating for kyc financier service {}", financier);
             financier.validateKyc(foundFinancier.getFinancierType());
             log.info("Financier details in service to use in completing kyc {}", financier);
-//            log.info("Bank details in financier service to use in completing kyc {}", financier.getUserIdentity().getBankDetail());
-//            BankDetail bankDetail = bankDetailOutputPort.save(financier.getUserIdentity().getBankDetail());
-//            log.info("Bank details in financier service after been saved in bank detail adapter. {}", bankDetail);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
             saveFinancierBeneficialOwners(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
