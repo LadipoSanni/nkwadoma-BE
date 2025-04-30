@@ -13,6 +13,7 @@ public interface InvestmentVehicleMapper {
 
     @Mapping(target = "totalAvailableAmount", source = "totalAvailableAmount")
     @Mapping(target = "operation", source = "vehicleOperation")
+    @Mapping(target = "closure", source = "vehicleClosureStatus")
     InvestmentVehicleEntity toInvestmentVehicleEntity(InvestmentVehicle investmentVehicle);
 
     @InheritInverseConfiguration

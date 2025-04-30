@@ -315,13 +315,18 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
         foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
                     investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
+        if(foundInvestmentVehicle.getVehicleClosureStatus() != null){
+            investmentVehicle.getVehicleClosureStatus().setId(foundInvestmentVehicle.getVehicleClosureStatus().getId());
             foundInvestmentVehicle.setVehicleClosureStatus(
-                    vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus()));
-            foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
+                    investmentVehicle.getVehicleClosureStatus());
+        }
+        foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
                     investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
         foundInvestmentVehicle.setVehicleOperation(
                 vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
         );
+        foundInvestmentVehicle.setVehicleClosureStatus(
+                vehicleClosureOutputPort.save(foundInvestmentVehicle.getVehicleClosureStatus()));
         investmentVehicleOutputPort.save(foundInvestmentVehicle);
     }
 
