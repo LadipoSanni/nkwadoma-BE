@@ -390,6 +390,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
+                .notificationFlag(NotificationFlag.FINANCIER)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
