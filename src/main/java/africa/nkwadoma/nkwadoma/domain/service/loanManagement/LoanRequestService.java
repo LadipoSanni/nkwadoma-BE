@@ -135,6 +135,7 @@ public class LoanRequestService implements LoanRequestUseCase {
                 .user(updatedLoanRequest.getLoanee().getUserIdentity())
                 .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
                 .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.LOAN_REQUEST)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
