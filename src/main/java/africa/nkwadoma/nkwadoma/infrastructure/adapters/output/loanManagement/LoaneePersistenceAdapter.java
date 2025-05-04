@@ -99,7 +99,10 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         if (loaneeEntity.isEmpty()) {
             return Optional.empty();
         }
+        log.info("Loanee found by user id. Is identity verified field Before mapping {}", loaneeEntity.get().getUserIdentity().isIdentityVerified());
         Loanee loanee = loaneeMapper.toLoanee(loaneeEntity.get());
+        loanee.getUserIdentity().setIdentityVerified(loaneeEntity.get().getUserIdentity().isIdentityVerified());
+        log.info("Loanee found by user id. Is identity verified field after mapping {}", loaneeEntity.get().getUserIdentity().isIdentityVerified());
         return Optional.of(loanee);
     }
 

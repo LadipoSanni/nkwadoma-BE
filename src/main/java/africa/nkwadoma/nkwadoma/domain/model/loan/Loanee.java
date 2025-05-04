@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +43,9 @@ public class Loanee {
         MeedlValidator.validateObjectInstance(userIdentity);
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateObjectInstance(loaneeLoanDetail);
+        if (loaneeLoanDetail.getInitialDeposit() == null) {
+            loaneeLoanDetail.setInitialDeposit(BigDecimal.valueOf(0));
+        }
         validateLoaneeUserIdentity();
     }
 

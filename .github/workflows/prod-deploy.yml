@@ -1,4 +1,4 @@
-name: Deploy Production
+name: Deploy Production - support
 
 env:
   REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod
@@ -58,15 +58,19 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ env.APP }}:$GITHUB_SHA .
 
+
       - name: Tag Docker image with "beta"
         run: |
          DOCKER_TAG=${{ env.REPO_URL }}:beta
+
          docker tag ${{ env.APP }}:$GITHUB_SHA $DOCKER_TAG
          docker tag ${{ env.APP }}:$GITHUB_SHA ${{ env.REPO_URL }}:$GITHUB_SHA
 
       - name: Push Docker image to ECR
         run: |
+
           docker push ${{ env.REPO_URL }}:beta
+
           docker push ${{ env.REPO_URL }}:$GITHUB_SHA
 
 

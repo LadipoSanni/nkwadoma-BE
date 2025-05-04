@@ -104,7 +104,8 @@ public class TokenUtils {
         }
         return claims;
     }
-    public String decryptAES(String encryptedData) throws MeedlException {
+    public String decryptAES(String encryptedData, String message) throws MeedlException {
+        log.info("Decryption of data started {}", encryptedData);
         MeedlValidator.validateDataElement(encryptedData, "Please provide a valid data.");
         String key = String.format("%-16s", AESSecretKey).substring(0, 16);
 
@@ -119,8 +120,10 @@ public class TokenUtils {
             decryptedValue = cipher.doFinal(decodedValue);
         } catch (Exception e) {
             log.error("Error processing identity verification. Error decrypting identity with root cause : {}", e.getMessage());
-            throw new MeedlException("Error processing identity verification");
+            log.error(message);
+            throw new MeedlException(message);
         }
+        log.info("Decryption completed");
         return new String(decryptedValue);
     }
 

@@ -54,7 +54,6 @@ public class LoanRequestService implements LoanRequestUseCase {
         log.info("Loan requests from repository: {}", loanRequests.getContent());
         return loanRequests;
     }
-
     @Override
     public LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
@@ -88,9 +87,6 @@ public class LoanRequestService implements LoanRequestUseCase {
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Loan request retrieved: {}", foundLoanRequest);
 
-        if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
-            throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
-        }
         if (ObjectUtils.isNotEmpty(foundLoanRequest.getStatus())
                 && foundLoanRequest.getStatus().equals(LoanRequestStatus.APPROVED)) {
             throw new LoanException(LoanMessages.LOAN_REQUEST_HAS_ALREADY_BEEN_APPROVED.getMessage());
@@ -101,6 +97,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
+            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
+                throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
+            }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
 
             updateLoanRequestOnMetrics(foundLoanRequest);
@@ -116,6 +115,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         }
         else {
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
+            updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
             return loanRequestOutputPort.save(updatedLoanRequest);
         }
     }

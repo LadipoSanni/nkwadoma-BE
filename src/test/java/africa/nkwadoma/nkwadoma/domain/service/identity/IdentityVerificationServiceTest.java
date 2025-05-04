@@ -11,10 +11,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerificationFailur
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.IdentityVerificationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import africa.nkwadoma.nkwadoma.test.data.TestData;
@@ -124,14 +122,14 @@ class IdentityVerificationServiceTest {
     void verifyIdentityFailedVerificationCreatesFailureRecord() throws MeedlException {
         PremblyResponse premblyResponse = new PremblyBvnResponse();
 //        premblyResponse.setVerification(Verification.builder().status("VERIFIED").build());
-        when(tokenUtils.decryptAES(testBvn)).thenReturn("12345678901");
-        when(tokenUtils.decryptAES(testNin)).thenReturn("12345678901");
+        when(tokenUtils.decryptAES(testBvn, "Error processing identity verification")).thenReturn("12345678901");
+        when(tokenUtils.decryptAES(testNin, "Error processing identity verification")).thenReturn("12345678901");
         when(loanReferralOutputPort.findById(identityVerification.getLoanReferralId())).thenReturn(loanReferral);
         when(userIdentityOutputPort.findByBvn(testBvn)).thenReturn(null);
 //        when(identityVerificationOutputPort.verifyBvn(identityVerification)).thenReturn(premblyResponse);
-        PremblyBvnResponse premblyBvnResponse = new PremblyBvnResponse();
+        PremblyNinResponse premblyBvnResponse = new PremblyNinResponse();
         premblyBvnResponse.setVerification(Verification.builder().status("NOT-VERIFIED").build());
-        when(identityVerificationOutputPort.verifyBvnLikeness(identityVerification)).thenReturn(
+        when(identityVerificationOutputPort.verifyNinLikeness(identityVerification)).thenReturn(
                 premblyBvnResponse);
 //        when(userIdentityOutputPort.findById(loanReferral.getLoanee().getUserIdentity().getId()
 //        )).thenReturn(favour);

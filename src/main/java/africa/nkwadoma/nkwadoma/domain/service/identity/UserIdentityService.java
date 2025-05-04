@@ -79,7 +79,10 @@ public class UserIdentityService implements CreateUserUseCase {
 
     @Override
     public AccessTokenResponse login(UserIdentity userIdentity)throws MeedlException {
+        MeedlValidator.validateDataElement(userIdentity.getPassword(), "Password must be provided to login");
         MeedlValidator.validateEmail(userIdentity.getEmail());
+        String password = tokenUtils.decryptAES(userIdentity.getPassword(), "Password provided is not valid. Contact admin.");
+        userIdentity.setPassword(password);
         MeedlValidator.validatePassword(userIdentity.getPassword());
         return identityManagerOutPutPort.login(userIdentity);
     }
@@ -130,10 +133,10 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public UserIdentity createPassword(String token, String password) throws MeedlException {
-        log.info("request got into service layer {}",password);
+    public UserIdentity createPassword(String token, String encryptedPassword) throws MeedlException {
+        log.info("request got into service layer {}",encryptedPassword);
 //        passwordPreviouslyCreated(token);
-        MeedlValidator.validateDataElement(token, "Please provide a valid token.");
+        String password = validatePassword(encryptedPassword, token);
         passwordPreviouslyCreated(token);
         UserIdentity foundUser = getUserIdentityFromToken(password, token);
         UserIdentity userIdentity = identityManagerOutPutPort.createPassword(
@@ -148,17 +151,24 @@ public class UserIdentityService implements CreateUserUseCase {
     }
 
     @Override
-    public void resetPassword(String token, String password) throws MeedlException {
+    public void resetPassword(String token, String encryptedPassword) throws MeedlException {
 //        passwordPreviouslyCreated(token);
+        String password = validatePassword(encryptedPassword, token);
         UserIdentity userIdentity = getUserIdentityFromToken(password, token);
         userIdentity.setNewPassword(password);
         identityManagerOutPutPort.resetPassword(userIdentity);
 //        blackListedTokenAdapter.blackListToken(createBlackList(token));
     }
 
-    private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
-        MeedlValidator.validatePassword(password);
+    private String validatePassword(String encryptedPassword, String token) throws MeedlException {
+        MeedlValidator.validateDataElement(encryptedPassword,  "Password cannot be empty");
         MeedlValidator.validateDataElement(token, "Invalid token provided.");
+        String password = tokenUtils.decryptAES(encryptedPassword, "Password provided is not valid. Contact admin.");
+        MeedlValidator.validatePassword(password);
+        return password;
+    }
+
+    private UserIdentity getUserIdentityFromToken(String password, String token) throws MeedlException {
         String email = tokenUtils.decodeJWTGetEmail(token);
         log.info("User email from token {}", email);
         return userIdentityOutputPort.findByEmail(email);

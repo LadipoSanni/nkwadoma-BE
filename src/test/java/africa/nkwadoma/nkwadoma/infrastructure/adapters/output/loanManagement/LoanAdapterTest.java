@@ -182,8 +182,9 @@ class LoanAdapterTest {
 
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
                     .status(LoanRequestStatus.APPROVED).referredBy("Amazing Grace Enterprises").loanee(loanee).createdDate(LocalDateTime.now()).
-                    loaneeId(loanee.getId()).loanReferralId(loanReferralId).cohortId(cohortId)
+                    loaneeId(loanee.getId())
                     .dateTimeApproved(LocalDateTime.now()).build();
+            loanRequest.setId(loanReferralId);
             loanRequest = loanRequestOutputPort.save(loanRequest);
             log.info("Loan request saved: {}", loanRequest);
             assertNotNull(loanRequest.getId());
