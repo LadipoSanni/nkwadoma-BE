@@ -5,19 +5,16 @@ import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierPoli
 import africa.nkwadoma.nkwadoma.application.ports.output.financier.PoliticallyExposedPersonOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierPoliticallyExposedPerson;
+import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -32,22 +29,22 @@ public class FinancierPoliticallyExposedPersonTest {
     private FinancierOutputPort financierOutputPort;
     @Autowired
     private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
-    private FinancierPoliticallyExposedPerson financierBeneficialOwner;
-    private String beneficialOwnerId;
-    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", name);;
+    private FinancierPoliticallyExposedPerson financierPoliticallyExposedPerson;
+    private String politicallyExposedPersonId;
+    private final String email = String.format("testfinancier%spoliticallyexposedpersonemail@email.com", TestUtils.generateName(4));;
     @BeforeAll
     void setUp() {
-        financierBeneficialOwner = TestData.buildFinancierPoliticallyExposedPerson(email);
+        financierPoliticallyExposedPerson = TestData.buildFinancierPoliticallyExposedPerson(email);
         try {
-            UserIdentity userIdentity = userIdentityOutputPort.save(financierBeneficialOwner.getFinancier().getUserIdentity());
-            financierBeneficialOwner.getFinancier().setUserIdentity(userIdentity);
-            Financier financier = financierOutputPort.save(financierBeneficialOwner.getFinancier());
-            BeneficialOwner beneficialOwner = politicallyExposedPersonOutputPort.save(financierBeneficialOwner.getBeneficialOwner());
-            financierBeneficialOwner.setBeneficialOwner(beneficialOwner);
-            financierBeneficialOwner.setFinancier(financier);
-            log.info("Details saved and set in test.");
+            UserIdentity userIdentity = userIdentityOutputPort.save(financierPoliticallyExposedPerson.getFinancier().getUserIdentity());
+            financierPoliticallyExposedPerson.getFinancier().setUserIdentity(userIdentity);
+            Financier financier = financierOutputPort.save(financierPoliticallyExposedPerson.getFinancier());
+            PoliticallyExposedPerson politicallyExposedPerson = politicallyExposedPersonOutputPort.save(financierPoliticallyExposedPerson.getPoliticallyExposedPerson());
+            financierPoliticallyExposedPerson.setPoliticallyExposedPerson(politicallyExposedPerson);
+            financierPoliticallyExposedPerson.setFinancier(financier);
+            log.info("Details saved and set in test ---- politically exposed person.");
         } catch (MeedlException e) {
-            log.error("Failed in test financier beneficial owner adapter", e);
+            log.error("Failed in test financier politically exposed person adapter", e);
             throw new RuntimeException(e);
         }
     }
@@ -55,18 +52,17 @@ public class FinancierPoliticallyExposedPersonTest {
     @Test
     @Order(1)
     void save() {
-        FinancierBeneficialOwner savedFinancierBeneficialOwner = null;
+        FinancierPoliticallyExposedPerson savedFinancierPoliticallyExposedPerson = null;
         try {
-            savedFinancierBeneficialOwner = financierPoliticallyExposedPersonOutputPort.save(financierBeneficialOwner);
+            savedFinancierPoliticallyExposedPerson = financierPoliticallyExposedPersonOutputPort.save(financierPoliticallyExposedPerson);
         } catch (MeedlException e) {
             log.error("",e);
             throw new RuntimeException(e);
         }
-        assertNotNull(savedFinancierBeneficialOwner);
-        assertNotNull(savedFinancierBeneficialOwner.getId());
-//        assertEquals(financierBeneficialOwner.getEntityName(), financierBeneficialOwner.getEntityName());
-        log.info("Saved cooperation {}", savedFinancierBeneficialOwner);
-        beneficialOwnerId = savedFinancierBeneficialOwner.getId();
+        assertNotNull(savedFinancierPoliticallyExposedPerson);
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getId());
+        log.info("Saved politically exposed person ...... {}", savedFinancierPoliticallyExposedPerson);
+        politicallyExposedPersonId = savedFinancierPoliticallyExposedPerson.getId();
     }
     @Test
     void saveWithNull(){
@@ -76,29 +72,35 @@ public class FinancierPoliticallyExposedPersonTest {
     @Test
     @Order(2)
     void findById() {
-        FinancierBeneficialOwner foundFinancierBeneficialOwner = null;
+        FinancierPoliticallyExposedPerson savedFinancierPoliticallyExposedPerson = null;
         try {
-            foundFinancierBeneficialOwner = financierPoliticallyExposedPersonOutputPort.findById(beneficialOwnerId);
+            savedFinancierPoliticallyExposedPerson = financierPoliticallyExposedPersonOutputPort.findById(politicallyExposedPersonId);
         } catch (MeedlException e) {
             log.error("",e);
             throw new RuntimeException(e);
         }
-        assertNotNull(foundFinancierBeneficialOwner);
-//        assertEquals(financierBeneficialOwner.getEntityName(), foundFinancierBeneficialOwner.getEntityName());
-        log.info("found beneficial owner {}", foundFinancierBeneficialOwner);
+        assertNotNull(savedFinancierPoliticallyExposedPerson);
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
+        assertEquals(email, savedFinancierPoliticallyExposedPerson.getFinancier().getUserIdentity().getEmail());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getPositionHeld());
+        assertNotNull(savedFinancierPoliticallyExposedPerson.getPoliticallyExposedPerson().getCountry());
+        log.info("found beneficial owner {}", savedFinancierPoliticallyExposedPerson);
     }
     @Test
     @Order(3)
     void deleteById() {
         try {
-            financierPoliticallyExposedPersonOutputPort.deleteById(beneficialOwnerId);
-            politicallyExposedPersonOutputPort.deleteById(financierBeneficialOwner.getBeneficialOwner().getId());
-            financierOutputPort.delete(financierBeneficialOwner.getFinancier().getId());
+            financierPoliticallyExposedPersonOutputPort.deleteById(politicallyExposedPersonId);
+            politicallyExposedPersonOutputPort.deleteById(financierPoliticallyExposedPerson.getPoliticallyExposedPerson().getId());
+            financierOutputPort.delete(financierPoliticallyExposedPerson.getFinancier().getId());
             userIdentityOutputPort.deleteUserByEmail(email);
         } catch (MeedlException e) {
             log.error("",e);
             throw new RuntimeException(e);
         }
-        assertThrows(MeedlException.class, ()-> financierPoliticallyExposedPersonOutputPort.findById(beneficialOwnerId));
+        assertThrows(MeedlException.class, ()-> financierPoliticallyExposedPersonOutputPort.findById(politicallyExposedPersonId));
     }
 }

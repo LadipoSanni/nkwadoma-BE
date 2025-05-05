@@ -485,6 +485,11 @@ public class TestData {
                 .totalNumberOfInvestmentVehicle(2)
                 .totalNumberOfInstitutionalFinancier(2)
                 .totalNumberOfIndividualFinancier(2)
+                .totalNumberOfLoans(33)
+                .loanReferralPercentage(27.2727)
+                .loanRequestPercentage(18.1818)
+                .loanDisbursalPercentage(15.1515)
+                .loanOfferPercentage(39.3939)
                 .build();
     }
 

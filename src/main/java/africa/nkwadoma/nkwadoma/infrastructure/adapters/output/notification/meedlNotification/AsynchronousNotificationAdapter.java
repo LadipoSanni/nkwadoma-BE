@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -54,6 +55,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
+            meedlNotification.setNotificationFlag(NotificationFlag.FINANCIER);
             log.info("Notifying portfolio manager on financier ");
         meedlNotificationUsecase.sendNotification(meedlNotification);
         }
@@ -72,6 +74,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
+                .notificationFlag(NotificationFlag.FINANCIER)
                 .build();
     }
 
@@ -88,6 +91,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
+                .notificationFlag(NotificationFlag.FINANCIER)
                 .build();
     }
 }

@@ -24,6 +24,7 @@ public class PortfolioResponse {
     private double loanReferralPercentage;
     private double loanRequestPercentage;
     private double loanDisbursalPercentage;
+    private double loanOfferPercentage;
     private String assetUnderManagement;
     private double aumPercentage;
     private BigDecimal totalAvailable;

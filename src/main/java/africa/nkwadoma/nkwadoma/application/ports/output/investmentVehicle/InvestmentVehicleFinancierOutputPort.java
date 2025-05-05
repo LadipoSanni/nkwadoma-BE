@@ -36,4 +36,6 @@ public interface InvestmentVehicleFinancierOutputPort {
     Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndUserId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
 
     Page<InvestmentVehicleFinancier> searchFinancierInvestmentByInvestmentVehicleNameAndFinancierId(String investmentVehicleName, String id, int pageSize, int pageNumber) throws MeedlException;
+
+    InvestmentVehicleFinancier findByFinancierIdAndInvestmentVehicleFinancierId(String id, String investmentVehicleFinancierId) throws MeedlException;
 }

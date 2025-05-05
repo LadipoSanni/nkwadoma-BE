@@ -40,7 +40,6 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "investmentVehicleType", source = "investmentVehicleType")
     @Mapping(target = "dateInvested", source = "dateInvested")
-    @Mapping(target = "amountInvested", source = "amountInvested", defaultValue = "0")
     @Mapping(target = "netAssetValue", source = "netAssetValue", defaultValue = "0")
     @Mapping(target = "netAssetValueInPercent", source = "netAssetValueInPercent")
     @Mapping(target = "percentageOfPortfolio", source = "percentageOfPortfolio")
@@ -59,5 +58,7 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "deployingStatus", source = "vehicleOperation.deployingStatus")
     @Mapping(target = "mandate", source = "mandate")
     @Mapping(target = "fundRaisingStatus", source = "vehicleOperation.fundRaisingStatus")
+    @Mapping(target = "minimumInvestmentAmount", source = "minimumInvestmentAmount")
+    @Mapping(target = "amountInvested", source = "amountFinancierInvested", defaultValue = "0")
     InvestmentSummary toInvestmentSummary(InvestmentVehicle investmentVehicle);
 }

@@ -18,6 +18,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
@@ -30,7 +31,6 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
@@ -236,6 +236,7 @@ public class FinancierService implements FinancierUseCase {
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier.setCreatedAt(LocalDateTime.now());
+        financier.setActivationStatus(ActivationStatus.INVITED);
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier = financierOutputPort.save(financier);
         return financier;
@@ -256,7 +257,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
         }
         return financier;
     }
@@ -353,7 +354,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Individual financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
             return updateFinancierDetails(financier, savedFinancier);
         }
     }
@@ -367,7 +368,7 @@ public class FinancierService implements FinancierUseCase {
         return userIdentity;
     }
 
-    private void notifyExistingFinancier(Financier financier) throws MeedlException {
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
         log.info("Started in app notification for existing financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(financier.getUserIdentity())
@@ -376,6 +377,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("You have now been made a financier on the platform.")
+                .notificationFlag(notificationFlag)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
@@ -389,6 +391,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
+                .notificationFlag(NotificationFlag.FINANCIER)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
@@ -695,7 +698,7 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException {
-        Financier financier = getFinancierByUserType(financierId, userId);
+        Financier financier = resolveFinancier(financierId, userId);
         List<InvestmentVehicleFinancier> financierInvestmentVehicles = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
         int numberOfInvestment = financierInvestmentVehicles.size();
         BigDecimal totalInvestmentAmount = financier.getTotalAmountInvested();
@@ -707,6 +710,18 @@ public class FinancierService implements FinancierUseCase {
                 .investmentSummaries(investmentSummaries)
                 .portfolioValue(financier.getPortfolioValue())
                 .build();
+    }
+
+    @Override
+    public InvestmentSummary viewInvestmentDetailOfFinancier(String financierId, String investmentVehicleFinancierId, String userId) throws MeedlException {
+        Financier financier = resolveFinancier(financierId, userId);
+        InvestmentVehicleFinancier investmentVehicleFinancier =
+                investmentVehicleFinancierOutputPort.findByFinancierIdAndInvestmentVehicleFinancierId(financier.getId(), investmentVehicleFinancierId);
+        InvestmentVehicle investmentVehicle = investmentVehicleFinancier.getInvestmentVehicle();
+        investmentVehicle.setAmountFinancierInvested(investmentVehicleFinancier.getAmountInvested());
+        investmentVehicle.setDateInvested(investmentVehicleFinancier.getDateInvested());
+        investmentVehicle.setDesignations(investmentVehicleFinancier.getInvestmentVehicleDesignation());
+        return investmentVehicleMapper.toInvestmentSummary(investmentVehicle);
     }
 
     @Override
@@ -740,7 +755,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
 
-    public Financier getFinancierByUserType(String financierId, String userId) throws MeedlException {
+    public Financier resolveFinancier(String financierId, String userId) throws MeedlException {
         Financier foundFinancier = null;
         if (isFinancier(userId)) {
             foundFinancier = financierOutputPort.findFinancierByUserId(userId);
