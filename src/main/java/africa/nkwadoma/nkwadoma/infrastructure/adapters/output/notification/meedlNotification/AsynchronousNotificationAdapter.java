@@ -55,6 +55,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
+            meedlNotification.setNotificationFlag(NotificationFlag.FINANCIER);
             log.info("Notifying portfolio manager on financier ");
         meedlNotificationUsecase.sendNotification(meedlNotification);
         }
