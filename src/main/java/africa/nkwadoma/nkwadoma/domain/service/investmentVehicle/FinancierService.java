@@ -257,7 +257,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
+            notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER);
         }
         return financier;
     }
@@ -354,7 +354,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Individual financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier, NotificationFlag.FINANCIER);
+            notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER);
             return updateFinancierDetails(financier, savedFinancier);
         }
     }
@@ -391,7 +391,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
-                .notificationFlag(NotificationFlag.FINANCIER)
+                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
