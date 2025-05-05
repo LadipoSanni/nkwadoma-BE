@@ -1,6 +1,9 @@
 package africa.nkwadoma.nkwadoma.domain.enums.identity;
 
 public enum UserRelationship {
+    // Self-reference
+    SELF,
+
     // Immediate Family
     FATHER,
     MOTHER,
