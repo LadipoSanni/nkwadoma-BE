@@ -35,8 +35,6 @@ public interface FinancierRestMapper {
     @Mapping(target = "totalNumberOfInvestment", source = "totalNumberOfInvestment")
     FinancierDashboardResponse mapToDashboardResponse(Financier financier);
 
-    @Mapping( target = "bankName", source = "userIdentity.bankDetail.bankName")
-    @Mapping( target = "bankNumber", source = "userIdentity.bankDetail.bankNumber")
     @Mapping( target = "firstName", source = "userIdentity.firstName")
     @Mapping( target = "lastName", source = "userIdentity.lastName")
     @Mapping( target = "financierEmail", source = "userIdentity.email")
@@ -46,8 +44,6 @@ public interface FinancierRestMapper {
     @Mapping( target = "taxId", source = "userIdentity.taxId")
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "userIdentity.bankDetail.bankName", source = "kycRequest.bankName")
-    @Mapping(target = "userIdentity.bankDetail.bankNumber", source = "kycRequest.bankNumber")
     @Mapping(target = "userIdentity.taxId", source = "kycRequest.taxId")
     @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")

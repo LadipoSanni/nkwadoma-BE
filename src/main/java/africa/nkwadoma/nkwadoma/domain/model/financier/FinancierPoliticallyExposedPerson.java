@@ -3,15 +3,15 @@ package africa.nkwadoma.nkwadoma.domain.model.financier;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class FinancierPoliticallyExposedPerson {
     private String id;
     private Financier financier;

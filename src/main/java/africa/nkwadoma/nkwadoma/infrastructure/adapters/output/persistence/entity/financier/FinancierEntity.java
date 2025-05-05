@@ -22,7 +22,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @Entity
 public class FinancierEntity {
 

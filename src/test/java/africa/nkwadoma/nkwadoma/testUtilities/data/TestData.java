@@ -560,7 +560,7 @@ public class TestData {
                 .country(Country.AFGHANISTAN)
                 .positionHeld("Vice President")
 //                .relationship(UserRelationship.BROTHER)
-                .AdditionalInformation("None")
+                .additionalInformation("None")
                 .build();
     }
     public static BeneficialOwner buildBeneficialOwner() {

@@ -16,10 +16,6 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 public class KycRequest {
-    @NotBlank(message= "Bank name is required")
-    private String bankName;
-    @NotBlank(message = "Bank number is required")
-    private String bankNumber;
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
     @NotBlank(message = "Address is required")

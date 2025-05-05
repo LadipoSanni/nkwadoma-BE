@@ -16,7 +16,7 @@ public class PoliticallyExposedPerson {
     private String positionHeld;
     private Country country;
     private UserRelationship relationship;
-    private String AdditionalInformation;
+    private String additionalInformation;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateDataElement(this.positionHeld, "Position held is required.");
