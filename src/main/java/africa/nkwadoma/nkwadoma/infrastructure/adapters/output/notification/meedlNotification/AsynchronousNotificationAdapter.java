@@ -55,7 +55,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
-            meedlNotification.setNotificationFlag(NotificationFlag.FINANCIER);
+            meedlNotification.setNotificationFlag(NotificationFlag.INVITE_FINANCIER);
             log.info("Notifying portfolio manager on financier ");
         meedlNotificationUsecase.sendNotification(meedlNotification);
         }
@@ -74,7 +74,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
-                .notificationFlag(NotificationFlag.FINANCIER)
+                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
                 .build();
     }
 
@@ -91,7 +91,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
-                .notificationFlag(NotificationFlag.FINANCIER)
+                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
                 .build();
     }
 }
