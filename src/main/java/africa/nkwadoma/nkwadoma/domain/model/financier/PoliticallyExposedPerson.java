@@ -4,12 +4,15 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-public class PoliticalPartyExposedTo {
+@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
+public class PoliticallyExposedPerson {
+    private String id;
     private String positionHeld;
     private Country country;
     private UserRelationship relationship;

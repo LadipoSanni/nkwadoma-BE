@@ -84,9 +84,8 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
         financiersToMail = new ArrayList<>();
-        InvestmentVehicle investmentVehicle = null;
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
+        InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
@@ -155,7 +154,8 @@ public class FinancierService implements FinancierUseCase {
         return getMessageForSingleFinancier(investmentVehicle);
     }
 
-    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId) throws MeedlException {
+        InvestmentVehicle investmentVehicle = null;
         if (StringUtils.isNotEmpty(investmentVehicleId) && StringUtils.isNotBlank(investmentVehicleId)){
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
             log.info("Fetching investment vehicle with id {}", investmentVehicleId);

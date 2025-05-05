@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.PoliticallyExposedPerson;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class KycRequest {
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
+    private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
 }
 

@@ -5,16 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.financier.PoliticalPartyExposedTo;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -237,11 +234,11 @@ public class TestData {
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
 
-        PoliticalPartyExposedTo politicalPartyExposedTo = new PoliticalPartyExposedTo();
-        politicalPartyExposedTo.setPositionHeld("President");
-        politicalPartyExposedTo.setCountry(Country.SERBIA);
-        List<PoliticalPartyExposedTo> politicalPartiesExposedTo = List.of(politicalPartyExposedTo);
-        financier.setPoliticalPartiesExposedTo(politicalPartiesExposedTo);
+        PoliticallyExposedPerson politicallyExposedPerson = new PoliticallyExposedPerson();
+        politicallyExposedPerson.setPositionHeld("President");
+        politicallyExposedPerson.setCountry(Country.SERBIA);
+        List<PoliticallyExposedPerson> politicallyExposedPeople = List.of(politicallyExposedPerson);
+        financier.setPoliticallyExposedPeople(politicallyExposedPeople);
         return financier;
     }
 
@@ -553,7 +550,14 @@ public class TestData {
                 .maturity("maturity")
                 .build();
     }
-
+    public static PoliticallyExposedPerson buildPoliticallyExposedPerson() {
+        return PoliticallyExposedPerson.builder()
+                .country(Country.AFGHANISTAN)
+                .positionHeld("Vice President")
+//                .relationship(UserRelationship.BROTHER)
+                .AdditionalInformation("None")
+                .build();
+    }
     public static BeneficialOwner buildBeneficialOwner() {
         return BeneficialOwner.builder()
                 .beneficialOwnerType(FinancierType.INDIVIDUAL)
@@ -575,6 +579,12 @@ public class TestData {
     public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
         return FinancierBeneficialOwner.builder()
                 .beneficialOwner(buildBeneficialOwner())
+                .financier(buildFinancierIndividual(createTestUserIdentity(email)))
+                .build();
+    }
+    public static FinancierPoliticallyExposedPerson buildFinancierPoliticallyExposedPerson(String email) {
+        return FinancierPoliticallyExposedPerson.builder()
+                .politicallyExposedPerson(buildPoliticallyExposedPerson())
                 .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }
