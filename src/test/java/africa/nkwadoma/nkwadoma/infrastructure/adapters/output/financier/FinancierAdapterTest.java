@@ -18,6 +18,8 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +46,6 @@ class FinancierAdapterTest {
     private Financier cooperateFinancier;
     private UserIdentity individualUserIdentity;
     private String financierId;
-    private String userIdentityId;
     private String nextOfKinId;
     private String bankDetailId;
     private String cooperateFinancierId;
@@ -63,25 +64,18 @@ class FinancierAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private UserIdentity cooperateUserIdentity;
-    private final String userEmail = "financierindividualemailadaptertest@mail.com";
+    private final String userEmail = TestUtils.generateEmail("financierindividualemailadapterstest", 5);
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
         individualUserIdentity = TestData.createTestUserIdentity(userEmail, "ead0f7cb-5483-4bb8-b271-813660a4c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
-        try{
-            individualUserIdentity  = userIdentityOutputPort.save(individualUserIdentity);
-            userIdentityId = individualUserIdentity.getId();
-            log.info("User saved in financier adapter test set up");
-        }catch (MeedlException meedlException) {
-            log.error("set up financier adapter failure saving user {} ", meedlException.getMessage(), meedlException);
-            throw new RuntimeException(meedlException);
-        }
+
         individualUserIdentity = savedUserToDb(userEmail, "ead0f7cb-5483-4bb8-b271-813660a4c368");
         individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
 
-        cooperateUserIdentity = savedUserToDb("adpatercooperatefinanciertest@emial.com", "ead0f7cb-5473-4bb8-b271-71350a4c363");
+        cooperateUserIdentity = savedUserToDb(TestUtils.generateEmail("adpatercooperatefinanciertest",4), "ead0f7cb-5473-4bb8-b271-71350a4c363");
         Cooperation cooperation = saveCooperation(cooperateUserIdentity);
         cooperateFinancier = TestData.buildCooperateFinancier(cooperation, cooperateUserIdentity);
 
@@ -94,7 +88,7 @@ class FinancierAdapterTest {
 
     private Cooperation saveCooperation(UserIdentity userIdentity) {
         log.info("Saved user identity for cooperation {}", userIdentity);
-        Cooperation cooperation = TestData.buildCooperation("FaradeTestCooperationAdapter");
+        Cooperation cooperation = TestData.buildCooperation(TestUtils.generateName("FaradeTestCooperationAdapter", 5));
 
         try {
             cooperation = cooperationOutputPort.save(cooperation);
@@ -112,6 +106,7 @@ class FinancierAdapterTest {
         try {
             individualUserIdentity = userIdentityOutputPort.save(individualUserIdentity);
         } catch (MeedlException e) {
+            log.info("Error saving user identity for financier.",e);
             throw new RuntimeException(e);
         }
         return individualUserIdentity;
