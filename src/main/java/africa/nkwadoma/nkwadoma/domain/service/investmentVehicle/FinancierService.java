@@ -4,12 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseC
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
@@ -27,15 +25,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -76,6 +71,8 @@ public class FinancierService implements FinancierUseCase {
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
+    private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
@@ -84,9 +81,8 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
         financiersToMail = new ArrayList<>();
-        InvestmentVehicle investmentVehicle = null;
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
+        InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
@@ -155,7 +151,8 @@ public class FinancierService implements FinancierUseCase {
         return getMessageForSingleFinancier(investmentVehicle);
     }
 
-    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId) throws MeedlException {
+        InvestmentVehicle investmentVehicle = null;
         if (StringUtils.isNotEmpty(investmentVehicleId) && StringUtils.isNotBlank(investmentVehicleId)){
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
             log.info("Fetching investment vehicle with id {}", investmentVehicleId);
@@ -627,6 +624,7 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
             saveFinancierBeneficialOwners(financier);
+            saveFinancierPoliticallyExposedPeople(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
             Financier savedFinancier = financierOutputPort.completeKyc(financier);
@@ -636,6 +634,34 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
+    }
+
+    private void saveFinancierPoliticallyExposedPeople(Financier financier) throws MeedlException {
+        List<PoliticallyExposedPerson> politicallyExposedPeople = new ArrayList<>();
+        log.info("Started saving politically exposed person.");
+        for (PoliticallyExposedPerson politicallyExposedPerson : financier.getPoliticallyExposedPeople()) {
+            PoliticallyExposedPerson savedPoliticallyExposedPerson = politicallyExposedPersonOutputPort.save(politicallyExposedPerson);
+            politicallyExposedPeople.add(savedPoliticallyExposedPerson);
+            log.info("Financier saved with politically exposed person : {}", savedPoliticallyExposedPerson);
+        }
+        financier.setPoliticallyExposedPeople(politicallyExposedPeople);
+        log.info("Saving financier politically exposed person...");
+        List<FinancierPoliticallyExposedPerson> financierPoliticallyExposedPeople =
+                financier.getPoliticallyExposedPeople().stream()
+                        .map(politicallyExposedPerson ->
+                                FinancierPoliticallyExposedPerson.builder()
+                                        .politicallyExposedPerson(politicallyExposedPerson)
+                                        .financier(financier)
+                                        .build()
+                        ).map(financierPoliticallyExposedPerson -> {
+                            try {
+                                return financierPoliticallyExposedPersonOutputPort.save(financierPoliticallyExposedPerson);
+                            } catch (MeedlException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .toList();
+        log.info("Saved... financier politically exposed people... {}",financierPoliticallyExposedPeople);
     }
 
     private void saveFinancierBeneficialOwners(Financier financier) throws MeedlException {

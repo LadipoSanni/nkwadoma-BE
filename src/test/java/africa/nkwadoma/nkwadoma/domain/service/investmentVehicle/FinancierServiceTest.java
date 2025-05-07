@@ -1,12 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -16,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierPoliticallyExposedPerson;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -98,11 +97,15 @@ public class FinancierServiceTest {
     private String portfolioManagerId;
     private final String actorId = "ead0f7cb-5453-4bb8-b261-413790a9c364";
     private final BigDecimal FIVE_THOUSAND = new BigDecimal("5000.00");
+    @Autowired
+    private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
+    @Autowired
+    private FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
-        UserIdentity actor = TestData.createTestUserIdentity("userforcreatedbyoractor7@mail.com", actorId);
+        UserIdentity actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
         actor.setRole(IdentityRole.PORTFOLIO_MANAGER);
         try {
             userIdentityOutputPort.save(actor);
@@ -110,18 +113,18 @@ public class FinancierServiceTest {
             log.error("Error saving actor (pm) for invite financier.",e);
             throw new RuntimeException(e);
         }
-        individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest24@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
+        individualUserIdentity = TestData.createTestUserIdentity(String.format("financierserviceindividualfinancier%stest24@mail.com", TestUtils.generateName(3)),"ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
         individualUserIdentity.setCreatedBy(actorId);
         deleteTestUserIfExist(individualUserIdentity);
-        portfolioManager = TestData.createTestUserIdentity("portfoliomanagertest6@gmail.com");
+        portfolioManager = TestData.createTestUserIdentity(String.format("portfoliomanager%stest6@gmail.com", TestUtils.generateName(3)));
         portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
+        cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  String.format("AlbertTestCooperationService%s", TestUtils.generateName(3)));
 
-        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(String.format("FinancierVehicleForService%sTest", TestUtils.generateName(3)));
         publicInvestmentVehicle = TestData.buildInvestmentVehicle("publicInvestmentVehicleInTestClass");
         privateInvestmentVehicle = TestData.buildInvestmentVehicle("privateInvestmentVehicleInTestClass");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -1125,9 +1128,9 @@ public class FinancierServiceTest {
     @Order(25)
     public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtestwithamount@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(String.format("cooperateFinancierEmailtestwith%samount@email.com", TestUtils.generateName(3)), "ead0f7cb-5484-4bb8-b371-433850a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationServiceWithAmountToInvest" );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  String.format("NewVehicleCooperationTestCooperationServiceWithAmountToInvest%s", TestUtils.generateName(3)));
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTestWithFinancierAmountToInvest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -1200,6 +1203,8 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
+        deleteFinancierPoliticallyExposedPeople(cooperateFinancierId);
+        deleteFinancierPoliticallyExposedPeople(individualFinancierId);
 
         deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
@@ -1221,6 +1226,26 @@ public class FinancierServiceTest {
 
         log.info("Test data deleted after test");
     }
+
+    private void deleteFinancierPoliticallyExposedPeople(String financierId) throws MeedlException {
+        List<FinancierPoliticallyExposedPerson> financierPoliticallyExposedPeople = financierPoliticallyExposedPersonOutputPort.findAllByFinancierId(financierId);
+        log.info("Financier politically exposed size : {}", financierPoliticallyExposedPeople.size());
+        financierPoliticallyExposedPeople
+                        .forEach(financierPoliticallyExposedPerson -> {
+                            try {
+                                financierPoliticallyExposedPersonOutputPort.deleteById(financierPoliticallyExposedPerson.getId());
+                                politicallyExposedPersonOutputPort.deleteById(financierPoliticallyExposedPerson.getPoliticallyExposedPerson().getId());
+                                log.info("politically exposed deleted successfully. single {}, joined {}",financierPoliticallyExposedPerson.getPoliticallyExposedPerson().getId(), financierPoliticallyExposedPerson.getId());
+                            } catch (MeedlException e) {
+                                log.error("Error deleting politically exposed person.", e);
+                                throw new RuntimeException(e);
+                            }
+                        });
+        log.info("End of deleting");
+
+
+    }
+
     private void deleteFinancierData(String financierId) throws MeedlException {
         List<FinancierBeneficialOwner> financierBeneficialOwners = financierBeneficialOwnerOutputPort.findAllByFinancierId(financierId);
         financierBeneficialOwners

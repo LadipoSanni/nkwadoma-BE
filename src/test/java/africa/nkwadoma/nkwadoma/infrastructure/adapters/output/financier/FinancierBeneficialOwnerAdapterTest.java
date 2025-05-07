@@ -52,7 +52,7 @@ public class FinancierBeneficialOwnerAdapterTest {
 
     @Test
     @Order(1)
-    void saveBeneficialOwner() {
+    void save() {
         FinancierBeneficialOwner savedFinancierBeneficialOwner = null;
         try {
             savedFinancierBeneficialOwner = financierBeneficialOwnerOutputPort.save(financierBeneficialOwner);
@@ -67,13 +67,13 @@ public class FinancierBeneficialOwnerAdapterTest {
         beneficialOwnerId = savedFinancierBeneficialOwner.getId();
     }
     @Test
-    void saveBeneficialOwnerWithNull(){
+    void saveWithNull(){
         assertThrows(MeedlException.class, () -> financierBeneficialOwnerOutputPort.save(null));
     }
 
     @Test
     @Order(2)
-    void findBeneficialOwnerById() {
+    void findById() {
         FinancierBeneficialOwner foundFinancierBeneficialOwner = null;
         try {
             foundFinancierBeneficialOwner = financierBeneficialOwnerOutputPort.findById(beneficialOwnerId);
@@ -87,7 +87,7 @@ public class FinancierBeneficialOwnerAdapterTest {
     }
     @Test
     @Order(3)
-    void deleteBeneficialOwnerById() {
+    void deleteById() {
         try {
             financierBeneficialOwnerOutputPort.deleteById(beneficialOwnerId);
             beneficialOwnerOutputPort.deleteById(financierBeneficialOwner.getBeneficialOwner().getId());

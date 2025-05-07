@@ -80,12 +80,16 @@ public class FinancierController {
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
                 mapCooperateValues(financierRequest, financier);
-                financier.getUserIdentity().setCreatedBy(meedlUserId);
             } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
-                financier.getUserIdentity().setCreatedBy(meedlUserId);
-                financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             }
+            if (financier.getUserIdentity() == null){
+                log.info("user identity is {}", financierRequest.getUserIdentity());
+                financier.setUserIdentity(UserIdentity.builder().build());
+            }
+
+            financier.getUserIdentity().setCreatedBy(meedlUserId);
+            financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             return financier;
         }).toList();
     }

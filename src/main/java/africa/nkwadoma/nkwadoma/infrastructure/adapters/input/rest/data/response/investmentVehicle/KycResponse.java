@@ -16,8 +16,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class KycResponse {
-    private String bankName;
-    private String bankNumber;
     private String firstName;
     private String lastName;
     private String financierEmail;
