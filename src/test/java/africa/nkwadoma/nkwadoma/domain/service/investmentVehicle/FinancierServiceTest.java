@@ -1068,7 +1068,7 @@ public class FinancierServiceTest {
     public void addMultipleExistingFinanciersToInvestmentVehicle() {
         List<Financier> financiers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
-            UserIdentity userIdentity = TestData.createTestUserIdentity(i+"unittestfinancier@email.com", "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
+            UserIdentity userIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail(i+"unittestfinancier", 3), "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
             Financier financier = TestData.buildFinancierIndividual(userIdentity);
             userIdentity.setCreatedBy(actorId);
             financiers.add(financier);

@@ -158,6 +158,7 @@ public class    Financier {
     private void validateDeclaration() throws MeedlException {
         if (this.declarationAndAgreement){
             if (this.isPoliticallyExposed()){
+                MeedlValidator.validateCollection(this.politicalPartiesExposedTo, "Political party exposed to should be declared.");
                 for (PoliticalPartyExposedTo party : this.politicalPartiesExposedTo) {
                     MeedlValidator.validateObjectInstance(party, "Political party exposed to should be declared.");
                     party.validate();
