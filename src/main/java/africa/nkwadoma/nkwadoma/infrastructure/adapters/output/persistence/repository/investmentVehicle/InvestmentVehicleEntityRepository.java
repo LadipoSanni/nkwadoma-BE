@@ -107,36 +107,190 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             Pageable pageRequest);
 
 
-    @Query("SELECT i FROM InvestmentVehicleEntity i " +
-            "WHERE EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
-            "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId) " +
-            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
-            "AND i.investmentVehicleStatus = 'PUBLISHED' ")
-    Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(
+    @Query("""
+    SELECT
+        i.id AS id,
+        i.name AS name,
+        i.investmentVehicleType AS investmentVehicleType,
+        i.mandate AS mandate,
+        i.investmentVehicleStatus AS investmentVehicleStatus,
+        i.size AS size,
+        i.tenure AS tenure,
+        i.totalAvailableAmount AS totalAvailableAmount,
+        i.interestRateOffered AS interestRateOffered,
+        i.investmentVehicleVisibility AS investmentVehicleVisibility,
+        i.trustee AS trustee,
+        i.custodian AS custodian,
+        i.bankPartner AS bankPartner,
+        i.fundManager AS fundManager,
+        i.startDate AS startDate,
+        i.createdDate AS createdDate,
+        i.investmentVehicleLink AS investmentVehicleLink,
+        i.minimumInvestmentAmount As minimumInvestmentAmount,
+        COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
+        vo.couponDistributionStatus AS couponDistributionStatus,
+        vo.fundRaisingStatus AS fundRaising,
+        vo.deployingStatus AS deployingStatus,
+        vc.recollectionStatus as recollectionStatus,
+        vc.maturity as maturity
+    FROM InvestmentVehicleEntity i
+    LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
+    LEFT JOIN i.operation vo
+    LEFT JOIN i.closure vc
+    WHERE ivf.financier.userIdentity.id = :userId
+    AND i.investmentVehicleStatus = 'PUBLISHED'
+    AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType)
+        GROUP BY
+                i.id,
+                i.name,
+                i.investmentVehicleType,
+                i.mandate,
+                i.investmentVehicleStatus,
+                i.size,
+                i.tenure,
+                i.totalAvailableAmount,
+                i.interestRateOffered,
+                i.investmentVehicleVisibility,
+                i.trustee,
+                i.custodian,
+                i.bankPartner,
+                i.fundManager,
+                i.startDate,
+                i.createdDate,
+                i.investmentVehicleLink,
+                vo.couponDistributionStatus,
+                vo.fundRaisingStatus,
+                vo.deployingStatus,
+                vc.recollectionStatus,
+                vc.maturity
+""")
+    Page<InvestmentVehicleProjection> findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(
             @Param("userId") String userId,
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType, Pageable pageRequest);
 
 
-    @Query("SELECT i FROM InvestmentVehicleEntity i " +
-            "WHERE EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
-            "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.userIdentity.id = :userId) " +
-            "AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType) " +
-            "AND i.investmentVehicleStatus = 'PUBLISHED' " +
-            "AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType(
+    @Query("""
+    SELECT
+        i.id AS id,
+        i.name AS name,
+        i.investmentVehicleType AS investmentVehicleType,
+        i.mandate AS mandate,
+        i.investmentVehicleStatus AS investmentVehicleStatus,
+        i.size AS size,
+        i.tenure AS tenure,
+        i.totalAvailableAmount AS totalAvailableAmount,
+        i.interestRateOffered AS interestRateOffered,
+        i.investmentVehicleVisibility AS investmentVehicleVisibility,
+        i.trustee AS trustee,
+        i.custodian AS custodian,
+        i.bankPartner AS bankPartner,
+        i.fundManager AS fundManager,
+        i.startDate AS startDate,
+        i.createdDate AS createdDate,
+        i.investmentVehicleLink AS investmentVehicleLink,
+        i.minimumInvestmentAmount As minimumInvestmentAmount,
+        COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
+        vo.couponDistributionStatus AS couponDistributionStatus,
+        vo.fundRaisingStatus AS fundRaising,
+        vo.deployingStatus AS deployingStatus,
+        vc.recollectionStatus as recollectionStatus,
+        vc.maturity as maturity
+    FROM InvestmentVehicleEntity i
+    LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
+    LEFT JOIN i.operation vo
+    LEFT JOIN i.closure vc
+    WHERE ivf.financier.userIdentity.id = :userId
+    AND (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+    AND (:investmentVehicleType IS NULL OR i.investmentVehicleType = :investmentVehicleType)
+        GROUP BY
+                i.id,
+                i.name,
+                i.investmentVehicleType,
+                i.mandate,
+                i.investmentVehicleStatus,
+                i.size,
+                i.tenure,
+                i.totalAvailableAmount,
+                i.interestRateOffered,
+                i.investmentVehicleVisibility,
+                i.trustee,
+                i.custodian,
+                i.bankPartner,
+                i.fundManager,
+                i.startDate,
+                i.createdDate,
+                i.investmentVehicleLink,
+                vo.couponDistributionStatus,
+                vo.fundRaisingStatus,
+                vo.deployingStatus,
+                vc.recollectionStatus,
+                vc.maturity
+
+""")
+    Page<InvestmentVehicleProjection> findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType(
             @Param("userId") String userId,
             @Param("investmentVehicleType") InvestmentVehicleType investmentVehicleType,
             @Param("name") String name,
             Pageable pageRequest);
 
-    @Query("SELECT i FROM InvestmentVehicleEntity i " +
-            "WHERE EXISTS (SELECT ivf FROM InvestmentVehicleFinancierEntity ivf " +
-            "WHERE ivf.investmentVehicle = i " +
-            "AND ivf.financier.id = :financierId) " +
-            "AND i.investmentVehicleStatus = 'PUBLISHED'")
-    Page<InvestmentVehicleEntity> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(
+
+    @Query("""
+    SELECT
+        i.id AS id,
+        i.name AS name,
+        i.investmentVehicleType AS investmentVehicleType,
+        i.mandate AS mandate,
+        i.investmentVehicleStatus AS investmentVehicleStatus,
+        i.size AS size,
+        i.tenure AS tenure,
+        i.totalAvailableAmount AS totalAvailableAmount,
+        i.interestRateOffered AS interestRateOffered,
+        i.investmentVehicleVisibility AS investmentVehicleVisibility,
+        i.trustee AS trustee,
+        i.custodian AS custodian,
+        i.bankPartner AS bankPartner,
+        i.fundManager AS fundManager,
+        i.startDate AS startDate,
+        i.createdDate AS createdDate,
+        i.investmentVehicleLink AS investmentVehicleLink,
+        i.minimumInvestmentAmount As minimumInvestmentAmount,
+        COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
+        vo.couponDistributionStatus AS couponDistributionStatus,
+        vo.fundRaisingStatus AS fundRaising,
+        vo.deployingStatus AS deployingStatus,
+        vc.recollectionStatus as recollectionStatus,
+        vc.maturity as maturity
+    FROM InvestmentVehicleEntity i
+    LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
+    LEFT JOIN i.operation vo
+    LEFT JOIN i.closure vc
+    WHERE ivf.financier.id = :financierId
+    AND i.investmentVehicleStatus = 'PUBLISHED'
+    GROUP BY
+            i.id,
+            i.name,
+            i.investmentVehicleType,
+            i.mandate,
+            i.investmentVehicleStatus,
+            i.size,
+            i.tenure,
+            i.totalAvailableAmount,
+            i.interestRateOffered,
+            i.investmentVehicleVisibility,
+            i.trustee,
+            i.custodian,
+            i.bankPartner,
+            i.fundManager,
+            i.startDate,
+            i.createdDate,
+            i.investmentVehicleLink,
+            vo.couponDistributionStatus,
+            vo.fundRaisingStatus,
+            vo.deployingStatus,
+            vc.recollectionStatus,
+            vc.maturity
+""")
+    Page<InvestmentVehicleProjection> findAllInvestmentVehicleFinancierWasAddedToByFinancierId(
             @Param("financierId")String financierId, Pageable pageRequest);
 
     boolean existsByName(String investmentVehicleName);
