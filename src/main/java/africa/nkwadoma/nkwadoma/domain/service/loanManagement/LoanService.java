@@ -146,7 +146,16 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         Loan savedLoan = loanOutputPort.save(loan);
         log.info("Saved loan: {}", savedLoan);
         updateLoanDisbursalOnLoamMatrics(foundLoanee);
+        updateInvestmentVehicleTalentFunded(savedLoan);
         return savedLoan;
+    }
+
+    private void updateInvestmentVehicleTalentFunded(Loan savedLoan) throws MeedlException {
+        InvestmentVehicle investmentVehicle = investmentVehicleOutputPort.findInvestmentVehicleByLoanOfferId(savedLoan.getLoanOfferId());
+        investmentVehicle.setTalentFunded(
+                investmentVehicle.getTalentFunded() + 1
+        );
+        investmentVehicleOutputPort.save(investmentVehicle);
     }
 
     private void updateLoanDisbursalOnLoamMatrics(Loanee foundLoanee) throws MeedlException {

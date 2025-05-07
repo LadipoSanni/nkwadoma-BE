@@ -127,6 +127,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
         i.createdDate AS createdDate,
         i.investmentVehicleLink AS investmentVehicleLink,
         i.minimumInvestmentAmount As minimumInvestmentAmount,
+        i.talentFunded as talentFunded,
         COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
         vo.couponDistributionStatus AS couponDistributionStatus,
         vo.fundRaisingStatus AS fundRaising,
@@ -158,6 +159,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
                 i.startDate,
                 i.createdDate,
                 i.investmentVehicleLink,
+                i.talentFunded,
                 vo.couponDistributionStatus,
                 vo.fundRaisingStatus,
                 vo.deployingStatus,
@@ -189,6 +191,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
         i.createdDate AS createdDate,
         i.investmentVehicleLink AS investmentVehicleLink,
         i.minimumInvestmentAmount As minimumInvestmentAmount,
+        i.talentFunded as talentFunded,
         COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
         vo.couponDistributionStatus AS couponDistributionStatus,
         vo.fundRaisingStatus AS fundRaising,
@@ -213,6 +216,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
                 i.totalAvailableAmount,
                 i.interestRateOffered,
                 i.investmentVehicleVisibility,
+                i.talentFunded, 
                 i.trustee,
                 i.custodian,
                 i.bankPartner,
@@ -254,6 +258,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
         i.createdDate AS createdDate,
         i.investmentVehicleLink AS investmentVehicleLink,
         i.minimumInvestmentAmount As minimumInvestmentAmount,
+        i.talentFunded as talentFunded,
         COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
         vo.couponDistributionStatus AS couponDistributionStatus,
         vo.fundRaisingStatus AS fundRaising,
@@ -280,6 +285,7 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             i.trustee,
             i.custodian,
             i.bankPartner,
+            i.talentFunded,
             i.fundManager,
             i.startDate,
             i.createdDate,
@@ -296,4 +302,11 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
     boolean existsByName(String investmentVehicleName);
 
     boolean existsByInvestmentVehicleLink(String investmentVehicleLink);
+
+    @Query("""
+            SELECT iv FROM InvestmentVehicleEntity iv
+            WHERE iv.id = (SELECT lp.investmentVehicleId FROM LoanOfferEntity lo
+            JOIN lo.loanProduct lp WHERE lo.id = :loanOfferId)
+            """)
+    InvestmentVehicleEntity findByLoanOfferId(@Param("loanOfferId") String loanOfferId);
 }

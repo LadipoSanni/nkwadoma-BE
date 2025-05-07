@@ -47,5 +47,6 @@ public class InvestmentVehicleResponse {
     private BigDecimal amountFinancierInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;
     private LocalDate dateInvested;
-
+    private int talentFunded;
+    private double portfolioValue;
 }
