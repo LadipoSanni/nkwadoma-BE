@@ -25,6 +25,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -80,7 +81,7 @@ public class FinancierServiceTest {
     private Financier cooperateFinancier;
     private String cooperateUserIdentityId;
     private String cooperateFinancierId;
-    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest247@mail.com";
+    private final String cooperateFinancierEmail = TestUtils.generateEmail("financierservicecooperatefinanciertest555", 5);
     private int pageSize = 10 ;
     private int pageNumber = 0 ;
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -821,11 +822,11 @@ public class FinancierServiceTest {
     @Order(15)
     public void inviteCooperateFinancierToNewVehicle() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail("cooperateFinancierEmailtest", 5), "ead0f7cb-5484-4bb8-b371-433850a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationService" );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  TestUtils.generateName("NewVehicleCooperationTestCooperationService" ,4));
 
-        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(TestUtils.generateName("FinancierVehicleForCooperateServiceTest",4));
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         List<Financier> cooperateFinancierList = List.of(cooperateFinancier);
 

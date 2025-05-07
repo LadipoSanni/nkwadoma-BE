@@ -7,6 +7,12 @@ public class TestUtils {
     public static String generateEmail(int emailLength){
         return generateName(emailLength) + "@grr.la";
     }
+    public static String generateEmail( String name, int emailLength){
+        return String.format(name+ "%s@grr.la", generateName(emailLength) );
+    }
+    public static String generateName(String actualName, int length) {
+        return String.format(actualName+"%s", generateName(length));
+    }
     public static String generateName(int length) {
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be positive");
