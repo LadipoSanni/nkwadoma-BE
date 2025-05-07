@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -172,10 +173,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(userId,
                                 investmentVehicleType,pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
     @Override
     public Page<InvestmentVehicle> searchInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
@@ -183,11 +184,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType
                 (userId,
                         investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
 
     @Override
@@ -197,9 +198,9 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
 
     @Override
