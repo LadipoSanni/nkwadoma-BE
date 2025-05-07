@@ -18,6 +18,8 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +65,7 @@ class FinancierAdapterTest {
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private UserIdentity cooperateUserIdentity;
-    private final String userEmail = "financierindividualemailadaptertest@mail.com";
+    private final String userEmail = String.format("financierindividualemailadapter%stest@mail.com", TestUtils.generateName(5));
 
     @BeforeAll
     void setUp(){
@@ -81,7 +83,7 @@ class FinancierAdapterTest {
         individualUserIdentity = savedUserToDb(userEmail, "ead0f7cb-5483-4bb8-b271-813660a4c368");
         individualFinancier = TestData.buildFinancierIndividual(individualUserIdentity);
 
-        cooperateUserIdentity = savedUserToDb("adpatercooperatefinanciertest@emial.com", "ead0f7cb-5473-4bb8-b271-71350a4c363");
+        cooperateUserIdentity = savedUserToDb(String.format("adpatercooperatefinancier%stest@emial.com", TestUtils.generateName(4)), "ead0f7cb-5473-4bb8-b271-71350a4c363");
         Cooperation cooperation = saveCooperation(cooperateUserIdentity);
         cooperateFinancier = TestData.buildCooperateFinancier(cooperation, cooperateUserIdentity);
 
@@ -94,7 +96,7 @@ class FinancierAdapterTest {
 
     private Cooperation saveCooperation(UserIdentity userIdentity) {
         log.info("Saved user identity for cooperation {}", userIdentity);
-        Cooperation cooperation = TestData.buildCooperation("FaradeTestCooperationAdapter");
+        Cooperation cooperation = TestData.buildCooperation(String.format("FaradeTestCooperationAdapter%s", TestUtils.generateName(3)));
 
         try {
             cooperation = cooperationOutputPort.save(cooperation);
