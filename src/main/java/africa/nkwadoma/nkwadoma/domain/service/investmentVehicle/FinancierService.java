@@ -694,6 +694,27 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) {
+        mapKycUserIdentityData(financier, foundFinancier);
+
+        mapKycFinancierPreviousData(financier, foundFinancier);
+
+    }
+
+    private static void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setActivationStatus(foundFinancier.getActivationStatus());
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setAmountInvested(foundFinancier.getAmountInvested());
+        financier.setTotalNumberOfInvestment(foundFinancier.getTotalNumberOfInvestment());
+        financier.setTotalAmountInvested(foundFinancier.getTotalAmountInvested());
+        financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
+        financier.setCreatedAt(foundFinancier.getCreatedAt());
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setId(foundFinancier.getId());
+    }
+
+    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) {
         UserIdentity userIdentity = foundFinancier.getUserIdentity();
         log.info("updating user details in kyc service : {}", userIdentity);
 
@@ -708,18 +729,10 @@ public class FinancierService implements FinancierUseCase {
         }
 
         foundFinancier.setUserIdentity(userIdentity);
-        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
-
-        financier.setFinancierType(foundFinancier.getFinancierType());
         financier.setUserIdentity(userIdentity);
-        financier.setCooperation(foundFinancier.getCooperation());
-        financier.setId(foundFinancier.getId());
 
-    }
-
-    @Override
-    public Financier findFinancierByCooperationId(String cooperationId) throws MeedlException {
-        return null;
+        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
+        return userIdentity;
     }
 
     @Override

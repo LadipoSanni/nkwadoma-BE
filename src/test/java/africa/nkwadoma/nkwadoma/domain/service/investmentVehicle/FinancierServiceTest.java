@@ -80,7 +80,7 @@ public class FinancierServiceTest {
     private Financier cooperateFinancier;
     private String cooperateUserIdentityId;
     private String cooperateFinancierId;
-    private final String cooperateFinancierEmail = String.format("financierservicecooperatefinancier%stest247@mail.com", TestUtils.generateName(3));
+    private final String cooperateFinancierEmail = TestUtils.generateEmail("financierservicecooperatefinanciertest555", 5);
     private int pageSize = 10 ;
     private int pageNumber = 0 ;
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -825,11 +825,11 @@ public class FinancierServiceTest {
     @Order(15)
     public void inviteCooperateFinancierToNewVehicle() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(String.format("cooperateFinancierEmail%stest@email.com", TestUtils.generateName(3)), "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail("cooperateFinancierEmailtest", 5), "ead0f7cb-5484-4bb8-b371-433850a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  String.format("NewVehicleCooperationTestCooperationService%s", TestUtils.generateName(3)) );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  TestUtils.generateName("NewVehicleCooperationTestCooperationService" ,4));
 
-        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(String.format("FinancierVehicleForCooperateService%sTest", TestUtils.generateName(3)));
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(TestUtils.generateName("FinancierVehicleForCooperateServiceTest",4));
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         List<Financier> cooperateFinancierList = List.of(cooperateFinancier);
 
@@ -1071,7 +1071,7 @@ public class FinancierServiceTest {
     public void addMultipleExistingFinanciersToInvestmentVehicle() {
         List<Financier> financiers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
-            UserIdentity userIdentity = TestData.createTestUserIdentity(i+"unittestfinancier@email.com", "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
+            UserIdentity userIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail(i+"unittestfinancier", 3), "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
             Financier financier = TestData.buildFinancierIndividual(userIdentity);
             userIdentity.setCreatedBy(actorId);
             financiers.add(financier);

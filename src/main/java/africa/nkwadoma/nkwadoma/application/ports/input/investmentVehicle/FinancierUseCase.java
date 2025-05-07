@@ -26,8 +26,6 @@ public interface FinancierUseCase {
 
     Financier completeKyc(Financier financier) throws MeedlException;
 
-    Financier findFinancierByCooperationId(String cooperationId) throws MeedlException;
-
     FinancierVehicleDetail viewInvestmentDetailOfFinancier(String financierId, String userId) throws MeedlException;
 
     Page<Financier> viewAllFinancierInvestment(String sub, String financierId, int pageSize, int pageNumber) throws MeedlException;
