@@ -209,6 +209,14 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         return investmentVehicleRepository.existsByInvestmentVehicleLink(investmentVehicleLink);
     }
 
+    @Override
+    public InvestmentVehicle findInvestmentVehicleByLoanOfferId(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty");
+        InvestmentVehicleEntity investmentVehicleEntity =
+                investmentVehicleRepository.findByLoanOfferId(loanOfferId);
+        return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
+    }
+
 
     @Override
     public InvestmentVehicle findByNameExcludingDraftStatus(String name, InvestmentVehicleStatus status) throws MeedlException {

@@ -38,4 +38,5 @@ public interface InvestmentVehicleProjection {
     BigDecimal getAmountRaised();
     BigDecimal getAmountDisbursed();
     BigDecimal getAmountAvailable();
+    Integer getTalentFunded();
 }

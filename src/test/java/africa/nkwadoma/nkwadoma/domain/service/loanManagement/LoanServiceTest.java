@@ -3,12 +3,14 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.*;
@@ -56,6 +58,8 @@ class LoanServiceTest {
     private LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     @Mock
     private LoanOfferOutputPort loanOfferOutputPort;
+    @Mock
+    private InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private LoanReferral loanReferral;
     private LoanRequest loanRequest;
     private Loan loan;
@@ -65,6 +69,7 @@ class LoanServiceTest {
     private LoaneeLoanAccount loaneeLoanAccount;
     private LoanMetrics loanMetrics;
     private OrganizationIdentity organizationIdentity;
+    private InvestmentVehicle investmentVehicle;
     private int pageSize = 10;
     private int pageNumber = 0;
 
@@ -108,6 +113,8 @@ class LoanServiceTest {
         loan.setOrganizationId("b95805d1-2e2d-47f8-a037-7bcd264914fc");
         loan.setPageNumber(0);
         loan.setPageSize(10);
+
+        investmentVehicle = TestData.buildInvestmentVehicle("vehicle");
     }
 
     @Test
@@ -284,6 +291,9 @@ class LoanServiceTest {
             when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
                     .thenReturn(Optional.of(loanMetrics));
             when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
+            when(investmentVehicleOutputPort.findInvestmentVehicleByLoanOfferId(startedLoan.getLoanOfferId()))
+                    .thenReturn(investmentVehicle);
+            when(investmentVehicleOutputPort.save(investmentVehicle)).thenReturn(investmentVehicle);
             startedLoan = loanService.startLoan(loan);
         } catch (MeedlException e) {
             log.error("Failed to start loan", e);
