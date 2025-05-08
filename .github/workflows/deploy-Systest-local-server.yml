@@ -127,52 +127,50 @@ jobs:
 
   # ======================= DEPLOY TO LOCAL =======================
   deploy-to-local:
-    runs-on: self-hosted  # Runs on a self-hosted runner (local machine)
-    needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    # if: github.event_name == 'pull_request' 
-    
-    
-    steps:
-      - name: Authenticate with Amazon ECR
-        run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+   runs-on: self-hosted
+   needs: build-and-push
+   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+   steps:
+    - name: Authenticate with Amazon ECR
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      - name: Pull latest Docker image
-        run: |
-          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha
+    - name: Pull latest Docker image
+      run: |
+        docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha
 
-      - name: Free port 8768 if in use
-        run: |
-          sudo fuser -k 8768/tcp || true
+    - name: Download env file from S3
+      run: |
+        ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+        aws s3 cp s3://semicolon-delivery/nkwadoma/backend/systest/nkwadoma.env $ENV_FILE_PATH --region eu-west-1
 
-      - name: Restart container with auto-restart policy
-        run: |
-          CONTAINER_NAME=nkwadoma_container
-          ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
-          
-          # Stop and remove existing container if it exists
-          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
-          fi
-          
-          # Ensure Docker network exists
-          docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
-          
-          # Run the container in the background and detach process
-          nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
-            --restart unless-stopped \
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha > /dev/null 2>&1 &
+    - name: Free port 8768 if in use
+      run: |
+        sudo fuser -k 8768/tcp || true
 
-      - name: Confirm Deployment Success
-        run: |
-          sleep 10  # Allow some time for the container to start
-          
-          if docker ps --format '{{.Names}}' | grep -q "enumverse_container"; then
-            echo "✅ Deployment to local machine successful!"
-            exit 0
-          else
-            echo "❌ Deployment failed!"
-            exit 1
-          fi
+    - name: Restart container with auto-restart policy
+      run: |
+        CONTAINER_NAME=nkwadoma_container
+        ENV_FILE_PATH="/home/cloud-group/nkwadoma-systest.env"
+        
+        if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+          docker stop $CONTAINER_NAME || true
+          docker rm $CONTAINER_NAME || true
+        fi
+        
+        docker network inspect meedl-network >/dev/null 2>&1 || docker network create meedl-network
+        
+        nohup docker run -d --env-file $ENV_FILE_PATH --network meedl-network --name $CONTAINER_NAME -p 8768:8768 \
+          --restart unless-stopped \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:alpha > /dev/null 2>&1 &
+
+    - name: Confirm Deployment Success
+      run: |
+        sleep 10
+        if docker ps --format '{{.Names}}' | grep -q "nkwadoma_container"; then
+          echo "✅ Deployment to local machine successful!"
+        else
+          echo "❌ Deployment failed!"
+          exit 1
+        fi
+
