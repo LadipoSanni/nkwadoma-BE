@@ -155,7 +155,7 @@ public class Financier {
         }
 
         if (totalPercentage > 100.0) {
-            throw new IllegalArgumentException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
+            throw new MeedlException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
         }
     }
 
