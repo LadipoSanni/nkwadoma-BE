@@ -64,18 +64,14 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
-    private final FinancierEmailUseCase financierEmailUseCase;
     private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private final FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
-    private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     private List<Financier> financiersToMail;
-    List<Financier> failedInviteOrAdd;
-    List<String> failedMessage ;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
@@ -128,7 +124,6 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private String inviteMultipleFinancier(List<Financier> financiers, InvestmentVehicle investmentVehicle) {
-
         financiers
                 .forEach(financier -> {
                     try {
@@ -139,7 +134,6 @@ public class FinancierService implements FinancierUseCase {
                         log.error("Multiple invite flow. Financier details {}", financier ,e);
                     }
                 });
-
         return getMessageForMultipleFinanciers(investmentVehicle);
     }
 
@@ -150,6 +144,7 @@ public class FinancierService implements FinancierUseCase {
             inviteFinancier(financier, investmentVehicle);
         }catch (MeedlException e){
             log.error("Single invite flow. financier details {}", financier ,e);
+            throw new MeedlException(e.getMessage());
         }
         return getMessageForSingleFinancier(investmentVehicle);
     }
@@ -368,6 +363,8 @@ public class FinancierService implements FinancierUseCase {
         }
         return userIdentity;
     }
+
+
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
