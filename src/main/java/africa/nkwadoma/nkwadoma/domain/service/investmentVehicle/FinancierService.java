@@ -74,13 +74,15 @@ public class FinancierService implements FinancierUseCase {
     private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
     private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     private List<Financier> financiersToMail;
+    List<Financier> failedInviteOrAdd;
+    List<String> failedMessage ;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
     private final PortfolioOutputPort portfolioOutputPort;
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
-        financiersToMail = new ArrayList<>();
+        initializeMessagingList();
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
         UserIdentity actor = getActorPerformingAction(financiers);
@@ -126,6 +128,7 @@ public class FinancierService implements FinancierUseCase {
     }
 
     private String inviteMultipleFinancier(List<Financier> financiers, InvestmentVehicle investmentVehicle) {
+
         financiers
                 .forEach(financier -> {
                     try {
@@ -134,10 +137,17 @@ public class FinancierService implements FinancierUseCase {
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
                         log.error("Financier details {}", financier ,e);
-//                        notifyExistingPortfolioManager();
-//                        notifyExistingFinancier();
+                        failedInviteOrAdd.add(financier);
+                        failedMessage.add(e.getMessage());
                     }
                 });
+        for (int i =0; i < failedInviteOrAdd.size(); i++){
+            try {
+                notifyPortfolioManagerOfFinancierInviteFailure(failedInviteOrAdd.get(i), NotificationFlag.INVITE_FINANCIER, failedMessage.get(i));
+            } catch (MeedlException e) {
+                log.error("Error notifying portfolio manager on invite/add failure",e);
+            }
+        }
         return getMessageForMultipleFinanciers(investmentVehicle);
     }
 
@@ -301,11 +311,12 @@ public class FinancierService implements FinancierUseCase {
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
                 updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+                notifyExistingFinancier(financier, NotificationFlag.INVESTMENT_VEHICLE, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+                notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER, investmentVehicle);
             }
-            notifyExistingFinancier(financier, investmentVehicle);
             log.info("Financier {} added to investment vehicle {}. Investment vehicle financier was not found. ", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
         }{
             log.warn("Attempted to add financier with email {} to the same investment vehicle twice with name {} and id {}", financier.getUserIdentity().getEmail(), investmentVehicle.getName(), investmentVehicle.getId());
@@ -366,34 +377,6 @@ public class FinancierService implements FinancierUseCase {
             //TODO Add new role to user.
         }
         return userIdentity;
-    }
-
-    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
-        log.info("Started in app notification for existing financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(financier.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("You have now been made a financier on the platform.")
-                .notificationFlag(notificationFlag)
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
-    }
-
-    private void notifyExistingFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        log.info("Started in app notification for invite financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(investmentVehicle.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
-                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
@@ -839,5 +822,50 @@ public class FinancierService implements FinancierUseCase {
         }else {
             return inviteCooperateFinancierToPlatform(financier);
         }
+    }
+    private void initializeMessagingList() {
+        financiersToMail = new ArrayList<>();
+        failedInviteOrAdd = new ArrayList<>();
+        failedMessage = new ArrayList<>();
+    }
+    private void notifyPortfolioManagerOfFinancierInviteFailure(Financier financier, NotificationFlag notificationFlag, String message) throws MeedlException {
+        log.info("Started failure in app notification for Portfolio Manager.");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .contentDetail("Error encountered when adding/inviting financier with id " + financier.getId()+
+                        " gotten :" + message + " Financier id : " +financier.getId() +
+                        "Click the link to view financier detail.")
+                .title("Failed to invite/add financier error.")
+                .notificationFlag(notificationFlag)
+                .build();
+        asynchronousNotificationOutputPort.notifyPortfolioManagers(meedlNotification);
+    }
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
+        log.info("Started in app notification for existing financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("You have now been made a financier on the platform.")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    private void notifyExistingFinancier(Financier financier,  NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle) throws MeedlException {
+        log.info("Started in app notification for invite financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(investmentVehicle.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 }
