@@ -82,7 +82,7 @@ public class FinancierService implements FinancierUseCase {
 
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
-        initializeMessagingList();
+        financiersToMail = new ArrayList<>();
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
         InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
         UserIdentity actor = getActorPerformingAction(financiers);
@@ -141,13 +141,7 @@ public class FinancierService implements FinancierUseCase {
                         failedMessage.add(e.getMessage());
                     }
                 });
-        for (int i =0; i < failedInviteOrAdd.size(); i++){
-            try {
-                notifyPortfolioManagerOfFinancierInviteFailure(failedInviteOrAdd.get(i), NotificationFlag.INVITE_FINANCIER, failedMessage.get(i));
-            } catch (MeedlException e) {
-                log.error("Error notifying portfolio manager on invite/add failure",e);
-            }
-        }
+
         return getMessageForMultipleFinanciers(investmentVehicle);
     }
 
@@ -823,24 +817,7 @@ public class FinancierService implements FinancierUseCase {
             return inviteCooperateFinancierToPlatform(financier);
         }
     }
-    private void initializeMessagingList() {
-        financiersToMail = new ArrayList<>();
-        failedInviteOrAdd = new ArrayList<>();
-        failedMessage = new ArrayList<>();
-    }
-    private void notifyPortfolioManagerOfFinancierInviteFailure(Financier financier, NotificationFlag notificationFlag, String message) throws MeedlException {
-        log.info("Started failure in app notification for Portfolio Manager.");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .timestamp(LocalDateTime.now())
-                .contentId(financier.getId())
-                .contentDetail("Error encountered when adding/inviting financier with id " + financier.getId()+
-                        " gotten :" + message + " Financier id : " +financier.getId() +
-                        "Click the link to view financier detail.")
-                .title("Failed to invite/add financier error.")
-                .notificationFlag(notificationFlag)
-                .build();
-        asynchronousNotificationOutputPort.notifyPortfolioManagers(meedlNotification);
-    }
+
     private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
         log.info("Started in app notification for existing financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
