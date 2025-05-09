@@ -229,7 +229,7 @@ public class TestData {
 //        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
 //        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(60), buildBeneficialOwner(40));
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
@@ -563,7 +563,7 @@ public class TestData {
                 .additionalInformation("None")
                 .build();
     }
-    public static BeneficialOwner buildBeneficialOwner() {
+    public static BeneficialOwner buildBeneficialOwner(double percentageOwnershipOrShare) {
         return BeneficialOwner.builder()
                 .beneficialOwnerType(FinancierType.INDIVIDUAL)
                 .entityName("Entity Name")
@@ -573,7 +573,7 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(100)
+                .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
@@ -583,7 +583,7 @@ public class TestData {
 
     public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
         return FinancierBeneficialOwner.builder()
-                .beneficialOwner(buildBeneficialOwner())
+                .beneficialOwner(buildBeneficialOwner(100))
                 .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }

@@ -25,7 +25,19 @@ public class BeneficialOwnerAdapterTest {
     private String beneficialOwnerId;
     @BeforeAll
     void setUp() {
-        beneficialOwner = TestData.buildBeneficialOwner();
+        beneficialOwner = TestData.buildBeneficialOwner(100);
+    }
+
+    @Test
+    void saveBeneficialOwnerWithNegativePercentageOwnershipOrShare(){
+        beneficialOwner.setPercentageOwnershipOrShare(-2);
+        assertThrows(MeedlException.class, () -> beneficialOwnerOutputPort.save(beneficialOwner));
+    }
+
+    @Test
+    void saveBeneficialOwnerWithPercentageOwnershipOrShareGreaterThan100(){
+        beneficialOwner.setPercentageOwnershipOrShare(101);
+        assertThrows(MeedlException.class, () -> beneficialOwnerOutputPort.save(beneficialOwner));
     }
 
     @Test
@@ -51,7 +63,7 @@ public class BeneficialOwnerAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
     void saveBeneficialOwnerWithInvalidName(String name){
-        BeneficialOwner beneficialOwner = TestData.buildBeneficialOwner();
+        BeneficialOwner beneficialOwner = TestData.buildBeneficialOwner(100);
         beneficialOwner.setBeneficialOwnerFirstName(name);
         assertThrows(MeedlException.class, () -> beneficialOwnerOutputPort.save(beneficialOwner));
     }
