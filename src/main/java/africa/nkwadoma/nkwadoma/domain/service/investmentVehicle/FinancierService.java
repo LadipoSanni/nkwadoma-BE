@@ -101,6 +101,9 @@ public class FinancierService implements FinancierUseCase {
         Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         for (Financier financier : financiers) {
+            if (financier.getFinancierType() == null){
+                continue;
+            }
             if (financier.getFinancierType().equals(COOPERATE)){
                 portfolio.setTotalNumberOfInstitutionalFinancier(portfolio.getTotalNumberOfInstitutionalFinancier() + 1);
             }else {
@@ -130,9 +133,9 @@ public class FinancierService implements FinancierUseCase {
                         confirmFinancierHasType(financier);
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
-                        log.error("financier details {}", financier ,e);
+                        log.error("Financier details {}", financier ,e);
                         //TODO notify financier on failure
-                        throw new RuntimeException(e.getMessage());
+//                        throw new RuntimeException(e.getMessage());
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
