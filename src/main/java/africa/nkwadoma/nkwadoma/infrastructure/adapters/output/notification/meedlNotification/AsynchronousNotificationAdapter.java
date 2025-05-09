@@ -70,7 +70,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " has been invited to the " + investmentVehicle.getName() +
                         " investment vehicle.\n" +
                         "Click the link to view financier detail.")
-                .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
+                .senderFullName(sender.getFirstName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")

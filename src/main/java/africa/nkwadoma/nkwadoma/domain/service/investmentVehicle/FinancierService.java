@@ -64,10 +64,8 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
-    private final FinancierEmailUseCase financierEmailUseCase;
     private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private final FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
-    private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
@@ -86,7 +84,7 @@ public class FinancierService implements FinancierUseCase {
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
-        if (financiers.size() == 1) {
+        if (financiers.size() == BigInteger.ONE.intValue()) {
             response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
@@ -133,9 +131,7 @@ public class FinancierService implements FinancierUseCase {
                         confirmFinancierHasType(financier);
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
-                        log.error("Financier details {}", financier ,e);
-                        //TODO notify financier on failure
-//                        throw new RuntimeException(e.getMessage());
+                        log.error("Multiple invite flow. Financier details {}", financier ,e);
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
@@ -147,8 +143,7 @@ public class FinancierService implements FinancierUseCase {
             confirmFinancierHasType(financier);
             inviteFinancier(financier, investmentVehicle);
         }catch (MeedlException e){
-            log.error("financier details {}", financier ,e);
-            //TODO notify financier on failure
+            log.error("Single invite flow. financier details {}", financier ,e);
             throw new MeedlException(e.getMessage());
         }
         return getMessageForSingleFinancier(investmentVehicle);
@@ -169,16 +164,16 @@ public class FinancierService implements FinancierUseCase {
 
     private static String getMessageForSingleFinancier(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier have been invited to the platform";
+            return "Financier has been invited to the platform";
         }else {
             return "Financier has been added to investment vehicle";
         }
     }
     private static String getMessageForMultipleFinanciers(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier(s) has been added to investment vehicle";
+            return "Financiers have been added to investment vehicle";
         }else {
-            return "Financier(s) have been invited to the platform";
+            return "Financiers have been invited to the platform";
         }
     }
 
@@ -301,7 +296,7 @@ public class FinancierService implements FinancierUseCase {
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
                 updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
-                notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER, investmentVehicle);
+                notifyExistingFinancier(financier, NotificationFlag.INVESTMENT_VEHICLE, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
@@ -369,33 +364,7 @@ public class FinancierService implements FinancierUseCase {
         return userIdentity;
     }
 
-    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
-        log.info("Started in app notification for existing financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(financier.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("You have now been made a financier on the platform.")
-                .notificationFlag(notificationFlag)
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
-    }
 
-    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle) throws MeedlException {
-        log.info("Started in app notification for invite financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(investmentVehicle.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
-                .notificationFlag(notificationFlag)
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
-    }
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
@@ -840,5 +809,33 @@ public class FinancierService implements FinancierUseCase {
         }else {
             return inviteCooperateFinancierToPlatform(financier);
         }
+    }
+
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
+        log.info("Started in app notification for existing financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("You have now been made a financier on the platform.")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    private void notifyExistingFinancier(Financier financier,  NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle) throws MeedlException {
+        log.info("Started in app notification for invite financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(investmentVehicle.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 }
