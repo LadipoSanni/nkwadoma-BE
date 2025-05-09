@@ -88,7 +88,7 @@ public class FinancierService implements FinancierUseCase {
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
-        if (financiers.size() == 1) {
+        if (financiers.size() == BigInteger.ONE.intValue()) {
             response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
@@ -136,9 +136,7 @@ public class FinancierService implements FinancierUseCase {
                         confirmFinancierHasType(financier);
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
-                        log.error("Financier details {}", financier ,e);
-                        failedInviteOrAdd.add(financier);
-                        failedMessage.add(e.getMessage());
+                        log.error("Multiple invite flow. Financier details {}", financier ,e);
                     }
                 });
 
@@ -151,9 +149,7 @@ public class FinancierService implements FinancierUseCase {
             confirmFinancierHasType(financier);
             inviteFinancier(financier, investmentVehicle);
         }catch (MeedlException e){
-            log.error("financier details {}", financier ,e);
-            //TODO notify financier on failure
-            throw new MeedlException(e.getMessage());
+            log.error("Single invite flow. financier details {}", financier ,e);
         }
         return getMessageForSingleFinancier(investmentVehicle);
     }
@@ -173,16 +169,16 @@ public class FinancierService implements FinancierUseCase {
 
     private static String getMessageForSingleFinancier(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier have been invited to the platform";
+            return "Financier has been invited to the platform";
         }else {
             return "Financier has been added to investment vehicle";
         }
     }
     private static String getMessageForMultipleFinanciers(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier(s) has been added to investment vehicle";
+            return "Financiers have been added to investment vehicle";
         }else {
-            return "Financier(s) have been invited to the platform";
+            return "Financiers have been invited to the platform";
         }
     }
 
