@@ -298,11 +298,12 @@ public class FinancierService implements FinancierUseCase {
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
                 updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+                notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+                notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER, investmentVehicle);
             }
-            notifyExistingFinancier(financier, investmentVehicle);
             log.info("Financier {} added to investment vehicle {}. Investment vehicle financier was not found. ", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
         }{
             log.warn("Attempted to add financier with email {} to the same investment vehicle twice with name {} and id {}", financier.getUserIdentity().getEmail(), investmentVehicle.getName(), investmentVehicle.getId());
@@ -379,7 +380,7 @@ public class FinancierService implements FinancierUseCase {
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 
-    private void notifyExistingFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle) throws MeedlException {
         log.info("Started in app notification for invite financier");
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .user(financier.getUserIdentity())
@@ -388,7 +389,7 @@ public class FinancierService implements FinancierUseCase {
                 .senderMail(financier.getUserIdentity().getEmail())
                 .senderFullName(financier.getUserIdentity().getFirstName())
                 .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
-                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
+                .notificationFlag(notificationFlag)
                 .build();
         meedlNotificationUsecase.sendNotification(meedlNotification);
     }
