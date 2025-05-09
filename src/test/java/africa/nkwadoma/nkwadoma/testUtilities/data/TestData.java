@@ -573,7 +573,7 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(6)
+                .percentageOwnershipOrShare(100)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
