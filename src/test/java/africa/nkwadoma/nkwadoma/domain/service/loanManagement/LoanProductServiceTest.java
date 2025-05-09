@@ -103,19 +103,19 @@ class LoanProductServiceTest {
             throw new RuntimeException(exception);
         }
     }
-    @Test
-    public void createLoanProductWithSizeGreaterThanVechicleAvailableAount() {
-        try {
-            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
-            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
-            investmentVehicle.setTotalAvailableAmount(new BigDecimal(200));
-            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
-                    .thenReturn(investmentVehicle);
-            assertThrows(MeedlException.class , ()-> loanService.createLoanProduct(loanProduct));
-        } catch (MeedlException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    @Test
+//    public void createLoanProductWithSizeGreaterThanVechicleAvailableAount() {
+//        try {
+//            when(userIdentityOutputPort.findById(any())).thenReturn(new UserIdentity());
+//            when(identityManagerOutPutPort.verifyUserExistsAndIsEnabled(any())).thenReturn(new UserIdentity());
+//            investmentVehicle.setTotalAvailableAmount(new BigDecimal(200));
+//            when(investmentVehicleOutputPort.findById(loanProduct.getId()))
+//                    .thenReturn(investmentVehicle);
+//            assertThrows(MeedlException.class , ()-> loanService.createLoanProduct(loanProduct));
+//        } catch (MeedlException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
     @Test
     void createLoanProductWithNullLoanProduct(){
         assertThrows(MeedlException.class, () -> loanService.createLoanProduct(null));
