@@ -229,7 +229,7 @@ public class TestData {
 //        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
 //        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(), secondBeneficialOwner());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(60), buildBeneficialOwner(40));
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
@@ -563,7 +563,7 @@ public class TestData {
                 .additionalInformation("None")
                 .build();
     }
-    public static BeneficialOwner buildBeneficialOwner() {
+    public static BeneficialOwner buildBeneficialOwner(double percentageOwnershipOrShare) {
         return BeneficialOwner.builder()
                 .beneficialOwnerType(FinancierType.INDIVIDUAL)
                 .entityName("Entity Name")
@@ -573,25 +573,7 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(60)
-                .votersCard("Voters card")
-                .nationalIdCard("national id card")
-                .driverLicensetionalIdCard("driver licensetional id card")
-                .driverLicense("Drivers license")
-                .build();
-    }
-
-    public static BeneficialOwner secondBeneficialOwner() {
-        return BeneficialOwner.builder()
-                .beneficialOwnerType(FinancierType.INDIVIDUAL)
-                .entityName("Entity Name for second beneficial")
-                .beneficialRcNumber("RC9488947")
-                .countryOfIncorporation(Country.TAJIKISTAN)
-                .beneficialOwnerFirstName("second Beneficial first name")
-                .beneficialOwnerLastName("second Beneficial last name")
-                .beneficialOwnerRelationship(UserRelationship.BROTHER)
-                .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(40)
+                .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
@@ -601,7 +583,7 @@ public class TestData {
 
     public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
         return FinancierBeneficialOwner.builder()
-                .beneficialOwner(buildBeneficialOwner())
+                .beneficialOwner(buildBeneficialOwner(100))
                 .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }
