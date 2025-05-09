@@ -134,8 +134,8 @@ public class FinancierService implements FinancierUseCase {
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
                         log.error("Financier details {}", financier ,e);
-                        //TODO notify financier on failure
-//                        throw new RuntimeException(e.getMessage());
+//                        notifyExistingPortfolioManager();
+//                        notifyExistingFinancier();
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
