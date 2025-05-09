@@ -30,7 +30,7 @@ import java.util.Set;
 @Setter
 @ToString
 @Builder
-public class    Financier {
+public class Financier {
     private String id;
     private List<BeneficialOwner> beneficialOwners;
 
@@ -142,6 +142,21 @@ public class    Financier {
         validateSourceOfFund();
         validateDeclaration();
         validateBeneficialOwnersKyc();
+        validateBeneficialOwnersPercentageOwnershipOrShare();
+    }
+
+    private void validateBeneficialOwnersPercentageOwnershipOrShare() throws MeedlException {
+        double totalPercentage = beneficialOwners.stream()
+                .mapToDouble(BeneficialOwner::getPercentageOwnershipOrShare)
+                .sum();
+
+        if (totalPercentage < 100.0) {
+            throw new MeedlException("Total ownership percentage cannot be less than 100%. Found: " + totalPercentage + "%");
+        }
+
+        if (totalPercentage > 100.0) {
+            throw new MeedlException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
+        }
     }
 
     private void validateBeneficialOwnersKyc() throws MeedlException {

@@ -617,9 +617,40 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
 
-
     @Test
     @Order(10)
+    void completeKycWithBeneficialOwnerPercentageLessThanHundredPercent(){
+        Financier financierUpdated = null;
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
+            assertNotNull(foundFinancier.getUserIdentity());
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, TestData.buildBankDetail());
+            financierWithKycRequest.getBeneficialOwners().get(0).setPercentageOwnershipOrShare(1);
+            assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+        } catch (MeedlException e) {
+            log.info("===================> {}", e.getMessage(), e);
+        }
+    }
+
+    @Test
+    @Order(11)
+    void completeKycWithBeneficialOwnerPercentageGreaterThanHundredPercent(){
+        Financier financierUpdated = null;
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
+            assertNotNull(foundFinancier.getUserIdentity());
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, TestData.buildBankDetail());
+            financierWithKycRequest.getBeneficialOwners().get(0).setPercentageOwnershipOrShare(101);
+            assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+        } catch (MeedlException e) {
+            log.info("===================> {}", e.getMessage(), e);
+        }
+    }
+
+    @Test
+    @Order(12)
     void completeKycIndividual() {
         Financier financierUpdated = null;
         Financier foundFinancier = null;
@@ -655,7 +686,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(11)
+    @Order(13)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -739,7 +770,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(12)
+    @Order(14)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
@@ -765,7 +796,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId, individualFinancierId));
     }
     @Test
-    @Order(13)
+    @Order(15)
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
@@ -802,7 +833,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, "invalid investment vehicle id"));
     }
     @Test
-    @Order(14)
+    @Order(16)
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
@@ -822,7 +853,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
     }
     @Test
-    @Order(15)
+    @Order(17)
     public void inviteCooperateFinancierToNewVehicle() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail("cooperateFinancierEmailtest", 5), "ead0f7cb-5484-4bb8-b371-433850a9c367");
@@ -902,7 +933,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.search(name, individualFinancier));
     }
     @Test
-    @Order(16)
+    @Order(18)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
@@ -916,7 +947,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(17)
+    @Order(19)
     void searchFinancierByLastName() {
         Page<Financier> foundFinanciers;
         try {
@@ -930,7 +961,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(18)
+    @Order(20)
     void searchFinancierWithFirstNameBeforeLastName() {
         Page<Financier> foundFinanciers;
         try {
@@ -944,7 +975,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(19)
+    @Order(21)
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
@@ -958,7 +989,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(20)
+    @Order(22)
     void searchFinancierWithEmail() {
         Page<Financier> foundFinanciers;
         try {
@@ -972,7 +1003,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(21)
+    @Order(23)
     void searchFinancierInVehicle() {
         Page<Financier> foundFinanciers;
         try {
@@ -1012,7 +1043,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(22)
+    @Order(24)
     void viewInvestmentDetailOfFinancierByPortfolioManager(){
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
@@ -1029,7 +1060,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(23)
+    @Order(25)
     public void inviteCooperateFinancierToPlatform() {
         Financier foundFinancier;
         String inviteResponse;
@@ -1067,7 +1098,7 @@ public class FinancierServiceTest {
         assertTrue(investmentVehicleFinanciers.isEmpty());
     }
     @Test
-    @Order(24)
+    @Order(26)
     public void addMultipleExistingFinanciersToInvestmentVehicle() {
         List<Financier> financiers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -1125,7 +1156,7 @@ public class FinancierServiceTest {
 
     }
     @Test
-    @Order(25)
+    @Order(27)
     public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
 
         UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(String.format("cooperateFinancierEmailtestwith%samount@email.com", TestUtils.generateName(3)), "ead0f7cb-5484-4bb8-b371-433850a9c367");
