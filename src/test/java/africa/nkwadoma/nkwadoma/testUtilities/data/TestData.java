@@ -229,7 +229,7 @@ public class TestData {
 //        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
 //        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(), secondBeneficialOwner());
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
@@ -573,7 +573,25 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(100)
+                .percentageOwnershipOrShare(60)
+                .votersCard("Voters card")
+                .nationalIdCard("national id card")
+                .driverLicensetionalIdCard("driver licensetional id card")
+                .driverLicense("Drivers license")
+                .build();
+    }
+
+    public static BeneficialOwner secondBeneficialOwner() {
+        return BeneficialOwner.builder()
+                .beneficialOwnerType(FinancierType.INDIVIDUAL)
+                .entityName("Entity Name for second beneficial")
+                .beneficialRcNumber("RC9488947")
+                .countryOfIncorporation(Country.TAJIKISTAN)
+                .beneficialOwnerFirstName("second Beneficial first name")
+                .beneficialOwnerLastName("second Beneficial last name")
+                .beneficialOwnerRelationship(UserRelationship.BROTHER)
+                .beneficialOwnerDateOfBirth(LocalDateTime.now())
+                .percentageOwnershipOrShare(40)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
