@@ -49,8 +49,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
         }
     }
 
-    @Override
-    public void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
+    private void notifyPortfolioManagers(MeedlNotification meedlNotification) throws MeedlException {
         notifyAllPortfolioManager(meedlNotification);
     }
     private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
