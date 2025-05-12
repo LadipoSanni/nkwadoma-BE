@@ -54,10 +54,10 @@ public class BeneficialOwner {
                 MeedlValidator.validateRCNumber(this.getBeneficialRcNumber());
                 MeedlValidator.validateObjectInstance(this.getCountryOfIncorporation(), "Country of incorporation is required.");
             }
-            if (this.getPercentageOwnershipOrShare() < 0) {
+            if (this.getPercentageOwnershipOrShare() < 0 && beneficialOwnerType == FinancierType.INDIVIDUAL) {
                 throw new MeedlException("Beneficial owner percentage ownership or share cannot be negative.");
             }
-            if (this.getPercentageOwnershipOrShare() > 100) {
+            if (this.getPercentageOwnershipOrShare() > 100 && beneficialOwnerType == FinancierType.INDIVIDUAL) {
                 throw new MeedlException("Beneficial owner percentage ownership or share cannot be greater than 100.");
             }
         }
