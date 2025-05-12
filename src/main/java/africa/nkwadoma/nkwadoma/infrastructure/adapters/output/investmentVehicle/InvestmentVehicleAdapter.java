@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
@@ -215,6 +216,14 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         InvestmentVehicleEntity investmentVehicleEntity =
                 investmentVehicleRepository.findByLoanOfferId(loanOfferId);
         return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
+    }
+
+    @Override
+    public List<InvestmentVehicle> findListOfInvestmentVehicleFinancierWasAddedTo(String financierId) {
+        List<InvestmentVehicleProjection> investmentVehicleEntities =
+                investmentVehicleRepository.findListOfInvestmentVehicleFinancierWasAddedToByFinancierId(financierId);
+        return investmentVehicleEntities.stream().
+                map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle).toList();
     }
 
 

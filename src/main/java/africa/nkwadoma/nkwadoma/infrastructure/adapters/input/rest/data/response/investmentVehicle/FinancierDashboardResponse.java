@@ -31,6 +31,6 @@ public class FinancierDashboardResponse {
     private String totalAmountInvested;
     private BigDecimal totalIncomeEarned;
     private BigDecimal portfolioValue;
-    private List<InvestmentVehicle> investmentVehicles;
+    private List<InvestmentVehicleResponse> investmentVehicleResponses;
 
 }

@@ -51,6 +51,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType.COOPERATE;
 
@@ -395,8 +397,14 @@ public class FinancierService implements FinancierUseCase {
 
     private Financier updateFinancierDetail(Financier financier) throws MeedlException {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
-        List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
-                .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
+
+        log.info("all investment financier made ---> {}",financierInvestmentVehicle.size());
+
+        List<InvestmentVehicle> investmentVehicles =
+                investmentVehicleOutputPort.findListOfInvestmentVehicleFinancierWasAddedTo(financier.getId());
+
+        log.info("non duplicate investment vehicle ----> {}",investmentVehicles.size());
+
         financier.setTotalNumberOfInvestment(financierInvestmentVehicle.size());
         financier.setInvestmentVehicles(investmentVehicles);
         List<BeneficialOwner> beneficialOwners = financierBeneficialOwnerOutputPort.findAllBeneficialOwner(financier.getId());
@@ -696,7 +704,7 @@ public class FinancierService implements FinancierUseCase {
         userIdentity.setBvn(financier.getUserIdentity().getBvn());
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
-        if (foundFinancier.getFinancierType() == FinancierType.COOPERATE){
+        if (foundFinancier.getFinancierType() == COOPERATE){
             userIdentity.setFirstName(foundFinancier.getCooperation().getName());
             userIdentity.setLastName(foundFinancier.getCooperation().getName());
         }
