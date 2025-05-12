@@ -74,7 +74,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
-                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
+                .notificationFlag(NotificationFlag.INVESTMENT_VEHICLE)
                 .build();
     }
 
@@ -86,7 +86,6 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " financier " + financier.getUserIdentity().getFirstName() +
                         " has been invited to the platform." +
                         "Click the link to view financier detail.")
-                .contentDetail("A new " + financier.getFinancierType().name().toLowerCase() + " financier has been invited to the platform. Click the link to view financier detail")
                 .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
