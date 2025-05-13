@@ -711,7 +711,6 @@ public class FinancierService implements FinancierUseCase {
             }
         }
 
-
         foundFinancier.setUserIdentity(userIdentity);
         financier.setUserIdentity(userIdentity);
 
