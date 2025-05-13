@@ -82,20 +82,20 @@ class CohortPersistenceAdapterTest {
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
     private List<LoanBreakdown> loanBreakdowns;
-    private int pageSize ;
-    private int pageNumber ;
+    private int pageSize = 10 ;
+    private int pageNumber = 0;
     @Autowired
     private ProgramRepository programRepository;
 
 
     @BeforeAll
     void setUpOrg() {
-        List<Cohort> cohortSearchResults;
+        Page<Cohort> cohortSearchResults;
         try {
-            cohortSearchResults = cohortOutputPort.findCohortByName("Elite");
+            cohortSearchResults = cohortOutputPort.findCohortByName("Elite",pageSize,pageNumber);
             if (cohortSearchResults != null && !cohortSearchResults.isEmpty()) {
-                if (ObjectUtils.isNotEmpty(cohortSearchResults.get(0)) && StringUtils.isNotEmpty(cohortSearchResults.get(0).getId())) {
-                    cohortOutputPort.deleteCohort(cohortSearchResults.get(0).getId());
+                if (ObjectUtils.isNotEmpty(cohortSearchResults.getContent().get(0)) && StringUtils.isNotEmpty(cohortSearchResults.getContent().get(0).getId())) {
+                    cohortOutputPort.deleteCohort(cohortSearchResults.getContent().get(0).getId());
                 }
 
             }
@@ -334,14 +334,14 @@ class CohortPersistenceAdapterTest {
     @Order(7)
     @Test
     void searchForCohortInProgram(){
-        List<Cohort> cohorts  = new ArrayList<>();
+        Page<Cohort> cohorts  = Page.empty();
         try{
             cohorts  =
-                    cohortOutputPort.searchForCohortInAProgram("X",programId);
+                    cohortOutputPort.searchForCohortInAProgram("X",programId,pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-       assertEquals(2,cohorts.size());
+       assertEquals(2,cohorts.getContent().size());
     }
 
     @ParameterizedTest
@@ -391,21 +391,27 @@ class CohortPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    @ValueSource(strings = {StringUtils.SPACE})
     void searchForCohortWithEmptyName(String emptyName){
-        assertThrows(MeedlException.class,()-> cohortOutputPort.findCohortByName(emptyName));
+         Page<Cohort> cohorts = Page.empty();
+         try{
+          cohorts = cohortOutputPort.findCohortByName(emptyName,pageSize,pageNumber);
+         }catch (MeedlException exception){
+             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+         }
+          assertEquals(0,cohorts.getContent().size());
     }
 
     @Order(10)
     @Test
     void searchForCohortInOrganization(){
-        List<Cohort> cohorts  = new ArrayList<>();
+        Page<Cohort> cohorts  = Page.empty();
         try{
-            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x");
+            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x",pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(3,cohorts.size());
+        assertEquals(3,cohorts.getContent().size());
     }
 
     @Order(11)

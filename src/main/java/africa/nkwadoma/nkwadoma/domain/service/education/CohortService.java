@@ -219,24 +219,22 @@ public class CohortService implements CohortUseCase {
         return program;
     }
 
-    @Override
-    public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
-    }
-
 
     @Override
-    public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
+    public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
-            OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
-            return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),name);
+            if (ObjectUtils.isEmpty(cohort.getProgramId())) {
+                OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
+                return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),cohort.getName(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }else {
+                return cohortOutputPort.searchForCohortInAProgram(cohort.getName(),cohort.getProgramId(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }
         }
-        return cohortOutputPort.findCohortByName(name);
+        return cohortOutputPort.findCohortByName(cohort.getName(),cohort.getPageSize(),cohort.getPageNumber());
     }
 
     @Override
