@@ -150,11 +150,11 @@ public class Financier {
                 .mapToDouble(BeneficialOwner::getPercentageOwnershipOrShare)
                 .sum();
 
-        if (totalPercentage < 100.0) {
+        if (totalPercentage < 100.0 && financierIsIndividual()) {
             throw new MeedlException("Total ownership percentage cannot be less than 100%. Found: " + totalPercentage + "%");
         }
 
-        if (totalPercentage > 100.0) {
+        if (totalPercentage > 100.0 && financierIsIndividual()) {
             throw new MeedlException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
         }
     }
