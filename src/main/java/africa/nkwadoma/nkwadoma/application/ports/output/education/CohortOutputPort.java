@@ -18,13 +18,13 @@ public interface CohortOutputPort {
 
     Cohort save(Cohort cohort) throws MeedlException;
 
-    List<Cohort> findCohortByName(String name) throws MeedlException;
+    Page<Cohort> findCohortByName(String name,int pageSize, int pageNumber) throws MeedlException;
 
     Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 
-    List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException;
+    Page<Cohort> searchForCohortInAProgram(String name,String programId,int pageSize, int pageNumber) throws MeedlException;
 
     Cohort checkIfCohortExistWithName(String name) throws MeedlException;
 
-    List<Cohort> searchCohortInOrganization(String organizationId, String x) throws MeedlException;
+    Page<Cohort> searchCohortInOrganization(String organizationId, String name,int pageSize,int pageNumber) throws MeedlException;
 }

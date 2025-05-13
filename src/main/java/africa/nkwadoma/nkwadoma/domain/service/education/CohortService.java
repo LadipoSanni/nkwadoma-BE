@@ -219,24 +219,21 @@ public class CohortService implements CohortUseCase {
         return program;
     }
 
-    @Override
-    public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
-    }
-
 
     @Override
-    public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
+    public Page<Cohort> searchForCohort(String userId, String name,String programId,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
-            OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
-            return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),name);
+            if (ObjectUtils.isEmpty(programId)) {
+                OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
+                return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(), name,pageSize,pageNumber);
+            }else {
+                return cohortOutputPort.searchForCohortInAProgram(name,programId,pageSize,pageNumber);
+            }
         }
-        return cohortOutputPort.findCohortByName(name);
+        return cohortOutputPort.findCohortByName(name,pageSize,pageNumber);
     }
 
     @Override

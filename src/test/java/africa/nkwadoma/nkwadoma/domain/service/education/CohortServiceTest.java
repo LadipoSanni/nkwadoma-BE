@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.*;
 import java.time.LocalDate;
@@ -63,6 +65,9 @@ class CohortServiceTest {
     private UserIdentity userIdentity;
     @Mock
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    @Mock
+    private UserIdentityOutputPort userIdentityOutputPort;
+    private
 
 
     @BeforeEach
@@ -200,18 +205,24 @@ class CohortServiceTest {
     @Order(6)
     @Test
     void searchForCohort() {
-        List<Cohort> searchedCohort = new ArrayList<>();
-        try{
-            when(cohortOutputPort.searchForCohortInAProgram(anyString(), eq(xplorers.getProgramId())))
-                    .thenReturn(List.of(elites, xplorers));
+        Page<Cohort> searchedCohort = new PageImpl<>(List.of(elites, xplorers));
+        try {
+            userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(cohortOutputPort.searchForCohortInAProgram(
+                    anyString(),
+                    eq(xplorers.getProgramId()),
+                    eq(pageSize),
+                    eq(pageNumber)
+            )).thenReturn(searchedCohort);
 
-            searchedCohort = cohortService.searchForCohortInAProgram("x", xplorers.getProgramId());
+            searchedCohort = cohortService.searchForCohort(mockId, "x", xplorers.getProgramId(), pageSize, pageNumber);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
 
         assertNotNull(searchedCohort);
-        assertEquals(2, searchedCohort.size());
+        assertEquals(2, searchedCohort.getContent().size());
     }
 
     @Test

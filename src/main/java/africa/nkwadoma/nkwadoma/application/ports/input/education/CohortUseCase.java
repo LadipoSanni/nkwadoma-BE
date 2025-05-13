@@ -20,9 +20,8 @@ public interface CohortUseCase {
 
     String inviteCohort(String userId, String cohortId, List<String> loaneeIds) throws MeedlException;
     Page<Cohort> viewAllCohortInAProgram(String programId, int pageSize,int pageNumber) throws MeedlException;
-    List<Cohort> searchForCohortInAProgram(String name, String programId) throws MeedlException;
 
-    List<Cohort> searchForCohort(String userId,String name) throws MeedlException;
+    Page<Cohort> searchForCohort(String userId,String name,String programId,int pageSize,int pageNumber) throws MeedlException;
     Page<Cohort> viewAllCohortInOrganization(String actorId,int pageNumber,int pageSize) throws MeedlException ;
 
     List<LoanBreakdown> getCohortLoanBreakDown( String cohortId) throws MeedlException;
