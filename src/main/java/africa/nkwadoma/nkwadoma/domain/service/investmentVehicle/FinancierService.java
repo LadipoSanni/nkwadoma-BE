@@ -705,6 +705,7 @@ public class FinancierService implements FinancierUseCase {
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
         if (foundFinancier.getFinancierType() == COOPERATE){
+//        if (foundFinancier.getFinancierType() == COOPERATE && foundFinancier.getCooperation() != null){
             userIdentity.setFirstName(foundFinancier.getCooperation().getName());
             userIdentity.setLastName(foundFinancier.getCooperation().getName());
         }
