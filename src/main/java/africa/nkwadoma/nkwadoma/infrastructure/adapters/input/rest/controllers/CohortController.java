@@ -11,7 +11,6 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.enums.constants.*;
 import io.swagger.v3.oas.annotations.*;
-import jakarta.annotation.Nullable;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -125,8 +124,10 @@ public class CohortController {
             @RequestParam(required = false) String programId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohortName,programId
-        ,pageSize,pageNumber);
+
+        Cohort cohort = Cohort.builder().programId(programId).name(cohortName).
+                pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohort);
         List<CohortResponse> cohortResponses =  cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);

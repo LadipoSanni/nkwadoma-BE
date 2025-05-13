@@ -47,6 +47,8 @@ public class Cohort {
     private String programName;
     private int numberOfEmployed;
     private int numberOfDropOut;
+    private int pageSize;
+    private int pageNumber;
 
 
 

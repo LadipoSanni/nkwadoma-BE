@@ -206,17 +206,19 @@ class CohortServiceTest {
     @Test
     void searchForCohort() {
         Page<Cohort> searchedCohort = new PageImpl<>(List.of(elites, xplorers));
+        Cohort cohort = Cohort.builder().name("x").pageNumber(0).
+                pageSize(10).programId(xplorers.getProgramId()).build();
         try {
             userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
             when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(cohortOutputPort.searchForCohortInAProgram(
                     anyString(),
-                    eq(xplorers.getProgramId()),
-                    eq(pageSize),
-                    eq(pageNumber)
+                    eq(cohort.getProgramId()),
+                    eq(cohort.getPageSize()),
+                    eq(cohort.getPageNumber())
             )).thenReturn(searchedCohort);
 
-            searchedCohort = cohortService.searchForCohort(mockId, "x", xplorers.getProgramId(), pageSize, pageNumber);
+            searchedCohort = cohortService.searchForCohort(mockId,cohort);
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
