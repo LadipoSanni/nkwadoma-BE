@@ -604,7 +604,7 @@ public class FinancierService implements FinancierUseCase {
             financier.validateKyc(foundFinancier.getFinancierType());
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
-            if (!financier.getBeneficialOwners().isEmpty()){
+            if (financier.getBeneficialOwners() != null){
                 saveFinancierBeneficialOwners(financier);
             }
             saveFinancierPoliticallyExposedPeople(financier);

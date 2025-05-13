@@ -141,8 +141,10 @@ public class Financier {
         }
         validateSourceOfFund();
         validateDeclaration();
-        validateBeneficialOwnersKyc();
-        validateBeneficialOwnersPercentageOwnershipOrShare();
+//        validateBeneficialOwnersKyc();
+        if (beneficialOwners != null){
+            validateBeneficialOwnersPercentageOwnershipOrShare();
+        }
     }
 
     private void validateBeneficialOwnersPercentageOwnershipOrShare() throws MeedlException {
