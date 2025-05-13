@@ -164,7 +164,7 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     @Override
     public Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException {
         OrganizationIdentity foundOrganizationIdentity = findCreatorOrganization(meedlUserId);
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt")));
         Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(foundOrganizationIdentity.getId(), pageRequest);
         return programEntities.map(programMapper::toProgram);
     }
