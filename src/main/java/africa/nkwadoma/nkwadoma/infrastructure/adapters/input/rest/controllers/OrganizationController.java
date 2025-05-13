@@ -83,9 +83,13 @@ public class OrganizationController {
 
     @GetMapping("organization/search")
     @Operation(summary = "Search for organization(s) by similar or precise name")
-    public ResponseEntity<ApiResponse<?>> searchOrganizationByName(@Valid @RequestParam(name = "name") @NotBlank(message = "Organization name is required") String name)
+    public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
+                                                                       @RequestParam(name = "name") String name,
+                                                                       @RequestParam(name = "status" , required = false) ActivationStatus status,
+                                                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                       @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
             throws MeedlException {
-        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name);
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name,status,pageSize,pageNumber );
         log.info("Organization {}", organizationIdentities);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
                 data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).

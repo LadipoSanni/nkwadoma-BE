@@ -19,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -286,9 +285,8 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationName, "Organization name is required");
-        return organizationIdentityOutputPort.findByName(organizationName);
+    public Page<OrganizationIdentity> search(String organizationName,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException {
+        return organizationIdentityOutputPort.findByName(organizationName,activationStatus,pageSize,pageNumber);
     }
 
     @Override

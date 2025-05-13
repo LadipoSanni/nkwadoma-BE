@@ -15,7 +15,11 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
 
     Optional<OrganizationEntity> findByRcNumber(String rcNumber);
 
-    List<OrganizationEntity> findByNameContainingIgnoreCase(String trim);
+    @Query("SELECT o FROM OrganizationEntity o WHERE LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
+            "AND (:status IS NULL OR o.status = :status)")
+    Page<OrganizationEntity> findByNameContainingIgnoreCaseAndStatus(@Param("name") String name,
+                                                                     @Param("status") ActivationStatus status,
+                                                                     Pageable pageable);
 
     Optional<OrganizationEntity> findByTaxIdentity(String tin);
 
