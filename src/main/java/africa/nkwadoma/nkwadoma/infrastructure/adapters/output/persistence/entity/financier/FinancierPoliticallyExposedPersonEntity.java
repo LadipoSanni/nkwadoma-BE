@@ -1,8 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.financier;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,7 +14,7 @@ public class FinancierPoliticallyExposedPersonEntity {
     @Id
     @UuidGenerator
     private String id;
-    @OneToOne
+    @ManyToOne
     private FinancierEntity financier;
     @OneToOne
     private PoliticallyExposedPersonEntity politicallyExposedPerson;

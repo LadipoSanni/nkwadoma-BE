@@ -674,11 +674,9 @@ public class FinancierService implements FinancierUseCase {
 
     }
 
-    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) {
+    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
         mapKycUserIdentityData(financier, foundFinancier);
-
         mapKycFinancierPreviousData(financier, foundFinancier);
-
     }
 
     private static void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
@@ -695,7 +693,7 @@ public class FinancierService implements FinancierUseCase {
         financier.setId(foundFinancier.getId());
     }
 
-    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) {
+    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
         UserIdentity userIdentity = foundFinancier.getUserIdentity();
         log.info("updating user details in kyc service : {}", userIdentity);
 
@@ -704,9 +702,13 @@ public class FinancierService implements FinancierUseCase {
         userIdentity.setBvn(financier.getUserIdentity().getBvn());
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
-        if (foundFinancier.getFinancierType() == COOPERATE){
-            userIdentity.setFirstName(foundFinancier.getCooperation().getName());
-            userIdentity.setLastName(foundFinancier.getCooperation().getName());
+        if (foundFinancier.getFinancierType() == null){
+            throw new MeedlException("Financier does not have type");
+        } else{
+            if (foundFinancier.getFinancierType() == COOPERATE){
+                userIdentity.setFirstName(foundFinancier.getCooperation().getName());
+                userIdentity.setLastName(foundFinancier.getCooperation().getName());
+            }
         }
 
         foundFinancier.setUserIdentity(userIdentity);
