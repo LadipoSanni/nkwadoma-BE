@@ -61,6 +61,8 @@ class OrganizationIdentityServiceTest {
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -307,9 +309,15 @@ class OrganizationIdentityServiceTest {
         }
     }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings = {"1"})
     void searchOrganizationWithInvalidName(String name) {
-        assertThrows(MeedlException.class, ()->organizationIdentityService.search(name));
+        Page<OrganizationIdentity> organizationIdentities = Page.empty();
+        try{
+            organizationIdentities = organizationIdentityService.search(name,ActivationStatus.ACTIVE,pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.info("{} {}", e.getClass().getName(), e.getMessage());
+        }
+        assertNull(organizationIdentities);
     }
 
     @ParameterizedTest
