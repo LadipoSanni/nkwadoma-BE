@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
@@ -309,8 +310,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public List<OrganizationIdentity> viewAllOrganizationsLoanMetrics() {
-        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics();
+    public Page<OrganizationIdentity> viewAllOrganizationsLoanMetrics(LoanType loanType,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Page<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics(loanType,pageSize,pageNumber);
         log.info("Organizations returned: {}", organizationIdentities);
         return organizationIdentities;
     }
