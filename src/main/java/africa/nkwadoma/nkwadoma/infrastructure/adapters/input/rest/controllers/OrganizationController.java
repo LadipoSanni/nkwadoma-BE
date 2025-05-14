@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.OrganizationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.ViewOrganizationUseCase;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -113,8 +114,11 @@ public class OrganizationController {
                             schema = @Schema(implementation = OrganizationIdentity.class))
             })
     })
-    public ResponseEntity<ApiResponse<?>> viewAllOrganizationWithLoanRequest() throws MeedlException {
-        List<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsLoanMetrics();
+    public ResponseEntity<ApiResponse<?>> viewAllOrganizationWithLoanRequest(@RequestParam()LoanType loanType,
+                                                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber
+                                                                             ) throws MeedlException {
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsLoanMetrics(loanType,pageSize,pageNumber);
         log.info("Organizations retrieved: {}", organizationIdentities);
         List<OrganizationResponse> organizationResponses =
                 organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();

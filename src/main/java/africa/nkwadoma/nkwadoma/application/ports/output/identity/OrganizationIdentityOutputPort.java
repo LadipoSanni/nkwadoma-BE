@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -26,7 +27,7 @@ public interface OrganizationIdentityOutputPort {
 
     void deleteOrganizationServiceOffering(String organizationServiceOfferingId) throws MeedlException;
     void deleteServiceOffering(String serviceOfferingId) throws MeedlException;
-    List<OrganizationIdentity> findAllWithLoanMetrics();
+    Page<OrganizationIdentity> findAllWithLoanMetrics(LoanType loanType,int pageSize , int pageNumber) throws MeedlException;
     Page<OrganizationIdentity> findByName(String name,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException;
     Optional<OrganizationIdentity> findOrganizationByName(String name) throws MeedlException;
     void updateNumberOfCohortInOrganization(String organizationId) throws MeedlException;
