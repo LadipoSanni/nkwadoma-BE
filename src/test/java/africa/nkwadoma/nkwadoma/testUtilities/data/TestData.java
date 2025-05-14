@@ -270,11 +270,18 @@ public class TestData {
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
+    public static LoanBook buildLoanBook(String absolutePath, String name){
+        return LoanBook.builder()
+                .absoluteFilePath(absolutePath)
+                .name(name)
+                .build();
+    }
     public static Cooperation buildCooperation(String name){
         return Cooperation.builder()
                 .name(name)
                 .build();
     }
+
 
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()
