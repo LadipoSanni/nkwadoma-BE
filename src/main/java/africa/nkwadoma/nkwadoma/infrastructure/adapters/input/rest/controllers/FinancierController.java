@@ -355,7 +355,7 @@ public class FinancierController {
     }
 
 
-    @GetMapping("financier/search-all-investment")
+    @GetMapping("financier/search/investment-vehicle/investment")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam String investmentVehicleName,
