@@ -141,8 +141,10 @@ public class Financier {
         }
         validateSourceOfFund();
         validateDeclaration();
-        validateBeneficialOwnersKyc();
-        validateBeneficialOwnersPercentageOwnershipOrShare();
+//        validateBeneficialOwnersKyc();
+        if (beneficialOwners != null){
+            validateBeneficialOwnersPercentageOwnershipOrShare();
+        }
     }
 
     private void validateBeneficialOwnersPercentageOwnershipOrShare() throws MeedlException {
@@ -150,11 +152,11 @@ public class Financier {
                 .mapToDouble(BeneficialOwner::getPercentageOwnershipOrShare)
                 .sum();
 
-        if (totalPercentage < 100.0 && financierIsIndividual()) {
+        if (totalPercentage < 100.0) {
             throw new MeedlException("Total ownership percentage cannot be less than 100%. Found: " + totalPercentage + "%");
         }
 
-        if (totalPercentage > 100.0 && financierIsIndividual()) {
+        if (totalPercentage > 100.0) {
             throw new MeedlException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
         }
     }
