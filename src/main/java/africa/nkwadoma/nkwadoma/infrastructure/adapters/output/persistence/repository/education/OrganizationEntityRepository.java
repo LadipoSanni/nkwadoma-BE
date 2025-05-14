@@ -41,9 +41,9 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     join LoanMetricsEntity lm on lm.organizationId = o.id
     order by 
         case :loanType
-            when 'LOAN_OFFER' then lm.loanOfferCount
-            when 'LOAN_REQUEST' then lm.loanRequestCount
-            when 'LOAN_DISBURSAL' then lm.loanDisbursalCount
+                when 'LOAN_OFFER' then coalesce(lm.loanOfferCount, 0)
+                when 'LOAN_REQUEST' then coalesce(lm.loanRequestCount, 0)
+                when 'LOAN_DISBURSAL' then coalesce(lm.loanDisbursalCount, 0)
             else 0
         end desc,
         o.name asc
@@ -53,5 +53,35 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
     @Query("SELECT o FROM OrganizationEntity o WHERE UPPER(o.status) = UPPER(:status) ")
     Page<OrganizationEntity> findAllByStatus(@Param("status") String status, Pageable pageable);
 
+
+    @Query("""
+        select o.id as organizationId,
+               o.name as name,
+               o.logoImage as logoImage,
+               o.numberOfLoanees as numberOfLoanees,
+               o.numberOfCohort as numberOfCohort,
+               o.numberOfPrograms as numberOfPrograms,
+               lm.loanRequestCount as loanRequestCount,
+               lm.loanDisbursalCount as loanDisbursalCount,
+               lm.loanOfferCount as loanOfferCount,
+               lm.loanReferralCount as loanReferralCount
+        from OrganizationEntity o
+        join LoanMetricsEntity lm on lm.organizationId = o.id
+        where lower(o.name) like lower(concat('%', :name, '%'))
+        and o.status = 'ACTIVE'
+        order by 
+            case :loanType
+                when 'LOAN_OFFER' then coalesce(lm.loanOfferCount, 0)
+                when 'LOAN_REQUEST' then coalesce(lm.loanRequestCount, 0)
+                when 'LOAN_DISBURSAL' then coalesce(lm.loanDisbursalCount, 0)
+                else 0
+            end desc,
+            o.name asc
+    """)
+    Page<OrganizationProjection> searchOrganizationSortingWithLoanType(
+            @Param("name") String name,
+            @Param("loanType") String loanType,
+            Pageable pageRequest
+    );
 
 }
