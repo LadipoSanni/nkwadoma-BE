@@ -286,8 +286,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public Page<OrganizationIdentity> search(String organizationName,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException {
-        return organizationIdentityOutputPort.findByName(organizationName,activationStatus,pageSize,pageNumber);
+    public Page<OrganizationIdentity> search(OrganizationIdentity organizationIdentity) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getLoanType())){
+            return organizationIdentityOutputPort.findByNameSortingByLoanType(organizationIdentity.getName()
+                    ,organizationIdentity.getLoanType(),organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
+        }
+        return organizationIdentityOutputPort.findByName(organizationIdentity.getName(),organizationIdentity.getStatus()
+                ,organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
     }
 
     @Override

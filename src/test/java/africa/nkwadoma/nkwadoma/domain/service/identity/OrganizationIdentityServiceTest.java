@@ -319,7 +319,8 @@ class OrganizationIdentityServiceTest {
     void searchOrganizationWithInvalidName(String name) {
         Page<OrganizationIdentity> organizationIdentities = Page.empty();
         try{
-            organizationIdentities = organizationIdentityService.search(name,ActivationStatus.ACTIVE,pageSize,pageNumber);
+            roseCouture.setName(name);
+            organizationIdentities = organizationIdentityService.search(roseCouture);
         }catch (MeedlException e){
             log.info("{} {}", e.getClass().getName(), e.getMessage());
         }

@@ -88,10 +88,13 @@ public class OrganizationController {
     public ResponseEntity<ApiResponse<?>> searchOrganizationByName(
                                                                        @RequestParam(name = "name") String name,
                                                                        @RequestParam(name = "status" , required = false) ActivationStatus status,
+                                                                       @RequestParam(name = "loanType" , required = false) LoanType loanType,
                                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
             throws MeedlException {
-        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name,status,pageSize,pageNumber );
+        OrganizationIdentity organizationIdentity = OrganizationIdentity.builder().name(name).status(status).loanType(loanType)
+                .pageNumber(pageNumber).pageSize(pageSize).build();
+        Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(organizationIdentity);
         List<OrganizationResponse> organizationResponses =
                 organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).collect(Collectors.toList());
         PaginatedResponse<OrganizationResponse> paginatedResponse = new PaginatedResponse<>(
@@ -121,10 +124,13 @@ public class OrganizationController {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.viewAllOrganizationsLoanMetrics(loanType,pageSize,pageNumber);
         log.info("Organizations retrieved: {}", organizationIdentities);
         List<OrganizationResponse> organizationResponses =
-                organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList();
+                organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).collect(Collectors.toList());
+        PaginatedResponse<OrganizationResponse> paginatedResponse = new PaginatedResponse<>(
+                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),pageNumber,pageSize
+        );
         log.info("Organization response mapped: {}", organizationResponses);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
-                data(organizationResponses).
+                data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );

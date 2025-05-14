@@ -268,4 +268,18 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         log.info("Found organization: {}", organizationEntity);
         return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
     }
+
+    @Override
+    public Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<OrganizationProjection> organizations = organizationEntityRepository.searchOrganizationSortingWithLoanType(
+                name,loanType.name(),pageRequest);
+        if (CollectionUtils.isEmpty(Collections.singleton(organizations))) {
+            return Page.empty();
+        }
+        return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
+    }
 }

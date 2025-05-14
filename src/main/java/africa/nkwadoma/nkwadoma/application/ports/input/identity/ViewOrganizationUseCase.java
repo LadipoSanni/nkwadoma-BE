@@ -7,7 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import org.springframework.data.domain.*;
 
 public interface ViewOrganizationUseCase {
-    Page<OrganizationIdentity> search(String organizationName,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException;
+    Page<OrganizationIdentity> search(OrganizationIdentity organizationIdentity) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException;
     OrganizationIdentity viewTopOrganizationByLoanRequestCount() throws MeedlException;
