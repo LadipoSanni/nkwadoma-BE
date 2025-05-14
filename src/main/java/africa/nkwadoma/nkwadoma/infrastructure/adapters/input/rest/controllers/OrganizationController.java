@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.*;
@@ -90,9 +91,15 @@ public class OrganizationController {
                                                                        @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)
             throws MeedlException {
         Page<OrganizationIdentity> organizationIdentities = viewOrganizationUseCase.search(name,status,pageSize,pageNumber );
+        List<OrganizationResponse> organizationResponses =
+                organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).collect(Collectors.toList());
+        PaginatedResponse<OrganizationResponse> paginatedResponse = new PaginatedResponse<>(
+                organizationResponses,organizationIdentities.hasNext(),organizationIdentities.getTotalPages(),pageNumber,pageSize
+        );
+
         log.info("Organization {}", organizationIdentities);
         return new ResponseEntity<>(ApiResponse.builder().statusCode(HttpStatus.OK.name()).
-                data(organizationIdentities.stream().map(organizationRestMapper::toOrganizationResponse).toList()).
+                data(paginatedResponse).
                 message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage()).build(),
                 HttpStatus.OK
         );
