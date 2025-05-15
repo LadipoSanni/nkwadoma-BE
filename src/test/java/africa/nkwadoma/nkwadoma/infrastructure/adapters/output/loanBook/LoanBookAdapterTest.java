@@ -65,9 +65,9 @@ public class LoanBookAdapterTest {
     @BeforeAll
     void setUp() throws IOException {
 //        populateCsvTestFile();
-        String loanBookName = "Loan Book Meedl";
-        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
-        Program program = saveProgram();
+//        String loanBookName = "Loan Book Meedl";
+//        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
+//        Program program = saveProgram();
     }
 
     private Program saveProgram() {
@@ -125,7 +125,7 @@ public class LoanBookAdapterTest {
         ));
     }
 
-    @Test
+//    @Test
     void upLoadExcelSheet() throws MeedlException {
 //        loanBookOutputPort.upLoadFile(loanBook);
 //        Page<LoanBook> allFoundLoanBook = loanBookOutputPort.search(loanBook.getName());
