@@ -160,16 +160,16 @@ public class CohortController {
 
     @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortsResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),
                                                                          pageNumber,pageSize);
-        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
-        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+        List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
+        PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
-        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+        ApiResponse<PaginatedResponse<CohortsResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortsResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())
