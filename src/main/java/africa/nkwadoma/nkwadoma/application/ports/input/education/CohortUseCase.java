@@ -21,7 +21,7 @@ public interface CohortUseCase {
     Page<Cohort> viewAllCohortInAProgram(String programId, int pageSize,int pageNumber) throws MeedlException;
 
     Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException;
-    Page<Cohort> viewAllCohortInOrganization(String actorId,int pageNumber,int pageSize) throws MeedlException ;
+    Page<Cohort> viewAllCohortInOrganization(String actorId, Cohort cohort) throws MeedlException ;
 
     List<LoanBreakdown> getCohortLoanBreakDown( String cohortId) throws MeedlException;
 }

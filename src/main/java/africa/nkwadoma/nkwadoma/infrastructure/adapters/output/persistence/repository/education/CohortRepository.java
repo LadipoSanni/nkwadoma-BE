@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
 
     Page<CohortEntity> findAllByProgramId(String programId, Pageable pageRequest);
 
-    Page<CohortEntity> findAllByOrganizationId(String organizationId, Pageable pageRequest);
+    Page<CohortEntity> findAllByOrganizationIdAndCohortStatus(String organizationId, Pageable pageRequest, CohortStatus cohortStatus);
 
     Page<CohortEntity> findByProgramIdAndNameContainingIgnoreCase(String programId, String name,Pageable pageRequest);
 
