@@ -161,7 +161,7 @@ public class CohortController {
 
     @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortsResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
             @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
@@ -169,7 +169,7 @@ public class CohortController {
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
         Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus)
                 .pageSize(pageSize).pageNumber(pageNumber).build();
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(cohort);
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
         List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
         PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
