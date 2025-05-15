@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.identity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,6 +32,8 @@ public class LoaneeEntity {
     private LoaneeLoanDetailEntity loaneeLoanDetail;
     @Enumerated(EnumType.STRING)
     private LoaneeStatus loaneeStatus;
+    @Enumerated(EnumType.STRING)
+    private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
 }
