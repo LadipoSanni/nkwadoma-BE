@@ -72,7 +72,6 @@ public class LoanBookAdapter implements LoanBookOutputPort {
 
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(cohort.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
 

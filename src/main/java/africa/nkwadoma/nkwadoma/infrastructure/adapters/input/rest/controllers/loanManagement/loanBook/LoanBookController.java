@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.CreateCohortRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.loanBook.LoanBookRequest;
@@ -46,10 +47,14 @@ public class LoanBookController {
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestPart("file") MultipartFile file,
-                                                             @PathVariable("file") String cohortId
+                                                             @PathVariable String cohortId
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api .... ");
-        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
+//        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
+//        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
+        LoanBook loanBook = new LoanBook();
+        loanBook.setFile(convertToTempFile(file));
+        loanBook.setCohort(Cohort.builder().id(cohortId).createdBy( meedlUser.getClaimAsString("sub")).build());
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());

@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class LoanBook {
     private String absoluteFilePath;
-    private String createdBy;
     private File file;
     private Cohort cohort;
     private List<Loanee> loanees;

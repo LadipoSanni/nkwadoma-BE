@@ -1,14 +1,17 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanBook;
 
+import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.LoanBookOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -54,16 +57,17 @@ public class LoanBookAdapterTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Autowired
     private ProgramOutputPort programOutputPort;
+    @Autowired
+    private LoanBreakdownOutputPort loanBreakdownOutputPort;
+    @Autowired
+    private CohortOutputPort cohortOutputPort;
 
     @BeforeAll
     void setUp() throws IOException {
         populateCsvTestFile();
-        Program program = saveProgram();
         String loanBookName = "Loan Book Meedl";
-        Cohort cohort = TestData.createCohortData(TestUtils.generateName(5), program.getId(),
-                program.getOrganizationId(), List.of(TestData.createLoanBreakDown()), meedleUserId);
         loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
-        loanBook.setCohort(cohort);
+        Program program = saveProgram();
     }
 
     private Program saveProgram() {
@@ -88,6 +92,15 @@ public class LoanBookAdapterTest {
             program = programOutputPort.saveProgram(program);
             log.info("Program saved {}",program);
             programId = program.getId();
+
+            LoanBreakdown loanBreakdown = TestData.createLoanBreakDown();
+            List<LoanBreakdown> loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(List.of(loanBreakdown));
+
+            Cohort cohort = TestData.createCohortData(TestUtils.generateName(5), program.getId(),
+                    program.getOrganizationId(), List.of(TestData.createLoanBreakDown()), meedleUserId);
+            cohort = cohortOutputPort.save(cohort);
+            loanBook.setCohort(cohort);
+
         } catch (MeedlException e) {
             log.error("",e);
             throw new RuntimeException(e);
