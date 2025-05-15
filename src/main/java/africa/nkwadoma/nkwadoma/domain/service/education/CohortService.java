@@ -245,12 +245,10 @@ public class CohortService implements CohortUseCase {
         if(userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
             MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
             OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
-            return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(), cohort.getPageSize(),
-                    cohort.getPageNumber(),cohort.getCohortStatus());
+            return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort);
         }
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
-        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort.getPageSize(),
-                cohort.getPageNumber(),cohort.getCohortStatus());
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort);
     }
 
     @Override

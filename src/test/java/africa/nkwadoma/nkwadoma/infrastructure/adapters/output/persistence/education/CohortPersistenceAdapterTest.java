@@ -371,13 +371,13 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings = {StringUtils.SPACE,StringUtils.EMPTY,"hhjhjjsdhhhdshhjdhsh"})
     void findAllCohortWithInvalidOrganizationId(String organizationId){
         assertThrows(MeedlException.class,()->
-                cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber,CohortStatus.GRADUATED));
+                cohortOutputPort.findAllCohortByOrganizationId(organizationId,elites));
     }
 
     @Test
     void findAllCohortWithNullOrganizationId(){
         assertThrows(MeedlException.class,()->
-                cohortOutputPort.findAllCohortByOrganizationId(null,pageSize,pageNumber,CohortStatus.GRADUATED));
+                cohortOutputPort.findAllCohortByOrganizationId(null,elites));
     }
 
     @Order(9)
@@ -385,7 +385,9 @@ class CohortPersistenceAdapterTest {
     void findAllCohortWitOrganizationId() throws MeedlException {
         pageSize = 3;
         pageNumber = 0;
-    Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber,CohortStatus.GRADUATED);
+        elites.setPageSize(pageSize);
+        elites.setPageNumber(pageNumber);
+    Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,elites);
     assertEquals(3,cohorts.getSize());
     }
 

@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.education;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
@@ -89,10 +88,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber, CohortStatus cohortStatus) throws MeedlException {
+    public Page<Cohort> findAllCohortByOrganizationId(String organizationId,Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Please provide a valid organization identification");
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationIdAndCohortStatus(organizationId,pageRequest,cohortStatus);
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationIdAndCohortStatus(organizationId,pageRequest,cohort.getCohortStatus());
         return cohortEntities.map(cohortMapper::toCohort);
     }
 
