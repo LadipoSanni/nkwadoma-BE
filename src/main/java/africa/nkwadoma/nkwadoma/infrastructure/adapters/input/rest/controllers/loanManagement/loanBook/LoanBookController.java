@@ -45,15 +45,19 @@ public class LoanBookController {
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
-                                                             @RequestPart("file") File file,
-                                                             @RequestPart() CreateCohortRequest createCohortRequest
+//                                                             @RequestPart("file") File file,
+                                                             @RequestBody LoanBookRequest loanBookRequest
+//                                                             @RequestPart() String absoluteFilePath,
+//                                                             @RequestPart() CreateCohortRequest createCohortRequest
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api .... ");
-        LoanBook loanBook = loanBookRestMapper.map(createCohortRequest);
-        loanBook.setFile(file);
-        loanBook.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        LoanBook loanBook = loanBookRestMapper.map(loanBookRequest.getCreateCohortRequest(),loanBookRequest.getAbsoluteFilePath(), meedlUser.getClaimAsString("sub") );
+//        loanBook.setFile(file);
+//        loanBook.setCreatedBy(meedlUser.getClaimAsString("sub"));
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
-        LoanBookResponse loanBookResponse = loanBookRestMapper.map(loanBookReturned);
+        LoanBookResponse loanBookResponse = new LoanBookResponse();
+        loanBookResponse.setCohort(loanBookReturned.getCohort());
+        loanBookResponse.setLoanees(loanBookReturned.getLoanees());
         ApiResponse<LoanBookResponse> apiResponse = ApiResponse.<LoanBookResponse>builder()
                 .data(loanBookResponse)
                 .message(LOAN_BOOK_UPLOADED_SUCCESS)

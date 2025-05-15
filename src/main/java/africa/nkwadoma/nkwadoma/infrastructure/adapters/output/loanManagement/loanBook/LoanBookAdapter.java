@@ -63,6 +63,7 @@ public class LoanBookAdapter implements LoanBookOutputPort {
             throw new MeedlException("Unsupported file type.");
         }
         log.info("Loan book read is {}", data);
+        loanBook.getCohort().setCreatedBy(loanBook.getCreatedBy());
         Cohort savedCohort = createCohort(loanBook.getCohort());
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort);
         loanBook.setLoanees(convertedLoanees);
