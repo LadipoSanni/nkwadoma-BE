@@ -5,16 +5,13 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
 import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
-import africa.nkwadoma.nkwadoma.domain.model.financier.PoliticalPartyExposedTo;
 import africa.nkwadoma.nkwadoma.domain.model.identity.IdentityVerification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
@@ -232,16 +229,16 @@ public class TestData {
 //        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
 //        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(60), buildBeneficialOwner(40));
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
 
-        PoliticalPartyExposedTo politicalPartyExposedTo = new PoliticalPartyExposedTo();
-        politicalPartyExposedTo.setPositionHeld("President");
-        politicalPartyExposedTo.setCountry(Country.SERBIA);
-        List<PoliticalPartyExposedTo> politicalPartiesExposedTo = List.of(politicalPartyExposedTo);
-        financier.setPoliticalPartiesExposedTo(politicalPartiesExposedTo);
+        PoliticallyExposedPerson politicallyExposedPerson = new PoliticallyExposedPerson();
+        politicallyExposedPerson.setPositionHeld("President");
+        politicallyExposedPerson.setCountry(Country.SERBIA);
+        List<PoliticallyExposedPerson> politicallyExposedPeople = List.of(politicallyExposedPerson);
+        financier.setPoliticallyExposedPeople(politicallyExposedPeople);
         return financier;
     }
 
@@ -488,6 +485,11 @@ public class TestData {
                 .totalNumberOfInvestmentVehicle(2)
                 .totalNumberOfInstitutionalFinancier(2)
                 .totalNumberOfIndividualFinancier(2)
+                .totalNumberOfLoans(33)
+                .loanReferralPercentage(27.2727)
+                .loanRequestPercentage(18.1818)
+                .loanDisbursalPercentage(15.1515)
+                .loanOfferPercentage(39.3939)
                 .build();
     }
 
@@ -553,8 +555,15 @@ public class TestData {
                 .maturity("maturity")
                 .build();
     }
-
-    public static BeneficialOwner buildBeneficialOwner() {
+    public static PoliticallyExposedPerson buildPoliticallyExposedPerson() {
+        return PoliticallyExposedPerson.builder()
+                .country(Country.AFGHANISTAN)
+                .positionHeld("Vice President")
+//                .relationship(UserRelationship.BROTHER)
+                .additionalInformation("None")
+                .build();
+    }
+    public static BeneficialOwner buildBeneficialOwner(double percentageOwnershipOrShare) {
         return BeneficialOwner.builder()
                 .beneficialOwnerType(FinancierType.INDIVIDUAL)
                 .entityName("Entity Name")
@@ -564,7 +573,7 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(6)
+                .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
@@ -574,7 +583,13 @@ public class TestData {
 
     public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
         return FinancierBeneficialOwner.builder()
-                .beneficialOwner(buildBeneficialOwner())
+                .beneficialOwner(buildBeneficialOwner(100))
+                .financier(buildFinancierIndividual(createTestUserIdentity(email)))
+                .build();
+    }
+    public static FinancierPoliticallyExposedPerson buildFinancierPoliticallyExposedPerson(String email) {
+        return FinancierPoliticallyExposedPerson.builder()
+                .politicallyExposedPerson(buildPoliticallyExposedPerson())
                 .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }

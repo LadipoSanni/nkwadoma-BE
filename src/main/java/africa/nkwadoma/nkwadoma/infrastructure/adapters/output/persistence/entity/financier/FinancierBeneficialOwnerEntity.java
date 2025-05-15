@@ -11,7 +11,6 @@ import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
-@ToString
 @Entity
 public class FinancierBeneficialOwnerEntity {
     @Id

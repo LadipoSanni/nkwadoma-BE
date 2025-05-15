@@ -57,4 +57,9 @@ public class LoanMetricsPersistenceAdapter implements LoanMetricsOutputPort {
         log.info("Loan metrics entity retrieved from db: {}", loanMetricsEntity);
         return loanMetricsEntity.map(loanMetricsMapper::toLoanMetrics);
     }
+
+    @Override
+    public LoanMetricsProjection calculateAllMetrics() {
+        return loanMetricsRepository.calculateLoanMetrics();
+    }
 }

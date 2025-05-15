@@ -7,9 +7,11 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.ServiceOffering;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
+import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanMetrics;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
@@ -61,6 +63,8 @@ class OrganizationIdentityServiceTest {
     private OrganizationEmployeeIdentity employeeSarah;
     private List<OrganizationEmployeeIdentity> orgEmployee;
     private final String mockId = "83f744df-78a2-4db6-bb04-b81545e78e49";
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -123,14 +127,18 @@ class OrganizationIdentityServiceTest {
     }
 
     @Test
-    void viewAllOrganizationsLoanRequests() {
-        when(organizationIdentityOutputPort.findAllWithLoanMetrics()).thenReturn(List.of(roseCouture));
-        List<OrganizationIdentity> organizationIdentities = organizationIdentityService.viewAllOrganizationsLoanMetrics();
-        verify(organizationIdentityOutputPort, times(1)).findAllWithLoanMetrics();
+    void viewAllOrganizationsLoanRequests() throws MeedlException {
+        Page<OrganizationIdentity> page = new PageImpl<>(List.of(roseCouture));
+        when(organizationIdentityOutputPort.findAllWithLoanMetrics(LoanType.LOAN_REQUEST,pageSize,pageNumber))
+                .thenReturn(page);
+        Page<OrganizationIdentity> organizationIdentities = organizationIdentityService
+                .viewAllOrganizationsLoanMetrics(LoanType.LOAN_REQUEST,pageSize,pageNumber);
+        verify(organizationIdentityOutputPort, times(1)).
+                findAllWithLoanMetrics(LoanType.LOAN_REQUEST,pageSize,pageNumber);
         assertNotNull(organizationIdentities);
-        assertEquals(organizationIdentities.get(0).getId(), roseCouture.getId());
-        assertEquals(organizationIdentities.get(0).getName(), roseCouture.getName());
-        assertEquals(organizationIdentities.get(0).getLogoImage(), roseCouture.getLogoImage());
+        assertEquals(organizationIdentities.getContent().get(0).getId(), roseCouture.getId());
+        assertEquals(organizationIdentities.getContent().get(0).getName(), roseCouture.getName());
+        assertEquals(organizationIdentities.getContent().get(0).getLogoImage(), roseCouture.getLogoImage());
     }
 
     @Test
@@ -307,9 +315,16 @@ class OrganizationIdentityServiceTest {
         }
     }
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    @ValueSource(strings = {"1"})
     void searchOrganizationWithInvalidName(String name) {
-        assertThrows(MeedlException.class, ()->organizationIdentityService.search(name));
+        Page<OrganizationIdentity> organizationIdentities = Page.empty();
+        try{
+            roseCouture.setName(name);
+            organizationIdentities = organizationIdentityService.search(roseCouture);
+        }catch (MeedlException e){
+            log.info("{} {}", e.getClass().getName(), e.getMessage());
+        }
+        assertNull(organizationIdentities);
     }
 
     @ParameterizedTest

@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.*;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.*;
@@ -36,7 +37,7 @@ public class CohortController {
     private final CohortRestMapper cohortMapper;
 
     @PostMapping("cohort/create")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> createCohort(@AuthenticationPrincipal Jwt meedlUser, @RequestBody @Valid
             CreateCohortRequest createCohortRequest) throws MeedlException {
         Cohort cohort = cohortMapper.toCohort(createCohortRequest);
@@ -114,31 +115,25 @@ public class CohortController {
                 .statusCode(HttpStatus.OK.toString())
                 .build(), HttpStatus.OK);
     }
-    @GetMapping("program/searchCohort")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
-    public ResponseEntity<ApiResponse<?>> searchCohortInAProgram(
-            @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
-            @RequestParam @NotBlank(message = "Program ID is required") String programId) throws MeedlException {
-        List<Cohort> cohorts = cohortUseCase.searchForCohortInAProgram(cohortName, programId);
-        List<CohortResponse> cohortResponses =
-                cohortMapper.toCohortResponses(cohorts);
-        ApiResponse<List<CohortResponse>> apiResponse = ApiResponse.<List<CohortResponse>>builder()
-                .data(cohortResponses)
-                .message(COHORT_RETRIEVED)
-                .statusCode(HttpStatus.OK.toString())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
+
 
     @GetMapping("searchCohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchCohort(
             @AuthenticationPrincipal Jwt meedl,
-            @RequestParam @NotBlank(message = "Cohort name is required") String cohortName) throws MeedlException {
-        List<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohortName);
-        List<CohortResponse> cohortResponses =  cohortMapper.toCohortResponses(cohorts);
-        ApiResponse<List<CohortResponse>> apiResponse = ApiResponse.<List<CohortResponse>>builder()
-                .data(cohortResponses)
+            @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
+            @RequestParam(required = false) String programId,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
+
+        Cohort cohort = Cohort.builder().programId(programId).name(cohortName).
+                pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohort);
+        List<CohortResponse> cohortResponses =  cohorts.stream().map(cohortMapper::toCohortResponse).toList();
+        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+                cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);
+        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+                .data(paginatedResponse)
                 .message(COHORT_RETRIEVED)
                 .statusCode(HttpStatus.OK.toString())
                 .build();
@@ -165,17 +160,20 @@ public class CohortController {
 
 
     @GetMapping("organization-cohort/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortsResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
+            @RequestParam(name = "organizationId", required = false) String organizationId,
+            @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),
-                                                                         pageNumber,pageSize);
-        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
-        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+        Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus)
+                .pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
+        List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
+        PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
-        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+        ApiResponse<PaginatedResponse<CohortsResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortsResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())

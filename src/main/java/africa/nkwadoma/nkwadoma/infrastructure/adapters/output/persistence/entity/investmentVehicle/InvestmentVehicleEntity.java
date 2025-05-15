@@ -66,4 +66,5 @@ public class InvestmentVehicleEntity {
     private LocalDateTime lastUpdatedDate;
     @Enumerated(EnumType.STRING)
     private InvestmentVehicleVisibility investmentVehicleVisibility;
+    private int talentFunded;
 }

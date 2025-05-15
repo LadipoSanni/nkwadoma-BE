@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -132,7 +133,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateObjectInstance(organizationIdentity, "View all organization request can not be empty");
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
@@ -145,7 +146,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
         log.info("Organization entities {}", organizationEntities.stream().toList());
@@ -222,24 +223,26 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationIdentity> findAllWithLoanMetrics() {
-        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanMetrics();
-        if (CollectionUtils.isEmpty(organizations)) {
-            return new ArrayList<>();
+    public Page<OrganizationIdentity> findAllWithLoanMetrics(LoanType loanType, int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanMetrics(loanType.name(),pageRequest);
+        if (CollectionUtils.isEmpty(Collections.singleton(organizations))) {
+            return Page.empty();
         }
-        List<OrganizationIdentity> organizationIdentities =
-                organizationIdentityMapper.projectionToOrganizationIdentity(organizations);
-        log.info("Mapped organization identities: {}", organizationIdentities);
-        return organizationIdentities;
+        return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
 
     @Override
-    public List<OrganizationIdentity> findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
+    public Page<OrganizationIdentity> findByName(String name,ActivationStatus activationStatus,int pageSize, int pageNumber) throws MeedlException {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("invitedDate").descending());
         log.info("Searching for organizations with name {}", name);
-        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
+        Page<OrganizationEntity> organizationEntities =
+                organizationEntityRepository.findByNameContainingIgnoreCaseAndStatus(name.trim(),activationStatus,pageRequest);
         log.info("Found {} organizations", organizationEntities);
-        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
+        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
     @Override
@@ -264,5 +267,19 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         if (organizationEntity.isEmpty()) return Optional.empty();
         log.info("Found organization: {}", organizationEntity);
         return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
+    }
+
+    @Override
+    public Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<OrganizationProjection> organizations = organizationEntityRepository.searchOrganizationSortingWithLoanType(
+                name,loanType.name(),pageRequest);
+        if (CollectionUtils.isEmpty(Collections.singleton(organizations))) {
+            return Page.empty();
+        }
+        return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
 }

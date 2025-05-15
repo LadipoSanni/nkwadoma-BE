@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.PoliticallyExposedPerson;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -15,10 +16,6 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 public class KycRequest {
-    @NotBlank(message= "Bank name is required")
-    private String bankName;
-    @NotBlank(message = "Bank number is required")
-    private String bankNumber;
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
     @NotBlank(message = "Address is required")
@@ -40,6 +37,7 @@ public class KycRequest {
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
+    private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
 }
 

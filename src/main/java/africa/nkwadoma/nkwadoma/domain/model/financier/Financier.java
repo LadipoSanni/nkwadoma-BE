@@ -4,8 +4,6 @@ import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.FinancierMessages;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
-import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleDesignation;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleType;
@@ -19,7 +17,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,7 +30,7 @@ import java.util.Set;
 @Setter
 @ToString
 @Builder
-public class    Financier {
+public class Financier {
     private String id;
     private List<BeneficialOwner> beneficialOwners;
 
@@ -73,7 +70,7 @@ public class    Financier {
     //Declaration
     private boolean declarationAndAgreement;
     private boolean politicallyExposed;
-    private List<PoliticalPartyExposedTo> politicalPartiesExposedTo;
+    private List<PoliticallyExposedPerson> politicallyExposedPeople;
 
     private void validateUserIdentity() throws MeedlException {
         log.info("Started validating financier user identity.");
@@ -144,7 +141,24 @@ public class    Financier {
         }
         validateSourceOfFund();
         validateDeclaration();
-        validateBeneficialOwnersKyc();
+//        validateBeneficialOwnersKyc();
+        if (beneficialOwners != null){
+            validateBeneficialOwnersPercentageOwnershipOrShare();
+        }
+    }
+
+    private void validateBeneficialOwnersPercentageOwnershipOrShare() throws MeedlException {
+        double totalPercentage = beneficialOwners.stream()
+                .mapToDouble(BeneficialOwner::getPercentageOwnershipOrShare)
+                .sum();
+
+        if (totalPercentage < 100.0) {
+            throw new MeedlException("Total ownership percentage cannot be less than 100%. Found: " + totalPercentage + "%");
+        }
+
+        if (totalPercentage > 100.0) {
+            throw new MeedlException("Total ownership percentage cannot be greater than 100%. Found: " + totalPercentage + "%");
+        }
     }
 
     private void validateBeneficialOwnersKyc() throws MeedlException {
@@ -155,12 +169,16 @@ public class    Financier {
         }
     }
 
+
+
     private void validateDeclaration() throws MeedlException {
         if (this.declarationAndAgreement){
             if (this.isPoliticallyExposed()){
-                for (PoliticalPartyExposedTo party : this.politicalPartiesExposedTo) {
-                    MeedlValidator.validateObjectInstance(party, "Political party exposed to should be declared.");
-                    party.validate();
+                MeedlValidator.validateCollection(this.politicallyExposedPeople, "No politically exposed person provided");
+                for (PoliticallyExposedPerson politicallyExposedPerson : this.politicallyExposedPeople) {
+                    log.info("Politically exposed person {}", politicallyExposedPerson);
+                    MeedlValidator.validateObjectInstance(politicallyExposedPerson, "Political politicallyExposedPerson exposed to should be declared.");
+                    politicallyExposedPerson.validate();
                 }
             }
         }else {

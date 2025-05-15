@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class BeneficialOwner {
@@ -55,6 +54,12 @@ public class BeneficialOwner {
                 MeedlValidator.validateRCNumber(this.getBeneficialRcNumber());
                 MeedlValidator.validateObjectInstance(this.getCountryOfIncorporation(), "Country of incorporation is required.");
             }
+            if (this.getPercentageOwnershipOrShare() < 0) {
+                throw new MeedlException("Beneficial owner percentage ownership or share cannot be negative.");
+            }
+            if (this.getPercentageOwnershipOrShare() > 100) {
+                throw new MeedlException("Beneficial owner percentage ownership or share cannot be greater than 100.");
+            }
         }
     }
     public void validateProofOfBeneficialOwnership(BeneficialOwner beneficialOwner) throws MeedlException {
@@ -62,4 +67,5 @@ public class BeneficialOwner {
             throw new MeedlException("At least one form of beneficial owner identification must be provided.");
         }
     }
+
 }

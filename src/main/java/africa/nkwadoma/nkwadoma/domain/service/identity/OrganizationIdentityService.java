@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
@@ -19,7 +20,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -286,9 +286,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public List<OrganizationIdentity> search(String organizationName) throws MeedlException {
-        MeedlValidator.validateDataElement(organizationName, "Organization name is required");
-        return organizationIdentityOutputPort.findByName(organizationName);
+    public Page<OrganizationIdentity> search(OrganizationIdentity organizationIdentity) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getLoanType())){
+            return organizationIdentityOutputPort.findByNameSortingByLoanType(organizationIdentity.getName()
+                    ,organizationIdentity.getLoanType(),organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
+        }
+        return organizationIdentityOutputPort.findByName(organizationIdentity.getName(),organizationIdentity.getStatus()
+                ,organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
     }
 
     @Override
@@ -311,8 +315,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public List<OrganizationIdentity> viewAllOrganizationsLoanMetrics() {
-        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics();
+    public Page<OrganizationIdentity> viewAllOrganizationsLoanMetrics(LoanType loanType,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Page<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics(loanType,pageSize,pageNumber);
         log.info("Organizations returned: {}", organizationIdentities);
         return organizationIdentities;
     }

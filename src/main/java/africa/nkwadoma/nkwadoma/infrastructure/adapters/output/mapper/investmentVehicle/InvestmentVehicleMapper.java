@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmen
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentSummary;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleProjection;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -61,4 +62,11 @@ public interface InvestmentVehicleMapper {
     @Mapping(target = "minimumInvestmentAmount", source = "minimumInvestmentAmount")
     @Mapping(target = "amountInvested", source = "amountFinancierInvested", defaultValue = "0")
     InvestmentSummary toInvestmentSummary(InvestmentVehicle investmentVehicle);
+
+    @Mapping(target = "vehicleOperation.couponDistributionStatus", source = "couponDistributionStatus")
+    @Mapping(target = "vehicleOperation.deployingStatus", source = "deployingStatus")
+    @Mapping(target = "vehicleOperation.fundRaisingStatus", source = "fundRaising")
+    @Mapping(target = "vehicleClosureStatus.recollectionStatus", source = "recollectionStatus")
+    @Mapping(target = "vehicleClosureStatus.maturity", source = "maturity")
+    InvestmentVehicle mapInvestmentvehicleProjecttionToInvestmentVehicle(InvestmentVehicleProjection investmentVehicleProjection);
 }

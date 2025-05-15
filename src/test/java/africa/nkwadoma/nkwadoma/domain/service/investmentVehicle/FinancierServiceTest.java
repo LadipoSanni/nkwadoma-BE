@@ -1,12 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.service.investmentVehicle;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
@@ -16,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierPoliticallyExposedPerson;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -25,6 +24,7 @@ import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -80,7 +80,7 @@ public class FinancierServiceTest {
     private Financier cooperateFinancier;
     private String cooperateUserIdentityId;
     private String cooperateFinancierId;
-    private final String cooperateFinancierEmail = "financierservicecooperatefinanciertest247@mail.com";
+    private final String cooperateFinancierEmail = TestUtils.generateEmail("financierservicecooperatefinanciertest555", 5);
     private int pageSize = 10 ;
     private int pageNumber = 0 ;
     private final Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -97,11 +97,15 @@ public class FinancierServiceTest {
     private String portfolioManagerId;
     private final String actorId = "ead0f7cb-5453-4bb8-b261-413790a9c364";
     private final BigDecimal FIVE_THOUSAND = new BigDecimal("5000.00");
+    @Autowired
+    private PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
+    @Autowired
+    private FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
 
     @BeforeAll
     void setUp(){
         bankDetail = TestData.buildBankDetail();
-        UserIdentity actor = TestData.createTestUserIdentity("userforcreatedbyoractor7@mail.com", actorId);
+        UserIdentity actor = TestData.createTestUserIdentity(String.format("userforcreatedbyoractor%s7@mail.com", TestUtils.generateName(3)), actorId);
         actor.setRole(IdentityRole.PORTFOLIO_MANAGER);
         try {
             userIdentityOutputPort.save(actor);
@@ -109,18 +113,18 @@ public class FinancierServiceTest {
             log.error("Error saving actor (pm) for invite financier.",e);
             throw new RuntimeException(e);
         }
-        individualUserIdentity = TestData.createTestUserIdentity("financierserviceindividualfinanciertest24@mail.com","ead0f7cb-5483-4bb8-b271-413990a9c368");
+        individualUserIdentity = TestData.createTestUserIdentity(String.format("financierserviceindividualfinancier%stest24@mail.com", TestUtils.generateName(3)),"ead0f7cb-5483-4bb8-b271-413990a9c368");
         individualUserIdentity.setRole(IdentityRole.FINANCIER);
         individualUserIdentity.setCreatedBy(actorId);
         deleteTestUserIfExist(individualUserIdentity);
-        portfolioManager = TestData.createTestUserIdentity("portfoliomanagertest6@gmail.com");
+        portfolioManager = TestData.createTestUserIdentity(String.format("portfoliomanager%stest6@gmail.com", TestUtils.generateName(3)));
         portfolioManager.setRole(IdentityRole.PORTFOLIO_MANAGER);
 
         cooperateUserIdentity = TestData.createTestUserIdentity(cooperateFinancierEmail, "ead0f7cb-5484-4bb8-b371-413950a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "AlbertTestCooperationService" );
+        cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  String.format("AlbertTestCooperationService%s", TestUtils.generateName(3)));
 
-        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForServiceTest");
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(String.format("FinancierVehicleForService%sTest", TestUtils.generateName(3)));
         publicInvestmentVehicle = TestData.buildInvestmentVehicle("publicInvestmentVehicleInTestClass");
         privateInvestmentVehicle = TestData.buildInvestmentVehicle("privateInvestmentVehicleInTestClass");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -613,9 +617,40 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
     }
 
-
     @Test
     @Order(10)
+    void completeKycWithBeneficialOwnerPercentageLessThanHundredPercent(){
+        Financier financierUpdated = null;
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
+            assertNotNull(foundFinancier.getUserIdentity());
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, TestData.buildBankDetail());
+            financierWithKycRequest.getBeneficialOwners().get(0).setPercentageOwnershipOrShare(1);
+            assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+        } catch (MeedlException e) {
+            log.info("===================> {}", e.getMessage(), e);
+        }
+    }
+
+    @Test
+    @Order(11)
+    void completeKycWithBeneficialOwnerPercentageGreaterThanHundredPercent(){
+        Financier financierUpdated = null;
+        Financier foundFinancier = null;
+        try {
+            foundFinancier = financierUseCase.viewFinancierDetail(individualUserIdentityId, individualFinancierId);
+            assertNotNull(foundFinancier.getUserIdentity());
+            Financier financierWithKycRequest = TestData.completeKycRequest(foundFinancier, TestData.buildBankDetail());
+            financierWithKycRequest.getBeneficialOwners().get(0).setPercentageOwnershipOrShare(101);
+            assertThrows(MeedlException.class,()-> financierUseCase.completeKyc(financierWithKycRequest));
+        } catch (MeedlException e) {
+            log.info("===================> {}", e.getMessage(), e);
+        }
+    }
+
+    @Test
+    @Order(12)
     void completeKycIndividual() {
         Financier financierUpdated = null;
         Financier foundFinancier = null;
@@ -651,7 +686,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(11)
+    @Order(13)
     void viewAllFinanciers(){
         Page<Financier> financiersPage = null;
         try {
@@ -735,7 +770,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(12)
+    @Order(14)
     void findFinancierById() {
         Financier foundFinancier = null;
         try {
@@ -761,7 +796,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> financierUseCase.viewFinancierDetail(invalidId, individualFinancierId));
     }
     @Test
-    @Order(13)
+    @Order(15)
     public void viewAllFinancierInInvestmentVehicle() {
         Page<Financier> financiersPage = null;
         individualFinancier.setInvestmentVehicleId(privateInvestmentVehicleId);
@@ -798,7 +833,7 @@ public class FinancierServiceTest {
         assertThrows( MeedlException.class,()-> financierUseCase.inviteFinancier(individualFinancierList, "invalid investment vehicle id"));
     }
     @Test
-    @Order(14)
+    @Order(16)
     void viewAllFinancierInVehicleWithActivationStatus(){
         Page<Financier> financiersPage = null;
         try {
@@ -818,14 +853,14 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class, ()-> investmentVehicleFinancierOutputPort.viewAllFinancierInAnInvestmentVehicle(invalidId, ActivationStatus.INVITED, pageRequest));
     }
     @Test
-    @Order(15)
+    @Order(17)
     public void inviteCooperateFinancierToNewVehicle() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtest@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail("cooperateFinancierEmailtest", 5), "ead0f7cb-5484-4bb8-b371-433850a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationService" );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  TestUtils.generateName("NewVehicleCooperationTestCooperationService" ,4));
 
-        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTest");
+        InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle(TestUtils.generateName("FinancierVehicleForCooperateServiceTest",4));
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
         List<Financier> cooperateFinancierList = List.of(cooperateFinancier);
 
@@ -898,7 +933,7 @@ public class FinancierServiceTest {
         assertThrows(MeedlException.class,()-> financierUseCase.search(name, individualFinancier));
     }
     @Test
-    @Order(16)
+    @Order(18)
     void searchFinancierByFirstName()  {
         Page<Financier> foundFinanciers = null;
         try {
@@ -912,7 +947,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(17)
+    @Order(19)
     void searchFinancierByLastName() {
         Page<Financier> foundFinanciers;
         try {
@@ -926,7 +961,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(18)
+    @Order(20)
     void searchFinancierWithFirstNameBeforeLastName() {
         Page<Financier> foundFinanciers;
         try {
@@ -940,7 +975,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(19)
+    @Order(21)
     void searchFinancierWithLastNameBeforeFirstName() {
         Page<Financier> foundFinanciers;
         try {
@@ -954,7 +989,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(20)
+    @Order(22)
     void searchFinancierWithEmail() {
         Page<Financier> foundFinanciers;
         try {
@@ -968,7 +1003,7 @@ public class FinancierServiceTest {
         assertNotNull(foundFinanciers.getContent().get(0));
     }
     @Test
-    @Order(21)
+    @Order(23)
     void searchFinancierInVehicle() {
         Page<Financier> foundFinanciers;
         try {
@@ -1008,7 +1043,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(22)
+    @Order(24)
     void viewInvestmentDetailOfFinancierByPortfolioManager(){
         FinancierVehicleDetail foundFinancierDetail = null;
         try {
@@ -1025,7 +1060,7 @@ public class FinancierServiceTest {
     }
 
     @Test
-    @Order(23)
+    @Order(25)
     public void inviteCooperateFinancierToPlatform() {
         Financier foundFinancier;
         String inviteResponse;
@@ -1063,11 +1098,11 @@ public class FinancierServiceTest {
         assertTrue(investmentVehicleFinanciers.isEmpty());
     }
     @Test
-    @Order(24)
+    @Order(26)
     public void addMultipleExistingFinanciersToInvestmentVehicle() {
         List<Financier> financiers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
-            UserIdentity userIdentity = TestData.createTestUserIdentity(i+"unittestfinancier@email.com", "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
+            UserIdentity userIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail(i+"unittestfinancier", 3), "ead0f8cb-5487-4bb8-b271-313990a9c36"+i);
             Financier financier = TestData.buildFinancierIndividual(userIdentity);
             userIdentity.setCreatedBy(actorId);
             financiers.add(financier);
@@ -1121,12 +1156,12 @@ public class FinancierServiceTest {
 
     }
     @Test
-    @Order(25)
+    @Order(27)
     public void inviteCooperateFinancierToNewVehicleWithAmountToInvest() {
 
-        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity("cooperateFinancierEmailtestwithamount@email.com", "ead0f7cb-5484-4bb8-b371-433850a9c367");
+        UserIdentity cooperateUserIdentity = TestData.createTestUserIdentity(String.format("cooperateFinancierEmailtestwith%samount@email.com", TestUtils.generateName(3)), "ead0f7cb-5484-4bb8-b371-433850a9c367");
         cooperateUserIdentity.setCreatedBy(actorId);
-        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  "NewVehicleCooperationTestCooperationServiceWithAmountToInvest" );
+        Financier cooperateFinancier = buildCooperateFinancier(cooperateUserIdentity,  String.format("NewVehicleCooperationTestCooperationServiceWithAmountToInvest%s", TestUtils.generateName(3)));
 
         InvestmentVehicle investmentVehicle = TestData.buildInvestmentVehicle("FinancierVehicleForCooperateServiceTestWithFinancierAmountToInvest");
         investmentVehicle = createInvestmentVehicle(investmentVehicle);
@@ -1199,6 +1234,8 @@ public class FinancierServiceTest {
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(privateInvestmentVehicleId, individualFinancierId);
         deleteInvestmentVehicleFinancier(publicInvestmentVehicleId, individualFinancierId);
+        deleteFinancierPoliticallyExposedPeople(cooperateFinancierId);
+        deleteFinancierPoliticallyExposedPeople(individualFinancierId);
 
         deleteFinancierData(individualFinancierId);
         identityManagerOutputPort.deleteUser(individualUserIdentity);
@@ -1220,6 +1257,26 @@ public class FinancierServiceTest {
 
         log.info("Test data deleted after test");
     }
+
+    private void deleteFinancierPoliticallyExposedPeople(String financierId) throws MeedlException {
+        List<FinancierPoliticallyExposedPerson> financierPoliticallyExposedPeople = financierPoliticallyExposedPersonOutputPort.findAllByFinancierId(financierId);
+        log.info("Financier politically exposed size : {}", financierPoliticallyExposedPeople.size());
+        financierPoliticallyExposedPeople
+                        .forEach(financierPoliticallyExposedPerson -> {
+                            try {
+                                financierPoliticallyExposedPersonOutputPort.deleteById(financierPoliticallyExposedPerson.getId());
+                                politicallyExposedPersonOutputPort.deleteById(financierPoliticallyExposedPerson.getPoliticallyExposedPerson().getId());
+                                log.info("politically exposed deleted successfully. single {}, joined {}",financierPoliticallyExposedPerson.getPoliticallyExposedPerson().getId(), financierPoliticallyExposedPerson.getId());
+                            } catch (MeedlException e) {
+                                log.error("Error deleting politically exposed person.", e);
+                                throw new RuntimeException(e);
+                            }
+                        });
+        log.info("End of deleting");
+
+
+    }
+
     private void deleteFinancierData(String financierId) throws MeedlException {
         List<FinancierBeneficialOwner> financierBeneficialOwners = financierBeneficialOwnerOutputPort.findAllByFinancierId(financierId);
         financierBeneficialOwners

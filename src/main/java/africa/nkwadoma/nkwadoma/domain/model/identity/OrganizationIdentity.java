@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.domain.model.identity;
 
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -39,6 +40,7 @@ public class OrganizationIdentity {
     private int loanDisbursalCount;
     private int loanOfferCount;
     private int loanReferralCount;
+    private LoanType loanType;
     private LocalDateTime timeUpdated;
     private List<ServiceOffering> serviceOfferings;
     private ActivationStatus status;

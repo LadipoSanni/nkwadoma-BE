@@ -4,12 +4,10 @@ import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseC
 import africa.nkwadoma.nkwadoma.application.ports.input.investmentVehicle.FinancierUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.bankDetail.BankDetailOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.BeneficialOwnerOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierBeneficialOwnerOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.financier.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.CooperationOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.financier.FinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleFinancierOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
@@ -18,6 +16,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotif
 import africa.nkwadoma.nkwadoma.domain.enums.AccreditationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.MeedlMessages;
@@ -26,15 +25,12 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.investmentVehicle.Financi
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.InvestmentVehicleVisibility;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.financier.BeneficialOwner;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierBeneficialOwner;
+import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.domain.model.financier.FinancierVehicleDetail;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.Cooperation;
-import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicleFinancier;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -55,6 +51,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.FinancierType.COOPERATE;
 
@@ -68,13 +66,13 @@ public class FinancierService implements FinancierUseCase {
     private final InvestmentVehicleOutputPort investmentVehicleOutputPort;
     private final InvestmentVehicleFinancierOutputPort investmentVehicleFinancierOutputPort;
     private final MeedlNotificationUsecase meedlNotificationUsecase;
-    private final FinancierEmailUseCase financierEmailUseCase;
     private final BeneficialOwnerOutputPort beneficialOwnerOutputPort;
     private final FinancierBeneficialOwnerOutputPort financierBeneficialOwnerOutputPort;
-    private final BankDetailOutputPort bankDetailOutputPort;
     private final CooperationOutputPort cooperationOutputPort;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    private final PoliticallyExposedPersonOutputPort politicallyExposedPersonOutputPort;
+    private final FinancierPoliticallyExposedPersonOutputPort financierPoliticallyExposedPersonOutputPort;
     private List<Financier> financiersToMail;
     private final InvestmentVehicleMapper investmentVehicleMapper;
     private final FinancierMapper financierMapper;
@@ -83,13 +81,12 @@ public class FinancierService implements FinancierUseCase {
     @Override
     public String inviteFinancier(List<Financier> financiers, String investmentVehicleId) throws MeedlException {
         financiersToMail = new ArrayList<>();
-        InvestmentVehicle investmentVehicle = null;
         MeedlValidator.validateCollection(financiers, FinancierMessages.EMPTY_FINANCIER_PROVIDED.getMessage());
-        investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId, investmentVehicle);
+        InvestmentVehicle investmentVehicle = fetchInvestmentVehicleIfProvided(investmentVehicleId);
         UserIdentity actor = getActorPerformingAction(financiers);
 
         String response = null;
-        if (financiers.size() == 1) {
+        if (financiers.size() == BigInteger.ONE.intValue()) {
             response =  inviteSingleFinancier(financiers.get(0), investmentVehicle);
         }else {
             response = inviteMultipleFinancier(financiers, investmentVehicle);
@@ -104,6 +101,9 @@ public class FinancierService implements FinancierUseCase {
         Portfolio portfolio = Portfolio.builder().portfolioName("Meedl").build();
         portfolio = portfolioOutputPort.findPortfolio(portfolio);
         for (Financier financier : financiers) {
+            if (financier.getFinancierType() == null){
+                continue;
+            }
             if (financier.getFinancierType().equals(COOPERATE)){
                 portfolio.setTotalNumberOfInstitutionalFinancier(portfolio.getTotalNumberOfInstitutionalFinancier() + 1);
             }else {
@@ -133,9 +133,7 @@ public class FinancierService implements FinancierUseCase {
                         confirmFinancierHasType(financier);
                         inviteFinancier(financier, investmentVehicle);
                     } catch (MeedlException e) {
-                        log.error("financier details {}", financier ,e);
-                        //TODO notify financier on failure
-                        throw new RuntimeException(e.getMessage());
+                        log.error("Multiple invite flow. Financier details {}", financier ,e);
                     }
                 });
         return getMessageForMultipleFinanciers(investmentVehicle);
@@ -147,14 +145,14 @@ public class FinancierService implements FinancierUseCase {
             confirmFinancierHasType(financier);
             inviteFinancier(financier, investmentVehicle);
         }catch (MeedlException e){
-            log.error("financier details {}", financier ,e);
-            //TODO notify financier on failure
+            log.error("Single invite flow. financier details {}", financier ,e);
             throw new MeedlException(e.getMessage());
         }
         return getMessageForSingleFinancier(investmentVehicle);
     }
 
-    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId, InvestmentVehicle investmentVehicle) throws MeedlException {
+    private InvestmentVehicle fetchInvestmentVehicleIfProvided(String investmentVehicleId) throws MeedlException {
+        InvestmentVehicle investmentVehicle = null;
         if (StringUtils.isNotEmpty(investmentVehicleId) && StringUtils.isNotBlank(investmentVehicleId)){
             MeedlValidator.validateUUID(investmentVehicleId, InvestmentVehicleMessages.INVALID_INVESTMENT_VEHICLE_ID.getMessage());
             log.info("Fetching investment vehicle with id {}", investmentVehicleId);
@@ -168,16 +166,16 @@ public class FinancierService implements FinancierUseCase {
 
     private static String getMessageForSingleFinancier(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier have been invited to the platform";
+            return "Financier has been invited to the platform";
         }else {
             return "Financier has been added to investment vehicle";
         }
     }
     private static String getMessageForMultipleFinanciers(InvestmentVehicle investmentVehicle) {
         if (ObjectUtils.isEmpty(investmentVehicle)){
-            return "Financier(s) has been added to investment vehicle";
+            return "Financiers have been added to investment vehicle";
         }else {
-            return "Financier(s) have been invited to the platform";
+            return "Financiers have been invited to the platform";
         }
     }
 
@@ -235,6 +233,7 @@ public class FinancierService implements FinancierUseCase {
         Cooperation cooperation = cooperationOutputPort.save(financier.getCooperation());
         financier.setCooperation(cooperation);
         financier.setCreatedAt(LocalDateTime.now());
+        financier.setActivationStatus(ActivationStatus.INVITED);
         financier.setAccreditationStatus(AccreditationStatus.UNVERIFIED);
         financier = financierOutputPort.save(financier);
         return financier;
@@ -255,7 +254,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Cooperate financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER);
         }
         return financier;
     }
@@ -299,11 +298,12 @@ public class FinancierService implements FinancierUseCase {
                 log.info("Financier with email {} is investing {}", financier.getUserIdentity().getEmail(), financier.getAmountToInvest());
                 updateInvestmentVehicleFinancierAmountInvested(investmentVehicle, financier);
                 updateInvestmentVehicleAvailableAmount(financier, investmentVehicle);
+                notifyExistingFinancier(financier, NotificationFlag.INVESTMENT_VEHICLE, investmentVehicle);
             }else {
                 log.info("Financier is not investing, therefore, saving investment vehicle financier. ");
                 investmentVehicleFinancierOutputPort.save(investmentVehicleFinancier);
+                notifyExistingFinancier(financier, NotificationFlag.INVESTMENT_VEHICLE, investmentVehicle);
             }
-            notifyExistingFinancier(financier, investmentVehicle);
             log.info("Financier {} added to investment vehicle {}. Investment vehicle financier was not found. ", financier.getUserIdentity().getEmail(), investmentVehicle.getName());
         }{
             log.warn("Attempted to add financier with email {} to the same investment vehicle twice with name {} and id {}", financier.getUserIdentity().getEmail(), investmentVehicle.getName(), investmentVehicle.getId());
@@ -352,7 +352,7 @@ public class FinancierService implements FinancierUseCase {
             Financier savedFinancier = financierOutputPort.save(financier);
             log.info("Individual financier saved successfully");
             log.info("User previously existing has now been made a financier");
-            notifyExistingFinancier(financier);
+            notifyExistingFinancier(financier, NotificationFlag.INVITE_FINANCIER);
             return updateFinancierDetails(financier, savedFinancier);
         }
     }
@@ -366,31 +366,7 @@ public class FinancierService implements FinancierUseCase {
         return userIdentity;
     }
 
-    private void notifyExistingFinancier(Financier financier) throws MeedlException {
-        log.info("Started in app notification for existing financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(financier.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("You have now been made a financier on the platform.")
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
-    }
 
-    private void notifyExistingFinancier(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {
-        log.info("Started in app notification for invite financier");
-        MeedlNotification meedlNotification = MeedlNotification.builder()
-                .user(financier.getUserIdentity())
-                .timestamp(LocalDateTime.now())
-                .contentId(investmentVehicle.getId())
-                .senderMail(financier.getUserIdentity().getEmail())
-                .senderFullName(financier.getUserIdentity().getFirstName())
-                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
-                .build();
-        meedlNotificationUsecase.sendNotification(meedlNotification);
-    }
 
     private static Financier updateFinancierDetails(Financier financier, Financier existingFinancier) {
         existingFinancier.setInvestmentVehicleId(financier.getInvestmentVehicleId());
@@ -421,8 +397,14 @@ public class FinancierService implements FinancierUseCase {
 
     private Financier updateFinancierDetail(Financier financier) throws MeedlException {
         List<InvestmentVehicleFinancier> financierInvestmentVehicle = investmentVehicleFinancierOutputPort.findAllInvestmentVehicleFinancierInvestedIn(financier.getId());
-        List<InvestmentVehicle> investmentVehicles = financierInvestmentVehicle.stream()
-                .map(InvestmentVehicleFinancier::getInvestmentVehicle).toList();
+
+        log.info("all investment financier made ---> {}",financierInvestmentVehicle.size());
+
+        List<InvestmentVehicle> investmentVehicles =
+                investmentVehicleOutputPort.findListOfInvestmentVehicleFinancierWasAddedTo(financier.getId());
+
+        log.info("non duplicate investment vehicle ----> {}",investmentVehicles.size());
+
         financier.setTotalNumberOfInvestment(financierInvestmentVehicle.size());
         financier.setInvestmentVehicles(investmentVehicles);
         List<BeneficialOwner> beneficialOwners = financierBeneficialOwnerOutputPort.findAllBeneficialOwner(financier.getId());
@@ -622,7 +604,10 @@ public class FinancierService implements FinancierUseCase {
             financier.validateKyc(foundFinancier.getFinancierType());
             log.info("Financier details in service to use in completing kyc {}", financier);
             mapKycFinancierUpdatedValues(financier, foundFinancier);
-            saveFinancierBeneficialOwners(financier);
+            if (financier.getBeneficialOwners() != null){
+                saveFinancierBeneficialOwners(financier);
+            }
+            saveFinancierPoliticallyExposedPeople(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
             Financier savedFinancier = financierOutputPort.completeKyc(financier);
@@ -632,6 +617,34 @@ public class FinancierService implements FinancierUseCase {
             log.info("Financier {} has already completed kyc.", foundFinancier);
             throw new MeedlException("Kyc already done.");
         }
+    }
+
+    private void saveFinancierPoliticallyExposedPeople(Financier financier) throws MeedlException {
+        List<PoliticallyExposedPerson> politicallyExposedPeople = new ArrayList<>();
+        log.info("Started saving politically exposed person.");
+        for (PoliticallyExposedPerson politicallyExposedPerson : financier.getPoliticallyExposedPeople()) {
+            PoliticallyExposedPerson savedPoliticallyExposedPerson = politicallyExposedPersonOutputPort.save(politicallyExposedPerson);
+            politicallyExposedPeople.add(savedPoliticallyExposedPerson);
+            log.info("Financier saved with politically exposed person : {}", savedPoliticallyExposedPerson);
+        }
+        financier.setPoliticallyExposedPeople(politicallyExposedPeople);
+        log.info("Saving financier politically exposed person...");
+        List<FinancierPoliticallyExposedPerson> financierPoliticallyExposedPeople =
+                financier.getPoliticallyExposedPeople().stream()
+                        .map(politicallyExposedPerson ->
+                                FinancierPoliticallyExposedPerson.builder()
+                                        .politicallyExposedPerson(politicallyExposedPerson)
+                                        .financier(financier)
+                                        .build()
+                        ).map(financierPoliticallyExposedPerson -> {
+                            try {
+                                return financierPoliticallyExposedPersonOutputPort.save(financierPoliticallyExposedPerson);
+                            } catch (MeedlException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .toList();
+        log.info("Saved... financier politically exposed people... {}",financierPoliticallyExposedPeople);
     }
 
     private void saveFinancierBeneficialOwners(Financier financier) throws MeedlException {
@@ -663,7 +676,26 @@ public class FinancierService implements FinancierUseCase {
 
     }
 
-    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) {
+    private static void mapKycFinancierUpdatedValues(Financier financier, Financier foundFinancier) throws MeedlException {
+        mapKycUserIdentityData(financier, foundFinancier);
+        mapKycFinancierPreviousData(financier, foundFinancier);
+    }
+
+    private static void mapKycFinancierPreviousData(Financier financier, Financier foundFinancier) {
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setActivationStatus(foundFinancier.getActivationStatus());
+        financier.setFinancierType(foundFinancier.getFinancierType());
+        financier.setAmountInvested(foundFinancier.getAmountInvested());
+        financier.setTotalNumberOfInvestment(foundFinancier.getTotalNumberOfInvestment());
+        financier.setTotalAmountInvested(foundFinancier.getTotalAmountInvested());
+        financier.setTotalIncomeEarned(foundFinancier.getTotalIncomeEarned());
+        financier.setCreatedAt(foundFinancier.getCreatedAt());
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setCooperation(foundFinancier.getCooperation());
+        financier.setId(foundFinancier.getId());
+    }
+
+    private static UserIdentity mapKycUserIdentityData(Financier financier, Financier foundFinancier) throws MeedlException {
         UserIdentity userIdentity = foundFinancier.getUserIdentity();
         log.info("updating user details in kyc service : {}", userIdentity);
 
@@ -672,24 +704,20 @@ public class FinancierService implements FinancierUseCase {
         userIdentity.setBvn(financier.getUserIdentity().getBvn());
         userIdentity.setPhoneNumber(financier.getUserIdentity().getPhoneNumber());
 
-        if (foundFinancier.getFinancierType() == FinancierType.COOPERATE){
-            userIdentity.setFirstName(foundFinancier.getCooperation().getName());
-            userIdentity.setLastName(foundFinancier.getCooperation().getName());
+        if (foundFinancier.getFinancierType() == null){
+            throw new MeedlException("Financier does not have type");
+        } else{
+            if (foundFinancier.getFinancierType() == COOPERATE){
+                userIdentity.setFirstName(foundFinancier.getCooperation().getName());
+                userIdentity.setLastName(foundFinancier.getCooperation().getName());
+            }
         }
 
         foundFinancier.setUserIdentity(userIdentity);
-        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
-
-        financier.setFinancierType(foundFinancier.getFinancierType());
         financier.setUserIdentity(userIdentity);
-        financier.setCooperation(foundFinancier.getCooperation());
-        financier.setId(foundFinancier.getId());
 
-    }
-
-    @Override
-    public Financier findFinancierByCooperationId(String cooperationId) throws MeedlException {
-        return null;
+        log.info("Mapped user in financier {}", foundFinancier.getUserIdentity());
+        return userIdentity;
     }
 
     @Override
@@ -793,5 +821,33 @@ public class FinancierService implements FinancierUseCase {
         }else {
             return inviteCooperateFinancierToPlatform(financier);
         }
+    }
+
+    private void notifyExistingFinancier(Financier financier, NotificationFlag notificationFlag) throws MeedlException {
+        log.info("Started in app notification for existing financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(financier.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("You have now been made a financier on the platform.")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
+    }
+
+    private void notifyExistingFinancier(Financier financier,  NotificationFlag notificationFlag, InvestmentVehicle investmentVehicle) throws MeedlException {
+        log.info("Started in app notification for invite financier");
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .user(financier.getUserIdentity())
+                .timestamp(LocalDateTime.now())
+                .contentId(investmentVehicle.getId())
+                .senderMail(financier.getUserIdentity().getEmail())
+                .senderFullName(financier.getUserIdentity().getFirstName())
+                .title("Added to "+ investmentVehicle.getName()+" investment vehicle")
+                .notificationFlag(notificationFlag)
+                .build();
+        meedlNotificationUsecase.sendNotification(meedlNotification);
     }
 }

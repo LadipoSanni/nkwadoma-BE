@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -219,31 +220,35 @@ public class CohortService implements CohortUseCase {
         return program;
     }
 
-    @Override
-    public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
-    }
-
 
     @Override
-    public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
+    public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
-            OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
-            return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),name);
+            if (ObjectUtils.isEmpty(cohort.getProgramId())) {
+                OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
+                return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),cohort.getName(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }else {
+                return cohortOutputPort.searchForCohortInAProgram(cohort.getName(),cohort.getProgramId(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }
         }
-        return cohortOutputPort.findCohortByName(name);
+        return cohortOutputPort.findCohortByName(cohort.getName(),cohort.getPageSize(),cohort.getPageNumber());
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInOrganization(String actorId,
-                                                    int pageNumber,int pageSize) throws MeedlException {
+    public Page<Cohort> viewAllCohortInOrganization(String actorId, Cohort cohort) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        MeedlValidator.validateObjectInstance(cohort.getCohortStatus(), CohortMessages.COHORT_STATUS_CANNOT_BE_EMPTY.getMessage());
+        if(userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
+            return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort);
+        }
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
-        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort);
     }
 
     @Override

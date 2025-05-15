@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.meedlResponse;
 
 
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,4 +23,5 @@ public class MeedlNotificationReponse {
     private String senderFullName;
     private String contentDetail;
     private String duration;
+    private NotificationFlag notificationFlag;
 }

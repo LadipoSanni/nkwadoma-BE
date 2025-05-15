@@ -326,18 +326,18 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         foundInvestmentVehicle.getVehicleOperation().setFundRaisingStatus(investmentVehicle.getVehicleOperation().getFundRaisingStatus());
         foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
                     investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
-        if(foundInvestmentVehicle.getVehicleClosureStatus() != null){
+        if (ObjectUtils.isNotEmpty(foundInvestmentVehicle.getVehicleClosureStatus())){
             investmentVehicle.getVehicleClosureStatus().setId(foundInvestmentVehicle.getVehicleClosureStatus().getId());
             foundInvestmentVehicle.setVehicleClosureStatus(
-                    investmentVehicle.getVehicleClosureStatus());
+                    investmentVehicle.getVehicleClosureStatus()
+            );
+            vehicleClosureOutputPort.save(foundInvestmentVehicle.getVehicleClosureStatus());
+        }else {
+            foundInvestmentVehicle.setVehicleClosureStatus(
+                    vehicleClosureOutputPort.save(investmentVehicle.getVehicleClosureStatus())
+            );
         }
-        foundInvestmentVehicle.getVehicleOperation().setCouponDistributionStatus(
-                    investmentVehicle.getVehicleOperation().getCouponDistributionStatus());
-        foundInvestmentVehicle.setVehicleOperation(
-                vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation())
-        );
-        foundInvestmentVehicle.setVehicleClosureStatus(
-                vehicleClosureOutputPort.save(foundInvestmentVehicle.getVehicleClosureStatus()));
+        vehicleOperationOutputPort.save(foundInvestmentVehicle.getVehicleOperation());
         investmentVehicleOutputPort.save(foundInvestmentVehicle);
     }
 

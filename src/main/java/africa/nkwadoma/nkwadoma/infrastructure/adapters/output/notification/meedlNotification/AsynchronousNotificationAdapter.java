@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlN
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -54,6 +55,7 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
     private void notifyAllPortfolioManager(MeedlNotification meedlNotification) throws MeedlException {
         for (UserIdentity userIdentity : userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)) {
             meedlNotification.setUser(userIdentity);
+            meedlNotification.setNotificationFlag(NotificationFlag.INVITE_FINANCIER);
             log.info("Notifying portfolio manager on financier ");
         meedlNotificationUsecase.sendNotification(meedlNotification);
         }
@@ -68,10 +70,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " has been invited to the " + investmentVehicle.getName() +
                         " investment vehicle.\n" +
                         "Click the link to view financier detail.")
-                .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
+                .senderFullName(sender.getFirstName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
+                .notificationFlag(NotificationFlag.INVESTMENT_VEHICLE)
                 .build();
     }
 
@@ -83,11 +86,11 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
                         " financier " + financier.getUserIdentity().getFirstName() +
                         " has been invited to the platform." +
                         "Click the link to view financier detail.")
-                .contentDetail("A new " + financier.getFinancierType().name().toLowerCase() + " financier has been invited to the platform. Click the link to view financier detail")
                 .senderFullName(sender.getFirstName() +" "+ sender.getFirstName())
                 .senderMail(sender.getEmail())
                 .callToAction(true)
                 .callToActionRoute("view/financier/details/not merge during this implementation. Should be updated")
+                .notificationFlag(NotificationFlag.INVITE_FINANCIER)
                 .build();
     }
 }

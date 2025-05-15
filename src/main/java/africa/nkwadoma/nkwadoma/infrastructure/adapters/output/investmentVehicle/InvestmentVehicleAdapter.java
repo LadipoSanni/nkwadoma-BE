@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.investmentVehicle.InvestmentVehicleEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.investmentVehicle.InvestmentVehicleMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleEntityRepository;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.investmentVehicle.InvestmentVehicleProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.InvestmentVehicleMessages.*;
@@ -172,10 +174,10 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByInvestmentVehicleType(userId,
                                 investmentVehicleType,pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
     @Override
     public Page<InvestmentVehicle> searchInvestmentVehicleFinancierWasAddedTo(String userId, InvestmentVehicle investmentVehicle, int pageSize, int pageNumber) throws MeedlException {
@@ -183,11 +185,11 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
         MeedlValidator.validatePageNumber(pageNumber);
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByVehicleNameContainingIgnoreCaseAndInvestmentVehicleType
                 (userId,
                         investmentVehicle.getInvestmentVehicleType(),investmentVehicle.getName(),pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
 
     @Override
@@ -197,15 +199,31 @@ public class InvestmentVehicleAdapter implements InvestmentVehicleOutputPort {
 
 
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<InvestmentVehicleEntity> investmentVehicleEntities =
+        Page<InvestmentVehicleProjection> investmentVehicleEntities =
                 investmentVehicleRepository.findAllInvestmentVehicleFinancierWasAddedToByFinancierId(financierId,pageRequest);
-        return investmentVehicleEntities.map(investmentVehicleMapper::toInvestmentVehicle);
+        return investmentVehicleEntities.map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle);
     }
 
     @Override
     public boolean existByInvestmentVehicleLink(String investmentVehicleLink) throws MeedlException {
         MeedlValidator.validateDataElement(investmentVehicleLink, "Investment vehicle link should be provided.");
         return investmentVehicleRepository.existsByInvestmentVehicleLink(investmentVehicleLink);
+    }
+
+    @Override
+    public InvestmentVehicle findInvestmentVehicleByLoanOfferId(String loanOfferId) throws MeedlException {
+        MeedlValidator.validateUUID(loanOfferId,"Loan offer id cannot be empty");
+        InvestmentVehicleEntity investmentVehicleEntity =
+                investmentVehicleRepository.findByLoanOfferId(loanOfferId);
+        return investmentVehicleMapper.toInvestmentVehicle(investmentVehicleEntity);
+    }
+
+    @Override
+    public List<InvestmentVehicle> findListOfInvestmentVehicleFinancierWasAddedTo(String financierId) {
+        List<InvestmentVehicleProjection> investmentVehicleEntities =
+                investmentVehicleRepository.findListOfInvestmentVehicleFinancierWasAddedToByFinancierId(financierId);
+        return investmentVehicleEntities.stream().
+                map(investmentVehicleMapper::mapInvestmentvehicleProjecttionToInvestmentVehicle).toList();
     }
 
 

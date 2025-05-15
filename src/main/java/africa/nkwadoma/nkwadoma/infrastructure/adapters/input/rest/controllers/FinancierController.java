@@ -82,12 +82,16 @@ public class FinancierController {
             Financier financier = financierRestMapper.map(financierRequest);
             if (financierRequest.getFinancierType() == FinancierType.COOPERATE){
                 mapCooperateValues(financierRequest, financier);
-                financier.getUserIdentity().setCreatedBy(meedlUserId);
             } else if (financierRequest.getFinancierType() == FinancierType.INDIVIDUAL) {
                 financier.setUserIdentity(financierRequest.getUserIdentity());
-                financier.getUserIdentity().setCreatedBy(meedlUserId);
-                financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             }
+            if (financier.getUserIdentity() == null){
+                log.info("user identity is {}", financierRequest.getUserIdentity());
+                financier.setUserIdentity(UserIdentity.builder().build());
+            }
+
+            financier.getUserIdentity().setCreatedBy(meedlUserId);
+            financier.getUserIdentity().setCreatedAt(LocalDateTime.now());
             return financier;
         }).toList();
     }
@@ -222,6 +226,7 @@ public class FinancierController {
         );
     }
 
+
     @GetMapping("financier/investment-detail")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     @FinancierInvestmentDetailDocs
@@ -285,8 +290,7 @@ public class FinancierController {
         );
     }
 
-
-    @GetMapping("financier/search-all-investment")
+    @GetMapping("financier/search/all/investment/investment-vehicle")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER') or hasRole('FINANCIER')")
     public ResponseEntity<ApiResponse<?>> viewAllFinancierInvestment(@AuthenticationPrincipal Jwt meedlUser,
                                                                      @RequestParam String investmentVehicleName,
@@ -310,6 +314,5 @@ public class FinancierController {
                 build(), HttpStatus.OK
         );
     }
-
 
 }

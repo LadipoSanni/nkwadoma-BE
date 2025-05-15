@@ -56,7 +56,7 @@ public class InvestmentVehicle {
     private InvestmentVehicleVisibility investmentVehicleVisibility;
     private Set<InvestmentVehicleDesignation> designations;
     private BigDecimal amountInvested;
-    private BigDecimal talentFunded;
+    private int talentFunded;
     private BigDecimal amountFinancierInvested;
     private LocalDate dateInvested;
     private Set<InvestmentVehicleDesignation> investmentVehicleDesignation;

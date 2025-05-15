@@ -11,7 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = {UserIdentityMapper.class, NextOfKinMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", uses = {UserIdentityMapper.class, NextOfKinMapper.class, InvestmentVehicleRestMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface FinancierRestMapper {
     @Mapping(target = "id", source = "financierId")
     Financier map(FinancierRequest financierRequest);
@@ -33,10 +33,9 @@ public interface FinancierRestMapper {
     @Mapping(target = "address", source="userIdentity.address")
     @Mapping(target = "rcNumber", source = "rcNumber")
     @Mapping(target = "totalNumberOfInvestment", source = "totalNumberOfInvestment")
+    @Mapping(target = "investmentVehicleResponses", source = "investmentVehicles")
     FinancierDashboardResponse mapToDashboardResponse(Financier financier);
 
-    @Mapping( target = "bankName", source = "userIdentity.bankDetail.bankName")
-    @Mapping( target = "bankNumber", source = "userIdentity.bankDetail.bankNumber")
     @Mapping( target = "firstName", source = "userIdentity.firstName")
     @Mapping( target = "lastName", source = "userIdentity.lastName")
     @Mapping( target = "financierEmail", source = "userIdentity.email")
@@ -46,8 +45,6 @@ public interface FinancierRestMapper {
     @Mapping( target = "taxId", source = "userIdentity.taxId")
     KycResponse mapToFinancierResponse(Financier financier);
 
-    @Mapping(target = "userIdentity.bankDetail.bankName", source = "kycRequest.bankName")
-    @Mapping(target = "userIdentity.bankDetail.bankNumber", source = "kycRequest.bankNumber")
     @Mapping(target = "userIdentity.taxId", source = "kycRequest.taxId")
     @Mapping(target = "userIdentity.nin", source = "kycRequest.nin")
     @Mapping(target = "userIdentity.bvn", source = "kycRequest.bvn")
