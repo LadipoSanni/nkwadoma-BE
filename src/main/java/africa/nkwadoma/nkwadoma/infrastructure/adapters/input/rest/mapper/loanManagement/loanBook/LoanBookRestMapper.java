@@ -8,13 +8,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.io.File;
+
 @Mapper(componentModel = "spring", uses = {CohortRestMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanBookRestMapper {
-    @Mapping(target = "cohort", source = "request")
-    @Mapping(target = "file", expression = "java(new java.io.File(absoluteFilePath))")
-    @Mapping(target = "absoluteFilePath", source = "absoluteFilePath")
+    @Mapping(target = "file", source = "file")
+    @Mapping(target = "cohort.id", source = "cohortId")
+    @Mapping(target = "cohort.createdBy", source = "createdBy")
     @Mapping(target = "createdBy", source = "createdBy")
-    LoanBook map(CreateCohortRequest request, String absoluteFilePath, String createdBy);
+    LoanBook map(String cohortId, File file, String createdBy);
 
     LoanBookResponse map(LoanBook loanBook);
 }

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.ControllerConstant.*;
 import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.SuccessMessages.LOAN_BOOK_UPLOADED_SUCCESS;
@@ -40,20 +41,15 @@ public class LoanBookController {
     private LoanBookRestMapper loanBookRestMapper;
     @Autowired
     private LoanBookUseCase loanBookUseCase;
-    @PostMapping(value = "/upload/file")
-//    , consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{cohortId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
-//                                                             @RequestPart("file") File file,
-                                                             @RequestBody LoanBookRequest loanBookRequest
-//                                                             @RequestPart() String absoluteFilePath,
-//                                                             @RequestPart() CreateCohortRequest createCohortRequest
+                                                             @RequestPart("file") MultipartFile file,
+                                                             @PathVariable("file") String cohortId
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api .... ");
-        LoanBook loanBook = loanBookRestMapper.map(loanBookRequest.getCreateCohortRequest(),loanBookRequest.getAbsoluteFilePath(), meedlUser.getClaimAsString("sub") );
-//        loanBook.setFile(file);
-//        loanBook.setCreatedBy(meedlUser.getClaimAsString("sub"));
+        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());
@@ -64,5 +60,25 @@ public class LoanBookController {
                 .statusCode(HttpStatus.CREATED.toString())
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
+    }
+    private File convertToTempFile(MultipartFile multipartFile) throws MeedlException {
+        String originalFilename = multipartFile.getOriginalFilename();
+
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new IllegalArgumentException("File must have a valid extension");
+        }
+
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        File tempFile;
+        try {
+
+            tempFile = File.createTempFile("upload-", extension);
+            multipartFile.transferTo(tempFile);
+        } catch (IOException e) {
+            log.error("Error at the loan book upload controller. File format doesn't match.", e);
+            throw new MeedlException("Error converting accessing file format.");
+
+        }
+        return tempFile;
     }
 }

@@ -63,17 +63,17 @@ public class LoanBookAdapter implements LoanBookOutputPort {
             throw new MeedlException("Unsupported file type.");
         }
         log.info("Loan book read is {}", data);
-        loanBook.getCohort().setCreatedBy(loanBook.getCreatedBy());
-        Cohort savedCohort = createCohort(loanBook.getCohort());
+
+        Cohort savedCohort = findCohort(loanBook.getCohort());
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort);
         loanBook.setLoanees(convertedLoanees);
         return loanBook;
     }
 
-    private Cohort createCohort(Cohort cohort) throws MeedlException {
+    private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(cohort.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return cohortUseCase.createCohort(cohort);
+        return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
 
     private List<Loanee> convertToLoanees(List<String[]> data, Cohort cohort) {
