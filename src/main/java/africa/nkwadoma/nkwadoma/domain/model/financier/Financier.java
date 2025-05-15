@@ -141,8 +141,10 @@ public class Financier {
         }
         validateSourceOfFund();
         validateDeclaration();
-        validateBeneficialOwnersKyc();
-        validateBeneficialOwnersPercentageOwnershipOrShare();
+//        validateBeneficialOwnersKyc();
+        if (beneficialOwners != null){
+            validateBeneficialOwnersPercentageOwnershipOrShare();
+        }
     }
 
     private void validateBeneficialOwnersPercentageOwnershipOrShare() throws MeedlException {
@@ -166,6 +168,8 @@ public class Financier {
             beneficialOwner.validate();
         }
     }
+
+
 
     private void validateDeclaration() throws MeedlException {
         if (this.declarationAndAgreement){

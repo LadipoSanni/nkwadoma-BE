@@ -1,11 +1,11 @@
 package africa.nkwadoma.nkwadoma.domain.service.education;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
@@ -66,12 +66,11 @@ public class CohortService implements CohortUseCase {
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
         cohort.setNumberOfLoanees(0);
-        ProgramCohort programCohort = new ProgramCohort();
         cohort.setExpectedEndDate(cohort.getStartDate().plusMonths(program.getDuration()));
         activateStatus(cohort);
         Cohort savedCohort = cohortOutputPort.save(cohort);
         List<LoanBreakdown> savedLoanBreakdowns = saveLoanBreakdown(cohort.getLoanBreakdowns(), savedCohort);
-        linkCohortToProgram(program, programCohort, savedCohort);
+        programCohortOutputPort.linkCohortToProgram(program, savedCohort);
         BigDecimal totalFee = calculateTotalLoanBreakdownAmount(savedLoanBreakdowns, cohort.getTuitionAmount());
         savedCohort.setTotalCohortFee(totalFee);
         savedCohort.setOrganizationId(program.getOrganizationId());
@@ -80,16 +79,6 @@ public class CohortService implements CohortUseCase {
         savedCohort.setProgramName(program.getName());
         organizationIdentityOutputPort.updateNumberOfCohortInOrganization(program.getOrganizationId());
         return savedCohort;
-    }
-
-    private void linkCohortToProgram(Program program, ProgramCohort programCohort, Cohort savedCohort) throws MeedlException {
-        log.info("Linking cohort to program {}", program.getName());
-        program.setNumberOfCohort(program.getNumberOfCohort() + 1);
-        log.info("Service offering of organization is : {} ", program.getOrganizationIdentity().getServiceOfferings());
-        programOutputPort.saveProgram(program);
-        programCohort.setCohort(savedCohort);
-        programCohort.setProgramId(program.getId());
-        programCohortOutputPort.save(programCohort);
     }
 
     private Program checkifCohortNameExistInProgram(Cohort cohort, String cohortName) throws MeedlException {
@@ -219,24 +208,22 @@ public class CohortService implements CohortUseCase {
         return program;
     }
 
-    @Override
-    public List<Cohort> searchForCohortInAProgram(String cohortName, String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(cohortName, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        return cohortOutputPort.searchForCohortInAProgram(cohortName,programId);
-    }
-
 
     @Override
-    public List<Cohort> searchForCohort(String userId, String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
+    public Page<Cohort> searchForCohort(String userId, Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(userId, UserMessages.INVALID_USER_ID.getMessage());
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
         if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)){
-            OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
-            return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),name);
+            if (ObjectUtils.isEmpty(cohort.getProgramId())) {
+                OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(userId);
+                return cohortOutputPort.searchCohortInOrganization(organizationIdentity.getId(),cohort.getName(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }else {
+                return cohortOutputPort.searchForCohortInAProgram(cohort.getName(),cohort.getProgramId(),
+                        cohort.getPageSize(),cohort.getPageNumber());
+            }
         }
-        return cohortOutputPort.findCohortByName(name);
+        return cohortOutputPort.findCohortByName(cohort.getName(),cohort.getPageSize(),cohort.getPageNumber());
     }
 
     @Override

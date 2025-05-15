@@ -1,0 +1,146 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.loanManagement;
+
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.exceptions.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan.*;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.*;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.data.domain.*;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.UrlConstant.*;
+
+@RequestMapping(BASE_URL + LOAN)
+@RequiredArgsConstructor
+@RestController
+@Slf4j
+public class LoanRequestController {
+    private final LoanRequestUseCase loanRequestUseCase;
+    private final LoanRequestRestMapper loanRequestRestMapper;
+
+    @GetMapping("/loan-requests")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
+        Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
+        log.info("Loan requests: {}", loanRequests.getContent());
+        List<LoanRequestResponse> loanRequestResponses = loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
+        log.info("Loan request responses: {}", loanRequestResponses);
+        PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
+                loanRequestResponses, loanRequests.hasNext(),
+                loanRequests.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+                <PaginatedResponse<LoanRequestResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("{organizationId}/loan-requests")
+    @Operation(summary = "View all loan requests in an organization")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Loan requests returned successfully",
+                    content =  @Content(mediaType = "application/json")),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid organization ID provided", content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Organization not found", content = @Content)
+    })
+    public ResponseEntity<ApiResponse<?>> viewAllLoanRequests(
+            @Valid @PathVariable @NotBlank(message = "Organization ID is required")
+            @Parameter(description = "ID of the organization", required = true) String organizationId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setOrganizationId(organizationId);
+        loanRequest.setPageNumber(pageNumber);
+        loanRequest.setPageSize(pageSize);
+        Page<LoanRequest> loanRequests = loanRequestUseCase.viewAllLoanRequests(loanRequest);
+        log.info("Loan requests returned from service layer: {}", loanRequests.getContent());
+        List<LoanRequestResponse> loanRequestResponses =
+                loanRequests.stream().map(loanRequestRestMapper::toLoanRequestResponse).toList();
+        log.info("Loan request response: {}", loanRequestResponses);
+        PaginatedResponse<LoanRequestResponse> paginatedResponse = new PaginatedResponse<>(
+                loanRequestResponses, loanRequests.hasNext(),
+                loanRequests.getTotalPages(), pageNumber, pageSize
+        );
+        ApiResponse<PaginatedResponse<LoanRequestResponse>> apiResponse = ApiResponse.
+                <PaginatedResponse<LoanRequestResponse>>builder()
+                .data(paginatedResponse)
+                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @Operation(summary = "View a loan request by its id")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Found the loan request",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoanRequestResponse.class)) }),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid id supplied",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Loan request not found",
+                    content = @Content) })
+    @GetMapping("/loan-requests/{id}")
+    public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
+            (message = "Loan request ID is required") @Parameter(description = "ID of the loan request to be returned", required = true) String id) throws MeedlException {
+        LoanRequest loanRequest = new LoanRequest();
+        loanRequest.setId(id);
+        LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
+        log.info("Loan request body: {}", foundLoanRequest);
+        LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
+        log.info("Mapped Loan request: {}", loanRequestResponse);
+        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.
+                <LoanRequestResponse>builder()
+                .data(loanRequestResponse)
+                .message(SuccessMessages.LOAN_REQUESTS_FOUND_SUCCESSFULLY)
+                .statusCode(HttpStatus.OK.name())
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    @PostMapping("/loan-request/response")
+    public ResponseEntity<ApiResponse<?>> respondToLoanRequest(@AuthenticationPrincipal Jwt meedlUser,
+                                                               @Valid @RequestBody LoanRequestDto loanRequestDto)
+            throws MeedlException {
+        LoanRequest loanRequest = loanRequestRestMapper.toLoanRequest(loanRequestDto);
+        loanRequest.setActorId(meedlUser.getClaimAsString("sub"));
+        loanRequest = loanRequestUseCase.respondToLoanRequest(loanRequest);
+        log.info("Loan request from service: {}", loanRequest);
+        LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(loanRequest);
+        log.info("Mapped Loan request response: {}", loanRequestResponse);
+        ApiResponse<LoanRequestResponse> apiResponse = ApiResponse.<LoanRequestResponse>builder()
+                .data(loanRequestResponse)
+                .message(loanRequestResponse.getStatus().equals(LoanRequestStatus.APPROVED) ?
+                        SuccessMessages.LOAN_REQUEST_APPROVED_SUCCESSFULLY :
+                        SuccessMessages.LOAN_REQUEST_DECLINED_SUCCESSFULLY
+                )
+                .statusCode(HttpStatus.OK.toString()).build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+}

@@ -80,13 +80,13 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public List<Cohort> findCohortByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
-        List<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name);
+    public Page<Cohort> findCohortByName(String name,int pageSize, int pageNumber) {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name,pageRequest);
         if (cohortEntities.isEmpty()){
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+        return cohortEntities.map(cohortMapper::toCohort);
     }
 
     @Override
@@ -98,14 +98,14 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public List<Cohort> searchForCohortInAProgram(String name,String programId) throws MeedlException {
-        MeedlValidator.validateDataElement(name, CohortMessages.COHORT_NAME_REQUIRED.getMessage());
+    public Page<Cohort> searchForCohortInAProgram(String name,String programId,int pageSize, int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(programId , "Please provide a valid program identification");
-        List<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findByProgramIdAndNameContainingIgnoreCase(programId,name,pageRequest);
         if (cohortEntities.isEmpty()){
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+        return cohortEntities.map(cohortMapper::toCohort);
     }
 
     @Override
@@ -116,15 +116,15 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public List<Cohort> searchCohortInOrganization(String organizationId, String name) throws MeedlException {
+    public Page<Cohort> searchCohortInOrganization(String organizationId, String name,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Provide a valid organization identification");
-        MeedlValidator.validateDataElement(name, COHORT_NAME_REQUIRED.getMessage());
-        List<CohortEntity> cohortEntities =
-                cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities =
+                cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name,pageRequest);
         if (cohortEntities.isEmpty()){
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return cohortEntities.stream().map(cohortMapper::toCohort).toList();
+        return cohortEntities.map(cohortMapper::toCohort);
     }
 
     private static Cohort getCohort(String cohortId, List<ProgramCohort> programCohorts) throws CohortException {

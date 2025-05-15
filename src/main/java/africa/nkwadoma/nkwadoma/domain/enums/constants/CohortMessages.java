@@ -6,6 +6,7 @@ import lombok.*;
 @Getter
 public enum CohortMessages {
     COHORT_EXIST("Cohort exist"),
+    COHORT_CANNOT_BE_EMPTY("Cohort cannot be empty"),
     INVALID_COHORT_ID("Please provide a valid cohort identification"),
     INPUT_CANNOT_BE_NULL("Input cannot be empty or null"),
     COHORT_DOES_NOT_EXIST("Cohort does not exist"),

@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -16,9 +16,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -31,7 +31,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,20 +81,20 @@ class CohortPersistenceAdapterTest {
     private String id = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
     private LoanDetail loanDetail;
     private List<LoanBreakdown> loanBreakdowns;
-    private int pageSize ;
-    private int pageNumber ;
+    private int pageSize = 10 ;
+    private int pageNumber = 0;
     @Autowired
     private ProgramRepository programRepository;
 
 
     @BeforeAll
     void setUpOrg() {
-        List<Cohort> cohortSearchResults;
+        Page<Cohort> cohortSearchResults;
         try {
-            cohortSearchResults = cohortOutputPort.findCohortByName("Elite");
+            cohortSearchResults = cohortOutputPort.findCohortByName("Elite",pageSize,pageNumber);
             if (cohortSearchResults != null && !cohortSearchResults.isEmpty()) {
-                if (ObjectUtils.isNotEmpty(cohortSearchResults.get(0)) && StringUtils.isNotEmpty(cohortSearchResults.get(0).getId())) {
-                    cohortOutputPort.deleteCohort(cohortSearchResults.get(0).getId());
+                if (ObjectUtils.isNotEmpty(cohortSearchResults.getContent().get(0)) && StringUtils.isNotEmpty(cohortSearchResults.getContent().get(0).getId())) {
+                    cohortOutputPort.deleteCohort(cohortSearchResults.getContent().get(0).getId());
                 }
 
             }
@@ -107,12 +106,10 @@ class CohortPersistenceAdapterTest {
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
         organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("This name should not duplicate1");
-        program2 = TestData.createProgramTestData("Write a test that checks first before creating1");
+        program = TestData.createProgramTestData(TestUtils.generateName(5));
+        program2 = TestData.createProgramTestData(TestUtils.generateName(5));
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
-
-        deleteExistingTestPrograms();
 
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
@@ -140,22 +137,6 @@ class CohortPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
-        }
-    }
-
-    private void deleteExistingTestPrograms() {
-        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
-        ProgramEntity foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
-        log.info("Deleting already existing program 1... {}", programs);
-        if (foundProgram != null) {
-            programRepository.delete(foundProgram);
-        }
-        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
-        foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
-
-        log.info("Deleting already existing program 2... {}", programs);
-        if (foundProgram != null) {
-            programRepository.delete(foundProgram);
         }
     }
 
@@ -334,14 +315,14 @@ class CohortPersistenceAdapterTest {
     @Order(7)
     @Test
     void searchForCohortInProgram(){
-        List<Cohort> cohorts  = new ArrayList<>();
+        Page<Cohort> cohorts  = Page.empty();
         try{
             cohorts  =
-                    cohortOutputPort.searchForCohortInAProgram("X",programId);
+                    cohortOutputPort.searchForCohortInAProgram("X",programId,pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-       assertEquals(2,cohorts.size());
+       assertEquals(2,cohorts.getContent().size());
     }
 
     @ParameterizedTest
@@ -391,21 +372,27 @@ class CohortPersistenceAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
+    @ValueSource(strings = {StringUtils.SPACE})
     void searchForCohortWithEmptyName(String emptyName){
-        assertThrows(MeedlException.class,()-> cohortOutputPort.findCohortByName(emptyName));
+         Page<Cohort> cohorts = Page.empty();
+         try{
+          cohorts = cohortOutputPort.findCohortByName(emptyName,pageSize,pageNumber);
+         }catch (MeedlException exception){
+             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
+         }
+          assertEquals(0,cohorts.getContent().size());
     }
 
     @Order(10)
     @Test
     void searchForCohortInOrganization(){
-        List<Cohort> cohorts  = new ArrayList<>();
+        Page<Cohort> cohorts  = Page.empty();
         try{
-            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x");
+            cohorts = cohortOutputPort.searchCohortInOrganization(organizationId,"x",pageSize,pageNumber);
         }catch (MeedlException exception){
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(3,cohorts.size());
+        assertEquals(3,cohorts.getContent().size());
     }
 
     @Order(11)

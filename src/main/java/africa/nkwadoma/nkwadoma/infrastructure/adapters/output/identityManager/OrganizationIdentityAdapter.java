@@ -132,7 +132,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateObjectInstance(organizationIdentity, "View all organization request can not be empty");
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
         log.info("Page number: {}, page size: {}", organizationIdentity.getPageNumber(), organizationIdentity.getPageSize());
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll(pageRequest);
         log.info("Found organizations in db: {}", organizationEntities);
@@ -145,7 +145,7 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         MeedlValidator.validateObjectInstance(status, OrganizationMessages.ORGANIZATION_STATUS_MUST_NOT_BE_EMPTY.getMessage());
         MeedlValidator.validatePageSize(organizationIdentity.getPageSize());
         MeedlValidator.validatePageNumber(organizationIdentity.getPageNumber());
-        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.ASC, "invitedDate"));
+        Pageable pageRequest = PageRequest.of(organizationIdentity.getPageNumber(), organizationIdentity.getPageSize(), Sort.by(Sort.Direction.DESC, "invitedDate"));
 
         Page<OrganizationEntity> organizationEntities = organizationEntityRepository.findAllByStatus(String.valueOf(status),pageRequest);
         log.info("Organization entities {}", organizationEntities.stream().toList());
@@ -234,12 +234,13 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationIdentity> findByName(String name) throws MeedlException {
-        MeedlValidator.validateDataElement(name, OrganizationMessages.ORGANIZATION_NAME_IS_REQUIRED.getMessage());
+    public Page<OrganizationIdentity> findByName(String name,ActivationStatus activationStatus,int pageSize, int pageNumber) throws MeedlException {
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("invitedDate").descending());
         log.info("Searching for organizations with name {}", name);
-        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findByNameContainingIgnoreCase(name.trim());
+        Page<OrganizationEntity> organizationEntities =
+                organizationEntityRepository.findByNameContainingIgnoreCaseAndStatus(name.trim(),activationStatus,pageRequest);
         log.info("Found {} organizations", organizationEntities);
-        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
+        return organizationEntities.map(organizationIdentityMapper::toOrganizationIdentity);
     }
 
     @Override

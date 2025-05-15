@@ -8,7 +8,7 @@ import org.springframework.data.domain.*;
 import java.util.*;
 
 public interface ViewOrganizationUseCase {
-    List<OrganizationIdentity> search(String organizationName) throws MeedlException;
+    Page<OrganizationIdentity> search(String organizationName,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException;
 
     OrganizationIdentity viewOrganizationDetails(String organizationId) throws MeedlException;
     OrganizationIdentity viewTopOrganizationByLoanRequestCount() throws MeedlException;

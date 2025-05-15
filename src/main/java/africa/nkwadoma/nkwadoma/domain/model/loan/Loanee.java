@@ -31,7 +31,6 @@ public class Loanee {
     private LocalDateTime creditScoreUpdatedAt;
     private int creditScore;
     private String registryId;
-    private String cohortName;
     private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetail;
     private List<LoaneeLoanBreakdown> loanBreakdowns;

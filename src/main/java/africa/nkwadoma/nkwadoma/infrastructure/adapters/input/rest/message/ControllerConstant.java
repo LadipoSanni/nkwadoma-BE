@@ -21,7 +21,9 @@ public class ControllerConstant {
    public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetch all loan product in the application using pagination. I.e page number and size.";
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
    public static final String  LOAN_CONTROLLER = "Loan Controller";
+   public static final String  LOAN_BOOK_CONTROLLER = "Loan Book Controller";
    public static final String  LOAN_CONTROLLER_DESCRIPTION = "Manage loans and loan product on the platform";
+   public static final String  LOAN_BOOK_CONTROLLER_DESCRIPTION = "Manage all loans on the platform. Loanee loan book management.";
    public static final String  START_LOAN_DESCRIPTION = "At this point the loan starts. Requirement is the loanee id and the loan offer (id) given to the loanee";
    public static final String  START_LOAN = "Start loan";
 

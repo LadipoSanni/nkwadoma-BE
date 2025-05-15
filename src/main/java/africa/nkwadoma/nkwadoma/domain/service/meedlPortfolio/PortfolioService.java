@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.meedlPortfolio;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.meedlPortfolio.PortfolioUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanMetricsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.meedlPortfolio.PortfolioOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;

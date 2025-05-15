@@ -1,5 +1,5 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loanManagement;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanAccountOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanAccountOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.AccountStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;

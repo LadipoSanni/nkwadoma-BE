@@ -22,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -229,7 +230,7 @@ public class TestData {
 //        financier.setCompensationOfLegalSettlements("Compensation of legal settlements stated.");
 //        financier.setProfitFromLegitimateActivities(new BigDecimal("1000"));
 
-        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner());
+        List<BeneficialOwner> beneficialOwners = List.of(buildBeneficialOwner(60), buildBeneficialOwner(40));
         financier.setBeneficialOwners(beneficialOwners);
         financier.setDeclarationAndAgreement(Boolean.TRUE);
         financier.setPoliticallyExposed(Boolean.FALSE);
@@ -273,7 +274,7 @@ public class TestData {
     public static LoanBook buildLoanBook(String absolutePath, String name){
         return LoanBook.builder()
                 .absoluteFilePath(absolutePath)
-                .name(name)
+                .file(new File(absolutePath))
                 .build();
     }
     public static Cooperation buildCooperation(String name){
@@ -570,7 +571,7 @@ public class TestData {
                 .additionalInformation("None")
                 .build();
     }
-    public static BeneficialOwner buildBeneficialOwner() {
+    public static BeneficialOwner buildBeneficialOwner(double percentageOwnershipOrShare) {
         return BeneficialOwner.builder()
                 .beneficialOwnerType(FinancierType.INDIVIDUAL)
                 .entityName("Entity Name")
@@ -580,7 +581,7 @@ public class TestData {
                 .beneficialOwnerLastName("Beneficial last name")
                 .beneficialOwnerRelationship(UserRelationship.BROTHER)
                 .beneficialOwnerDateOfBirth(LocalDateTime.now())
-                .percentageOwnershipOrShare(100)
+                .percentageOwnershipOrShare(percentageOwnershipOrShare)
                 .votersCard("Voters card")
                 .nationalIdCard("national id card")
                 .driverLicensetionalIdCard("driver licensetional id card")
@@ -590,7 +591,7 @@ public class TestData {
 
     public static FinancierBeneficialOwner buildFinancierBeneficialOwner(String email) {
         return FinancierBeneficialOwner.builder()
-                .beneficialOwner(buildBeneficialOwner())
+                .beneficialOwner(buildBeneficialOwner(100))
                 .financier(buildFinancierIndividual(createTestUserIdentity(email)))
                 .build();
     }

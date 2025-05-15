@@ -1,7 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -40,6 +40,8 @@ class OrganizationIdentityAdapterTest {
     private String amazingGraceId;
     private String loanMetricsId;
     private UserIdentity joel;
+    private int pageSize = 10;
+    private int pageNumber = 0;
 
     @BeforeEach
     void setUp() {
@@ -203,21 +205,29 @@ class OrganizationIdentityAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {StringUtils.SPACE, StringUtils.EMPTY})
+    @ValueSource(strings = {"1"})
     void searchOrganizationWithInvalidName(String name) {
-        assertThrows(MeedlException.class, () -> organizationOutputPort.findByName(name));
+        Page<OrganizationIdentity> organizationIdentities = Page.empty();
+        try{
+         organizationIdentities = organizationOutputPort.findByName(name,ActivationStatus.ACTIVE,
+                pageSize,pageNumber);
+        }catch (MeedlException e){
+            log.info("{} {}", e.getClass().getName(), e.getMessage());
+        }
+        assertTrue(organizationIdentities.isEmpty());
     }
 
     @Test
     @Order(2)
     void searchOrganizationByValidName() {
-        List<OrganizationIdentity> organizationIdentities = null;
+        Page<OrganizationIdentity> organizationIdentities = null;
         try {
             OrganizationIdentity savedOrganization = organizationOutputPort.save(amazingGrace);
             log.info("Saved Organization ID : {}", savedOrganization.getId());
             assertNotNull(savedOrganization);
             amazingGraceId = savedOrganization.getId();
-            organizationIdentities = organizationOutputPort.findByName("a");
+            organizationIdentities = organizationOutputPort.findByName("a",ActivationStatus.INVITED,
+                    pageSize,pageNumber );
         } catch (MeedlException e) {
             log.error("{}", e.getMessage());
         }

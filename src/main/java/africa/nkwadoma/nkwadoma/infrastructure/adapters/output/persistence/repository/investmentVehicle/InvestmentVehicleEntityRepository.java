@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InvestmentVehicleEntityRepository extends JpaRepository<InvestmentVehicleEntity,String> {
@@ -309,4 +310,65 @@ public interface InvestmentVehicleEntityRepository extends JpaRepository<Investm
             JOIN lo.loanProduct lp WHERE lo.id = :loanOfferId)
             """)
     InvestmentVehicleEntity findByLoanOfferId(@Param("loanOfferId") String loanOfferId);
+
+    @Query("""
+    SELECT
+        i.id AS id,
+        i.name AS name,
+        i.investmentVehicleType AS investmentVehicleType,
+        i.mandate AS mandate,
+        i.investmentVehicleStatus AS investmentVehicleStatus,
+        i.size AS size,
+        i.tenure AS tenure,
+        i.totalAvailableAmount AS totalAvailableAmount,
+        i.interestRateOffered AS interestRateOffered,
+        i.investmentVehicleVisibility AS investmentVehicleVisibility,
+        i.trustee AS trustee,
+        i.custodian AS custodian,
+        i.bankPartner AS bankPartner,
+        i.fundManager AS fundManager,
+        i.startDate AS startDate,
+        i.createdDate AS createdDate,
+        i.investmentVehicleLink AS investmentVehicleLink,
+        i.minimumInvestmentAmount As minimumInvestmentAmount,
+        i.talentFunded as talentFunded,
+        COALESCE(SUM(ivf.amountInvested), 0) AS amountFinancierInvested,
+        vo.couponDistributionStatus AS couponDistributionStatus,
+        vo.fundRaisingStatus AS fundRaising,
+        vo.deployingStatus AS deployingStatus,
+        vc.recollectionStatus as recollectionStatus,
+        vc.maturity as maturity
+    FROM InvestmentVehicleEntity i
+    LEFT JOIN InvestmentVehicleFinancierEntity ivf ON ivf.investmentVehicle = i
+    LEFT JOIN i.operation vo
+    LEFT JOIN i.closure vc
+    WHERE ivf.financier.id = :financierId
+    AND i.investmentVehicleStatus = 'PUBLISHED'
+    GROUP BY
+            i.id,
+            i.name,
+            i.investmentVehicleType,
+            i.mandate,
+            i.investmentVehicleStatus,
+            i.size,
+            i.tenure,
+            i.totalAvailableAmount,
+            i.interestRateOffered,
+            i.investmentVehicleVisibility,
+            i.trustee,
+            i.custodian,
+            i.bankPartner,
+            i.talentFunded,
+            i.fundManager,
+            i.startDate,
+            i.createdDate,
+            i.investmentVehicleLink,
+            vo.couponDistributionStatus,
+            vo.fundRaisingStatus,
+            vo.deployingStatus,
+            vc.recollectionStatus,
+            vc.maturity
+""")
+    List<InvestmentVehicleProjection> findListOfInvestmentVehicleFinancierWasAddedToByFinancierId(
+            @Param("financierId")String financierId);
 }
