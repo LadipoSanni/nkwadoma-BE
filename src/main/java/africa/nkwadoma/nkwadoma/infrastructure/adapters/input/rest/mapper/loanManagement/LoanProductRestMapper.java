@@ -1,10 +1,10 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanProductRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanProductResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.StartLoanResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.StartLoanResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 

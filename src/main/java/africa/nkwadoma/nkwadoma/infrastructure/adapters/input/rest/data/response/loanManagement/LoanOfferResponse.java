@@ -1,12 +1,7 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
-import africa.nkwadoma.nkwadoma.domain.model.education.LoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
-import africa.nkwadoma.nkwadoma.domain.model.loan.NextOfKin;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.NextOfKinResponse;
 import lombok.Getter;
 import lombok.Setter;
 

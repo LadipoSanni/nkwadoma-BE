@@ -1,8 +1,8 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanDetail;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanDetailsResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanDetailsResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;

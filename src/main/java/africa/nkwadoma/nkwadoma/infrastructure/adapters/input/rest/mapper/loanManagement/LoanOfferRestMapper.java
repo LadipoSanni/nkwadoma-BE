@@ -1,10 +1,9 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loan;
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
 
 
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanOffer;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.AllLoanOfferResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loan.LoanOfferResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.AllLoanOfferResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoanOfferAcceptRequest;
 import jakarta.validation.Valid;
 import org.mapstruct.Mapper;
@@ -12,11 +11,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanOfferRestMapper {
