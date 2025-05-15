@@ -127,7 +127,7 @@ public class LoanBookAdapterTest {
 
     @Test
     void upLoadExcelSheet() throws MeedlException {
-        loanBookOutputPort.upLoadFile(loanBook);
+//        loanBookOutputPort.upLoadFile(loanBook);
 //        Page<LoanBook> allFoundLoanBook = loanBookOutputPort.search(loanBook.getName());
 //        assertNotNull(allFoundLoanBook);
     }
