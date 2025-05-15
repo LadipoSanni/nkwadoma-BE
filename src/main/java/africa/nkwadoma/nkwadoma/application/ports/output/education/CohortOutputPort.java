@@ -1,11 +1,9 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import org.springframework.data.domain.Page;
-
-import java.util.*;
 
 public interface CohortOutputPort {
 
@@ -20,7 +18,7 @@ public interface CohortOutputPort {
 
     Page<Cohort> findCohortByName(String name,int pageSize, int pageNumber) throws MeedlException;
 
-    Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
+    Page<Cohort> findAllCohortByOrganizationId(String organizationId, int pageSize, int pageNumber, CohortStatus cohortStatus) throws MeedlException;
 
     Page<Cohort> searchForCohortInAProgram(String name,String programId,int pageSize, int pageNumber) throws MeedlException;
 

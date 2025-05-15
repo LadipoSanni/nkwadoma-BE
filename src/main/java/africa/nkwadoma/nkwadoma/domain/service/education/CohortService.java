@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -238,10 +239,18 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInOrganization(String actorId,
-                                                    int pageNumber,int pageSize) throws MeedlException {
+    public Page<Cohort> viewAllCohortInOrganization(String actorId, Cohort cohort) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(actorId);
+        MeedlValidator.validateObjectInstance(cohort.getCohortStatus(), CohortMessages.COHORT_STATUS_CANNOT_BE_EMPTY.getMessage());
+        if(userIdentity.getRole().equals(IdentityRole.PORTFOLIO_MANAGER)){
+            MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+            OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(cohort.getOrganizationId());
+            return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(), cohort.getPageSize(),
+                    cohort.getPageNumber(),cohort.getCohortStatus());
+        }
         OrganizationIdentity organizationIdentity = programOutputPort.findCreatorOrganization(actorId);
-        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),pageSize,pageNumber);
+        return cohortOutputPort.findAllCohortByOrganizationId(organizationIdentity.getId(),cohort.getPageSize(),
+                cohort.getPageNumber(),cohort.getCohortStatus());
     }
 
     @Override

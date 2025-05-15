@@ -31,7 +31,6 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -372,13 +371,13 @@ class CohortPersistenceAdapterTest {
     @ValueSource(strings = {StringUtils.SPACE,StringUtils.EMPTY,"hhjhjjsdhhhdshhjdhsh"})
     void findAllCohortWithInvalidOrganizationId(String organizationId){
         assertThrows(MeedlException.class,()->
-                cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber));
+                cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber,CohortStatus.GRADUATED));
     }
 
     @Test
     void findAllCohortWithNullOrganizationId(){
         assertThrows(MeedlException.class,()->
-                cohortOutputPort.findAllCohortByOrganizationId(null,pageSize,pageNumber));
+                cohortOutputPort.findAllCohortByOrganizationId(null,pageSize,pageNumber,CohortStatus.GRADUATED));
     }
 
     @Order(9)
@@ -386,7 +385,7 @@ class CohortPersistenceAdapterTest {
     void findAllCohortWitOrganizationId() throws MeedlException {
         pageSize = 3;
         pageNumber = 0;
-    Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber);
+    Page<Cohort> cohorts = cohortOutputPort.findAllCohortByOrganizationId(organizationId,pageSize,pageNumber,CohortStatus.GRADUATED);
     assertEquals(3,cohorts.getSize());
     }
 
