@@ -161,7 +161,7 @@ public class CohortController {
 
     @GetMapping("organization-cohort/all")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER') ")
-    public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInOrganization(
+    public ResponseEntity<ApiResponse<PaginatedResponse<CohortsResponse>>> viewAllCohortsInOrganization(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam(name = "organizationId", required = false) String organizationId,
             @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
@@ -170,10 +170,10 @@ public class CohortController {
         Cohort cohort = Cohort.builder().organizationId(organizationId).cohortStatus(cohortStatus)
                 .pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.viewAllCohortInOrganization(meedl.getClaimAsString("sub"),cohort);
-        List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
-        PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
+        List<CohortsResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortsResponse).toList();
+        PaginatedResponse<CohortsResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber,pageSize);
-        ApiResponse<PaginatedResponse<CohortResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortResponse>>builder()
+        ApiResponse<PaginatedResponse<CohortsResponse>> apiResponse = ApiResponse.<PaginatedResponse<CohortsResponse>>builder()
                 .data(paginatedResponse)
                 .message(String.format("Cohorts %s", ControllerConstant.RETURNED_SUCCESSFULLY.getMessage()))
                 .statusCode(HttpStatus.OK.toString())

@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.CohortMapper;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortProjection;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoanBreakdownRepository;
 import lombok.RequiredArgsConstructor;
@@ -91,8 +92,8 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     public Page<Cohort> findAllCohortByOrganizationId(String organizationId,Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Please provide a valid organization identification");
         Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findAllByOrganizationIdAndCohortStatus(organizationId,pageRequest,cohort.getCohortStatus());
-        return cohortEntities.map(cohortMapper::toCohort);
+        Page<CohortProjection> cohortEntities = cohortRepository.findAllByOrganizationIdAndCohortStatus(organizationId,pageRequest,cohort.getCohortStatus());
+        return cohortEntities.map(cohortMapper::mapFromProjectionToCohort);
     }
 
     @Override
