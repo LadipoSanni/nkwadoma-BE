@@ -17,7 +17,8 @@ public enum CohortMessages {
     CREATEDBY_NOT_EXIST_IN_ORGANIZATION("Created-By doesnt exist in organization"),
     COHORT_NAME_REQUIRED("Cohort name is required"),
     COHORT_WITH_NAME_EXIST("Cohort with name exist"),
-    COHORT_WITH_LOANEE_CANNOT_BE_DELETED("Cohort with loanee cannot be deleted");
+    COHORT_WITH_LOANEE_CANNOT_BE_DELETED("Cohort with loanee cannot be deleted"),
+    COHORT_STATUS_CANNOT_BE_EMPTY("Cohort status cannot be empty"),;
 
     private final String message;
 
