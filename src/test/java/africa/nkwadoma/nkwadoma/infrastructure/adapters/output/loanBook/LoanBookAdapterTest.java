@@ -64,7 +64,7 @@ public class LoanBookAdapterTest {
 
     @BeforeAll
     void setUp() throws IOException {
-        populateCsvTestFile();
+//        populateCsvTestFile();
         String loanBookName = "Loan Book Meedl";
         loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
         Program program = saveProgram();
