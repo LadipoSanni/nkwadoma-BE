@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.ResourceAlreadyExistsException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
@@ -285,8 +286,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public Page<OrganizationIdentity> search(String organizationName,ActivationStatus activationStatus, int pageSize, int pageNumber) throws MeedlException {
-        return organizationIdentityOutputPort.findByName(organizationName,activationStatus,pageSize,pageNumber);
+    public Page<OrganizationIdentity> search(OrganizationIdentity organizationIdentity) throws MeedlException {
+        if (ObjectUtils.isNotEmpty(organizationIdentity.getLoanType())){
+            return organizationIdentityOutputPort.findByNameSortingByLoanType(organizationIdentity.getName()
+                    ,organizationIdentity.getLoanType(),organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
+        }
+        return organizationIdentityOutputPort.findByName(organizationIdentity.getName(),organizationIdentity.getStatus()
+                ,organizationIdentity.getPageSize(),organizationIdentity.getPageNumber());
     }
 
     @Override
@@ -309,8 +315,11 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     }
 
     @Override
-    public List<OrganizationIdentity> viewAllOrganizationsLoanMetrics() {
-        List<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics();
+    public Page<OrganizationIdentity> viewAllOrganizationsLoanMetrics(LoanType loanType,int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Page<OrganizationIdentity> organizationIdentities = organizationIdentityOutputPort.findAllWithLoanMetrics(loanType,pageSize,pageNumber);
         log.info("Organizations returned: {}", organizationIdentities);
         return organizationIdentities;
     }

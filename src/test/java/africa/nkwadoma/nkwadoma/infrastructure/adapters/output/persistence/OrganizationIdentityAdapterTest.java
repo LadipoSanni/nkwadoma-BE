@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -339,7 +340,7 @@ class OrganizationIdentityAdapterTest {
     }
 
     @Test
-    void findAllOrganizationWithLoanRequests() {
+    void findAllOrganizationWithLoanRequests() throws MeedlException {
         try {
             amazingGrace = organizationOutputPort.save(amazingGrace);
             assertNotNull(amazingGrace);
@@ -353,10 +354,10 @@ class OrganizationIdentityAdapterTest {
         } catch (MeedlException e) {
             log.error("Exception occurred saving loan metrics {}", e.getMessage());
         }
-        List<OrganizationIdentity> organizationIdentities = organizationOutputPort.findAllWithLoanMetrics();
+        Page<OrganizationIdentity> organizationIdentities = organizationOutputPort.findAllWithLoanMetrics(LoanType.LOAN_REQUEST,pageSize,pageNumber);
         assertNotNull(organizationIdentities);
-        assertEquals(organizationIdentities.get(0).getName(), amazingGrace.getName());
-        assertEquals(organizationIdentities.get(0).getLogoImage(), amazingGrace.getLogoImage());
+        assertEquals(organizationIdentities.getContent().get(0).getName(), amazingGrace.getName());
+        assertEquals(organizationIdentities.getContent().get(0).getLogoImage(), amazingGrace.getLogoImage());
         assertEquals(1, organizationIdentities.stream().mapToInt(OrganizationIdentity::getLoanRequestCount).sum());
     }
 

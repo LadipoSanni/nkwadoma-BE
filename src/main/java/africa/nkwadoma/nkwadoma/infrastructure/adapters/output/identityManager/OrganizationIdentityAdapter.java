@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.domain.enums.ActivationStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -222,15 +223,16 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
     }
 
     @Override
-    public List<OrganizationIdentity> findAllWithLoanMetrics() {
-        List<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanMetrics();
-        if (CollectionUtils.isEmpty(organizations)) {
-            return new ArrayList<>();
+    public Page<OrganizationIdentity> findAllWithLoanMetrics(LoanType loanType, int pageSize , int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<OrganizationProjection> organizations = organizationEntityRepository.findAllWithLoanMetrics(loanType.name(),pageRequest);
+        if (CollectionUtils.isEmpty(Collections.singleton(organizations))) {
+            return Page.empty();
         }
-        List<OrganizationIdentity> organizationIdentities =
-                organizationIdentityMapper.projectionToOrganizationIdentity(organizations);
-        log.info("Mapped organization identities: {}", organizationIdentities);
-        return organizationIdentities;
+        return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
 
     @Override
@@ -265,5 +267,19 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         if (organizationEntity.isEmpty()) return Optional.empty();
         log.info("Found organization: {}", organizationEntity);
         return organizationEntity.map(organizationIdentityMapper::toOrganizationIdentity);
+    }
+
+    @Override
+    public Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateObjectInstance(loanType,"Loan type cannot be empty");
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<OrganizationProjection> organizations = organizationEntityRepository.searchOrganizationSortingWithLoanType(
+                name,loanType.name(),pageRequest);
+        if (CollectionUtils.isEmpty(Collections.singleton(organizations))) {
+            return Page.empty();
+        }
+        return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
 }
