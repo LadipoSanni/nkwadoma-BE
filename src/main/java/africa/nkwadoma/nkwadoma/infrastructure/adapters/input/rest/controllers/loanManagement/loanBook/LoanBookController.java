@@ -44,8 +44,8 @@ public class LoanBookController {
     private LoanBookUseCase loanBookUseCase;
     @PostMapping(value = "/upload/{cohortId}/{loanProductId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
-    @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
+    @Operation(summary = LOAN_BOOK_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_CREATION_DESCRIPTION)
+    public ResponseEntity<ApiResponse<?>> createLoanBook (@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestPart("file") MultipartFile file,
                                                              @PathVariable String cohortId,
                                                              @PathVariable String loanProductId

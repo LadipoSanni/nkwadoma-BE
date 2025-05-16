@@ -12,11 +12,13 @@ public class ControllerConstant {
    public static final String  REACTIVATE_ORGANIZATION_TITLE = "Reactivate Organization";
    public static final String  DEACTIVATE_ORGANIZATION_DESCRIPTION = "This endpoint will be used to DEACTIVATE an organization and all its organizations employees";
    public static final String  REACTIVATE_ORGANIZATION_DESCRIPTION = "This endpoint will be used to REACTIVATE an organization and all its organizations its previously deactivated employees";
-   public static final String  LOAN_PRODUCT_CREATION = "create loan product";
+   public static final String  LOAN_PRODUCT_CREATION = "Create loan product";
+   public static final String  LOAN_BOOK_CREATION_VIA_FILE_UPLOAD = "Creating loan book via file upload.";
    public static final String  LOAN_PRODUCT_UPDATE = "update loan product";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS = "View loan product details by id.";
    public static final String  VIEW_LOAN_PRODUCT_DETAILS_DESCRIPTION = "This endpoint is used to view the details of a loan product with unique id";
    public static final String  LOAN_PRODUCT_CREATION_DESCRIPTION = "To create a loan product with unique name";
+   public static final String  LOAN_BOOK_CREATION_DESCRIPTION = "To create a loan book via file upload. Either an excel file or a csv file upload.";
    public static final String  LOAN_PRODUCT_UPDATE_DESCRIPTION = "To update a loan product with unique name. The id of the loan product must be provided";
    public static final String  LOAN_PRODUCT_VIEW_ALL_DESCRIPTION = "Fetch all loan product in the application using pagination. I.e page number and size.";
    public static final String  LOAN_PRODUCT_VIEW_ALL = "View all loan product";
