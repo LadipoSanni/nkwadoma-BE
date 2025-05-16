@@ -22,6 +22,7 @@ import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -270,11 +271,18 @@ public class TestData {
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
+    public static LoanBook buildLoanBook(String absolutePath, String name){
+        return LoanBook.builder()
+                .absoluteFilePath(absolutePath)
+                .file(new File(absolutePath))
+                .build();
+    }
     public static Cooperation buildCooperation(String name){
         return Cooperation.builder()
                 .name(name)
                 .build();
     }
+
 
     private static Financier buildFinancier( Set<InvestmentVehicleDesignation> investmentVehicleDesignations) {
         return Financier.builder()

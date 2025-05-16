@@ -1,0 +1,48 @@
+package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement;
+
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBreakdownResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeReferralResponse;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoaneeResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface LoaneeRestMapper {
+
+    @Mapping(target = "loanBreakdowns"  , source = "loaneeLoanDetail.loanBreakdown")
+    Loanee toLoanee(LoaneeRequest loaneeRequest);
+
+
+    @Mapping( target= "loaneeLoanDetail.loanBreakdown",source = "loanBreakdowns")
+    @Mapping( target= "loaneeLoanDetail.initialDeposit",source = "loaneeLoanDetail.initialDeposit")
+    @Mapping( target= "loaneeLoanDetail.amountRequested",source = "loaneeLoanDetail.amountRequested")
+    @Mapping(target = "creditScore", source = "creditScore")
+    LoaneeResponse toLoaneeResponse(Loanee loanee);
+
+    @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")
+    @Mapping(target = "itemName", source = "itemName")
+    @Mapping(target = "itemAmount", source = "itemAmount")
+    @Mapping(target = "currency", source = "currency")
+    LoanBreakdownResponse toLoanBreakdownResponse(LoaneeLoanBreakdown loanBreakdown);
+
+    @Mapping(target = "loaneeLoanBreakdownId", source = "loanBreakdownId")
+    LoaneeLoanBreakdown mapToLoanBreakdown(LoaneeLoanBreakdownRequest breakdownRequest);
+
+    LoaneeReferralResponse toLoaneeReferralResponse(LoanReferral loanReferral);
+
+    List<LoaneeResponse> toLoaneeResponses(List<Loanee> loanee);
+
+    @Mapping(target = "firstName", source = "userIdentity.firstName")
+    @Mapping(target = "lastName", source = "userIdentity.lastName")
+    @Mapping(target = "instituteName", source = "referredBy")
+    LoanBeneficiaryResponse toLoanBeneficiaryResponse(Loanee loanee);
+}

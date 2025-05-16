@@ -5,7 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -16,9 +16,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.CohortEntity;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.education.ProgramEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.CohortRepository;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.ProgramRepository;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
@@ -106,12 +106,10 @@ class CohortPersistenceAdapterTest {
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
         organizationIdentity = TestData.createOrganizationTestData("Organization test1","RC3456891",List.of(employeeIdentity));
-        program = TestData.createProgramTestData("This name should not duplicate1");
-        program2 = TestData.createProgramTestData("Write a test that checks first before creating1");
+        program = TestData.createProgramTestData(TestUtils.generateName(5));
+        program2 = TestData.createProgramTestData(TestUtils.generateName(5));
         loanDetail = TestData.createLoanDetail();
         loanBreakdown = TestData.createLoanBreakDown();
-
-        deleteExistingTestPrograms();
 
         try {
             Optional<UserIdentity> userByEmail = identityManagementOutputPort.getUserByEmail(meedleUser.getEmail());
@@ -139,22 +137,6 @@ class CohortPersistenceAdapterTest {
         } catch (MeedlException e) {
             log.info("Failed to save program {}", e.getMessage());
             throw new RuntimeException(e);
-        }
-    }
-
-    private void deleteExistingTestPrograms() {
-        List<ProgramEntity> programs = programRepository.findByNameContainingIgnoreCase(program.getName());
-        ProgramEntity foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
-        log.info("Deleting already existing program 1... {}", programs);
-        if (foundProgram != null) {
-            programRepository.delete(foundProgram);
-        }
-        programs = programRepository.findByNameContainingIgnoreCase(program2.getName());
-        foundProgram = programs.stream().filter(programEntity -> programEntity.getName().equalsIgnoreCase(program.getName())).findFirst().orElse(null);
-
-        log.info("Deleting already existing program 2... {}", programs);
-        if (foundProgram != null) {
-            programRepository.delete(foundProgram);
         }
     }
 

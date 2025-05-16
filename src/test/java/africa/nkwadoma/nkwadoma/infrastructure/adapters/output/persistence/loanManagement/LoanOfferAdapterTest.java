@@ -2,10 +2,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.loan
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanOfferOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOfferOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanRequestStatus;

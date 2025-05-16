@@ -3,7 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.investmentVehicle.InvestmentVehicleOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
@@ -64,7 +64,6 @@ class LoanProductServiceTest {
         loanee = new Loanee();
         loanee.setId("9a4e3b70-3bdb-4676-bcf0-017cd83f6a07");
         loanee.setCohortId("e4fda779-3c21-4dd6-b66a-3a8742f6ecb1");
-        loanee.setCohortName("Elite");
         loaneeLoanBreakdown = TestData.createTestLoaneeLoanBreakdown
                 ("1886df42-1f75-4d17-bdef-e0b016707885");
 
