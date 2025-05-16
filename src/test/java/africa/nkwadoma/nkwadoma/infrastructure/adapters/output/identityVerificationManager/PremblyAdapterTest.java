@@ -42,7 +42,7 @@ class PremblyAdapterTest {
     private ImageConverter base64Converter;
 
 
-    @BeforeEach
+//    @BeforeEach
     void setUp() {
         bvnIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");
         ninIdentityVerification = TestData.createTestIdentityVerification("12345678903", "12345678903");

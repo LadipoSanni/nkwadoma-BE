@@ -42,7 +42,7 @@ public class LoanBookController {
     private LoanBookRestMapper loanBookRestMapper;
     @Autowired
     private LoanBookUseCase loanBookUseCase;
-    @PostMapping(value = "/upload/{cohortId}/{loanProductId/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{cohortId}/{loanProductId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_PRODUCT_CREATION,description = LOAN_PRODUCT_CREATION_DESCRIPTION)
     public ResponseEntity<ApiResponse<?>> createLoanProduct (@AuthenticationPrincipal Jwt meedlUser,
