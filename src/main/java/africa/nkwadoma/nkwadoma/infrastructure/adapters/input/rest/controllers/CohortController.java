@@ -144,9 +144,13 @@ public class CohortController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
+            @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
-        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(programId, pageSize, pageNumber);
+
+        Cohort cohort = Cohort.builder().programId(programId).cohortStatus(cohortStatus)
+                .pageSize(pageSize).pageNumber(pageNumber).build();
+        Page<Cohort> cohorts = cohortUseCase.viewAllCohortInAProgram(cohort);
         List<CohortResponse> cohortResponses = cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
                 cohortResponses, cohorts.hasNext(), cohorts.getTotalPages(), pageNumber, pageSize);

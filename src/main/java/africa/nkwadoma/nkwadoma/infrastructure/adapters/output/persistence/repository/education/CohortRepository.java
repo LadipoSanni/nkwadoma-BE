@@ -13,7 +13,7 @@ import java.util.*;
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
     Page<CohortEntity> findByNameContainingIgnoreCase(String name,Pageable pageRequest);
 
-    Page<CohortEntity> findAllByProgramId(String programId, Pageable pageRequest);
+    Page<CohortEntity> findAllByProgramIdAndCohortStatus(String programId, CohortStatus cohortStatus, Pageable pageRequest);
     @Query("""
     SELECT 
         c.id AS id,

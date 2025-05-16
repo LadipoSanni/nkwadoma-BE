@@ -135,10 +135,11 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
 
     @Override
-    public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId, "Provide a valid program identification");
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId, pageRequest);
+    public Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateUUID(cohort.getProgramId(), "Provide a valid program identification");
+        MeedlValidator.validateObjectInstance(cohort.getCohortStatus(),CohortMessages.COHORT_STATUS_CANNOT_BE_EMPTY.name());
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramIdAndCohortStatus(cohort.getProgramId(),cohort.getCohortStatus(), pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
     }
 
