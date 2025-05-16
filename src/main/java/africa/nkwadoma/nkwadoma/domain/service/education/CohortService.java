@@ -172,7 +172,7 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
-        MeedlValidator.validateObjectInstance(cohort,"Cohort cannot be empty");
+        MeedlValidator.validateObjectInstance(cohort,CohortMessages.COHORT_CANNOT_BE_EMPTY.name());
         MeedlValidator.validateUUID(cohort.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validatePageNumber(cohort.getPageNumber());
         MeedlValidator.validatePageSize(cohort.getPageSize());
