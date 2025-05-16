@@ -52,14 +52,16 @@ public class ProgramController {
     }
 
     @GetMapping("/programs/all")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = "View all Programs in an Institute", description = "Fetch all programs in the given organization.")
     public ResponseEntity<ApiResponse<?>> viewAllPrograms(@AuthenticationPrincipal Jwt meedlUser,
+                                                          @RequestParam(name = "organizationId", required = false) String organizationId,
                                                           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
                                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) throws MeedlException {
         Program program = new Program();
         program.setPageSize(pageSize);
         program.setPageNumber(pageNumber);
+        program.setOrganizationId(organizationId);
         log.info("Meedl User ID: {}", meedlUser.getClaimAsString("sub"));
         program.setCreatedBy(meedlUser.getClaimAsString("sub"));
 

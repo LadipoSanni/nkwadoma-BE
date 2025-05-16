@@ -184,6 +184,8 @@ class ProgramServiceTest {
     @Test
     void viewAllPrograms() {
         try {
+            program.setCreatedBy(testId);
+            when(userIdentityOutputPort.findById(program.getCreatedBy())).thenReturn(userIdentity);
             when(programOutputPort.findAllPrograms(testId, pageSize, pageNumber)).
                     thenReturn(new PageImpl<>(List.of(program)));
             program.setPageSize(pageSize);

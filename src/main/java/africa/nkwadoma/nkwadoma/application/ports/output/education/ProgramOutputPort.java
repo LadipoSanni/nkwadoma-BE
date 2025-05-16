@@ -18,4 +18,6 @@ public interface ProgramOutputPort {
     Page<Program> findAllPrograms(String meedlUserId, int pageSize, int pageNumber) throws MeedlException;
     OrganizationIdentity findCreatorOrganization(String meedlUserId) throws MeedlException;
     List<Program> findAllProgramsByOrganizationId(String organizationId);
+
+    Page<Program> findAllProgramByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException;
 }

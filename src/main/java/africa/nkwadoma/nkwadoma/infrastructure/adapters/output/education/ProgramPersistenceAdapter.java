@@ -117,6 +117,16 @@ public class ProgramPersistenceAdapter implements ProgramOutputPort {
     }
 
     @Override
+    public Page<Program> findAllProgramByOrganizationId(String organizationId, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId,OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        Page<ProgramEntity> programEntities = programRepository.findAllByOrganizationIdentityId(organizationId, pageRequest);
+        return programEntities.map(programMapper::toProgram);
+    }
+
+    @Override
     public boolean programExistsInOrganization(Program program) throws MeedlException {
         MeedlValidator.validateDataElement(program.getName(),ProgramMessages.PROGRAM_NAME_REQUIRED.getMessage());
         log.error("Checking if this program name : {}, exists in organization: {}", program.getName(), program.getOrganizationId());

@@ -371,7 +371,6 @@ class ProgramPersistenceAdapterTest {
         MeedlException meedlException = assertThrows(MeedlException.class, () -> programOutputPort.findProgramById(programId));
         assertEquals("Please provide a valid program identification.", meedlException.getMessage());
     }
-
     @Test
     void findAllPrograms() {
         try {
