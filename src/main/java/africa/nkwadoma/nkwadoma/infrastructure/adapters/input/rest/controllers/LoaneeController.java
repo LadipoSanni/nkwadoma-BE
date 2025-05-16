@@ -94,7 +94,7 @@ public class LoaneeController {
     }
 
     @GetMapping("cohort/searchForLoanee")
-    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN' or hasRole('PORTFOLIO_MANAGER'))")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId) throws MeedlException {
        List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId);
