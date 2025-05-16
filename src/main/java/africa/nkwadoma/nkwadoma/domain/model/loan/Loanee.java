@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -35,6 +36,7 @@ public class Loanee {
     private LoaneeLoanDetail loaneeLoanDetail;
     private List<LoaneeLoanBreakdown> loanBreakdowns;
     private LoaneeStatus loaneeStatus;
+    private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
 
