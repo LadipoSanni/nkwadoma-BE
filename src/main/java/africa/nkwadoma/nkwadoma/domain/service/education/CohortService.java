@@ -225,7 +225,8 @@ public class CohortService implements CohortUseCase {
                         cohort.getPageSize(),cohort.getPageNumber());
             }
         }
-        return cohortOutputPort.findCohortByName(cohort.getName(),cohort.getPageSize(),cohort.getPageNumber());
+        MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        return cohortOutputPort.findCohortByNameAndOrganizationId(cohort);
     }
 
     @Override

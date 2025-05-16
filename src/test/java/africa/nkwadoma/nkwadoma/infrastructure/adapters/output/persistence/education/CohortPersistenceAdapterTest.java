@@ -89,19 +89,6 @@ class CohortPersistenceAdapterTest {
 
     @BeforeAll
     void setUpOrg() {
-        Page<Cohort> cohortSearchResults;
-        try {
-            cohortSearchResults = cohortOutputPort.findCohortByName("Elite",pageSize,pageNumber);
-            if (cohortSearchResults != null && !cohortSearchResults.isEmpty()) {
-                if (ObjectUtils.isNotEmpty(cohortSearchResults.getContent().get(0)) && StringUtils.isNotEmpty(cohortSearchResults.getContent().get(0).getId())) {
-                    cohortOutputPort.deleteCohort(cohortSearchResults.getContent().get(0).getId());
-                }
-
-            }
-        } catch (MeedlException e) {
-            log.error("error deleting cohorts ... {}", e.getMessage());
-        }
-
         meedleUser = TestData.createTestUserIdentity("ade45@gmail.com");
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
@@ -378,9 +365,12 @@ class CohortPersistenceAdapterTest {
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.SPACE})
     void searchForCohortWithEmptyName(String emptyName){
+        elites.setName(emptyName);
+        elites.setPageSize(pageSize);
+        elites.setPageNumber(pageNumber);
          Page<Cohort> cohorts = Page.empty();
          try{
-          cohorts = cohortOutputPort.findCohortByName(emptyName,pageSize,pageNumber);
+          cohorts = cohortOutputPort.findCohortByNameAndOrganizationId(elites);
          }catch (MeedlException exception){
              log.info("{} {}", exception.getClass().getName(), exception.getMessage());
          }

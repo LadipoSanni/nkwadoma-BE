@@ -122,12 +122,14 @@ public class CohortController {
     public ResponseEntity<ApiResponse<?>> searchCohort(
             @AuthenticationPrincipal Jwt meedl,
             @RequestParam @NotBlank(message = "Cohort name is required") String cohortName,
+            @RequestParam(required = false) String organizationId,
             @RequestParam(required = false) String programId,
+            @RequestParam(required = false)CohortStatus cohortStatus,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 
-        Cohort cohort = Cohort.builder().programId(programId).name(cohortName).
-                pageSize(pageSize).pageNumber(pageNumber).build();
+        Cohort cohort = Cohort.builder().programId(programId).organizationId(organizationId).name(cohortName)
+                .cohortStatus(cohortStatus).pageSize(pageSize).pageNumber(pageNumber).build();
         Page<Cohort> cohorts = cohortUseCase.searchForCohort(meedl.getClaimAsString("sub"),cohort);
         List<CohortResponse> cohortResponses =  cohorts.stream().map(cohortMapper::toCohortResponse).toList();
         PaginatedResponse<CohortResponse> paginatedResponse = new PaginatedResponse<>(
