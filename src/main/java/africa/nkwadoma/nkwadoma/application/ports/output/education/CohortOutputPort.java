@@ -9,7 +9,7 @@ public interface CohortOutputPort {
     Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException;
 
     void deleteCohort(String id) throws MeedlException;
-    Page<Cohort> findAllCohortInAProgram(String id, int pageSize,int pageNumber) throws MeedlException;
+    Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException;
 
     Cohort findCohort(String cohortId) throws MeedlException;
 
