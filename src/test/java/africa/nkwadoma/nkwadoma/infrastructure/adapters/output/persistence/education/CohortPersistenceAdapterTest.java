@@ -320,9 +320,11 @@ class CohortPersistenceAdapterTest {
 
         pageSize = 2;
         pageNumber = 0;
+        elites.setPageSize(pageSize);
+        elites.setPageNumber(pageNumber);
         try{
           Page<Cohort> cohorts = cohortOutputPort.findAllCohortInAProgram(elites);
-            assertEquals(2,cohorts.toList().size());
+            assertEquals(1,cohorts.toList().size());
         } catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
         }

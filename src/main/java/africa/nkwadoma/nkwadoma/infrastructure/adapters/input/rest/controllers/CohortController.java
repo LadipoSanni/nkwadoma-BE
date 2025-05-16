@@ -144,7 +144,7 @@ public class CohortController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<CohortResponse>>> viewAllCohortsInAProgram(
             @RequestParam @NotBlank(message = "Program ID is required") String programId,
-            @RequestParam(name = "cohortStatus") CohortStatus cohortStatus,
+            @RequestParam(name = "cohortStatus",required = false) CohortStatus cohortStatus,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber) throws MeedlException {
 

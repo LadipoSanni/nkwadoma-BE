@@ -183,10 +183,10 @@ public class CohortService implements CohortUseCase {
 
     @Override
     public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateObjectInstance(cohort,"Cohort cannot be empty");
         MeedlValidator.validateUUID(cohort.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
         MeedlValidator.validatePageNumber(cohort.getPageNumber());
         MeedlValidator.validatePageSize(cohort.getPageSize());
-        MeedlValidator.validateObjectInstance(cohort.getCohortStatus(),CohortMessages.COHORT_STATUS_CANNOT_BE_EMPTY.name());
         Program foundProgram = programOutputPort.findProgramById(cohort.getProgramId());
         if (ObjectUtils.isEmpty(foundProgram)) {
             log.error("While trying to view all cohort in a program, the program {} was not found.", cohort.getProgramId());
