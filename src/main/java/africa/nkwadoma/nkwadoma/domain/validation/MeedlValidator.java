@@ -221,7 +221,7 @@ public class MeedlValidator {
     }
 
     public static void validateLoanBreakdowns(List<LoanBreakdown> loanBreakdowns) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanBreakdowns, LoanMessages.LOAN_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loanBreakdowns, LoanMessages.LOAN_BREAK_DOWN_CANNOT_BE_EMPTY.getMessage());
         for(LoanBreakdown loanBreakdown : loanBreakdowns){
             loanBreakdown.validate();
         }

@@ -4,8 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerific
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.IdentityVerificationEnum;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;

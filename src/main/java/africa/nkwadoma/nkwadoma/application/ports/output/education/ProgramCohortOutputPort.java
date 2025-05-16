@@ -11,6 +11,8 @@ public interface ProgramCohortOutputPort {
 
     ProgramCohort findByProgramId(String programId) throws MeedlException;
 
+    void linkCohortToProgram(Program program, Cohort savedCohort) throws MeedlException;
+
     List<ProgramCohort> findAllByProgramId(String programId) throws MeedlException;
 
     void save(ProgramCohort programCohort1) throws MeedlException;

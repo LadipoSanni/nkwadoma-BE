@@ -1,8 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.identityManager;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.education.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
 
-import java.math.*;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

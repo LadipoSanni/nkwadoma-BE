@@ -1,26 +1,10 @@
 package africa.nkwadoma.nkwadoma.domain.model.identity;
 
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
-import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
-import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyBvnResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.PremblyFaceData;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.Verification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.identity.IdentityVerificationMapper;
-import africa.nkwadoma.nkwadoma.infrastructure.commons.IdentityVerificationMessage;
-import africa.nkwadoma.nkwadoma.infrastructure.exceptions.IdentityVerificationException;
-import africa.nkwadoma.nkwadoma.infrastructure.utilities.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages.*;
 
 @Slf4j
 @Component
