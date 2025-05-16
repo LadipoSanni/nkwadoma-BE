@@ -11,7 +11,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.*;
 
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
-    Page<CohortEntity> findByNameContainingIgnoreCase(String name,Pageable pageRequest);
+
+    @Query("SELECT c FROM CohortEntity c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
+            "AND c.organizationId = :organizationId " +
+            "AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)")
+    Page<CohortEntity> findByNameContainingIgnoreCaseAndOrganizationId(
+            @Param("name") String name,
+            @Param("cohortStatus") CohortStatus cohortStatus,
+            @Param("organizationId") String organizationId,
+            Pageable pageRequest);
 
     Page<CohortEntity> findAllByProgramId(String programId, Pageable pageRequest);
     @Query("""
