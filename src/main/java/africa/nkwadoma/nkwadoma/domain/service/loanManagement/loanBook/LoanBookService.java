@@ -1,17 +1,21 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoaneeUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -27,7 +31,10 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.message.cohort.SuccessMessages.COHORT_INVITED;
 
 @Slf4j
 @Component
@@ -38,6 +45,8 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
     private final CohortUseCase cohortUseCase;
+    private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
+    private final LoaneeUseCase loaneeUseCase;
 
     @Override
     public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
@@ -69,8 +78,30 @@ public class LoanBookService implements LoanBookUseCase {
         Cohort savedCohort = findCohort(loanBook.getCohort());
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort);
         loanBook.setLoanees(convertedLoanees);
+        referCohort(loanBook);
         return loanBook;
     }
+
+    private void referCohort(LoanBook loanBook) {
+        Iterator<Loanee> iterator = loanBook.getLoanees().iterator();
+        while (iterator.hasNext()) {
+            Loanee loanee = iterator.next();
+            try {
+                inviteTrainee(loanee);
+            } catch (MeedlException e) {
+                log.error("Failed to invite trainee with id: {}", loanee.getId(), e);
+                iterator.remove();
+            }
+        }
+
+        log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
+        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
+    }
+private void inviteTrainee (Loanee loanee) throws MeedlException {
+    log.info("Single loanee is being referred...");
+    loaneeUseCase.referLoanee(loanee);
+}
+
 
     private Cohort findCohort(Cohort cohort) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
@@ -102,6 +133,7 @@ public class LoanBookService implements LoanBookUseCase {
             Loanee loanee = Loanee.builder()
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
+                    .loaneeStatus(LoaneeStatus.ADDED)
                     .cohortId(cohort.getId())
                     .build();
 
