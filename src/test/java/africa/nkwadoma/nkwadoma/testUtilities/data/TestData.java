@@ -273,7 +273,7 @@ public class TestData {
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
-    public static LoanBook buildLoanBook(String absolutePath, String name){
+    public static LoanBook buildLoanBook(String absolutePath){
         return LoanBook.builder()
                 .absoluteFilePath(absolutePath)
                 .file(new File(absolutePath))
