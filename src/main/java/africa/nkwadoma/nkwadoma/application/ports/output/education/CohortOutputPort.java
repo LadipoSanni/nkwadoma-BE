@@ -9,13 +9,13 @@ public interface CohortOutputPort {
     Cohort viewCohortDetails(String userId,  String cohortId) throws MeedlException;
 
     void deleteCohort(String id) throws MeedlException;
-    Page<Cohort> findAllCohortInAProgram(String id, int pageSize,int pageNumber) throws MeedlException;
+    Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException;
 
     Cohort findCohort(String cohortId) throws MeedlException;
 
     Cohort save(Cohort cohort) throws MeedlException;
 
-    Page<Cohort> findCohortByName(String name,int pageSize, int pageNumber) throws MeedlException;
+    Page<Cohort> findCohortByNameAndOrganizationId(Cohort cohort) throws MeedlException;
 
     Page<Cohort> findAllCohortByOrganizationId(String organizationId,Cohort cohort) throws MeedlException;
 

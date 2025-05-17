@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputP
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramCohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.ProgramMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.UserMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -79,9 +80,12 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     }
 
     @Override
-    public Page<Cohort> findCohortByName(String name,int pageSize, int pageNumber) {
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCase(name,pageRequest);
+    public Page<Cohort> findCohortByNameAndOrganizationId(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(),
+                Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCaseAndOrganizationId(cohort.getName(),
+                cohort.getCohortStatus(),cohort.getOrganizationId(),pageRequest);
         if (cohortEntities.isEmpty()){
             return Page.empty();
         }
@@ -135,10 +139,10 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
 
 
     @Override
-    public Page<Cohort> findAllCohortInAProgram(String programId,int pageSize,int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId, "Provide a valid program identification");
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("cohortStatus")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramId(programId, pageRequest);
+    public Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateUUID(cohort.getProgramId(), "Provide a valid program identification");
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
+        Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramIdAndCohortStatus(cohort.getProgramId(),cohort.getCohortStatus(), pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
     }
 

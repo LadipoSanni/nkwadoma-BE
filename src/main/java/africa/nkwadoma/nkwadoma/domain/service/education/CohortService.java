@@ -62,7 +62,10 @@ public class CohortService implements CohortUseCase {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.INPUT_CANNOT_BE_NULL.getMessage());
         cohort.validate();
         String cohortName = cohort.getName();
-        cohort.validateLoanBreakDowns();
+        UserIdentity userIdentity = userIdentityOutputPort.findById(cohort.getCreatedBy());
+        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+            cohort.validateLoanBreakDowns();
+        }
         log.info("Creating cohort with name {} at service level", cohortName);
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
@@ -171,16 +174,17 @@ public class CohortService implements CohortUseCase {
     }
 
     @Override
-    public Page<Cohort> viewAllCohortInAProgram(String programId, int pageSize, int pageNumber) throws MeedlException {
-        MeedlValidator.validateUUID(programId, ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validatePageNumber(pageNumber);
-        MeedlValidator.validatePageSize(pageSize);
-        Program foundProgram = programOutputPort.findProgramById(programId);
+    public Page<Cohort> viewAllCohortInAProgram(Cohort cohort) throws MeedlException {
+        MeedlValidator.validateObjectInstance(cohort,CohortMessages.COHORT_CANNOT_BE_EMPTY.name());
+        MeedlValidator.validateUUID(cohort.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validatePageNumber(cohort.getPageNumber());
+        MeedlValidator.validatePageSize(cohort.getPageSize());
+        Program foundProgram = programOutputPort.findProgramById(cohort.getProgramId());
         if (ObjectUtils.isEmpty(foundProgram)) {
-            log.error("While trying to view all cohort in a program, the program {} was not found.", programId);
+            log.error("While trying to view all cohort in a program, the program {} was not found.", cohort.getProgramId());
             throw new MeedlException(PROGRAM_NOT_FOUND.getMessage());
         }
-        return cohortOutputPort.findAllCohortInAProgram(programId, pageSize, pageNumber);
+        return cohortOutputPort.findAllCohortInAProgram(cohort);
     }
 
     @Override
@@ -224,7 +228,8 @@ public class CohortService implements CohortUseCase {
                         cohort.getPageSize(),cohort.getPageNumber());
             }
         }
-        return cohortOutputPort.findCohortByName(cohort.getName(),cohort.getPageSize(),cohort.getPageNumber());
+        MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        return cohortOutputPort.findCohortByNameAndOrganizationId(cohort);
     }
 
     @Override

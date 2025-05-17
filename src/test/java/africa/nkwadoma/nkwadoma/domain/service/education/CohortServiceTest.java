@@ -90,6 +90,7 @@ class CohortServiceTest {
         elites.setStartDate(LocalDate.of(2024,11,29));
         elites.setExpectedEndDate(LocalDate.of( 2025,6,29));
         elites.setTuitionAmount(BigDecimal.valueOf(2000));
+        elites.setCohortStatus(CohortStatus.GRADUATED);
         programCohort = new ProgramCohort();
         programCohort.setCohort(elites);
         programCohort.setProgramId(program.getId());
@@ -99,6 +100,7 @@ class CohortServiceTest {
         xplorers.setProgramId(program.getId());
         xplorers.setCreatedBy(mockId);
         xplorers.setStartDate(LocalDate.of(2024,1,2));
+        xplorers.setCohortStatus(CohortStatus.GRADUATED);
         xplorers.setExpectedEndDate(LocalDate.of(2024,8,2));
         xplorers.setTuitionAmount(BigDecimal.valueOf(2000));
 
@@ -115,6 +117,7 @@ class CohortServiceTest {
     void saveCohort() {
         try {
             elites.setLoanBreakdowns(List.of(loanBreakdown));
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
             Cohort cohort = cohortService.createCohort(elites);
@@ -128,6 +131,7 @@ class CohortServiceTest {
     @Test
     void saveCohortWithExistingCohortName() {
         try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenThrow(MeedlException.class);
@@ -139,7 +143,8 @@ class CohortServiceTest {
 
 
     @Test
-    void saveCohortWithNegativeLoanBreakDownItemAmount(){
+    void saveCohortWithNegativeLoanBreakDownItemAmount() throws MeedlException {
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         loanBreakdown.setItemAmount(BigDecimal.valueOf(-2000));
         xplorers.setLoanBreakdowns(List.of(loanBreakdown));
         assertThrows(MeedlException.class,() -> cohortService.createCohort(xplorers));
@@ -148,6 +153,7 @@ class CohortServiceTest {
     @Test
     void saveAnotherCohortInProgram() {
         try {
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
             xplorers.setLoanBreakdowns(List.of(loanBreakdown));
             when(programOutputPort.findProgramById(mockId)).thenReturn(program);
             when(cohortOutputPort.save(xplorers)).thenReturn(xplorers);
@@ -230,11 +236,12 @@ class CohortServiceTest {
     @Test
     void viewAllCohortInAProgram() {
         try {
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize);
+
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(elites);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
-            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(program.getId(),pageNumber,pageSize);
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(elites);
         }
         catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
@@ -243,32 +250,36 @@ class CohortServiceTest {
 
     @Test
     void viewCohortsInAProgramWithNullProgramId(){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null,pageNumber,pageSize));
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid uuid"})
     void viewCohortsInAProgramWithNonUUIDProgramId(String programId) {
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize));
+        elites.setProgramId(programId);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(elites));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"3a6d1124-1349-4f5b-831a-ac269369a90f"})
     void viewCohortsInAProgramWithInvalidProgramId(String programId){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize));
+        elites.setProgramId(programId);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(elites));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void viewCohortsInAProgramWithInvalidPageSize(int pageSize) {
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize));
+        elites.setPageSize(pageSize);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(elites));
     }
 
 
     @ParameterizedTest
     @ValueSource(ints = {-1})
     void viewCohortsInAProgramWithInvalidPageNumber(int pageNumber){
-        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(program.getId(),pageNumber,pageSize));
+        elites.setPageNumber(pageNumber);
+        assertThrows(MeedlException.class, ()-> cohortService.viewAllCohortInAProgram(elites));
     }
 
     @ParameterizedTest
@@ -278,12 +289,13 @@ class CohortServiceTest {
             "    1de71eaa-de6d-4cdf-8f93-aa7be533f4aa     "
     })
     void viewCohortsInAProgramWithProgramIdWithSpaces(String programId){
+        elites.setProgramId(programId);
         try {
-            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(programId,pageNumber,pageSize);
+            Page<Cohort> allCohortInAProgram = cohortService.viewAllCohortInAProgram(elites);
             List<Cohort> cohorts = allCohortInAProgram.toList();
 
             assertEquals(2, cohorts.size());
-            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(programId.trim(),pageNumber,pageSize);
+            verify(cohortOutputPort, times(1)).findAllCohortInAProgram(elites);
         }
         catch (MeedlException exception) {
             log.info("{} {}", exception.getClass().getName(), exception.getMessage());
