@@ -50,11 +50,12 @@ public class LoanBookController {
                                                              @PathVariable String cohortId,
                                                              @PathVariable String loanProductId
                                                             ) throws MeedlException {
-        log.info("Upload loan book. Api .... ");
+        log.info("Upload loan book. Api called .... ");
 //        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
 //        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
         LoanBook loanBook = new LoanBook();
         loanBook.setFile(convertToTempFile(file));
+        loanBook.setLoanProductId(loanProductId);
         loanBook.setCohort(Cohort.builder().id(cohortId).createdBy(meedlUser.getClaimAsString("sub")).build());
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
