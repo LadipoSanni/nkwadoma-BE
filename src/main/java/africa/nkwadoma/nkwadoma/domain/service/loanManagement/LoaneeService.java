@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
@@ -79,6 +80,7 @@ public class LoaneeService implements LoaneeUseCase {
         LoaneeLoanDetail loaneeLoanDetail = saveLoaneeLoanDetails(loanee.getLoaneeLoanDetail());
         loanee.setLoaneeLoanDetail(loaneeLoanDetail);
         loanee.getUserIdentity().setRole(IdentityRole.LOANEE);
+        loanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
         List<LoaneeLoanBreakdown> loanBreakdowns = loanee.getLoanBreakdowns();
         loanee = createLoaneeAccount(loanee);
         loanBreakdowns = loaneeLoanBreakDownOutputPort.saveAll(loanBreakdowns,loanee);
@@ -168,19 +170,33 @@ public class LoaneeService implements LoaneeUseCase {
     public LoanReferral referLoanee(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanee.getId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(loanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
+
+        OrganizationIdentity organizationIdentity = null;
+        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED)){
+            organizationIdentity = getLoaneeOrganization(loanee.getCohortId());
+        }else {
+            organizationIdentity = getLoaneeOrganization(loanee);
+        }
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
+
+        return referLoanee(loanee, organizationIdentity);
+    }
+
+    private LoanReferral referLoanee(Loanee loanee, OrganizationIdentity organizationIdentity) throws MeedlException {
         updateLoaneeReferralDetail(loanee);
+        loanee.setReferredBy(organizationIdentity.getName());
         LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
         cohortOutputPort.save(cohort);
-        OrganizationIdentity organizationIdentity = getLoaneeOrganization(loanee);
         Optional<LoanMetrics> loanMetrics = updateLoanMetrics(organizationIdentity);
         log.info("Loan metrics saved: {}", loanMetrics);
         List<LoaneeLoanBreakdown> loanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanee.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
-        return  loanReferral;
+        return loanReferral;
     }
 
     private void updateLoaneeReferralDetail(Loanee loanee) throws MeedlException {
@@ -256,15 +272,14 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoaneeException(LoaneeMessages.LOANEE_MUST_BE_ADDED_TO_COHORT.getMessage());
         }
     }
+    private OrganizationIdentity getLoaneeOrganization(String cohortId) throws MeedlException {
+        return organizationIdentityOutputPort.findOrganizationByCohortId(cohortId);
+    }
 
     private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
-        OrganizationIdentity organizationIdentity =
-                organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
-        loanee.setReferredBy(organizationIdentity.getName());
-        loaneeOutputPort.save(loanee);
-        return organizationIdentity;
+        return organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
     }
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());

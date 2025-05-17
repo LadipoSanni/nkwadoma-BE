@@ -121,6 +121,13 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
                 .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
         return updateFoundOrganizationIdentityDetails(organizationEntity);
     }
+    @Override
+    public OrganizationIdentity findOrganizationByCohortId(String cohortId) throws MeedlException {
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        OrganizationEntity organizationEntity = organizationEntityRepository.findByCohortId(cohortId)
+                .orElseThrow(()-> new ResourceNotFoundException(ORGANIZATION_NOT_FOUND.getMessage()));
+        return updateFoundOrganizationIdentityDetails(organizationEntity);
+    }
     private OrganizationIdentity updateFoundOrganizationIdentityDetails(OrganizationEntity organizationEntity) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationIdentityMapper.toOrganizationIdentity(organizationEntity);
         organizationIdentity.setServiceOfferings(getServiceOfferings(organizationIdentity.getId()));
@@ -282,4 +289,5 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         }
         return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
+
 }

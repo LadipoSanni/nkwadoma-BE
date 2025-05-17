@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Asyn
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -123,7 +124,8 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .createdAt(LocalDateTime.now())
                     .createdBy("73de0343-be48-4967-99ea-10be007e4347")
                     .build();
-            log.info("Created user identity with email {}", userIdentity.getEmail());
+            log.info("Built user identity object with email {}", userIdentity.getEmail());
+
             LoaneeLoanDetail loaneeLoanDetail = LoaneeLoanDetail.builder()
                     .initialDeposit(new BigDecimal(row[5].trim()))
                     .amountRequested(new BigDecimal(row[6].trim()))
@@ -134,8 +136,10 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
                     .loaneeStatus(LoaneeStatus.ADDED)
+                    .onboardingMode(OnboardingMode.FILE_UPLOADED)
                     .cohortId(cohort.getId())
                     .build();
+            log.info("Built loanee object with onboarding status {}", loanee.getOnboardingMode());
 
             loanees.add(loanee);
         }
