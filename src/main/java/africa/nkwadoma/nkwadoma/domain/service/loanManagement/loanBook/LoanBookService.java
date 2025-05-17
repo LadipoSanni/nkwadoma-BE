@@ -56,24 +56,7 @@ public class LoanBookService implements LoanBookUseCase {
         File file = loanBook.getFile();
         List<String[]> data;
 
-        if (file.getName().endsWith(".csv")) {
-            try {
-                data = readCSV(file);
-            }catch (IOException e){
-                log.error("Error occurred reading csv",e);
-                throw new MeedlException(e.getMessage());
-            }
-        } else if (file.getName().endsWith(".xlsx")) {
-            try{
-                data = readExcel(file);
-            }catch (IOException e){
-                log.error("Error occurred reading excel",e);
-                throw new MeedlException(e.getMessage());
-            }
-        } else {
-            log.error("Unsupported file type.");
-            throw new MeedlException("Unsupported file type.");
-        }
+        data = readFile(file);
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
@@ -82,6 +65,7 @@ public class LoanBookService implements LoanBookUseCase {
         referCohort(loanBook);
         return loanBook;
     }
+
 
     private void referCohort(LoanBook loanBook) {
         Iterator<Loanee> iterator = loanBook.getLoanees().iterator();
@@ -166,6 +150,28 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         }
         log.info("Done saving loanee data from file to db. loanees size {}", savedLoanees.size());
         return savedLoanees;
+    }
+    private List<String[]> readFile(File file) throws MeedlException {
+        List<String[]> data;
+        if (file.getName().endsWith(".csv")) {
+            try {
+                data = readCSV(file);
+            }catch (IOException e){
+                log.error("Error occurred reading csv",e);
+                throw new MeedlException(e.getMessage());
+            }
+        } else if (file.getName().endsWith(".xlsx")) {
+            try{
+                data = readExcel(file);
+            }catch (IOException e){
+                log.error("Error occurred reading excel",e);
+                throw new MeedlException(e.getMessage());
+            }
+        } else {
+            log.error("Unsupported file type.");
+            throw new MeedlException("Unsupported file type.");
+        }
+        return data;
     }
 
     private List<String[]> readCSV(File file) throws IOException {
