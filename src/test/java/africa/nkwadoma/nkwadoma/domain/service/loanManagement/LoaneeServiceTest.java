@@ -163,7 +163,7 @@ class LoaneeServiceTest {
 
         atlasProgram = TestData.createProgramTestData("AtlasProgram");
 
-        loanProduct = TestData.buildTestLoanProduct("product",TestData.createTestVendor("vendor"));
+        loanProduct = TestData.buildTestLoanProduct();
 
     }
 

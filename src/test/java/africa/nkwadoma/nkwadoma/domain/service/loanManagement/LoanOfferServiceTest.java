@@ -101,8 +101,7 @@ public class LoanOfferServiceTest {
         loanRequest = TestData.buildLoanRequest(loanee,loaneeLoanDetail);
         loanOffer = TestData.buildLoanOffer(loanRequest,loanee,mockId);
         loanOffer2 = TestData.buildLoanOffer(loanRequest,loanee,mockId);
-        vendor = TestData.createTestVendor("vendor");
-        loanProduct = TestData.buildTestLoanProduct("loanProduct",vendor);
+        loanProduct = TestData.buildTestLoanProduct();
         loaneeLoanAccount = TestData.createLoaneeLoanAccount(LoanStatus.AWAITING_DISBURSAL, AccountStatus.NEW,loanOffer.getLoaneeId());
         program = TestData.createProgramTestData("program name");
         loanDetail = TestData.createLoanLifeCycle();

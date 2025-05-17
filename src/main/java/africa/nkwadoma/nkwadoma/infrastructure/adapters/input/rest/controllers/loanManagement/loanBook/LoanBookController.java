@@ -55,7 +55,7 @@ public class LoanBookController {
 //        LoanBook loanBook = loanBookRestMapper.map(convertToTempFile(file));
         LoanBook loanBook = new LoanBook();
         loanBook.setFile(convertToTempFile(file));
-        loanBook.setCohort(Cohort.builder().id(cohortId).createdBy( meedlUser.getClaimAsString("sub")).build());
+        loanBook.setCohort(Cohort.builder().id(cohortId).createdBy(meedlUser.getClaimAsString("sub")).build());
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
         loanBookResponse.setCohort(loanBookReturned.getCohort());

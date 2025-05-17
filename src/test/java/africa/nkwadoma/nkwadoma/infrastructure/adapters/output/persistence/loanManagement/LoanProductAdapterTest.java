@@ -37,17 +37,12 @@ class LoanProductAdapterTest {
     private VendorEntityRepository vendorEntityRepository;
     private LoanProduct gemsLoanProduct;
     private LoanProduct goldLoanProduct;
-    private Vendor vendor;
-    private Vendor goldVendor;
-    @Autowired
-    private UserIdentityService userIdentityService;
 
     @BeforeEach
     void setUp() {
-        vendor = TestData.createTestVendor("test Gems tone Finance");
-        goldVendor = TestData.createTestVendor("test Gold tone");
-        gemsLoanProduct = TestData.buildTestLoanProduct("test Gems", vendor);
-        goldLoanProduct = TestData.buildTestLoanProduct("test Gold Product", goldVendor);
+
+        gemsLoanProduct = TestData.buildTestLoanProduct();
+        goldLoanProduct = TestData.buildTestLoanProduct();
     }
 
     @Test
@@ -268,8 +263,8 @@ class LoanProductAdapterTest {
     @AfterAll
     void cleanUp() {
         try {
-            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(vendor.getVendorName());
-            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldVendor.getVendorName());
+            VendorEntity foundGemsVendorEntity = vendorEntityRepository.findByVendorName(gemsLoanProduct.getVendors().get(0).getVendorName());
+            VendorEntity foundGoldVendorEntity = vendorEntityRepository.findByVendorName(goldLoanProduct.getVendors().get(0).getVendorName());
             loanProductVendorRepository.deleteAllByVendorEntity(foundGemsVendorEntity);
 //            loanProductVendorRepository.deleteAllByVendorEntity(foundGoldVendorEntity);
             vendorEntityRepository.deleteById(foundGemsVendorEntity.getId());

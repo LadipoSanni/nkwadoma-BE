@@ -1,5 +1,6 @@
-package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanBook;
+package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.CohortOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.ProgramOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -7,7 +8,6 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.LoanBookOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -17,10 +17,14 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,6 +34,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -37,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Slf4j
 public class LoanBookAdapterTest {
     @Autowired
-    private LoanBookOutputPort loanBookOutputPort;
+    private LoanBookUseCase loanBookUseCase;
     @Autowired
     private UserIdentityOutputPort userIdentityOutputPort;
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
@@ -64,13 +69,18 @@ public class LoanBookAdapterTest {
 
     @BeforeAll
     void setUp() throws IOException {
-//        populateCsvTestFile();
-//        String loanBookName = "Loan Book Meedl";
-//        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
-//        Program program = saveProgram();
+        populateCsvTestFile();
+        String loanBookName = "Loan Book Meedl";
+        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
+        saveLoanBookCohort();
+        saveLoanProduct();
     }
 
-    private Program saveProgram() {
+    private void saveLoanProduct() {
+        LoanProduct loanProduct = TestData.buildTestLoanProduct();
+    }
+
+    private void saveLoanBookCohort() {
         meedleUser = TestData.createTestUserIdentity(TestUtils.generateEmail(4));
         meedleUser.setRole(IdentityRole.ORGANIZATION_ADMIN);
         employeeIdentity = TestData.createOrganizationEmployeeIdentityTestData(meedleUser);
@@ -105,7 +115,6 @@ public class LoanBookAdapterTest {
             log.error("",e);
             throw new RuntimeException(e);
         }
-        return program;
     }
 
     private void populateCsvTestFile() throws IOException {
@@ -125,11 +134,38 @@ public class LoanBookAdapterTest {
         ));
     }
 
-//    @Test
+    @Test
     void upLoadExcelSheet() throws MeedlException {
-//        loanBookOutputPort.upLoadFile(loanBook);
-//        Page<LoanBook> allFoundLoanBook = loanBookOutputPort.search(loanBook.getName());
-//        assertNotNull(allFoundLoanBook);
+        loanBookUseCase.upLoadFile(loanBook);
+    }
+    @Test
+    void uploadLoanBookWithNull(){
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(null));
+    }
+    @Test
+    void uploadLoanBookWithNullCohort(){
+        loanBook.setCohort(null);
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
+    void uploadLoanBookWithInvalidCohortId(String id){
+        Cohort cohort = Cohort.builder().id(id).build();
+        loanBook.setCohort(cohort);
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
+    void uploadLoanBookWithInvalidActorId(String id){
+        Cohort cohort = Cohort.builder().createdBy(id).build();
+        loanBook.setCohort(cohort);
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "", "288b3cf9-7106-4405-9061-7cd92aceb474"})
+    void uploadLoanBookWithInvalidLoanProductId(String id){
+        loanBook.setLoanProductId(id);
+        assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
     }
 
 

@@ -75,8 +75,7 @@ class LoanRequestServiceTest {
                 TestData.createTestLoaneeLoanBreakdown("1886df42-1f75-4d17-bdef-e0b016707885");
         loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
 
-        Vendor vendor = TestData.createTestVendor("vendor for test");
-        loanProduct = TestData.buildTestLoanProduct("Test Loan Product - unit testing within application", vendor);
+        loanProduct = TestData.buildTestLoanProduct();
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoanProductId(loanProduct.getId());
