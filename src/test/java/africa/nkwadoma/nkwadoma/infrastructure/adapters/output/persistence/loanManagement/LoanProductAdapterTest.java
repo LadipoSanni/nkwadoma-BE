@@ -38,7 +38,7 @@ class LoanProductAdapterTest {
     private LoanProduct gemsLoanProduct;
     private LoanProduct goldLoanProduct;
 
-    @BeforeEach
+    @BeforeAll
     void setUp() {
 
         gemsLoanProduct = TestData.buildTestLoanProduct();

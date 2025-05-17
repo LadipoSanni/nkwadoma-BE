@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanProductOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
@@ -66,9 +67,11 @@ public class LoanBookAdapterTest {
     private LoanBreakdownOutputPort loanBreakdownOutputPort;
     @Autowired
     private CohortOutputPort cohortOutputPort;
+    @Autowired
+    private LoanProductOutputPort loanProductOutputPort;
 
     @BeforeAll
-    void setUp() throws IOException {
+    void setUp() throws IOException, MeedlException {
         populateCsvTestFile();
         String loanBookName = "Loan Book Meedl";
         loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
@@ -76,8 +79,10 @@ public class LoanBookAdapterTest {
         saveLoanProduct();
     }
 
-    private void saveLoanProduct() {
+    private void saveLoanProduct() throws MeedlException {
         LoanProduct loanProduct = TestData.buildTestLoanProduct();
+        loanProduct = loanProductOutputPort.save(loanProduct);
+        loanBook.setLoanProductId(loanProduct.getId());
     }
 
     private void saveLoanBookCohort() {

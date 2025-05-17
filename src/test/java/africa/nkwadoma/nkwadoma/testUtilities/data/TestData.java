@@ -170,7 +170,7 @@ public class TestData {
         loanProduct.setInvestmentVehicleId(testId);
         loanProduct.setTenor(2);
         loanProduct.setMoratorium(2);
-        loanProduct.setName(TestUtils.generateName(6));
+        loanProduct.setName("test " +TestUtils.generateName(6));
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsor("Mark");
         loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
