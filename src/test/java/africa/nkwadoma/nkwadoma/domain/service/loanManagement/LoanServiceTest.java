@@ -94,8 +94,7 @@ class LoanServiceTest {
 
         loanReferral = LoanReferral.builder().id(testId).loanee(loanee).
                 loanReferralStatus(LoanReferralStatus.ACCEPTED).build();
-        Vendor vendor = TestData.createTestVendor("Large vendor");
-        LoanProduct loanProduct = TestData.buildTestLoanProduct("Test Loan Product - unit testing within application", vendor);
+        LoanProduct loanProduct = TestData.buildTestLoanProduct();
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoaneeId(loanee.getId());

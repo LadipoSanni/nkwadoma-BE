@@ -20,6 +20,7 @@ import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -162,13 +163,14 @@ public class TestData {
                 .itemName("Accommodation").build();
     }
 
-    public static LoanProduct buildTestLoanProduct(String name, Vendor vendor) {
+    public static LoanProduct buildTestLoanProduct() {
+        Vendor vendor = TestData.createTestVendor(TestUtils.generateName(6));
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setId("3a6d1124-1349-4f5b-831a-ac269369a90f");
         loanProduct.setInvestmentVehicleId(testId);
         loanProduct.setTenor(2);
         loanProduct.setMoratorium(2);
-        loanProduct.setName(name);
+        loanProduct.setName("test " +TestUtils.generateName(6));
         loanProduct.setMandate("Test: A new mandate for test");
         loanProduct.setSponsor("Mark");
         loanProduct.setObligorLoanLimit(new BigDecimal("100.00"));
@@ -271,7 +273,7 @@ public class TestData {
         financier.setFinancierType(FinancierType.INDIVIDUAL);
         return financier;
     }
-    public static LoanBook buildLoanBook(String absolutePath, String name){
+    public static LoanBook buildLoanBook(String absolutePath){
         return LoanBook.builder()
                 .absoluteFilePath(absolutePath)
                 .file(new File(absolutePath))

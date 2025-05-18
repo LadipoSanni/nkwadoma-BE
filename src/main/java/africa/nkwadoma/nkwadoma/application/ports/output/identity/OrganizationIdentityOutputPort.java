@@ -34,5 +34,7 @@ public interface OrganizationIdentityOutputPort {
     Optional<OrganizationIdentity> findByTin(String tin) throws MeedlException;
 
     Page<OrganizationIdentity> findByNameSortingByLoanType(String name, LoanType loanType, int pageSize, int pageNumber) throws MeedlException;
+
+    OrganizationIdentity findOrganizationByCohortId(String cohortId) throws MeedlException;
 }
 
