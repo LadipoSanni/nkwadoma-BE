@@ -19,6 +19,9 @@ public interface CohortRestMapper {
 
     Cohort toCohort(CreateCohortRequest createCohortRequest);
 
+    @Mapping(target = "amountReceived", source = "totalAmountReceived")
+    @Mapping(target = "amountRequested", source = "totalAmountRequested")
+    @Mapping(target = "amountOutstanding", source = "totalOutstandingAmount")
     CohortResponse toCohortResponse(Cohort cohort);
 
     LoanBreakdownResponse toLoanBreakdownResponse(LoanBreakdown loanBreakdown);

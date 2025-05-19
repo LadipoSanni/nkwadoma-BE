@@ -83,19 +83,19 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     public Page<Cohort> findCohortByNameAndOrganizationId(Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(cohort.getOrganizationId(), OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
         Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(),
-                Sort.by(Sort.Order.asc("createdAt")));
-        Page<CohortEntity> cohortEntities = cohortRepository.findByNameContainingIgnoreCaseAndOrganizationId(cohort.getName(),
+                Sort.by(Sort.Order.desc("createdAt")));
+        Page<CohortProjection> cohortEntities = cohortRepository.findByNameContainingIgnoreCaseAndOrganizationId(cohort.getName(),
                 cohort.getCohortStatus(),cohort.getOrganizationId(),pageRequest);
         if (cohortEntities.isEmpty()){
             return Page.empty();
         }
-        return cohortEntities.map(cohortMapper::toCohort);
+        return cohortEntities.map(cohortMapper::mapFromProjectionToCohort);
     }
 
     @Override
     public Page<Cohort> findAllCohortByOrganizationId(String organizationId,Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Please provide a valid organization identification");
-        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.desc("createdAt")));
         Page<CohortProjection> cohortEntities = cohortRepository.findAllByOrganizationIdAndCohortStatus(organizationId,pageRequest,cohort.getCohortStatus());
         return cohortEntities.map(cohortMapper::mapFromProjectionToCohort);
     }
@@ -121,7 +121,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Page<Cohort> searchCohortInOrganization(String organizationId, String name,int pageSize,int pageNumber) throws MeedlException {
         MeedlValidator.validateUUID(organizationId, "Provide a valid organization identification");
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("createdAt")));
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt")));
         Page<CohortEntity> cohortEntities =
                 cohortRepository.findByOrganizationIdAndNameContainingIgnoreCase(organizationId,name,pageRequest);
         if (cohortEntities.isEmpty()){
@@ -141,7 +141,7 @@ public class CohortPersistenceAdapter implements CohortOutputPort {
     @Override
     public Page<Cohort> findAllCohortInAProgram(Cohort cohort) throws MeedlException {
         MeedlValidator.validateUUID(cohort.getProgramId(), "Provide a valid program identification");
-        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.asc("createdAt")));
+        Pageable pageRequest = PageRequest.of(cohort.getPageNumber(), cohort.getPageSize(), Sort.by(Sort.Order.desc("createdAt")));
         Page<CohortEntity> cohortEntities = cohortRepository.findAllByProgramIdAndCohortStatus(cohort.getProgramId(),cohort.getCohortStatus(), pageRequest);
         return cohortEntities.map(cohortMapper::toCohort);
     }

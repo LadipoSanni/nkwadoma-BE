@@ -29,6 +29,9 @@ public class CohortResponse {
     private CohortStatus cohortStatus;
     private BigDecimal tuitionAmount = BigDecimal.ZERO;
     private BigDecimal totalCohortFee = BigDecimal.ZERO;
+    private BigDecimal amountRequested;
+    private BigDecimal amountOutstanding;
+    private BigDecimal amountReceived;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
