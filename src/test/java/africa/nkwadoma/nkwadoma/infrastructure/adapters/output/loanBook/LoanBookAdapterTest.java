@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +44,7 @@ public class LoanBookAdapterTest {
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
-    private final String absoluteCSVFilePath = "/Users/admin/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/infrastructure/adapters/output/loanBook/";
+    private final String absoluteCSVFilePath = "/Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/infrastructure/adapters/output/loanBook/";
     private final String CSVName = "loanBook.csv";
     private LoanBook loanBook;
     private UserIdentity meedleUser;
@@ -64,10 +65,10 @@ public class LoanBookAdapterTest {
 
     @BeforeAll
     void setUp() throws IOException {
-//        populateCsvTestFile();
-//        String loanBookName = "Loan Book Meedl";
-//        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
-//        Program program = saveProgram();
+        populateCsvTestFile();
+        String loanBookName = "Loan Book Meedl";
+        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName,  loanBookName );
+        Program program = saveProgram();
     }
 
     private Program saveProgram() {
@@ -125,9 +126,9 @@ public class LoanBookAdapterTest {
         ));
     }
 
-//    @Test
+    @Test
     void upLoadExcelSheet() throws MeedlException {
-//        loanBookOutputPort.upLoadFile(loanBook);
+        loanBookOutputPort.upLoadFile(loanBook);
 //        Page<LoanBook> allFoundLoanBook = loanBookOutputPort.search(loanBook.getName());
 //        assertNotNull(allFoundLoanBook);
     }

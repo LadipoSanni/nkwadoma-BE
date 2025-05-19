@@ -31,7 +31,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             Pageable pageRequest);
 
     @Query("""
-    SELECT 
+    SELECT
         c.id AS id,
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
