@@ -83,5 +83,11 @@ public interface OrganizationEntityRepository extends JpaRepository<Organization
             @Param("loanType") String loanType,
             Pageable pageRequest
     );
-
+    @Query("""
+    SELECT o FROM OrganizationEntity o
+    JOIN ProgramEntity p ON p.organizationIdentity.id = o.id
+    JOIN CohortEntity c ON c.programId = p.id
+    WHERE c.id = :cohortId
+""")
+    Optional<OrganizationEntity> findByCohortId(String cohortId);
 }

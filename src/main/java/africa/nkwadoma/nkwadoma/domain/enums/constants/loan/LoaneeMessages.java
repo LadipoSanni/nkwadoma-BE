@@ -6,6 +6,7 @@ import lombok.*;
 @Getter
 public enum LoaneeMessages {
     INVALID_LOANEE_ID("Please provide a valid loanee identification"),
+    INVALID_ONBOARDING_MODE("Specify mode of onboarding."),
     LOANEE_WITH_EMAIL_EXIST_IN_COHORT("Loanee With Email Exist In Cohort"),
     LOANEE_NOT_FOUND("Loanee Not Found"),
     LOANEE_HAS_BEEN_REFERRED("Loanee Has Been Referred"),

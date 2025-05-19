@@ -15,6 +15,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
@@ -117,6 +118,8 @@ class LoaneeServiceTest {
         firstLoanee.setId(mockId);
         firstLoanee.setUserIdentity(loaneeUserIdentity);
         firstLoanee.setCohortId(mockId);
+        firstLoanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
+
 
         loanBreakdown = new LoaneeLoanBreakdown();
         loanBreakdown.setLoaneeLoanBreakdownId(mockId);
@@ -163,7 +166,7 @@ class LoaneeServiceTest {
 
         atlasProgram = TestData.createProgramTestData("AtlasProgram");
 
-        loanProduct = TestData.buildTestLoanProduct("product",TestData.createTestVendor("vendor"));
+        loanProduct = TestData.buildTestLoanProduct();
 
     }
 
@@ -284,6 +287,10 @@ class LoaneeServiceTest {
             firstLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
             when(loanReferralOutputPort.findLoanReferralByLoaneeIdAndCohortId(firstLoanee.getId(), firstLoanee.getCohortId()))
                     .thenReturn(new LoanReferral());
+            when(organizationEmployeeIdentityOutputPort.findByEmployeeId(anyString()))
+                    .thenReturn(organizationEmployeeIdentity);
+            when(organizationIdentityOutputPort.findById(anyString()))
+                    .thenReturn(organizationIdentity);
         }catch (MeedlException exception){
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }

@@ -69,7 +69,7 @@ public class LoanProduct {
         validateTenor();
         validateMoratorium();
 
-        log.info("ended loan product validation successfully... ");
+        log.info("Ended loan product validation successfully... ");
     }
 
     private void validateMoratorium() throws InvalidInputException {

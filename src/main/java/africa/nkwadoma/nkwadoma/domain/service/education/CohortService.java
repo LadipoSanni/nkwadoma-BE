@@ -62,7 +62,10 @@ public class CohortService implements CohortUseCase {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.INPUT_CANNOT_BE_NULL.getMessage());
         cohort.validate();
         String cohortName = cohort.getName();
-        cohort.validateLoanBreakDowns();
+        UserIdentity userIdentity = userIdentityOutputPort.findById(cohort.getCreatedBy());
+        if (userIdentity.getRole().equals(IdentityRole.ORGANIZATION_ADMIN)) {
+            cohort.validateLoanBreakDowns();
+        }
         log.info("Creating cohort with name {} at service level", cohortName);
         Program program = checkifCohortNameExistInProgram(cohort, cohortName);
         cohort.setCreatedAt(LocalDateTime.now());
