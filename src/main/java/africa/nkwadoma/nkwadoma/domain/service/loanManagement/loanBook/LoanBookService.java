@@ -80,7 +80,7 @@ public class LoanBookService implements LoanBookUseCase {
         }
 
         log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
-        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
+//        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
 private void inviteTrainee (Loanee loanee) throws MeedlException {
     log.info("Single loanee is being referred...");
