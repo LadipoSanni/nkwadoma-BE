@@ -12,10 +12,33 @@ import java.util.*;
 
 public interface CohortRepository extends JpaRepository<CohortEntity, String> {
 
-    @Query("SELECT c FROM CohortEntity c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND c.organizationId = :organizationId " +
-            "AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)")
-    Page<CohortEntity> findByNameContainingIgnoreCaseAndOrganizationId(
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.name AS name,
+            COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
+            c.startDate AS startDate,
+            COALESCE(SUM(
+                CASE 
+                    WHEN lne.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
+                    ELSE lr.loanAmountRequested
+                END
+            ), 0) AS amountRequested,
+            c.tuitionAmount AS tuitionAmount,
+            COALESCE(0, 0) AS amountReceived,
+            COALESCE(0, 0) AS amountOutstanding
+        FROM CohortEntity c
+        LEFT JOIN LoaneeEntity lne ON lne.cohortId = c.id
+        LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = lne.loaneeLoanDetail.id
+        LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
+        LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
+        LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
+        WHERE c.organizationId = :organizationId 
+            AND (:cohortStatus IS NULL OR c.cohortStatus = :cohortStatus)
+            AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+        GROUP BY c.id, c.name, c.startDate
+    """)
+    Page<CohortProjection> findByNameContainingIgnoreCaseAndOrganizationId(
             @Param("name") String name,
             @Param("cohortStatus") CohortStatus cohortStatus,
             @Param("organizationId") String organizationId,
@@ -31,17 +54,23 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
             Pageable pageRequest);
 
     @Query("""
-    SELECT 
+    SELECT
         c.id AS id,
         c.name AS name,
         COALESCE(COUNT(DISTINCT lne.id), 0) AS numberOfLoanees,
         c.startDate AS startDate,
-        COALESCE(SUM(lr.loanAmountRequested), 0) AS amountRequested,
+        COALESCE(SUM(
+            CASE 
+                WHEN lne.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
+                ELSE lr.loanAmountRequested
+            END
+        ), 0) AS amountRequested,
         c.tuitionAmount AS tuitionAmount,
         COALESCE(0, 0) AS amountReceived,
         COALESCE(0, 0) AS amountOutstanding
     FROM CohortEntity c
     LEFT JOIN LoaneeEntity lne ON lne.cohortId = c.id
+    LEFT JOIN LoaneeLoanDetailEntity lld ON lld.id = lne.loaneeLoanDetail.id
     LEFT JOIN LoanEntity le ON le.loaneeEntity.id = lne.id AND le.loanOfferId IS NOT NULL
     LEFT JOIN LoanOfferEntity lo ON lo.id = le.loanOfferId
     LEFT JOIN LoanRequestEntity lr ON lr.id = lo.loanRequest.id
