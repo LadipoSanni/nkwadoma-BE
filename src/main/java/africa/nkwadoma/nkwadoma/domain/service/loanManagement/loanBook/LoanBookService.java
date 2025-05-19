@@ -6,19 +6,19 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.service.loanManagement.LoanService;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +48,8 @@ public class LoanBookService implements LoanBookUseCase {
     private final CohortUseCase cohortUseCase;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
+    private final LoanService loanService;
+    private final LoanRequestOutputPort loanRequestOutputPort;
 
     @Override
     public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
@@ -63,7 +65,27 @@ public class LoanBookService implements LoanBookUseCase {
         List<Loanee> convertedLoanees = convertToLoanees(data, savedCohort);
         loanBook.setLoanees(convertedLoanees);
         referCohort(loanBook);
+        acceptLoanReferral(loanBook);
         return loanBook;
+    }
+
+    private void acceptLoanReferral(LoanBook loanBook) {
+        loanBook.getLoanees().stream()
+                .map(loanee -> {
+                    LoanReferral loanReferral = LoanReferral.builder()
+                            .loanee(loanee)
+                            .build();
+                    LoanRequest loanRequest;
+                    try {
+                        loanReferral = loanService.viewLoanReferral(loanReferral);
+                        loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+                        loanService.respondToLoanReferral(loanReferral);
+                        loanRequest = loanRequestOutputPort.findLoanRequestById(loanReferral.getId()).orElseThrow();
+                    } catch (MeedlException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return loanRequest;
+                });
     }
 
 
@@ -80,7 +102,7 @@ public class LoanBookService implements LoanBookUseCase {
         }
 
         log.info("Number of referable loanees :{} ",  loanBook.getLoanees().size());
-        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
+//        asynchronousMailingOutputPort.notifyLoanReferralActors(loanBook.getLoanees());
     }
 private void inviteTrainee (Loanee loanee) throws MeedlException {
     log.info("Single loanee is being referred...");
