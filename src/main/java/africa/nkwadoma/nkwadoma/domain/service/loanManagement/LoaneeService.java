@@ -180,6 +180,7 @@ public class LoaneeService implements LoaneeUseCase {
             organizationIdentity = getLoaneeOrganization(loanee);
         }
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
+        loanee.setReferredBy(organizationIdentity.getName());
 
         return referLoanee(loanee, organizationIdentity);
     }
@@ -279,7 +280,9 @@ public class LoaneeService implements LoaneeUseCase {
     private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
-        return organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+        loanee.setReferredBy(organizationIdentity.getName());
+        return organizationIdentity;
     }
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
