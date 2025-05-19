@@ -70,21 +70,21 @@ public class LoanBookService implements LoanBookUseCase {
     }
 
     private void acceptLoanReferral(LoanBook loanBook) {
-        loanBook.getLoanees().stream()
-                .map(loanee -> {
+        loanBook.getLoanees()
+                .forEach(loanee -> {
                     LoanReferral loanReferral = LoanReferral.builder()
                             .loanee(loanee)
                             .build();
-                    LoanRequest loanRequest;
+                    LoanRequest loanRequest ;
                     try {
                         loanReferral = loanService.viewLoanReferral(loanReferral);
                         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
                         loanService.respondToLoanReferral(loanReferral);
-                        loanRequest = loanRequestOutputPort.findLoanRequestById(loanReferral.getId()).orElseThrow();
+//                        loanRequest = loanRequestOutputPort.findLoanRequestById(loanReferral.getId()).orElseThrow();
+//                        loanRequest = loanRequestOutputPort.save(loanRequest);
                     } catch (MeedlException e) {
-                        throw new RuntimeException(e);
+                        log.error("Error accepting loan referral.",e);
                     }
-                    return loanRequest;
                 });
     }
 
