@@ -2,6 +2,8 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoaneeUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.RespondToLoanReferralUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.ViewLoanReferralsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -48,7 +50,8 @@ public class LoanBookService implements LoanBookUseCase {
     private final CohortUseCase cohortUseCase;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
-    private final LoanService loanService;
+    private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
+    private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
     private final LoanRequestOutputPort loanRequestOutputPort;
 
     @Override
@@ -77,9 +80,9 @@ public class LoanBookService implements LoanBookUseCase {
                             .build();
                     LoanRequest loanRequest ;
                     try {
-                        loanReferral = loanService.viewLoanReferral(loanReferral);
+                        loanReferral = viewLoanReferralsUseCase.viewLoanReferral(loanReferral);
                         loanReferral.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
-                        loanService.respondToLoanReferral(loanReferral);
+                        respondToLoanReferralUseCase.respondToLoanReferral(loanReferral);
 //                        loanRequest = loanRequestOutputPort.findLoanRequestById(loanReferral.getId()).orElseThrow();
 //                        loanRequest = loanRequestOutputPort.save(loanRequest);
                     } catch (MeedlException e) {
