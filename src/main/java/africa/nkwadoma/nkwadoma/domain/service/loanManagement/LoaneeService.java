@@ -180,14 +180,13 @@ public class LoaneeService implements LoaneeUseCase {
             organizationIdentity = getLoaneeOrganization(loanee);
         }
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
-        loanee.setReferredBy(organizationIdentity.getName());
-
         return referLoanee(loanee, organizationIdentity);
     }
 
     private LoanReferral referLoanee(Loanee loanee, OrganizationIdentity organizationIdentity) throws MeedlException {
-        updateLoaneeReferralDetail(loanee);
         loanee.setReferredBy(organizationIdentity.getName());
+        updateLoaneeReferralDetail(loanee);
+        log.info("referred by {}", loanee.getReferredBy());
         LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
@@ -197,6 +196,7 @@ public class LoaneeService implements LoaneeUseCase {
         List<LoaneeLoanBreakdown> loanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanee.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
         return loanReferral;
     }
 
@@ -204,6 +204,7 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
         loaneeOutputPort.save(loanee);
+        log.info("saved loanee referred by {}", loanee.getReferredBy());
     }
 
     private Optional<LoanMetrics> updateLoanMetrics(OrganizationIdentity organizationIdentity) throws MeedlException {
