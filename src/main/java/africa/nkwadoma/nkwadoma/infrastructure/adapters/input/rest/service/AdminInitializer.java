@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.service;
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loan.LoanMetricsUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -40,6 +41,7 @@ public class AdminInitializer {
     private final IdentityManagerOutputPort identityManagerOutPutPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort organizationEmployeeIdentityOutputPort;
+    private final LoanMetricsUseCase loanMetricsUseCase;
     private final PortfolioOutputPort portfolioOutputPort;
 
     @Value("${superAdmin.email}")
@@ -198,6 +200,7 @@ public class AdminInitializer {
     public void init() throws MeedlException {
         UserIdentity userIdentity = inviteFirstUser(getUserIdentity());
         OrganizationIdentity organizationIdentity = createFirstOrganizationIdentity(getOrganizationIdentity(userIdentity));
+        loanMetricsUseCase.correctLoanRequestCount();
         Portfolio portfolio = createMeedlPortfolio(getPortfolio());
         log.info("Meedl portfolio process done-- {}", portfolio);
     }

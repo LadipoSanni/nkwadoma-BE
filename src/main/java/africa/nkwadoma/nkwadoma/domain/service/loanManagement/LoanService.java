@@ -273,6 +273,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         if (loanReferral.getLoanReferralStatus().equals(LoanReferralStatus.ACCEPTED)) {
             LoanRequest loanRequest = loanRequestMapper.mapLoanReferralToLoanRequest(foundLoanReferral);
             loanRequest.setLoanReferralStatus(LoanReferralStatus.ACCEPTED);
+            loanRequest.setId(loanReferral.getId());
             log.info("Mapped loan request: {}", loanRequest);
             loanRequest = createLoanRequest(loanRequest);
             log.info("Created loan request: {}", loanRequest);
@@ -317,25 +318,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         loanRequest.setCreatedDate(LocalDateTime.now());
         LoanRequest request = loanRequestOutputPort.save(loanRequest);
         log.info("Saved loan request: {}", request);
-        updateLoanMetricsLoanRequestCount(request);
         return request;
-    }
-
-    private void updateLoanMetricsLoanRequestCount(LoanRequest loanRequest) throws MeedlException {
-        Optional<OrganizationIdentity> organization =
-                organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy());
-        if (organization.isEmpty()) {
-            throw new EducationException(OrganizationMessages.ORGANIZATION_NOT_FOUND.getMessage());
-        }
-        Optional<LoanMetrics> loanMetrics =
-                loanMetricsOutputPort.findByOrganizationId(organization.get().getId());
-        if (loanMetrics.isEmpty()) {
-            throw new LoanException("Organization has no loan metrics");
-        }
-        loanMetrics.get().setLoanRequestCount(
-                loanMetrics.get().getLoanRequestCount() + 1
-        );
-        loanMetricsOutputPort.save(loanMetrics.get());
     }
 
     @Override
@@ -589,6 +572,8 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
         }
         throw new LoanException(loanOffer.getType().name()+" is not a loan type");
     }
+
+
 
 
 }

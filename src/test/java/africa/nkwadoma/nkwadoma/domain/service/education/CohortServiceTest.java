@@ -6,6 +6,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanBreakdownOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.CohortException;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
@@ -307,8 +308,6 @@ class CohortServiceTest {
     void deleteCohortWithInvalidId(String cohortId){
         assertThrows(MeedlException.class, ()-> cohortService.deleteCohort(cohortId));
     }
-
-
     @Test
     void deleteCohort() {
         try {
@@ -337,6 +336,17 @@ class CohortServiceTest {
         when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(loanees);
         assertThrows(CohortException.class, () ->
                 cohortService.deleteCohort(mockId));
+        verify(cohortOutputPort, never()).deleteCohort(anyString());
+        assertEquals(0, program.getNumberOfCohort());
+        assertEquals(0, organizationIdentity.getNumberOfCohort());
+    }
+
+    @Test
+    void deleteCohort_withLoanees_throwsException() throws MeedlException {
+        List<Loanee> loanees = List.of(new Loanee());
+        when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(loanees);
+        assertThrows(CohortException.class, () ->
+            cohortService.deleteCohort(mockId));
         verify(cohortOutputPort, never()).deleteCohort(anyString());
     }
 

@@ -23,6 +23,7 @@ public class LoanMetricsService implements LoanMetricsUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
     private final LoanMetricsMapper loanMetricsMapper;
+    private final LoanRequestOutputPort loanRequestOutputPort;
 
     @Override
     public LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException {
@@ -52,6 +53,25 @@ public class LoanMetricsService implements LoanMetricsUseCase {
         log.info("Create loan metrics: {}", id);
         loanMetrics.setOrganizationId(id);
         return loanMetricsOutputPort.save(loanMetrics);
+    }
+
+    @Override
+    public void correctLoanRequestCount() throws MeedlException {
+        List<OrganizationIdentity> organizationIdentities =
+                organizationIdentityOutputPort.findAllOrganization();
+        log.info("Found {} organization identity", organizationIdentities.size());
+        for (OrganizationIdentity organizationIdentity : organizationIdentities) {
+            Optional<LoanMetrics> loanMetrics = loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId());
+            log.info("Loan metrics found: {}", loanMetrics);
+            if (loanMetrics.isPresent()) {
+                loanMetrics.get().setLoanRequestCount(
+                        loanRequestOutputPort.getCountOfAllVerifiedLoanRequestInOrganization(organizationIdentity.getId())
+                );
+                 log.info("Loan request count change: {}", loanMetrics.get().getLoanRequestCount());
+                 loanMetricsOutputPort.save(loanMetrics.get());
+                 log.info("Loan metrics saved successfully: {}", loanMetrics.get());
+            }
+        }
     }
 
 }

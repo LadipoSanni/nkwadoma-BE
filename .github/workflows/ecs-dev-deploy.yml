@@ -10,7 +10,7 @@ env:
   CLUSTER: learnspace-africa
   ECS: learnspace-backend-systest
   AWS_REGION: us-east-1
-  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/nkwadoma
+  REPO_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/meedl-prod-support
   
 
 jobs:
