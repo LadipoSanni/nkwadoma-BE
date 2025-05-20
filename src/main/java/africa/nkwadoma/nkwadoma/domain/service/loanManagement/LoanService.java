@@ -289,6 +289,7 @@ public class LoanService implements CreateLoanProductUseCase, ViewLoanProductUse
     }
 
     private void updateLoanReferralOnMetrics(LoanReferral foundLoanReferral) throws MeedlException {
+        log.info("org name ====  {}",foundLoanReferral.getLoanee().getReferredBy());
         Optional<OrganizationIdentity> organization =
                 organizationIdentityOutputPort.findOrganizationByName(foundLoanReferral.getLoanee().getReferredBy());
         if (organization.isEmpty()) {
