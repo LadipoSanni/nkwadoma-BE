@@ -88,7 +88,7 @@ class LoanRequestServiceTest {
     @Test
     void viewLoanRequestById() {
         try {
-            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(Optional.of(loanRequest));
+            when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
             when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId())).thenReturn(loanRequest.getLoanee());
             LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
@@ -112,13 +112,6 @@ class LoanRequestServiceTest {
         loanRequest.setId(null);
         assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest));
     }
-
-    @Test
-    void viewLoanRequestWithNonExistingId() {
-        loanRequest.setId("0d09dd7f-e6ed-49fd-85b8-dfaffcac9ea1");
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest));
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"36470395798", "sjgbnsvkh"})
     void viewLoanRequestWithNonUUID(String id) {

@@ -69,6 +69,9 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestVerification(identityVerification)) {
+            return AutomationTestData.createPremblyNinTestResponse(identityVerification.getDecryptedNin());
+        }
         return getNinDetails(identityVerification);
     }
 
@@ -134,15 +137,15 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     }
 
     private boolean isTestVerification(IdentityVerification identityVerification) {
-        return identityVerification.getTest() != null
-                && identityVerification.getTest().equals("Q-A_TEST")
-                || bvnStartWithTestValues(identityVerification);
+        return isIdentityNumbersStartingWithTestValues(identityVerification);
     }
 
-    private boolean bvnStartWithTestValues(IdentityVerification identityVerification) {
-        String result = identityVerification.getDecryptedBvn().substring(0, 2);
-        log.info("Result is : {}, and is this a test call : {}", result, result.equals("01"));
-        return result.equals("01");
+    private boolean isIdentityNumbersStartingWithTestValues(IdentityVerification identityVerification) {
+        String bvnResult = identityVerification.getDecryptedBvn().substring(0, 2);
+        String ninResult = identityVerification.getDecryptedNin().substring(0, 2);
+        log.info("Bvn Result is : {}, and is this a test call : {}", bvnResult, bvnResult.equals("01"));
+        log.info("Nin Result is : {}, and is this a test call : {}", ninResult, ninResult.equals("01"));
+        return bvnResult.equals("01") && ninResult.equals("01") ;
     }
 
     public PremblyBvnResponse getBvnDetails(IdentityVerification identityVerification) {
