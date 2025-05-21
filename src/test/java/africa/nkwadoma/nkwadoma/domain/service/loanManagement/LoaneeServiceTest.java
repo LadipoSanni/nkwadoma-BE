@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
@@ -22,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +92,8 @@ class LoaneeServiceTest {
     private LoanProductOutputPort loanProductOutputPort;
     @Mock
     private LoanOutputPort loanOutputPort;
+    @Mock
+    private MeedlNotificationOutputPort meedlNotificationOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -455,19 +459,36 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void indicateDeferredLoanee(){
-        String deferred = "";
+    void indicateDeferredLoanee() throws MeedlException {
+        String result = "";
         try{
-            userIdentity.setRole(IdentityRole.ORGANIZATION_ADMIN);
-            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-            loan.setLoanStatus(LoanStatus.DEFERRED);
-            when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.ofNullable(loan));
-            deferred = loaneeService.indicateDeferredLoanee(mockId,mockId);
-        }catch (MeedlException meedlException) {
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(true);
+        when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+        when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                .thenReturn(Collections.singletonList(userIdentity));
+         result = loaneeService.indicateDeferredLoanee(mockId, mockId);
+        }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
-        assertEquals(deferred,LoanStatus.DEFERRED.name());
+        verify(loanOutputPort).save(argThat(l -> l.getLoanStatus() == LoanStatus.DEFERRED));
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("Loanee has been Deferred", result);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLoaneeNotAssociatedWithOrganization() throws MeedlException {
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(false);
+        assertThrows(MeedlException.class,()-> loaneeService.indicateDeferredLoanee(mockId, mockId));
     }
 }
 

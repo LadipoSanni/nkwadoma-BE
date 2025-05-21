@@ -394,7 +394,17 @@ public class LoaneeService implements LoaneeUseCase {
         if (! cohortExistInOrganization) {
             throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
-        
+
+        Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
+
+        sendLoaneeNotification(loan, loanee, userIdentity);
+
+        sendPortfolioManagersNotification(loan, userIdentity);
+
+        return "Loanee has been Deferred";
+    }
+
+    private Optional<Loan> findLoaneeLoanAndDeferLoan(Loanee loanee) throws MeedlException {
         Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
         if (loan.isEmpty()){
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
@@ -402,28 +412,39 @@ public class LoaneeService implements LoaneeUseCase {
 
         loan.get().setLoanStatus(LoanStatus.DEFERRED);
         loanOutputPort.save(loan.get());
+        return loan;
+    }
 
+    private void sendLoaneeNotification(Optional<Loan> loan, Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         MeedlNotification meedlNotification = MeedlNotification.builder()
                 .contentId(loan.get().getId())
                 .user(loanee.getUserIdentity())
-                .senderFullName(userIdentity.getFirstName()+" "+userIdentity.getLastName())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
                 .senderMail(userIdentity.getEmail())
                 .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
                 .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
                 .title(LOAN_DEFERRAL.getMessage())
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
+    }
 
+    private void sendPortfolioManagersNotification(Optional<Loan> loan, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
 
-//        MeedlNotification
+        MeedlNotification portfolioManagerNotification =
+                MeedlNotification.builder()
+                        .contentId(loan.get().getId())
+                        .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
+                        .title(LOAN_DEFERRAL.getMessage())
+                        .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                        .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
+                        .senderMail(userIdentity.getEmail())
+                        .build();
         for (UserIdentity portfolioManager : portfolioManagers) {
-
+            portfolioManagerNotification.setUser(portfolioManager);
+            meedlNotificationOutputPort.save(portfolioManagerNotification);
         }
-
-
-        return "";
     }
 }
 
