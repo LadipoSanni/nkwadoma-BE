@@ -130,7 +130,6 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
 
     private boolean isTestVerification(IdentityVerification identityVerification) {
         return identityVerification.getTest() != null
-                && identityVerification.getTest().equals("Q-A_TEST")
                 || bvnStartWithTestValues(identityVerification);
     }
 
