@@ -69,6 +69,9 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         MeedlValidator.validateObjectInstance(identityVerification, IdentityMessages.IDENTITY_CANNOT_BE_NULL.getMessage());
         identityVerification.validate();
         identityVerification.validateImageUrl();
+        if (isTestVerification(identityVerification)) {
+            return AutomationTestData.createPremblyBvnTestResponse(identityVerification.getDecryptedBvn());
+        }
         return getNinDetails(identityVerification);
     }
 
