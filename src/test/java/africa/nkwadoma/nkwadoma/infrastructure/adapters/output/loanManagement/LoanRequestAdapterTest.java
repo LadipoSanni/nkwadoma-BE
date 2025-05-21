@@ -190,6 +190,7 @@ class LoanRequestAdapterTest {
             userIdentity.setIdentityVerified(true);
             log.info("before Saving user {} in test, with id {}, identity verified {}", userIdentity.getEmail(), userId, userIdentity.isIdentityVerified());
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
+            log.info("user identity verified status {}", savedUserIdentity.isIdentityVerified());
             userId = savedUserIdentity.getId();
             log.info("Saved user {} in test, with id {}, identity verified {}", savedUserIdentity.getEmail(), userId, savedUserIdentity.isIdentityVerified());
 
@@ -201,7 +202,9 @@ class LoanRequestAdapterTest {
             loaneeLoanBreakdowns = List.of(accommodationBreakdown, feedingBreakdown);
             loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
+            log.info("loanee verification status before adding to cohort {}",loanee.getUserIdentity().isIdentityVerified());
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            log.info("loanee verification status after adding to cohort {}",loanee.getUserIdentity().isIdentityVerified());
             log.info("Loanee {} added to cohort with id {}", loanee.getUserIdentity().getEmail(), loanee.getCohortId());
             assertNotNull(loanee);
             loaneeId = loanee.getId();
