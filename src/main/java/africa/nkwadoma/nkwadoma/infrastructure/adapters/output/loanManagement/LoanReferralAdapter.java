@@ -96,5 +96,21 @@ public class LoanReferralAdapter implements LoanReferralOutputPort {
                 loanReferralRepository.findByLoaneeEntityIdAndLoaneeEntityCohortId(id,cohortId);
         return loanReferralMapper.toLoanReferral(loanReferral);
     }
+
+    @Override
+    public List<LoanReferral> viewAll() {
+        List<LoanReferralEntity> loanReferrals =
+                loanReferralRepository.findAll();
+        log.info("All loan referral entities found {}", loanReferrals);
+        return loanReferrals.stream().map(loanReferralMapper::toLoanReferral).toList();
+    }
+
+    @Override
+    public LoanReferral findByEmail(String loaneeEmail) throws MeedlException {
+        LoanReferralEntity loanReferral = loanReferralRepository.findByLoaneeEntity_UserIdentity_Email(loaneeEmail)
+                .orElseThrow(()-> new MeedlException("Loan referral not found by loanee email: "+loaneeEmail));
+        log.info("Loan referral entity found {}",loanReferral);
+        return loanReferralMapper.toLoanReferral(loanReferral);
+    }
 }
 

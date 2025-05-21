@@ -75,13 +75,18 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     public PremblyNinResponse getNinDetails(IdentityVerification identityVerification) {
         PremblyNinResponse premblyNinResponse = getIdentityDetailsByNin(identityVerification);
         log.info("PremblyNinResponse: {}", premblyNinResponse);
-        premblyNinResponse.getVerification().updateValidIdentity();
+        if (premblyNinResponse.getVerification() != null){
+            log.info("Updating valid identity if verified or not...");
+            premblyNinResponse.getVerification().updateValidIdentity();
+        }else {
+            log.info("No verification info was returned in verify with nin {}", premblyNinResponse.getDetail());
+        }
         log.info("Response: {}", premblyNinResponse);
         return premblyNinResponse;
     }
 
     private PremblyNinResponse getIdentityDetailsByNin(IdentityVerification identityVerification) {
-        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(identityVerification);
+        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntityForNin(identityVerification);
         String url = premblyUrl.concat(PremblyParameter.NIN_FACE_URL.getValue());
         log.info(url);
         log.info("entity: {}", entity);
@@ -157,7 +162,7 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
     }
 
     private PremblyBvnResponse getIdentityDetailsByBvn(IdentityVerification verificationRequest) {
-        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntity(verificationRequest);
+        HttpEntity<MultiValueMap<String, String>> entity = createRequestEntityForBvn(verificationRequest);
         log.info("prembly url : {}", premblyUrl);
         String url = premblyUrl.concat(PremblyParameter.BVN_FACE.getValue());
         log.info("Complete prembly url : {}",url);
@@ -227,7 +232,17 @@ public class PremblyAdapter implements IdentityVerificationOutputPort {
         return responseEntity.getBody();
     }
 
-    private HttpEntity<MultiValueMap<String, String>> createRequestEntity(IdentityVerification verificationRequest) {
+    private HttpEntity<MultiValueMap<String, String>> createRequestEntityForNin(IdentityVerification verificationRequest) {
+        HttpHeaders headers = getHttpHeaders();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getDecryptedNin());
+        formData.add(PremblyParameter.IMAGE.getValue(), verificationRequest.getImageUrl());
+        log.debug("Prepared form data: {}", formData);
+        return new HttpEntity<>(formData, headers);
+
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> createRequestEntityForBvn(IdentityVerification verificationRequest) {
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add(PremblyParameter.NUMBER.getValue(), verificationRequest.getDecryptedBvn());

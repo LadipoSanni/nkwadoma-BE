@@ -200,6 +200,8 @@ public class CohortService implements CohortUseCase {
         decreaseNumberOfCohortInOrganization(program);
     }
 
+
+
     private void decreaseNumberOfCohortInOrganization(Program program) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - 1);

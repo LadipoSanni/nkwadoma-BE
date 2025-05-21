@@ -50,6 +50,9 @@ class NextOfKinServiceTest {
     @Test
     void saveAdditionalDetails() {
         try {
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
             when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
             when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             NextOfKin savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
@@ -71,6 +74,151 @@ class NextOfKinServiceTest {
     void saveNullNextOfKin() {
         assertThrows(MeedlException.class, ()-> nextOfKinService.saveAdditionalDetails(null));
     }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"    Ahmad", "Ahmad   "})
+//    void saveNextOfKinFirstNameWithTrailingOrLeadingSpaces(String firstName) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setFirstName(firstName);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(userIdentityOutputPort.save(any())).thenReturn(userIdentity);
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"    Doe", "Doe   "})
+//    void saveNextOfKinLastNameWithTrailingOrLeadingSpaces(String lastName) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setFirstName(lastName);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"    0785678901", "0785678901   "})
+//    void saveNextOfKinPhoneNumberWithTrailingOrLeadingSpaces(String phoneNumber) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setPhoneNumber(phoneNumber);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"    test@example.com", "test@example.com   "})
+//    void saveNextOfKinEmailWithTrailingOrLeadingSpaces(String email) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setEmail(email);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   Brother", "Brother   "})
+//    void saveNextOfKinContactAddressWithTrailingOrLeadingSpaces(String contactAddress) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setContactAddress(contactAddress);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   2, Spencer Street, Yaba, Lagos", "2, Spencer Street, Yaba, Lagos   "})
+//    void saveNextOfKinRelationshipWithTrailingOrLeadingSpaces(String nextOfKinRelationship) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.setNextOfKinRelationship(nextOfKinRelationship);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   alt276@example.com", "alt276@example.com   "})
+//    void saveAlternateEmailWithTrailingOrLeadingSpaces(String alternateEmail) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.getLoanee().getUserIdentity().setAlternateEmail(alternateEmail);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   0986564534", "0986564534   "})
+//    void saveAlternatePhoneNumberWithTrailingOrLeadingSpaces(String alternatePhoneNumber) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.getLoanee().getUserIdentity().setAlternatePhoneNumber(alternatePhoneNumber);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
+//
+//    @ParameterizedTest
+//    @ValueSource(strings = {"   10, Onigbagbo Street, Mushin, Lagos State", "10, Onigbagbo Street, Mushin, Lagos State   "})
+//    void saveAlternateContactAddressWithTrailingOrLeadingSpaces(String alternateContactAddress) {
+//        NextOfKin savedNextOfKin = null;
+//        try {
+//            nextOfKin.getLoanee().getUserIdentity().setAlternateContactAddress(alternateContactAddress);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);
+//        } catch (MeedlException e) {
+//            log.error("Failed to save next of kin", e);
+//        }
+//        assertNotNull(savedNextOfKin);
+//    }
 
     @Test
     void saveNullUserDetails() {

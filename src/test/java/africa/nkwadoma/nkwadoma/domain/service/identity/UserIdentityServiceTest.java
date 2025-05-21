@@ -167,10 +167,12 @@ class UserIdentityServiceTest {
     @Test
     @Order(2)
     void createPassword(){
+        String password = "Passkey90@";
         try {
-            favour.setPassword("Passkey90@");
+            favour.setPassword(password);
             favour.setEmail(favour.getEmail());
             assertNotNull(generatedToken);
+            when(tokenUtils.decryptAES(eq(password), any())).thenReturn(password);
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
             when(identityManagerOutPutPort.createPassword(any())).thenReturn(favour);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
@@ -204,8 +206,9 @@ class UserIdentityServiceTest {
 
     @Test
     void loginWithInvalidPassword(){
-        favour.setPassword("Invalid@456");
         try {
+            favour.setPassword("Invalid@456");
+            when(tokenUtils.decryptAES(eq(favour.getPassword()), any())).thenReturn("Invalid@456");
             doThrow(MeedlException.class).when(identityManagerOutPutPort).login(favour);
         } catch (MeedlException e) {
             log.error(e.getMessage());
@@ -386,14 +389,17 @@ class UserIdentityServiceTest {
     }
     @Test
     void resetPassword(){
+        String password = "Passkey90@";
         try {
             assertNotNull(generatedToken);
             when(tokenUtils.decodeJWTGetEmail(generatedToken)).thenReturn(favour.getEmail());
+            when(tokenUtils.decryptAES(eq(password), eq("Password provided is not valid. Contact admin.")))
+                    .thenReturn(password);
             doNothing().when(identityManagerOutPutPort).resetPassword(any());
             favour.setEnabled(Boolean.TRUE);
             favour.setEmailVerified(Boolean.TRUE);
             when(userIdentityOutputPort.findByEmail(favour.getEmail())).thenReturn(favour);
-            userIdentityService.resetPassword(generatedToken,"Passkey90@");
+            userIdentityService.resetPassword(generatedToken, password);
         }catch (MeedlException exception){
             log.info("{} {}",exception.getClass().getName(),exception.getMessage());
         }
@@ -405,12 +411,14 @@ class UserIdentityServiceTest {
     }
     @Test
     void resetPasswordForNoneExistingUser() {
+        String password = "Pasord*HFNure9";
         try {
+            when(tokenUtils.decryptAES(eq(password), any())).thenReturn("Pasord*HFNure9");
             doThrow(MeedlException.class).when(userIdentityOutputPort).findByEmail(any());
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
-        assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", "Pasord*HFNure9"));
+        assertThrows(MeedlException.class, () -> userIdentityService.resetPassword("invlidToken", password));
     }
 
     @ParameterizedTest
