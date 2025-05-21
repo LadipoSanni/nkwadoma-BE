@@ -367,5 +367,4 @@ class LoanServiceTest {
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
     }
-
 }

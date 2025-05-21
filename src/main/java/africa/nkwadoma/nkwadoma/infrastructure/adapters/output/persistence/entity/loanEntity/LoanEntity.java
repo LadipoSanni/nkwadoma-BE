@@ -21,4 +21,5 @@ public class LoanEntity {
     private String loanOfferId;
     private LocalDateTime startDate;
     private LocalDateTime lastUpdatedDate;
+    private LoanStatus loanStatus;
 }
