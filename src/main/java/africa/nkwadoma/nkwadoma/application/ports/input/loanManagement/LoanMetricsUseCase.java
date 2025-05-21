@@ -7,5 +7,7 @@ public interface LoanMetricsUseCase {
     LoanMetrics save(LoanMetrics loanMetrics) throws MeedlException;
 
     LoanMetrics createLoanMetrics(String id) throws MeedlException;
+
+    void correctLoanRequestCount() throws MeedlException;
 }
 

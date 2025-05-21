@@ -28,8 +28,8 @@ public class ProgramService implements AddProgramUseCase {
     private final ProgramOutputPort programOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
     private final OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
-    private final ProgramMapper programMapper;
     private final OrganizationIdentityOutputPort organizationIdentityOutputPort;
+    private final ProgramMapper programMapper;
 
     @Override
     public Program createProgram(Program program) throws MeedlException {

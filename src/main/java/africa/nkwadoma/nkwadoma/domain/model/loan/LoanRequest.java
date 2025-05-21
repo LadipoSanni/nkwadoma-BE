@@ -28,8 +28,6 @@ public class LoanRequest {
     private String email;
     private LoanDecision loanRequestDecision;
     private String declineReason;
-    private String cohortId;
-    private String loanReferralId;
     private BigDecimal loanAmountRequested;
     private BigDecimal loanAmountApproved;
     private LoanReferralStatus loanReferralStatus;
@@ -38,7 +36,6 @@ public class LoanRequest {
     private LocalDateTime createdDate;
     private BigDecimal initialDeposit;
     private BigDecimal tuitionAmount;
-    private String reasonForDecliningLoanRequest;
     private LoanProduct loanProduct;
     private LoanRequestStatus status;
     private Loanee loanee;

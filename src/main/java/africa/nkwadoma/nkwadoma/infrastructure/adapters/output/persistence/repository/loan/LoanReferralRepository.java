@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoanReferralEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.*;
@@ -31,4 +32,6 @@ public interface LoanReferralRepository extends JpaRepository<LoanReferralEntity
     List<LoanReferralEntity> findAllByLoaneeEntityUserIdentityId(String userId);
 
     LoanReferralEntity findByLoaneeEntityIdAndLoaneeEntityCohortId(String id, String cohortId);
+
+    Optional<LoanReferralEntity> findByLoaneeEntity_UserIdentity_Email(String loaneeEmail);
 }

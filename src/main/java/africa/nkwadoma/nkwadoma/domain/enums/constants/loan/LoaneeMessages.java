@@ -27,7 +27,9 @@ public enum LoaneeMessages {
     LOAN_OFFER_ACCEPTED_TEMPLATE("loan-offer-accepted"),
     LOAN_OFFER_DECLINED_TEMPLATE("loan-offer-declined"),
     LOAN_REQUEST_APPROVED("loan request approved"),
-    PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION("Please provide a valid loanee identification");
+    PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION("Please provide a valid loanee identification"),
+    LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT("Loanee with zero or negative amount request " +
+            "cannot be added to cohort"),;
 
     private final String message;
 

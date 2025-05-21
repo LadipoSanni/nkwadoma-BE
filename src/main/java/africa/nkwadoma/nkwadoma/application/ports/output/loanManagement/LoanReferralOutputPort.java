@@ -18,4 +18,8 @@ public interface LoanReferralOutputPort {
 
 
     LoanReferral findLoanReferralByLoaneeIdAndCohortId(String id, String cohortId) throws MeedlException;
+
+    List<LoanReferral> viewAll();
+
+    LoanReferral findByEmail(String loaneeEmail) throws MeedlException;
 }

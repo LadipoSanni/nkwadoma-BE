@@ -135,7 +135,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
-        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
+        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
 
         try {
@@ -180,13 +180,13 @@ public class LoaneeService implements LoaneeUseCase {
             organizationIdentity = getLoaneeOrganization(loanee);
         }
         checkIfLoaneeHasBeenReferredInTheSameCohort(loanee);
-
         return referLoanee(loanee, organizationIdentity);
     }
 
     private LoanReferral referLoanee(Loanee loanee, OrganizationIdentity organizationIdentity) throws MeedlException {
-        updateLoaneeReferralDetail(loanee);
         loanee.setReferredBy(organizationIdentity.getName());
+        updateLoaneeReferralDetail(loanee);
+        log.info("referred by {}", loanee.getReferredBy());
         LoanReferral loanReferral = loanReferralOutputPort.createLoanReferral(loanee);
         Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
         cohort.setNumberOfReferredLoanee(cohort.getNumberOfReferredLoanee() + 1);
@@ -196,6 +196,7 @@ public class LoaneeService implements LoaneeUseCase {
         List<LoaneeLoanBreakdown> loanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanee.getId());
         loanReferral.getLoanee().setLoanBreakdowns(loanBreakdowns);
+        log.info("loan referral org == {}", loanReferral.getLoanee().getReferredBy());
         return loanReferral;
     }
 
@@ -203,6 +204,7 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setLoaneeStatus(LoaneeStatus.REFERRED);
         loanee.setReferralDateTime(LocalDateTime.now());
         loaneeOutputPort.save(loanee);
+        log.info("saved loanee referred by {}", loanee.getReferredBy());
     }
 
     private Optional<LoanMetrics> updateLoanMetrics(OrganizationIdentity organizationIdentity) throws MeedlException {
@@ -279,7 +281,9 @@ public class LoaneeService implements LoaneeUseCase {
     private OrganizationIdentity getLoaneeOrganization(Loanee loanee) throws MeedlException {
         OrganizationEmployeeIdentity organizationEmployeeIdentity =
                 organizationEmployeeIdentityOutputPort.findByEmployeeId(loanee.getUserIdentity().getCreatedBy());
-        return organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(organizationEmployeeIdentity.getOrganization());
+        loanee.setReferredBy(organizationIdentity.getName());
+        return organizationIdentity;
     }
     private void checkIfLoaneeWithEmailExist(Loanee loanee) throws MeedlException {
         Loanee existingLoanee = loaneeOutputPort.findByLoaneeEmail(loanee.getUserIdentity().getEmail());
@@ -290,11 +294,15 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());
     }
 
-    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) {
+    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoaneeException {
         log.info("Calculating amount requested for loanee {}", loanee.getUserIdentity().getEmail());
         loanee.getLoaneeLoanDetail().
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
                         subtract(loanee.getLoaneeLoanDetail().getInitialDeposit()));
+        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(BigDecimal.ZERO)  <= 0){
+            log.info("Loanee amount request is zero or negative {}", loanee.getLoaneeLoanDetail().getAmountRequested());
+            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT.getMessage());
+        }
     }
 
     private static BigDecimal getTotalLoanBreakdown(Loanee loanee) throws MeedlException {

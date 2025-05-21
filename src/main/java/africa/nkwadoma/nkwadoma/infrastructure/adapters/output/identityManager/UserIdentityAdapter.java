@@ -40,8 +40,9 @@ public class UserIdentityAdapter implements UserIdentityOutputPort {
         log.info("User in adapter before being mapped to save: {}", userIdentity);
         UserEntity userEntity = userIdentityMapper.toUserEntity(userIdentity);
         userEntity = userEntityRepository.save(userEntity);
-        log.info("UserIdentity saved to database {}", userEntity);
-        return userIdentityMapper.toUserIdentity(userEntity);
+        userIdentity = userIdentityMapper.toUserIdentity(userEntity);
+        userIdentity.setIdentityVerified(userEntity.isIdentityVerified());
+        return userIdentity;
     }
 
     @Override
