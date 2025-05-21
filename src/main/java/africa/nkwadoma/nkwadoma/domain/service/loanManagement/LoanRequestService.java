@@ -65,10 +65,6 @@ public class LoanRequestService implements LoanRequestUseCase {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanRequest.getId(), LoanMessages.LOAN_REQUEST_ID_CANNOT_BE_EMPTY.getMessage());
         loanRequest = loanRequestOutputPort.findById(loanRequest.getId());
-//        if (foundLoanRequest.isEmpty()) {
-//            throw new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage());
-//        }
-//        loanRequest = foundLoanRequest.get();
         log.info("Found loan request: {}", loanRequest);
         List<LoaneeLoanBreakdown> loaneeLoanBreakdowns =
                 loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId());
