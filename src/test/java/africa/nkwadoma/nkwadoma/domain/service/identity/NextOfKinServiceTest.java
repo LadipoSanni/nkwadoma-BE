@@ -50,9 +50,9 @@ class NextOfKinServiceTest {
     @Test
     void saveAdditionalDetails() {
         try {
-            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
-            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
-            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
+//            when(loaneeOutputPort.findByUserId(nextOfKin.getLoanee().getUserIdentity().getId())).thenReturn(Optional.of(loanee));
+//            when(nextOfKinIdentityOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
+//            when(userIdentityMapper.updateUser(any(), any())).thenReturn(userIdentity);
             when(userIdentityOutputPort.findById(userIdentity.getId())).thenReturn(userIdentity);
             when(nextOfKinOutputPort.save(nextOfKin)).thenReturn(nextOfKin);
             NextOfKin savedNextOfKin = nextOfKinService.saveAdditionalDetails(nextOfKin);

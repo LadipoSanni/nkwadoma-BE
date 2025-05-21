@@ -1,9 +1,8 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.email;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.EmailResendUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.email.SendLoaneeEmailUsecase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loan.ViewLoanReferralsUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.ViewLoanReferralsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -21,7 +20,7 @@ import java.util.List;
 public class EmailResendAdapter implements EmailResendUseCase {
     private final LoanReferralOutputPort loanReferralOutputPort;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
-    private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
+//    private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
 
 //    @Scheduled(fixedRate = 1800000)
 //    @PostConstruct
@@ -54,6 +53,6 @@ public class EmailResendAdapter implements EmailResendUseCase {
         log.info("Loan referral email resend finished.");
     }
     private void refer(Loanee loanee, String loanReferralId) throws MeedlException {
-        sendLoaneeEmailUsecase.referLoaneeEmail(loanee,loanReferralId);
+//        sendLoaneeEmailUsecase.referLoaneeEmail(loanee,loanReferralId);
     }
 }

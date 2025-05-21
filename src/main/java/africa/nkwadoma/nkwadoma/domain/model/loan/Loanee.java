@@ -46,7 +46,7 @@ public class Loanee {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateObjectInstance(loaneeLoanDetail, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateObjectInstance(loaneeLoanDetail);
+        MeedlValidator.validateObjectInstance(loaneeLoanDetail, "Please provide loanee loan details.");
         if (loaneeLoanDetail.getInitialDeposit() == null) {
             loaneeLoanDetail.setInitialDeposit(BigDecimal.valueOf(0));
         }

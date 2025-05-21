@@ -2,13 +2,12 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.IdentityVerificationUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.*;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanMetricsOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityVerificationFailureRecordOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanMetricsOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.ServiceProvider;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.IdentityMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
@@ -263,51 +262,51 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         return premblyBvnResponse;
     }
 
-    private String processAnotherVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
-        PremblyNinResponse premblyNinResponse;
-        try{
-//            PremblyResponse premblyResponse =
-//                    identityVerificationOutputPort.verifyBvn(identityVerification);
-//                    PremblyNinResponse premblyNinResponse =
+//    private String processAnotherVerification(IdentityVerification identityVerification, LoanReferral loanReferral) throws MeedlException {
+//        PremblyNinResponse premblyNinResponse;
+//        try{
+////            PremblyResponse premblyResponse =
+////                    identityVerificationOutputPort.verifyBvn(identityVerification);
+////                    PremblyNinResponse premblyNinResponse =
+////                            identityVerificationOutputPort.verifyNinLikeness(identityVerification);
+//                     premblyNinResponse =
 //                            identityVerificationOutputPort.verifyNinLikeness(identityVerification);
-                     premblyNinResponse =
-                            identityVerificationOutputPort.verifyNinLikeness(identityVerification);
-            log.info("prembly bvn response: {}", premblyNinResponse);
+//            log.info("prembly bvn response: {}", premblyNinResponse);
+//
+//            log.info("Identity verification process. {}", (premblyNinResponse.getVerification().getStatus().equals("VERIFIED") && premblyNinResponse.getNinData() != null &&
+//                    premblyNinResponse.getFaceData() != null && premblyNinResponse.getFaceData().isFaceVerified()));
+//
+//            if (premblyNinResponse.getVerification().getStatus().equals("VERIFIED") && premblyNinResponse.getNinData() != null &&
+//            premblyNinResponse.getFaceData() != null && premblyNinResponse.getFaceData().isFaceVerified()) {
+//                 handleSuccessfulVerification(identityVerification,loanReferral,premblyNinResponse);
+//            }else {
+//                 handleFailedVerification(loanReferral,premblyNinResponse);
+//            }
+//        }catch (MeedlException exception){
+//            log.error("Error verifying user's identity... {}", exception.getMessage());
+//            createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
+//            throw new MeedlException(exception.getMessage());
+//        }
+//        return premblyNinResponse.getVerificationResponse();
+//    }
+//    private String handleAnotherVerification(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyBvnResponse) throws MeedlException {
+//        log.info("prembly bvn response: {}", premblyBvnResponse);
+//
+//        log.info("Identity verification process. {}", (premblyBvnResponse.getVerification().getStatus().equals("VERIFIED") && premblyBvnResponse.getData() != null &&
+//                premblyBvnResponse.getData().getFaceData() != null && premblyBvnResponse.getData().getFaceData().isFaceVerified()));
+//
+//        if (premblyBvnResponse.getVerification().getStatus().equals("VERIFIED") && premblyBvnResponse.getData() != null &&
+//                premblyBvnResponse.getData().getFaceData() != null && premblyBvnResponse.getData().getFaceData().isFaceVerified()) {
+//            return handleSuccessfulVerification(identityVerification, loanReferral, premblyBvnResponse);
+//        }else {
+//            return handleFailedVerification(loanReferral, premblyBvnResponse);
+//        }
+//    }
 
-            log.info("Identity verification process. {}", (premblyNinResponse.getVerification().getStatus().equals("VERIFIED") && premblyNinResponse.getNinData() != null &&
-                    premblyNinResponse.getFaceData() != null && premblyNinResponse.getFaceData().isFaceVerified()));
-
-            if (premblyNinResponse.getVerification().getStatus().equals("VERIFIED") && premblyNinResponse.getNinData() != null &&
-            premblyNinResponse.getFaceData() != null && premblyNinResponse.getFaceData().isFaceVerified()) {
-                 handleSuccessfulVerification(identityVerification,loanReferral,premblyNinResponse);
-            }else {
-                 handleFailedVerification(loanReferral,premblyNinResponse);
-            }
-        }catch (MeedlException exception){
-            log.error("Error verifying user's identity... {}", exception.getMessage());
-            createVerificationFailure(loanReferral, exception.getMessage(), ServiceProvider.PREMBLY);
-            throw new MeedlException(exception.getMessage());
-        }
-        return premblyNinResponse.getVerificationResponse();
-    }
-    private String handleAnotherVerification(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyBvnResponse premblyBvnResponse) throws MeedlException {
-        log.info("prembly bvn response: {}", premblyBvnResponse);
-
-        log.info("Identity verification process. {}", (premblyBvnResponse.getVerification().getStatus().equals("VERIFIED") && premblyBvnResponse.getData() != null &&
-                premblyBvnResponse.getData().getFaceData() != null && premblyBvnResponse.getData().getFaceData().isFaceVerified()));
-
-        if (premblyBvnResponse.getVerification().getStatus().equals("VERIFIED") && premblyBvnResponse.getData() != null &&
-                premblyBvnResponse.getData().getFaceData() != null && premblyBvnResponse.getData().getFaceData().isFaceVerified()) {
-            return handleSuccessfulVerification(identityVerification, loanReferral, premblyBvnResponse);
-        }else {
-            return handleFailedVerification(loanReferral, premblyBvnResponse);
-        }
-    }
-
-    private boolean isIdentityVerified(PremblyResponse premblyResponse) {
-        return premblyResponse.getVerification() != null &&
-                "VERIFIED".equals(premblyResponse.getVerification().getStatus());
-    }
+//    private boolean isIdentityVerified(PremblyResponse premblyResponse) {
+//        return premblyResponse.getVerification() != null &&
+//                "VERIFIED".equals(premblyResponse.getVerification().getStatus());
+//    }
 
     private void handleSuccessfulVerification(IdentityVerification identityVerification, LoanReferral loanReferral, PremblyNinResponse premblyResponse) throws MeedlException {
         log.info("Identity verified successfully. {}", premblyResponse);

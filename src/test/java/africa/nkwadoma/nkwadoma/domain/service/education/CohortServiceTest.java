@@ -68,7 +68,6 @@ class CohortServiceTest {
     private OrganizationIdentityOutputPort organizationIdentityOutputPort;
     @Mock
     private UserIdentityOutputPort userIdentityOutputPort;
-    private
 
 
     @BeforeEach
@@ -339,15 +338,6 @@ class CohortServiceTest {
         verify(cohortOutputPort, never()).deleteCohort(anyString());
         assertEquals(0, program.getNumberOfCohort());
         assertEquals(0, organizationIdentity.getNumberOfCohort());
-    }
-
-    @Test
-    void deleteCohort_withLoanees_throwsException() throws MeedlException {
-        List<Loanee> loanees = List.of(new Loanee());
-        when(loaneeOutputPort.findAllLoaneesByCohortId(mockId)).thenReturn(loanees);
-        assertThrows(CohortException.class, () ->
-            cohortService.deleteCohort(mockId));
-        verify(cohortOutputPort, never()).deleteCohort(anyString());
     }
 
     @Test

@@ -200,27 +200,12 @@ public class CohortService implements CohortUseCase {
         decreaseNumberOfCohortInOrganization(program);
     }
 
-    private void decreaseNumberOfCohortInOrganization(Program program) throws MeedlException {
-        OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
-        organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - 1);
-        organizationIdentityOutputPort.save(organizationIdentity);
-        Cohort cohort = cohortOutputPort.findCohort(id);
-        cohortOutputPort.deleteCohort(cohort.getId());
-        Program program = decreaseNumberOfCohortInProgram(cohort);
-        decreaseNumberOfCohortInOrganization(program);
-    }
+
 
     private void decreaseNumberOfCohortInOrganization(Program program) throws MeedlException {
         OrganizationIdentity organizationIdentity = organizationIdentityOutputPort.findById(program.getOrganizationId());
         organizationIdentity.setNumberOfCohort(organizationIdentity.getNumberOfCohort() - 1);
         organizationIdentityOutputPort.save(organizationIdentity);
-    }
-
-    private Program decreaseNumberOfCohortInProgram(Cohort cohort) throws MeedlException {
-        Program program = programOutputPort.findProgramById(cohort.getProgramId());
-        program.setNumberOfCohort(program.getNumberOfCohort() - 1);
-        programOutputPort.saveProgram(program);
-        return program;
     }
 
     private Program decreaseNumberOfCohortInProgram(Cohort cohort) throws MeedlException {
