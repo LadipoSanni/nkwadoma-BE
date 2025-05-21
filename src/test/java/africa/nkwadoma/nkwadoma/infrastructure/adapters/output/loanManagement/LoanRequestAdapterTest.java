@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -173,8 +174,7 @@ class LoanRequestAdapterTest {
             log.info("Cohort with name {} saved in test. For program {}",cohort.getName(), cohort.getProgramId());
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
 
-            UserIdentity userIdentity = TestData.createTestUserIdentity("loxeha1691@fundapk.com");
-            userIdentity.setIdentityVerified(true);
+
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
                     initialDeposit(BigDecimal.valueOf(1000000.00)).build();
             LoaneeLoanBreakdown accommodationBreakdown = LoaneeLoanBreakdown.builder().
@@ -186,14 +186,12 @@ class LoanRequestAdapterTest {
                     itemAmount(feeding.getItemAmount()).
                     itemName(feeding.getItemName()).build();
 
-            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
-            if (foundUser.isPresent()) {
-                log.info("Deleting user {} found in test before saving", foundUser.get().getEmail());
-                identityManagerOutputPort.deleteUser(foundUser.get());
-            }
+            UserIdentity userIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail(5));
+            userIdentity.setIdentityVerified(true);
+            log.info("before Saving user {} in test, with id {}, identity verified {}", userIdentity.getEmail(), userId, userIdentity.isIdentityVerified());
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
             userId = savedUserIdentity.getId();
-            log.info("Saved user {} in test, with id {}", savedUserIdentity.getEmail(), userId);
+            log.info("Saved user {} in test, with id {}, identity verified {}", savedUserIdentity.getEmail(), userId, savedUserIdentity.isIdentityVerified());
 
             loanee = new Loanee();
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -287,15 +285,18 @@ class LoanRequestAdapterTest {
     void viewAllLoanRequests() {
         try {
             loanRequest.setId(loanReferralId);
+
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
+            log.info("Loan request saved in test. {}", savedLoanRequest);
         } catch (MeedlException e) {
             log.error("Error saving loan request: ", e);
         }
         Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequests = loanRequestOutputPort.viewAll(0, 10);
+            log.info("Total loan request present in test. {}", loanRequests);
         } catch (MeedlException e) {
             log.error("Error viewing all loan requests ", e);
         }
@@ -328,6 +329,7 @@ class LoanRequestAdapterTest {
     void viewAllLoanRequestsByOrganizationId() {
         try {
             loanRequest.setId(loanReferralId);
+            loanRequest.setOrganizationId(organizationId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
