@@ -11,10 +11,14 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -27,6 +31,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
@@ -44,6 +49,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_DEFERRAL;
 
 @Slf4j
 @AllArgsConstructor
@@ -65,6 +72,8 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
     private final LoanOutputPort loanOutputPort;
+    private final MeedlNotificationOutputPort meedlNotificationOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -402,6 +411,75 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
 
+    }
+
+    @Override
+    public String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        UserIdentity userIdentity = identityOutputPort.findById(actorId);
+        Optional<OrganizationEmployeeIdentity> organizationEmployeeIdentity =
+                organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
+
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+
+        boolean cohortExistInOrganization =
+                loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
+        if (! cohortExistInOrganization) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+        }
+
+        Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
+
+        sendLoaneeNotification(loan, loanee, userIdentity);
+
+        sendPortfolioManagersNotification(loan, userIdentity);
+
+        return "Loanee has been Deferred";
+    }
+
+    private Optional<Loan> findLoaneeLoanAndDeferLoan(Loanee loanee) throws MeedlException {
+        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
+        if (loan.isEmpty()){
+            throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
+        }
+
+        loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        loanOutputPort.save(loan.get());
+        return loan;
+    }
+
+    private void sendLoaneeNotification(Optional<Loan> loan, Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(loan.get().getId())
+                .user(loanee.getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
+                .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
+                .title(LOAN_DEFERRAL.getMessage())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
+    }
+
+    private void sendPortfolioManagersNotification(Optional<Loan> loan, UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> portfolioManagers =
+                userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        MeedlNotification portfolioManagerNotification =
+                MeedlNotification.builder()
+                        .contentId(loan.get().getId())
+                        .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
+                        .title(LOAN_DEFERRAL.getMessage())
+                        .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                        .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
+                        .senderMail(userIdentity.getEmail())
+                        .build();
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            portfolioManagerNotification.setUser(portfolioManager);
+            meedlNotificationOutputPort.save(portfolioManagerNotification);
+        }
     }
 }
 

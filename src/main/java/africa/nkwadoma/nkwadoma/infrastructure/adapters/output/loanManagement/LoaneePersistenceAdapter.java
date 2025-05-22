@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
@@ -124,6 +125,13 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
 
+    }
+
+    @Override
+    public boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        return loaneeRepository.checkIfLoaneeCohortExistInOrganization(loaneeId,organizationId);
     }
 
 

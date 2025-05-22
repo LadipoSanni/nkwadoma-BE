@@ -26,5 +26,7 @@ public interface LoaneeUseCase {
 
     Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException;
 
+    String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException;
+
     void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException;
 }

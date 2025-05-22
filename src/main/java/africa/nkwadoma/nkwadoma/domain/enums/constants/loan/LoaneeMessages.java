@@ -29,7 +29,8 @@ public enum LoaneeMessages {
     LOAN_REQUEST_APPROVED("loan request approved"),
     PLEASE_PROVIDE_A_VALID_LOANEE_IDENTIFICATION("Please provide a valid loanee identification"),
     LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT("Loanee with zero or negative amount request " +
-            "cannot be added to cohort"),;
+            "cannot be added to cohort"),
+    LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION("Loanee does not associated with a cohort that belong to your organization ");
 
     private final String message;
 

@@ -61,4 +61,16 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                         or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         """)
     Page<LoaneeProjection> findAllByLoanProductIdAndNameFragment(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
+
+
+    @Query("""
+            SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END
+            FROM LoaneeEntity l 
+            JOIN CohortEntity c ON l.cohortId = c.id 
+            JOIN ProgramEntity p ON c.programId = p.id 
+            WHERE l.id = :loaneeId AND p.organizationIdentity.id = :organizationId
+                        """)
+    boolean checkIfLoaneeCohortExistInOrganization(@Param("loaneeId") String loaneeId,
+                                                   @Param("organizationId") String organizationId);
+
 }
