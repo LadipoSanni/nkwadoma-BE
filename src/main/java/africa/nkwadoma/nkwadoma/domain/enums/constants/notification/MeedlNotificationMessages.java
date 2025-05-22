@@ -12,8 +12,12 @@ public enum MeedlNotificationMessages {
     LOAN_REQUEST_DECLINED_CONTENT("Your loan request was declined"),
     LOAN_REQUEST("Loan Request"),
     NOTIFICATION_LIST_CANNOT_BE_EMPTY("Please select at least one notification to proceed."),
-    LOAN_DEFERRAL_LOANEE(""),
-    LOAN_DEFERRAL("");
+    LOAN_DEFERRAL_LOANEE("Your loan has been deferred "),
+    LOAN_DEFERRAL("Loan Deferral"),
+    DROP_OUT_LOANEE("We have received confirmation that you are no longer participating"),
+    DROP_OUT("Dropped Out"),
+    DROP_OUT_PORTFOLIO_MANAGER("Loanee has dropped out"),
+    LOAN_DEFERRAL_PORTFOLIO_MANAGER("Loanee loan has been deffered");
 
     private final String message;
 
