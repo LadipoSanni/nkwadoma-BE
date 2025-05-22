@@ -364,7 +364,8 @@ class LoaneeServiceTest {
     void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(15));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-
+        log.info("-------> Skip loanee -------> {}", firstLoanee.getUserIdentity().getId());
+        when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
 
         assertNotNull(result);

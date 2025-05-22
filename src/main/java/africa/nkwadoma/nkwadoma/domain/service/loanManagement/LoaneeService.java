@@ -127,6 +127,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        log.info("----------> User identity ---------> {} userId {}", userIdentity, userId);
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             Optional<Loanee> foundLoanee = loaneeOutputPort
                     .findByUserId(userId);
