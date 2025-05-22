@@ -122,9 +122,17 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+    public Loanee viewLoaneeDetails(String id, String userId) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            Optional<Loanee> foundLoanee = loaneeOutputPort
+                    .findByUserId(userId);
+            if (foundLoanee.isPresent() && !foundLoanee.get().getId().equals(loanee.getId())) {
+                throw new MeedlException("Access denied: You can only view your own loan details.");
+            }
+        }
         log.info("loanee found successfully. Loanee with id {}", id);
         return updateLoaneeCreditScore(loanee);
     }

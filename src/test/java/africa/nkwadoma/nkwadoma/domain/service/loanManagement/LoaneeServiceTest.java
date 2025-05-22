@@ -316,13 +316,13 @@ class LoaneeServiceTest {
 
     @Test
     void cannotFindLoaneeWithNullLoaneeId(){
-        assertThrows(MeedlException.class,()->loaneeService.viewLoaneeDetails(null));
+        assertThrows(MeedlException.class,()->loaneeService.viewLoaneeDetails(null, userIdentity.getId()));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"7837783-jjduydsbghew87ew-ekyuhjuhdsj"})
     void cannotFindLoaneeWithInvalidUuid(String id){
-        assertThrows(MeedlException.class,() -> loaneeService.viewLoaneeDetails(id));
+        assertThrows(MeedlException.class,() -> loaneeService.viewLoaneeDetails(id, userIdentity.getId()));
     }
 
     @Test
@@ -335,7 +335,7 @@ class LoaneeServiceTest {
             when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
             when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
             when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn(anyString());
-            loanee = loaneeService.viewLoaneeDetails(mockId);
+            loanee = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
             verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
         } catch (MeedlException exception) {
             log.error("Error occured",  exception);
@@ -353,7 +353,7 @@ class LoaneeServiceTest {
         when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
         when(tokenUtils.decryptAES(anyString(), any())).thenReturn(anyString());
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
 
         assertNotNull(result);
         assertEquals(firstLoanee.getId(), result.getId());
@@ -365,7 +365,7 @@ class LoaneeServiceTest {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(15));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
 
         assertNotNull(result);
         assertEquals(firstLoanee.getId(), result.getId());
@@ -376,7 +376,7 @@ class LoaneeServiceTest {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(10));
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId);
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
 
         assertNotNull(result);
         assertEquals(firstLoanee.getCreditScoreUpdatedAt(), result.getCreditScoreUpdatedAt());
@@ -490,6 +490,8 @@ class LoaneeServiceTest {
                 .thenReturn(false);
         assertThrows(MeedlException.class,()-> loaneeService.indicateDeferredLoanee(mockId, mockId));
     }
+
+
 }
 
 

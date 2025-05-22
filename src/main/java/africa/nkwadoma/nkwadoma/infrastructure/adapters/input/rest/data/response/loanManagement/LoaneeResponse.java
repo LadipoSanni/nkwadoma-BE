@@ -4,7 +4,9 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.identity.UserIdentityResponse;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
@@ -18,4 +20,17 @@ public class LoaneeResponse {
     private UserIdentityResponse userIdentity;
     private LoaneeLoanDetailResponse loaneeLoanDetail;
     private LoaneeStatus loaneeStatus;
+    private String highestLevelOfEducation;
+    private String nameOfPreviousInstitution;
+    private String programOfStudy;
+    private String institutionName;
+    private String programName;
+    private String cohortName;
+    private String cohortStartDate;
+    private String fitnessToWorkRating;
+    private BigDecimal loanAmount;
+    private Double interestRate;
+    private String paymentMoratoriumPeriod;
+    private String termsAndConditions;
+    private int tenor;
 }

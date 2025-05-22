@@ -57,8 +57,9 @@ public class LoaneeController {
 
     @GetMapping("loanees/{loaneeId}")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
-    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId) throws MeedlException {
-        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId);
+    public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId,
+                                                            @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
+        Loanee loanee = loaneeUseCase.viewLoaneeDetails(loaneeId, meedlUser.getClaimAsString("sub"));
         LoaneeResponse loaneeResponse =
                 loaneeRestMapper.toLoaneeResponse(loanee);
         log.info("Loanee response: {}", loaneeResponse);

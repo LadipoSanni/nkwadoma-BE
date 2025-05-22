@@ -90,11 +90,11 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
-            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId())).thenReturn(loanRequest.getLoanee());
+            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), id)).thenReturn(loanRequest.getLoanee());
             LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
 
             verify(loanRequestOutputPort, times(1)).findById(loanRequest.getId());
-            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId());
+            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId(), id);
             assertNotNull(retrievedLoanRequest);
             assertNotNull(retrievedLoanRequest.getLoaneeLoanBreakdowns());
         } catch (MeedlException e) {
