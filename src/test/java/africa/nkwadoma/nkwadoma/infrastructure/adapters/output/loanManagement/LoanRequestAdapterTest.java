@@ -378,19 +378,19 @@ class LoanRequestAdapterTest {
         assertNotNull(savedLoanRequest.getId());
         loanRequestId = savedLoanRequest.getId();
         try {
-            Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
+            LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
 
-            assertFalse(foundLoanRequest.isEmpty());
-            assertNotNull(foundLoanRequest.get().getId());
-            assertNotNull(foundLoanRequest.get().getNextOfKin());
-            assertEquals(foundLoanRequest.get().getReferredBy(), amazingGrace.getName());
-            assertEquals(foundLoanRequest.get().getProgramName(), dataAnalytics.getName());
-            assertEquals(foundLoanRequest.get().getCohortName(), cohort.getName());
-            assertEquals(foundLoanRequest.get().getCohortStartDate(), cohort.getStartDate());
-            assertNotNull(foundLoanRequest.get().getLoanAmountRequested());
-            assertNotNull(foundLoanRequest.get().getInitialDeposit());
-            assertEquals("John", foundLoanRequest.get().getFirstName());
-            assertEquals("Doe", foundLoanRequest.get().getLastName());
+            assertNotNull(foundLoanRequest);
+            assertNotNull(foundLoanRequest.getId());
+            assertNotNull(foundLoanRequest.getNextOfKin());
+            assertEquals(foundLoanRequest.getReferredBy(), amazingGrace.getName());
+            assertEquals(foundLoanRequest.getProgramName(), dataAnalytics.getName());
+            assertEquals(foundLoanRequest.getCohortName(), cohort.getName());
+            assertEquals(foundLoanRequest.getCohortStartDate(), cohort.getStartDate());
+            assertNotNull(foundLoanRequest.getLoanAmountRequested());
+            assertNotNull(foundLoanRequest.getInitialDeposit());
+            assertEquals("John", foundLoanRequest.getFirstName());
+            assertEquals("Doe", foundLoanRequest.getLastName());
 
             UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
 
@@ -401,13 +401,13 @@ class LoanRequestAdapterTest {
 //            assertEquals("Brother", userIdentity.getNextOfKin().getNextOfKinRelationship());
 //            assertEquals("2, Spencer Street, Yaba, Lagos", userIdentity.getNextOfKin().getContactAddress())
 
-            assertEquals(joel.getGender(), foundLoanRequest.get().getUserIdentity().getGender());
-            assertEquals(joel.getMaritalStatus(), foundLoanRequest.get().getUserIdentity().getMaritalStatus());
-            assertEquals(joel.getResidentialAddress(), foundLoanRequest.get().getUserIdentity().getResidentialAddress());
-            assertEquals(joel.getNationality(), foundLoanRequest.get().getUserIdentity().getNationality());
-            assertEquals(joel.getDateOfBirth(), foundLoanRequest.get().getUserIdentity().getDateOfBirth());
-            assertEquals(joel.getStateOfOrigin(), foundLoanRequest.get().getUserIdentity().getStateOfOrigin());
-            assertEquals(joel.getStateOfResidence(), foundLoanRequest.get().getUserIdentity().getStateOfResidence());
+            assertEquals(joel.getGender(), foundLoanRequest.getUserIdentity().getGender());
+            assertEquals(joel.getMaritalStatus(), foundLoanRequest.getUserIdentity().getMaritalStatus());
+            assertEquals(joel.getResidentialAddress(), foundLoanRequest.getUserIdentity().getResidentialAddress());
+            assertEquals(joel.getNationality(), foundLoanRequest.getUserIdentity().getNationality());
+            assertEquals(joel.getDateOfBirth(), foundLoanRequest.getUserIdentity().getDateOfBirth());
+            assertEquals(joel.getStateOfOrigin(), foundLoanRequest.getUserIdentity().getStateOfOrigin());
+            assertEquals(joel.getStateOfResidence(), foundLoanRequest.getUserIdentity().getStateOfResidence());
         } catch (MeedlException e) {
             log.error("", e);
         }

@@ -193,7 +193,7 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
 
                     log.info("verification done successfully. {}", verificationResponse);
                     log.info("about to increase loan request count  {}", loanReferral);
-                    LoanRequest loanRequest = loanRequestOutputPort.findLoanRequestByLoaneeId(loanReferral.getLoanee().getId());
+                    LoanRequest loanRequest = loanRequestOutputPort.findById(loanReferral.getId());
                     log.info("found loan request {}", loanRequest);
                     updateLoanMetricsLoanRequestCount(loanRequest);
                     log.info("done with loan request count {}", loanRequest);

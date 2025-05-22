@@ -9,7 +9,7 @@ import java.util.*;
 public interface LoanRequestOutputPort {
     LoanRequest save(LoanRequest loanRequest) throws MeedlException;
 
-    Optional<LoanRequest> findById(String loanRequestId) throws MeedlException;
+    LoanRequest findById(String loanRequestId) throws MeedlException;
 
     Optional<LoanRequest> findLoanRequestById(String loanRequestId) throws MeedlException;
     void deleteLoanRequestById(String id) throws MeedlException;

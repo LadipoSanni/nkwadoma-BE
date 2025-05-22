@@ -11,7 +11,9 @@ public enum MeedlNotificationMessages {
     LOAN_OFFER_CONTENT("We are pleased to inform you that your loan application has been approved!"),
     LOAN_REQUEST_DECLINED_CONTENT("Your loan request was declined"),
     LOAN_REQUEST("Loan Request"),
-    NOTIFICATION_LIST_CANNOT_BE_EMPTY("Please select at least one notification to proceed.");
+    NOTIFICATION_LIST_CANNOT_BE_EMPTY("Please select at least one notification to proceed."),
+    LOAN_DEFERRAL_LOANEE(""),
+    LOAN_DEFERRAL("");
 
     private final String message;
 

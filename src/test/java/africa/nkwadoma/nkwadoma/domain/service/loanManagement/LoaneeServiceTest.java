@@ -11,8 +11,10 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -21,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +90,10 @@ class LoaneeServiceTest {
     private LoanMetricsOutputPort loanMetricsOutputPort;
     @Mock
     private LoanProductOutputPort loanProductOutputPort;
+    @Mock
+    private LoanOutputPort loanOutputPort;
+    @Mock
+    private MeedlNotificationOutputPort meedlNotificationOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -94,18 +101,18 @@ class LoaneeServiceTest {
     private Program atlasProgram;
     private Loanee firstLoanee;
     private final String mockId = "5bc2ef97-1035-4e42-bc8b-22a90b809f7c";
-    private UserIdentity loaneeUserIdentity;
+    private UserIdentity userIdentity;
     private LoaneeLoanDetail loaneeLoanDetails;
     private LoaneeLoanBreakdown loanBreakdown;
     private LoanReferral loanReferral;
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private LoanProduct loanProduct;
-
+    private Loan loan;
 
     @BeforeEach
     void setUpLoanee() {
-        loaneeUserIdentity = UserIdentity.builder()
+        userIdentity = UserIdentity.builder()
                 .email("qudus55@gmail.com")
                 .firstName("qudus")
                 .lastName("lekan")
@@ -116,7 +123,7 @@ class LoaneeServiceTest {
 
         firstLoanee = new Loanee();
         firstLoanee.setId(mockId);
-        firstLoanee.setUserIdentity(loaneeUserIdentity);
+        firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setCohortId(mockId);
         firstLoanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
 
@@ -155,7 +162,7 @@ class LoaneeServiceTest {
 
         organizationEmployeeIdentity = new OrganizationEmployeeIdentity();
         organizationEmployeeIdentity.setId(mockId);
-        organizationEmployeeIdentity.setMeedlUser(loaneeUserIdentity);
+        organizationEmployeeIdentity.setMeedlUser(userIdentity);
         organizationEmployeeIdentity.setOrganization(mockId);
 
         organizationIdentity = new OrganizationIdentity();
@@ -167,6 +174,7 @@ class LoaneeServiceTest {
         atlasProgram = TestData.createProgramTestData("AtlasProgram");
 
         loanProduct = TestData.buildTestLoanProduct();
+        loan = TestData.createTestLoan(firstLoanee);
 
     }
 
@@ -178,8 +186,8 @@ class LoaneeServiceTest {
         when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
         when(loaneeLoanDetailsOutputPort.save(any())).thenReturn(loaneeLoanDetails);
         when(identityManagerOutputPort.getUserByEmail(anyString())).thenReturn(Optional.empty());
-        when(identityManagerOutputPort.createUser(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
-        when(userIdentityOutputPort.save(loaneeUserIdentity)).thenReturn(loaneeUserIdentity);
+        when(identityManagerOutputPort.createUser(userIdentity)).thenReturn(userIdentity);
+        when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
         when(loaneeOutputPort.save(any())).thenReturn(firstLoanee);
         when(cohortOutputPort.save(any())).thenReturn(elites);
         when(programOutputPort.findProgramById(any())).thenReturn(atlasProgram);
@@ -233,7 +241,7 @@ class LoaneeServiceTest {
 
     @Test
     void cannotAddLoaneeToACohortWithExistingLoaneeEmail() throws MeedlException {
-        when(loaneeOutputPort.findByLoaneeEmail(loaneeUserIdentity.getEmail())).thenReturn(firstLoanee);
+        when(loaneeOutputPort.findByLoaneeEmail(userIdentity.getEmail())).thenReturn(firstLoanee);
         assertThrows(MeedlException.class, () -> loaneeService.addLoaneeToCohort(firstLoanee));
     }
 
@@ -448,6 +456,39 @@ class LoaneeServiceTest {
         }
         assertTrue(loanees.getContent().isEmpty());
         assertEquals(0,loanees.getContent().size());
+    }
+
+    @Test
+    void indicateDeferredLoanee() throws MeedlException {
+        String result = "";
+        try{
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(true);
+        when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+        when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                .thenReturn(Collections.singletonList(userIdentity));
+         result = loaneeService.indicateDeferredLoanee(mockId, mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        verify(loanOutputPort).save(argThat(l -> l.getLoanStatus() == LoanStatus.DEFERRED));
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("Loanee has been Deferred", result);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLoaneeNotAssociatedWithOrganization() throws MeedlException {
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                .thenReturn(Optional.of(organizationEmployeeIdentity));
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                .thenReturn(false);
+        assertThrows(MeedlException.class,()-> loaneeService.indicateDeferredLoanee(mockId, mockId));
     }
 }
 
