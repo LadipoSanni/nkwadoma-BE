@@ -21,11 +21,13 @@ public interface LoaneeRestMapper {
     @Mapping(target = "loanBreakdowns"  , source = "loaneeLoanDetail.loanBreakdown")
     Loanee toLoanee(LoaneeRequest loaneeRequest);
 
-
     @Mapping( target= "loaneeLoanDetail.loanBreakdown",source = "loanBreakdowns")
     @Mapping( target= "loaneeLoanDetail.initialDeposit",source = "loaneeLoanDetail.initialDeposit")
     @Mapping( target= "loaneeLoanDetail.amountRequested",source = "loaneeLoanDetail.amountRequested")
     @Mapping(target = "creditScore", source = "creditScore")
+    @Mapping(target = "loaneeLoanDetail.amountReceived", source= "loaneeLoanDetail.amountReceived")
+    @Mapping(target = "loaneeLoanDetail.amountRepaid", source= "loaneeLoanDetail.amountRepaid")
+    @Mapping(target = "loaneeLoanDetail.amountOutstanding", source= "loaneeLoanDetail.amountOutstanding")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
 
     @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")
