@@ -318,6 +318,22 @@ class LoanAdapterTest {
         assertEquals(1, loans.getTotalElements());
     }
 
+    @Test
+    @Order(6)
+    void setLoanStatus(){
+        Loan foundLoan = new Loan();
+        try {
+            foundLoan = loanOutputPort.findLoanById(loanId);
+            foundLoan.setLoanStatus(LoanStatus.DEFERRED);
+            foundLoan = loanOutputPort.save(foundLoan);
+        } catch (MeedlException e) {
+            log.error("Error  : {}", e.getMessage());
+        }
+        assertNotNull(foundLoan);
+        assertEquals(LoanStatus.DEFERRED, foundLoan.getLoanStatus());
+        assertEquals(loanId, foundLoan.getId());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid.id"})
     void deleteLoanByInvalidId(String id){

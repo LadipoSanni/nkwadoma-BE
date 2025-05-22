@@ -4,6 +4,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
@@ -157,5 +158,20 @@ public class LoaneeController {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+
+    @PostMapping("loanee/defer")
+    @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
+    public ResponseEntity<ApiResponse<?>> indicateDeferLoanee(@AuthenticationPrincipal Jwt meedlUser,
+                                                              @RequestBody LoaneeDeferRequest loaneeDeferRequest) throws MeedlException {
+        String response = loaneeUseCase.indicateDeferredLoanee(meedlUser.getClaimAsString("sub"), loaneeDeferRequest.getLoaneeId());
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
 }
