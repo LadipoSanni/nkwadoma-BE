@@ -185,7 +185,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED)){
+        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             organizationIdentity = getLoaneeOrganization(loanee.getCohortId());
         }else {
             organizationIdentity = getLoaneeOrganization(loanee);
