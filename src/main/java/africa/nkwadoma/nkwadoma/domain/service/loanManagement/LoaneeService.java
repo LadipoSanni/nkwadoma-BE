@@ -48,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.DROP_OUT;
 import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_DEFERRAL;
 
 @Slf4j
@@ -432,6 +433,7 @@ public class LoaneeService implements LoaneeUseCase {
                 .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
                 .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
                 .title(LOAN_DEFERRAL.getMessage())
+                .timestamp(LocalDateTime.now())
                 .build();
         meedlNotificationOutputPort.save(meedlNotification);
     }
@@ -446,13 +448,75 @@ public class LoaneeService implements LoaneeUseCase {
                         .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
                         .title(LOAN_DEFERRAL.getMessage())
                         .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
-                        .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
+                        .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_PORTFOLIO_MANAGER.getMessage())
                         .senderMail(userIdentity.getEmail())
+                        .timestamp(LocalDateTime.now())
                         .build();
         for (UserIdentity portfolioManager : portfolioManagers) {
             portfolioManagerNotification.setUser(portfolioManager);
             meedlNotificationOutputPort.save(portfolioManagerNotification);
         }
+    }
+
+    @Override
+    public String indicateDropOutLoanee(String actorId, String loaneeId) throws MeedlException {
+
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        UserIdentity userIdentity = identityOutputPort.findById(actorId);
+        Optional<OrganizationEmployeeIdentity> organizationEmployeeIdentity =
+                organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
+
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+
+        boolean cohortExistInOrganization =
+                loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
+        if (! cohortExistInOrganization) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+        }
+
+        loanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
+        loaneeOutputPort.save(loanee);
+        sendLoaneeDropOutNotification(loanee, userIdentity);
+
+        sendPortfolioManagerDropOutNotification(loanee, userIdentity);
+
+        return "Loanee has been dropped out";
+    }
+
+    private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> portfolioManagers =
+                userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        MeedlNotification portfolioManagerNotification =
+                MeedlNotification.builder()
+                        .contentId(loanee.getId())
+                        .notificationFlag(NotificationFlag.DROP_OUT)
+                        .title(DROP_OUT.getMessage())
+                        .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                        .contentDetail(MeedlNotificationMessages.DROP_OUT_PORTFOLIO_MANAGER.getMessage())
+                        .senderMail(userIdentity.getEmail())
+                        .timestamp(LocalDateTime.now())
+                        .build();
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            portfolioManagerNotification.setUser(portfolioManager);
+            meedlNotificationOutputPort.save(portfolioManagerNotification);
+        }
+    }
+
+    private void sendLoaneeDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(loanee.getId())
+                .user(loanee.getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.DROP_OUT)
+                .contentDetail(MeedlNotificationMessages.DROP_OUT_LOANEE.getMessage())
+                .title(DROP_OUT.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
     }
 }
 

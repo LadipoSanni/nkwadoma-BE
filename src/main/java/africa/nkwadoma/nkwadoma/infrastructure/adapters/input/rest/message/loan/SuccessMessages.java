@@ -9,5 +9,7 @@ public class SuccessMessages {
     public static final String ACCEPT_LOAN_OFFER = "Acknowledged";
     public static final String ALL_LOAN_OFFERS = "Successfully retrieved loan offers for the current page";
     public static final String ALL_LOAN = "Successfully retrieved";
+    public static final String LOANEE_DEFERRED = "Loanee has been deferred";
+    public static final String LOANEE_DROPOUT = "Loanee has ben dropped out";
 
 }
