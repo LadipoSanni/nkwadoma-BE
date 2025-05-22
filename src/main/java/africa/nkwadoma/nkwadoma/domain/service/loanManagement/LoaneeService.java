@@ -391,16 +391,9 @@ public class LoaneeService implements LoaneeUseCase {
                 .findProgramById(deferProgramRequest.getProgramId());
         Loan loan = loanOutputPort
                 .findLoanById(deferProgramRequest.getLoanId());
-//        loanee.setLoaneeStatus(LoaneeStatus.);
-//        loan.setLoanStatus(LoaneeStatus);
+        loan.setLoanStatus(LoanStatus.DEFERRED);
+        loanOutputPort.save(loan);
 
-        if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ACCEPTED)) {
-            throw new MeedlException("Loanee is not active");
-        }
-        if (!loanee.getCohortId().equals(deferProgramRequest.getCohortId())) {
-            throw new MeedlException("Loanee is not in specified Cohort ");
-        }
-        Optional<Loan> loanId = loanOutputPort.viewLoanByLoaneeId(deferProgramRequest.getLoaneeId());
 
     }
 
