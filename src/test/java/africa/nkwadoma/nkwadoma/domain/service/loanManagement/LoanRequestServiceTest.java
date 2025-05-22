@@ -8,6 +8,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
@@ -60,7 +61,7 @@ class LoanRequestServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private MeedlNotificationUsecase meedlNotificationUsecase;
-    private String id = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
+    private String testId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
 
     @BeforeEach
     void setUp() {
@@ -71,6 +72,7 @@ class LoanRequestServiceTest {
 
         LoaneeLoanDetail loaneeLoanDetail = TestData.createTestLoaneeLoanDetail();
         Loanee loanee = TestData.createTestLoanee(userIdentity, loaneeLoanDetail);
+        loanee.setOnboardingMode(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS);
         LoaneeLoanBreakdown loaneeLoanBreakdown =
                 TestData.createTestLoaneeLoanBreakdown("1886df42-1f75-4d17-bdef-e0b016707885");
         loaneeLoanBreakdowns = List.of(loaneeLoanBreakdown);
@@ -162,7 +164,7 @@ class LoanRequestServiceTest {
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
-                    .thenReturn(Optional.of(OrganizationIdentity.builder().id(id).build()));
+                    .thenReturn(Optional.of(OrganizationIdentity.builder().id(testId).build()));
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
@@ -248,6 +250,12 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findLoanRequestById(loanRequest.getId()))
                     .thenReturn(Optional.ofNullable(loanRequest));
+            when(loanProductOutputPort.findById(loanRequest.getLoanProductId()))
+                    .thenReturn(loanProduct);
+            when(loanRequestMapper.updateLoanRequest(loanRequest, loanRequest))
+                    .thenReturn(loanRequest);
+            when(loanRequestOutputPort.save(loanRequest))
+                    .thenReturn(loanRequest);
             assertThrows(MeedlException.class, () -> loanRequestService.respondToLoanRequest(loanRequest));
         }catch (MeedlException exception){
             log.error(exception.getMessage());
