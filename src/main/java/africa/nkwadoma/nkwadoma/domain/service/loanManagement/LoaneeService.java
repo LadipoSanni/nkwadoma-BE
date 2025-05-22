@@ -13,6 +13,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -27,6 +28,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.AllArgsConstructor;
@@ -61,6 +64,7 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoanOutputPort loanOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -365,6 +369,39 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
         return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+    }
+
+    @Override
+    public void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException {
+        validateDeferProgramRequest(deferProgramRequest);
+        Loanee loanee = loaneeOutputPort
+                .findLoaneeById(deferProgramRequest.getLoaneeId());
+        Cohort cohort = cohortOutputPort
+                .findCohort(deferProgramRequest.getCohortId());
+        Program program = programOutputPort
+                .findProgramById(deferProgramRequest.getProgramId());
+        Loan loan = loanOutputPort
+                .findLoanById(deferProgramRequest.getLoanId());
+//        loanee.setLoaneeStatus(LoaneeStatus.);
+//        loan.setLoanStatus(LoaneeStatus);
+
+        if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ACCEPTED)) {
+            throw new MeedlException("Loanee is not active");
+        }
+        if (!loanee.getCohortId().equals(deferProgramRequest.getCohortId())) {
+            throw new MeedlException("Loanee is not in specified Cohort ");
+        }
+        Optional<Loan> loanId = loanOutputPort.viewLoanByLoaneeId(deferProgramRequest.getLoaneeId());
+
+    }
+
+    private void validateDeferProgramRequest(DeferProgramRequest deferProgramRequest) throws MeedlException {
+        MeedlValidator.validateObjectInstance(deferProgramRequest, "DeferProgramRequest cannot be empty");
+        MeedlValidator.validateUUID(deferProgramRequest.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+
     }
 }
 

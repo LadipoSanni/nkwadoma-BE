@@ -21,6 +21,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -101,6 +102,7 @@ class LoaneeServiceTest {
     private OrganizationIdentity organizationIdentity;
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private LoanProduct loanProduct;
+    private DeferProgramRequest deferProgramRequest;
 
 
     @BeforeEach
@@ -167,7 +169,9 @@ class LoaneeServiceTest {
         atlasProgram = TestData.createProgramTestData("AtlasProgram");
 
         loanProduct = TestData.buildTestLoanProduct();
-
+        deferProgramRequest = TestData.
+                deferProgramTestData(firstLoanee.getId(), programCohort.getProgramId(), programCohort.getCohort().getId(), loanProduct.getId());
+        // loan id
     }
 
 
@@ -448,6 +452,64 @@ class LoaneeServiceTest {
         }
         assertTrue(loanees.getContent().isEmpty());
         assertEquals(0,loanees.getContent().size());
+    }
+
+    @Test
+    void deferLoaneeWithNullRequest(){
+        deferProgramRequest = null;
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @Test
+    void deferLoaneeWithNullLoaneeId(){
+        deferProgramRequest.setLoaneeId(null);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deferLoaneeWithEmptyLoaneeIdOrSpace(String input){
+        deferProgramRequest.setLoaneeId(input);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @Test
+    void deferLoaneeWithNullProgramId(){
+        deferProgramRequest.setProgramId(null);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deferLoaneeWithEmptyProgramIdOrSpace(String input){
+        deferProgramRequest.setProgramId(input);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @Test
+    void deferLoaneeWithNullCohortId(){
+        deferProgramRequest.setCohortId(null);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deferLoaneeWithEmptyCohortIdOrSpace(String input){
+        deferProgramRequest.setCohortId(input);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @Test
+    void deferLoaneeWithNullLoanId(){
+        deferProgramRequest.setLoanId(null);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE})
+    void deferLoaneeWithEmptyLoanIdOrSpace(String input){
+        deferProgramRequest.setLoanId(input);
+        assertThrows(MeedlException.class, ()-> loaneeService.deferProgram(deferProgramRequest));
     }
 }
 

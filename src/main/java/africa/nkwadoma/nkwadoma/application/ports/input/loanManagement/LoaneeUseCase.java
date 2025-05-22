@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.application.ports.input.loanManagement;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -24,4 +25,6 @@ public interface LoaneeUseCase {
 
 
     Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String loanProductId,String name, int pageSize, int pageNumber) throws MeedlException;
+
+    void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException;
 }

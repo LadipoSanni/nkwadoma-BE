@@ -2,11 +2,14 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
@@ -100,6 +103,27 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
             return new PageImpl<>(new ArrayList<>());
         }
         return loaneeProjections.map(loaneeMapper::mapProjecttionToLoanee);
+    }
+
+    @Override
+    public void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException {
+        validateDeferProgramRequest(deferProgramRequest);
+        LoaneeEntity loanee = loaneeRepository
+                .findById(deferProgramRequest.getLoaneeId()).orElseThrow(()-> new MeedlException("Loanee does not exist"));
+        if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ACCEPTED)) {
+            throw new MeedlException("Loanee is not active");
+        }
+        if (!loanee.getCohortId().equals(deferProgramRequest.getCohortId())) {
+            throw new MeedlException("Loanee is not in specified Cohort ");
+        }
+    }
+
+    private void validateDeferProgramRequest(DeferProgramRequest deferProgramRequest) throws MeedlException {
+        MeedlValidator.validateUUID(deferProgramRequest.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+
     }
 
 
