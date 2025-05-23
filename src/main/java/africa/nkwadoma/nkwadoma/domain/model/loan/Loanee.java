@@ -40,6 +40,10 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private String programId;
+    private String loanId;
+    private String deferReason;
+    private LocalDateTime deferredDate;
 
 
     public void validate() throws MeedlException {

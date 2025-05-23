@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -381,29 +382,26 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException {
-        validateDeferProgramRequest(deferProgramRequest);
-        Loanee loanee = loaneeOutputPort
-                .findLoaneeById(deferProgramRequest.getLoaneeId());
-        Cohort cohort = cohortOutputPort
-                .findCohort(deferProgramRequest.getCohortId());
-        Program program = programOutputPort
-                .findProgramById(deferProgramRequest.getProgramId());
-        Loan loan = loanOutputPort
-                .findLoanById(deferProgramRequest.getLoanId());
+    public String deferProgram(Loanee loanee, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+        Loan loan =
+                loanOutputPort.findLoanById(loanee.getLoanId());
+        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot defer another loanee");
+        }
+
+        Cohort cohort = cohortOutputPort.findCohort(foundLoanee.getCohortId());
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
+        }
+        if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("Loanee is already deferred");
+        }
+
         loan.setLoanStatus(LoanStatus.DEFERRED);
         loanOutputPort.save(loan);
-
-
-    }
-
-    private void validateDeferProgramRequest(DeferProgramRequest deferProgramRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(deferProgramRequest, "DeferProgramRequest cannot be empty");
-        MeedlValidator.validateUUID(deferProgramRequest.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
-
+        return "Successfully deferred";
     }
 
     @Override

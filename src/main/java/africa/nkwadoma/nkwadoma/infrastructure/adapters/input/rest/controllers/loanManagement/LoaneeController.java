@@ -2,8 +2,10 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
@@ -36,6 +38,7 @@ public class LoaneeController {
 
     private final LoaneeRestMapper loaneeRestMapper;
     private final LoaneeUseCase loaneeUseCase;
+    private final LoanOutputPort loanOutputPort;
 
 
     @PostMapping("addLoaneeToCohort")
@@ -157,6 +160,24 @@ public class LoaneeController {
                 .statusCode(HttpStatus.OK.toString())
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("loanees/defer-program")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> deferProgram(@AuthenticationPrincipal Jwt meedlUser,
+                                                       @RequestBody DeferProgramRequest deferProgramRequest) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        Loanee loanee = loaneeRestMapper.toLoanee(deferProgramRequest);
+        loanee.setId(userId);
+        String response = loaneeUseCase.deferProgram(loanee, userId);
+
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+
     }
 
 
