@@ -191,6 +191,7 @@ class LoanAdapterTest {
             loanRequestId = loanRequest.getId();
 
             LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+            loanOffer.setId(loanReferralId);
             loanOffer = loanOfferOutputPort.save(loanOffer);
             assertNotNull(loanOffer);
             loanOfferId = loanOffer.getId();

@@ -54,6 +54,7 @@ public class LoanOfferAdapterTest {
     private LoanRequest loanRequest;
     private String loanOfferId;
     private String loanRequestId;
+    private String testId = "88ee2dd8-df66-4f67-b718-dfd1635f8053";
     private int pageSize = 1;
     private int pageNumber = 0;
 
@@ -72,7 +73,7 @@ public class LoanOfferAdapterTest {
             loanReferral = loanReferralOutputPort.save(loanReferral);
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
                     .status(LoanRequestStatus.APPROVED).referredBy("Brown Hills Institute").loanee(loanee).createdDate(LocalDateTime.now()).
-                    loaneeId("88ee2dd8-df66-4f67-b718-dfd1635f8053")
+                    loaneeId(testId)
                     .dateTimeApproved(LocalDateTime.now()).build();
             loanRequest.setId(loanReferral.getId());
             loanRequest = loanRequestOutputPort.save(loanRequest);
@@ -87,6 +88,7 @@ public class LoanOfferAdapterTest {
     @BeforeEach
     void setUpLoanOffer() {
         loanOffer = new LoanOffer();
+        loanOffer.setId(testId);
         loanOffer.setLoanOfferStatus(LoanOfferStatus.OFFERED);
         loanOffer.setLoanee(loanee);
         loanOffer.setLoanRequest(loanRequest);
