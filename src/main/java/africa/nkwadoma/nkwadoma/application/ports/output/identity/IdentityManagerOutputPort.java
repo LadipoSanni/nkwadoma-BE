@@ -15,6 +15,7 @@ import java.util.Optional;
 
 public interface IdentityManagerOutputPort {
     UserIdentity createUser(UserIdentity userIdentity) throws MeedlException;
+    UserIdentity updateUserData(UserIdentity userIdentity) throws MeedlException;
 
     void deleteUser(UserIdentity userIdentity) throws MeedlException;
 

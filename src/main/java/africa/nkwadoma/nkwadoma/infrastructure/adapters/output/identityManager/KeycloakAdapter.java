@@ -86,6 +86,27 @@ public class KeycloakAdapter implements IdentityManagerOutputPort {
     }
 
     @Override
+    public UserIdentity updateUserData(UserIdentity userIdentity) throws MeedlException {
+        validateUserIdentityDetails(userIdentity);
+        MeedlValidator.validateUUID(userIdentity.getId(), INVALID_USER_ID.getMessage());
+        log.info("Done validating user identity details in keycloak adapter for update : {}",userIdentity);
+        UserRepresentation userRepresentation = mapper.map(userIdentity);
+        UserIdentity foundUserIdentity = getUserById(userIdentity.getId());
+        userIdentity.setEmail(foundUserIdentity.getEmail());
+        try{
+            UsersResource users = keycloak.realm(KEYCLOAK_REALM).users();
+            users.get(userRepresentation.getId()).update(userRepresentation);
+
+//            assignRole(userIdentity);
+//            log.info("User created on keycloak, role assigned : {}", userIdentity.getId());
+        } catch (NotFoundException exception) {
+            log.error("{} - {} --- Error occurred on attempting to update user details on keycloak", exception.getClass().getName(), exception.getMessage());
+            throw new IdentityException(exception.getMessage());
+        }
+        return userIdentity;
+    }
+
+    @Override
     public void deleteUser(UserIdentity userIdentity) throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(userIdentity.getId(), "Please provide a valid user identification");

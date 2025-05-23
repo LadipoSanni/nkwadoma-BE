@@ -619,6 +619,28 @@ class LoaneeServiceTest {
                 .thenReturn(false);
         assertThrows(MeedlException.class,()-> loaneeService.indicateDeferredLoanee(mockId, mockId));
     }
+
+    @Test
+    void indicateDropOutLoanee() throws MeedlException {
+        String response = "";
+        try{
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                    .thenReturn(Optional.of(organizationEmployeeIdentity));
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                    .thenReturn(true);
+            firstLoanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
+            when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                    .thenReturn(Collections.singletonList(userIdentity));
+            response = loaneeService.indicateDropOutLoanee(mockId,mockId);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("Loanee has been dropped out", response);
+    }
 }
 
 

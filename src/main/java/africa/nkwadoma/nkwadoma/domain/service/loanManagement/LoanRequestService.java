@@ -10,6 +10,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.constants.OrganizationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.education.EducationException;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -99,7 +100,9 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest respondToLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         LoanRequest updatedLoanRequest;
         if (loanRequest.getLoanRequestDecision() == LoanDecision.ACCEPTED) {
-            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified()){
+            if (!foundLoanRequest.getLoanee().getUserIdentity().isIdentityVerified() &&
+            !foundLoanRequest.getLoanee().getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
+                log.info("The loanee for this loan request is not verified. Onboarding mode is: {}. {}", foundLoanRequest.getLoanee().getOnboardingMode(), LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
                 throw new LoanException(LoanMessages.LOAN_REQUEST_CANNOT_BE_APPROVED.getMessage());
             }
             updatedLoanRequest = approveLoanRequest(loanRequest, foundLoanRequest);
@@ -112,6 +115,7 @@ public class LoanRequestService implements LoanRequestUseCase {
             return updatedLoanRequest;
         }
         else {
+            log.info("Loan request is not accepted {}", loanRequest);
             updatedLoanRequest = declineLoanRequest(loanRequest, foundLoanRequest);
             updatedLoanRequest.setLoaneeId(foundLoanRequest.getLoanee().getId());
 

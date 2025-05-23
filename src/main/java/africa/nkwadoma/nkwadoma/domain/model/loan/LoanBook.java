@@ -20,6 +20,7 @@ public class LoanBook {
     private File file;
     private Cohort cohort;
     private String loanProductId;
+    private String actorId;
     private List<Loanee> loanees;
 
     public void validate() throws MeedlException {

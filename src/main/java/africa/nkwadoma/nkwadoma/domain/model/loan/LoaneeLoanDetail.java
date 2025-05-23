@@ -20,6 +20,8 @@ public class LoaneeLoanDetail {
     private BigDecimal amountRequested;
     private BigDecimal amountReceived = BigDecimal.ZERO;
     private BigDecimal amountApproved;
+    private BigDecimal amountRepaid;
+    private BigDecimal amountOutstanding;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateNegativeAmount(initialDeposit,"Initial deposit");
