@@ -1,10 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoanRequestUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoaneeUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.RespondToLoanReferralUseCase;
-import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.ViewLoanReferralsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
@@ -15,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.Asyn
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
@@ -51,8 +49,9 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoaneeUseCase loaneeUseCase;
     private final RespondToLoanReferralUseCase respondToLoanReferralUseCase;
     private final ViewLoanReferralsUseCase viewLoanReferralsUseCase;
-    private final LoanRequestOutputPort loanRequestOutputPort;
+    private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
+    private final LoanOfferUseCase loanOfferUseCase;
 
     @Override
     public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
@@ -78,11 +77,28 @@ public class LoanBookService implements LoanBookUseCase {
                     try {
                         LoanReferral loanReferral = acceptLoanReferral(loanee);
                         LoanRequest loanRequest = acceptLoanRequest(loanee, loanReferral, loanBook);
+                        acceptLoanOffer(loanRequest);
+                        startLoan(loanRequest);
                     } catch (MeedlException e) {
                         log.error("Error accepting loan referral.",e);
                     }
                 });
     }
+
+    private void startLoan(LoanRequest loanRequest) throws MeedlException {
+        Loan loan = Loan.builder().loaneeId(loanRequest.getLoanee().getId()).loanOfferId(loanRequest.getId()).build();
+        createLoanProductUseCase.startLoan(loan);
+        log.info("Loan started for loanee {}", loanRequest.getLoanee().getUserIdentity().getEmail());
+    }
+
+    private void acceptLoanOffer(LoanRequest loanRequest) throws MeedlException {
+        LoanOffer loanOffer = new LoanOffer();
+        loanOffer.setId(loanRequest.getId());
+        loanOffer.setLoaneeResponse(LoanDecision.ACCEPTED);
+        loanOffer.setUserId(loanRequest.getLoanee().getUserIdentity().getId());
+        loanOfferUseCase.acceptLoanOffer(loanOffer);
+    }
+
     private LoanReferral acceptLoanReferral(Loanee loanee) throws MeedlException {
         LoanReferral loanReferral = LoanReferral.builder()
                 .loanee(loanee)
