@@ -128,7 +128,12 @@ public class IdentityVerificationService implements IdentityVerificationUseCase 
         log.info("update user identity from prembly {}", updatedUserIdentity);
 //        identityManagerOutputPort.createUser(updatedUserIdentity);
         updatedUserIdentity = userIdentityOutputPort.save(updatedUserIdentity);
+        updatedUserIdentity = updateLoaneeDetail(updatedUserIdentity);
         log.info("User identity details updated for loanee with user id : {}", updatedUserIdentity);
+    }
+
+    private UserIdentity updateLoaneeDetail(UserIdentity userIdentity) throws MeedlException {
+        return identityManagerOutputPort.updateUserData(userIdentity);
     }
 
     private void createVerificationFailure(LoanReferral loanReferral, String message, ServiceProvider serviceProvider) throws MeedlException, IdentityVerificationException {

@@ -64,7 +64,6 @@ class KeycloakAdapterTest {
     void createUser() {
         try {
             UserIdentity createdUser = identityManagementOutputPort.createUser(john);
-            identityManagementOutputPort.createUser(peter);
             assertNotNull(createdUser);
             assertNotNull(createdUser.getId());
             assertEquals(john.getId(), createdUser.getId());
@@ -72,6 +71,48 @@ class KeycloakAdapterTest {
             assertEquals(createdUser.getEmail(), john.getEmail());
             assertEquals(createdUser.getFirstName(), john.getFirstName());
             assertEquals(createdUser.getLastName(), john.getLastName());
+        }catch (MeedlException exception){
+            log.error("Failed to create user in keycloak", exception);
+            log.info("{} {}", exception.getClass().getName(),exception.getMessage());
+        }
+    }
+    @Test
+    void updateUserEmail(){
+        peter.setEmail("updatedtestemail@emial.com");
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.updateUserData(peter));
+    }
+    @Test
+    void updateUserDataWithNull(){
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.updateUserData(null));
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-uuid"})
+    void updateUserDataWithInvalidId(String id){
+        peter.setId(id);
+        assertThrows(MeedlException.class, ()-> identityManagementOutputPort.updateUserData(peter));
+    }
+    @Test
+    void updateUser() {
+        try {
+            String firstName = peter.getFirstName();
+            String lastName = peter.getLastName();
+            UserIdentity createdUser = identityManagementOutputPort.createUser(peter);
+            assertNotNull(createdUser);
+            assertNotNull(createdUser.getId());
+            assertEquals(peter.getFirstName(), createdUser.getFirstName());
+            assertEquals(peter.getLastName(), createdUser.getLastName());
+            assertEquals(peter.getRole(), createdUser.getRole());
+            assertEquals(peter.getEmail(), createdUser.getEmail());
+            peter.setFirstName("UpdatedPeter");
+            peter.setLastName("UpdatedLastName");
+            peter.setId(createdUser.getId());
+            UserIdentity updateUserData = identityManagementOutputPort.updateUserData(peter);
+            assertNotEquals(firstName, updateUserData.getFirstName());
+            assertNotEquals(lastName, updateUserData.getLastName());
+            assertEquals(peter.getFirstName(), updateUserData.getFirstName());
+            assertEquals(peter.getLastName(), updateUserData.getLastName());
+            assertEquals(peter.getEmail(), updateUserData.getEmail());
+
         }catch (MeedlException exception){
             log.error("Failed to create user in keycloak", exception);
             log.info("{} {}", exception.getClass().getName(),exception.getMessage());

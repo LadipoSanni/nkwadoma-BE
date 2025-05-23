@@ -609,6 +609,7 @@ public class FinancierService implements FinancierUseCase {
             }
             saveFinancierPoliticallyExposedPeople(financier);
             userIdentityOutputPort.save(foundFinancier.getUserIdentity());
+            identityManagerOutputPort.updateUserData(foundFinancier.getUserIdentity());
             log.info("updated user details for kyc");
             Financier savedFinancier = financierOutputPort.completeKyc(financier);
             savedFinancier.setBeneficialOwners(financier.getBeneficialOwners());
