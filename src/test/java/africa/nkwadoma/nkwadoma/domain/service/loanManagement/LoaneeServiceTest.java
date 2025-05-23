@@ -113,6 +113,7 @@ class LoaneeServiceTest {
     @BeforeEach
     void setUpLoanee() {
         userIdentity = UserIdentity.builder()
+                .id(mockId)
                 .email("qudus55@gmail.com")
                 .firstName("qudus")
                 .lastName("lekan")
@@ -326,34 +327,47 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void findLoanee(){
-        Loanee loanee = new Loanee();
-        try {
-            firstLoanee.setId(mockId);
-            firstLoanee.getUserIdentity().setBvn("12345678901");
-            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-            when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
-            when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-            when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn(anyString());
-            loanee = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
-            verify(loaneeOutputPort, times(1)).findLoaneeById(mockId);
-        } catch (MeedlException exception) {
-            log.error("Error occured",  exception);
-        }
-        assertEquals(firstLoanee.getId(), loanee.getId());
-        assertEquals(firstLoanee.getUserIdentity().getEmail(), loanee.getUserIdentity().getEmail());
+    void findLoanee() throws MeedlException {
+        firstLoanee.setId(mockId);
+        firstLoanee.getUserIdentity().setBvn("12345678901");
+        firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
+
+        firstLoanee.setId(mockId);
+        firstLoanee.setUserIdentity(userIdentity);
+        firstLoanee.setCreditScoreUpdatedAt(null);
+
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+        when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn("decrypted-bvn");
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+
+        assertNotNull(result);
+        assertEquals(firstLoanee.getId(), result.getId());
+        assertEquals(firstLoanee.getUserIdentity().getEmail(), result.getUserIdentity().getEmail());
+
+        verify(loaneeOutputPort).findLoaneeById(mockId);
+        verify(userIdentityOutputPort).findById(mockId);
+        verify(creditRegistryOutputPort).getCreditScoreWithBvn(any());
+        verify(tokenUtils).decryptAES(anyString(), anyString());
+        verify(loaneeOutputPort).save(firstLoanee);
     }
 
     @Test
     void updateLoaneeCreditScoreWhenCreditScoreUpdateIsDue() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusMonths(2));
         firstLoanee.getUserIdentity().setBvn("12345678900");
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
-        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
-        when(tokenUtils.decryptAES(anyString(), any())).thenReturn(anyString());
+        firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
+        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+        when(tokenUtils.decryptAES(eq("12345678900"), eq("Error processing identity verification")))
+                .thenReturn("decrypted-bvn");
+//        when(tokenUtils.decryptAES(anyString(), any())).thenReturn(anyString());
+        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
 
         assertNotNull(result);
         assertEquals(firstLoanee.getId(), result.getId());
@@ -363,21 +377,26 @@ class LoaneeServiceTest {
     @Test
     void skipLoaneeCreditScoreUpdateWhenNotDue() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(15));
+        firstLoanee.getUserIdentity().setBvn("12345678910");
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        log.info("-------> Skip loanee -------> {}", firstLoanee.getUserIdentity().getId());
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
+        log.info("----> user identity ---> {}", userIdentity);
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, mockId);
 
         assertNotNull(result);
         assertEquals(firstLoanee.getId(), result.getId());
         verify(loaneeOutputPort, never()).save(firstLoanee);
     }
+
     @Test
     void loaneeDetailsSuccessfullyRetrievedWhenCreditScoreUpdateIsSkipped() throws MeedlException {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(10));
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, userIdentity.getId());
+        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
+        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
 
         assertNotNull(result);
         assertEquals(firstLoanee.getCreditScoreUpdatedAt(), result.getCreditScoreUpdatedAt());

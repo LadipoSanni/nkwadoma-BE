@@ -143,13 +143,16 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
-        if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
-                creditScoreIsAboveOrEqualOneMonth(loanee)) {
-            loanee = updateCreditScore(loanee);
+        if (loanee.getUserIdentity().getBvn() != null) {
+            if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
+                    creditScoreIsAboveOrEqualOneMonth(loanee)) {
+                loanee = updateCreditScore(loanee);
+            }
         }
 
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
         return loanee;
+
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
