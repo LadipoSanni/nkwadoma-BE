@@ -523,6 +523,29 @@ class LoaneeServiceTest {
     }
 
     @Test
+    void deferProgram() throws MeedlException {
+        String result = "";
+        try{
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+            when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
+                    .thenReturn(Optional.of(organizationEmployeeIdentity));
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(firstLoanee.getId(), organizationEmployeeIdentity.getOrganization()))
+                    .thenReturn(true);
+            when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                    .thenReturn(Collections.singletonList(userIdentity));
+//            result = loaneeService.indicateDeferredLoanee(mockId, mockId);
+            ///  here
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+        verify(loanOutputPort).save(argThat(l -> l.getLoanStatus() == LoanStatus.DEFERRED));
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("Loanee has been Deferred", result);
+    }
+
+    @Test
     void indicateDeferredLoanee() throws MeedlException {
         String result = "";
         try{
