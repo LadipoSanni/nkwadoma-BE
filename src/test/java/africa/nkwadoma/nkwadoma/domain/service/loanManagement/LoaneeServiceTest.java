@@ -179,9 +179,6 @@ class LoaneeServiceTest {
         loanProduct = TestData.buildTestLoanProduct();
         loan = TestData.createTestLoan(firstLoanee);
 
-        deferProgramRequest = TestData.
-                deferProgramTestData(firstLoanee.getId(), programCohort.getProgramId(), programCohort.getCohort().getId(), loanProduct.getId());
-        // loan id
     }
 
 

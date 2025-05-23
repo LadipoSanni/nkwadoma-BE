@@ -605,17 +605,4 @@ public class TestData {
                 .build();
     }
 
-    public static DeferProgramRequest deferProgramTestData(String loaneeId,
-                                                           String programId,
-                                                           String cohortId,
-                                                           String loanId) {
-        return DeferProgramRequest.builder()
-                .loaneeId(loaneeId)
-                .programId(programId)
-                .cohortId(cohortId)
-                .loanId(loanId)
-                .deferReason("Curriculum to fast")
-                .deferredDateAndTime(LocalDateTime.now())
-                .build();
-    }
 }
