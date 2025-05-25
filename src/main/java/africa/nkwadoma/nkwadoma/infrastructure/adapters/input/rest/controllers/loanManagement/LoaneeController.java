@@ -181,6 +181,23 @@ public class LoaneeController {
 
     }
 
+    @PutMapping("loanees/program/resume")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> deferProgram(@AuthenticationPrincipal Jwt meedlUser,
+                                                       @RequestParam String loanId,
+                                                       @RequestParam String cohortId) throws MeedlException {
+        String userId = meedlUser.getClaimAsString("sub");
+        String response = loaneeUseCase.resumeProgram(loanId, cohortId, userId);
+
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(ControllerConstant.RESPONSE_IS_SUCCESSFUL.getMessage())
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+
+    }
+
 
     @PostMapping("loanee/defer")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
