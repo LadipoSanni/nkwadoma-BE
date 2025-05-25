@@ -413,6 +413,7 @@ public class LoaneeService implements LoaneeUseCase {
     @Override
     public String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException {
         MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         Loan loan =
                 loanOutputPort.findLoanById(loanId);
         Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
