@@ -128,13 +128,11 @@ class LoaneeServiceTest {
         firstLoanee.setCohortId(mockId);
         firstLoanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
 
-
         loanBreakdown = new LoaneeLoanBreakdown();
         loanBreakdown.setLoaneeLoanBreakdownId(mockId);
         loanBreakdown.setCurrency("usd");
         loanBreakdown.setItemAmount(BigDecimal.valueOf(100));
         loanBreakdown.setItemName("juno");
-
 
         loaneeLoanDetails = new LoaneeLoanDetail();
         loaneeLoanDetails.setAmountRequested(BigDecimal.valueOf(750));
@@ -534,8 +532,6 @@ class LoaneeServiceTest {
                 .thenReturn(false);
         assertThrows(MeedlException.class,()-> loaneeService.indicateDeferredLoanee(mockId, mockId));
     }
-
-
 
     @Test
     void indicateDropOutLoanee() throws MeedlException {
