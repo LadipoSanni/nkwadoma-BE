@@ -60,7 +60,7 @@ class LoanRequestServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private MeedlNotificationUsecase meedlNotificationUsecase;
-    private String id = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
+    private String mockId = "96f2eb2b-1a78-4838-b5d8-66e95cc9ae9f";
 
     @BeforeEach
     void setUp() {
@@ -90,11 +90,11 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
-            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), id)).thenReturn(loanRequest.getLoanee());
-            LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest, id);
+            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), mockId)).thenReturn(loanRequest.getLoanee());
+            LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest, mockId);
 
             verify(loanRequestOutputPort, times(1)).findById(loanRequest.getId());
-            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId(), id);
+            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId(), mockId);
             assertNotNull(retrievedLoanRequest);
             assertNotNull(retrievedLoanRequest.getLoaneeLoanBreakdowns());
         } catch (MeedlException e) {
@@ -104,13 +104,13 @@ class LoanRequestServiceTest {
 
     @Test
     void viewNullLoanRequest() {
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(null, id));
+        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(null, mockId));
     }
 
     @Test
     void viewLoanRequestWithNullId() {
         loanRequest.setId(null);
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest, id));
+        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest, mockId));
     }
     @ParameterizedTest
     @ValueSource(strings = {"36470395798", "sjgbnsvkh"})
@@ -162,7 +162,7 @@ class LoanRequestServiceTest {
             when(loanRequestMapper.updateLoanRequest(any(), any())).thenReturn(loanRequest);
             when(loanRequestOutputPort.save(any())).thenReturn(loanRequest);
             when(organizationIdentityOutputPort.findOrganizationByName(any()))
-                    .thenReturn(Optional.of(OrganizationIdentity.builder().id(id).build()));
+                    .thenReturn(Optional.of(OrganizationIdentity.builder().id(mockId).build()));
             when(loanMetricsOutputPort.findByOrganizationId(anyString()))
                     .thenReturn(Optional.of(new LoanMetrics()));
             when(loanMetricsOutputPort.save(any())).thenReturn(new LoanMetrics());
