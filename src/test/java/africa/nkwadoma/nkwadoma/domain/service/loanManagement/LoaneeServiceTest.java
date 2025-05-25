@@ -129,7 +129,8 @@ class LoaneeServiceTest {
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setCohortId(mockId);
         firstLoanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
-
+        firstLoanee.setDeferReason("My head no carry coding again");
+        firstLoanee.setLoanId(mockId);
 
         loanBreakdown = new LoaneeLoanBreakdown();
         loanBreakdown.setLoaneeLoanBreakdownId(mockId);
@@ -463,9 +464,6 @@ class LoaneeServiceTest {
 
     @Test
     void deferProgramThrowsWhenCohortIsIncoming() {
-        Loanee loanee = new Loanee();
-        loanee.setLoanId(mockId);
-        loanee.setId(mockId);
 
         Loan loan = new Loan();
         loan.setLoaneeId(mockId);
@@ -488,7 +486,7 @@ class LoaneeServiceTest {
         }
 
         Exception message = assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(loanee, userId));
+                loaneeService.deferProgram(firstLoanee, userId));
     }
 
     @Test
@@ -496,6 +494,7 @@ class LoaneeServiceTest {
         Loanee loanee = new Loanee();
         loanee.setLoanId(mockId);
         loanee.setId(mockId);
+        loanee.setDeferReason("Hunger want finish me");
 
         Loan loan = new Loan();
         loan.setLoaneeId(mockId);
@@ -523,9 +522,6 @@ class LoaneeServiceTest {
 
     @Test
     void deferProgramWithAnotherUser() {
-        Loanee loanee = new Loanee();
-        loanee.setLoanId(mockId);
-
         Loan loan = new Loan();
         loan.setLoaneeId(mockId);
 
@@ -541,7 +537,7 @@ class LoaneeServiceTest {
         }
 
         Exception e = assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(loanee, mockId));
+                loaneeService.deferProgram(firstLoanee, mockId));
     }
 
     @ParameterizedTest
@@ -556,10 +552,6 @@ class LoaneeServiceTest {
 
     @Test
     void deferProgramSuccessfully() {
-        String loaneeUserId = "2bc2ef97-1035-5e42-bc8b-22a90b809f8d";
-        Loanee loanee = new Loanee();
-        loanee.setLoanId(mockId);
-        loanee.setId(mockId);
 
         Loan loan = new Loan();
         loan.setLoaneeId(mockId);
@@ -567,7 +559,7 @@ class LoaneeServiceTest {
 
 
         Loanee foundLoanee = new Loanee();
-        userIdentity.setId(loaneeUserId);
+        userIdentity.setId(userId);
         foundLoanee.setUserIdentity(userIdentity);
         foundLoanee.setCohortId(mockId);
 
@@ -579,7 +571,7 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
             when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
             when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
-            result = loaneeService.deferProgram(loanee, loaneeUserId);
+            result = loaneeService.deferProgram(firstLoanee, userId);
         } catch (Exception e) {
             log.info("Error: {}", e.getMessage());
         }
