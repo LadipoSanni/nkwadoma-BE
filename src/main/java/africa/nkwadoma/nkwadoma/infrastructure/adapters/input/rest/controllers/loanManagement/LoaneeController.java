@@ -164,13 +164,12 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("loanees/defer-program")
+    @PutMapping("loanees/program/defer")
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> deferProgram(@AuthenticationPrincipal Jwt meedlUser,
                                                        @RequestBody DeferProgramRequest deferProgramRequest) throws MeedlException {
         String userId = meedlUser.getClaimAsString("sub");
         Loanee loanee = loaneeRestMapper.toLoanee(deferProgramRequest);
-        loanee.setId(userId);
         String response = loaneeUseCase.deferProgram(loanee, userId);
 
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()

@@ -107,27 +107,6 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException {
-        validateDeferProgramRequest(deferProgramRequest);
-        LoaneeEntity loanee = loaneeRepository
-                .findById(deferProgramRequest.getLoaneeId()).orElseThrow(()-> new MeedlException("Loanee does not exist"));
-        if (!loanee.getLoaneeStatus().equals(LoaneeStatus.ACCEPTED)) {
-            throw new MeedlException("Loanee is not active");
-        }
-        if (!loanee.getCohortId().equals(deferProgramRequest.getCohortId())) {
-            throw new MeedlException("Loanee is not in specified Cohort ");
-        }
-    }
-
-    private void validateDeferProgramRequest(DeferProgramRequest deferProgramRequest) throws MeedlException {
-        MeedlValidator.validateUUID(deferProgramRequest.getLoaneeId(), LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getProgramId(), ProgramMessages.INVALID_PROGRAM_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateUUID(deferProgramRequest.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
-
-    }
-
-    @Override
     public boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organizationId) throws MeedlException {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());

@@ -384,10 +384,13 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public String deferProgram(Loanee loanee, String userId) throws MeedlException {
+        log.info("---------> loanee from request ----------> {} ", loanee);
         MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateDataElement(loanee.getDeferReason(), "Reason cannot be empty");
         Loan loan =
                 loanOutputPort.findLoanById(loanee.getLoanId());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        log.info("---------> Found loanee ----------> {} ", foundLoanee);
         if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
             throw new MeedlException("Access denied: A loanee cannot defer another loanee");
         }
@@ -399,6 +402,11 @@ public class LoaneeService implements LoaneeUseCase {
         if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
             throw new MeedlException("Loanee is already deferred");
         }
+
+        foundLoanee.setDeferredDateAndTime(LocalDateTime.now());
+        foundLoanee.setDeferReason(loanee.getDeferReason());
+        Loanee savedLoanee = loaneeOutputPort.save(foundLoanee);
+        log.info("---------> Saved loanee after ----------> {} ", savedLoanee);
 
         loan.setLoanStatus(LoanStatus.DEFERRED);
         loanOutputPort.save(loan);

@@ -32,7 +32,5 @@ public interface LoaneeOutputPort {
 
     Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String id,String name, int pageSize, int pageNumber) throws MeedlException;
 
-    void deferProgram(DeferProgramRequest deferProgramRequest) throws MeedlException;
-
     boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organization) throws MeedlException;
 }

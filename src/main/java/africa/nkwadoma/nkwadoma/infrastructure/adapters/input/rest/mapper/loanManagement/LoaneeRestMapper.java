@@ -22,7 +22,6 @@ public interface LoaneeRestMapper {
     @Mapping(target = "loanBreakdowns"  , source = "loaneeLoanDetail.loanBreakdown")
     Loanee toLoanee(LoaneeRequest loaneeRequest);
 
-    @Mapping(target= "id", source = "loaneeId")
     @Mapping(target= "cohortId", source = "cohortId")
     @Mapping(target= "programId", source = "programId")
     @Mapping(target = "deferReason", source = "deferReason")
