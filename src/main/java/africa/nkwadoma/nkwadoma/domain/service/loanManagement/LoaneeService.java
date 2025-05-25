@@ -477,6 +477,22 @@ public class LoaneeService implements LoaneeUseCase {
         return "Loanee has been dropped out";
     }
 
+    @Override
+    public String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException {
+        if (loaneeIds.isEmpty()){
+            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        for (String loaneeId : loaneeIds) {
+            MeedlValidator.validateUUID(loaneeId,UserMessages.INVALID_USER_ID.getMessage());
+        }
+        loaneeOutputPort.archiveOrUnArchiveByIds(loaneeIds,loaneeStatus);
+        if (loaneeIds.size() == 1) {
+            return "Loanee has been "+loaneeStatus.name();
+        }else {
+            return "Loanees has been "+loaneeStatus.name();
+        }
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);

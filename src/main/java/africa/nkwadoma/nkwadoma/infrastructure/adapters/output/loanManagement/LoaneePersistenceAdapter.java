@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -108,6 +110,14 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
         return loaneeRepository.checkIfLoaneeCohortExistInOrganization(loaneeId,organizationId);
+    }
+
+    @Override
+    public void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException {
+        if (loaneesId.isEmpty()){
+            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
     }
 
 
