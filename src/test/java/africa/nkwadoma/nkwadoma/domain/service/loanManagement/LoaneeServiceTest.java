@@ -331,15 +331,17 @@ class LoaneeServiceTest {
         firstLoanee.setId(mockId);
         firstLoanee.getUserIdentity().setBvn("12345678901");
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
-
-        firstLoanee.setId(mockId);
-        firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setCreditScoreUpdatedAt(null);
+//
+//        firstLoanee.setId(mockId);
+//        firstLoanee.setUserIdentity(userIdentity);
 
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
         when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
         when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn("decrypted-bvn");
+        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+
         Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
 
         assertNotNull(result);
@@ -380,7 +382,7 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn("12345678910");
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
-        when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
+//        when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
         log.info("----> user identity ---> {}", userIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(mockId, mockId);
 

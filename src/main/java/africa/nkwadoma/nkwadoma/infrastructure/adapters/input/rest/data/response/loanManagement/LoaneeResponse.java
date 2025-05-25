@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class LoaneeResponse {
     private String institutionName;
     private String programName;
     private String cohortName;
-    private String cohortStartDate;
+    private LocalDate cohortStartDate;
     private String fitnessToWorkRating;
     private BigDecimal loanAmount;
     private Double interestRate;

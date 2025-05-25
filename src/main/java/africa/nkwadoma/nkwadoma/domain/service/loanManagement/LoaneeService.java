@@ -151,6 +151,15 @@ public class LoaneeService implements LoaneeUseCase {
         }
 
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        loanee.setCohortName(cohort.getName());
+        loanee.setCohortStartDate(cohort.getStartDate());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        loanee.setProgramName(program.getName());
+
+//        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
+//        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
         return loanee;
 
     }
