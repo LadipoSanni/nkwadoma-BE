@@ -52,6 +52,7 @@ public class LoanBookController {
         LoanBook loanBook = new LoanBook();
         loanBook.setFile(convertToTempFile(file));
         loanBook.setLoanProductId(loanProductId);
+        loanBook.setActorId(meedlUser.getClaimAsString("sub"));
         loanBook.setCohort(Cohort.builder().id(cohortId).createdBy(meedlUser.getClaimAsString("sub")).build());
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
@@ -68,7 +69,7 @@ public class LoanBookController {
         String originalFilename = multipartFile.getOriginalFilename();
 
         if (originalFilename == null || !originalFilename.contains(".")) {
-            throw new IllegalArgumentException("File must have a valid extension");
+            throw new MeedlException("File must have a valid extension");
         }
 
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
