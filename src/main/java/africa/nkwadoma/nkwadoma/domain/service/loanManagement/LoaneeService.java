@@ -384,13 +384,11 @@ public class LoaneeService implements LoaneeUseCase {
 
     @Override
     public String deferProgram(Loanee loanee, String userId) throws MeedlException {
-        log.info("---------> loanee from request ----------> {} ", loanee);
         MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
         MeedlValidator.validateDataElement(loanee.getDeferReason(), "Reason cannot be empty");
         Loan loan =
                 loanOutputPort.findLoanById(loanee.getLoanId());
         Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
-        log.info("---------> Found loanee ----------> {} ", foundLoanee);
         if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
             throw new MeedlException("Access denied: A loanee cannot defer another loanee");
         }
@@ -405,12 +403,32 @@ public class LoaneeService implements LoaneeUseCase {
 
         foundLoanee.setDeferredDateAndTime(LocalDateTime.now());
         foundLoanee.setDeferReason(loanee.getDeferReason());
-        Loanee savedLoanee = loaneeOutputPort.save(foundLoanee);
-        log.info("---------> Saved loanee after ----------> {} ", savedLoanee);
+        loaneeOutputPort.save(foundLoanee);
 
         loan.setLoanStatus(LoanStatus.DEFERRED);
         loanOutputPort.save(loan);
         return "Successfully deferred";
+    }
+
+    @Override
+    public String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        Loan loan =
+                loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(loanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot resume program on behalf of another loanee");
+        }
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        if (!loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("The action is for a loanee that deferred");
+        }
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Loanee can only resume to a current cohort. Selected cohort is "+ cohort.getCohortStatus());
+        }
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+        loanOutputPort.save(loan);
+        return "Successfully resumed";
     }
 
     @Override

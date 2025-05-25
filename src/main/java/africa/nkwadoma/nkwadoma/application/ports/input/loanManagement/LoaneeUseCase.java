@@ -31,4 +31,6 @@ public interface LoaneeUseCase {
     String deferProgram(Loanee loanee, String userId) throws MeedlException;
 
     String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
+
+    String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 }
