@@ -327,32 +327,40 @@ class LoaneeServiceTest {
     }
 
     @Test
-    void findLoanee() throws MeedlException {
+    void findLoanee() {
         firstLoanee.setId(mockId);
         firstLoanee.getUserIdentity().setBvn("12345678901");
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
         firstLoanee.setCreditScoreUpdatedAt(null);
-//
-//        firstLoanee.setId(mockId);
-//        firstLoanee.setUserIdentity(userIdentity);
+        Loanee loanee = null;
+        try{
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
+            when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+            when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn("decrypted-bvn");
+            when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
+            loanee = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+        } catch (MeedlException exception) {
+            log.info("Error: {}", exception.getMessage());
+        }
 
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
-        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
-        when(tokenUtils.decryptAES(anyString(), anyString())).thenReturn("decrypted-bvn");
-        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
 
-        assertNotNull(result);
-        assertEquals(firstLoanee.getId(), result.getId());
-        assertEquals(firstLoanee.getUserIdentity().getEmail(), result.getUserIdentity().getEmail());
+        assertNotNull(loanee);
+        assertEquals(firstLoanee.getId(), loanee.getId());
+        assertEquals(firstLoanee.getUserIdentity().getEmail(), loanee.getUserIdentity().getEmail());
 
-        verify(loaneeOutputPort).findLoaneeById(mockId);
-        verify(userIdentityOutputPort).findById(mockId);
-        verify(creditRegistryOutputPort).getCreditScoreWithBvn(any());
-        verify(tokenUtils).decryptAES(anyString(), anyString());
-        verify(loaneeOutputPort).save(firstLoanee);
+        try {
+            verify(loaneeOutputPort).findLoaneeById(mockId);
+            verify(userIdentityOutputPort).findById(mockId);
+            verify(creditRegistryOutputPort).getCreditScoreWithBvn(any());
+            verify(tokenUtils).decryptAES(anyString(), anyString());
+            verify(loaneeOutputPort).save(firstLoanee);
+        } catch (MeedlException exception) {
+            log.info("Error: {}", exception.getMessage());
+        }
     }
 
     @Test
@@ -361,18 +369,24 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn("12345678900");
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
-        when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
-        when(tokenUtils.decryptAES(eq("12345678900"), eq("Error processing identity verification")))
-                .thenReturn("decrypted-bvn");
-//        when(tokenUtils.decryptAES(anyString(), any())).thenReturn(anyString());
-        when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+        Loanee loanee = null;
+        try{
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
+            when(creditRegistryOutputPort.getCreditScoreWithBvn(any())).thenReturn(10);
+            when(tokenUtils.decryptAES(eq("12345678900"), eq("Error processing identity verification")))
+                    .thenReturn("decrypted-bvn");
+            when(loaneeOutputPort.save(any(Loanee.class))).thenReturn(firstLoanee);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
 
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+            loanee = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+        } catch (MeedlException exception) {
+            log.info("Error: {}", exception.getMessage());
+        }
 
-        assertNotNull(result);
-        assertEquals(firstLoanee.getId(), result.getId());
+        assertNotNull(loanee);
+        assertEquals(firstLoanee.getId(), loanee.getId());
         verify(loaneeOutputPort, times(1)).save(firstLoanee);
     }
 
@@ -382,8 +396,9 @@ class LoaneeServiceTest {
         firstLoanee.getUserIdentity().setBvn("12345678910");
         when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
+        when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+        when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
 //        when(userIdentityOutputPort.save(userIdentity)).thenReturn(userIdentity);
-        log.info("----> user identity ---> {}", userIdentity);
         Loanee result = loaneeService.viewLoaneeDetails(mockId, mockId);
 
         assertNotNull(result);
@@ -396,12 +411,19 @@ class LoaneeServiceTest {
         firstLoanee.setCreditScoreUpdatedAt(LocalDateTime.now().minusDays(10));
         firstLoanee.getUserIdentity().setRole(IdentityRole.LOANEE);
 
-        when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
-        when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
-        Loanee result = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+        Loanee loanee = null;
+        try{
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(userIdentityOutputPort.findById(mockId)).thenReturn(firstLoanee.getUserIdentity());
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            when(programOutputPort.findProgramById(mockId)).thenReturn(atlasProgram);
+            loanee = loaneeService.viewLoaneeDetails(mockId, firstLoanee.getUserIdentity().getId());
+        } catch (MeedlException exception) {
+            log.info("Error: {}", exception.getMessage());
+        }
 
-        assertNotNull(result);
-        assertEquals(firstLoanee.getCreditScoreUpdatedAt(), result.getCreditScoreUpdatedAt());
+        assertNotNull(loanee);
+        assertEquals(firstLoanee.getCreditScoreUpdatedAt(), loanee.getCreditScoreUpdatedAt());
         verify(loaneeOutputPort, never()).save(firstLoanee);
     }
 
