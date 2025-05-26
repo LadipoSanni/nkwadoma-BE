@@ -36,4 +36,6 @@ public class LoaneeEntity {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private LocalDateTime deferredDateAndTime;
+    private String deferReason;
 }

@@ -4,6 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -28,7 +29,11 @@ public interface LoaneeUseCase {
 
     String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException;
 
+    String deferProgram(Loanee loanee, String userId) throws MeedlException;
+
     String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
+
+    String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 
     String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 }

@@ -23,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -109,6 +110,8 @@ class LoaneeServiceTest {
     private OrganizationEmployeeIdentity organizationEmployeeIdentity;
     private LoanProduct loanProduct;
     private Loan loan;
+    private DeferProgramRequest deferProgramRequest;
+    private String userId = "2bc2ef97-1035-5e42-bc8b-22a90b809f8d";
 
     @BeforeEach
     void setUpLoanee() {
@@ -127,6 +130,9 @@ class LoaneeServiceTest {
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setCohortId(mockId);
         firstLoanee.setOnboardingMode(OnboardingMode.EMAIL_REFERRED);
+
+        firstLoanee.setDeferReason("My head no carry coding again");
+        firstLoanee.setLoanId(mockId);
 
         loanBreakdown = new LoaneeLoanBreakdown();
         loanBreakdown.setLoaneeLoanBreakdownId(mockId);
@@ -498,6 +504,198 @@ class LoaneeServiceTest {
         }
         assertTrue(loanees.getContent().isEmpty());
         assertEquals(0,loanees.getContent().size());
+    }
+
+    @Test
+    void deferProgramThrowsWhenCohortIsIncoming() {
+
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+
+        Loanee foundLoanee = new Loanee();
+        userIdentity.setId(userId);
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.setCohortId(mockId);
+
+        Cohort cohort = new Cohort();
+        cohort.setCohortStatus(CohortStatus.INCOMING);
+
+        try{
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(cohort);
+        } catch (MeedlException e){
+            log.info("Error: {}", e.getMessage());
+        }
+
+        Exception message = assertThrows(MeedlException.class, () ->
+                loaneeService.deferProgram(firstLoanee, userId));
+    }
+
+    @Test
+    void deferProgramThrowsWhenCohortIsGraduated() {
+        Loanee loanee = new Loanee();
+        loanee.setLoanId(mockId);
+        loanee.setId(mockId);
+        loanee.setDeferReason("Hunger want finish me");
+
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+
+        Loanee foundLoanee = new Loanee();
+        userIdentity.setId(userId);
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.setCohortId(mockId);
+
+        Cohort cohort = new Cohort();
+        cohort.setCohortStatus(CohortStatus.GRADUATED);
+
+        try{
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(cohort);
+        } catch (MeedlException e){
+            log.info("Error: {}", e.getMessage());
+        }
+
+        Exception message = assertThrows(MeedlException.class, () ->
+                loaneeService.deferProgram(loanee, userId));
+    }
+
+    @Test
+    void deferProgramWithAnotherUser() {
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+
+        Loanee foundLoanee = new Loanee();
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.getUserIdentity().setId("different-user-id");
+
+        try {
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+        } catch (MeedlException e) {
+            log.info("Error: {}", e.getMessage());
+        }
+
+        Exception e = assertThrows(MeedlException.class, () ->
+                loaneeService.deferProgram(firstLoanee, mockId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "invalid-uuid"})
+    void deferProgramThrowsWhenLoanIdInvalid(String loanId) {
+        Loanee loanee = new Loanee();
+        loanee.setLoanId(loanId);
+
+        assertThrows(MeedlException.class, () ->
+                loaneeService.deferProgram(loanee, mockId));
+    }
+
+    @Test
+    void deferProgramSuccessfully() {
+
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+
+
+        Loanee foundLoanee = new Loanee();
+        userIdentity.setId(userId);
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.setCohortId(mockId);
+
+        Cohort cohort = new Cohort();
+        cohort.setCohortStatus(CohortStatus.CURRENT);
+        String result = null;
+        try{
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+            when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
+            when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
+            result = loaneeService.deferProgram(firstLoanee, userId);
+        } catch (Exception e) {
+            log.info("Error: {}", e.getMessage());
+        }
+
+        assertEquals("Successfully deferred", result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "invalid-uuid"})
+    void resumeProgramThrowsWhenLoanIdIsInvalid(String loanId) {
+        Loanee loanee = new Loanee();
+        loanee.setLoanId(loanId);
+
+        assertThrows(MeedlException.class, () ->
+                loaneeService.resumeProgram(loanId, mockId, mockId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "invalid-uuid"})
+    void resumeProgramThrowsWhenCohortIdIsInvalid(String cohortId) {
+        assertThrows(MeedlException.class, () ->
+                loaneeService.resumeProgram(mockId, cohortId, mockId));
+    }
+
+    @Test
+    void resumeProgramSuccessfully() {
+
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+        loan.setLoanStatus(LoanStatus.DEFERRED);
+
+
+        Loanee foundLoanee = new Loanee();
+        userIdentity.setId(userId);
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.setCohortId(mockId);
+
+        Cohort cohort = new Cohort();
+        cohort.setId(mockId);
+        cohort.setCohortStatus(CohortStatus.CURRENT);
+        String result = null;
+        try{
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+            when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
+            when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
+            result = loaneeService.resumeProgram(mockId, cohort.getId(), userId);
+        } catch (Exception e) {
+            log.info("Error: {}", e.getMessage());
+        }
+
+        assertEquals("Successfully resumed", result);
+    }
+
+    @Test
+    void resumeToAGraduatedCohort() {
+
+        Loan loan = new Loan();
+        loan.setLoaneeId(mockId);
+        loan.setLoanStatus(LoanStatus.DEFERRED);
+
+
+        Loanee foundLoanee = new Loanee();
+        userIdentity.setId(userId);
+        foundLoanee.setUserIdentity(userIdentity);
+        foundLoanee.setCohortId(mockId);
+
+        Cohort cohort = new Cohort();
+        cohort.setId(mockId);
+        cohort.setCohortStatus(CohortStatus.GRADUATED);
+        try{
+            when(loanOutputPort.findLoanById(mockId)).thenReturn(loan);
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
+            when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
+        } catch (Exception e) {
+            log.info("Error: {}", e.getMessage());
+        }
+
+        assertThrows(MeedlException.class, () -> loaneeService.
+                resumeProgram(mockId, cohort.getId(), userId));
     }
 
     @Test

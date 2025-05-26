@@ -44,6 +44,11 @@ public class Loanee {
     private String cohortName;
     private LocalDate cohortStartDate;
     private String programName;
+    private String programId;
+    private String loanId;
+    private String deferReason;
+    private LocalDateTime deferredDateAndTime;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());

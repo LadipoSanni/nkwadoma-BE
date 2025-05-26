@@ -12,6 +12,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationId
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -33,6 +34,8 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.AllArgsConstructor;
@@ -127,7 +130,6 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
         UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        log.info("----------> User identity ---------> {} userId {}", userIdentity, userId);
         if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
             Optional<Loanee> foundLoanee = loaneeOutputPort
                     .findByUserId(userId);
@@ -398,6 +400,56 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
         return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+    }
+
+    @Override
+    public String deferProgram(Loanee loanee, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateDataElement(loanee.getDeferReason(), "Reason cannot be empty");
+        Loan loan =
+                loanOutputPort.findLoanById(loanee.getLoanId());
+        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot defer another loanee");
+        }
+
+        Cohort cohort = cohortOutputPort.findCohort(foundLoanee.getCohortId());
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
+        }
+        if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("Loanee is already deferred");
+        }
+
+        foundLoanee.setDeferredDateAndTime(LocalDateTime.now());
+        foundLoanee.setDeferReason(loanee.getDeferReason());
+        loaneeOutputPort.save(foundLoanee);
+
+        loan.setLoanStatus(LoanStatus.DEFERRED);
+        loanOutputPort.save(loan);
+        return "Successfully deferred";
+    }
+
+    @Override
+    public String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        Loan loan =
+                loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(loanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot resume program on behalf of another loanee");
+        }
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        if (!loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("The action is for a loanee that deferred");
+        }
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Loanee can only resume to a current cohort. Selected cohort is "+ cohort.getCohortStatus());
+        }
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+        loanOutputPort.save(loan);
+        return "Successfully resumed";
     }
 
     @Override
