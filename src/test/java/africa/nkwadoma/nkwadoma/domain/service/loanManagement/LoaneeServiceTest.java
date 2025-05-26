@@ -515,16 +515,30 @@ class LoaneeServiceTest {
 
 
     @Test
-    void dropOutFromCohortByLoanee(){
+    void dropOutFromCohortByLoanee() throws MeedlException {
         String response = "";
         try {
             String reason = "School na scam";
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            elites.setStartDate(LocalDate.now());
             when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            firstLoanee.setCohortId(elites.getId());
+            elites.setProgramId(atlasProgram.getId());
+            when(programOutputPort.findProgramById(elites.getProgramId())).thenReturn(atlasProgram);
+            when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+            when(loanOutputPort.save(loan)).thenReturn(loan);
+            when(organizationEmployeeIdentityOutputPort.
+                    findAllEmployeesInOrganizationByOrganizationIdAndRole(atlasProgram.getOrganizationId(),
+                            IdentityRole.ORGANIZATION_ADMIN)).thenReturn(List.of(organizationEmployeeIdentity));
+
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER)).thenReturn(List.of(userIdentity));
+
             response = loaneeService.dropOutFromCohort(mockId,mockId,reason);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("Loanee has been dropped out", response);
     }
 }
 

@@ -40,6 +40,7 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private String setReasonForDropOut;
 
 
     public void validate() throws MeedlException {
