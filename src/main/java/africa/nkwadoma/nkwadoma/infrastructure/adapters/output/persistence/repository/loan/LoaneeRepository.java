@@ -2,6 +2,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repo
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -76,11 +77,11 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                                                    @Param("organizationId") String organizationId);
 
     @Modifying
+    @Transactional
     @Query(value = """
-        UPDATE LoaneeEntity l SET l.loaneeStatus = : status
-        WHERE l.id IN (: ids) AND (: status != 'UNARCHIVE' OR l.loaneeStatus = 'ARCHIVE')
+        UPDATE LoaneeEntity l SET l.loaneeStatus = :status
+        WHERE l.id IN (:ids)
  """)
     void updateStatusByIds(@Param("ids") List<String> ids, @Param("status") LoaneeStatus status);
 
-    List<LoaneeEntity> findLoaneesByIdAndStatus(List<String> loaneesId, LoaneeStatus loaneeStatus);
 }

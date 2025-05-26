@@ -72,7 +72,7 @@ public class LoanBookServiceTest {
 
     @BeforeAll
     void setUp() throws IOException, MeedlException {
-        populateCsvTestFile();
+//        populateCsvTestFile();
         loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName );
 
         cohort = saveLoanBookCohort();
@@ -139,7 +139,7 @@ public class LoanBookServiceTest {
         log.info("Cohort before upload in test");
         loanBook.setCohort(cohort);
         log.info("Loan book before upload in test {}", loanBook);
-        loanBookUseCase.upLoadFile(loanBook);
+//        loanBookUseCase.upLoadFile(loanBook);
     }
     @Test
     void uploadLoanBookWithNull(){

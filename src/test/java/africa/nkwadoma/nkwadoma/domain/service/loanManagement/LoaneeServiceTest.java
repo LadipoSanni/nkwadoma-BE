@@ -517,7 +517,7 @@ class LoaneeServiceTest {
     void archiveLoanee(){
         List<Loanee> loaneeList = new ArrayList<>();
         try{
-            doNothing().when(loaneeOutputPort.archiveOrUnArchiveByIds(List.of(mockId),LoaneeStatus.ARCHIVE);
+//            doNothing().when(loaneeOutputPort.archiveOrUnArchiveByIds(List.of(mockId),LoaneeStatus.ARCHIVE));
             String response = loaneeService.archiveOrUnArchiveByIds(mockId,List.of(mockId),LoaneeStatus.ARCHIVE);
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
