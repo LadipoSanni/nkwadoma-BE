@@ -61,7 +61,7 @@ public interface CohortRepository extends JpaRepository<CohortEntity, String> {
         c.startDate AS startDate,
         COALESCE(SUM(
             CASE 
-                WHEN lne.onboardingMode = 'FILE_UPLOADED' THEN lld.amountRequested
+                WHEN lne.onboardingMode = 'FILE_UPLOADED_FOR_DISBURSED_LOANS' THEN lld.amountRequested
                 ELSE lr.loanAmountRequested
             END
         ), 0) AS amountRequested,

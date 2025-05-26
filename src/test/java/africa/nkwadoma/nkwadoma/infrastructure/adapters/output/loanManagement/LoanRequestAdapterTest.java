@@ -16,6 +16,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.education.*;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.*;
+import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.*;
 import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.*;
@@ -173,7 +174,7 @@ class LoanRequestAdapterTest {
             log.info("Cohort with name {} saved in test. For program {}",cohort.getName(), cohort.getProgramId());
             loanBreakdowns = loanBreakdownOutputPort.saveAllLoanBreakDown(loanBreakdowns);
 
-            UserIdentity userIdentity = TestData.createTestUserIdentity("loxeha1691@fundapk.com");
+
             loaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(3000000.00)).
                     initialDeposit(BigDecimal.valueOf(1000000.00)).build();
             LoaneeLoanBreakdown accommodationBreakdown = LoaneeLoanBreakdown.builder().
@@ -185,14 +186,13 @@ class LoanRequestAdapterTest {
                     itemAmount(feeding.getItemAmount()).
                     itemName(feeding.getItemName()).build();
 
-            Optional<UserIdentity> foundUser = identityManagerOutputPort.getUserByEmail(userIdentity.getEmail());
-            if (foundUser.isPresent()) {
-                log.info("Deleting user {} found in test before saving", foundUser.get().getEmail());
-                identityManagerOutputPort.deleteUser(foundUser.get());
-            }
+            UserIdentity userIdentity = TestData.createTestUserIdentity(TestUtils.generateEmail(5));
+            userIdentity.setIdentityVerified(true);
+            log.info("before Saving user {} in test, with id {}, identity verified {}", userIdentity.getEmail(), userId, userIdentity.isIdentityVerified());
             UserIdentity savedUserIdentity = userIdentityOutputPort.save(userIdentity);
+            log.info("user identity verified status {}", savedUserIdentity.isIdentityVerified());
             userId = savedUserIdentity.getId();
-            log.info("Saved user {} in test, with id {}", savedUserIdentity.getEmail(), userId);
+            log.info("Saved user {} in test, with id {}, identity verified {}", savedUserIdentity.getEmail(), userId, savedUserIdentity.isIdentityVerified());
 
             loanee = new Loanee();
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
@@ -202,7 +202,9 @@ class LoanRequestAdapterTest {
             loaneeLoanBreakdowns = List.of(accommodationBreakdown, feedingBreakdown);
             loanee.setLoanBreakdowns(loaneeLoanBreakdowns);
 
+            log.info("loanee verification status before adding to cohort {}",loanee.getUserIdentity().isIdentityVerified());
             loanee = loaneeUseCase.addLoaneeToCohort(loanee);
+            log.info("loanee verification status after adding to cohort {}",loanee.getUserIdentity().isIdentityVerified());
             log.info("Loanee {} added to cohort with id {}", loanee.getUserIdentity().getEmail(), loanee.getCohortId());
             assertNotNull(loanee);
             loaneeId = loanee.getId();
@@ -235,8 +237,6 @@ class LoanRequestAdapterTest {
             loanee.setLoaneeLoanDetail(loaneeLoanDetail);
             loanRequest.setLoanee(loanee);
             loanRequest.setLoaneeId(loaneeId);
-            loanRequest.setLoanReferralId(loanReferralId);
-            loanRequest.setCohortId(eliteCohortId);
             loanRequest.setCreatedDate(LocalDateTime.now());
             loanRequest.setLoanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested());
         }
@@ -255,6 +255,7 @@ class LoanRequestAdapterTest {
     void save() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
@@ -286,15 +287,19 @@ class LoanRequestAdapterTest {
     @Test
     void viewAllLoanRequests() {
         try {
+            loanRequest.setId(loanReferralId);
+
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
+            log.info("Loan request saved in test. {}", savedLoanRequest);
         } catch (MeedlException e) {
             log.error("Error saving loan request: ", e);
         }
         Page<LoanRequest> loanRequests = Page.empty();
         try {
             loanRequests = loanRequestOutputPort.viewAll(0, 10);
+            log.info("Total loan request present in test. {}", loanRequests);
         } catch (MeedlException e) {
             log.error("Error viewing all loan requests ", e);
         }
@@ -306,6 +311,7 @@ class LoanRequestAdapterTest {
     void viewAllLoanRequestsThatHaveBeenApproved() {
         try {
             loanRequest.setStatus(LoanRequestStatus.APPROVED);
+            loanRequest.setId(loanReferralId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
@@ -325,6 +331,8 @@ class LoanRequestAdapterTest {
     @Test
     void viewAllLoanRequestsByOrganizationId() {
         try {
+            loanRequest.setId(loanReferralId);
+            loanRequest.setOrganizationId(organizationId);
             LoanRequest savedLoanRequest = loanRequestOutputPort.save(loanRequest);
             assertNotNull(savedLoanRequest);
             loanRequestId = savedLoanRequest.getId();
@@ -361,6 +369,7 @@ class LoanRequestAdapterTest {
     void viewLoanRequestById() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);
@@ -369,19 +378,19 @@ class LoanRequestAdapterTest {
         assertNotNull(savedLoanRequest.getId());
         loanRequestId = savedLoanRequest.getId();
         try {
-            Optional<LoanRequest> foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
+            LoanRequest foundLoanRequest = loanRequestOutputPort.findById(loanRequestId);
 
-            assertFalse(foundLoanRequest.isEmpty());
-            assertNotNull(foundLoanRequest.get().getId());
-            assertNotNull(foundLoanRequest.get().getNextOfKin());
-            assertEquals(foundLoanRequest.get().getReferredBy(), amazingGrace.getName());
-            assertEquals(foundLoanRequest.get().getProgramName(), dataAnalytics.getName());
-            assertEquals(foundLoanRequest.get().getCohortName(), cohort.getName());
-            assertEquals(foundLoanRequest.get().getCohortStartDate(), cohort.getStartDate());
-            assertNotNull(foundLoanRequest.get().getLoanAmountRequested());
-            assertNotNull(foundLoanRequest.get().getInitialDeposit());
-            assertEquals("John", foundLoanRequest.get().getFirstName());
-            assertEquals("Doe", foundLoanRequest.get().getLastName());
+            assertNotNull(foundLoanRequest);
+            assertNotNull(foundLoanRequest.getId());
+            assertNotNull(foundLoanRequest.getNextOfKin());
+            assertEquals(foundLoanRequest.getReferredBy(), amazingGrace.getName());
+            assertEquals(foundLoanRequest.getProgramName(), dataAnalytics.getName());
+            assertEquals(foundLoanRequest.getCohortName(), cohort.getName());
+            assertEquals(foundLoanRequest.getCohortStartDate(), cohort.getStartDate());
+            assertNotNull(foundLoanRequest.getLoanAmountRequested());
+            assertNotNull(foundLoanRequest.getInitialDeposit());
+            assertEquals("John", foundLoanRequest.getFirstName());
+            assertEquals("Doe", foundLoanRequest.getLastName());
 
             UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
 
@@ -392,13 +401,13 @@ class LoanRequestAdapterTest {
 //            assertEquals("Brother", userIdentity.getNextOfKin().getNextOfKinRelationship());
 //            assertEquals("2, Spencer Street, Yaba, Lagos", userIdentity.getNextOfKin().getContactAddress())
 
-            assertEquals(joel.getGender(), foundLoanRequest.get().getUserIdentity().getGender());
-            assertEquals(joel.getMaritalStatus(), foundLoanRequest.get().getUserIdentity().getMaritalStatus());
-            assertEquals(joel.getResidentialAddress(), foundLoanRequest.get().getUserIdentity().getResidentialAddress());
-            assertEquals(joel.getNationality(), foundLoanRequest.get().getUserIdentity().getNationality());
-            assertEquals(joel.getDateOfBirth(), foundLoanRequest.get().getUserIdentity().getDateOfBirth());
-            assertEquals(joel.getStateOfOrigin(), foundLoanRequest.get().getUserIdentity().getStateOfOrigin());
-            assertEquals(joel.getStateOfResidence(), foundLoanRequest.get().getUserIdentity().getStateOfResidence());
+            assertEquals(joel.getGender(), foundLoanRequest.getUserIdentity().getGender());
+            assertEquals(joel.getMaritalStatus(), foundLoanRequest.getUserIdentity().getMaritalStatus());
+            assertEquals(joel.getResidentialAddress(), foundLoanRequest.getUserIdentity().getResidentialAddress());
+            assertEquals(joel.getNationality(), foundLoanRequest.getUserIdentity().getNationality());
+            assertEquals(joel.getDateOfBirth(), foundLoanRequest.getUserIdentity().getDateOfBirth());
+            assertEquals(joel.getStateOfOrigin(), foundLoanRequest.getUserIdentity().getStateOfOrigin());
+            assertEquals(joel.getStateOfResidence(), foundLoanRequest.getUserIdentity().getStateOfResidence());
         } catch (MeedlException e) {
             log.error("", e);
         }
@@ -408,6 +417,7 @@ class LoanRequestAdapterTest {
     void findLoanRequestById() {
         LoanRequest savedLoanRequest = null;
         try {
+            loanRequest.setId(loanReferralId);
             savedLoanRequest = loanRequestOutputPort.save(loanRequest);
         } catch (MeedlException e) {
             log.error("", e);

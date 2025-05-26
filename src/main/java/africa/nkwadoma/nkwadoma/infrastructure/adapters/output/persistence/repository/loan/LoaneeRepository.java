@@ -1,9 +1,12 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -61,4 +64,24 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
                         or upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
         """)
     Page<LoaneeProjection> findAllByLoanProductIdAndNameFragment(@Param("loanProductId")String loanProductId, @Param("nameFragment") String nameFragment, Pageable pageRequest);
+
+
+    @Query("""
+            SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END
+            FROM LoaneeEntity l 
+            JOIN CohortEntity c ON l.cohortId = c.id 
+            JOIN ProgramEntity p ON c.programId = p.id 
+            WHERE l.id = :loaneeId AND p.organizationIdentity.id = :organizationId
+                        """)
+    boolean checkIfLoaneeCohortExistInOrganization(@Param("loaneeId") String loaneeId,
+                                                   @Param("organizationId") String organizationId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE LoaneeEntity l SET l.loaneeStatus = :status
+        WHERE l.id IN (:ids)
+ """)
+    void updateStatusByIds(@Param("ids") List<String> ids, @Param("status") LoaneeStatus status);
+
 }

@@ -4,15 +4,11 @@ import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.CreateCohortRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.loanBook.LoanBookRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanProductResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.loanBook.LoanBookResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanManagement.loanBook.LoanBookRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +41,10 @@ public class LoanBookController {
     @PostMapping(value = "/upload/{cohortId}/{loanProductId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     @Operation(summary = LOAN_BOOK_CREATION_VIA_FILE_UPLOAD,description = LOAN_BOOK_CREATION_DESCRIPTION)
-    public ResponseEntity<ApiResponse<?>> createLoanBook (@AuthenticationPrincipal Jwt meedlUser,
-                                                             @RequestPart("file") MultipartFile file,
-                                                             @PathVariable String cohortId,
-                                                             @PathVariable String loanProductId
+    public ResponseEntity<ApiResponse<?>> uploadLoanBook(@AuthenticationPrincipal Jwt meedlUser,
+                                                         @RequestPart("file") MultipartFile file,
+                                                         @PathVariable String cohortId,
+                                                         @PathVariable String loanProductId
                                                             ) throws MeedlException {
         log.info("Upload loan book. Api called .... ");
 //        LoanBook loanBook = loanBookRestMapper.map(cohortId, convertToTempFile(file), meedlUser.getClaimAsString("sub") );
@@ -56,6 +52,7 @@ public class LoanBookController {
         LoanBook loanBook = new LoanBook();
         loanBook.setFile(convertToTempFile(file));
         loanBook.setLoanProductId(loanProductId);
+        loanBook.setActorId(meedlUser.getClaimAsString("sub"));
         loanBook.setCohort(Cohort.builder().id(cohortId).createdBy(meedlUser.getClaimAsString("sub")).build());
         LoanBook loanBookReturned = loanBookUseCase.upLoadFile(loanBook);
         LoanBookResponse loanBookResponse = new LoanBookResponse();
@@ -72,7 +69,7 @@ public class LoanBookController {
         String originalFilename = multipartFile.getOriginalFilename();
 
         if (originalFilename == null || !originalFilename.contains(".")) {
-            throw new IllegalArgumentException("File must have a valid extension");
+            throw new MeedlException("File must have a valid extension");
         }
 
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));

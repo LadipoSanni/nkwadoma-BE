@@ -14,6 +14,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,12 +40,24 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private List<RepaymentHistory> repaymentHistories;
+    private String cohortName;
+    private LocalDate cohortStartDate;
+    private String programName;
+    private String programId;
+    private String loanId;
+    private String deferReason;
+    private LocalDateTime deferredDateAndTime;
 
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateObjectInstance(loaneeLoanDetail, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
+        MeedlValidator.validateObjectInstance(loaneeLoanDetail, "Please provide loanee loan details.");
+        if (loaneeLoanDetail.getInitialDeposit() == null) {
+            loaneeLoanDetail.setInitialDeposit(BigDecimal.valueOf(0));
+        }
         validateLoaneeUserIdentity();
     }
 

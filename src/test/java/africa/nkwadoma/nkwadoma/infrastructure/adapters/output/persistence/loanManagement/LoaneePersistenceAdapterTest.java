@@ -11,7 +11,10 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -22,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +50,6 @@ class LoaneePersistenceAdapterTest {
     private int pageNumber = 0;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeLoanDetail secondLoaneeLoanDetail;
-
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -108,6 +111,7 @@ class LoaneePersistenceAdapterTest {
         anotherLoanee.setCohortId(id);
         anotherLoanee.setUserIdentity(anotherUser);
         anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
+
     }
 
     @Test

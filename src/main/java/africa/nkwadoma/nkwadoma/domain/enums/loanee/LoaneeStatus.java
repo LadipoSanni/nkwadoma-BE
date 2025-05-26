@@ -5,5 +5,5 @@ public enum LoaneeStatus {
     REFERRED,
     INVITED,
     ACCEPTED,
-    REJECTED,
+    REJECTED, DROPOUT, ARCHIVE,UNARCHIVE
 }

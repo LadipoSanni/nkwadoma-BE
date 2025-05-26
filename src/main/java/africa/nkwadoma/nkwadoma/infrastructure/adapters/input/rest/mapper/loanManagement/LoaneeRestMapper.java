@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.mapper.loanM
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanBreakdown;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeLoanBreakdownRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
@@ -21,11 +22,20 @@ public interface LoaneeRestMapper {
     @Mapping(target = "loanBreakdowns"  , source = "loaneeLoanDetail.loanBreakdown")
     Loanee toLoanee(LoaneeRequest loaneeRequest);
 
+    @Mapping(target= "cohortId", source = "cohortId")
+    @Mapping(target= "programId", source = "programId")
+    @Mapping(target = "deferReason", source = "deferReason")
+    Loanee toLoanee(DeferProgramRequest deferProgramRequest);
 
     @Mapping( target= "loaneeLoanDetail.loanBreakdown",source = "loanBreakdowns")
     @Mapping( target= "loaneeLoanDetail.initialDeposit",source = "loaneeLoanDetail.initialDeposit")
     @Mapping( target= "loaneeLoanDetail.amountRequested",source = "loaneeLoanDetail.amountRequested")
     @Mapping(target = "creditScore", source = "creditScore")
+    @Mapping(target = "loaneeLoanDetail.amountReceived", source= "loaneeLoanDetail.amountReceived")
+    @Mapping(target = "loaneeLoanDetail.amountRepaid", source= "loaneeLoanDetail.amountRepaid")
+    @Mapping(target = "loaneeLoanDetail.amountOutstanding", source= "loaneeLoanDetail.amountOutstanding")
+    @Mapping(target = "loaneeLoanDetail.tuitionAmount", source = "loaneeLoanDetail.tuitionAmount")
+    @Mapping(target = "cohortStartDate", source = "cohortStartDate")
     LoaneeResponse toLoaneeResponse(Loanee loanee);
 
     @Mapping(target = "loanBreakdownId", source = "loaneeLoanBreakdownId")

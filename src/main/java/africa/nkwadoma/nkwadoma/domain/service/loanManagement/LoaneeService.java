@@ -11,9 +11,15 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEm
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.CohortStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.IdentityException;
@@ -26,7 +32,10 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdenti
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.exceptions.LoanException;
 import africa.nkwadoma.nkwadoma.infrastructure.utilities.*;
 import lombok.AllArgsConstructor;
@@ -41,6 +50,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.DROP_OUT;
+import static africa.nkwadoma.nkwadoma.domain.enums.constants.notification.MeedlNotificationMessages.LOAN_DEFERRAL;
 
 @Slf4j
 @AllArgsConstructor
@@ -61,6 +73,9 @@ public class LoaneeService implements LoaneeUseCase {
     private final LoaneeLoanBreakDownOutputPort loaneeLoanBreakDownOutputPort;
     private final LoanMetricsOutputPort loanMetricsOutputPort;
     private final LoanProductOutputPort loanProductOutputPort;
+    private final LoanOutputPort loanOutputPort;
+    private final MeedlNotificationOutputPort meedlNotificationOutputPort;
+    private final UserIdentityOutputPort userIdentityOutputPort;
 
     @Override
     public Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException {
@@ -111,9 +126,17 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+    public Loanee viewLoaneeDetails(String id, String userId) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            Optional<Loanee> foundLoanee = loaneeOutputPort
+                    .findByUserId(userId);
+            if (foundLoanee.isPresent() && !foundLoanee.get().getId().equals(loanee.getId())) {
+                throw new MeedlException("Access denied: You can only view your own loan details.");
+            }
+        }
         log.info("loanee found successfully. Loanee with id {}", id);
         return updateLoaneeCreditScore(loanee);
     }
@@ -122,20 +145,32 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
-        if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
-                creditScoreIsAboveOrEqualOneMonth(loanee)) {
-            loanee = updateCreditScore(loanee);
+        if (loanee.getUserIdentity().getBvn() != null) {
+            if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
+                    creditScoreIsAboveOrEqualOneMonth(loanee)) {
+                loanee = updateCreditScore(loanee);
+            }
         }
 
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        loanee.setCohortName(cohort.getName());
+        loanee.setCohortStartDate(cohort.getStartDate());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        loanee.setProgramName(program.getName());
+
+//        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
+//        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
         return loanee;
+
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity().getBvn(), UserMessages.BVN_CANNOT_BE_EMPTY.getMessage());
         log.info("Updating credit score, for loanee with id {}. Last date updated was {}.", loanee.getId(), loanee.getCreditScoreUpdatedAt());
         log.info("Encrypted Loanee BVN: {}", loanee.getUserIdentity().getBvn());
-        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn());
+        String decryptedBVN = tokenUtils.decryptAES(loanee.getUserIdentity().getBvn(), "Error processing identity verification");
         log.info("Decrypted Loanee BVN: {}", decryptedBVN);
 
         try {
@@ -174,7 +209,7 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee.getOnboardingMode(), LoaneeMessages.INVALID_ONBOARDING_MODE.getMessage());
 
         OrganizationIdentity organizationIdentity = null;
-        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED)){
+        if (loanee.getOnboardingMode().equals(OnboardingMode.FILE_UPLOADED_FOR_DISBURSED_LOANS)){
             organizationIdentity = getLoaneeOrganization(loanee.getCohortId());
         }else {
             organizationIdentity = getLoaneeOrganization(loanee);
@@ -294,11 +329,15 @@ public class LoaneeService implements LoaneeUseCase {
         log.info("Successfully confirmed user does not previously exist. {}",loanee.getUserIdentity().getEmail());
     }
 
-    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) {
+    private static void calculateAmountRequested(Loanee loanee, BigDecimal totalLoanBreakDown, Cohort cohort) throws LoaneeException {
         log.info("Calculating amount requested for loanee {}", loanee.getUserIdentity().getEmail());
         loanee.getLoaneeLoanDetail().
                 setAmountRequested(totalLoanBreakDown.add(cohort.getTuitionAmount()).
                         subtract(loanee.getLoaneeLoanDetail().getInitialDeposit()));
+        if (loanee.getLoaneeLoanDetail().getAmountRequested().compareTo(BigDecimal.ZERO)  <= 0){
+            log.info("Loanee amount request is zero or negative {}", loanee.getLoaneeLoanDetail().getAmountRequested());
+            throw new LoaneeException(LoaneeMessages.LOANEE_WITH_ZERO_OR_NEGATIVE_AMOUNT_REQUEST_CANNOT_BE_ADDED_TO_COHORT.getMessage());
+        }
     }
 
     private static BigDecimal getTotalLoanBreakdown(Loanee loanee) throws MeedlException {
@@ -361,6 +400,204 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateUUID(loanProductId,"Loan product id cannot be empty");
         LoanProduct loanProduct = loanProductOutputPort.findById(loanProductId);
         return loaneeOutputPort.searchLoaneeThatBenefitedFromLoanProduct(loanProduct.getId(),name,pageSize,pageNumber);
+    }
+
+    @Override
+    public String deferProgram(Loanee loanee, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getLoanId(), LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateDataElement(loanee.getDeferReason(), "Reason cannot be empty");
+        Loan loan =
+                loanOutputPort.findLoanById(loanee.getLoanId());
+        Loanee foundLoanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(foundLoanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot defer another loanee");
+        }
+
+        Cohort cohort = cohortOutputPort.findCohort(foundLoanee.getCohortId());
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Deferral is only allowed for 'CURRENT' cohorts. This cohort's status is "+ cohort.getCohortStatus());
+        }
+        if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("Loanee is already deferred");
+        }
+
+        foundLoanee.setDeferredDateAndTime(LocalDateTime.now());
+        foundLoanee.setDeferReason(loanee.getDeferReason());
+        loaneeOutputPort.save(foundLoanee);
+
+        loan.setLoanStatus(LoanStatus.DEFERRED);
+        loanOutputPort.save(loan);
+        return "Successfully deferred";
+    }
+
+    @Override
+    public String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException {
+        MeedlValidator.validateUUID(loanId, LoanMessages.INVALID_LOAN_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+        Loan loan =
+                loanOutputPort.findLoanById(loanId);
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loan.getLoaneeId());
+        if (!userId.equals(loanee.getUserIdentity().getId())) {
+            throw new MeedlException("Access denied: A loanee cannot resume program on behalf of another loanee");
+        }
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        if (!loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("The action is for a loanee that deferred");
+        }
+        if (!cohort.getCohortStatus().equals(CohortStatus.CURRENT)){
+            throw new MeedlException("Loanee can only resume to a current cohort. Selected cohort is "+ cohort.getCohortStatus());
+        }
+        loan.setLoanStatus(LoanStatus.PERFORMING);
+        loanOutputPort.save(loan);
+        return "Successfully resumed";
+    }
+
+    @Override
+    public String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException {
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        UserIdentity userIdentity = identityOutputPort.findById(actorId);
+        Optional<OrganizationEmployeeIdentity> organizationEmployeeIdentity =
+                organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
+
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+
+        boolean cohortExistInOrganization =
+                loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
+        if (! cohortExistInOrganization) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+        }
+
+        Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
+
+        sendLoaneeNotification(loan, loanee, userIdentity);
+
+        sendPortfolioManagersNotification(loan, userIdentity);
+
+        return "Loanee has been Deferred";
+    }
+
+    private Optional<Loan> findLoaneeLoanAndDeferLoan(Loanee loanee) throws MeedlException {
+        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
+        if (loan.isEmpty()){
+            throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
+        }
+
+        loan.get().setLoanStatus(LoanStatus.DEFERRED);
+        loanOutputPort.save(loan.get());
+        return loan;
+    }
+
+    private void sendLoaneeNotification(Optional<Loan> loan, Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(loan.get().getId())
+                .user(loanee.getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
+                .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_LOANEE.getMessage())
+                .title(LOAN_DEFERRAL.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
+    }
+
+    private void sendPortfolioManagersNotification(Optional<Loan> loan, UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> portfolioManagers =
+                userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        MeedlNotification portfolioManagerNotification =
+                MeedlNotification.builder()
+                        .contentId(loan.get().getId())
+                        .notificationFlag(NotificationFlag.LOAN_DEFERRAL)
+                        .title(LOAN_DEFERRAL.getMessage())
+                        .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                        .contentDetail(MeedlNotificationMessages.LOAN_DEFERRAL_PORTFOLIO_MANAGER.getMessage())
+                        .senderMail(userIdentity.getEmail())
+                        .timestamp(LocalDateTime.now())
+                        .build();
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            portfolioManagerNotification.setUser(portfolioManager);
+            meedlNotificationOutputPort.save(portfolioManagerNotification);
+        }
+    }
+
+    @Override
+    public String indicateDropOutLoanee(String actorId, String loaneeId) throws MeedlException {
+
+        MeedlValidator.validateUUID(actorId,UserMessages.INVALID_USER_ID.getMessage());
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+
+        UserIdentity userIdentity = identityOutputPort.findById(actorId);
+        Optional<OrganizationEmployeeIdentity> organizationEmployeeIdentity =
+                organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId());
+
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+
+        boolean cohortExistInOrganization =
+                loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
+        if (! cohortExistInOrganization) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
+        }
+
+        loanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
+        loaneeOutputPort.save(loanee);
+        sendLoaneeDropOutNotification(loanee, userIdentity);
+
+        sendPortfolioManagerDropOutNotification(loanee, userIdentity);
+
+        return "Loanee has been dropped out";
+    }
+
+    @Override
+    public String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException {
+        if (loaneeIds.isEmpty()){
+            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        for (String loaneeId : loaneeIds) {
+            MeedlValidator.validateUUID(loaneeId,UserMessages.INVALID_USER_ID.getMessage());
+        }
+        loaneeOutputPort.archiveOrUnArchiveByIds(loaneeIds,loaneeStatus);
+        if (loaneeIds.size() == 1) {
+            return "Loanee has been "+loaneeStatus.name();
+        }else {
+            return "Loanees has been "+loaneeStatus.name();
+        }
+    }
+
+    private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        List<UserIdentity> portfolioManagers =
+                userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+
+        MeedlNotification portfolioManagerNotification =
+                MeedlNotification.builder()
+                        .contentId(loanee.getId())
+                        .notificationFlag(NotificationFlag.DROP_OUT)
+                        .title(DROP_OUT.getMessage())
+                        .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                        .contentDetail(MeedlNotificationMessages.DROP_OUT_PORTFOLIO_MANAGER.getMessage())
+                        .senderMail(userIdentity.getEmail())
+                        .timestamp(LocalDateTime.now())
+                        .build();
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            portfolioManagerNotification.setUser(portfolioManager);
+            meedlNotificationOutputPort.save(portfolioManagerNotification);
+        }
+    }
+
+    private void sendLoaneeDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(loanee.getId())
+                .user(loanee.getUserIdentity())
+                .senderFullName(userIdentity.getFirstName()+" "+ userIdentity.getLastName())
+                .senderMail(userIdentity.getEmail())
+                .notificationFlag(NotificationFlag.DROP_OUT)
+                .contentDetail(MeedlNotificationMessages.DROP_OUT_LOANEE.getMessage())
+                .title(DROP_OUT.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        meedlNotificationOutputPort.save(meedlNotification);
     }
 }
 

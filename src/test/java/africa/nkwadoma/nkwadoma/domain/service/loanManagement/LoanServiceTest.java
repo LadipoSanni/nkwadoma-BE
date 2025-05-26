@@ -98,8 +98,8 @@ class LoanServiceTest {
 
         loanRequest = TestData.buildLoanRequest(loanee, loaneeLoanDetail);
         loanRequest.setLoaneeId(loanee.getId());
+        loanRequest.setId(loanReferral.getId());
         loanRequest.setLoanProductId(loanProduct.getId());
-        loanRequest.setLoanReferralId(loanReferral.getId());
         loanRequest.setReferredBy(organizationIdentity.getName());
         loanRequest.setCreatedDate(LocalDateTime.now());
 
@@ -121,13 +121,7 @@ class LoanServiceTest {
         try {
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
             loanRequest.setReferredBy(organizationIdentity.getName());
-            when(organizationIdentityOutputPort.findOrganizationByName(loanRequest.getReferredBy())).
-                    thenReturn(Optional.ofNullable(organizationIdentity));
-            when(loanMetricsOutputPort.findByOrganizationId(organizationIdentity.getId()))
-                    .thenReturn(Optional.ofNullable(loanMetrics));
-            when(loanMetricsOutputPort.save(loanMetrics)).thenReturn(loanMetrics);
             LoanRequest createdLoanRequest = loanService.createLoanRequest(loanRequest);
-
             verify(loanRequestOutputPort, times(1)).save(loanRequest);
             assertNotNull(createdLoanRequest);
         } catch (MeedlException e) {
@@ -200,8 +194,6 @@ class LoanServiceTest {
         try {
             when(loanReferralOutputPort.findById(loanReferral.getId())).thenReturn(loanReferral);
             when(loanRequestMapper.mapLoanReferralToLoanRequest(loanReferral)).thenReturn(loanRequest);
-            when(organizationIdentityOutputPort.findOrganizationByName(organizationIdentity.getName())).
-                    thenReturn(Optional.ofNullable(organizationIdentity));
             when(loanReferralOutputPort.save(loanReferral)).thenReturn(loanReferral);
             when(loanRequestOutputPort.save(loanRequest)).thenReturn(loanRequest);
             loanReferral.getLoanee().setReferredBy("RefferedBy");
@@ -375,5 +367,4 @@ class LoanServiceTest {
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
     }
-
 }

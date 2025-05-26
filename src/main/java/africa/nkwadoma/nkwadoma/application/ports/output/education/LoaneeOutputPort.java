@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.*;
@@ -30,4 +32,9 @@ public interface LoaneeOutputPort {
 
 
     Page<Loanee> searchLoaneeThatBenefitedFromLoanProduct(String id,String name, int pageSize, int pageNumber) throws MeedlException;
+
+    boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organization) throws MeedlException;
+
+    void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException;
+
 }

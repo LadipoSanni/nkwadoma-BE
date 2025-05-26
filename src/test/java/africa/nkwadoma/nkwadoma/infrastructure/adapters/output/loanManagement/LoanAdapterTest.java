@@ -182,14 +182,16 @@ class LoanAdapterTest {
 
             loanRequest = LoanRequest.builder().loanAmountRequested(loanReferral.getLoanee().getLoaneeLoanDetail().getAmountRequested())
                     .status(LoanRequestStatus.APPROVED).referredBy("Amazing Grace Enterprises").loanee(loanee).createdDate(LocalDateTime.now()).
-                    loaneeId(loanee.getId()).loanReferralId(loanReferralId).cohortId(cohortId)
+                    loaneeId(loanee.getId())
                     .dateTimeApproved(LocalDateTime.now()).build();
+            loanRequest.setId(loanReferralId);
             loanRequest = loanRequestOutputPort.save(loanRequest);
             log.info("Loan request saved: {}", loanRequest);
             assertNotNull(loanRequest.getId());
             loanRequestId = loanRequest.getId();
 
             LoanOffer loanOffer = TestData.buildLoanOffer(loanRequest, loanee);
+            loanOffer.setId(loanReferralId);
             loanOffer = loanOfferOutputPort.save(loanOffer);
             assertNotNull(loanOffer);
             loanOfferId = loanOffer.getId();
@@ -315,6 +317,22 @@ class LoanAdapterTest {
         assertNotNull(loans);
         assertNotNull(loans.getContent());
         assertEquals(1, loans.getTotalElements());
+    }
+
+    @Test
+    @Order(6)
+    void setLoanStatus(){
+        Loan foundLoan = new Loan();
+        try {
+            foundLoan = loanOutputPort.findLoanById(loanId);
+            foundLoan.setLoanStatus(LoanStatus.DEFERRED);
+            foundLoan = loanOutputPort.save(foundLoan);
+        } catch (MeedlException e) {
+            log.error("Error  : {}", e.getMessage());
+        }
+        assertNotNull(foundLoan);
+        assertEquals(LoanStatus.DEFERRED, foundLoan.getLoanStatus());
+        assertEquals(loanId, foundLoan.getId());
     }
 
     @ParameterizedTest

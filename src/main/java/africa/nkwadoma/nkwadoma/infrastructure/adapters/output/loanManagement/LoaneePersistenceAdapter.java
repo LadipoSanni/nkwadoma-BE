@@ -2,11 +2,15 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -102,6 +107,21 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         return loaneeProjections.map(loaneeMapper::mapProjecttionToLoanee);
     }
 
+    @Override
+    public boolean checkIfLoaneeCohortExistInOrganization(String loaneeId, String organizationId) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
+        return loaneeRepository.checkIfLoaneeCohortExistInOrganization(loaneeId,organizationId);
+    }
+
+    @Override
+    public void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException {
+        if (loaneesId.isEmpty()){
+            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
+    }
+
 
     @Override
     public List<Loanee> findSelectedLoaneesInCohort(String id, List<String> loaneeIds) throws MeedlException {
@@ -118,7 +138,10 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         if (loaneeEntity.isEmpty()) {
             return Optional.empty();
         }
+        log.info("Loanee found by user id. Is identity verified field Before mapping {}", loaneeEntity.get().getUserIdentity().isIdentityVerified());
         Loanee loanee = loaneeMapper.toLoanee(loaneeEntity.get());
+        loanee.getUserIdentity().setIdentityVerified(loaneeEntity.get().getUserIdentity().isIdentityVerified());
+        log.info("Loanee found by user id. Is identity verified field after mapping {}", loaneeEntity.get().getUserIdentity().isIdentityVerified());
         return Optional.of(loanee);
     }
 

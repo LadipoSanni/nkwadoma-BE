@@ -20,4 +20,7 @@ public class LoaneeLoanDetailEntity {
     private BigDecimal tuitionAmount;
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
+    private BigDecimal amountReceived;
+    private BigDecimal amountRepaid;
+    private BigDecimal amountOutstanding;
 }

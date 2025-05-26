@@ -290,4 +290,10 @@ public class OrganizationIdentityAdapter implements OrganizationIdentityOutputPo
         return organizations.map(organizationIdentityMapper::projectionToOrganizationIdentity);
     }
 
+
+    @Override
+    public List<OrganizationIdentity> findAllOrganization() {
+        List<OrganizationEntity> organizationEntities = organizationEntityRepository.findAll();
+        return organizationEntities.stream().map(organizationIdentityMapper::toOrganizationIdentity).toList();
+    }
 }

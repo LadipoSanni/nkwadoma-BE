@@ -47,7 +47,8 @@ public class LoanBookServiceTest {
     private OrganizationEmployeeIdentityOutputPort employeeIdentityOutputPort;
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
-    private final String absoluteCSVFilePath = "/Users/admin/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
+    private final String absoluteCSVFilePath = "/Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
+//    /Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook
     private final String CSVName = "loanBook.csv";
     private LoanBook loanBook;
     private Cohort cohort ;

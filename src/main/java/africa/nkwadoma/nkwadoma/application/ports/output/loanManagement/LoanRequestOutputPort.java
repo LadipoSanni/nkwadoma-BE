@@ -9,7 +9,7 @@ import java.util.*;
 public interface LoanRequestOutputPort {
     LoanRequest save(LoanRequest loanRequest) throws MeedlException;
 
-    Optional<LoanRequest> findById(String loanRequestId) throws MeedlException;
+    LoanRequest findById(String loanRequestId) throws MeedlException;
 
     Optional<LoanRequest> findLoanRequestById(String loanRequestId) throws MeedlException;
     void deleteLoanRequestById(String id) throws MeedlException;
@@ -19,4 +19,8 @@ public interface LoanRequestOutputPort {
     Page<LoanRequest> searchLoanRequest(String programId, String organizationId, String name,int pageSize, int pageNumber) throws MeedlException;
 
     Page<LoanRequest> filterLoanRequestByProgram(String programId, String organizationId, int pageSize, int pageNumber) throws MeedlException;
+
+    LoanRequest findLoanRequestByLoaneeId(String id) throws MeedlException;
+
+    int getCountOfAllVerifiedLoanRequestInOrganization(String id);
 }
