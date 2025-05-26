@@ -77,7 +77,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @GetMapping("cohorts/loanees")
+    @GetMapping("cohort/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
@@ -100,7 +100,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping("cohort/searchForLoanee")
+    @GetMapping("cohorts/search/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId) throws MeedlException {
@@ -141,7 +141,7 @@ public class LoaneeController {
     }
 
 
-    @GetMapping("loanProduct/search-loanees/{loanProductId}")
+    @GetMapping("loan-product/search/loanees/{loanProductId}")
     @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchLoanBeneficiaryFromLoanProduct(
             @PathVariable String loanProductId,
