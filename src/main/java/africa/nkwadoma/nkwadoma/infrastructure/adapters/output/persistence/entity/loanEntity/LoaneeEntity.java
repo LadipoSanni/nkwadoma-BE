@@ -37,4 +37,6 @@ public class LoaneeEntity {
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String setReasonForDropOut;
+    private LocalDateTime deferredDateAndTime;
+    private String deferReason;
 }

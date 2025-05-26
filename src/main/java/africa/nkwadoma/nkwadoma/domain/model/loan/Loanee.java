@@ -41,6 +41,14 @@ public class Loanee {
     private LocalDateTime referralDateTime;
     private String referredBy;
     private String setReasonForDropOut;
+    private List<RepaymentHistory> repaymentHistories;
+    private String cohortName;
+    private LocalDate cohortStartDate;
+    private String programName;
+    private String programId;
+    private String loanId;
+    private String deferReason;
+    private LocalDateTime deferredDateAndTime;
 
 
     public void validate() throws MeedlException {
