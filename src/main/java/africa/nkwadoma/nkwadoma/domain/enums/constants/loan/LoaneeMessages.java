@@ -33,7 +33,6 @@ public enum LoaneeMessages {
     LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION("Loanee does not associated with a cohort that belong to your organization "),
     LOANEE_DOES_NOT_EXIST_IN_COHORT("Loanee does not exist in cohort"),
     LOANEE_CANNOT_DROP_FROM_COHORT("Loanee cannot drop from cohort"),
-    LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION("Loanee does not associated with a cohort that belong to your organization "),
     LOANEES_ID_CANNOT_BE_EMPTY("Loanees cannot ID be empty"),;
 
     private final String message;
