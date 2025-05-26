@@ -33,7 +33,7 @@ import static africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.messag
 
 @Slf4j
 @RestController
-@RequestMapping(BASE_URL)
+@RequestMapping(BASE_URL + "loanee/")
 @RequiredArgsConstructor
 public class LoaneeController {
 
@@ -42,7 +42,7 @@ public class LoaneeController {
     private final LoanOutputPort loanOutputPort;
 
 
-    @PostMapping("addLoaneeToCohort")
+    @PostMapping("cohort")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> addLoaneeToCohort(@AuthenticationPrincipal Jwt meedlUser,
                                                             @RequestBody  @Valid LoaneeRequest loaneeRequest) throws MeedlException {
@@ -59,7 +59,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.CREATED);
     }
 
-    @GetMapping("loanees/{loaneeId}")
+    @GetMapping("{loaneeId}")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')  or hasRole('PORTFOLIO_MANAGER')  or hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> viewLoaneeDetails(@PathVariable String loaneeId,
                                                             @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
@@ -166,7 +166,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("loanee/defer/program")
+    @PutMapping("defer/program")
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> deferProgram(@AuthenticationPrincipal Jwt meedlUser,
                                                        @RequestBody DeferProgramRequest deferProgramRequest) throws MeedlException {
@@ -183,7 +183,7 @@ public class LoaneeController {
 
     }
 
-    @PutMapping("loanee/resume/program")
+    @PutMapping("resume/program")
     @PreAuthorize("hasRole('LOANEE')")
     public ResponseEntity<ApiResponse<?>> resumeProgram(@AuthenticationPrincipal Jwt meedlUser,
                                                        @RequestParam String loanId,
@@ -201,7 +201,7 @@ public class LoaneeController {
     }
 
 
-    @PostMapping("loanee/defer")
+    @PostMapping("defer")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> indicateDeferLoanee(@AuthenticationPrincipal Jwt meedlUser,
                                                               @RequestBody LoaneeDeferRequest loaneeDeferRequest) throws MeedlException {
@@ -214,7 +214,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @PostMapping("loanee/dropout")
+    @PostMapping("dropout")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
     public ResponseEntity<ApiResponse<?>> indicateDeferLoanee(@AuthenticationPrincipal Jwt meedlUser,
                                                               @RequestBody LoaneeDropOutRequest loaneeDropOutRequest) throws MeedlException {
@@ -226,6 +226,5 @@ public class LoaneeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
-
 
 }
