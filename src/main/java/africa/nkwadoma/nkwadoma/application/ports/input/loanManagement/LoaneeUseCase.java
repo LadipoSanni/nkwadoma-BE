@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanManagement;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -28,4 +29,6 @@ public interface LoaneeUseCase {
     String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException;
 
     String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
+
+    String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;
 }
