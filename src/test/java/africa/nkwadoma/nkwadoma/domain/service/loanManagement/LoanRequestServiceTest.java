@@ -92,11 +92,11 @@ class LoanRequestServiceTest {
         try {
             when(loanRequestOutputPort.findById(loanRequest.getId())).thenReturn(loanRequest);
             when(loaneeLoanBreakDownOutputPort.findAllLoaneeLoanBreakDownByLoaneeId(loanRequest.getLoaneeId())).thenReturn(loaneeLoanBreakdowns);
-            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId())).thenReturn(loanRequest.getLoanee());
-            LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest);
+            when(loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), testId)).thenReturn(loanRequest.getLoanee());
+            LoanRequest retrievedLoanRequest = loanRequestService.viewLoanRequestById(loanRequest, testId);
 
             verify(loanRequestOutputPort, times(1)).findById(loanRequest.getId());
-            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId());
+            verify(loaneeUseCase, times(1)).viewLoaneeDetails(loanRequest.getLoaneeId(), testId);
             assertNotNull(retrievedLoanRequest);
             assertNotNull(retrievedLoanRequest.getLoaneeLoanBreakdowns());
         } catch (MeedlException e) {
@@ -106,19 +106,19 @@ class LoanRequestServiceTest {
 
     @Test
     void viewNullLoanRequest() {
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(null));
+        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(null, testId));
     }
 
     @Test
     void viewLoanRequestWithNullId() {
         loanRequest.setId(null);
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest));
+        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest, testId));
     }
     @ParameterizedTest
     @ValueSource(strings = {"36470395798", "sjgbnsvkh"})
     void viewLoanRequestWithNonUUID(String id) {
         loanRequest.setId(id);
-        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest));
+        assertThrows(MeedlException.class, ()-> loanRequestService.viewLoanRequestById(loanRequest, id));
     }
 
     @Test

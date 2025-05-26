@@ -40,7 +40,10 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
-
+    private List<RepaymentHistory> repaymentHistories;
+    private String cohortName;
+    private LocalDate cohortStartDate;
+    private String programName;
 
     public void validate() throws MeedlException {
         MeedlValidator.validateObjectInstance(userIdentity, IdentityMessages.USER_IDENTITY_CANNOT_BE_NULL.getMessage());

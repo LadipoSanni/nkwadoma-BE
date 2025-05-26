@@ -123,9 +123,18 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Loanee viewLoaneeDetails(String id) throws MeedlException {
+    public Loanee viewLoaneeDetails(String id, String userId) throws MeedlException {
         MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         Loanee loanee = loaneeOutputPort.findLoaneeById(id);
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        log.info("----------> User identity ---------> {} userId {}", userIdentity, userId);
+        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
+            Optional<Loanee> foundLoanee = loaneeOutputPort
+                    .findByUserId(userId);
+            if (foundLoanee.isPresent() && !foundLoanee.get().getId().equals(loanee.getId())) {
+                throw new MeedlException("Access denied: You can only view your own loan details.");
+            }
+        }
         log.info("loanee found successfully. Loanee with id {}", id);
         return updateLoaneeCreditScore(loanee);
     }
@@ -134,13 +143,25 @@ public class LoaneeService implements LoaneeUseCase {
         MeedlValidator.validateObjectInstance(loanee, LoaneeMessages.LOANEE_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateObjectInstance(loanee.getUserIdentity(), UserMessages.USER_IDENTITY_CANNOT_BE_EMPTY.getMessage());
 
-        if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
-                creditScoreIsAboveOrEqualOneMonth(loanee)) {
-            loanee = updateCreditScore(loanee);
+        if (loanee.getUserIdentity().getBvn() != null) {
+            if (ObjectUtils.isEmpty(loanee.getCreditScoreUpdatedAt()) ||
+                    creditScoreIsAboveOrEqualOneMonth(loanee)) {
+                loanee = updateCreditScore(loanee);
+            }
         }
 
         log.info("Credit score for loanee with id {} has already been updated within the last month", loanee.getId());
+
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        loanee.setCohortName(cohort.getName());
+        loanee.setCohortStartDate(cohort.getStartDate());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        loanee.setProgramName(program.getName());
+
+//        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
+//        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
         return loanee;
+
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
