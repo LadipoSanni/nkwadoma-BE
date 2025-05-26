@@ -75,8 +75,6 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
 
     private void notifyPortfolioManager(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-        log.info("---------> PM -----------> {}", portfolioManagers);
-        log.info("---------> PM -----------> {}", portfolioManagers.size());
         for (UserIdentity portfolioManager : portfolioManagers) {
             MeedlNotification notification = MeedlNotification.builder()
                     .user(portfolioManager)
