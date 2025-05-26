@@ -77,7 +77,7 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
-    @GetMapping("cohort/loanees")
+    @GetMapping("cohorts/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> viewAllLoaneeInCohort(
             @RequestParam String cohortId,
