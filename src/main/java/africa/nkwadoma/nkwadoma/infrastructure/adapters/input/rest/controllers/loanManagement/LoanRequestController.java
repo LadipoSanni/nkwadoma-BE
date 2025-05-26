@@ -107,10 +107,12 @@ public class LoanRequestController {
                     content = @Content) })
     @GetMapping("/loan-requests/{id}")
     public ResponseEntity<ApiResponse<?>> viewLoanRequestDetails(@Valid @PathVariable @NotBlank
-            (message = "Loan request ID is required") @Parameter(description = "ID of the loan request to be returned", required = true) String id) throws MeedlException {
+            (message = "Loan request ID is required") @Parameter(description = "ID of the loan request to be returned", required = true) String id,
+                                                                 @AuthenticationPrincipal Jwt meedlUser) throws MeedlException {
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setId(id);
-        LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest);
+        String userId = meedlUser.getClaimAsString("sub");
+        LoanRequest foundLoanRequest = loanRequestUseCase.viewLoanRequestById(loanRequest, userId);
         log.info("Loan request body: {}", foundLoanRequest);
         LoanRequestResponse loanRequestResponse = loanRequestRestMapper.toLoanRequestResponse(foundLoanRequest);
         log.info("Mapped Loan request: {}", loanRequestResponse);

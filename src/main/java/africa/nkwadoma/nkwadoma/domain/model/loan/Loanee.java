@@ -40,6 +40,10 @@ public class Loanee {
     private OnboardingMode onboardingMode;
     private LocalDateTime referralDateTime;
     private String referredBy;
+    private List<RepaymentHistory> repaymentHistories;
+    private String cohortName;
+    private LocalDate cohortStartDate;
+    private String programName;
     private String programId;
     private String loanId;
     private String deferReason;

@@ -12,7 +12,7 @@ public interface LoaneeUseCase {
 
     Loanee addLoaneeToCohort(Loanee loanee) throws MeedlException;
 
-    Loanee viewLoaneeDetails(String loaneeId) throws MeedlException;
+    Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException;
 
     Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber, String sortBy) throws MeedlException;
     LoanReferral referLoanee(Loanee loanee) throws MeedlException;

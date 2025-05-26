@@ -62,7 +62,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         return loanRequests;
     }
     @Override
-    public LoanRequest viewLoanRequestById(LoanRequest loanRequest) throws MeedlException {
+    public LoanRequest viewLoanRequestById(LoanRequest loanRequest, String userId) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_CANNOT_BE_EMPTY.getMessage());
         MeedlValidator.validateUUID(loanRequest.getId(), LoanMessages.LOAN_REQUEST_ID_CANNOT_BE_EMPTY.getMessage());
         loanRequest = loanRequestOutputPort.findById(loanRequest.getId());
@@ -72,7 +72,7 @@ public class LoanRequestService implements LoanRequestUseCase {
         log.info("Loanee loan breakdowns by loanee with ID: {}: {}", loanRequest.getLoaneeId(), loaneeLoanBreakdowns);
         Loanee loanee = new Loanee();
         try {
-            loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId());
+            loanee = loaneeUseCase.viewLoaneeDetails(loanRequest.getLoaneeId(), userId);
             log.info("Credit score returned: {}", loanee.getCreditScore());
         } catch (MeedlException e) {
             log.error("Error retrieving loanee credit score {}", e.getMessage());

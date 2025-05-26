@@ -14,8 +14,8 @@ public class LoaneeLoanDetailResponse {
     private BigDecimal initialDeposit;
     private BigDecimal amountRequested;
     private BigDecimal amountReceived;
-    private List<LoanBreakdownResponse> loanBreakdown;
     private BigDecimal amountRepaid;
     private BigDecimal amountOutstanding;
+    private List<LoanBreakdownResponse> loanBreakdown;
 
 }

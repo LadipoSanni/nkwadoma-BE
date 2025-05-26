@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.validation.*;
 import lombok.*;
 
 import java.math.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,6 +24,9 @@ public class LoanDetail {
     private BigDecimal totalInterestIncurred;
     private BigDecimal monthlyExpected;
     private BigDecimal lastMonthActual;
+    private Double creditWorthinessRating;
+    private LocalDateTime loanStartDate;
+
 
     public void validate() throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(totalAmountDisbursed);
