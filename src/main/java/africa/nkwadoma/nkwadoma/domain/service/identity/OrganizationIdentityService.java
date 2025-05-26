@@ -69,21 +69,22 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
-
+        notifyPortfolioManager(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
         return organizationIdentity;
     }
 
     private void notifyPortfolioManager(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
         List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
-
+        log.info("---------> PM -----------> {}", portfolioManagers);
+        log.info("---------> PM -----------> {}", portfolioManagers.size());
         for (UserIdentity portfolioManager : portfolioManagers) {
             MeedlNotification notification = MeedlNotification.builder()
                     .user(portfolioManager)
                     .timestamp(LocalDateTime.now())
                     .contentId(organizationIdentity.getId())
                     .senderMail(organizationIdentity.getEmail())
-                    .senderFullName(organizationIdentity.getUserIdentity().getFirstName())
-                    .title("Added " + organizationIdentity.getName() + " organizations")
+                    .senderFullName(organizationIdentity.getName())
+                    .title("Added " + organizationIdentity.getName() + " to organizations")
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);
