@@ -4,8 +4,9 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.LoaneeDropOutRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDropOutRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.IndicateLoaneeDropOutRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
@@ -177,9 +178,9 @@ public class LoaneeController {
 
     @PostMapping("loanee/dropout")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN')")
-    public ResponseEntity<ApiResponse<?>> indicateDeferLoanee(@AuthenticationPrincipal Jwt meedlUser,
-                                                              @RequestBody LoaneeDropOutRequest loaneeDropOutRequest) throws MeedlException {
-        String response = loaneeUseCase.indicateDropOutLoanee(meedlUser.getClaimAsString("sub"),loaneeDropOutRequest.getLoaneeId());
+    public ResponseEntity<ApiResponse<?>> indicateDropOutLoanee(@AuthenticationPrincipal Jwt meedlUser,
+                                                                @RequestBody IndicateLoaneeDropOutRequest indicateLoaneeDropOutRequest) throws MeedlException {
+        String response = loaneeUseCase.indicateDropOutLoanee(meedlUser.getClaimAsString("sub"), indicateLoaneeDropOutRequest.getLoaneeId());
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .data(response)
                 .message(LOANEE_DROPOUT)
@@ -187,6 +188,21 @@ public class LoaneeController {
                 .build();
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
+
+    @PostMapping("loanee/dropout")
+    @PreAuthorize("hasRole('LOANEE')")
+    public ResponseEntity<ApiResponse<?>> dropOutFromCohort(@RequestBody LoaneeDropOutRequest loaneeDropOutRequest) throws MeedlException{
+
+        String response = loaneeUseCase.dropOutFromCohort(loaneeDropOutRequest.getLoaneeId(),
+                loaneeDropOutRequest.getCohortId(),loaneeDropOutRequest.getReasonForDropOut());
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(LOANEE_DROPOUT)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
+
 
 
 }

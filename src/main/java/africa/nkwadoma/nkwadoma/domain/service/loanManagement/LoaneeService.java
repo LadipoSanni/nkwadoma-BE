@@ -540,8 +540,8 @@ public class LoaneeService implements LoaneeUseCase {
         LocalDate cohortEndDate = cohort.getStartDate().plusMonths(program.getDuration());
         long totalDays = ChronoUnit.DAYS.between(cohort.getStartDate(), cohortEndDate);
         long quarterDays = totalDays / 4;
-        LocalDate firstQuarterEnd = cohort.getStartDate().plusMonths(quarterDays);
-        if (firstQuarterEnd.isAfter(LocalDate.now())) {
+        LocalDate firstQuarterEnd = cohort.getStartDate().plusDays(quarterDays);
+        if (firstQuarterEnd.isBefore(LocalDate.now())) {
             throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
         }
     }
