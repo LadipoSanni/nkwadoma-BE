@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -111,6 +112,14 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
         MeedlValidator.validateUUID(organizationId, OrganizationMessages.ORGANIZATION_ID_IS_REQUIRED.getMessage());
         return loaneeRepository.checkIfLoaneeCohortExistInOrganization(loaneeId,organizationId);
+    }
+
+    @Override
+    public void archiveOrUnArchiveByIds(List<String> loaneesId, LoaneeStatus loaneeStatus) throws MeedlException {
+        if (loaneesId.isEmpty()){
+            throw new MeedlException(LoaneeMessages.LOANEES_ID_CANNOT_BE_EMPTY.getMessage());
+        }
+        loaneeRepository.updateStatusByIds(loaneesId, loaneeStatus);
     }
 
 

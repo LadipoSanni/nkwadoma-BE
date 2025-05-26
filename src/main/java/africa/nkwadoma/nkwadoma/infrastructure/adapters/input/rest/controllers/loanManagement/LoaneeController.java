@@ -9,6 +9,7 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDeferRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeDropOutRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeRequest;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.LoaneeStatusRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.ApiResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.PaginatedResponse;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.response.loanManagement.LoanBeneficiaryResponse;
@@ -227,4 +228,17 @@ public class LoaneeController {
         return new ResponseEntity<>(apiResponse,HttpStatus.OK);
     }
 
+    @PostMapping("status")
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
+    public ResponseEntity<ApiResponse<?>> archiveOrUnArchiveLoanee(@AuthenticationPrincipal Jwt meedlUser,
+                                                                   @RequestBody LoaneeStatusRequest loaneeStatusRequest) throws MeedlException{
+        String response = loaneeUseCase.archiveOrUnArchiveByIds(meedlUser.getClaimAsString("sub"),
+                loaneeStatusRequest.getLoaneeIds(),loaneeStatusRequest.getLoaneeStatus());
+        ApiResponse<String > apiResponse = ApiResponse.<String>builder()
+                .data(response)
+                .message(LOANEE_RETRIEVED)
+                .statusCode(HttpStatus.OK.toString())
+                .build();
+        return new ResponseEntity<>(apiResponse,HttpStatus.OK);
+    }
 }

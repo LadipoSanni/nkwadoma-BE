@@ -752,6 +752,17 @@ class LoaneeServiceTest {
         verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
         assertEquals("Loanee has been dropped out", response);
     }
+
+    @Test
+    void archiveLoanee(){
+        List<Loanee> loaneeList = new ArrayList<>();
+        try{
+//            doNothing().when(loaneeOutputPort.archiveOrUnArchiveByIds(List.of(mockId),LoaneeStatus.ARCHIVE));
+            String response = loaneeService.archiveOrUnArchiveByIds(mockId,List.of(mockId),LoaneeStatus.ARCHIVE);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+    }
 }
 
 
