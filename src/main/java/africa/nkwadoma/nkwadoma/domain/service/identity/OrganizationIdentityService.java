@@ -82,7 +82,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
                     .contentId(organizationIdentity.getId())
                     .senderMail(organizationIdentity.getEmail())
                     .senderFullName(organizationIdentity.getName())
-                    .title("Added " + organizationIdentity.getName() + " to organizations")
+                    .title("New organization with the name " + organizationIdentity.getName() + " added to organizations")
                     .notificationFlag(notificationFlag)
                     .build();
             meedlNotificationUsecase.sendNotification(notification);
