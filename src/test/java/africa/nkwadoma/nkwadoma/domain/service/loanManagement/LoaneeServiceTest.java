@@ -512,6 +512,20 @@ class LoaneeServiceTest {
         verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
         assertEquals("Loanee has been dropped out", response);
     }
+
+
+    @Test
+    void dropOutFromCohortByLoanee(){
+        String response = "";
+        try {
+            String reason = "School na scam";
+            when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(firstLoanee);
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            response = loaneeService.dropOutFromCohort(mockId,mockId,reason);
+        }catch (MeedlException meedlException){
+            log.error(meedlException.getMessage());
+        }
+    }
 }
 
 

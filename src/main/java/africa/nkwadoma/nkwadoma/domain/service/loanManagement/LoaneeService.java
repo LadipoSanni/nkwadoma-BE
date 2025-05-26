@@ -477,6 +477,16 @@ public class LoaneeService implements LoaneeUseCase {
         return "Loanee has been dropped out";
     }
 
+    @Override
+    public String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(reasonForDropOut,"Reason for drop out cannot be empty");
+
+
+        return "";
+    }
+
     private void sendPortfolioManagerDropOutNotification(Loanee loanee, UserIdentity userIdentity) throws MeedlException {
         List<UserIdentity> portfolioManagers =
                 userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);

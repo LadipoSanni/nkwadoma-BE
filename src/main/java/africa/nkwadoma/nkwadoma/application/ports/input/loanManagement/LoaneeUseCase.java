@@ -28,4 +28,6 @@ public interface LoaneeUseCase {
     String indicateDeferredLoanee(String actorId, String loaneeId) throws MeedlException;
 
     String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
+
+    String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException;
 }
