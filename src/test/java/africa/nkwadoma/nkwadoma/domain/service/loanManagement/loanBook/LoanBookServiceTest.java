@@ -17,8 +17,9 @@ import africa.nkwadoma.nkwadoma.domain.model.education.Program;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationEmployeeIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
-import africa.nkwadoma.nkwadoma.domain.model.loan.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,8 +48,10 @@ public class LoanBookServiceTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     private final String absoluteCSVFilePath = "/Users/admin/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
-    private final String CSVName = "loanBook.csv";
+    private final String loanBookCSVName = "loanBook.csv";
+    private final String repaymentRecordBookCSVName = "repaymentRecordBook.csv";
     private LoanBook loanBook;
+    private LoanBook repaymentRecordBook;
     private Cohort cohort ;
     private UserIdentity meedleUser;
     private Program program;
@@ -71,14 +73,17 @@ public class LoanBookServiceTest {
 
     @BeforeAll
     void setUp() throws IOException, MeedlException {
-//        populateCsvTestFile();
-        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+CSVName );
+        populateCsvTestFile();
+        loanBook = TestData.buildLoanBook(absoluteCSVFilePath+ loanBookCSVName);
+        repaymentRecordBook = TestData.buildLoanBook(absoluteCSVFilePath+ repaymentRecordBookCSVName);
 
         cohort = saveLoanBookCohort();
         LoanProduct loanProduct = saveLoanProduct();
 
         loanBook.setCohort(cohort);
+        repaymentRecordBook.setCohort(cohort);
         loanBook.setLoanProductId(loanProduct.getId());
+        repaymentRecordBook.setLoanProductId(loanProduct.getId());
         log.info("Loan book cohort id {}", loanBook.getCohort().getId());
 
 
@@ -130,7 +135,8 @@ public class LoanBookServiceTest {
     }
 
     private void populateCsvTestFile() throws IOException {
-        TestUtils.generateRandomCSV(absoluteCSVFilePath+CSVName, 10);
+        List<String> emails = TestUtils.generateRandomLoanBookCSV(absoluteCSVFilePath+ loanBookCSVName, 10);
+        TestUtils.generateRandomRepaymentRecordCSV(emails, absoluteCSVFilePath+ repaymentRecordBookCSVName);
     }
 
     @Test
@@ -170,5 +176,13 @@ public class LoanBookServiceTest {
         assertThrows(MeedlException.class,() -> loanBookUseCase.upLoadFile(loanBook));
     }
 
+    @Test
+    void upLoadRepaymentRecord(){
+        try {
+            loanBookUseCase.uploadRepaymentRecord(repaymentRecordBook);
+        } catch (MeedlException e) {
+            log.error("Error uploading repayment record book. {}", e.getMessage());
+        }
+    }
 
 }
