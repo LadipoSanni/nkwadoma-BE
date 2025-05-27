@@ -21,7 +21,7 @@ public interface LoaneeOutputPort {
 
     Loanee findLoaneeById(String loaneeId) throws MeedlException;
 
-    Page<Loanee> findAllLoaneeByCohortId(String cohortId , int pageSize , int pageNumber, String sortBy) throws MeedlException;
+    Page<Loanee> findAllLoaneeByCohortId(String cohortId , int pageSize , int pageNumber, LoaneeStatus status) throws MeedlException;
 
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
 

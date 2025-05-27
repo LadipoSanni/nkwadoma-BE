@@ -17,7 +17,11 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     Optional<LoaneeEntity> findLoaneeByUserIdentityId(String userId);
 
-    Page<LoaneeEntity> findAllByCohortId(String cohortId, Pageable pageable);
+    @Query("""
+        SELECT l FROM LoaneeEntity l WHERE l.cohortId = :cohortId AND (:status IS NULL OR l.loaneeStatus = :status)
+        """)
+    Page<LoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,@Param("status")LoaneeStatus status, Pageable pageable);
+
     @Query("SELECT l FROM LoaneeEntity l WHERE l.cohortId = :cohortId AND l.id IN :loaneeIds")
     List<LoaneeEntity> findAllLoaneesByCohortIdAndLoaneeIds(
             @Param("cohortId") String cohortId,
