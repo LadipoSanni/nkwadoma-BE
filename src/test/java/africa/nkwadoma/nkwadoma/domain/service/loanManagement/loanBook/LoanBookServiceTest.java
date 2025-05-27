@@ -19,7 +19,6 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanProduct;
-import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
 import lombok.extern.slf4j.Slf4j;
@@ -48,11 +47,10 @@ public class LoanBookServiceTest {
     @Autowired
     private IdentityManagerOutputPort identityManagerOutputPort;
     private final String absoluteCSVFilePath = "/Users/admin/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
+//    private final String absoluteCSVFilePath = "/Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
+    //    /Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook
     private final String loanBookCSVName = "loanBook.csv";
     private final String repaymentRecordBookCSVName = "repaymentRecordBook.csv";
-    private final String absoluteCSVFilePath = "/Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook/";
-//    /Users/qudusadeshina/IdeaProjects/nkwadoma-BE/src/test/java/africa/nkwadoma/nkwadoma/domain/service/loanManagement/loanBook
-    private final String CSVName = "loanBook.csv";
     private LoanBook loanBook;
     private LoanBook repaymentRecordBook;
     private Cohort cohort ;
