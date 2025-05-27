@@ -52,6 +52,7 @@ public class OrganizationController {
 
     @PostMapping("organization/invite")
     @Operation(summary = INVITE_ORGANIZATION_TITLE, description = INVITE_ORGANIZATION_DESCRIPTION)
+    @PreAuthorize("hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> inviteOrganization(@AuthenticationPrincipal Jwt meedlUser,
                                                              @RequestBody @Valid OrganizationRequest inviteOrganizationRequest) throws MeedlException {
         String createdBy = meedlUser.getClaimAsString("sub");
