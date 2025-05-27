@@ -43,7 +43,7 @@ public class TestUtils {
         List<String> lines = new ArrayList<>();
         List<String> emails = new ArrayList<>();
 
-        lines.add("firstName,lastName,email,phoneNumber,DON,initialDeposit,amountRequested,amountReceived");
+        lines.add("firstName,lastName,email,phoneNumber,DON,initialDeposit,amountRequested,amountReceived,amountApproved");
 
         for (int i = 0; i < numberOfRows; i++) {
             String firstName = generateName(4);
@@ -55,11 +55,13 @@ public class TestUtils {
             int initialDeposit = 5000 + (i * 1000);
             int amountRequested = 30000 + (i * 2000);
             int amountReceived = amountRequested - (i % 5) * 1000;
+            int amountApproved = amountRequested - (i % 5) * 1000;
 
             lines.add(String.join(",", firstName, lastName, email, phoneNumber, don,
                     String.valueOf(initialDeposit),
                     String.valueOf(amountRequested),
-                    String.valueOf(amountReceived)));
+                    String.valueOf(amountReceived),
+                    String.valueOf(amountApproved)));
         }
 
         Files.write(filePath, lines);

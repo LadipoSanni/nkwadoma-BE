@@ -129,11 +129,11 @@ public class LoanBookService implements LoanBookUseCase {
         return loanReferral;
     }
     private LoanRequest acceptLoanRequest(Loanee loanee, LoanReferral loanReferral, LoanBook loanBook) throws MeedlException {
+        log.info("Loan Amount Approved is {}", loanee.getLoaneeLoanDetail().getAmountApproved());
         log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
         LoanRequest loanRequest = LoanRequest.builder()
                 //TODO Amount received should be changed to amount approved. Not currently been collected.
-//                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved())
-                .loanAmountApproved(new BigDecimal(5000))
+                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved())
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
@@ -152,6 +152,7 @@ public class LoanBookService implements LoanBookUseCase {
         while (iterator.hasNext()) {
             Loanee loanee = iterator.next();
             log.info("About to refer loanee with details {}", loanee);
+            log.info("About to refer loanee in cohort with loan details {}", loanee.getLoaneeLoanDetail());
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
@@ -215,8 +216,10 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .initialDeposit(new BigDecimal(row[5].trim()))
                     .amountRequested(new BigDecimal(row[6].trim()))
                     .amountReceived(new BigDecimal(row[7].trim()))
+                    .amountApproved(new BigDecimal(row[8].trim()))
                     .build();
 
+            log.info("Test values in the file {}", loaneeLoanDetail);
             Loanee loanee = Loanee.builder()
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
@@ -225,6 +228,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .cohortId(cohort.getId())
                     .build();
             log.info("Built loanee object with onboarding status {}", loanee.getOnboardingMode());
+            log.info("Loanee object detail loan after creating loanee object {}", loanee.getLoaneeLoanDetail());
 
             loanees.add(loanee);
         }
@@ -238,11 +242,15 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
                 userIdentityOutputPort.save(userIdentity);
                 LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+                loanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
                 loanee.setUserIdentity(userIdentity);
-                loanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+                loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
 
                 Loanee savedLoanee = loaneeOutputPort.save(loanee);
+                savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
+                log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
+                log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
                 savedLoanees.add(savedLoanee);
             } catch (MeedlException e) {
                 log.info("Error occurred while saving data .", e);

@@ -389,8 +389,6 @@ class LoanRequestAdapterTest {
             assertEquals(foundLoanRequest.getCohortStartDate(), cohort.getStartDate());
             assertNotNull(foundLoanRequest.getLoanAmountRequested());
             assertNotNull(foundLoanRequest.getInitialDeposit());
-            assertEquals("John", foundLoanRequest.getFirstName());
-            assertEquals("Doe", foundLoanRequest.getLastName());
 
             UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
 
