@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -94,6 +95,7 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setCohortId(id);
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        firstLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
 
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -111,6 +113,7 @@ class LoaneePersistenceAdapterTest {
         anotherLoanee.setCohortId(id);
         anotherLoanee.setUserIdentity(anotherUser);
         anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
+        anotherLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
 
     }
 

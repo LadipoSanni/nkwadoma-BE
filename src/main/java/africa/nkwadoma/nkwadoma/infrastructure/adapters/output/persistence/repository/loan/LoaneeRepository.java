@@ -18,7 +18,7 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
     Optional<LoaneeEntity> findLoaneeByUserIdentityId(String userId);
 
     @Query("""
-        SELECT l FROM LoaneeEntity l
+        SELECT l FROM LoaneeEntity l 
         WHERE l.cohortId = :cohortId 
         AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
         """)
