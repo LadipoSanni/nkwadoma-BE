@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.controllers.
 
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.education.LoaneeDropOutRequest;
@@ -84,9 +85,9 @@ public class LoaneeController {
             @RequestParam String cohortId,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy
-    ) throws MeedlException {
-        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId, pageSize, pageNumber, sortBy);
+            @RequestParam(name = "status" , required = false )LoaneeStatus loaneeStatus
+            ) throws MeedlException {
+        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId, pageSize, pageNumber, loaneeStatus);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();
         PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
