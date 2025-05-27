@@ -7,6 +7,7 @@ public class SuccessMessages {
     public static final String UPDATE_ORGANIZATION_SUCCESS = "Organization successfully updated";
     public static final String CREATE_LOAN_PRODUCT_SUCCESS = "Loan product created successfully";
     public static final String LOAN_BOOK_UPLOADED_SUCCESS = "Loan book uploaded successfully";
+    public static final String REPAYMENT_RECORD_BOOK_UPLOADED_SUCCESS = "Repayment record book uploaded successfully";
     public static final String UPDATED_LOAN_PRODUCT_SUCCESS = "Loan product updated successfully";
     public static final String LOAN_PRODUCT_FOUND_SUCCESSFULLY = "Loan product found successfully";
     public static final String LOAN_REFERRAL_FOUND_SUCCESSFULLY = "Loan referral found successfully";

@@ -85,7 +85,8 @@ public class LoanRequestService implements LoanRequestUseCase {
 
     @Override
     public LoanRequest respondToLoanRequest(LoanRequest loanRequest) throws MeedlException {
-        LoanRequest.validate(loanRequest);
+        MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
+        loanRequest.validateLoanProductIdAndAmountApproved();
         LoanRequest foundLoanRequest = loanRequestOutputPort.findLoanRequestById(loanRequest.getId()).
                 orElseThrow(()-> new LoanException(LoanMessages.LOAN_REQUEST_NOT_FOUND.getMessage()));
         log.info("Loan request retrieved: {}", foundLoanRequest);
@@ -184,6 +185,7 @@ public class LoanRequestService implements LoanRequestUseCase {
     private LoanRequest approveLoanRequest(LoanRequest loanRequest, LoanRequest foundLoanRequest) throws MeedlException {
         MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved(), LoanMessages.LOAN_AMOUNT_APPROVED_MUST_NOT_BE_EMPTY.getMessage());
         if (loanRequest.getLoanAmountApproved().compareTo(foundLoanRequest.getLoanAmountRequested()) > 0) {
+            log.error("The approved loan amount {} is greater than the requested loan amount {}",loanRequest.getLoanAmountApproved(), foundLoanRequest.getLoanAmountRequested() );
             throw new LoanException(LoanMessages.LOAN_AMOUNT_APPROVED_MUST_BE_LESS_THAN_OR_EQUAL_TO_REQUESTED_AMOUNT.getMessage());
         }
 

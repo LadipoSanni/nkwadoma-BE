@@ -23,9 +23,6 @@ public class LoanRequest {
     private String loanProductId;
     private String organizationId;
     private String referredBy;
-    private String firstName;
-    private String lastName;
-    private String email;
     private LoanDecision loanRequestDecision;
     private String declineReason;
     private BigDecimal loanAmountRequested;
@@ -58,11 +55,10 @@ public class LoanRequest {
     private String actorId;
 
 
-    public static void validate(LoanRequest loanRequest) throws MeedlException {
-        MeedlValidator.validateObjectInstance(loanRequest, LoanMessages.LOAN_REQUEST_MUST_NOT_BE_EMPTY.getMessage());
-        MeedlValidator.validateUUID(loanRequest.getId(), "Please provide a valid loan request identification");
-        MeedlValidator.validateUUID(loanRequest.getLoanProductId(), LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
-        MeedlValidator.validateBigDecimalDataElement(loanRequest.getLoanAmountApproved());
+    public void validateLoanProductIdAndAmountApproved() throws MeedlException {
+        MeedlValidator.validateUUID(this.id, "Please provide a valid loan request identification");
+        MeedlValidator.validateUUID(this.loanProductId, LoanMessages.INVALID_LOAN_PRODUCT_ID.getMessage());
+        MeedlValidator.validateBigDecimalDataElement(this.loanAmountApproved);
     }
 
     public void validate() throws MeedlException {
@@ -76,8 +72,6 @@ public class LoanRequest {
                        String alternatePhoneNumber, String organizationName, BigDecimal loanAmountRequested,
                        BigDecimal initialDeposit, LocalDate startDate, String programName) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
         this.alternateContactAddress = alternateContactAddress;
         this.alternateEmail = alternateEmail;
         this.alternatePhoneNumber = alternatePhoneNumber;

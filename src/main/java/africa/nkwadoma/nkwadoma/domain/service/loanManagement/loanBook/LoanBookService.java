@@ -3,23 +3,26 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.LoanBookUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.RepaymentHistoryUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
-import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanRequestOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.CohortMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanDecision;
-import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanOfferResponse;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanReferralStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,7 @@ public class LoanBookService implements LoanBookUseCase {
     private final LoaneeOutputPort loaneeOutputPort;
     private final LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     private final IdentityManagerOutputPort identityManagerOutputPort;
+    private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final CohortUseCase cohortUseCase;
     private final AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private final LoaneeUseCase loaneeUseCase;
@@ -52,15 +56,14 @@ public class LoanBookService implements LoanBookUseCase {
     private final CreateLoanProductUseCase createLoanProductUseCase;
     private final LoanRequestUseCase loanRequestUseCase;
     private final LoanOfferUseCase loanOfferUseCase;
+    private final RepaymentHistoryUseCase repaymentHistoryUseCase;
 
     @Override
     public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
         loanBook.validate();
-        File file = loanBook.getFile();
-        List<String[]> data;
 
-        data = readFile(file);
+        List<String[]> data = readFile(loanBook.getFile());
         log.info("Loan book read is {}", data);
 
         Cohort savedCohort = findCohort(loanBook.getCohort());
@@ -69,6 +72,23 @@ public class LoanBookService implements LoanBookUseCase {
         referCohort(loanBook);
         completeLoanProcessing(loanBook);
         return loanBook;
+    }
+    @Override
+    public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
+        MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
+        repaymentRecordBook.validate();
+        List<String[]> data = readFile(repaymentRecordBook.getFile());
+        log.info("Repayment record book read is {}", data);
+
+//        RepaymentHistory repaymentHistory =
+
+        Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
+        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data, savedCohort);
+        List<RepaymentHistory> savedRepaymentHistories = saveRepaymentHistory(convertedRepaymentHistories, repaymentRecordBook.getActorId(), repaymentRecordBook.getCohort().getId());
+    }
+
+    private List<RepaymentHistory> saveRepaymentHistory(List<RepaymentHistory> repaymentHistories, String actorId, String cohortId) throws MeedlException {
+        return repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId);
     }
 
     private void completeLoanProcessing(LoanBook loanBook) {
@@ -109,11 +129,11 @@ public class LoanBookService implements LoanBookUseCase {
         return loanReferral;
     }
     private LoanRequest acceptLoanRequest(Loanee loanee, LoanReferral loanReferral, LoanBook loanBook) throws MeedlException {
+        log.info("Loan Amount Approved is {}", loanee.getLoaneeLoanDetail().getAmountApproved());
         log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
         LoanRequest loanRequest = LoanRequest.builder()
                 //TODO Amount received should be changed to amount approved. Not currently been collected.
-//                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved())
-                .loanAmountApproved(new BigDecimal(5000))
+                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved())
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
@@ -132,6 +152,7 @@ public class LoanBookService implements LoanBookUseCase {
         while (iterator.hasNext()) {
             Loanee loanee = iterator.next();
             log.info("About to refer loanee with details {}", loanee);
+            log.info("About to refer loanee in cohort with loan details {}", loanee.getLoaneeLoanDetail());
             try {
                 inviteTrainee(loanee);
             } catch (MeedlException e) {
@@ -153,6 +174,25 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
+    private List<RepaymentHistory> convertToRepaymentHistory(List<String[]> data, Cohort cohort) {
+        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
+
+        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
+        for (String[] row : data) {
+            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
+                    .firstName(row[0].trim())
+                    .lastName(row[1].trim())
+                    .email(row[2].trim())
+                    .paymentDate(row[3].trim())
+                    .amountPaid(new BigDecimal(row[4].trim()))
+                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
+                    .build();
+            log.info("Repayment history {}", repaymentHistory);
+            repaymentHistories.add(repaymentHistory);
+        }
+        return repaymentHistories;
+    }
+
 
     private List<Loanee> convertToLoanees(List<String[]> data, Cohort cohort) {
         List<Loanee> loanees = new ArrayList<>();
@@ -176,8 +216,10 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .initialDeposit(new BigDecimal(row[5].trim()))
                     .amountRequested(new BigDecimal(row[6].trim()))
                     .amountReceived(new BigDecimal(row[7].trim()))
+                    .amountApproved(new BigDecimal(row[8].trim()))
                     .build();
 
+            log.info("Test values in the file {}", loaneeLoanDetail);
             Loanee loanee = Loanee.builder()
                     .userIdentity(userIdentity)
                     .loaneeLoanDetail(loaneeLoanDetail)
@@ -186,6 +228,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .cohortId(cohort.getId())
                     .build();
             log.info("Built loanee object with onboarding status {}", loanee.getOnboardingMode());
+            log.info("Loanee object detail loan after creating loanee object {}", loanee.getLoaneeLoanDetail());
 
             loanees.add(loanee);
         }
@@ -199,11 +242,15 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 UserIdentity userIdentity = identityManagerOutputPort.createUser(loanee.getUserIdentity());
                 userIdentityOutputPort.save(userIdentity);
                 LoaneeLoanDetail savedLoaneeLoanDetail = loaneeLoanDetailsOutputPort.save(loanee.getLoaneeLoanDetail());
+                loanee.getLoaneeLoanDetail().setId(savedLoaneeLoanDetail.getId());
                 log.info("Loanee's loan details after saving in file upload {}", savedLoaneeLoanDetail);
                 loanee.setUserIdentity(userIdentity);
-                loanee.setLoaneeLoanDetail(savedLoaneeLoanDetail);
+                loanee.setLoaneeLoanDetail(loanee.getLoaneeLoanDetail());
 
                 Loanee savedLoanee = loaneeOutputPort.save(loanee);
+                savedLoanee.getLoaneeLoanDetail().setAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved());
+                log.info("Loanee's amount approved in file upload: {}", savedLoanee.getLoaneeLoanDetail());
+                log.info("Loanee's actual loan details in file upload: {}", loanee.getLoaneeLoanDetail());
                 savedLoanees.add(savedLoanee);
             } catch (MeedlException e) {
                 log.info("Error occurred while saving data .", e);

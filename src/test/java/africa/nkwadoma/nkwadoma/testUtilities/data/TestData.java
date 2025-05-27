@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.identity.Country;
 import africa.nkwadoma.nkwadoma.domain.enums.identity.UserRelationship;
 import africa.nkwadoma.nkwadoma.domain.enums.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.OnboardingMode;
 import africa.nkwadoma.nkwadoma.domain.model.financier.*;
 import africa.nkwadoma.nkwadoma.domain.model.bankDetail.BankDetail;
@@ -18,6 +19,9 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
@@ -278,6 +282,13 @@ public class TestData {
     }
     public static LoanBook buildLoanBook(String absolutePath){
         return LoanBook.builder()
+                .absoluteFilePath(absolutePath)
+                .file(new File(absolutePath))
+                .build();
+    }
+
+    public static RepaymentRecordBook buildRepaymentRecordBook(String absolutePath) {
+        return RepaymentRecordBook.builder()
                 .absoluteFilePath(absolutePath)
                 .file(new File(absolutePath))
                 .build();
@@ -607,4 +618,14 @@ public class TestData {
                 .build();
     }
 
+    public static RepaymentHistory buildRepaymentHistory(String cohortId) {
+        return RepaymentHistory.builder()
+                .modeOfPayment(ModeOfPayment.CASH)
+                .amountPaid(new BigDecimal("20000"))
+                .cohort(Cohort.builder().id(cohortId).build())
+                .paymentDate(LocalDateTime.now().toString())
+                .firstName("firstName")
+                .lastName("lastName")
+                .build();
+    }
 }

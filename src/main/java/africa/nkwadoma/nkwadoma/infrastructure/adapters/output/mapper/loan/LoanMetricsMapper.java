@@ -29,8 +29,6 @@ public interface LoanMetricsMapper {
     LoanDetail mapLoanOfferToLoanLifeCycles(LoanOffer loanOffer);
 
 
-    @Mapping(target = "firstName", source = "firstName")
-    @Mapping(target = "lastName", source = "lastName")
     @Mapping(target = "cohortName", source = "cohortName")
     @Mapping(target = "programName", source = "programName")
     @Mapping(target = "amountRequested", source = "loanAmountRequested")
