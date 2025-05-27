@@ -113,7 +113,7 @@ class OrganizationIdentityServiceTest {
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
-//            doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
+            doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
