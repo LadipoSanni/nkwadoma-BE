@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class LoaneeDropOutRequest {
+public class IndicateLoaneeDropOutRequest {
 
    private String loaneeId;
 }

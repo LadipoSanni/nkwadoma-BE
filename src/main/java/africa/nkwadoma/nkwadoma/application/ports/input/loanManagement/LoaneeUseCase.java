@@ -33,6 +33,8 @@ public interface LoaneeUseCase {
 
     String indicateDropOutLoanee(String actorId, String loaneeID) throws MeedlException;
 
+    String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException;
+
     String resumeProgram(String loanId, String cohortId, String userId) throws MeedlException;
 
     String archiveOrUnArchiveByIds(String actorId, List<String> loaneeIds, LoaneeStatus loaneeStatus) throws MeedlException;

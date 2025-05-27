@@ -47,7 +47,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -548,6 +550,79 @@ public class LoaneeService implements LoaneeUseCase {
         sendPortfolioManagerDropOutNotification(loanee, userIdentity);
 
         return "Loanee has been dropped out";
+    }
+
+    @Override
+    public String dropOutFromCohort(String loaneeId, String cohortId, String reasonForDropOut) throws MeedlException {
+        MeedlValidator.validateUUID(loaneeId,LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validateUUID(cohortId,CohortMessages.INVALID_COHORT_ID.getMessage());
+        MeedlValidator.validateObjectInstance(reasonForDropOut,"Reason for drop out cannot be empty");
+
+        Loanee loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        Cohort cohort = cohortOutputPort.findCohort(cohortId);
+        checkIfLoaneeExistInCohort(loanee.getCohortId().equals(cohort.getId()));
+
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+
+        checkIfProgramDurationIsStillWithinFirstQuarter(cohort, program);
+
+        terminateLoaneeLoan(loanee);
+
+        //Meedl refunds loanee initial deposit to organization
+
+        notifyOrganizationAdmin(program, loanee);
+        sendPortfolioManagerDropOutNotification(loanee,loanee.getUserIdentity());
+
+        dropOutLoanee(reasonForDropOut, loanee);
+
+        return "loanee drop out from cohort";
+    }
+
+    private void dropOutLoanee(String reasonForDropOut, Loanee loanee) throws MeedlException {
+        loanee.setLoaneeStatus(LoaneeStatus.DROPOUT);
+        loanee.setSetReasonForDropOut(reasonForDropOut);
+        loaneeOutputPort.save(loanee);
+    }
+
+    private void notifyOrganizationAdmin(Program program, Loanee loanee) throws MeedlException {
+        List<OrganizationEmployeeIdentity> organizationEmployees =
+                organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(
+                        program.getOrganizationId(),IdentityRole.ORGANIZATION_ADMIN);
+        MeedlNotification meedlNotification = MeedlNotification.builder()
+                .contentId(loanee.getId())
+                .senderFullName(loanee.getUserIdentity().getFirstName()+" "+ loanee.getUserIdentity().getLastName())
+                .senderMail(loanee.getUserIdentity().getEmail())
+                .notificationFlag(NotificationFlag.DROP_OUT)
+                .contentDetail(MeedlNotificationMessages.DROP_OUT_BY_LOANEE.getMessage())
+                .title(DROP_OUT.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        for (OrganizationEmployeeIdentity organizationEmployee : organizationEmployees) {
+            meedlNotification.setUser(organizationEmployee.getMeedlUser());
+            meedlNotificationOutputPort.save(meedlNotification);
+        }
+    }
+
+    private void terminateLoaneeLoan(Loanee loanee) throws MeedlException {
+        Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
+        loan.get().setLoanStatus(LoanStatus.TERMINATED);
+        loanOutputPort.save(loan.get());
+    }
+
+    private static void checkIfProgramDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) throws LoaneeException {
+        LocalDate cohortEndDate = cohort.getStartDate().plusMonths(program.getDuration());
+        long totalDays = ChronoUnit.DAYS.between(cohort.getStartDate(), cohortEndDate);
+        long quarterDays = totalDays / 4;
+        LocalDate firstQuarterEnd = cohort.getStartDate().plusDays(quarterDays);
+        if (firstQuarterEnd.isBefore(LocalDate.now())) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
+        }
+    }
+
+    private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoaneeException {
+        if (!existInCohort) {
+            throw new LoaneeException(LoaneeMessages.LOANEE_DOES_NOT_EXIST_IN_COHORT.getMessage());
+        }
     }
 
     @Override

@@ -753,6 +753,55 @@ class LoaneeServiceTest {
         assertEquals("Loanee has been dropped out", response);
     }
 
+
+    @Test
+    void dropOutFromCohortByLoanee() throws MeedlException {
+        String response = "";
+        try {
+            String reason = "School na scam";
+            when(loaneeOutputPort.findLoaneeById(any())).thenReturn(firstLoanee);
+            elites.setStartDate(LocalDate.now());
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            firstLoanee.setCohortId(elites.getId());
+            elites.setProgramId(atlasProgram.getId());
+            atlasProgram.setDuration(4);
+            when(programOutputPort.findProgramById(elites.getProgramId())).thenReturn(atlasProgram);
+            when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
+            when(loanOutputPort.save(loan)).thenReturn(loan);
+            when(organizationEmployeeIdentityOutputPort
+                    .findAllEmployeesInOrganizationByOrganizationIdAndRole(
+                            atlasProgram.getOrganizationId(), IdentityRole.ORGANIZATION_ADMIN))
+                    .thenReturn(List.of(organizationEmployeeIdentity));
+
+            when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
+                    .thenReturn(List.of(userIdentity));
+            response = loaneeService.dropOutFromCohort(mockId, mockId, reason);
+        } catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+            fail("Unexpected MeedlException: " + meedlException.getMessage());
+        }
+
+        verify(meedlNotificationOutputPort, times(2)).save(any(MeedlNotification.class));
+        assertEquals("loanee drop out from cohort", response); // Match method's return value
+    }
+
+    @Test
+    void loanneCannotDropOutFromCohortThatHasGonePastFirstQuarter() throws MeedlException {
+        String reason = "School na scam";
+        try {
+            when(loaneeOutputPort.findLoaneeById(any())).thenReturn(firstLoanee);
+            elites.setStartDate(LocalDate.now().minusMonths(6));
+            when(cohortOutputPort.findCohort(mockId)).thenReturn(elites);
+            firstLoanee.setCohortId(elites.getId());
+            elites.setProgramId(atlasProgram.getId());
+            atlasProgram.setDuration(12);
+            when(programOutputPort.findProgramById(elites.getProgramId())).thenReturn(atlasProgram);
+        }catch (MeedlException meedlException) {
+            log.error(meedlException.getMessage());
+        }
+            assertThrows(MeedlException.class,()-> loaneeService.dropOutFromCohort(mockId,mockId,reason));
+    }
+
     @Test
     void archiveLoanee(){
         List<Loanee> loaneeList = new ArrayList<>();

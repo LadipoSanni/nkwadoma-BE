@@ -34,4 +34,6 @@ public interface OrganizationEmployeeIdentityOutputPort {
 
     Page<OrganizationEmployeeIdentity> findAllEmployeesInOrganization(String organizationId,String name, int pageSize, int pageNumber) throws MeedlException;
     Optional<OrganizationEmployeeIdentity> findByMeedlUserId(String meedlUserId) throws MeedlException;
+
+    List<OrganizationEmployeeIdentity> findAllEmployeesInOrganizationByOrganizationIdAndRole(String organizationId, IdentityRole identityRole) throws MeedlException;
 }
