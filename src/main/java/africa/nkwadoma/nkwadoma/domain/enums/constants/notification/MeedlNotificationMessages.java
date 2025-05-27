@@ -17,7 +17,8 @@ public enum MeedlNotificationMessages {
     DROP_OUT_LOANEE("We have received confirmation that you are no longer participating"),
     DROP_OUT("Dropped Out"),
     DROP_OUT_PORTFOLIO_MANAGER("Loanee has dropped out"),
-    LOAN_DEFERRAL_PORTFOLIO_MANAGER("Loanee loan has been deffered");
+    LOAN_DEFERRAL_PORTFOLIO_MANAGER("Loanee loan has been deffered"),
+    DROP_OUT_BY_LOANEE("wanna drop out tired of this program");
 
     private final String message;
 

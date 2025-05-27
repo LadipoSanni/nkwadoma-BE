@@ -180,5 +180,15 @@ public class OrganizationEmployeeIdentityAdapter implements OrganizationEmployee
         return Optional.empty();
     }
 
+    @Override
+    public List<OrganizationEmployeeIdentity> findAllEmployeesInOrganizationByOrganizationIdAndRole(String organizationId, IdentityRole identityRole) throws MeedlException {
+        MeedlValidator.validateUUID(organizationId, OrganizationMessages.INVALID_ORGANIZATION_ID.getMessage());
+        MeedlValidator.validateObjectInstance(identityRole, IdentityMessages.INVALID_VALID_ROLE.getMessage());
+
+        List<OrganizationEmployeeEntity> organizationEmployeeEntities =
+                employeeAdminEntityRepository.findOrganizationEmployeeEntityByOrganizationAndMeedlUserRole(organizationId,identityRole);
+        return organizationEmployeeEntities.stream().map(organizationEmployeeIdentityMapper::toOrganizationEmployeeIdentity).toList();
+    }
+
 
 }

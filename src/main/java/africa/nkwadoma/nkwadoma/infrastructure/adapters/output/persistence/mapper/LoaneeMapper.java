@@ -12,6 +12,8 @@ import java.util.*;
 @Mapper(componentModel = "spring",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoaneeMapper {
     @Mapping(target = "userIdentity", source = "userIdentity")
+    @Mapping(target = "deferredDateAndTime", source = "deferredDateAndTime")
+    @Mapping(target = "deferReason", source = "deferReason")
     LoaneeEntity toLoaneeEntity(Loanee loanee);
 
     @InheritInverseConfiguration

@@ -176,6 +176,19 @@ class OrganizationEmployeeIdentityAdapterTest {
         assertEquals(1, organizationEmployeeIdentities.getSize());
     }
 
+    @Test
+    void findAllAdminInOrganizationReturningList(){
+        List<OrganizationEmployeeIdentity> organizationEmployeeIdentities = new ArrayList<>();
+        try{
+            organizationEmployeeIdentities =
+                    organizationEmployeeIdentityOutputPort.findAllEmployeesInOrganizationByOrganizationIdAndRole(amazingGrace.getId(),IdentityRole.ORGANIZATION_ADMIN);
+        }catch (MeedlException exception){
+            log.error("Error finding organization employees", exception);
+        }
+        assertNotNull(organizationEmployeeIdentities);
+        assertEquals(1, organizationEmployeeIdentities.size());
+    }
+
     @AfterAll
     void tearDown() {
         try {

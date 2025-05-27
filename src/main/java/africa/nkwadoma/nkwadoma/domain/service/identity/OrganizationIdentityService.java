@@ -3,6 +3,7 @@ package africa.nkwadoma.nkwadoma.domain.service.identity;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.identity.*;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoanMetricsUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManagerOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
@@ -17,6 +18,7 @@ import africa.nkwadoma.nkwadoma.domain.exceptions.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.education.*;
 import africa.nkwadoma.nkwadoma.domain.model.identity.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.organization.OrganizationEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.OrganizationIdentityMapper;
@@ -46,6 +48,7 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
     private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     private final ViewOrganizationEmployeesUseCase employeesUseCase;
     private final LoanMetricsUseCase  loanMetricsUseCase;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
 
 
     @Override
@@ -60,13 +63,30 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
+//        sendOrganizationEmployeeEmailUseCase.sendEmail(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}", organizationIdentity);
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
+        notifyPortfolioManager(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
         return organizationIdentity;
+    }
+
+    private void notifyPortfolioManager(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(organizationIdentity.getId())
+                    .senderMail(organizationIdentity.getEmail())
+                    .senderFullName(organizationIdentity.getName())
+                    .title("New organization with the name " + organizationIdentity.getName() + " added to organizations")
+                    .notificationFlag(notificationFlag)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
+        }
     }
 
     private void checkIfOrganizationAndAdminExist(OrganizationIdentity organizationIdentity) throws MeedlException {

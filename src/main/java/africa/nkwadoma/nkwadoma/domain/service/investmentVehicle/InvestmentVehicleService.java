@@ -27,6 +27,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,6 +61,7 @@ public class InvestmentVehicleService implements InvestmentVehicleUseCase {
         MeedlValidator.validateObjectInstance(investmentVehicle,"Investment Vehicle Object Cannot Be Null");
             investmentVehicle.validateDraft();
             investmentVehicle.setLastUpdatedDate(LocalDateTime.now());
+            investmentVehicle.setTotalAvailableAmount(BigDecimal.ZERO);
             return saveInvestmentVehicleToDraft(investmentVehicle);
     }
 

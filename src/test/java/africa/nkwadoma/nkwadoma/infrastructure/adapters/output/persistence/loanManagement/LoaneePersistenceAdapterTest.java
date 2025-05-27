@@ -7,11 +7,15 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoaneeLoanDetailsOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
+import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoaneeLoanDetail;
+import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeRepository;
+import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -22,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +51,6 @@ class LoaneePersistenceAdapterTest {
     private int pageNumber = 0;
     private LoaneeLoanDetail loaneeLoanDetail;
     private LoaneeLoanDetail secondLoaneeLoanDetail;
-
 
     @Autowired
     private LoaneeRepository loaneeRepository;
@@ -91,6 +95,7 @@ class LoaneePersistenceAdapterTest {
         firstLoanee.setCohortId(id);
         firstLoanee.setUserIdentity(userIdentity);
         firstLoanee.setLoaneeLoanDetail(loaneeLoanDetail);
+        firstLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
 
         secondLoaneeLoanDetail = LoaneeLoanDetail.builder().amountRequested(BigDecimal.valueOf(4000))
                 .initialDeposit(BigDecimal.valueOf(200)).build();
@@ -108,6 +113,8 @@ class LoaneePersistenceAdapterTest {
         anotherLoanee.setCohortId(id);
         anotherLoanee.setUserIdentity(anotherUser);
         anotherLoanee.setLoaneeLoanDetail(secondLoaneeLoanDetail);
+        anotherLoanee.setLoaneeStatus(LoaneeStatus.ADDED);
+
     }
 
     @Test
@@ -236,7 +243,7 @@ class LoaneePersistenceAdapterTest {
     @Test
     void findAllLoanee(){
         try {
-            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber, MeedlMessages.CREATED_AT.getMessage());
+            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber, null);
             assertEquals(2,loanees.toList().size());
         }catch (MeedlException exception){
             log.error(exception.getMessage());
