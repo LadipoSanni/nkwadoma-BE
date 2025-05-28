@@ -132,7 +132,11 @@ public class LoaneeService implements LoaneeUseCase {
             MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
             loanee = loaneeOutputPort.findLoaneeById(loaneeId);
         } else {
-            loanee = loaneeOutputPort.findByUserId(userId).get();
+            Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(userId);
+            if (optionalLoanee.isEmpty()) {
+                throw new MeedlException("Loanee not found");
+            }
+            loanee = optionalLoanee.get();
         }
 
         return updateLoaneeCreditScore(loanee);
@@ -165,7 +169,6 @@ public class LoaneeService implements LoaneeUseCase {
 //        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
 //        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
         return loanee;
-
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
