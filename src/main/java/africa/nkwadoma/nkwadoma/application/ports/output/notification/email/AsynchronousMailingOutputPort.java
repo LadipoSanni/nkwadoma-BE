@@ -25,6 +25,6 @@ public interface AsynchronousMailingOutputPort {
     void sendColleagueEmail(String organizationName, UserIdentity userIdentity) throws MeedlException;
 
     @Async
-    void sendEmail(UserIdentity userIdentity) throws MeedlException;
+    void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException;
 
 }

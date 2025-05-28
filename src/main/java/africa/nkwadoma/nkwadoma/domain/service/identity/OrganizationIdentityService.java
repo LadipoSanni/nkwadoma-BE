@@ -68,13 +68,13 @@ public class OrganizationIdentityService implements OrganizationUseCase, ViewOrg
         List<ServiceOffering> serviceOfferings = organizationIdentityOutputPort.getServiceOfferings(organizationIdentity.getId());
         organizationIdentity.setServiceOfferings(serviceOfferings);
         log.info("OrganizationEmployeeIdentity created on the db {}", organizationEmployeeIdentity);
-        asynchronousMailingOutputPort.sendEmail(organizationEmployeeIdentity.getMeedlUser());
+        asynchronousMailingOutputPort.sendEmailToInvitedOrganization(organizationEmployeeIdentity.getMeedlUser());
         log.info("sent email");
         log.info("organization identity saved is : {}", organizationIdentity);
         log.info("about to create Loan Metrics for organization : {}", organizationIdentity);
         LoanMetrics loanMetrics = loanMetricsUseCase.createLoanMetrics(organizationIdentity.getId());
         log.info("loan metrics was created successfully for organiozation : {}", loanMetrics.getOrganizationId());
-        asynchronousNotificationOutputPort.notifyPortfolioManager(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
+        asynchronousNotificationOutputPort.notifyPortfolioManagerOfNewOrganization(organizationIdentity, NotificationFlag.INVITE_ORGANIZATION);
         return organizationIdentity;
     }
 

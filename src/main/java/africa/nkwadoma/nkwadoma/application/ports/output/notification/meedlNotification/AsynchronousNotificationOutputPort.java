@@ -14,5 +14,5 @@ import java.util.List;
 public interface AsynchronousNotificationOutputPort {
     void notifyPortfolioManagerOfNewFinancier(List<Financier> financiersToMail, InvestmentVehicle investmentVehicle, UserIdentity actor);
     @Async
-    void notifyPortfolioManager(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException;
+    void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException;
 }

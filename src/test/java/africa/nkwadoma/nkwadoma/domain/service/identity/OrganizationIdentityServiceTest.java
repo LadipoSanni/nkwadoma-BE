@@ -119,8 +119,8 @@ class OrganizationIdentityServiceTest {
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
-            doNothing().when(asynchronousMailingOutputPort).sendEmail(any(UserIdentity.class));
-            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManager(any(OrganizationIdentity.class), any(NotificationFlag.class));
+            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewOrganization(any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);
