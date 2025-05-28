@@ -275,7 +275,7 @@ class LoaneePersistenceAdapterTest {
     void searchLoanee(){
         List<Loanee> loanees = new ArrayList<>();
         try{
-            loanees = loaneeOutputPort.searchForLoaneeInCohort("le",cohortId);
+            loanees = loaneeOutputPort.searchForLoaneeInCohort("le",cohortId,null);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }

@@ -32,12 +32,17 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     List<LoaneeEntity> findAllLoaneesByCohortId(String id);
 
-    @Query("SELECT l FROM LoaneeEntity l " +
-            "WHERE l.cohortId = :cohortId " +
-            "AND (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%')) " +
-            "OR upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))")
+
+    @Query("""
+        SELECT l FROM LoaneeEntity l
+        WHERE l.cohortId = :cohortId
+        AND (upper(concat(l.userIdentity.firstName, ' ', l.userIdentity.lastName)) LIKE upper(concat('%', :nameFragment, '%'))
+        OR upper(concat(l.userIdentity.lastName, ' ', l.userIdentity.firstName)) LIKE upper(concat('%', :nameFragment, '%')))
+        AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
+        """)
     List<LoaneeEntity> findByCohortIdAndNameFragment(@Param("cohortId") String cohortId,
-                                                     @Param("nameFragment") String nameFragment);
+                                                     @Param("nameFragment") String nameFragment,
+                                                     @Param("status") LoaneeStatus status)  ;
 
     @Query("""
         SELECT l.id as id,

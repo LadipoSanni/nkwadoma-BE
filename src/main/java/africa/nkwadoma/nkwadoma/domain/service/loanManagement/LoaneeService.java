@@ -294,10 +294,10 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public List<Loanee> searchForLoaneeInCohort(String name, String cohortId) throws MeedlException {
+    public List<Loanee> searchForLoaneeInCohort(String name, String cohortId,LoaneeStatus loaneeStatus) throws MeedlException {
         MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
         MeedlValidator.validateDataElement(name, MeedlMessages.INVALID_SEARCH_PARAMETER.getMessage());
-        return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId);
+        return loaneeOutputPort.searchForLoaneeInCohort(name,cohortId,loaneeStatus);
     }
 
     private void checkLoaneeStatus(Loanee loanee) throws MeedlException {

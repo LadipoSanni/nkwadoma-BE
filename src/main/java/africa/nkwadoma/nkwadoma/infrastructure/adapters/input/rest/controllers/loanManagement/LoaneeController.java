@@ -105,8 +105,10 @@ public class LoaneeController {
     @GetMapping("cohorts/search/loanees")
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
-                                                                  @RequestParam("cohortId")String cohortId) throws MeedlException {
-       List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId);
+                                                                  @RequestParam("cohortId")String cohortId,
+                                                                  @RequestParam(name = "status" , required = false )
+                                                                      LoaneeStatus loaneeStatus )throws MeedlException {
+       List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId,loaneeStatus);
        List<LoaneeResponse> loaneeResponse = loaneeRestMapper.toLoaneeResponses(loanee);
        ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
                .data(loaneeResponse)
