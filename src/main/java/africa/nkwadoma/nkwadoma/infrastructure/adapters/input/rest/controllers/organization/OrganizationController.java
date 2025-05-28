@@ -58,6 +58,7 @@ public class OrganizationController {
         String createdBy = meedlUser.getClaimAsString("sub");
         OrganizationIdentity organizationIdentity = setOrganizationEmployeesInOrganization(inviteOrganizationRequest, createdBy);
         organizationIdentity = createOrganizationUseCase.inviteOrganization(organizationIdentity);
+        log.info("------------------Controller ------------------->");
         log.info("Organization identity from service level: {}", organizationIdentity);
         InviteOrganizationResponse inviteOrganizationResponse = organizationRestMapper.toInviteOrganizationresponse(organizationIdentity);
         log.info("Mapped Organization identity from service level: {}", organizationIdentity);
