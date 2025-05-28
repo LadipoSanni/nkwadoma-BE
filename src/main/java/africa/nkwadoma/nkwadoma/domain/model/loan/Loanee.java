@@ -47,6 +47,7 @@ public class Loanee {
     private String loanId;
     private String deferReason;
     private LocalDateTime deferredDateAndTime;
+    private String loaneeName;
 
 
     public void validate() throws MeedlException {
