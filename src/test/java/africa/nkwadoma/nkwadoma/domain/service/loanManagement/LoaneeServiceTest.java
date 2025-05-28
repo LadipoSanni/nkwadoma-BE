@@ -434,14 +434,16 @@ class LoaneeServiceTest {
 
     @Test
     void searchLoaneeInACohort(){
-        List<Loanee> loanees = new ArrayList<>();
+        Page<Loanee> loanees = Page.empty();
         try {
-            when(loaneeOutputPort.searchForLoaneeInCohort("le", mockId)).thenReturn(List.of(firstLoanee));
-            loanees = loaneeService.searchForLoaneeInCohort("le", mockId);
+            firstLoanee.setLoaneeName("q");
+            when(loaneeOutputPort.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber))
+                    .thenReturn(new PageImpl<>(List.of(firstLoanee)));
+            loanees = loaneeService.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber);
         }catch (MeedlException exception){
             log.error("{} {}", exception.getClass().getName(), exception.getMessage());
         }
-        assertEquals(1,loanees.size());
+        assertEquals(1,loanees.getContent().size());
     }
 
 
