@@ -27,6 +27,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         Cohort cohort = cohortUseCase.viewCohortDetails(actorId, cohortId);
         verifyLoaneesExist(repaymentHistories);
         return repaymentHistories.stream()
+                .peek(repaymentHistory -> repaymentHistory.setCohort(cohort))
                 .map(repaymentHistoryOutputPort::save)
                 .toList();
     }

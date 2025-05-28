@@ -273,13 +273,14 @@ class LoaneePersistenceAdapterTest {
     @Order(5)
     @Test
     void searchLoanee(){
-        List<Loanee> loanees = new ArrayList<>();
+        Page<Loanee> loanees = Page.empty();
+        firstLoanee.setLoaneeName("le");
         try{
-            loanees = loaneeOutputPort.searchForLoaneeInCohort("le",cohortId);
+            loanees = loaneeOutputPort.searchForLoaneeInCohort(firstLoanee,pageSize,pageNumber);
         } catch (MeedlException e) {
             log.error(e.getMessage());
         }
-        assertEquals(2,loanees.size());
+        assertEquals(2,loanees.getContent().size());
     }
 
     @AfterAll

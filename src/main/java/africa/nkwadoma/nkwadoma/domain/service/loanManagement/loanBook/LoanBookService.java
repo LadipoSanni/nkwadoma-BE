@@ -85,6 +85,7 @@ public class LoanBookService implements LoanBookUseCase {
         Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
         List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data, savedCohort);
         List<RepaymentHistory> savedRepaymentHistories = saveRepaymentHistory(convertedRepaymentHistories, repaymentRecordBook.getActorId(), repaymentRecordBook.getCohort().getId());
+        log.info("Repayment record uploaded..");
     }
 
     private List<RepaymentHistory> saveRepaymentHistory(List<RepaymentHistory> repaymentHistories, String actorId, String cohortId) throws MeedlException {
