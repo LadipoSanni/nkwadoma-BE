@@ -1,4 +1,4 @@
-package africa.nkwadoma.nkwadoma.domain.service.identity;
+    package africa.nkwadoma.nkwadoma.domain.service.identity;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.LoanMetricsUseCase;
@@ -6,6 +6,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.IdentityManage
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanType;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
@@ -58,6 +60,10 @@ class OrganizationIdentityServiceTest {
     private OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
     @Mock
     private LoanMetricsUseCase loanMetricsUseCase;
+    @Mock
+    private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
+    @Mock
+    private AsynchronousMailingOutputPort asynchronousMailingOutputPort;
     private UserIdentity sarah;
     private OrganizationIdentity roseCouture;
     private OrganizationEmployeeIdentity employeeSarah;
@@ -113,7 +119,8 @@ class OrganizationIdentityServiceTest {
             when(organizationEmployeeIdentityOutputPort.save(employeeSarah)).thenReturn(employeeSarah);
             when(identityManagerOutPutPort.getClientRepresentationByName(roseCouture.getName())).thenReturn(new ClientRepresentation());
             when(identityManagerOutPutPort.getUserByEmail(roseCouture.getOrganizationEmployees().get(0).getMeedlUser().getEmail())).thenReturn(Optional.empty());
-            doNothing().when(sendOrganizationEmployeeEmailUseCase).sendEmail(sarah);
+            doNothing().when(asynchronousMailingOutputPort).sendEmailToInvitedOrganization(any(UserIdentity.class));
+            doNothing().when(asynchronousNotificationOutputPort).notifyPortfolioManagerOfNewOrganization(any(OrganizationIdentity.class), any(NotificationFlag.class));
             when(loanMetricsUseCase.createLoanMetrics(anyString())).thenReturn(new LoanMetrics());
 
             invitedOrganisation = organizationIdentityService.inviteOrganization(roseCouture);

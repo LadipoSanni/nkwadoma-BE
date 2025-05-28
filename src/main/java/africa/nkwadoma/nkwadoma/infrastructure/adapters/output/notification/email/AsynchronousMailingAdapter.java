@@ -2,21 +2,27 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.notification.ema
 
 import africa.nkwadoma.nkwadoma.application.ports.input.email.FinancierEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.LoaneeEmailUsecase;
+import africa.nkwadoma.nkwadoma.application.ports.input.email.OrganizationEmployeeEmailUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.email.SendColleagueEmailUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.input.meedlNotification.MeedlNotificationUsecase;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.email.AsynchronousMailingOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
+import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +33,8 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     private final LoaneeEmailUsecase loaneeEmailUsecase;
     private final FinancierEmailUseCase financierEmailUseCase;
     private final SendColleagueEmailUseCase sendEmail;
+    private final MeedlNotificationUsecase meedlNotificationUsecase;
+    private final OrganizationEmployeeEmailUseCase sendOrganizationEmployeeEmailUseCase;
 
     @Async
     @Override
@@ -79,6 +87,12 @@ public class AsynchronousMailingAdapter implements AsynchronousMailingOutputPort
     @Override
     public void sendColleagueEmail(String organizationName, UserIdentity userIdentity) throws MeedlException {
         sendEmail.sendColleagueEmail(organizationName,userIdentity);
+    }
+
+    @Async
+    @Override
+    public void sendEmailToInvitedOrganization(UserIdentity userIdentity) throws MeedlException {
+        sendOrganizationEmployeeEmailUseCase.sendEmail(userIdentity);
     }
 
     private void emailInviteNonExistingFinancierToVehicle(Financier financier, InvestmentVehicle investmentVehicle) throws MeedlException {

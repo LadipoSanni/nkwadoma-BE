@@ -27,6 +27,7 @@ import lombok.extern.slf4j.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.thymeleaf.context.*;
 
 import java.time.LocalDateTime;

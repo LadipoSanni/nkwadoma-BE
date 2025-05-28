@@ -7,6 +7,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.IdentityRole;
 import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.financier.Financier;
+import africa.nkwadoma.nkwadoma.domain.model.identity.OrganizationIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.investmentVehicle.InvestmentVehicle;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,24 @@ public class AsynchronousNotificationAdapter implements AsynchronousNotification
             } catch (MeedlException e) {
                 log.error("FAILED NOTIFICATION: Notify financier notification to financiers wasn't sent due to {}",e.getMessage(), e);
             }
+        }
+    }
+
+    @Async
+    @Override
+    public void notifyPortfolioManagerOfNewOrganization(OrganizationIdentity organizationIdentity, NotificationFlag notificationFlag) throws MeedlException {
+        List<UserIdentity> portfolioManagers = userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER);
+        for (UserIdentity portfolioManager : portfolioManagers) {
+            MeedlNotification notification = MeedlNotification.builder()
+                    .user(portfolioManager)
+                    .timestamp(LocalDateTime.now())
+                    .contentId(organizationIdentity.getId())
+                    .senderMail(organizationIdentity.getEmail())
+                    .senderFullName(organizationIdentity.getName())
+                    .title("New organization with the name " + organizationIdentity.getName() + " has been invited.")
+                    .notificationFlag(notificationFlag)
+                    .build();
+            meedlNotificationUsecase.sendNotification(notification);
         }
     }
 
