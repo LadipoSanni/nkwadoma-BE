@@ -6,8 +6,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanB
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.RepaymentHistoryEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
@@ -17,8 +19,11 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     @Override
     public RepaymentHistory save(RepaymentHistory repaymentHistory){
         repaymentHistory.validate();
+        log.info("Repayment history before mapping to entity in adapter {}", repaymentHistory);
         RepaymentHistoryEntity repaymentHistoryEntity = repaymentHistoryMapper.map(repaymentHistory);
+        log.info("Repayment history after mapping to entity {}", repaymentHistory);
         RepaymentHistoryEntity savedRepaymentHistoryEntity = repaymentHistoryRepository.save(repaymentHistoryEntity);
+        log.info("Repayment history after saving entity to db {}", repaymentHistory);
         return repaymentHistoryMapper.map(savedRepaymentHistoryEntity);
     }
 }
