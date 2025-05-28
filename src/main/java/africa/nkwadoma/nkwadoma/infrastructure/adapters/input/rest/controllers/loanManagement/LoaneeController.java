@@ -106,12 +106,19 @@ public class LoaneeController {
     @PreAuthorize("hasRole('ORGANIZATION_ADMIN') or hasRole('PORTFOLIO_MANAGER')")
     public ResponseEntity<ApiResponse<?>> searchForLoaneeInCohort(@RequestParam("loaneeName")String loaneeName,
                                                                   @RequestParam("cohortId")String cohortId,
-                                                                  @RequestParam(name = "status" , required = false )
-                                                                      LoaneeStatus loaneeStatus )throws MeedlException {
-       List<Loanee> loanee = loaneeUseCase.searchForLoaneeInCohort(loaneeName,cohortId,loaneeStatus);
-       List<LoaneeResponse> loaneeResponse = loaneeRestMapper.toLoaneeResponses(loanee);
-       ApiResponse<List<LoaneeResponse>> apiResponse = ApiResponse.<List<LoaneeResponse>>builder()
-               .data(loaneeResponse)
+                                                                  @RequestParam(name = "status" , required = false ) LoaneeStatus status,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber)throws MeedlException {
+        Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(status).loaneeName(loaneeName).build();
+       Page<Loanee> loanees = loaneeUseCase.searchForLoaneeInCohort(loanee,pageSize,pageNumber);
+       List<LoaneeResponse> loaneeResponse = loanees.stream()
+               .map(loaneeRestMapper::toLoaneeResponse).toList();
+       PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
+               loaneeResponse,loanees.hasNext(),
+               loanees.getTotalPages(), pageNumber, pageSize
+       );
+       ApiResponse<PaginatedResponse<LoaneeResponse>> apiResponse = ApiResponse.<PaginatedResponse<LoaneeResponse>>builder()
+               .data(paginatedResponse)
                .message(LOANEE_RETRIEVED)
                .statusCode(HttpStatus.OK.toString())
                .build();

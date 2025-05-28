@@ -2,15 +2,12 @@ package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
-import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoanMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.*;
 import africa.nkwadoma.nkwadoma.domain.exceptions.loan.LoaneeException;
-import africa.nkwadoma.nkwadoma.domain.model.loan.Loan;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.mapper.LoaneeMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.LoaneeProjection;
@@ -23,7 +20,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -77,15 +73,16 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public List<Loanee> searchForLoaneeInCohort(String name,String cohortId,LoaneeStatus loaneeStatus) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
-        MeedlValidator.validateDataElement(name, LoaneeMessages.LOANEE_NAME_CANNOT_BE_EMPTY.getMessage());
-        List<LoaneeEntity> loaneeEntities =
-                loaneeRepository.findByCohortIdAndNameFragment(cohortId,name,loaneeStatus);
+    public Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getCohortId(),CohortMessages.INVALID_COHORT_ID.getMessage());
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
+        Page<LoaneeEntity> loaneeEntities =
+                loaneeRepository.findByCohortIdAndNameFragment(loanee.getCohortId(),
+                        loanee.getLoaneeName(),loanee.getLoaneeStatus(),pageRequest);
         if (loaneeEntities.isEmpty()){
-            return new ArrayList<>();
+            return Page.empty();
         }
-        return loaneeEntities.stream().map(loaneeMapper::toLoanee).toList();
+        return loaneeEntities.map(loaneeMapper::toLoanee);
     }
 
     @Override

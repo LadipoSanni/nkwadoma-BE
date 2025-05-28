@@ -3,7 +3,6 @@ package africa.nkwadoma.nkwadoma.application.ports.output.education;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.*;
@@ -25,7 +24,7 @@ public interface LoaneeOutputPort {
 
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
 
-    List<Loanee> searchForLoaneeInCohort(String name,String cohortId,LoaneeStatus loaneeStatus) throws MeedlException;
+    Page<Loanee> searchForLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
 
 
     Page<Loanee> findAllLoaneeThatBenefitedFromLoanProduct(String id,int pageSize , int pageNumber) throws MeedlException;
