@@ -24,7 +24,7 @@ public class EmailResendAdapter implements EmailResendUseCase {
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
 
 //    @Scheduled(fixedRate = 1800000)
-    @PostConstruct
+//    @PostConstruct
     public void scheduledReferralEmailResend(){
         List<LoanReferral> allLoanReferral = loanReferralOutputPort.viewAll();
 
