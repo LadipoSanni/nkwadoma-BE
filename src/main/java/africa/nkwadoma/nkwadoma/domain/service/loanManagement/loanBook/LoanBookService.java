@@ -134,7 +134,7 @@ public class LoanBookService implements LoanBookUseCase {
         log.info("Amount received by this loanee {}", loanee.getLoaneeLoanDetail().getAmountReceived());
         LoanRequest loanRequest = LoanRequest.builder()
                 //TODO Amount received should be changed to amount approved. Not currently been collected.
-                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountApproved())
+                .loanAmountApproved(loanee.getLoaneeLoanDetail().getAmountReceived())
                 .loanAmountRequested(loanee.getLoaneeLoanDetail().getAmountRequested())
                 .loanRequestDecision(LoanDecision.ACCEPTED)
                 .id(loanReferral.getId())
@@ -217,7 +217,6 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .initialDeposit(new BigDecimal(row[5].trim()))
                     .amountRequested(new BigDecimal(row[6].trim()))
                     .amountReceived(new BigDecimal(row[7].trim()))
-                    .amountApproved(new BigDecimal(row[8].trim()))
                     .build();
 
             log.info("Test values in the file {}", loaneeLoanDetail);
