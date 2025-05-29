@@ -22,6 +22,7 @@ public class RepaymentHistoryEntity {
     private String lastName;
     private String email;
     private String paymentDate;
+    private String cohortId;
     private BigDecimal amountPaid;
     @Enumerated(EnumType.STRING)
     private ModeOfPayment modeOfPayment;

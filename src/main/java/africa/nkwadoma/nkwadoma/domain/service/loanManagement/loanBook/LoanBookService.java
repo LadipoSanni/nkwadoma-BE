@@ -61,7 +61,7 @@ public class LoanBookService implements LoanBookUseCase {
     @Override
     public LoanBook upLoadFile(LoanBook loanBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
-        loanBook.validate();
+        loanBook.validateLoanBook();
 
         List<String[]> data = readFile(loanBook.getFile());
         log.info("Loan book read is {}", data);
@@ -76,7 +76,7 @@ public class LoanBookService implements LoanBookUseCase {
     @Override
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
-        repaymentRecordBook.validate();
+        repaymentRecordBook.validateRepaymentRecord();
         List<String[]> data = readFile(repaymentRecordBook.getFile());
         log.info("Repayment record book read is {}", data);
 
@@ -85,6 +85,7 @@ public class LoanBookService implements LoanBookUseCase {
         Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
         List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data, savedCohort);
         List<RepaymentHistory> savedRepaymentHistories = saveRepaymentHistory(convertedRepaymentHistories, repaymentRecordBook.getActorId(), repaymentRecordBook.getCohort().getId());
+        log.info("Repayment record uploaded..");
     }
 
     private List<RepaymentHistory> saveRepaymentHistory(List<RepaymentHistory> repaymentHistories, String actorId, String cohortId) throws MeedlException {
@@ -187,7 +188,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .amountPaid(new BigDecimal(row[4].trim()))
                     .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
                     .build();
-            log.info("Repayment history {}", repaymentHistory);
+            log.info("Repayment history model created from file {}", repaymentHistory);
             repaymentHistories.add(repaymentHistory);
         }
         return repaymentHistories;

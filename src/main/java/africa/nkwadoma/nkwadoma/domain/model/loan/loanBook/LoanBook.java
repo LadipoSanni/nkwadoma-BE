@@ -23,10 +23,14 @@ public class LoanBook {
     private String actorId;
     private List<Loanee> loanees;
 
-    public void validate() throws MeedlException {
+    public void validateRepaymentRecord() throws MeedlException {
         MeedlValidator.validateObjectInstance(this.getCohort(), "Cohort details can not be empty.");
         MeedlValidator.validateUUID(this.getCohort().getId(), "Cohort id cannot be null.");
         MeedlValidator.validateObjectInstance(this.getFile(), "Please Provide file to upload");
-        MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
+
+    }
+    public void validateLoanBook() throws MeedlException {
+        validateRepaymentRecord();
+       MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
     }
 }
