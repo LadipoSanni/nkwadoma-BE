@@ -66,64 +66,64 @@ jobs:
         run: docker push $IMAGE_TAG
 
   # ======================= DEPLOY TO EC2 =======================
-  deploy-to-ec2:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    # if: github.event_name == 'pull_request' 
+  # deploy-to-ec2:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-push
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+  #   # if: github.event_name == 'pull_request' 
     
-    steps:
-      - name: SSH into EC2 and Deploy Container
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          S3_BUCKET_NAME: semicolon-delivery
-          S3_REGION: eu-west-1
-        run: |
-          echo "$EC2_SSH_KEY" > QA-KP.pem
-          chmod 600 QA-KP.pem
-          ssh -t -o StrictHostKeyChecking=no -i "QA-KP.pem" $EC2_USER@$EC2_HOST << 'EOF'
-          set -e
+  #   steps:
+  #     - name: SSH into EC2 and Deploy Container
+  #       env:
+  #         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+  #         EC2_USER: ${{ secrets.EC2_USER }}
+  #         EC2_HOST: ${{ secrets.EC2_HOST }}
+  #         S3_BUCKET_NAME: semicolon-delivery
+  #         S3_REGION: eu-west-1
+  #       run: |
+  #         echo "$EC2_SSH_KEY" > QA-KP.pem
+  #         chmod 600 QA-KP.pem
+  #         ssh -t -o StrictHostKeyChecking=no -i "QA-KP.pem" $EC2_USER@$EC2_HOST << 'EOF'
+  #         set -e
           
-          echo "✅ SSH connection established!"
+  #         echo "✅ SSH connection established!"
 
-          # Login to Amazon ECR
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
+  #         # Login to Amazon ECR
+  #         aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.REPO_URL }}
 
-          # Fetch latest environment file from S3
-          echo "📥 Downloading environment file from S3..."
-          aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma.env --region ${{ env.S3_REGION }}
+  #         # Fetch latest environment file from S3
+  #         echo "📥 Downloading environment file from S3..."
+  #         aws s3 cp s3://${{ env.S3_BUCKET_NAME }}/nkwadoma/backend/dev/nkwadoma.env nkwadoma.env --region ${{ env.S3_REGION }}
 
-          if [ ! -f "nkwadoma.env" ]; then
-            echo "❌ ERROR: nkwadoma.env file not found!"
-            exit 1
-          fi
+  #         if [ ! -f "nkwadoma.env" ]; then
+  #           echo "❌ ERROR: nkwadoma.env file not found!"
+  #           exit 1
+  #         fi
 
-          # Pull latest Docker image
-          echo "📦 Pulling latest Docker image..."
-          docker pull ${{ env.REPO_URL }}:alpha
+  #         # Pull latest Docker image
+  #         echo "📦 Pulling latest Docker image..."
+  #         docker pull ${{ env.REPO_URL }}:alpha
 
-          # Stop any running container on port 8768
-          sudo fuser -k 8768/tcp || true
+  #         # Stop any running container on port 8768
+  #         sudo fuser -k 8768/tcp || true
 
-          # Remove existing container if exists
-          CONTAINER_NAME="nkwadoma-container"
-          if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
-             docker stop ${CONTAINER_NAME} || true
-             docker rm ${CONTAINER_NAME} || true
-          fi
+  #         # Remove existing container if exists
+  #         CONTAINER_NAME="nkwadoma-container"
+  #         if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
+  #            docker stop ${CONTAINER_NAME} || true
+  #            docker rm ${CONTAINER_NAME} || true
+  #         fi
 
-          # Run the container
-          echo "🚀 Running the container..."
-          docker run -d --name ${CONTAINER_NAME} -p 8768:8768 \
-              --env-file nkwadoma.env \
-              --restart unless-stopped \
-              "${{ env.REPO_URL }}:alpha"
+  #         # Run the container
+  #         echo "🚀 Running the container..."
+  #         docker run -d --name ${CONTAINER_NAME} -p 8768:8768 \
+  #             --env-file nkwadoma.env \
+  #             --restart unless-stopped \
+  #             "${{ env.REPO_URL }}:alpha"
 
-          # Clean up old unused Docker images
-          docker system prune -f
-          EOF
+  #         # Clean up old unused Docker images
+  #         docker system prune -f
+  #         EOF
 
   # ======================= DEPLOY TO LOCAL =======================
   deploy-to-local:
