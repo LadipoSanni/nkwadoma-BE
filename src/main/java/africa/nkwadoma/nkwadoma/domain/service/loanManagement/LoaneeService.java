@@ -134,7 +134,7 @@ public class LoaneeService implements LoaneeUseCase {
         } else {
             Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(userId);
             if (optionalLoanee.isEmpty()) {
-                throw new MeedlException("Loanee not found");
+                throw new MeedlException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage());
             }
             loanee = optionalLoanee.get();
         }
