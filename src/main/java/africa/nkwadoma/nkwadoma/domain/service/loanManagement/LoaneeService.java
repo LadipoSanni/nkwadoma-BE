@@ -126,19 +126,25 @@ public class LoaneeService implements LoaneeUseCase {
     }
 
     @Override
-    public Loanee viewLoaneeDetails(String id, String userId) throws MeedlException {
-        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
-        Loanee loanee = loaneeOutputPort.findLoaneeById(id);
-        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
-        if (userIdentity.getRole().equals(IdentityRole.LOANEE)){
-            Optional<Loanee> foundLoanee = loaneeOutputPort
-                    .findByUserId(userId);
-            if (foundLoanee.isPresent() && !foundLoanee.get().getId().equals(loanee.getId())) {
-                throw new MeedlException("Access denied: You can only view your own loan details.");
+    public Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException {
+        Loanee loanee = null;
+        if (!isLoanee(userId)) {
+            MeedlValidator.validateUUID(loaneeId, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+            loanee = loaneeOutputPort.findLoaneeById(loaneeId);
+        } else {
+            Optional<Loanee> optionalLoanee = loaneeOutputPort.findByUserId(userId);
+            if (optionalLoanee.isEmpty()) {
+                throw new MeedlException(LoaneeMessages.LOANEE_NOT_FOUND.getMessage());
             }
+            loanee = optionalLoanee.get();
         }
-        log.info("loanee found successfully. Loanee with id {}", id);
+
         return updateLoaneeCreditScore(loanee);
+    }
+
+    private boolean isLoanee(String userId) throws MeedlException {
+        UserIdentity userIdentity = userIdentityOutputPort.findById(userId);
+        return userIdentity.getRole().equals(IdentityRole.LOANEE);
     }
 
     private Loanee updateLoaneeCreditScore(Loanee loanee) throws MeedlException {
@@ -163,7 +169,6 @@ public class LoaneeService implements LoaneeUseCase {
 //        Loan loan = loanOutputPort.findLoanById(loanee.getLoaneeLoanDetail().getId());
 //        LoanProduct loanProduct = loanProductOutputPort.findById(loanee.);
         return loanee;
-
     }
 
     private Loanee updateCreditScore(Loanee loanee) throws MeedlException {
