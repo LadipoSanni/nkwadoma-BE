@@ -7,10 +7,8 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loan.LoanReferralOutput
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,7 +22,7 @@ public class EmailResendAdapter implements EmailResendUseCase {
     private final SendLoaneeEmailUsecase sendLoaneeEmailUsecase;
 
 //    @Scheduled(fixedRate = 1800000)
-    @PostConstruct
+//    @PostConstruct
     public void scheduledReferralEmailResend(){
         List<LoanReferral> allLoanReferral = loanReferralOutputPort.viewAll();
 
