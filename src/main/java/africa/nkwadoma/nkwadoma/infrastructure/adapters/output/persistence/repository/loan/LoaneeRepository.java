@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.LoaneeEntity;
 import jakarta.transaction.Transactional;
@@ -17,12 +18,23 @@ public interface LoaneeRepository extends JpaRepository<LoaneeEntity,String> {
 
     Optional<LoaneeEntity> findLoaneeByUserIdentityId(String userId);
 
+//    @Query("""
+//        SELECT l FROM LoaneeEntity l
+//        WHERE l.cohortId = :cohortId
+//        AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
+//        """)
     @Query("""
-        SELECT l FROM LoaneeEntity l 
-        WHERE l.cohortId = :cohortId 
+    SELECT l FROM LoaneeEntity l 
+    JOIN LoanEntity loan ON loan.loaneeEntity.id = l.id
+    WHERE l.cohortId = :cohortId 
         AND (:status IS NULL AND l.loaneeStatus != 'ARCHIVE' OR l.loaneeStatus = :status)
-        """)
-    Page<LoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,@Param("status")LoaneeStatus status, Pageable pageable);
+    AND (:status IS NULL OR l.loaneeStatus = :status)
+    AND (:loanStatus IS NULL OR loan.loanStatus = :loanStatus)
+    """)
+    Page<LoaneeEntity> findAllByCohortId(@Param("cohortId") String cohortId,
+                                         @Param("status")LoaneeStatus status,
+                                         @Param("loanStatus") LoanStatus loanStatus,
+                                         Pageable pageable);
 
     @Query("SELECT l FROM LoaneeEntity l WHERE l.cohortId = :cohortId AND l.id IN :loaneeIds")
     List<LoaneeEntity> findAllLoaneesByCohortIdAndLoaneeIds(

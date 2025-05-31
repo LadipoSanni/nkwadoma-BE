@@ -253,27 +253,27 @@ class LoaneeServiceTest {
 
     @Test
     void viewAllLoaneeInCohort() throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber,null)).
+        when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber,null, null)).
                 thenReturn(new PageImpl<>(List.of(firstLoanee)));
-        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(mockId,pageSize,pageNumber,null);
+        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(mockId,pageSize,pageNumber,null, null);
         assertEquals(1,loanees.toList().size());
     }
 
     @Test
     void viewAllLoaneeInCohortWithNullId() {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber,null));
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber,null, null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void viewAllLoaneeInCohortWithEmptyId(String cohortId) {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null));
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null, null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
     void viewAllLoaneeInCohortWithInvalidId(String cohortId) {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null));
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null, null));
     }
     @Test
     void referTrainee() throws MeedlException {
