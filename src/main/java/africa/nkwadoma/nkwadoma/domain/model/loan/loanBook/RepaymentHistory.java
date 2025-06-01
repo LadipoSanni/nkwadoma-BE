@@ -2,10 +2,10 @@ package africa.nkwadoma.nkwadoma.domain.model.loan.loanBook;
 
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.ModeOfPayment;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class RepaymentHistory {
     private String firstName;
     private String lastName;
-    private String email;
+    private UserIdentity userIdentity;
     private String paymentDate;
     private BigDecimal amountPaid;
     private ModeOfPayment modeOfPayment;
