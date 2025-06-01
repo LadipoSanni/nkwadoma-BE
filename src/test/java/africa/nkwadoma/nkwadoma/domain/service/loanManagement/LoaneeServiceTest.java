@@ -11,6 +11,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.*;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationEmployeeIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.OrganizationIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.LoanReferralOutputPort;
+import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.AsynchronousNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.notification.meedlNotification.MeedlNotificationOutputPort;
 import africa.nkwadoma.nkwadoma.domain.enums.*;
 import africa.nkwadoma.nkwadoma.domain.enums.constants.*;
@@ -96,6 +97,8 @@ class LoaneeServiceTest {
     private LoanOutputPort loanOutputPort;
     @Mock
     private MeedlNotificationOutputPort meedlNotificationOutputPort;
+    @Mock
+    private AsynchronousNotificationOutputPort asynchronousNotificationOutputPort;
     private int pageSize = 2;
     private int pageNumber = 1;
 
@@ -113,6 +116,7 @@ class LoaneeServiceTest {
     private Loan loan;
     private DeferProgramRequest deferProgramRequest;
     private String userId = "2bc2ef97-1035-5e42-bc8b-22a90b809f8d";
+    private String reasonForDeferral = "My head no carry coding again";
 
     @BeforeEach
     void setUpLoanee() {
@@ -543,9 +547,9 @@ class LoaneeServiceTest {
         } catch (MeedlException e){
             log.info("Error: {}", e.getMessage());
         }
-
+;
         Exception message = assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(firstLoanee, userId));
+                loaneeService.deferLoan(userId, mockId, reasonForDeferral));
     }
 
     @Test
@@ -576,7 +580,7 @@ class LoaneeServiceTest {
         }
 
         Exception message = assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(loanee, userId));
+                loaneeService.deferLoan(userId, mockId, reasonForDeferral));
     }
 
     @Test
@@ -596,7 +600,7 @@ class LoaneeServiceTest {
         }
 
         Exception e = assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(firstLoanee, mockId));
+                loaneeService.deferLoan(userId, mockId, reasonForDeferral));
     }
 
     @ParameterizedTest
@@ -606,7 +610,7 @@ class LoaneeServiceTest {
         loanee.setLoanId(loanId);
 
         assertThrows(MeedlException.class, () ->
-                loaneeService.deferProgram(loanee, mockId));
+                loaneeService.deferLoan(userId, loanId, reasonForDeferral));
     }
 
     @Test
@@ -630,12 +634,14 @@ class LoaneeServiceTest {
             when(loaneeOutputPort.findLoaneeById(mockId)).thenReturn(foundLoanee);
             when(cohortOutputPort.findCohort(anyString())).thenReturn(cohort);
             when(loanOutputPort.save(any(Loan.class))).thenReturn(loan);
-            result = loaneeService.deferProgram(firstLoanee, userId);
+//            when(asynchronousNotificationOutputPort.sendDeferralNotificationToEmployee(any(), any(), any()))
+//                    .thenReturn("Deferral request sent");
+            result = loaneeService.deferLoan(userId, mockId, reasonForDeferral);
         } catch (Exception e) {
             log.info("Error: {}", e.getMessage());
         }
 
-        assertEquals("Successfully deferred", result);
+        assertEquals("Deferral request sent", result);
     }
 
     @ParameterizedTest
