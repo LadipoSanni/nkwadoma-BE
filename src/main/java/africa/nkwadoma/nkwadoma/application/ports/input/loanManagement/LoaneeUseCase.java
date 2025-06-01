@@ -15,7 +15,7 @@ public interface LoaneeUseCase {
 
     Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber, LoaneeStatus loaneeStatus, LoanStatus loanStatus) throws MeedlException;
+    Page<Loanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
     LoanReferral referLoanee(Loanee loanee) throws MeedlException;
 
     void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException;

@@ -59,10 +59,11 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
     }
 
     @Override
-    public Page<Loanee> findAllLoaneeByCohortId(String cohortId, int pageSize, int pageNumber,LoaneeStatus status, LoanStatus loanStatus) throws MeedlException {
-        MeedlValidator.validateUUID(cohortId, CohortMessages.INVALID_COHORT_ID.getMessage());
+    public Page<Loanee> findAllLoaneeByCohortId(Loanee loanee, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(loanee.getCohortId(), CohortMessages.INVALID_COHORT_ID.getMessage());
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
-        Page<LoaneeEntity> loaneeEntities = loaneeRepository.findAllByCohortId(cohortId,status, loanStatus, pageRequest);
+        Page<LoaneeEntity> loaneeEntities = loaneeRepository
+                .findAllByCohortId(loanee.getCohortId(), loanee.getLoaneeStatus(), loanee.getLoanStatus(), pageRequest);
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }
 

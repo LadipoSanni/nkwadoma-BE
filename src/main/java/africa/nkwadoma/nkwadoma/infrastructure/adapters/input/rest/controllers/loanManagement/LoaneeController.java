@@ -89,7 +89,9 @@ public class LoaneeController {
             @RequestParam(name = "status" , required = false )LoaneeStatus loaneeStatus,
             @RequestParam(name= "loanStatus", required = false) LoanStatus loanStatus
             ) throws MeedlException {
-        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(cohortId, pageSize, pageNumber, loaneeStatus, loanStatus);
+        Loanee loanee = Loanee.builder().cohortId(cohortId).loaneeStatus(loaneeStatus)
+                .loanStatus(loanStatus).build();
+        Page<Loanee> loanees = loaneeUseCase.viewAllLoaneeInCohort(loanee, pageSize, pageNumber);
         List<LoaneeResponse> loaneeResponses = loanees.stream()
                 .map(loaneeRestMapper::toLoaneeResponse).toList();
         PaginatedResponse<LoaneeResponse> paginatedResponse = new PaginatedResponse<>(
