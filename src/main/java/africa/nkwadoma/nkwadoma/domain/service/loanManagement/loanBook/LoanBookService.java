@@ -23,6 +23,7 @@ import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.*;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+import javax.management.Notification;
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -77,19 +79,19 @@ public class LoanBookService implements LoanBookUseCase {
         List<String> requiredHeaders = List.of("firstName", "lastName", "email", "paymentDate", "amountPaid", "modeOfPayment");
 
         List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
+        repaymentRecordBook.setMeedlNotification(new MeedlNotification());
+//        List<String[]> data = readFile(repaymentRecordBook.getFile());
         log.info("Repayment record book read is {}", data);
 
-//        RepaymentHistory repaymentHistory =
 
         Cohort savedCohort = findCohort(repaymentRecordBook.getCohort());
-        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data, savedCohort);
-        List<RepaymentHistory> savedRepaymentHistories = saveRepaymentHistory(convertedRepaymentHistories, repaymentRecordBook.getActorId(), repaymentRecordBook.getCohort().getId());
+        repaymentRecordBook.setCohort(savedCohort);
+//        List<RepaymentHistory> convertedRepaymentHistories = convertToRepaymentHistory(data);
+//        repaymentRecordBook.setRepaymentHistories(convertedRepaymentHistories);
+        List<RepaymentHistory> savedRepaymentHistories = repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentRecordBook);
         log.info("Repayment record uploaded..");
     }
 
-    private List<RepaymentHistory> saveRepaymentHistory(List<RepaymentHistory> repaymentHistories, String actorId, String cohortId) throws MeedlException {
-        return repaymentHistoryUseCase.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId);
-    }
 
     private void completeLoanProcessing(LoanBook loanBook) {
         loanBook.getLoanees()
@@ -173,24 +175,24 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         MeedlValidator.validateObjectInstance(cohort, CohortMessages.COHORT_CANNOT_BE_EMPTY.getMessage());
         return cohortUseCase.viewCohortDetails(cohort.getCreatedBy(), cohort.getId());
     }
-    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data, Cohort cohort) {
-        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
-
-        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
-        for (String[] row : data) {
-            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
-                    .firstName(row[0].trim())
-                    .lastName(row[1].trim())
-                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
-                    .paymentDate(row[3].trim())
-                    .amountPaid(new BigDecimal(row[4].trim()))
-                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
-                    .build();
-            log.info("Repayment history model created from file {}", repaymentHistory);
-            repaymentHistories.add(repaymentHistory);
-        }
-        return repaymentHistories;
-    }
+//    private List<RepaymentHistory> convertToRepaymentHistory(List<Map<String, String>>  data) {
+//        List<RepaymentHistory> repaymentHistories = new ArrayList<>();
+//
+//        log.info("Started creating Repayment record from data gotten from file upload {}, size {}",data, data.size());
+//        for (String[] row : data) {
+//            RepaymentHistory repaymentHistory = RepaymentHistory.builder()
+//                    .firstName(row[0].trim())
+//                    .lastName(row[1].trim())
+//                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
+//                    .paymentDate(row[3].trim())
+//                    .amountPaid(new BigDecimal(row[4].trim()))
+//                    .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
+//                    .build();
+//            log.info("Repayment history model created from file {}", repaymentHistory);
+//            repaymentHistories.add(repaymentHistory);
+//        }
+//        return repaymentHistories;
+//    }
 
 
     List<Loanee> convertToLoanees(List<Map<String, String>> data, Cohort cohort) {

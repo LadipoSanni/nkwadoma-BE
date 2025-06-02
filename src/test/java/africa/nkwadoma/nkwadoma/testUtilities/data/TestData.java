@@ -24,7 +24,6 @@ import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentRecordBook;
 import africa.nkwadoma.nkwadoma.domain.model.meedlPortfolio.Portfolio;
 import africa.nkwadoma.nkwadoma.domain.model.notification.MeedlNotification;
-import africa.nkwadoma.nkwadoma.infrastructure.adapters.input.rest.data.request.loanManagement.DeferProgramRequest;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.data.response.premblyresponses.*;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -286,6 +285,14 @@ public class TestData {
                 .file(new File(absolutePath))
                 .build();
     }
+    public static LoanBook buildLoanBook(String absolutePath, String cohortId){
+        return LoanBook.builder()
+                .absoluteFilePath(absolutePath)
+                .file(new File(absolutePath))
+                .cohort(Cohort.builder().id(cohortId).build())
+                .build();
+    }
+
 
     public static RepaymentRecordBook buildRepaymentRecordBook(String absolutePath) {
         return RepaymentRecordBook.builder()
