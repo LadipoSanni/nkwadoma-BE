@@ -4,10 +4,7 @@ import africa.nkwadoma.nkwadoma.domain.enums.NotificationFlag;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 @ToString
 public class MeedlNotification {
 
