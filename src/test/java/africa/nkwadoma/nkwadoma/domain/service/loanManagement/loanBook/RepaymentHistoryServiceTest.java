@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
@@ -39,6 +40,8 @@ class RepaymentHistoryServiceTest {
     private UserIdentityOutputPort userIdentityOutputPort;
     @Mock
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
+    @Mock
+    private LoaneeOutputPort loaneeOutputPort;
     private RepaymentHistory repaymentHistory;
     private List<RepaymentHistory> repaymentHistories;
     private final String actorId = TestUtils.generateRandomUUID();
@@ -58,8 +61,8 @@ class RepaymentHistoryServiceTest {
     void saveRepaymentHistory() throws MeedlException {
         when(cohortUseCase.viewCohortDetails(actorId,cohortId)).thenReturn(new Cohort());
         when(repaymentHistoryOutputPort.save(repaymentHistory)).thenReturn(repaymentHistory);
-        when(userIdentityOutputPort.findByEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail()))
-                .thenReturn(repaymentHistory.getLoanee().getUserIdentity());
+        when(loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail()))
+                .thenReturn(repaymentHistory.getLoanee());
         repaymentHistoryService.saveCohortRepaymentHistory(loanBook);
     }
     @ParameterizedTest
