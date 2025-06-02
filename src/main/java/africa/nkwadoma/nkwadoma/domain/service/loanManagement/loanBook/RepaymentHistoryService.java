@@ -2,12 +2,14 @@ package africa.nkwadoma.nkwadoma.domain.service.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.input.education.CohortUseCase;
 import africa.nkwadoma.nkwadoma.application.ports.input.loanManagement.loanBook.RepaymentHistoryUseCase;
+import africa.nkwadoma.nkwadoma.application.ports.output.education.LoaneeOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOutputPort;
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
 import africa.nkwadoma.nkwadoma.domain.model.identity.UserIdentity;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanRequest;
+import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -26,6 +28,7 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
     private final CohortUseCase cohortUseCase;
     private final RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private final UserIdentityOutputPort userIdentityOutputPort;
+    private final LoaneeOutputPort loaneeOutputPort;
 
     @Override
     public List<RepaymentHistory> saveCohortRepaymentHistory(LoanBook loanBook) throws MeedlException {
@@ -43,14 +46,14 @@ public class RepaymentHistoryService implements RepaymentHistoryUseCase {
         return loanBook.getRepaymentHistories().stream()
                 .peek(repaymentHistory -> {
                     try {
-                        UserIdentity userIdentity = userIdentityOutputPort.findByEmail(repaymentHistory.getUserIdentity().getEmail());
-                        repaymentHistory.setUserIdentity(userIdentity);
+                        Loanee loanee = loaneeOutputPort.findByLoaneeEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail());
+                        repaymentHistory.setLoanee(loanee);
                         repaymentHistory.setCohort(loanBook.getCohort());
                         repaymentHistoryOutputPort.save(repaymentHistory);
                     } catch (MeedlException e) {
                         //TODO notify user doesn't exist on the platform.
 //                        updateFailureNotification(loanBook);
-                        log.error("Error occurred while verifying user exist on platform. {}", repaymentHistory.getUserIdentity());
+                        log.error("Error occurred while verifying user exist on platform. {}", repaymentHistory.getLoanee().getUserIdentity().getEmail(), e);
                     }
                 }).toList();
     }

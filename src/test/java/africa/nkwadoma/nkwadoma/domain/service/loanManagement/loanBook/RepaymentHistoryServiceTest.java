@@ -58,7 +58,8 @@ class RepaymentHistoryServiceTest {
     void saveRepaymentHistory() throws MeedlException {
         when(cohortUseCase.viewCohortDetails(actorId,cohortId)).thenReturn(new Cohort());
         when(repaymentHistoryOutputPort.save(repaymentHistory)).thenReturn(repaymentHistory);
-        when(userIdentityOutputPort.findByEmail(repaymentHistory.getUserIdentity().getEmail())).thenReturn(repaymentHistory.getUserIdentity());
+        when(userIdentityOutputPort.findByEmail(repaymentHistory.getLoanee().getUserIdentity().getEmail()))
+                .thenReturn(repaymentHistory.getLoanee().getUserIdentity());
         repaymentHistoryService.saveCohortRepaymentHistory(loanBook);
     }
     @ParameterizedTest

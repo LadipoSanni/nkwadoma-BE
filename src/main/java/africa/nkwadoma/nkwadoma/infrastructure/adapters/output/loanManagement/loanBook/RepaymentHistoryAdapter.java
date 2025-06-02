@@ -1,7 +1,9 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
+import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.mapper.loan.loanBook.RepaymentHistoryMapper;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entity.loanEntity.RepaymentHistoryEntity;
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
@@ -17,7 +19,8 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     private final RepaymentHistoryRepository repaymentHistoryRepository;
 
     @Override
-    public RepaymentHistory save(RepaymentHistory repaymentHistory){
+    public RepaymentHistory save(RepaymentHistory repaymentHistory) throws MeedlException {
+        MeedlValidator.validateObjectInstance(repaymentHistory,"RepaymentHistory cannot be empty");
         repaymentHistory.validate();
         log.info("Repayment history before mapping to entity in adapter {}", repaymentHistory);
         RepaymentHistoryEntity repaymentHistoryEntity = repaymentHistoryMapper.map(repaymentHistory);
@@ -25,5 +28,11 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
         RepaymentHistoryEntity savedRepaymentHistoryEntity = repaymentHistoryRepository.save(repaymentHistoryEntity);
         log.info("Repayment history after saving entity to db {}", repaymentHistory);
         return repaymentHistoryMapper.map(savedRepaymentHistoryEntity);
+    }
+
+    @Override
+    public void delete(String repaymentId) throws MeedlException {
+        MeedlValidator.validateUUID(repaymentId,"RepaymentId cannot be empty");
+        repaymentHistoryRepository.deleteById(repaymentId);
     }
 }
