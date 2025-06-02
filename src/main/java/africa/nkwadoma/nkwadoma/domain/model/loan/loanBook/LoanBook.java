@@ -31,6 +31,7 @@ public class LoanBook {
     }
     public void validateLoanBook() throws MeedlException {
         validateRepaymentRecord();
+        MeedlValidator.validateObjectInstance(file, "Empty record can not be sent.");
        MeedlValidator.validateUUID(this.loanProductId, "Loan product id is required.");
     }
 }
