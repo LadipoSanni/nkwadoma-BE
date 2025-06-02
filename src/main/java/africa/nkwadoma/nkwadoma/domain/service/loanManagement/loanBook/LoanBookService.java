@@ -61,7 +61,7 @@ public class LoanBookService implements LoanBookUseCase {
         MeedlValidator.validateObjectInstance(loanBook, "Loan book cannot be empty.");
         loanBook.validateLoanBook();
 
-        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
+        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "dob", "initialDeposit", "amountRequested", "amountReceived");
         List<Map<String, String>> data = readFile(loanBook.getFile(), requiredHeaders);
         log.info("Loan book read is {}", data);
 
@@ -204,7 +204,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     .lastName(row.get("lastName"))
                     .email(row.get("email"))
                     .phoneNumber(row.get("phoneNumber"))
-                    .dateOfBirth(row.get("DON"))
+                    .dateOfBirth(row.get("dob"))
                     .role(IdentityRole.LOANEE)
                     .createdAt(LocalDateTime.now())
                     .createdBy("73de0343-be48-4967-99ea-10be007e4347")
@@ -279,7 +279,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         return data;
     }
 
-    private List<Map<String, String>> validateAndReadCSV(File file, List<String> requiredHeaders) throws IOException {
+    private List<Map<String, String>> validateAndReadCSV(File file, List<String> requiredHeaders) throws IOException, MeedlException {
         List<Map<String, String>> records = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -297,7 +297,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                 for (String header : requiredHeaders) {
                     int index = headerIndexMap.get(header);
                     if (index >= values.length) {
-                        throw new IllegalArgumentException("Missing value for column: " + header);
+                        throw new MeedlException("Missing value for column: " + header);
                     }
                     rowMap.put(header, values[index].trim());
                 }
@@ -307,15 +307,15 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         }
 
         if (records.isEmpty()) {
-            throw new IllegalArgumentException("CSV file has no data rows.");
+            throw new MeedlException("CSV file has no data rows.");
         }
 
         return records;
     }
 
-    private static Map<String, Integer> getStringIntegerMap(List<String> requiredHeaders, String headerLine) {
+    private static Map<String, Integer> getStringIntegerMap(List<String> requiredHeaders, String headerLine) throws MeedlException {
         if (headerLine == null) {
-            throw new IllegalArgumentException("CSV file is empty or missing headers.");
+            throw new MeedlException("CSV file is empty or missing headers.");
         }
 
         String[] headers = headerLine.split(",");
@@ -328,14 +328,14 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         // Check for missing headers
         for (String required : requiredHeaders) {
             if (!headerIndexMap.containsKey(required)) {
-                throw new IllegalArgumentException("Missing required column: " + required);
+                throw new MeedlException("Missing required column: " + required);
             }
         }
         return headerIndexMap;
     }
 
 
-    private List<Map<String, String>> validateAndReadExcel(File file) throws IOException {
+    private List<Map<String, String>> validateAndReadExcel(File file) throws IOException, MeedlException {
         List<Map<String, String>> records = new ArrayList<>();
         List<String> requiredHeaders = List.of("firstName", "lastName", "email", "phoneNumber", "DON", "initialDeposit", "amountRequested", "amountReceived");
 
@@ -346,7 +346,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
             Iterator<Row> rowIterator = sheet.iterator();
 
             if (!rowIterator.hasNext()) {
-                throw new IllegalArgumentException("Excel file is empty.");
+                throw new MeedlException("Excel file is empty.");
             }
 
             // Read header row
@@ -361,7 +361,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
             // Validate required headers
             for (String required : requiredHeaders) {
                 if (!headerIndexMap.containsKey(required)) {
-                    throw new IllegalArgumentException("Missing required column: " + required);
+                    throw new MeedlException("Missing required column: " + required);
                 }
             }
 
@@ -375,7 +375,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
                     int colIndex = headerIndexMap.get(header);
                     Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     if (cell == null) {
-                        throw new IllegalArgumentException("Missing value for column: " + header);
+                        throw new MeedlException("Missing value for column: " + header);
                     }
                     rowMap.put(header, getCellValueAsString(cell));
                 }
@@ -385,7 +385,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
         }
 
         if (records.isEmpty()) {
-            throw new IllegalArgumentException("Excel file has no data rows.");
+            throw new MeedlException("Excel file has no data rows.");
         }
 
         return records;
