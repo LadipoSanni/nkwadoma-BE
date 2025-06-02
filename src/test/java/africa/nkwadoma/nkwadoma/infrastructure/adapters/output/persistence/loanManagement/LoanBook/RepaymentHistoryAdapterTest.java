@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,6 +39,8 @@ public class RepaymentHistoryAdapterTest {
     @Autowired
     private LoaneeLoanDetailsOutputPort loaneeLoanDetailsOutputPort;
     String repaymentId = "";
+    int pageSize = 10;
+    int pageNumber = 0;
 
     @BeforeAll
     void setUp() throws MeedlException {
@@ -93,6 +96,19 @@ public class RepaymentHistoryAdapterTest {
         }
         assertNotNull(savedRepaymentHistory);
         assertEquals(savedRepaymentHistory.getAmountPaid(), repaymentHistory.getAmountPaid());
+    }
+
+    @Order(2)
+    @Test
+    void findLoaneeRepaymentHistory(){
+        Page<RepaymentHistory> repaymentHistories = Page.empty();
+        try {
+            repaymentHistories = repaymentHistoryOutputPort.findAllRepaymentHistoryAttachedToLoanee(loanee.getId(),pageSize,pageNumber);
+        }catch (MeedlException meedlException){
+            log.info("RepaymentHistoryAdapterTest.findLoaneeRepaymentHistory(): {}", meedlException.getMessage());
+        }
+        assertNotNull(repaymentHistories);
+        assertTrue(repaymentHistories.hasContent());
     }
 
 

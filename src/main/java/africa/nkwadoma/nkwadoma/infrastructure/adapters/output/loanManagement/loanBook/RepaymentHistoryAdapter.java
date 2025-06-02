@@ -1,6 +1,7 @@
 package africa.nkwadoma.nkwadoma.infrastructure.adapters.output.loanManagement.loanBook;
 
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
+import africa.nkwadoma.nkwadoma.domain.enums.constants.loan.LoaneeMessages;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.domain.validation.MeedlValidator;
@@ -9,6 +10,10 @@ import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.entit
 import africa.nkwadoma.nkwadoma.infrastructure.adapters.output.persistence.repository.loan.loanBook.RepaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -31,8 +36,21 @@ public class RepaymentHistoryAdapter implements RepaymentHistoryOutputPort {
     }
 
     @Override
+
     public void delete(String repaymentId) throws MeedlException {
         MeedlValidator.validateUUID(repaymentId,"RepaymentId cannot be empty");
         repaymentHistoryRepository.deleteById(repaymentId);
+    }
+
+    @Override
+    public Page<RepaymentHistory> findAllRepaymentHistoryAttachedToLoanee(String id, int pageSize, int pageNumber) throws MeedlException {
+        MeedlValidator.validateUUID(id, LoaneeMessages.INVALID_LOANEE_ID.getMessage());
+        MeedlValidator.validatePageSize(pageSize);
+        MeedlValidator.validatePageNumber(pageNumber);
+
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("paymentDateTime"));
+        Page<RepaymentHistoryEntity> repaymentHistoryEntities = repaymentHistoryRepository.findAllByLoaneeId(id,pageable);
+        return repaymentHistoryEntities.map(repaymentHistoryMapper::map);
     }
 }
