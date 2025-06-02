@@ -24,13 +24,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
@@ -242,14 +243,22 @@ class LoaneePersistenceAdapterTest {
     @Order(3)
     @Test
     void findAllLoanee(){
+
+        Loanee cohortLoanee = Loanee.builder()
+                .cohortId(firstLoanee.getCohortId())
+                .loaneeStatus(null)
+                .loanStatus(null)
+                .build();
+        Page<Loanee> loanees = Page.empty();
         try {
-            Page<Loanee> loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortId,pageSize,pageNumber, null);
-            assertEquals(2,loanees.toList().size());
+            loanees = loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee,pageSize,pageNumber);
+            log.info("------> The loanees -----> {}", loanees.getContent());
         }catch (MeedlException exception){
             log.error(exception.getMessage());
         }
-
+        assertEquals(2,loanees.toList().size());
     }
+
     @Order(4)
     @Test
     void findLoanee(){

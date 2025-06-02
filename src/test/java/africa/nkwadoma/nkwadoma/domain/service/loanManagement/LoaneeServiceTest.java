@@ -113,6 +113,7 @@ class LoaneeServiceTest {
     private Loan loan;
     private DeferProgramRequest deferProgramRequest;
     private String userId = "2bc2ef97-1035-5e42-bc8b-22a90b809f8d";
+    private Loanee cohortLoanee;
 
     @BeforeEach
     void setUpLoanee() {
@@ -181,6 +182,12 @@ class LoaneeServiceTest {
 
         loanProduct = TestData.buildTestLoanProduct();
         loan = TestData.createTestLoan(firstLoanee);
+
+        cohortLoanee = Loanee.builder()
+                .cohortId(mockId)
+                .loaneeStatus(null)
+                .loanStatus(null)
+                .build();
 
     }
 
@@ -253,27 +260,30 @@ class LoaneeServiceTest {
 
     @Test
     void viewAllLoaneeInCohort() throws MeedlException {
-        when(loaneeOutputPort.findAllLoaneeByCohortId(mockId,pageSize,pageNumber,null)).
+        when(loaneeOutputPort.findAllLoaneeByCohortId(cohortLoanee,pageSize,pageNumber)).
                 thenReturn(new PageImpl<>(List.of(firstLoanee)));
-        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(mockId,pageSize,pageNumber,null);
+        Page<Loanee> loanees = loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber);
         assertEquals(1,loanees.toList().size());
     }
 
     @Test
     void viewAllLoaneeInCohortWithNullId() {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(null,pageSize,pageNumber,null));
+        cohortLoanee.setCohortId(null);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY,StringUtils.SPACE})
     void viewAllLoaneeInCohortWithEmptyId(String cohortId) {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null));
+        cohortLoanee.setCohortId(cohortId);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"invalid-id"})
     void viewAllLoaneeInCohortWithInvalidId(String cohortId) {
-        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortId,pageSize,pageNumber, null));
+        cohortLoanee.setCohortId(cohortId);
+        assertThrows(MeedlException.class, ()-> loaneeService.viewAllLoaneeInCohort(cohortLoanee,pageSize,pageNumber));
     }
     @Test
     void referTrainee() throws MeedlException {

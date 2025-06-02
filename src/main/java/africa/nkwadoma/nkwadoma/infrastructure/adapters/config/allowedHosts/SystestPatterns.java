@@ -11,11 +11,15 @@ public class SystestPatterns implements AllowedHost{
     private String allowedHost;
     @Value("${systest2}")
     private String allowedHost2;
+    @Value("${swaggerSystest}")
+    private String swaggerSystest;
+
     @Override
     public String[] getPatterns() {
         return new String[]{
                 allowedHost,
-                allowedHost2
+                allowedHost2,
+                swaggerSystest
         };
     }
 }
