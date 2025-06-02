@@ -286,6 +286,14 @@ public class TestData {
                 .file(new File(absolutePath))
                 .build();
     }
+    public static LoanBook buildLoanBook(String absolutePath, String cohortId){
+        return LoanBook.builder()
+                .absoluteFilePath(absolutePath)
+                .file(new File(absolutePath))
+                .cohort(Cohort.builder().id(cohortId).build())
+                .build();
+    }
+
 
     public static RepaymentRecordBook buildRepaymentRecordBook(String absolutePath) {
         return RepaymentRecordBook.builder()

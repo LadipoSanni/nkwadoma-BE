@@ -5,6 +5,7 @@ import africa.nkwadoma.nkwadoma.application.ports.output.identity.UserIdentityOu
 import africa.nkwadoma.nkwadoma.application.ports.output.loanManagement.loanBook.RepaymentHistoryOutputPort;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.education.Cohort;
+import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.LoanBook;
 import africa.nkwadoma.nkwadoma.domain.model.loan.loanBook.RepaymentHistory;
 import africa.nkwadoma.nkwadoma.testUtilities.TestUtils;
 import africa.nkwadoma.nkwadoma.testUtilities.data.TestData;
@@ -40,41 +41,47 @@ class RepaymentHistoryServiceTest {
     private RepaymentHistoryOutputPort repaymentHistoryOutputPort;
     private RepaymentHistory repaymentHistory;
     private List<RepaymentHistory> repaymentHistories;
-    private final String cohortId = TestUtils.generateRandomUUID();
     private final String actorId = TestUtils.generateRandomUUID();
+    private final String cohortId = TestUtils.generateRandomUUID();
+    private LoanBook loanBook;
 
     @BeforeEach
     void setUp() {
-        repaymentHistory = TestData.buildRepaymentHistory(cohortId);
+        loanBook = TestData.buildLoanBook("randomLink", cohortId);
+        repaymentHistory = TestData.buildRepaymentHistory(loanBook.getCohort().getId());
         repaymentHistories = List.of(repaymentHistory);
+        loanBook.setRepaymentHistories(repaymentHistories);
+        loanBook.setActorId(actorId);
     }
 
     @Test
     void saveRepaymentHistory() throws MeedlException {
-        when(cohortUseCase.viewCohortDetails(actorId, cohortId)).thenReturn(new Cohort());
+        when(cohortUseCase.viewCohortDetails(actorId,cohortId)).thenReturn(new Cohort());
         when(repaymentHistoryOutputPort.save(repaymentHistory)).thenReturn(repaymentHistory);
         when(userIdentityOutputPort.findByEmail(repaymentHistory.getUserIdentity().getEmail())).thenReturn(repaymentHistory.getUserIdentity());
-        repaymentHistoryService.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId);
+        repaymentHistoryService.saveCohortRepaymentHistory(loanBook);
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
     void saveRepaymentHistoryInvalidCohortId(String cohortId){
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId));
+        loanBook.getCohort().setId(cohortId);
+        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
     }
     @ParameterizedTest
     @ValueSource(strings = {StringUtils.EMPTY, StringUtils.SPACE, "invalid-id"})
     void saveRepaymentHistoryInvalidActorId(String actorId){
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId));
+        loanBook.setActorId(actorId);
+        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
     }
     @Test
     void saveRepaymentHistoryWithEmptyRepaymentHistory(){
-        assertThrows(MeedlException.class, ()->repaymentHistoryService.saveCohortRepaymentHistory(null, actorId, cohortId));
-        assertThrows(MeedlException.class, ()->repaymentHistoryService.saveCohortRepaymentHistory(List.of(), actorId, cohortId));
+        loanBook.setRepaymentHistories(null);
+        assertThrows(MeedlException.class, ()->repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
     }
     @Test
     void saveRepaymentHistoryOfNunExistingCohort() throws MeedlException {
         when(cohortUseCase.viewCohortDetails(actorId, cohortId)).thenThrow(MeedlException.class);
-        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(repaymentHistories, actorId, cohortId));
+        assertThrows(MeedlException.class, ()-> repaymentHistoryService.saveCohortRepaymentHistory(loanBook));
     }
     @AfterEach
     void tearDown() {
