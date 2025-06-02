@@ -427,7 +427,10 @@ public class LoaneeService implements LoaneeUseCase {
         if (loan.getLoanStatus().equals(LoanStatus.DEFERRED)){
             throw new MeedlException("Loanee is already deferred");
         }
-
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+        }
         loanee.setDeferredDateAndTime(LocalDateTime.now());
         loanee.setDeferReason(reasonForDeferral);
         loaneeOutputPort.save(loanee);
@@ -476,10 +479,14 @@ public class LoaneeService implements LoaneeUseCase {
             throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
+        Cohort cohort = cohortOutputPort.findCohort(loanee.getCohortId());
+        Program program = programOutputPort.findProgramById(cohort.getProgramId());
+        if (programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new MeedlException(LoaneeMessages.LOANEE_CANNOT_DEFER_LOAN.getMessage());
+        }
+
         Optional<Loan> loan = findLoaneeLoanAndDeferLoan(loanee);
-
         sendLoaneeNotification(loan, loanee, userIdentity);
-
         sendPortfolioManagersNotification(loan, userIdentity);
 
         return "Loanee has been Deferred";
@@ -572,7 +579,9 @@ public class LoaneeService implements LoaneeUseCase {
 
         Program program = programOutputPort.findProgramById(cohort.getProgramId());
 
-        checkIfProgramDurationIsStillWithinFirstQuarter(cohort, program);
+        if(programDurationIsStillWithinFirstQuarter(cohort, program)){
+            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
+        }
 
         terminateLoaneeLoan(loanee);
 
@@ -617,14 +626,19 @@ public class LoaneeService implements LoaneeUseCase {
         loanOutputPort.save(loan.get());
     }
 
-    private static void checkIfProgramDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) throws LoaneeException {
+    private boolean programDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) {
         LocalDate cohortEndDate = cohort.getStartDate().plusMonths(program.getDuration());
+        log.info("-------cohort end date------> {}", cohortEndDate);
         long totalDays = ChronoUnit.DAYS.between(cohort.getStartDate(), cohortEndDate);
+        log.info("-------total days date------> {}", totalDays);
         long quarterDays = totalDays / 4;
+        log.info("-------Quater days------> {}", quarterDays);
         LocalDate firstQuarterEnd = cohort.getStartDate().plusDays(quarterDays);
+        log.info("-------First Quater days------> {}", firstQuarterEnd);
         if (firstQuarterEnd.isBefore(LocalDate.now())) {
-            throw new LoaneeException(LoaneeMessages.LOANEE_CANNOT_DROP_FROM_COHORT.getMessage());
+            return true;
         }
+        return false;
     }
 
     private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoaneeException {
