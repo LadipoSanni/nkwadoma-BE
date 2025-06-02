@@ -74,7 +74,9 @@ public class LoanBookService implements LoanBookUseCase {
     public void uploadRepaymentRecord(LoanBook repaymentRecordBook) throws MeedlException {
         MeedlValidator.validateObjectInstance(repaymentRecordBook, "Repayment record book cannot be empty.");
         repaymentRecordBook.validateRepaymentRecord();
-        List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile());
+        List<String> requiredHeaders = List.of("firstName", "lastName", "email", "paymentDate", "amountPaid", "modeOfPayment");
+
+        List<Map<String, String>>  data = readFile(repaymentRecordBook.getFile(), requiredHeaders);
         log.info("Repayment record book read is {}", data);
 
 //        RepaymentHistory repaymentHistory =
