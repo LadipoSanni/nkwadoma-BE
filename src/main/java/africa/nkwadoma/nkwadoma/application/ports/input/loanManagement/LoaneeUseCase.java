@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.input.loanManagement;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.LoanReferral;
@@ -14,7 +15,7 @@ public interface LoaneeUseCase {
 
     Loanee viewLoaneeDetails(String loaneeId, String userId) throws MeedlException;
 
-    Page<Loanee> viewAllLoaneeInCohort(String cohortId,int pageSize ,int pageNumber, LoaneeStatus loaneeStatus) throws MeedlException;
+    Page<Loanee> viewAllLoaneeInCohort(Loanee loanee, int pageSize, int pageNumber) throws MeedlException;
     LoanReferral referLoanee(Loanee loanee) throws MeedlException;
 
     void notifyLoanReferralActors(List<Loanee> loanees) throws MeedlException;

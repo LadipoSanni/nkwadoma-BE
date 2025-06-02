@@ -1,5 +1,6 @@
 package africa.nkwadoma.nkwadoma.application.ports.output.education;
 
+import africa.nkwadoma.nkwadoma.domain.enums.loanEnums.LoanStatus;
 import africa.nkwadoma.nkwadoma.domain.enums.loanee.LoaneeStatus;
 import africa.nkwadoma.nkwadoma.domain.exceptions.MeedlException;
 import africa.nkwadoma.nkwadoma.domain.model.loan.Loanee;
@@ -20,7 +21,7 @@ public interface LoaneeOutputPort {
 
     Loanee findLoaneeById(String loaneeId) throws MeedlException;
 
-    Page<Loanee> findAllLoaneeByCohortId(String cohortId , int pageSize , int pageNumber, LoaneeStatus status) throws MeedlException;
+    Page<Loanee> findAllLoaneeByCohortId(Loanee loanee, int pageSize , int pageNumber) throws MeedlException;
 
     List<Loanee> findAllLoaneesByCohortId(String id) throws MeedlException;
 

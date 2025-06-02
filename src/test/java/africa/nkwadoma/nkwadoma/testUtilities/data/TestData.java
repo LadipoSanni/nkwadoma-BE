@@ -623,6 +623,7 @@ public class TestData {
                 .modeOfPayment(ModeOfPayment.CASH)
                 .amountPaid(new BigDecimal("20000"))
                 .cohort(Cohort.builder().id(cohortId).build())
+                .userIdentity(UserIdentity.builder().email(TestUtils.generateEmail(7)).build())
                 .paymentDate(LocalDateTime.now().toString())
                 .firstName("firstName")
                 .lastName("lastName")
