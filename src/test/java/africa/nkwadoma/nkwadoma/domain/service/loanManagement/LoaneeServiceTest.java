@@ -293,7 +293,6 @@ class LoaneeServiceTest {
                     thenReturn(organizationIdentity);
             when(loaneeOutputPort.save(firstLoanee)).thenReturn(firstLoanee);
             when(cohortOutputPort.save(elites)).thenReturn(elites);
-//            doNothing().when(sendLoaneeEmailUsecase).sendLoaneeHasBeenReferEmail(any());
             when(loanReferralOutputPort.createLoanReferral(firstLoanee)).thenReturn(loanReferral);
             when(loanMetricsOutputPort.findByOrganizationId(organizationEmployeeIdentity.getOrganization()))
                     .thenReturn(Optional.of(new LoanMetrics()));
@@ -722,6 +721,7 @@ class LoaneeServiceTest {
     @Test
     void indicateDeferredLoanee() throws MeedlException {
         String result = "";
+        loan.setLoanStatus(LoanStatus.PERFORMING);
         try{
         when(userIdentityOutputPort.findById(mockId)).thenReturn(userIdentity);
         when(organizationEmployeeIdentityOutputPort.findByMeedlUserId(userIdentity.getId()))
@@ -732,7 +732,7 @@ class LoaneeServiceTest {
         when(loanOutputPort.viewLoanByLoaneeId(firstLoanee.getId())).thenReturn(Optional.of(loan));
         when(userIdentityOutputPort.findAllByRole(IdentityRole.PORTFOLIO_MANAGER))
                 .thenReturn(Collections.singletonList(userIdentity));
-         result = loaneeService.indicateDeferredLoanee(mockId, mockId);
+         result = loaneeService.indicateDeferredLoanee(mockId, firstLoanee.getId());
         }catch (MeedlException meedlException){
             log.error(meedlException.getMessage());
         }

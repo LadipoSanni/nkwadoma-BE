@@ -432,8 +432,6 @@ public class LoaneeService implements LoaneeUseCase {
         loanee.setDeferReason(reasonForDeferral);
         loaneeOutputPort.save(loanee);
 
-//        loan.setLoanStatus(LoanStatus.DEFERRED);
-
         asynchronousNotificationOutputPort.sendDeferralNotificationToEmployee(loanee, loan.getId(), NotificationFlag.LOAN_DEFERRAL);
         loanOutputPort.save(loan);
         return "Deferral request sent";
@@ -474,7 +472,7 @@ public class LoaneeService implements LoaneeUseCase {
 
         boolean cohortExistInOrganization =
                 loaneeOutputPort.checkIfLoaneeCohortExistInOrganization(loanee.getId(),organizationEmployeeIdentity.get().getOrganization());
-        if (! cohortExistInOrganization) {
+        if (!cohortExistInOrganization) {
             throw new LoaneeException(LoaneeMessages.LOANEE_NOT_ASSOCIATE_WITH_ORGANIZATION.getMessage());
         }
 
@@ -491,6 +489,9 @@ public class LoaneeService implements LoaneeUseCase {
         Optional<Loan> loan = loanOutputPort.viewLoanByLoaneeId(loanee.getId());
         if (loan.isEmpty()){
             throw new LoanException(LoanMessages.LOANEE_LOAN_NOT_FOUND.getMessage());
+        }
+        if (loan.get().getLoanStatus().equals(LoanStatus.DEFERRED)){
+            throw new MeedlException("Loan already deferred");
         }
 
         loan.get().setLoanStatus(LoanStatus.DEFERRED);
