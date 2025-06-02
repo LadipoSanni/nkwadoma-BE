@@ -183,7 +183,7 @@ private void inviteTrainee (Loanee loanee) throws MeedlException {
             RepaymentHistory repaymentHistory = RepaymentHistory.builder()
                     .firstName(row[0].trim())
                     .lastName(row[1].trim())
-                    .email(row[2].trim())
+                    .userIdentity(UserIdentity.builder().email(row[2].trim()).build())
                     .paymentDate(row[3].trim())
                     .amountPaid(new BigDecimal(row[4].trim()))
                     .modeOfPayment(ModeOfPayment.valueOf(row[5].trim()))
