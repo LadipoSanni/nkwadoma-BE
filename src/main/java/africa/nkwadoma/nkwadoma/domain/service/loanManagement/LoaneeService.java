@@ -628,17 +628,10 @@ public class LoaneeService implements LoaneeUseCase {
 
     private boolean programDurationIsStillWithinFirstQuarter(Cohort cohort, Program program) {
         LocalDate cohortEndDate = cohort.getStartDate().plusMonths(program.getDuration());
-        log.info("-------cohort end date------> {}", cohortEndDate);
         long totalDays = ChronoUnit.DAYS.between(cohort.getStartDate(), cohortEndDate);
-        log.info("-------total days date------> {}", totalDays);
         long quarterDays = totalDays / 4;
-        log.info("-------Quater days------> {}", quarterDays);
         LocalDate firstQuarterEnd = cohort.getStartDate().plusDays(quarterDays);
-        log.info("-------First Quater days------> {}", firstQuarterEnd);
-        if (firstQuarterEnd.isBefore(LocalDate.now())) {
-            return true;
-        }
-        return false;
+        return firstQuarterEnd.isBefore(LocalDate.now());
     }
 
     private static void checkIfLoaneeExistInCohort(boolean existInCohort) throws LoaneeException {
