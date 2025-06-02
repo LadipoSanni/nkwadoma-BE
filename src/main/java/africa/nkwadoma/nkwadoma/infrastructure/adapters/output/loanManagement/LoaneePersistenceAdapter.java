@@ -64,6 +64,7 @@ public class LoaneePersistenceAdapter implements LoaneeOutputPort {
         Pageable pageRequest = PageRequest.of(pageNumber, pageSize,Sort.by(Sort.Order.desc("createdAt")));
         Page<LoaneeEntity> loaneeEntities = loaneeRepository
                 .findAllByCohortId(loanee.getCohortId(), loanee.getLoaneeStatus(), loanee.getLoanStatus(), pageRequest);
+        log.info("Loanees {} == ", loaneeEntities.getContent());
         return loaneeEntities.map(loaneeMapper::toLoanee);
     }
 
